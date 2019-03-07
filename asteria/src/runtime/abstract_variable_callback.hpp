@@ -20,6 +20,6 @@ class Abstract_Variable_Callback
     virtual bool operator()(const Rcptr<Variable> &var) const = 0;
   };
 
-}
+}  // namespace Asteria
 
 #endif

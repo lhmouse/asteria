@@ -91,6 +91,6 @@ class Variable : public virtual Rcbase
       }
   };
 
-}
+}  // namespace Asteria
 
 #endif

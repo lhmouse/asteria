@@ -109,6 +109,6 @@ enum Value_Type : std::uint8_t
     type_object    = 8,
   };
 
-}
+}  // namespace Asteria
 
 #endif

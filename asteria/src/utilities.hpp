@@ -258,6 +258,6 @@ struct Wrapped_Subscript
 
 extern Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size);
 
-}
+}  // namespace Asteria
 
 #endif

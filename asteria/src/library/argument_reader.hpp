@@ -122,6 +122,6 @@ class Argument_Reader
     [[noreturn]] void throw_no_matching_function_call() const;
   };
 
-}
+}  // namespace Asteria
 
 #endif

@@ -86,6 +86,6 @@ class Reference_Root
     void enumerate_variables(const Abstract_Variable_Callback &callback) const;
   };
 
-}
+}  // namespace Asteria
 
 #endif

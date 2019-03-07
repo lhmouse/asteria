@@ -45,6 +45,6 @@ class Rcbase : public rocket::refcnt_base<Rcbase>
       }
   };
 
-}
+}  // namespace Asteria
 
 #endif

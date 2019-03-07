@@ -10,4 +10,4 @@ Abstract_Variable_Callback::~Abstract_Variable_Callback()
   {
   }
 
-}
+}  // namespace Asteria

@@ -299,4 +299,4 @@ void Argument_Reader::throw_no_matching_function_call() const
     throw_runtime_error(__func__, mos.extract_string());
   }
 
-}
+}  // namespace Asteria

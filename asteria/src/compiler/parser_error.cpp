@@ -226,4 +226,4 @@ void Parser_Error::convert_to_runtime_error_and_throw(const Parser_Error &err)
     throw_runtime_error(__func__, mos.extract_string());
   }
 
-}
+}  // namespace Asteria

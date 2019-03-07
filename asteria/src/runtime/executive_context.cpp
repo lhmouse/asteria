@@ -11,4 +11,4 @@ Executive_Context::~Executive_Context()
   {
   }
 
-}
+}  // namespace Asteria

@@ -28,6 +28,6 @@ class Function_Analytic_Context : public Analytic_Context
     void do_set_parameters(const Cow_Vector<PreHashed_String> &params);
   };
 
-}
+}  // namespace Asteria
 
 #endif

@@ -11,4 +11,4 @@ Variable::~Variable()
   {
   }
 
-}
+}  // namespace Asteria

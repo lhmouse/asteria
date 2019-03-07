@@ -239,4 +239,4 @@ Rcptr<Variable> Variable_HashSet::erase_random_opt() noexcept
     return rocket::move(var);
   }
 
-}
+}  // namespace Asteria

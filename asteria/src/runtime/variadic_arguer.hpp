@@ -63,6 +63,6 @@ class Variadic_Arguer : public Abstract_Function
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 
-}
+}  // namespace Asteria
 
 #endif

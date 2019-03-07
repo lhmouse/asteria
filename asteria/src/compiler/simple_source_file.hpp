@@ -55,6 +55,6 @@ class Simple_Source_File
     Reference execute(const Global_Context &global, Cow_Vector<Reference> &&args) const;
   };
 
-}
+}  // namespace Asteria
 
 #endif

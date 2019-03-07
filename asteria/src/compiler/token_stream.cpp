@@ -803,7 +803,7 @@ namespace Asteria {
         return true;
       }
 
-    }
+    }  // namespace
 
 Parser_Error Token_Stream::get_parser_error() const noexcept
   {
@@ -998,4 +998,4 @@ Token Token_Stream::shift()
     }
   }
 
-}
+}  // namespace Asteria

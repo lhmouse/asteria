@@ -249,4 +249,4 @@ bool Reference_Dictionary::remove(const PreHashed_String &name) noexcept
     return true;
   }
 
-}
+}  // namespace Asteria

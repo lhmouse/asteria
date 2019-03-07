@@ -11,4 +11,4 @@ Analytic_Context::~Analytic_Context()
   {
   }
 
-}
+}  // namespace Asteria

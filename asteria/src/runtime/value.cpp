@@ -59,7 +59,7 @@ const char * Value::get_type_name(Value_Type etype) noexcept
       }
     const s_null = { 0 };  // Don't play with this at home.
 
-    }
+    }  // namespace
 
 const Value & Value::get_null() noexcept
   {
@@ -139,7 +139,7 @@ bool Value::test() const noexcept
         return Value::compare_equal;
       }
 
-    }
+    }  // namespace
 
 Value::Compare Value::compare(const Value &other) const noexcept
   {
@@ -231,7 +231,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
         return (indent_increment != 0) ? indent('\n', indent_next) : indent(' ', 0);
       }
 
-    }
+    }  // namespace
 
 void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
   {
@@ -436,4 +436,4 @@ void Value::enumerate_variables(const Abstract_Variable_Callback &callback) cons
     }
   }
 
-}
+}  // namespace Asteria

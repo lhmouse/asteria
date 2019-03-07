@@ -35,4 +35,4 @@ void Abstract_Context::do_set_named_reference_templates(const std::pair<Cow_Stri
     this->m_named_references.set_templates(tdata_opt, tsize);
   }
 
-}
+}  // namespace Asteria

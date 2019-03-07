@@ -71,4 +71,4 @@ bool Generational_Collector::collect_variables(unsigned gen_limit)
     return true;
   }
 
-}
+}  // namespace Asteria

@@ -46,4 +46,4 @@ void Variadic_Arguer::enumerate_variables(const Abstract_Variable_Callback &call
     rocket::for_each(this->m_vargs, [&](const Reference &arg) { arg.enumerate_variables(callback);  });
   }
 
-}
+}  // namespace Asteria

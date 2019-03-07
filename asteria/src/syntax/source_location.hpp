@@ -39,6 +39,6 @@ inline std::ostream & operator<<(std::ostream &os, const Source_Location &sloc)
     return os;
   }
 
-}
+}  // namespace Asteria
 
 #endif

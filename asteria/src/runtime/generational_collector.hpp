@@ -41,6 +41,6 @@ class Generational_Collector : public virtual Rcbase
     bool collect_variables(unsigned gen_limit);
   };
 
-}
+}  // namespace Asteria
 
 #endif

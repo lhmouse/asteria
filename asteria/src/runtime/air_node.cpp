@@ -43,4 +43,4 @@ void Air_Node::enumerate_variables(const Abstract_Variable_Callback &callback) c
     rocket::for_each(this->m_params, enumerate_variables_recursively);
   }
 
-}
+}  // namespace Asteria

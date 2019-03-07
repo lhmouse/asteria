@@ -421,4 +421,4 @@ void Token::print(std::ostream &os) const
     }
   }
 
-}
+}  // namespace Asteria

@@ -11,4 +11,4 @@ void Source_Location::print(std::ostream &os) const
     os << this->file() << ':' << this->line();
   }
 
-}
+}  // namespace Asteria

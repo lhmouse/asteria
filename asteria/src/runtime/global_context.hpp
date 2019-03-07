@@ -49,6 +49,6 @@ class Global_Context : public Abstract_Context
     bool remove_std_member(const PreHashed_String &name);
   };
 
-}
+}  // namespace Asteria
 
 #endif

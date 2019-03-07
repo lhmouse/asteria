@@ -1792,7 +1792,7 @@ namespace Asteria {
                do_accept_nonblock_statement(stmts_out, tstrm_io);
       }
 
-    }
+    }  // namespace
 
 Parser_Error Parser::get_parser_error() const noexcept
   {
@@ -1892,4 +1892,4 @@ const Cow_Vector<Statement> & Parser::get_statements() const noexcept
     }
   }
 
-}
+}  // namespace Asteria

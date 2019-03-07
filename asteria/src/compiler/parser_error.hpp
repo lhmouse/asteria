@@ -122,6 +122,6 @@ constexpr bool operator!=(Parser_Error::Code lhs, const Parser_Error &rhs) noexc
     return lhs != rhs.code();
   }
 
-}
+}  // namespace Asteria
 
 #endif

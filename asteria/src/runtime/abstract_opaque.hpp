@@ -29,6 +29,6 @@ inline std::ostream & operator<<(std::ostream &os, const Abstract_Opaque &opaque
     return os;
   }
 
-}
+}  // namespace Asteria
 
 #endif

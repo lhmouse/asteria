@@ -33,7 +33,7 @@ Function_Executive_Context::~Function_Executive_Context()
         return Rcobj<Variadic_Arguer>(zvarg.get(), rocket::move(args));
       }
 
-    }
+    }  // namespace
 
 void Function_Executive_Context::do_set_arguments(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args)
   {
@@ -69,4 +69,4 @@ void Function_Executive_Context::do_set_arguments(const Rcobj<Variadic_Arguer> &
     this->do_set_named_reference_templates(this->m_predef_refs.data(), this->m_predef_refs.size());
   }
 
-}
+}  // namespace Asteria

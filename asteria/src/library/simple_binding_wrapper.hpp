@@ -38,6 +38,6 @@ inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple
     return Rcobj<Simple_Binding_Wrapper>(rocket::move(desc), fptr, rocket::move(params));
   }
 
-}
+}  // namespace Asteria
 
 #endif

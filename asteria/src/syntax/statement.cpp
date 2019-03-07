@@ -531,7 +531,7 @@ namespace Asteria {
         throw_runtime_error(__func__, mos.extract_string());
       }
 
-    }
+    }  // namespace
 
 void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const
   {
@@ -818,4 +818,4 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
     }
   }
 
-}
+}  // namespace Asteria

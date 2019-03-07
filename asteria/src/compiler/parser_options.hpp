@@ -20,6 +20,6 @@ struct Parser_Options
       }
   };
 
-}
+}  // namespace Asteria
 
 #endif

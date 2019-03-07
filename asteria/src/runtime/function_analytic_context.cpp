@@ -19,7 +19,7 @@ Function_Analytic_Context::~Function_Analytic_Context()
         predefs_out.emplace_back(std::forward<XnameT>(xname), Reference_Root::S_null());
       }
 
-    }
+    }  // namespace
 
 void Function_Analytic_Context::do_set_parameters(const Cow_Vector<PreHashed_String> &params)
   {
@@ -47,4 +47,4 @@ void Function_Analytic_Context::do_set_parameters(const Cow_Vector<PreHashed_Str
     this->do_set_named_reference_templates(this->m_predef_refs.data(), this->m_predef_refs.size());
   }
 
-}
+}  // namespace Asteria

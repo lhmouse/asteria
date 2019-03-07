@@ -55,6 +55,6 @@ class Token_Stream
     Token shift();
   };
 
-}
+}  // namespace Asteria
 
 #endif

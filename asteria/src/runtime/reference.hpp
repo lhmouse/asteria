@@ -108,6 +108,6 @@ class Reference
       }
   };
 
-}
+}  // namespace Asteria
 
 #endif

@@ -10,4 +10,4 @@ Rcbase::~Rcbase()
   {
   }
 
-}
+}  // namespace Asteria

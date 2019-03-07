@@ -27,4 +27,4 @@ void Simple_Binding_Wrapper::enumerate_variables(const Abstract_Variable_Callbac
     // There is no variable to enumerate.
   }
 
-}
+}  // namespace Asteria

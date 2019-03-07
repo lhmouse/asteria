@@ -55,6 +55,6 @@ class Abstract_Context
     virtual const Abstract_Context * get_parent_opt() const noexcept = 0;
   };
 
-}
+}  // namespace Asteria
 
 #endif

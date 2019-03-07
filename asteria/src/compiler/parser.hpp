@@ -53,6 +53,6 @@ class Parser
     const Cow_Vector<Statement> & get_statements() const noexcept;
   };
 
-}
+}  // namespace Asteria
 
 #endif

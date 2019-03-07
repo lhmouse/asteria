@@ -10,4 +10,4 @@ Traceable_Exception::~Traceable_Exception()
   {
   }
 
-}
+}  // namespace Asteria

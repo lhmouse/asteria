@@ -66,4 +66,4 @@ Reference Simple_Source_File::execute(const Global_Context &global, Cow_Vector<R
     return result;
   }
 
-}
+}  // namespace Asteria

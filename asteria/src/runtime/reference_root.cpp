@@ -108,4 +108,4 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback &callb
     }
   }
 
-}
+}  // namespace Asteria

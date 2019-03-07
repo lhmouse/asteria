@@ -11,4 +11,4 @@ Reference_Stack::~Reference_Stack()
   {
   }
 
-}
+}  // namespace Asteria

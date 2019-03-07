@@ -65,4 +65,4 @@ bool Global_Context::remove_std_member(const PreHashed_String &name)
     return std_var->open_value().check<D_object>().erase(name);
   }
 
-}
+}  // namespace Asteria

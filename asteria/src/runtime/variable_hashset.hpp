@@ -89,6 +89,6 @@ class Variable_HashSet
     Rcptr<Variable> erase_random_opt() noexcept;
   };
 
-}
+}  // namespace Asteria
 
 #endif

@@ -66,4 +66,4 @@ void Instantiated_Function::enumerate_variables(const Abstract_Variable_Callback
     rocket::for_each(this->m_code, [&](const Air_Node &node) { node.enumerate_variables(callback);  });
   }
 
-}
+}  // namespace Asteria

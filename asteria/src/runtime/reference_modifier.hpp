@@ -56,6 +56,6 @@ class Reference_Modifier
     Value apply_and_erase(Value &parent) const;
   };
 
-}
+}  // namespace Asteria
 
 #endif

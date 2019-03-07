@@ -88,6 +88,6 @@ class Reference_Stack
       }
   };
 
-}
+}  // namespace Asteria
 
 #endif

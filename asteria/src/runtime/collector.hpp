@@ -73,6 +73,6 @@ class Collector
     void collect();
   };
 
-}
+}  // namespace Asteria
 
 #endif

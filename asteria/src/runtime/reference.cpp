@@ -60,4 +60,4 @@ Value Reference::do_unset_with_modifiers() const
     return this->m_mods.at(epos).apply_and_erase(cur);
   }
 
-}
+}  // namespace Asteria

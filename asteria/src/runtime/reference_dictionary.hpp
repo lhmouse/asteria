@@ -131,6 +131,6 @@ class Reference_Dictionary
     bool remove(const PreHashed_String &name) noexcept;
   };
 
-}
+}  // namespace Asteria
 
 #endif

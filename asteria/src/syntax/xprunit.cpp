@@ -1435,7 +1435,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    }
+    }  // namespace
 
 void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Context &ctx) const
   {
@@ -1735,4 +1735,4 @@ void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Conte
     }
   }
 
-}
+}  // namespace Asteria

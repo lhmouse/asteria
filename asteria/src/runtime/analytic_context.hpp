@@ -33,6 +33,6 @@ class Analytic_Context : public Abstract_Context
       }
   };
 
-}
+}  // namespace Asteria
 
 #endif

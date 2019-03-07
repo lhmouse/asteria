@@ -75,7 +75,7 @@ bool are_debug_logs_enabled() noexcept
         return len;
       }
 
-    }
+    }  // namespace
 
 bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) noexcept
   {
@@ -467,4 +467,4 @@ Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size)
     return wrap;
   }
 
-}
+}  // namespace Asteria

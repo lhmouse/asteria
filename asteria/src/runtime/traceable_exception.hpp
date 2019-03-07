@@ -68,6 +68,6 @@ template<typename ExceptionT> Traceable_Exception trace_exception(ExceptionT &&e
     return static_cast<typename std::conditional<copy_or_move, const Traceable_Exception &, Traceable_Exception &&>::type>(*traceable);
   }
 
-}
+}  // namespace Asteria
 
 #endif

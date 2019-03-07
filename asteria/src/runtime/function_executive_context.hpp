@@ -28,6 +28,6 @@ class Function_Executive_Context : public Executive_Context
     void do_set_arguments(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args);
   };
 
-}
+}  // namespace Asteria
 
 #endif

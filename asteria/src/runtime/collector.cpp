@@ -68,7 +68,7 @@ namespace Asteria {
         set.for_each(Variable_Callback<FunctionT>(std::forward<FunctionT>(func)));
       }
 
-    }
+    }  // namespace
 
 Collector * Collector::do_collect_once()
   {
@@ -262,4 +262,4 @@ void Collector::collect()
     } while(cur);
   }
 
-}
+}  // namespace Asteria
