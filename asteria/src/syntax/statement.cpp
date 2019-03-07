@@ -84,14 +84,18 @@ namespace Asteria {
     void do_evaluate_expression(Reference_Stack &stack, Executive_Context &ctx,
                                 const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
       {
+        // We push a null reference in case of empty expressions.
         stack.clear();
         stack.push(Reference_Root::S_null());
+        // Evaluate the expression.
+        // If it is empty, the result will be pushed on `stack`; otherwise the aforementioned null reference will be on the top.
         rocket::for_each(code, [&](const Air_Node &node) { node.execute(stack, ctx, func, global);  });
       }
 
     Air_Node::Status do_execute_clear_stack(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
                                             const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
+        // We push a null reference in case of empty expressions.
         stack.clear();
         stack.push(Reference_Root::S_null());
         return Air_Node::status_next;
@@ -107,21 +111,48 @@ namespace Asteria {
         return status;
       }
 
-    Air_Node::Status do_define_variable(Reference_Stack &stack, Executive_Context &ctx_io,
-                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_define_uninitialized_variable(Reference_Stack & /*stack*/, Executive_Context &ctx_io,
+                                                      const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Decode arguments.
-        // - unused - const auto &sloc = p.at(0).as<Source_Location>();
+        const auto &sloc = p.at(0).as<Source_Location>();
         const auto &name = p.at(1).as<PreHashed_String>();
         const auto &immutable = static_cast<bool>(p.at(2).as<std::int64_t>());
-        const auto &code_init = p.at(3).as<Cow_Vector<Air_Node>>();
-        // Create a dummy reference for further name lookups.
-        // A variable becomes visible before its initializer, where it is initialized to `null`.
+        // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx_io, "variable", name, global);
-        // Evaluate the initializer.
-        do_evaluate_expression(stack, ctx_io, code_init, func, global);
-        var->reset(stack.top().read(), immutable);
-        ASTERIA_DEBUG_LOG("New variable: ", name, " = ", var->get_value());
+        // Initialize the variable.
+        var->reset(sloc, D_null(), immutable);
+        return Air_Node::status_next;
+      }
+
+   Air_Node::Status do_declare_variable_and_clear_stack(Reference_Stack &stack, Executive_Context &ctx_io,
+                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
+      {
+        // Decode arguments.
+        const auto &name = p.at(0).as<PreHashed_String>();
+        // Allocate a variable.
+        auto var = do_safe_create_variable(nullptr, ctx_io, "variable placeholder", name, global);
+        // Note that the initializer must not be empty for this code.
+        stack.clear();
+        // Push the variable on the stack.
+        Reference_Root::S_variable ref_c = { var };
+        stack.push(std::move(ref_c));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_initialize_variable(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
+                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
+      {
+        // Decode arguments.
+        const auto &sloc = p.at(0).as<Source_Location>();
+        const auto &immutable = static_cast<bool>(p.at(1).as<std::int64_t>());
+        // Read the value of the initializer.
+        // Note that the initializer must not have been empty for this code.
+        auto value = stack.top().read();
+        stack.pop();
+        auto var = stack.top().get_variable_opt();
+        ROCKET_ASSERT(var);
+        var->reset(sloc, std::move(value), immutable);
         return Air_Node::status_next;
       }
 
@@ -146,8 +177,8 @@ namespace Asteria {
             << rocket::ostream_implode(params.begin(), params.size(), ", ")
             <<")";
         Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_next));
-        ASTERIA_DEBUG_LOG("New function: ", closure);
-        var->reset(D_function(rocket::move(closure)), true);
+        // Initialized the function variable.
+        var->reset(sloc, D_function(rocket::move(closure)), true);
         return Air_Node::status_next;
       }
 
@@ -358,7 +389,7 @@ namespace Asteria {
               // Create a fresh context for the loop body.
               Executive_Context ctx_body(&ctx_for);
               // Set up the key variable, which is immutable.
-              key_var->reset(D_integer(it - array.begin()), true);
+              key_var->reset(Source_Location(rocket::sref("<builtin>"), 0), D_integer(it - array.begin()), true);
               // Set up the mapped reference.
               Reference_Modifier::S_array_index refm_c = { it - array.begin() };
               range_ref.zoom_in(rocket::move(refm_c));
@@ -382,7 +413,7 @@ namespace Asteria {
               // Create a fresh context for the loop body.
               Executive_Context ctx_body(&ctx_for);
               // Set up the key variable, which is immutable.
-              key_var->reset(D_string(it->first), true);
+              key_var->reset(Source_Location(rocket::sref("<builtin>"), 0), D_string(it->first), true);
               // Set up the mapped reference.
               Reference_Modifier::S_object_key refm_c = { it->first };
               range_ref.zoom_in(rocket::move(refm_c));
@@ -529,13 +560,26 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
         do_safe_set_named_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_null());
-        // Encode arguments.
+        // Distinguish uninitialized variables from initialized ones.
+        if(alt.init.empty()) {
+          Cow_Vector<Air_Node::Variant> p;
+          p.emplace_back(alt.sloc);  // 0
+          p.emplace_back(alt.name);  // 1
+          p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 2
+          code_out.emplace_back(&do_define_uninitialized_variable, rocket::move(p));
+          return;
+        }
+        // A variable becomes visible before its initializer, where it is initialized to `null`.
         Cow_Vector<Air_Node::Variant> p;
+        p.emplace_back(alt.name);  // 0
+        code_out.emplace_back(&do_declare_variable_and_clear_stack, rocket::move(p));
+        // Generate inline code for the initializer.
+        rocket::for_each(alt.init, [&](const Xprunit &xpru) { xpru.generate_code(code_out, ctx_io);  });
+        // Generate code to initialize the variable.
+        p.clear();
         p.emplace_back(alt.sloc);  // 0
-        p.emplace_back(alt.name);  // 1
-        p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 2
-        p.emplace_back(do_generate_code_expression(ctx_io, alt.init));  // 3
-        code_out.emplace_back(&do_define_variable, rocket::move(p));
+        p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 1
+        code_out.emplace_back(&do_initialize_variable, rocket::move(p));
         return;
       }
     case index_function:

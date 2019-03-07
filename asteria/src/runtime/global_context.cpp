@@ -21,7 +21,7 @@ void Global_Context::do_initialize_runtime(void * /*reserved*/)
     this->m_collector = collector;
     // Create the `std` variable.
     auto std_var = collector->create_variable();
-    std_var->reset(D_object(), true);
+    std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), D_object(), true);
     Reference_Root::S_variable std_ref_c = { std_var };
     this->open_named_reference(rocket::sref("std")) = rocket::move(std_ref_c);
     this->m_std_var = std_var;

@@ -38,10 +38,10 @@ Rcptr<Variable> Generational_Collector::create_variable()
     auto var = this->m_pool.erase_random_opt();
     if(ROCKET_EXPECT(var)) {
       // Initialize it to `null`.
-      var->reset(D_null(), true);
+      var->reset(Source_Location(rocket::sref("<pooled>"), 0), D_null(), true);
     } else {
       // Create a new one if the pool has been exhausted.
-      var = rocket::make_refcnt<Variable>();
+      var = rocket::make_refcnt<Variable>(Source_Location(rocket::sref("<fresh>"), 0));
     }
     // The variable is alive now.
     this->m_gen_zero.track_variable(var);

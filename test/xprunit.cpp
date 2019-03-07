@@ -15,21 +15,22 @@ int main()
   {
     Global_Context global;
     Executive_Context ctx(nullptr);
+    Source_Location sloc(rocket::sref("test"), 42);
 
-    const auto cond = rocket::make_refcnt<Variable>();
-    cond->reset(D_null(), false);
+    const auto cond = global.create_variable();
+    cond->reset(sloc, D_null(), false);
     ctx.open_named_reference(rocket::sref("cond")) = Reference_Root::S_variable { cond };
 
-    const auto dval = rocket::make_refcnt<Variable>();
+    const auto dval = global.create_variable();
     ctx.open_named_reference(rocket::sref("dval")) = Reference_Root::S_variable { dval };
-    dval->reset(D_real(1.5), false);
+    dval->reset(sloc, D_real(1.5), false);
 
-    const auto ival = rocket::make_refcnt<Variable>();
+    const auto ival = global.create_variable();
     ctx.open_named_reference(rocket::sref("ival")) = Reference_Root::S_variable { ival };
-    ival->reset(D_integer(3), false);
+    ival->reset(sloc, D_integer(3), false);
 
-    const auto aval = rocket::make_refcnt<Variable>();
-    aval->reset(D_array(), false);
+    const auto aval = global.create_variable();
+    aval->reset(sloc, D_array(), false);
     ctx.open_named_reference(rocket::sref("aval")) = Reference_Root::S_variable { aval };
 
     // Plain: aval[1] = !cond ? (dval++ + 0.25) : (ival * "hello,");

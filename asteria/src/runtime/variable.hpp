@@ -7,12 +7,14 @@
 #include "../fwd.hpp"
 #include "rcbase.hpp"
 #include "value.hpp"
+#include "../syntax/source_location.hpp"
 
 namespace Asteria {
 
 class Variable : public virtual Rcbase
   {
   private:
+    Source_Location m_sloc;
     Value m_value;
     bool m_immutable;
 
@@ -21,8 +23,9 @@ class Variable : public virtual Rcbase
     mutable double m_gcref_mant;
 
   public:
-    Variable() noexcept
-      : m_value(), m_immutable(true)
+    explicit Variable(const Source_Location &sloc) noexcept
+      : m_sloc(sloc),
+        m_value(), m_immutable(true)
       {
       }
     ~Variable() override;
@@ -33,6 +36,10 @@ class Variable : public virtual Rcbase
       = delete;
 
   public:
+    const Source_Location & get_source_location() const noexcept
+      {
+        return this->m_sloc;
+      }
     const Value & get_value() const noexcept
       {
         return this->m_value;
@@ -49,8 +56,9 @@ class Variable : public virtual Rcbase
       {
         this->m_immutable = immutable;
       }
-    template<typename XvalueT> void reset(XvalueT &&value, bool immutable)
+    template<typename XvalueT> void reset(const Source_Location &sloc, XvalueT &&value, bool immutable)
       {
+        this->m_sloc = sloc;
         this->m_value = std::forward<XvalueT>(value);
         this->m_immutable = immutable;
       }
