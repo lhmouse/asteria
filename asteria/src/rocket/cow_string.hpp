@@ -648,8 +648,8 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
 
     using shallow_type   = details_cow_string::shallow<charT, traitsT>;
 
-    static constexpr size_type npos = size_type(-1);
-    static constexpr value_type null_char = { };
+    static constexpr size_type npos        = size_type(-1);
+    static constexpr value_type null_char  = { };
 
     // hash support
     struct hash;
