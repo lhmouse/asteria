@@ -369,7 +369,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         auto times = static_cast<std::size_t>(rhs);
         // Reserve space for the result string.
-        char *ptr = &*(res.insert(res.begin(), nchars * times, ' '));
+        auto ptr = rocket::unfancy(res.insert(res.begin(), nchars * times, ' '));
         // Copy the source string once.
         std::memcpy(ptr, lhs.data(), nchars);
         // Append the result string to itself, doubling its length, until more than half of the result string has been populated.
@@ -396,7 +396,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         Cow_String res;
         // Reserve space for the result string.
-        char *ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
+        auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
         if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
@@ -413,7 +413,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         Cow_String res;
         // Reserve space for the result string.
-        char *ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
+        auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
         if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
