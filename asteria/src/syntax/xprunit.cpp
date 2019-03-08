@@ -862,7 +862,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(ref_c.value);
@@ -879,7 +879,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(ref_c.value);
@@ -896,7 +896,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // Throw an exception in case of unordered operands.
         auto comp = lhs.compare(ref_c.value);
         if(comp == Value::compare_unordered) {
@@ -915,7 +915,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // Throw an exception in case of unordered operands.
         auto comp = lhs.compare(ref_c.value);
         if(comp == Value::compare_unordered) {
@@ -934,7 +934,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // Throw an exception in case of unordered operands.
         auto comp = lhs.compare(ref_c.value);
         if(comp == Value::compare_unordered) {
@@ -953,7 +953,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // Throw an exception in case of unordered operands.
         auto comp = lhs.compare(ref_c.value);
         if(comp == Value::compare_unordered) {
@@ -972,7 +972,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(ref_c.value);
         switch(rocket::weaken_enum(comp)) {
@@ -1009,7 +1009,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1048,7 +1048,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1079,7 +1079,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // For type `boolean`, return the logical AND'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1123,7 +1123,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // For the `integer` and `real` types, return the quotient of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
@@ -1148,7 +1148,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // For types `integer` and `real`, return the reminder of both operands.
         if((lhs.type() == type_integer) && (ref_c.value.type() == type_integer)) {
           auto &rhs = ref_c.value.check<D_integer>();
@@ -1173,7 +1173,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // The second operand shall have type `integer`.
         if(ref_c.value.type() == type_integer) {
           // If the first operand has type `integer`, shift the first operand to the left by the number of bits specified by the second operand.
@@ -1204,7 +1204,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // The second operand shall have type `integer`.
         if(ref_c.value.type() == type_integer) {
           // If the first operand has type `integer`, shift the first operand to the right by the number of bits specified by the second operand.
@@ -1235,7 +1235,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // The second operand shall have type `integer`.
         if(ref_c.value.type() == type_integer) {
           // If the first operand is of type `integer`, shift the first operand to the left by the number of bits specified by the second operand.
@@ -1266,7 +1266,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // The second operand shall have type `integer`.
         if(ref_c.value.type() == type_integer) {
           // If the first operand is of type `integer`, shift the first operand to the right by the number of bits specified by the second operand.
@@ -1296,7 +1296,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1322,7 +1322,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
@@ -1348,7 +1348,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed by the LHS operand.
         Reference_Root::S_temporary ref_c = { stack_io.top().read() };
         stack_io.pop();
-        auto &lhs = stack_io.top().read();
+        const auto &lhs = stack_io.top().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if((lhs.type() == type_boolean) && (ref_c.value.type() == type_boolean)) {
           auto &rhs = ref_c.value.check<D_boolean>();
