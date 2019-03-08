@@ -359,11 +359,11 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
+        Cow_String res;
         auto nchars = lhs.size();
         if((nchars == 0) || (rhs == 0)) {
-          return Cow_String();
+          return res;
         }
-        Cow_String res;
         if(nchars > res.max_size() / static_cast<std::uint64_t>(rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
         }
