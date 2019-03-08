@@ -17,7 +17,8 @@ namespace Asteria {
 Parser_Error Simple_Source_File::do_reload_file(bool throw_on_failure, const Cow_String &filename)
   {
     std::ifstream ifstrm(filename.c_str());
-    return this->do_reload_stream(throw_on_failure, ifstrm, filename);
+    auto err = this->do_reload_stream(throw_on_failure, ifstrm, filename);
+    return err;
   }
 
 Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::istream &cstrm_io, const Cow_String &filename)
