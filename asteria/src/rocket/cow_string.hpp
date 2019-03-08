@@ -1761,9 +1761,8 @@ template<typename charT, typename traitsT, typename allocatorT> basic_cow_string
                                                                                                                        const basic_cow_string<charT, traitsT, allocatorT> &rhs)
   {
     // Copy `lhs` to create a new string then append `rhs` to it.
-    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
-    string_type res;
-    res.assign(typename string_type::shallow(lhs));
+    basic_cow_string<charT, traitsT, allocatorT> res;
+    res.assign(details_cow_string::shallow<charT, traitsT>(lhs));
     res.append(rhs);
     return res;
   }
@@ -1783,18 +1782,16 @@ template<typename charT, typename traitsT, typename allocatorT> basic_cow_string
 template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, const charT *rhs)
   {
     // Copy `lhs` to create a new string then append `rhs` to it.
-    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
-    string_type res;
-    res.assign(typename string_type::shallow(lhs));
+    basic_cow_string<charT, traitsT, allocatorT> res;
+    res.assign(details_cow_string::shallow<charT, traitsT>(lhs));
     res.append(rhs);
     return res;
   }
 template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT> &lhs, charT rhs)
   {
     // Copy `lhs` to create a new string then append `rhs` to it.
-    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
-    string_type res;
-    res.assign(typename string_type::shallow(lhs));
+    basic_cow_string<charT, traitsT, allocatorT> res;
+    res.assign(details_cow_string::shallow<charT, traitsT>(lhs));
     res.push_back(rhs);
     return res;
   }
@@ -1802,18 +1799,16 @@ template<typename charT, typename traitsT, typename allocatorT> basic_cow_string
 template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(const charT *lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
   {
     // Copy `rhs` to create a new string then prepend `lhs` to it.
-    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
-    string_type res;
-    res.assign(typename string_type::shallow(rhs));
+    basic_cow_string<charT, traitsT, allocatorT> res;
+    res.assign(details_cow_string::shallow<charT, traitsT>(rhs));
     res.insert(0, lhs);
     return res;
   }
 template<typename charT, typename traitsT, typename allocatorT> basic_cow_string<charT, traitsT, allocatorT> operator+(charT lhs, const basic_cow_string<charT, traitsT, allocatorT> &rhs)
   {
     // Copy `rhs` to create a new string then prepend `lhs` to it.
-    using string_type = basic_cow_string<charT, traitsT, allocatorT>;
-    string_type res;
-    res.assign(typename string_type::shallow(rhs));
+    basic_cow_string<charT, traitsT, allocatorT> res;
+    res.assign(details_cow_string::shallow<charT, traitsT>(rhs));
     res.insert(0, 1, lhs);
     return res;
   }
