@@ -178,9 +178,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs == INT64_MIN) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
         }
-        auto res = static_cast<std::uint64_t>(rhs);
-        res = -res;
-        return static_cast<std::int64_t>(res);
+        return -rhs;
       }
 
     ROCKET_PURE_FUNCTION std::int64_t do_operator_add(std::int64_t lhs, std::int64_t rhs)
@@ -213,8 +211,13 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if((lhs == -1) || (rhs == -1)) {
           return -(lhs ^ rhs ^ -1);
         }
-        auto slhs = (rhs >= 0) ? lhs : -lhs;
-        auto arhs = std::abs(rhs);
+        // signed lhs and absolute rhs
+        auto slhs = lhs;
+        auto arhs = rhs;
+        if(rhs < 0) {
+          slhs = -lhs;
+          arhs = -rhs;
+        }
         if((slhs >= 0) ? (slhs > INT64_MAX / arhs) : (slhs < INT64_MIN / arhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
@@ -251,9 +254,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs >= 64) {
           return 0;
         }
-        auto res = static_cast<std::uint64_t>(lhs);
-        res <<= rhs;
-        return static_cast<std::int64_t>(res);
+        return static_cast<std::int64_t>(static_cast<std::uint64_t>(lhs) << rhs);
       }
 
     ROCKET_PURE_FUNCTION std::int64_t do_operator_srl(std::int64_t lhs, std::int64_t rhs)
@@ -264,9 +265,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs >= 64) {
           return 0;
         }
-        auto res = static_cast<std::uint64_t>(lhs);
-        res >>= rhs;
-        return static_cast<std::int64_t>(res);
+        return static_cast<std::int64_t>(static_cast<std::uint64_t>(lhs) >> rhs);
       }
 
     ROCKET_PURE_FUNCTION std::int64_t do_operator_sla(std::int64_t lhs, std::int64_t rhs)
@@ -274,21 +273,19 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        auto res = static_cast<std::uint64_t>(lhs);
-        if(res == 0) {
+        if(lhs == 0) {
           return 0;
         }
         if(rhs >= 64) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
-        auto bits_rem = static_cast<unsigned char>(63 - rhs);
-        auto mask_out = (res >> bits_rem) << bits_rem;
-        auto mask_sign = -(res >> 63) << bits_rem;
-        if(mask_out != mask_sign) {
+        auto bc = static_cast<int>(63 - rhs);
+        auto mask_out = static_cast<std::uint64_t>(lhs) >> bc << bc;
+        auto mask_sbt = static_cast<std::uint64_t>(lhs >> 63) << bc;
+        if(mask_out != mask_sbt) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
-        res <<= rhs;
-        return static_cast<std::int64_t>(res);
+        return static_cast<std::int64_t>(static_cast<std::uint64_t>(lhs) << rhs);
       }
 
     ROCKET_PURE_FUNCTION std::int64_t do_operator_sra(std::int64_t lhs, std::int64_t rhs)
@@ -296,18 +293,10 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        auto res = static_cast<std::uint64_t>(lhs);
-        if(res == 0) {
-          return 0;
-        }
         if(rhs >= 64) {
-          return static_cast<std::int64_t>(-(res >> 63));
+          return lhs >> 63;
         }
-        auto bits_rem = static_cast<unsigned char>(63 - rhs);
-        auto mask_in = -(res >> 63) << bits_rem;
-        res >>= rhs;
-        res |= mask_in;
-        return static_cast<std::int64_t>(res);
+        return lhs >> rhs;
       }
 
     ROCKET_PURE_FUNCTION std::int64_t do_operator_not(std::int64_t rhs)
