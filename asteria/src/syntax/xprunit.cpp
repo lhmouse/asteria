@@ -351,11 +351,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
 
     ROCKET_PURE_FUNCTION Cow_String do_operator_add(const Cow_String &lhs, const Cow_String &rhs)
       {
-        Cow_String res;
-        res.reserve(lhs.size() + rhs.size());
-        res.append(lhs);
-        res.append(rhs);
-        return res;
+        return lhs + rhs;
       }
 
     ROCKET_PURE_FUNCTION Cow_String do_operator_mul(const Cow_String &lhs, std::int64_t rhs)
@@ -363,24 +359,27 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res;
-        auto count = static_cast<std::uint64_t>(rhs);
-        if(count == 0) {
-          return res;
+        auto nchars = lhs.size();
+        if((nchars == 0) || (rhs == 0)) {
+          return Cow_String();
         }
-        if(lhs.size() > res.max_size() / count) {
+        Cow_String res;
+        if(nchars > res.max_size() / static_cast<std::uint64_t>(rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
         }
-        res.reserve(lhs.size() * static_cast<std::size_t>(count));
-        auto mask = static_cast<std::size_t>(-1) / 2 + 1;
-        for(;;) {
-          if(count & mask) {
-            res.append(lhs);
-          }
-          if((mask >>= 1) == 0) {
-            break;
-          }
-          res.append(res);
+        auto times = static_cast<std::size_t>(rhs);
+        // Reserve space for the result string.
+        char *ptr = &*(res.insert(res.begin(), nchars * times, ' '));
+        // Copy the source string once.
+        std::memcpy(ptr, lhs.data(), nchars);
+        // Append the result string to itself, doubling its length, until more than half of the result string has been populated.
+        while(nchars <= res.size() / 2) {
+          std::memcpy(ptr + nchars, ptr, nchars);
+          nchars *= 2;
+        }
+        // Copy remaining characters, if any.
+        if(nchars < res.size()) {
+          std::memcpy(ptr + nchars, ptr, res.size() - nchars);
         }
         return res;
       }
@@ -395,12 +394,15 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res(lhs.size(), ' ');
-        auto count = static_cast<std::uint64_t>(rhs);
-        if(count >= lhs.size()) {
+        Cow_String res;
+        // Reserve space for the result string.
+        char *ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
+        if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
-        std::char_traits<char>::copy(res.mut_data(), lhs.data() + count, lhs.size() - static_cast<std::size_t>(count));
+        auto count = static_cast<std::size_t>(rhs);
+        // Copy the substring in the right.
+        std::memcpy(ptr, lhs.data() + count, lhs.size() - count);
         return res;
       }
 
@@ -409,12 +411,15 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        Cow_String res(lhs.size(), ' ');
-        auto count = static_cast<std::uint64_t>(rhs);
-        if(count >= lhs.size()) {
+        Cow_String res;
+        // Reserve space for the result string.
+        char *ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
+        if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
-        std::char_traits<char>::copy(res.mut_data() + count, lhs.data(), lhs.size() - static_cast<std::size_t>(count));
+        auto count = static_cast<std::size_t>(rhs);
+        // Copy the substring in the left.
+        std::memcpy(ptr + count, lhs.data(), lhs.size() - count);
         return res;
       }
 
@@ -424,12 +429,13 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
         Cow_String res;
-        auto count = static_cast<std::uint64_t>(rhs);
-        if(count > res.max_size() - lhs.size()) {
+        if(static_cast<std::uint64_t>(rhs) >= res.max_size() - lhs.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
         }
-        res.assign(lhs.size() + static_cast<std::size_t>(count), ' ');
-        std::char_traits<char>::copy(res.mut_data(), lhs.data(), lhs.size());
+        auto count = static_cast<std::size_t>(rhs);
+        // Append spaces in the right and return the result.
+        res.assign(Cow_String::shallow_type(lhs));
+        res.append(count, ' ');
         return res;
       }
 
@@ -439,11 +445,12 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
         Cow_String res;
-        auto count = static_cast<std::uint64_t>(rhs);
-        if(count >= lhs.size()) {
+        if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
-        res.append(lhs.data(), lhs.size() - static_cast<std::size_t>(count));
+        auto count = static_cast<std::size_t>(rhs);
+        // Return the substring in the left.
+        res.append(lhs.data(), lhs.size() - count);
         return res;
       }
 
