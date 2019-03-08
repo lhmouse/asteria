@@ -23,13 +23,13 @@ class Reference
       {
       }
     // This constructor does not accept lvalues.
-    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)> Reference(XrootT &&xroot)
+    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)> Reference(XrootT &&xroot) noexcept
       : m_root(std::forward<XrootT>(xroot)),
         m_mods()
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)> Reference & operator=(XrootT &&xroot)
+    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)> Reference & operator=(XrootT &&xroot) noexcept
       {
         this->m_root = std::forward<XrootT>(xroot);
         this->m_mods.clear();

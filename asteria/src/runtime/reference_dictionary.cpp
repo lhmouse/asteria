@@ -209,7 +209,7 @@ Reference & Reference_Dictionary::open(const PreHashed_String &name)
     auto templ = this->do_get_template_opt(name);
     if(ROCKET_UNEXPECT(templ)) {
        // Copy the static template.
-      static_assert(std::is_nothrow_copy_constructible<Reference>::value, "??");
+      static_assert(std::is_nothrow_copy_assignable<Reference>::value, "??");
       rocket::construct_at(bkt->second, *templ);
     } else {
       // Construct a null reference.

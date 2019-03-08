@@ -154,7 +154,7 @@ class Statement
         , S_return      // 14,
         , S_assert      // 15,
       )>;
-    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
 
   private:
     Variant m_stor;

@@ -35,7 +35,7 @@ class Value
         , D_array     // 7,
         , D_object    // 8,
       )>;
-    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
 
   public:
     template<typename TypeT> ROCKET_PURE_FUNCTION static constexpr Value_Type get_type() noexcept
@@ -59,11 +59,11 @@ class Value
       : m_stor()  // Initialize to `null`.
       {
       }
-    template<typename AltT, ROCKET_ENABLE_IF(std::is_constructible<Variant, AltT &&>::value)> Value(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF(std::is_constructible<Variant, AltT &&>::value)> Value(AltT &&alt) noexcept(std::is_nothrow_constructible<Variant, AltT &&>::value)
       : m_stor(std::forward<AltT>(alt))
       {
       }
-    template<typename AltT, ROCKET_ENABLE_IF(std::is_assignable<Variant, AltT &&>::value)> Value & operator=(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF(std::is_assignable<Variant, AltT &&>::value)> Value & operator=(AltT &&alt) noexcept(std::is_nothrow_assignable<Variant, AltT &&>::value)
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;

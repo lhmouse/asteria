@@ -32,19 +32,19 @@ class Reference_Modifier
         , S_array_index  // 0,
         , S_object_key   // 1,
       )>;
-    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
 
   private:
     Variant m_stor;
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Modifier(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Modifier(AltT &&alt) noexcept
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Modifier & operator=(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Modifier & operator=(AltT &&alt) noexcept
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;

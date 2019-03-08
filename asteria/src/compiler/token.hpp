@@ -151,7 +151,7 @@ class Token
         , S_real_literal     // 4,
         , S_string_literal   // 5,
       )>;
-    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
 
   public:
     ROCKET_PURE_FUNCTION static const char * get_keyword(Keyword keyword) noexcept;

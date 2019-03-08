@@ -130,7 +130,7 @@ class Xprunit
         , S_unnamed_object    //  8,
         , S_coalescence       //  9,
       )>;
-    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
 
   public:
     ROCKET_PURE_FUNCTION static const char * get_operator_name(Xop xop) noexcept;

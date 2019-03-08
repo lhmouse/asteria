@@ -45,7 +45,7 @@ class Reference_Root
         , S_temporary  // 2,
         , S_variable   // 3,
       )>;
-    static_assert(rocket::is_nothrow_copy_constructible<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
 
   private:
     Variant m_stor;
@@ -56,12 +56,12 @@ class Reference_Root
       {
       }
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Root(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Root(AltT &&alt) noexcept
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Root & operator=(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Root & operator=(AltT &&alt) noexcept
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
