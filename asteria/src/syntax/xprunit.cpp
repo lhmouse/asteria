@@ -482,25 +482,25 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto &name = p.at(0).as<PreHashed_String>();
         // Look for the name recursively.
         const Reference *qref;
-        auto qctx = static_cast<const Executive_Context *>(&ctx);
-        for(;;) {
+        const Executive_Context *qctx = &ctx;
+        do {
           qref = qctx->get_named_reference_opt(name);
           if(qref) {
-            break;
+            // Push the reference found.
+            stack_io.push_reference(*qref);
+            return Air_Node::status_next;
           }
+          // Try the parent context.
           qctx = qctx->get_parent_opt();
-          if(!qctx) {
-            // Try the global context.
-            qref = global.get_named_reference_opt(name);
-            if(qref) {
-              break;
-            }
-            ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
-          }
+        } while(qctx);
+        // Try the global context.
+        qref = global.get_named_reference_opt(name);
+        if(qref) {
+          // Push the reference found.
+          stack_io.push_reference(*qref);
+          return Air_Node::status_next;
         }
-        // Found the found reference.
-        stack_io.push_reference(*qref);
-        return Air_Node::status_next;
+        ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
       }
 
     Air_Node::Status do_execute_closure_function(Evaluation_Stack &stack_io, Executive_Context &ctx,
@@ -1362,30 +1362,24 @@ void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Conte
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later declared one.
         const Reference *qref;
-        auto qctx = static_cast<const Abstract_Context *>(&ctx);
-        for(;;) {
+        const Abstract_Context *qctx = &ctx;
+        do {
           qref = qctx->get_named_reference_opt(alt.name);
           if(qref) {
             // If the context is analytic, don't bind onto the reference.
-            // Stop in either case.
             if(qctx->is_analytic()) {
-              qref = nullptr;
+              break;
             }
-            break;
+            // A named reference has been found.
+            Cow_Vector<Air_Node::Variant> p;
+            p.emplace_back(*qref);  // 0
+            code_out.emplace_back(&do_execute_bound_reference, rocket::move(p));
+            return;
           }
+          // Try the parent context.
           qctx = qctx->get_parent_opt();
-          if(!qctx) {
-            break;
-          }
-        }
-        if(qref) {
-          // A named reference has been found.
-          Cow_Vector<Air_Node::Variant> p;
-          p.emplace_back(*qref);  // 0
-          code_out.emplace_back(&do_execute_bound_reference, rocket::move(p));
-          return;
-        }
-        // Encode arguments.
+        } while(qctx);
+        // Perform lazy binding.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.name);  // 0
         code_out.emplace_back(&do_execute_named_reference, rocket::move(p));
