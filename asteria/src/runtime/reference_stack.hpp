@@ -15,9 +15,12 @@ class Reference_Stack
     Cow_Vector<Reference> m_stor;
     Reference *m_btop;  // This points to the next element of the top.
 
+    Rcptr<Variable> m_varh_opt;
+
   public:
     Reference_Stack() noexcept
-      : m_stor(), m_btop(this->m_stor.mut_data())
+      : m_stor(), m_btop(this->m_stor.mut_data()),
+        m_varh_opt()
       {
       }
     ~Reference_Stack();
@@ -85,6 +88,15 @@ class Reference_Stack
         // Set up the past-the-top pointer.
         --btop;
         this->m_btop = btop;
+      }
+
+    void set_variable_hint(Rcptr<Variable> &&varh_opt) noexcept
+      {
+        this->m_varh_opt = std::move(varh_opt);
+      }
+    Rcptr<Variable> release_variable_hint_opt() noexcept
+      {
+        return std::exchange(this->m_varh_opt, nullptr);
       }
   };
 

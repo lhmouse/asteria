@@ -132,11 +132,9 @@ namespace Asteria {
         const auto &name = p.at(0).as<PreHashed_String>();
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx_io, "variable placeholder", name, global);
+        stack.set_variable_hint(std::move(var));
         // Note that the initializer must not be empty for this code.
         stack.clear();
-        // Push the variable on the stack.
-        Reference_Root::S_variable ref_c = { var };
-        stack.push(std::move(ref_c));
         return Air_Node::status_next;
       }
 
@@ -150,7 +148,8 @@ namespace Asteria {
         // Note that the initializer must not have been empty for this code.
         auto value = stack.top().read();
         stack.pop();
-        auto var = stack.top().get_variable_opt();
+        // Get back the variable that has been allocated in `do_declare_variable_and_clear_stack()`.
+        auto var = stack.release_variable_hint_opt();
         ROCKET_ASSERT(var);
         var->reset(sloc, std::move(value), immutable);
         return Air_Node::status_next;

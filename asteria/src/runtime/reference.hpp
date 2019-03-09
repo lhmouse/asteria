@@ -93,15 +93,6 @@ class Reference
         return *this;
       }
 
-    Rcptr<Variable> get_variable_opt() const noexcept
-      {
-        auto altr = this->m_root.opt<Reference_Root::S_variable>();
-        if(!altr) {
-          return nullptr;
-        }
-        return altr->var_opt;
-      }
-
     void enumerate_variables(const Abstract_Variable_Callback &callback) const
       {
         this->m_root.enumerate_variables(callback);
