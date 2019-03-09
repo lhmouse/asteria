@@ -52,11 +52,6 @@ class Evaluation_Stack
       {
         this->m_references.pop();
       }
-    void pop_previous_reference() noexcept
-      {
-        this->m_references.mut(1) = rocket::move(this->m_references.mut(0));
-        this->m_references.pop();
-      }
 
     void set_last_variable(Rcptr<Variable> &&var_opt) noexcept
       {
@@ -66,6 +61,11 @@ class Evaluation_Stack
       {
         return std::exchange(this->m_last_variable_opt, nullptr);
       }
+
+    // These are auxiliary functions purely for evaluation of expressions/
+    // Do not play with these at home.
+    void set_temporary_result(bool assign, Value &&value);
+    void forward_result(bool assign);
   };
 
 }  // namespace Asteria

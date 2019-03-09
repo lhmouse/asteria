@@ -11,4 +11,35 @@ Evaluation_Stack::~Evaluation_Stack()
   {
   }
 
+void Evaluation_Stack::set_temporary_result(bool assign, Value &&value)
+  {
+    // Do not play with this at home.
+    ROCKET_ASSERT(this->m_references.size() >= 1);
+    if(assign) {
+      // Write the value to the top refernce.
+      this->m_references.get(0).open() = rocket::move(value);
+      return;
+    }
+    // Replace the top reference to a temporary reference to the value.
+    Reference_Root::S_temporary ref_c = { rocket::move(value) };
+    this->m_references.mut(0) = rocket::move(ref_c);
+  }
+
+void Evaluation_Stack::forward_result(bool assign)
+  {
+    // Do not play with this at home.
+    ROCKET_ASSERT(this->m_references.size() >= 2);
+    if(assign) {
+      // Read a temporary value from the top reference and pop it.
+      // Set the new top to a temporary reference to the value.
+      Reference_Root::S_temporary ref_c = { this->m_references.get(0).read() };
+      this->m_references.mut(1) = rocket::move(ref_c);
+      this->m_references.pop();
+      return;
+    }
+    // Remove the next reference from the top.
+    this->m_references.mut(1) = rocket::move(this->m_references.mut(0));
+    this->m_references.pop();
+  }
+
 }  // namespace Asteria
