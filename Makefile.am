@@ -25,7 +25,7 @@ CLEANFILES =  \
   .pch.hpp.gch
 
 noinst_HEADERS =  \
-  test/_test_init.hpp
+  asteria/test/_test_init.hpp
 
 noinst_LTLIBRARIES =  \
   lib/librocket.la
@@ -184,19 +184,19 @@ bin_asteria_SOURCES =  \
   asteria/src/main.cpp
 
 check_PROGRAMS =  \
-  test/utilities.test  \
-  test/value.test  \
-  test/variable.test  \
-  test/reference.test  \
-  test/xprunit.test  \
-  test/statement.test  \
-  test/traceable_exception.test  \
-  test/executive_context.test  \
-  test/token_stream.test  \
-  test/parser.test  \
-  test/simple_source_file.test  \
-  test/garbage_collection.test  \
-  test/std_library.test  \
-  test/varg.test
+  asteria/test/utilities.test  \
+  asteria/test/value.test  \
+  asteria/test/variable.test  \
+  asteria/test/reference.test  \
+  asteria/test/xprunit.test  \
+  asteria/test/statement.test  \
+  asteria/test/traceable_exception.test  \
+  asteria/test/executive_context.test  \
+  asteria/test/token_stream.test  \
+  asteria/test/parser.test  \
+  asteria/test/simple_source_file.test  \
+  asteria/test/garbage_collection.test  \
+  asteria/test/std_library.test  \
+  asteria/test/varg.test
 
 TESTS = ${check_PROGRAMS}
