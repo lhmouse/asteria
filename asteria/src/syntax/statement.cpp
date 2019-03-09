@@ -5,7 +5,7 @@
 #include "statement.hpp"
 #include "xprunit.hpp"
 #include "../runtime/air_node.hpp"
-#include "../runtime/reference_stack.hpp"
+#include "../runtime/evaluation_stack.hpp"
 #include "../runtime/executive_context.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/global_context.hpp"
@@ -57,7 +57,7 @@ namespace Asteria {
         return code;
       }
 
-    Air_Node::Status do_execute_statement_list(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_statement_list(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                                const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
       {
         auto status = Air_Node::status_next;
@@ -66,7 +66,7 @@ namespace Asteria {
         return status;
       }
 
-    Air_Node::Status do_execute_block(Reference_Stack &stack,
+    Air_Node::Status do_execute_block(Evaluation_Stack &stack,
                                       const Executive_Context &ctx, const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
       {
         Executive_Context ctx_next(&ctx);
@@ -81,27 +81,27 @@ namespace Asteria {
         return code;
       }
 
-    void do_evaluate_expression(Reference_Stack &stack, Executive_Context &ctx,
+    void do_evaluate_expression(Evaluation_Stack &stack, Executive_Context &ctx,
                                 const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
       {
         // We push a null reference in case of empty expressions.
-        stack.clear();
-        stack.push(Reference_Root::S_null());
+        stack.clear_references();
+        stack.push_reference(Reference_Root::S_null());
         // Evaluate the expression.
         // If it is empty, the result will be pushed on `stack`; otherwise the aforementioned null reference will be on the top.
         rocket::for_each(code, [&](const Air_Node &node) { node.execute(stack, ctx, func, global);  });
       }
 
-    Air_Node::Status do_execute_clear_stack(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_clear_stack(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
                                             const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // We push a null reference in case of empty expressions.
-        stack.clear();
-        stack.push(Reference_Root::S_null());
+        stack.clear_references();
+        stack.push_reference(Reference_Root::S_null());
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_block_callback(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_block_callback(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                                const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -111,7 +111,7 @@ namespace Asteria {
         return status;
       }
 
-    Air_Node::Status do_define_uninitialized_variable(Reference_Stack & /*stack*/, Executive_Context &ctx_io,
+    Air_Node::Status do_define_uninitialized_variable(Evaluation_Stack & /*stack*/, Executive_Context &ctx_io,
                                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Decode arguments.
@@ -125,20 +125,20 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-   Air_Node::Status do_declare_variable_and_clear_stack(Reference_Stack &stack, Executive_Context &ctx_io,
+   Air_Node::Status do_declare_variable_and_clear_stack(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Decode arguments.
         const auto &name = p.at(0).as<PreHashed_String>();
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx_io, "variable placeholder", name, global);
-        stack.set_variable_hint(std::move(var));
+        stack.set_last_variable(std::move(var));
         // Note that the initializer must not be empty for this code.
-        stack.clear();
+        stack.clear_references();
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_initialize_variable(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_initialize_variable(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
                                             const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -146,16 +146,16 @@ namespace Asteria {
         const auto &immutable = static_cast<bool>(p.at(1).as<std::int64_t>());
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this code.
-        auto value = stack.top().read();
-        stack.pop();
+        auto value = stack.get_top_reference().read();
+        stack.pop_reference();
         // Get back the variable that has been allocated in `do_declare_variable_and_clear_stack()`.
-        auto var = stack.release_variable_hint_opt();
+        auto var = stack.release_last_variable_opt();
         ROCKET_ASSERT(var);
         var->reset(sloc, std::move(value), immutable);
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_define_function(Reference_Stack & /*stack*/, Executive_Context &ctx_io,
+    Air_Node::Status do_define_function(Evaluation_Stack & /*stack*/, Executive_Context &ctx_io,
                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
       {
         // Decode arguments.
@@ -181,7 +181,7 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_branch(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_branch(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -189,7 +189,7 @@ namespace Asteria {
         const auto &code_true = p.at(1).as<Cow_Vector<Air_Node>>();
         const auto &code_false = p.at(2).as<Cow_Vector<Air_Node>>();
         // Pick a branch basing on the condition.
-        if(stack.top().read().test() != negative) {
+        if(stack.get_top_reference().read().test() != negative) {
           // Execute the true branch. Forward any status codes unexpected to the caller.
           auto status = do_execute_block(stack, ctx_io, code_true, func, global);
           if(rocket::is_none_of(status, { Air_Node::status_next })) {
@@ -205,12 +205,12 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_select(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_select(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // This is different from a C `switch` statement where `case` labels must have constant operands.
         // Evaluate the control expression.
-        const auto ctrl_value = stack.top().read();
+        const auto ctrl_value = stack.get_top_reference().read();
         // `ctx_fr` is used before a `default` clause is encountered; `ctx_bk` is used after it.
         Executive_Context ctx_fr(&ctx_io);
         Executive_Context ctx_bk(&ctx_fr);
@@ -238,7 +238,7 @@ namespace Asteria {
             // This is a `case` clause.
             // Evaluate the operand and check whether it equals `ctrl_value`.
             do_evaluate_expression(stack, *qctx_cur, code_case, func, global);
-            if(stack.top().read().compare(ctrl_value) == Value::compare_equal) {
+            if(stack.get_top_reference().read().compare(ctrl_value) == Value::compare_equal) {
               // Found a `case` label.
               break;
             }
@@ -277,7 +277,7 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_do_while(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_do_while(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -296,14 +296,14 @@ namespace Asteria {
           }
           // Check the condition.
           do_evaluate_expression(stack, ctx_io, code_cond, func, global);
-          if(stack.top().read().test() == negative) {
+          if(stack.get_top_reference().read().test() == negative) {
             break;
           }
         }
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_while(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_while(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -314,7 +314,7 @@ namespace Asteria {
         for(;;) {
           // Check the condition.
           do_evaluate_expression(stack, ctx_io, code_cond, func, global);
-          if(stack.top().read().test() == negative) {
+          if(stack.get_top_reference().read().test() == negative) {
             break;
           }
           // Execute the body. Break out of the loop if requested. Forward any status codes unexpected to the caller.
@@ -329,7 +329,7 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_for(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_for(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                     const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -345,7 +345,7 @@ namespace Asteria {
           if(!code_cond.empty()) {
             // Check the condition.
             do_evaluate_expression(stack, ctx_for, code_cond, func, global);
-            if(stack.top().read().test() == false) {
+            if(stack.get_top_reference().read().test() == false) {
               break;
             }
           }
@@ -363,7 +363,7 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_for_each(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_for_each(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                          const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -377,7 +377,7 @@ namespace Asteria {
         do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, Reference_Root::S_null());
         // Evaluate the range initializer.
         do_evaluate_expression(stack, ctx_for, code_init, func, global);
-        auto range_ref = rocket::move(stack.mut_top());
+        auto range_ref = rocket::move(stack.open_top_reference());
         auto range_value = range_ref.read();
         // Iterate over the range.
         switch(rocket::weaken_enum(range_value.type())) {
@@ -435,7 +435,7 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_try(Reference_Stack &stack, Executive_Context &ctx_io,
+    Air_Node::Status do_execute_try(Evaluation_Stack &stack, Executive_Context &ctx_io,
                                     const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
       {
         // Decode arguments.
@@ -478,7 +478,7 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_return_status_simple(Reference_Stack & /*stack*/, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_return_status_simple(Evaluation_Stack & /*stack*/, Executive_Context & /*ctx_io*/,
                                              const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -487,28 +487,28 @@ namespace Asteria {
         return status;
       }
 
-    [[noreturn]] Air_Node::Status do_execute_throw(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
+    [[noreturn]] Air_Node::Status do_execute_throw(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
                                                    const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context & /*global*/)
       {
         // Decode arguments.
         const auto &sloc = p.at(0).as<Source_Location>();
         // Throw the value; we don't throw by reference.
-        throw Traceable_Exception(stack.top().read(), sloc, func);
+        throw Traceable_Exception(stack.get_top_reference().read(), sloc, func);
       }
 
-    Air_Node::Status do_execute_convert_to_temporary(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_convert_to_temporary(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
                                                      const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Replace the result with a temporary value, if it isn't.
-        if(stack.top().is_temporary()) {
+        if(stack.get_top_reference().is_temporary()) {
           return Air_Node::status_next;
         }
-        Reference_Root::S_temporary ref_c = { stack.top().read() };
-        stack.mut_top() = rocket::move(ref_c);
+        Reference_Root::S_temporary ref_c = { stack.get_top_reference().read() };
+        stack.open_top_reference() = rocket::move(ref_c);
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_assert(Reference_Stack &stack, Executive_Context & /*ctx_io*/,
+    Air_Node::Status do_execute_assert(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
@@ -516,7 +516,7 @@ namespace Asteria {
         const auto &negative = static_cast<bool>(p.at(1).as<std::int64_t>());
         const auto &msg = p.at(2).as<PreHashed_String>();
         // If the assertion succeeds, there is no effect.
-        if(ROCKET_EXPECT(stack.top().read().test() != negative)) {
+        if(ROCKET_EXPECT(stack.get_top_reference().read().test() != negative)) {
           return Air_Node::status_next;
         }
         // Throw a `Runtime_Error` if the assertion fails.

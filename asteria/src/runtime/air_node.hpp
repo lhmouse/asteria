@@ -51,7 +51,7 @@ class Air_Node
         , Reference                     // 6,
         , Cow_Vector<Air_Node>          // 7,
       )>;
-    using Executor = Status (Reference_Stack &stack_io, Executive_Context &ctx_io, const Cow_Vector<Variant> &params, const Cow_String &func, const Global_Context &global);
+    using Executor = Status (Evaluation_Stack &stack_io, Executive_Context &ctx_io, const Cow_Vector<Variant> &params, const Cow_String &func, const Global_Context &global);
 
   private:
     Executor *m_fptr;
@@ -64,7 +64,7 @@ class Air_Node
       }
 
   public:
-    Status execute(Reference_Stack &stack_io, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const
+    Status execute(Evaluation_Stack &stack_io, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const
       {
         return (*(this->m_fptr))(stack_io, ctx_io, this->m_params, func, global);
       }

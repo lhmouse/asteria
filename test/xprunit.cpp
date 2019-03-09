@@ -6,7 +6,7 @@
 #include "../asteria/src/runtime/global_context.hpp"
 #include "../asteria/src/runtime/executive_context.hpp"
 #include "../asteria/src/runtime/air_node.hpp"
-#include "../asteria/src/runtime/reference_stack.hpp"
+#include "../asteria/src/runtime/evaluation_stack.hpp"
 #include "../asteria/src/runtime/analytic_context.hpp"
 
 using namespace Asteria;
@@ -64,27 +64,27 @@ int main()
     Analytic_Context actx(&ctx);
     rocket::for_each(nodes, [&](const Xprunit &node) { node.generate_code(expr_code, actx);  });
 
-    Reference_Stack stack;
+    Evaluation_Stack stack;
     rocket::for_each(expr_code, [&](const Air_Node &node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
-    ASTERIA_TEST_CHECK(stack.size() == 1);
+    ASTERIA_TEST_CHECK(stack.get_reference_count() == 1);
     auto value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival->get_value();
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
     value = aval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_real>() == 1.75);
-    value = stack.top().read();
+    value = stack.get_top_reference().read();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
     cond->open_value() = D_integer(42);
     rocket::for_each(expr_code, [&](const Air_Node &node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
-    ASTERIA_TEST_CHECK(stack.size() == 2);
+    ASTERIA_TEST_CHECK(stack.get_reference_count() == 2);
     value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
     value = ival->get_value();
     ASTERIA_TEST_CHECK(value.check<D_integer>() == 3);
     value = aval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_array>().at(1).check<D_string>() == "hello,hello,hello,");
-    value = stack.top().read();
+    value = stack.get_top_reference().read();
     ASTERIA_TEST_CHECK(value.check<D_string>() == "hello,hello,hello,");
  }

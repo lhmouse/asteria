@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "instantiated_function.hpp"
 #include "../runtime/air_node.hpp"
-#include "reference_stack.hpp"
+#include "evaluation_stack.hpp"
 #include "function_executive_context.hpp"
 #include "../utilities.hpp"
 
@@ -22,7 +22,7 @@ void Instantiated_Function::describe(std::ostream &os) const
 void Instantiated_Function::invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const
   {
     // Create a stack and a context for this function.
-    Reference_Stack stack;
+    Evaluation_Stack stack;
     Function_Executive_Context ctx(this->m_zvarg, this->m_params, rocket::move(self_io), rocket::move(args));
     const auto &func = this->m_zvarg->get_function_signature();
     // Execute AIR nodes one by one.
@@ -39,7 +39,7 @@ void Instantiated_Function::invoke(Reference &self_io, const Global_Context &glo
     case Air_Node::status_return:
       {
         // Return the reference at the top of `stack`.
-        self_io = rocket::move(stack.mut_top());
+        self_io = rocket::move(stack.open_top_reference());
         break;
       }
     case Air_Node::status_break_unspec:
