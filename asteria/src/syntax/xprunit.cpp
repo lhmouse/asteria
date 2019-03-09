@@ -480,10 +480,10 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto &name = p.at(0).as<PreHashed_String>();
-        const auto &level = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
+        const auto &depth = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
         // Locate the context.
         const Executive_Context *qctx = &ctx;
-        for(std::size_t i = 0; i != level; ++i) {
+        for(std::size_t i = 0; i != depth; ++i) {
           qctx = qctx->get_parent_opt();
           ROCKET_ASSERT(qctx);
         }
@@ -1369,7 +1369,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Conte
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
         const Abstract_Context *qctx = &ctx;
-        std::size_t level = 0;
+        std::size_t depth = 0;
         for(;;) {
           auto qref = qctx->get_named_reference_opt(alt.name);
           if(qref) {
@@ -1381,10 +1381,10 @@ void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Conte
               return;
             }
             // A later-declared reference has been found.
-            // Record the context level and perform the lookup later.
+            // Record the context depth for later lookups.
             Cow_Vector<Air_Node::Variant> p;
             p.emplace_back(alt.name);  // 0
-            p.emplace_back(static_cast<std::int64_t>(level));  // 1
+            p.emplace_back(static_cast<std::int64_t>(depth));  // 1
             code_out.emplace_back(&do_find_named_reference_local, rocket::move(p));
             return;
           }
@@ -1392,7 +1392,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Conte
           if(!qctx) {
             break;
           }
-          ++level;
+          ++depth;
         }
         // No name has been found so far.
         Cow_Vector<Air_Node::Variant> p;
