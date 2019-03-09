@@ -41,17 +41,15 @@ class Reference_Stack
         this->m_btop = this->m_stor.mut_data();
       }
 
-    const Reference & top() const noexcept
+    const Reference & get(std::size_t index) const noexcept
       {
-        auto btop = this->m_btop;
-        ROCKET_ASSERT(btop != this->m_stor.data());
-        return btop[-1];
+        ROCKET_ASSERT(index < this->size());
+        return this->m_btop[~index];
       }
-    Reference & mut_top() noexcept
+    Reference & mut(std::size_t index) noexcept
       {
-        auto btop = this->m_btop;
-        ROCKET_ASSERT(btop != this->m_stor.data());
-        return btop[-1];
+        ROCKET_ASSERT(index < this->size());
+        return this->m_btop[~index];
       }
     template<typename ParamT> Reference & push(ParamT &&param)
       {
@@ -72,16 +70,6 @@ class Reference_Stack
       {
         auto btop = this->m_btop;
         ROCKET_ASSERT(btop != this->m_stor.data());
-        // Set up the past-the-top pointer.
-        --btop;
-        this->m_btop = btop;
-      }
-    void pop_prev() noexcept
-      {
-        auto btop = this->m_btop;
-        ROCKET_ASSERT(btop - this->m_stor.data() >= 2);
-        // Overwrite the previous element with the top.
-        btop[-2] = rocket::move(btop[-1]);
         // Set up the past-the-top pointer.
         --btop;
         this->m_btop = btop;

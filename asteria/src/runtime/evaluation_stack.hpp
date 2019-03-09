@@ -38,11 +38,11 @@ class Evaluation_Stack
 
     const Reference & get_top_reference() const noexcept
       {
-        return this->m_references.top();
+        return this->m_references.get(0);
       }
     Reference & open_top_reference() noexcept
       {
-        return this->m_references.mut_top();
+        return this->m_references.mut(0);
       }
     template<typename ParamT> Reference & push_reference(ParamT &&param)
       {
@@ -54,7 +54,8 @@ class Evaluation_Stack
       }
     void pop_previous_reference() noexcept
       {
-        this->m_references.pop_prev();
+        this->m_references.mut(1) = rocket::move(this->m_references.mut(0));
+        this->m_references.pop();
       }
 
     void set_last_variable(Rcptr<Variable> &&var_opt) noexcept
