@@ -1367,7 +1367,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Conte
       {
         const auto &alt = this->m_stor.as<S_named_reference>();
         // Perform early lookup when the expression is defined.
-        // If a named reference is found, it will not be replaced or hidden by a later declared one.
+        // If a named reference is found, it will not be replaced or hidden by a later-declared one.
         const Abstract_Context *qctx = &ctx;
         std::size_t level = 0;
         for(;;) {
