@@ -210,25 +210,31 @@ namespace Asteria {
       {
         // This is different from a C `switch` statement where `case` labels must have constant operands.
         // Evaluate the control expression.
-        const auto ctrl_value = stack.get_top_reference().read();
-        // `ctx_fr` is used before a `default` clause is encountered; `ctx_bk` is used after it.
-        Executive_Context ctx_fr(&ctx_io);
-        Executive_Context ctx_bk(&ctx_fr);
-        auto qctx_cur = &ctx_fr;
-        // Iterate over all `case` labels and evaluate them. Stop if the result value compares equal with `switch_value`.
+        auto ctrl_value = stack.get_top_reference().read();
+        // Note that all clauses share the same context.
+        Executive_Context ctx_body(&ctx_io);
         std::size_t index_def = SIZE_MAX;
         std::size_t index_case = 0;
+        // Iterate over all `case` labels and evaluate them. Stop if the result value equals `ctrl_value`.
         for(;;) {
-          // No more clauses?
           if(index_case >= p.size()) {
             // No `case` label equals `ctrl_value`.
             if(index_def == SIZE_MAX) {
               // There is no `default` label. Skip this block.
               return Air_Node::status_next;
             }
-            // A `default` label exists. Jump back to it.
-            qctx_cur = &ctx_fr;
-            index_case = index_def;
+            // Jump back to the `default` label.
+            // Rebuild the context.
+            ctx_body.clear_named_references();
+            index_case = 0;
+            while(index_case != index_def) {
+              // Decode arguments.
+              const auto &names = p.at(index_case + 2).as<Cow_Vector<PreHashed_String>>();
+              // Recreate references.
+              rocket::for_each(names, [&](const PreHashed_String &name) { do_safe_set_named_reference(nullptr, ctx_body, "skipped reference",
+                                                                                                      name, Reference_Root::S_null());  });
+              index_case += 3;
+            }
             break;
           }
           // Decode arguments.
@@ -237,30 +243,28 @@ namespace Asteria {
           if(!code_case.empty()) {
             // This is a `case` clause.
             // Evaluate the operand and check whether it equals `ctrl_value`.
-            do_evaluate_expression(stack, *qctx_cur, code_case, func, global);
+            do_evaluate_expression(stack, ctx_body, code_case, func, global);
             if(stack.get_top_reference().read().compare(ctrl_value) == Value::compare_equal) {
               // Found a `case` label.
               break;
             }
           } else {
             // This is a `default` clause.
-            if(qctx_cur != &ctx_fr) {
+            if(index_def != SIZE_MAX) {
               ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses have been found in this `switch` statement.");
             }
-            // Record it.
-            qctx_cur = &ctx_bk;
             index_def = index_case;
           }
           // Inject all names into this scope.
-          rocket::for_each(names, [&](const PreHashed_String &name) { do_safe_set_named_reference(nullptr, *qctx_cur, "skipped variable", name, Reference_Root::S_null());  });
-          // Try the next clause.
+          rocket::for_each(names, [&](const PreHashed_String &name) { do_safe_set_named_reference(nullptr, ctx_body, "skipped reference",
+                                                                                                  name, Reference_Root::S_null());  });
           index_case += 3;
         }
         for(;;) {
           // Decode arguments.
           const auto &code_clause = p.at(index_case + 1).as<Cow_Vector<Air_Node>>();
           // Execute the clause. Break out of the block if requested. Forward any status codes unexpected to the caller.
-          auto status = do_execute_statement_list(stack, *qctx_cur, code_clause, func, global);
+          auto status = do_execute_statement_list(stack, ctx_body, code_clause, func, global);
           if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
             break;
           }
@@ -392,7 +396,7 @@ namespace Asteria {
               // Set up the mapped reference.
               Reference_Modifier::S_array_index refm_c = { it - array.begin() };
               range_ref.zoom_in(rocket::move(refm_c));
-              do_safe_set_named_reference(nullptr, ctx_body, "mapped reference", mapped_name, range_ref);
+              do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, range_ref);
               range_ref.zoom_out();
               // Execute the loop body.
               auto status = do_execute_statement_list(stack, ctx_body, code_body, func, global);
@@ -416,7 +420,7 @@ namespace Asteria {
               // Set up the mapped reference.
               Reference_Modifier::S_object_key refm_c = { it->first };
               range_ref.zoom_in(rocket::move(refm_c));
-              do_safe_set_named_reference(nullptr, ctx_body, "mapped reference", mapped_name, range_ref);
+              do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, range_ref);
               range_ref.zoom_out();
               // Execute the loop body.
               auto status = do_execute_statement_list(stack, ctx_body, code_body, func, global);
@@ -666,7 +670,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         p.emplace_back(do_generate_code_statement_list(nullptr, ctx_for, alt.init));  // 0
         p.emplace_back(do_generate_code_expression(ctx_for, alt.cond));  // 1
         p.emplace_back(do_generate_code_expression(ctx_for, alt.step));  // 2
-        p.emplace_back(do_generate_code_statement_list(nullptr, ctx_for, alt.body));  // 3
+        p.emplace_back(do_generate_code_block(ctx_for, alt.body));  // 3
         code_out.emplace_back(&do_execute_for, rocket::move(p));
         return;
       }
@@ -682,7 +686,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         p.emplace_back(alt.key_name);  // 0
         p.emplace_back(alt.mapped_name);  // 1
         p.emplace_back(do_generate_code_expression(ctx_for, alt.init));  // 2
-        p.emplace_back(do_generate_code_statement_list(nullptr, ctx_for, alt.body));  // 3
+        p.emplace_back(do_generate_code_block(ctx_for, alt.body));  // 3
         code_out.emplace_back(&do_execute_for_each, rocket::move(p));
         return;
       }
@@ -694,7 +698,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         do_safe_set_named_reference(nullptr, ctx_catch, "exception placeholder", alt.except_name, Reference_Root::S_null());
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
-        p.emplace_back(do_generate_code_block(ctx_catch, alt.body_try));  // 0
+        p.emplace_back(do_generate_code_block(ctx_io, alt.body_try));  // 0
         p.emplace_back(alt.except_name);  // 1
         p.emplace_back(do_generate_code_statement_list(nullptr, ctx_catch, alt.body_catch));  // 2
         code_out.emplace_back(&do_execute_try, rocket::move(p));
