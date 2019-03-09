@@ -455,7 +455,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       }
 
     Air_Node::Status do_push_literal(Evaluation_Stack &stack_io, Executive_Context & /*ctx*/,
-                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
+                                     const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
       {
         // Decode arguments.
         const auto &value = p.at(0).as<Value>();
