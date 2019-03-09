@@ -63,7 +63,8 @@ const char * Value::get_type_name(Value_Type etype) noexcept
 
 const Value & Value::get_null() noexcept
   {
-    return *static_cast<const Value *>(static_cast<const void *>(s_null.bytes));
+    auto vptr = static_cast<const void *>(s_null.bytes);
+    return *static_cast<const Value *>(vptr);
   }
 
 bool Value::test() const noexcept
