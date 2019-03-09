@@ -132,7 +132,7 @@ namespace Asteria {
         const auto &name = p.at(0).as<PreHashed_String>();
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx_io, "variable placeholder", name, global);
-        stack.set_last_variable(std::move(var));
+        stack.set_last_variable(rocket::move(var));
         // Note that the initializer must not be empty for this code.
         stack.clear_references();
         return Air_Node::status_next;
@@ -151,7 +151,7 @@ namespace Asteria {
         // Get back the variable that has been allocated in `do_declare_variable_and_clear_stack()`.
         auto var = stack.release_last_variable_opt();
         ROCKET_ASSERT(var);
-        var->reset(sloc, std::move(value), immutable);
+        var->reset(sloc, rocket::move(value), immutable);
         return Air_Node::status_next;
       }
 

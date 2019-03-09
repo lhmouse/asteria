@@ -59,7 +59,7 @@ class Evaluation_Stack
 
     void set_last_variable(Rcptr<Variable> &&var_opt) noexcept
       {
-        this->m_last_variable_opt = std::move(var_opt);
+        this->m_last_variable_opt = rocket::move(var_opt);
       }
     Rcptr<Variable> release_last_variable_opt() noexcept
       {
