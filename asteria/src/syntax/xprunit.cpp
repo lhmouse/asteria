@@ -1727,7 +1727,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Conte
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown expression node type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown expression unit type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 
