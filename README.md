@@ -1,6 +1,6 @@
 |CI            |Category                   |Build on OS   |Host OS             |Build Status     |
 |:-------------|:--------------------------|:-------------|:-------------------|:----------------|
-|**Travis CI** |:1st_place_medal:Primary   |Ubuntu Trusty |Ubuntu Trusty       |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |
+|**Travis CI** |:1st_place_medal:Primary   |Ubuntu Xenial |Ubuntu Xenial       |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |
 |**Tea CI**    |:2nd_place_medal:Secondary |Wine          |Windows Server 2003 |[![Build Status](https://tea-ci.org/api/badges/lhmouse/asteria/status.svg)](https://tea-ci.org/lhmouse/asteria) |
 
 |Compiler    |Category                   |Comments                                                    |
