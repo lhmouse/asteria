@@ -12,8 +12,8 @@ namespace Asteria {
 class Evaluation_Stack
   {
   private:
-    Reference_Stack m_references;
-    Rcptr<Variable> m_last_variable_opt;
+    Reference_Stack m_refs;
+    Rcptr<Variable> m_lvar_opt;
 
   public:
     Evaluation_Stack() noexcept
@@ -29,37 +29,37 @@ class Evaluation_Stack
   public:
     std::size_t get_reference_count() const noexcept
       {
-        return this->m_references.size();
+        return this->m_refs.size();
       }
     void clear_references() noexcept
       {
-        this->m_references.clear();
+        this->m_refs.clear();
       }
 
     const Reference & get_top_reference() const noexcept
       {
-        return this->m_references.get(0);
+        return this->m_refs.get(0);
       }
     Reference & open_top_reference() noexcept
       {
-        return this->m_references.mut(0);
+        return this->m_refs.mut(0);
       }
     template<typename ParamT> Reference & push_reference(ParamT &&param)
       {
-        return this->m_references.push(std::forward<ParamT>(param));
+        return this->m_refs.push(std::forward<ParamT>(param));
       }
     void pop_reference() noexcept
       {
-        this->m_references.pop();
+        this->m_refs.pop();
       }
 
     void set_last_variable(Rcptr<Variable> &&var_opt) noexcept
       {
-        this->m_last_variable_opt = rocket::move(var_opt);
+        this->m_lvar_opt = rocket::move(var_opt);
       }
     Rcptr<Variable> release_last_variable_opt() noexcept
       {
-        return std::exchange(this->m_last_variable_opt, nullptr);
+        return std::exchange(this->m_lvar_opt, nullptr);
       }
 
     // These are auxiliary functions purely for evaluation of expressions/

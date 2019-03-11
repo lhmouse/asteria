@@ -18,9 +18,9 @@ class Abstract_Context
       };
 
   private:
-    Uptr<Rcbase, Collection_Trigger> m_tied_collector_opt;
-    // This has to be defined after `m_tied_collector_opt` because of the order of destruction.
-    Reference_Dictionary m_named_references;
+    Uptr<Rcbase, Collection_Trigger> m_tied_coll_opt;
+    // This has to be defined after `m_tied_coll_opt` because of the order of destruction.
+    Reference_Dictionary m_named_refs;
 
   public:
     Abstract_Context() noexcept
@@ -40,15 +40,15 @@ class Abstract_Context
   public:
     const Reference * get_named_reference_opt(const PreHashed_String &name) const
       {
-        return this->m_named_references.get_opt(name);
+        return this->m_named_refs.get_opt(name);
       }
     Reference & open_named_reference(const PreHashed_String &name)
       {
-        return this->m_named_references.open(name);
+        return this->m_named_refs.open(name);
       }
     void clear_named_references() noexcept
       {
-        this->m_named_references.clear();
+        this->m_named_refs.clear();
       }
 
     virtual bool is_analytic() const noexcept = 0;
