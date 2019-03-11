@@ -127,7 +127,10 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
 
 bool Variable_HashSet::has(const Rcptr<Variable> &var) const noexcept
   {
-    if(this->m_stor.empty()) {
+    if(ROCKET_UNEXPECT(!var)) {
+      return false;
+    }
+    if(ROCKET_UNEXPECT(this->m_stor.empty())) {
       return false;
     }
     // Get table bounds.
@@ -147,7 +150,7 @@ bool Variable_HashSet::has(const Rcptr<Variable> &var) const noexcept
 
 void Variable_HashSet::for_each(const Abstract_Variable_Callback &callback) const
   {
-    if(this->m_stor.empty()) {
+    if(ROCKET_UNEXPECT(this->m_stor.empty())) {
       return;
     }
     // Get table bounds.
@@ -162,10 +165,9 @@ void Variable_HashSet::for_each(const Abstract_Variable_Callback &callback) cons
 
 bool Variable_HashSet::insert(const Rcptr<Variable> &var)
   {
-    if(!var) {
+    if(ROCKET_UNEXPECT(!var)) {
       ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_HashSet`.");
     }
-    // Rehash as needed.
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
       this->do_rehash(this->m_stor.size() * 2 | 97);
     }
@@ -191,7 +193,10 @@ bool Variable_HashSet::insert(const Rcptr<Variable> &var)
 
 bool Variable_HashSet::erase(const Rcptr<Variable> &var) noexcept
   {
-    if(this->m_stor.empty()) {
+    if(ROCKET_UNEXPECT(!var)) {
+      return false;
+    }
+    if(ROCKET_UNEXPECT(this->m_stor.empty())) {
       return false;
     }
     // Get table bounds.
@@ -217,7 +222,7 @@ bool Variable_HashSet::erase(const Rcptr<Variable> &var) noexcept
 
 Rcptr<Variable> Variable_HashSet::erase_random_opt() noexcept
   {
-    if(this->m_stor.empty()) {
+    if(ROCKET_UNEXPECT(this->m_stor.empty())) {
       return nullptr;
     }
     // Get table bounds.

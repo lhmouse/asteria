@@ -137,7 +137,10 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
 
 const Reference * Reference_Dictionary::get_opt(const PreHashed_String &name) const noexcept
   {
-    if(ROCKET_EXPECT(this->m_stor.empty())) {
+    if(ROCKET_UNEXPECT(name.empty())) {
+      return nullptr;
+    }
+    if(ROCKET_UNEXPECT(this->m_stor.empty())) {
       return nullptr;
     }
     // Get table bounds.
@@ -157,10 +160,9 @@ const Reference * Reference_Dictionary::get_opt(const PreHashed_String &name) co
 
 Reference & Reference_Dictionary::open(const PreHashed_String &name)
   {
-    if(name.empty()) {
+    if(ROCKET_UNEXPECT(name.empty())) {
       ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_Dictionary`.");
     }
-    // Rehash as needed.
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
       this->do_rehash(this->m_stor.size() * 2 | 11);
     }
@@ -187,7 +189,10 @@ Reference & Reference_Dictionary::open(const PreHashed_String &name)
 
 bool Reference_Dictionary::remove(const PreHashed_String &name) noexcept
   {
-    if(this->m_stor.empty()) {
+    if(ROCKET_UNEXPECT(name.empty())) {
+      return false;
+    }
+    if(ROCKET_UNEXPECT(this->m_stor.empty())) {
       return false;
     }
     // Get table bounds.
