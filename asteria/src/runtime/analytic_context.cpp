@@ -23,7 +23,7 @@ void Analytic_Context::prepare_function_parameters(const Cow_Vector<PreHashed_St
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Its contents are out of interest.
-      this->open_named_reference(param) = Reference_Root::S_null();
+      this->open_named_reference(param) /*= Reference_Root::S_null()*/;
     }
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update 'executive_context.cpp' as well.
