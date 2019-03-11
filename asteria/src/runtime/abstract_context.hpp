@@ -33,10 +33,9 @@ class Abstract_Context
     Abstract_Context & operator=(const Abstract_Context &)
       = delete;
 
-  protected:
-    void do_tie_collector(Rcptr<Generational_Collector> tied_coll_opt) noexcept;
-
   public:
+    void tie_collector(Rcptr<Generational_Collector> coll_opt) noexcept;
+
     const Reference * get_named_reference_opt(const PreHashed_String &name) const
       {
         return this->m_named_refs.get_opt(name);

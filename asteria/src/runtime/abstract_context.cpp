@@ -25,9 +25,9 @@ Abstract_Context::~Abstract_Context()
   {
   }
 
-void Abstract_Context::do_tie_collector(Rcptr<Generational_Collector> tied_collector_opt) noexcept
+void Abstract_Context::tie_collector(Rcptr<Generational_Collector> coll_opt) noexcept
   {
-    this->m_tied_coll_opt.reset(tied_collector_opt.release());
+    this->m_tied_coll_opt.reset(coll_opt.release());
   }
 
 }  // namespace Asteria

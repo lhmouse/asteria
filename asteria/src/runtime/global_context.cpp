@@ -17,7 +17,7 @@ void Global_Context::do_initialize_runtime(void * /*reserved*/)
   {
     // Initialize the global garbage collector.
     auto collector = rocket::make_refcnt<Generational_Collector>();
-    this->do_tie_collector(collector);
+    this->tie_collector(collector);
     this->m_collector = collector;
     // Create the `std` variable.
     auto std_var = collector->create_variable();
