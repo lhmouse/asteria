@@ -35,12 +35,6 @@ template<typename elementT> class refcnt_object
       : m_ptr(other.m_ptr)
       {
       }
-    template<typename paramT, ROCKET_ENABLE_IF(is_assignable<elementT,
-                                                             paramT &&>::value)> refcnt_object & operator=(paramT &&param) noexcept(is_nothrow_assignable<elementT, paramT &&>::value)
-      {
-        *(this->m_ptr) = ::std::forward<paramT>(param);
-        return *this;
-      }
     refcnt_object & operator=(const refcnt_object &other) noexcept
       {
         this->m_ptr = other.m_ptr;
