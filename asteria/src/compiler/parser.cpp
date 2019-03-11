@@ -1426,7 +1426,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
         }
-        Cow_Vector<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> clauses;
+        Cow_Vector<std::pair<Cow_Vector<Xprunit>,  // This is empty on `default` clauses and non-empty on `case` clauses.
+                             Cow_Vector<Statement>>> clauses;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_expected);
         }
