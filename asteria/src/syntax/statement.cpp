@@ -5,11 +5,10 @@
 #include "statement.hpp"
 #include "xprunit.hpp"
 #include "../runtime/air_node.hpp"
-#include "../runtime/evaluation_stack.hpp"
-#include "../runtime/executive_context.hpp"
 #include "../runtime/analytic_context.hpp"
+#include "../runtime/executive_context.hpp"
 #include "../runtime/global_context.hpp"
-#include "../runtime/function_analytic_context.hpp"
+#include "../runtime/evaluation_stack.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../runtime/traceable_exception.hpp"
 #include "../utilities.hpp"
@@ -167,15 +166,16 @@ namespace Asteria {
         // A function becomes visible before its definition, where it is initialized to `null`.
         auto var = do_safe_create_variable(nullptr, ctx_io, "function", name, global);
         // Generate code for the function body.
-        Cow_Vector<Air_Node> code_next;
-        Function_Analytic_Context ctx_next(&ctx_io, params);
-        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_next, nullptr, ctx_next);  });
+        Cow_Vector<Air_Node> code_func;
+        Analytic_Context ctx_func(&ctx_io);
+        ctx_func.prepare_function_parameters(params);
+        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_func, nullptr, ctx_func);  });
         // Instantiate the function.
         rocket::insertable_ostream nos;
         nos << name << "("
             << rocket::ostream_implode(params.begin(), params.size(), ", ")
             <<")";
-        Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_next));
+        Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_func));
         // Initialized the function variable.
         var->reset(sloc, D_function(rocket::move(closure)), true);
         return Air_Node::status_next;

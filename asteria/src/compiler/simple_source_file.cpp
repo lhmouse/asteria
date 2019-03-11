@@ -7,7 +7,7 @@
 #include "parser.hpp"
 #include "../syntax/statement.hpp"
 #include "../runtime/air_node.hpp"
-#include "../runtime/function_analytic_context.hpp"
+#include "../runtime/analytic_context.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../utilities.hpp"
 #include <fstream>
@@ -44,15 +44,16 @@ Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::is
       return err;
     }
     // Initialize parameters of the top scope.
-    const Source_Location sloc(filename, 0);
-    const Cow_Vector<PreHashed_String> params;
+    Source_Location sloc(filename, 0);
+    Cow_Vector<PreHashed_String> params;
     // Generate code.
-    Cow_Vector<Air_Node> code;
-    Function_Analytic_Context ctx(nullptr, params);
-    rocket::for_each(parser.get_statements(), [&](const Statement &stmt) { stmt.generate_code(code, nullptr, ctx);  });
+    Cow_Vector<Air_Node> code_func;
+    Analytic_Context ctx_func(nullptr);
+    ctx_func.prepare_function_parameters(params);
+    rocket::for_each(parser.get_statements(), [&](const Statement &stmt) { stmt.generate_code(code_func, nullptr, ctx_func);  });
     // Accept the code.
     this->m_codev.clear();
-    this->m_codev.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
+    this->m_codev.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code_func));
     return Parser_Error(0, 0, 0, Parser_Error::code_success);
   }
 

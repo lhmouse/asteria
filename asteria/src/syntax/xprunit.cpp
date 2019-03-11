@@ -6,9 +6,9 @@
 #include "statement.hpp"
 #include "../runtime/air_node.hpp"
 #include "../runtime/evaluation_stack.hpp"
+#include "../runtime/analytic_context.hpp"
 #include "../runtime/executive_context.hpp"
 #include "../runtime/global_context.hpp"
-#include "../runtime/function_analytic_context.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../runtime/traceable_exception.hpp"
 #include "../utilities.hpp"
@@ -519,8 +519,9 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto &body = p.at(2).as<Cow_Vector<Statement>>();
         // Generate code of the function body.
         Cow_Vector<Air_Node> code_body;
-        Function_Analytic_Context ctx_next(&ctx, params);
-        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_body, nullptr, ctx_next);  });
+        Analytic_Context ctx_func(&ctx);
+        ctx_func.prepare_function_parameters(params);
+        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_body, nullptr, ctx_func);  });
         // Instantiate the function.
         Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, rocket::move(code_body));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);

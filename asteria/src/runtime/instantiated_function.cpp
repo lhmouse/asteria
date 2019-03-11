@@ -5,7 +5,7 @@
 #include "instantiated_function.hpp"
 #include "../runtime/air_node.hpp"
 #include "evaluation_stack.hpp"
-#include "function_executive_context.hpp"
+#include "executive_context.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -23,11 +23,12 @@ void Instantiated_Function::invoke(Reference &self_io, const Global_Context &glo
   {
     // Create a stack and a context for this function.
     Evaluation_Stack stack;
-    Function_Executive_Context ctx(this->m_zvarg, this->m_params, rocket::move(self_io), rocket::move(args));
+    Executive_Context ctx_func(nullptr);
+    ctx_func.prepare_function_arguments(this->m_zvarg, this->m_params, rocket::move(self_io), rocket::move(args));
     const auto &func = this->m_zvarg->get_function_signature();
     // Execute AIR nodes one by one.
     auto status = Air_Node::status_next;
-    rocket::any_of(this->m_code, [&](const Air_Node &node) { return (status = node.execute(stack, ctx, func, global))
+    rocket::any_of(this->m_code, [&](const Air_Node &node) { return (status = node.execute(stack, ctx_func, func, global))
                                                                     != Air_Node::status_next;  });
     switch(status) {
     case Air_Node::status_next:

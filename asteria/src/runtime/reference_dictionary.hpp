@@ -44,16 +44,12 @@ class Reference_Dictionary
       };
 
   private:
-    const std::pair<Cow_String, Reference> *m_templ_data;
-    std::size_t m_templ_size;
-
     // The first and last buckets are permanently reserved.
     Cow_Vector<Bucket> m_stor;
 
   public:
     Reference_Dictionary() noexcept
-      : m_templ_data(nullptr), m_templ_size(0),
-        m_stor()
+      : m_stor()
       {
       }
 
@@ -63,36 +59,11 @@ class Reference_Dictionary
       = delete;
 
   private:
-    const Reference * do_get_template_nonempty_opt(const PreHashed_String &name) const noexcept;
-    const Reference * do_get_dynamic_nonempty_opt(const PreHashed_String &name) const noexcept;
-
-    const Reference * do_get_template_opt(const PreHashed_String &name) const noexcept
-      {
-        if(ROCKET_EXPECT(this->m_templ_size == 0)) {
-          return nullptr;
-        }
-        return this->do_get_template_nonempty_opt(name);
-      }
-    const Reference * do_get_dynamic_opt(const PreHashed_String &name) const noexcept
-      {
-        if(ROCKET_EXPECT(this->m_stor.empty())) {
-          return nullptr;
-        }
-        return this->do_get_dynamic_nonempty_opt(name);
-      }
-
     void do_clear() noexcept;
     void do_rehash(std::size_t res_arg);
     void do_check_relocation(Bucket *to, Bucket *from);
 
   public:
-    void set_templates(const std::pair<Cow_String, Reference> *tdata_opt, std::size_t tsize) noexcept
-      {
-        // Elements in [begin, end) must have been sorted.
-        this->m_templ_data = tdata_opt;
-        this->m_templ_size = tsize;
-      }
-
     bool empty() const noexcept
       {
         if(this->m_stor.empty()) {
@@ -115,18 +86,7 @@ class Reference_Dictionary
         this->do_clear();
       }
 
-    const Reference * get_opt(const PreHashed_String &name) const noexcept
-      {
-        auto qref = this->do_get_dynamic_opt(name);
-        if(ROCKET_EXPECT(qref)) {
-          return qref;
-        }
-        qref = this->do_get_template_opt(name);
-        if(ROCKET_EXPECT(qref)) {
-          return qref;
-        }
-        return nullptr;
-      }
+    const Reference * get_opt(const PreHashed_String &name) const noexcept;
     Reference & open(const PreHashed_String &name);
     bool remove(const PreHashed_String &name) noexcept;
   };

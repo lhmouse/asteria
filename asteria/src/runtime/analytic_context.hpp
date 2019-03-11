@@ -31,6 +31,8 @@ class Analytic_Context : public Abstract_Context
       {
         return this->m_parent_opt;
       }
+
+    void prepare_function_parameters(const Cow_Vector<PreHashed_String> &params);
   };
 
 }  // namespace Asteria

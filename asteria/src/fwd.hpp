@@ -52,8 +52,6 @@ class Collector;
 class Abstract_Context;
 class Analytic_Context;
 class Executive_Context;
-class Function_Analytic_Context;
-class Function_Executive_Context;
 class Global_Context;
 class Generational_Collector;
 class Variadic_Arguer;

@@ -34,8 +34,7 @@ class Abstract_Context
       = delete;
 
   protected:
-    void do_tie_collector(Rcptr<Generational_Collector> tied_collector_opt) noexcept;
-    void do_set_named_reference_templates(const std::pair<Cow_String, Reference> *tdata_opt, std::size_t tsize) noexcept;
+    void do_tie_collector(Rcptr<Generational_Collector> tied_coll_opt) noexcept;
 
   public:
     const Reference * get_named_reference_opt(const PreHashed_String &name) const

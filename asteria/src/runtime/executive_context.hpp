@@ -31,6 +31,8 @@ class Executive_Context : public Abstract_Context
       {
         return this->m_parent_opt;
       }
+
+    void prepare_function_arguments(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args);
   };
 
 }  // namespace Asteria

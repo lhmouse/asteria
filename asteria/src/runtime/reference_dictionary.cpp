@@ -40,57 +40,6 @@ void Reference_Dictionary::Bucket::do_detach() noexcept
     next->prev = iprev;
   }
 
-const Reference * Reference_Dictionary::do_get_template_nonempty_opt(const PreHashed_String &name) const noexcept
-  {
-    ROCKET_ASSERT(this->m_templ_size != 0);
-#ifdef ROCKET_DEBUG
-    // The table must have been sorted.
-    ROCKET_ASSERT(std::is_sorted(this->m_templ_data, this->m_templ_data + this->m_templ_size,
-                                 [](const auto &lhs, const auto &rhs) { return lhs.first < rhs.first;  }));
-#endif
-    // Get template table range.
-    auto base = this->m_templ_data;
-    std::size_t lower = 0;
-    std::size_t upper = this->m_templ_size;
-    for(;;) {
-      // This is a handwritten binary search, utilizing 3-way comparison results of strings.
-      std::size_t middle = (lower + upper) / 2;
-      const auto &pivot = base[middle];
-      int cmp = name.rdstr().compare(pivot.first);
-      if(ROCKET_EXPECT(cmp == 0)) {
-        // Found.
-        return std::addressof(pivot.second);
-      }
-      if(cmp > 0) {
-        lower = middle + 1;
-      } else {
-        upper = middle;
-      }
-      if(ROCKET_UNEXPECT(lower == upper)) {
-        // Not found.
-        return nullptr;
-      }
-    }
-  }
-
-const Reference * Reference_Dictionary::do_get_dynamic_nonempty_opt(const PreHashed_String &name) const noexcept
-  {
-    ROCKET_ASSERT(!this->m_stor.empty());
-    // Get table bounds.
-    auto pre = this->m_stor.data();
-    auto end = pre + (this->m_stor.size() - 1);
-    // Find the element using linear probing.
-    auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name;  });
-    // There will always be some empty buckets in the table.
-    ROCKET_ASSERT(bkt);
-    if(!*bkt) {
-      // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
-      return nullptr;
-    }
-    return bkt->second;
-  }
-
 void Reference_Dictionary::do_clear() noexcept
   {
     ROCKET_ASSERT(this->m_stor.size() >= 2);
@@ -186,11 +135,32 @@ void Reference_Dictionary::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
+const Reference * Reference_Dictionary::get_opt(const PreHashed_String &name) const noexcept
+  {
+    if(ROCKET_EXPECT(this->m_stor.empty())) {
+      return nullptr;
+    }
+    // Get table bounds.
+    auto pre = this->m_stor.data();
+    auto end = pre + (this->m_stor.size() - 1);
+    // Find the element using linear probing.
+    auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
+    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == name;  });
+    // There will always be some empty buckets in the table.
+    ROCKET_ASSERT(bkt);
+    if(!*bkt) {
+      // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
+      return nullptr;
+    }
+    return bkt->second;
+  }
+
 Reference & Reference_Dictionary::open(const PreHashed_String &name)
   {
     if(name.empty()) {
       ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_Dictionary`.");
     }
+    // Rehash as needed.
     if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
       this->do_rehash(this->m_stor.size() * 2 | 11);
     }
@@ -208,17 +178,7 @@ Reference & Reference_Dictionary::open(const PreHashed_String &name)
     }
     // Insert it into the new bucket.
     bkt->first = name;
-    // Find the template to copy from.
-    auto templ = this->do_get_template_opt(name);
-    if(ROCKET_UNEXPECT(templ)) {
-       // Copy the static template.
-      static_assert(std::is_nothrow_copy_assignable<Reference>::value, "??");
-      rocket::construct_at(bkt->second, *templ);
-    } else {
-      // Construct a null reference.
-      static_assert(std::is_nothrow_constructible<Reference>::value, "??");
-      rocket::construct_at(bkt->second);
-    }
+    rocket::construct_at(bkt->second);
     bkt->do_attach(end);
     // Update the number of elements.
     pre->size++;
