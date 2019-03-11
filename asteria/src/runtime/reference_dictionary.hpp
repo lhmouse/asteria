@@ -46,6 +46,7 @@ class Reference_Dictionary
   private:
     const std::pair<Cow_String, Reference> *m_templ_data;
     std::size_t m_templ_size;
+
     // The first and last buckets are permanently reserved.
     Cow_Vector<Bucket> m_stor;
 
