@@ -18,8 +18,8 @@ class Abstract_Context
       };
 
   private:
+    // Mind the order of destruction.
     Uptr<Rcbase, Collection_Trigger> m_tied_coll_opt;
-    // This has to be defined after `m_tied_coll_opt` because of the order of destruction.
     Reference_Dictionary m_named_refs;
 
   public:
