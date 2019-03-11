@@ -17,14 +17,14 @@ void Simple_Binding_Wrapper::describe(std::ostream &os) const
     os << this->m_desc;
   }
 
-void Simple_Binding_Wrapper::invoke(Reference &self_io, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) const
+void Simple_Binding_Wrapper::invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const
   {
-    self_io = (*(this->m_fptr))(this->m_params, rocket::move(args));
+    self_io = (*(this->m_fptr))(this->m_opaque, global, rocket::move(args));
   }
 
 void Simple_Binding_Wrapper::enumerate_variables(const Abstract_Variable_Callback &callback) const
   {
-    rocket::for_each(this->m_params, [&](const Value &value) { value.enumerate_variables(callback);  });
+    rocket::for_each(this->m_opaque, [&](const Value &value) { value.enumerate_variables(callback);  });
   }
 
 }  // namespace Asteria

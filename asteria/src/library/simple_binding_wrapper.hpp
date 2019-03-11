@@ -12,16 +12,16 @@ namespace Asteria {
 class Simple_Binding_Wrapper : public Abstract_Function
   {
   public:
-    using Prototype = Reference (const Cow_Vector<Value> &params, Cow_Vector<Reference> &&args);
+    using Prototype = Reference (const Cow_Vector<Value> &opaque, const Global_Context &global, Cow_Vector<Reference> &&args);
 
   private:
     Cow_String m_desc;
     Prototype *m_fptr;
-    Cow_Vector<Value> m_params;
+    Cow_Vector<Value> m_opaque;
 
   public:
-    Simple_Binding_Wrapper(Cow_String desc, Prototype *fptr, Cow_Vector<Value> params) noexcept
-      : m_desc(rocket::move(desc)), m_fptr(fptr), m_params(rocket::move(params))
+    Simple_Binding_Wrapper(Cow_String desc, Prototype *fptr, Cow_Vector<Value> opaque) noexcept
+      : m_desc(rocket::move(desc)), m_fptr(fptr), m_opaque(rocket::move(opaque))
       {
       }
     ~Simple_Binding_Wrapper() override;
@@ -32,9 +32,9 @@ class Simple_Binding_Wrapper : public Abstract_Function
     void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
   };
 
-inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr, Cow_Vector<Value> params)
+inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype *fptr, Cow_Vector<Value> opaque)
   {
-    return Rcobj<Simple_Binding_Wrapper>(rocket::move(desc), fptr, rocket::move(params));
+    return Rcobj<Simple_Binding_Wrapper>(rocket::move(desc), fptr, rocket::move(opaque));
   }
 
 }  // namespace Asteria
