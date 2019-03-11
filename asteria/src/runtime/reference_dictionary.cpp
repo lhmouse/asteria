@@ -40,38 +40,42 @@ void Reference_Dictionary::Bucket::do_detach() noexcept
     next->prev = iprev;
   }
 
-const Reference * Reference_Dictionary::do_get_template_noninline_opt(const PreHashed_String &name) const noexcept
+const Reference * Reference_Dictionary::do_get_template_nonempty_opt(const PreHashed_String &name) const noexcept
   {
-    // Get template table range.
-    auto bptr = this->m_templ_data;
-    auto eptr = bptr + this->m_templ_size;
+    ROCKET_ASSERT(this->m_templ_size != 0);
 #ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(std::is_sorted(bptr, eptr, [](const auto &lhs, const auto &rhs) { return lhs.first < rhs.first;  }));
+    // The table must have been sorted.
+    ROCKET_ASSERT(std::is_sorted(this->m_templ_data, this->m_templ_data + this->m_templ_size,
+                                 [](const auto &lhs, const auto &rhs) { return lhs.first < rhs.first;  }));
 #endif
-    while(bptr != eptr) {
-      // This is a handwritten binary search, utilizing 3-way comparison result of strings.
-      auto mptr = bptr + (eptr - bptr) / 2;
-      auto cmp = name.rdstr().compare(mptr->first);
-      if(cmp < 0) {
-        eptr = mptr;
-        continue;
+    // Get template table range.
+    auto base = this->m_templ_data;
+    std::size_t lower = 0;
+    std::size_t upper = this->m_templ_size;
+    for(;;) {
+      // This is a handwritten binary search, utilizing 3-way comparison results of strings.
+      std::size_t middle = (lower + upper) / 2;
+      const auto &pivot = base[middle];
+      int cmp = name.rdstr().compare(pivot.first);
+      if(ROCKET_EXPECT(cmp == 0)) {
+        // Found.
+        return std::addressof(pivot.second);
       }
       if(cmp > 0) {
-        bptr = mptr + 1;
-        continue;
+        lower = middle + 1;
+      } else {
+        upper = middle;
       }
-      // Found.
-      return std::addressof(mptr->second);
+      if(ROCKET_UNEXPECT(lower == upper)) {
+        // Not found.
+        return nullptr;
+      }
     }
-    // Not found.
-    return nullptr;
   }
 
-const Reference * Reference_Dictionary::do_get_dynamic_noninline_opt(const PreHashed_String &name) const noexcept
+const Reference * Reference_Dictionary::do_get_dynamic_nonempty_opt(const PreHashed_String &name) const noexcept
   {
-    if(this->m_stor.empty()) {
-      return nullptr;
-    }
+    ROCKET_ASSERT(!this->m_stor.empty());
     // Get table bounds.
     auto pre = this->m_stor.data();
     auto end = pre + (this->m_stor.size() - 1);
