@@ -1209,7 +1209,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return 1;
       }
     // N.B. This is a non-standard extension.
-    template<typename ykeyT, typename ydefaultT> decltype(0 ? ::std::declval<ydefaultT>() : ::std::declval<const mapped_type &>()) get_or(const ykeyT &key, ydefaultT &&ydef) const
+    template<typename ykeyT, typename ydefaultT> decltype(0 ? ::std::declval<const mapped_type &>()
+                                                            : ::std::declval<ydefaultT>()) get_or(const ykeyT &key, ydefaultT &&ydef) const
       {
         auto ptr = this->do_get_table();
         size_type tpos;
@@ -1243,8 +1244,28 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->do_reserve_more(1);
         auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                                ::std::forward_as_tuple(::std::forward<ykeyT>(key)), ::std::forward_as_tuple());
+                                                               ::std::forward_as_tuple(::std::forward<ykeyT>(key)), ::std::forward_as_tuple());
         return result.first->get()->second;
+      }
+    // N.B. This is a non-standard extension.
+    template<typename ykeyT> const mapped_type * get_ptr(const ykeyT &key) const
+      {
+        auto ptr = this->do_get_table();
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
+          return nullptr;
+        }
+        return ::std::addressof(ptr[tpos]->second);
+      }
+    // N.B. This is a non-standard extension.
+    template<typename ykeyT> mapped_type & mut_ptr(const ykeyT &key)
+      {
+        auto ptr = this->do_mut_table();
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
+          return nullptr;
+        }
+        return ::std::addressof(ptr[tpos]->second);
       }
 
     // N.B. This function is a non-standard extension.
