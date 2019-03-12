@@ -55,12 +55,11 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                 {
                   Argument_Reader reader(rocket::sref("std.debug.print"), args);
                   // Parse variadic arguments.
-                  if(!reader.start()) {
+                  Cow_Vector<Value> values(args.size());
+                  reader.start();
+                  std::for_each(values.mut_begin(), values.mut_end(), [&](Value &value) { reader.opt(value);  });
+                  if(!reader.finish()) {
                     reader.throw_no_matching_function_call();
-                  }
-                  Cow_Vector<Value> values;
-                  for(Value value; reader.opt(value); ) {
-                    values.emplace_back(rocket::move(value));
                   }
                   // Call the binding function.
                   auto succ = std_debug_print(values);
