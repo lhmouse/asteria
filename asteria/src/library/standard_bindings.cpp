@@ -92,7 +92,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   if(!reader.start().opt(value).opt(indent_increment).finish()) {
                     reader.throw_no_matching_function_call();
                   }
-                  indent_increment = rocket::mclamp(0, indent_increment, 2);
+                  indent_increment = rocket::mclamp(0, indent_increment, 10);
                   // Call the binding function.
                   auto succ = std_debug_var_dump(value, static_cast<std::size_t>(indent_increment));
                   // Forward the result.
