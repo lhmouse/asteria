@@ -230,7 +230,7 @@ namespace Asteria {
               const auto &names = p.at(index_case + 2).as<Cow_Vector<PreHashed_String>>();
               // Recreate references.
               rocket::for_each(names, [&](const PreHashed_String &name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
-                                                                                                      name, Reference_Root::S_null());  });
+                                                                                                         name, Reference_Root::S_null());  });
               index_case += 3;
             }
             break;
@@ -255,7 +255,7 @@ namespace Asteria {
           }
           // Inject all names into this scope.
           rocket::for_each(names, [&](const PreHashed_String &name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
-                                                                                                  name, Reference_Root::S_null());  });
+                                                                                                     name, Reference_Root::S_null());  });
           index_case += 3;
         }
         for(;;) {
