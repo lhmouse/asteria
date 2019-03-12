@@ -59,11 +59,11 @@ class Value
       : m_stor()  // Initialize to `null`.
       {
       }
-    template<typename AltT, ROCKET_ENABLE_IF(std::is_constructible<Variant, AltT &&>::value)> Value(AltT &&alt) noexcept(std::is_nothrow_constructible<Variant, AltT &&>::value)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<typename std::decay<AltT>::type>::value)> Value(AltT &&alt) noexcept
       : m_stor(std::forward<AltT>(alt))
       {
       }
-    template<typename AltT, ROCKET_ENABLE_IF(std::is_assignable<Variant, AltT &&>::value)> Value & operator=(AltT &&alt) noexcept(std::is_nothrow_assignable<Variant, AltT &&>::value)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<typename std::decay<AltT>::type>::value)> Value & operator=(AltT &&alt) noexcept
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
