@@ -19,7 +19,7 @@ D_boolean std_debug_print(const Cow_Vector<Value> &values)
 D_boolean std_debug_var_dump(const Value &value, std::size_t indent_increment)
   {
     rocket::insertable_ostream mos;
-    value.var_dump(mos, indent_increment);
+    value.dump(mos, indent_increment);
     return write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
   }
 
@@ -71,12 +71,12 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
               { }
             )));
           //===================================================================
-          // `std.debug.var_dump()`
+          // `std.debug.dump()`
           //===================================================================
-          debug.try_emplace(rocket::sref("var_dump"),
+          debug.try_emplace(rocket::sref("dump"),
             D_function(make_simple_binding(
               // Description
-              rocket::sref("std.debug.var_dump(value, [indent_increment]):\n"
+              rocket::sref("std.debug.dump(value, [indent_increment]):\n"
                            "* Prints the value to the standard error stream with detailed information.\n"
                            "  `indent_increment` is the number of spaces used as a single level of indent.\n"
                            "  Its value is clamped within the range [0, 10] inclusive. If it is set to `0`,\n"
@@ -85,7 +85,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
               // Definition
               [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
                 {
-                  Argument_Reader reader(rocket::sref("std.debug.var_dump"), args);
+                  Argument_Reader reader(rocket::sref("std.debug.dump"), args);
                   // Parse arguments.
                   Value value;
                   D_integer indent_increment = 2;

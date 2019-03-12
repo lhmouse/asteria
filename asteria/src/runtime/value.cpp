@@ -318,7 +318,7 @@ void Value::print(std::ostream &os) const
 
     }  // namespace
 
-void Value::var_dump(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
+void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->type()) {
     case type_null:
@@ -382,7 +382,7 @@ void Value::var_dump(std::ostream &os, std::size_t indent_increment, std::size_t
         os << do_indent_or_space(indent_increment, indent_next + 1) << '[';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           os << do_indent_or_space(indent_increment, indent_next + indent_increment) << std::dec << (it - alt.begin()) << " = ";
-          it->var_dump(os, indent_increment, indent_next + indent_increment);
+          it->dump(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
         os << do_indent_or_space(indent_increment, indent_next + 1) << ']';
@@ -401,7 +401,7 @@ void Value::var_dump(std::ostream &os, std::size_t indent_increment, std::size_t
         os << do_indent_or_space(indent_increment, indent_next + 1) << '{';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           os << do_indent_or_space(indent_increment, indent_next + indent_increment) << quote(it->first) << " = ";
-          it->second.var_dump(os, indent_increment, indent_next + indent_increment);
+          it->second.dump(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
         os << do_indent_or_space(indent_increment, indent_next + 1) << '}';
