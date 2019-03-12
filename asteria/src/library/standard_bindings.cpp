@@ -65,7 +65,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   auto succ = std_debug_print(values);
                   // Forward the result.
                   Reference_Root::S_temporary ref_c = { D_boolean(succ) };
-                  return ref_c;
+                  return rocket::move(ref_c);
                 },
               // Opaque parameters
               { }
@@ -97,7 +97,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   auto succ = std_debug_var_dump(value, static_cast<std::size_t>(indent_increment));
                   // Forward the result.
                   Reference_Root::S_temporary ref_c = { D_boolean(succ) };
-                  return ref_c;
+                  return rocket::move(ref_c);
                 },
               // Opaque parameters
               { }
