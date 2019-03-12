@@ -7,103 +7,153 @@
 
 namespace Asteria {
 
-const Reference * Argument_Reader::do_peek_argument(bool required)
+template<typename HandlerT> void Argument_Reader::do_fail(HandlerT &&handler)
   {
-    // Check for the end of operation.
+    if(this->m_throw_on_failure) {
+      std::forward<HandlerT>(handler)();
+    }
+    this->m_state.succeeded = false;
+  }
+
+    namespace {
+
+    /* Bits in a byte are described as follows:
+     * ------------------------------------------
+     * type enum  -------------+
+     * generic    --------+    |
+     * required   ------+ |  __^__
+     *                  | | /     \
+     * bit index    7 6 5 4 3 2 1 0
+     */
+
+    constexpr std::uint8_t do_encode_typed_param(Value_Type type, bool required) noexcept
+      {
+        return static_cast<std::uint8_t>((static_cast<int>(type) & 0x0F) | (required << 5));
+      }
+    constexpr std::uint8_t do_encode_generic_param(bool required) noexcept
+      {
+        return static_cast<std::uint8_t>((1 << 4) | (required << 5));
+      }
+
+    struct Decoded_Param
+      {
+        Value_Type type;
+        bool generic;
+        bool required;
+
+        explicit constexpr Decoded_Param(std::uint8_t byte) noexcept
+          : type(static_cast<Value_Type>(byte & 0x0F)),
+            generic((byte >> 4) & 1), required((byte >> 5) & 1)
+          {
+          }
+      };
+
+    inline std::ostream & operator<<(std::ostream &os, const Decoded_Param &p)
+      {
+        if(p.generic) {
+          // generic (and optional always)
+          return os << "<generic>";
+        }
+        if(p.required) {
+          return os << Value::get_type_name(p.type);
+        }
+        return os << '[' << Value::get_type_name(p.type) << ']';
+      }
+
+    }
+
+const Reference * Argument_Reader::do_peek_argument_optional_opt()
+  {
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");
     }
     // Check for previous failures.
     if(!this->m_state.succeeded) {
-      if(!required) {
-        return nullptr;
-      }
-      if(this->m_throw_on_failure) {
-        ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
-      }
-      this->m_state.succeeded = false;
       return nullptr;
     }
-    // Check for the end of arguments.
-    if(this->m_state.offset >= this->m_args.get().size()) {
-      if(!required) {
-        return nullptr;
-      }
-      if(this->m_throw_on_failure) {
-        ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", this->m_state.offset + 1, ").");
-      }
-      this->m_state.succeeded = false;
+    // Before calling this function, the parameter information must have been recorded in `m_state.prototype`.
+    auto index = this->m_state.prototype.size() - 1;
+    if(index >= this->m_args.get().size()) {
       return nullptr;
     }
-    // Succeed.
-    auto arg = this->m_args.get().data() + this->m_state.offset;
-    ROCKET_ASSERT(arg);
-    return arg;
+    auto qarg = this->m_args.get().data() + index;
+    ROCKET_ASSERT(qarg);
+    return qarg;
   }
 
-template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_value(XvalueT &value_out, const XvalueT &default_value)
+template<typename XvalueT> Argument_Reader & Argument_Reader::do_read_typed_argument_optional(XvalueT &xvalue_out)
   {
-    // Record the type of this parameter.
-    this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
+    // Record a parameter.
+    constexpr auto xtype = static_cast<Value_Type>(Value::Variant::index_of<XvalueT>::value);
+    this->m_state.prototype.emplace_back(do_encode_typed_param(xtype, false));
     // Get the next argument.
-    auto arg = this->do_peek_argument(false);
-    if(!arg) {
+    auto qarg = this->do_peek_argument_optional_opt();
+    if(!qarg) {
       return *this;
     }
-    // Check whether the value has the desired type.
-    const auto &value = arg->read();
-    if(value.type() == type_null) {
-      // If the value is `null`, set the default value.
-      value_out = default_value;
-    } else {
-      // Not null...
-      auto qvalue = value.opt<XvalueT>();
-      if(!qvalue) {
-        if(this->m_throw_on_failure) {
-          ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                      "but `", Value::get_type_name<XvalueT>(), "` or `null` was expected.");
-        }
-        this->m_state.succeeded = false;
+    // Read a value from the argument.
+    const auto &value = qarg->read();
+    if(value.type() != type_null) {
+      if(value.type() != xtype) {
+        // If the value doesn't have the desired type, fail.
+        this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.prototype.size(), " had type `", Value::get_type_name(value.type()), "`, "
+                                                       "but `", Value::get_type_name(xtype), "` or `null` was expected.");  });
         return *this;
       }
-      value_out = *qvalue;
+      // Copy the value.
+      xvalue_out = value.check<XvalueT>();
     }
-    // Succeed.
-    this->m_state.offset++;
     return *this;
   }
 
-template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_value(XvalueT &value_out)
+const Reference * Argument_Reader::do_peek_argument_required_opt()
   {
-    // Record the type of this parameter.
-    this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
+    if(this->m_state.finished) {
+      ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence no argument could be extracted any further.");
+    }
+    // Check for previous failures.
+    if(!this->m_state.succeeded) {
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
+      return nullptr;
+    }
+    // Before calling this function, the parameter information must have been recorded in `m_state.prototype`.
+    auto index = this->m_state.prototype.size() - 1;
+    if(index >= this->m_args.get().size()) {
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", index + 1, ").");  });
+      return nullptr;
+    }
+    auto qarg = this->m_args.get().data() + index;
+    ROCKET_ASSERT(qarg);
+    return qarg;
+  }
+
+template<typename XvalueT> Argument_Reader & Argument_Reader::do_read_typed_argument_required(XvalueT &xvalue_out)
+  {
+    // Record a parameter.
+    constexpr auto xtype = static_cast<Value_Type>(Value::Variant::index_of<XvalueT>::value);
+    this->m_state.prototype.emplace_back(do_encode_typed_param(xtype, true));
     // Get the next argument.
-    auto arg = this->do_peek_argument(true);
-    if(!arg) {
+    auto qarg = this->do_peek_argument_required_opt();
+    if(!qarg) {
       return *this;
     }
-    // Check whether the value has the desired type.
-    const auto &value = arg->read();
-    // `null` is not an option.
-    auto qvalue = value.opt<XvalueT>();
-    if(!qvalue) {
-      if(this->m_throw_on_failure) {
-        ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.offset + 1, " had type `", Value::get_type_name(value.type()), "`, "
-                                    "but `", Value::get_type_name<XvalueT>(), "` was expected.");
-      }
-      this->m_state.succeeded = false;
+    // Read a value from the argument.
+    const auto &value = qarg->read();
+    if(value.type() != xtype) {
+      // If the value doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.prototype.size(), " had type `", Value::get_type_name(value.type()), "`, "
+                                                     "but `", Value::get_type_name(xtype), "` was expected.");  });
       return *this;
     }
-    value_out = *qvalue;
-    // Succeed.
-    this->m_state.offset++;
+    // Copy the value.
+    xvalue_out = value.check<XvalueT>();
     return *this;
   }
 
 Argument_Reader & Argument_Reader::start() noexcept
   {
-    this->m_state.history.clear();
-    this->m_state.offset = 0;
+    // Clear any internal states.
+    this->m_state.prototype.clear();
     this->m_state.finished = false;
     this->m_state.succeeded = true;
     return *this;
@@ -111,156 +161,144 @@ Argument_Reader & Argument_Reader::start() noexcept
 
 Argument_Reader & Argument_Reader::opt(Reference &ref_out)
   {
-    // Record a type-generic or output-only parameter.
-    this->m_state.history.push_back(0xFF);
+    // Record a parameter.
+    this->m_state.prototype.emplace_back(do_encode_generic_param(false));
     // Get the next argument.
-    auto arg = this->do_peek_argument(false);
-    if(!arg) {
+    auto qarg = this->do_peek_argument_optional_opt();
+    if(!qarg) {
       return *this;
     }
     // Copy the reference as is.
-    ref_out = *arg;
-    // Succeed.
-    this->m_state.offset++;
+    ref_out = *qarg;
     return *this;
   }
 
 Argument_Reader & Argument_Reader::opt(Value &value_out)
   {
-    // Record a type-generic or output-only parameter.
-    this->m_state.history.push_back(0xFF);
+    // Record a parameter.
+    this->m_state.prototype.emplace_back(do_encode_generic_param(false));
     // Get the next argument.
-    auto arg = this->do_peek_argument(false);
-    if(!arg) {
+    auto qarg = this->do_peek_argument_optional_opt();
+    if(!qarg) {
       return *this;
     }
+    // Read a value from the argument.
+    const auto &value = qarg->read();
     // Copy the value as is.
-    value_out = arg->read();
-    // Succeed.
-    this->m_state.offset++;
+    value_out = value;
     return *this;
   }
 
-Argument_Reader & Argument_Reader::opt(D_boolean &value_out, D_boolean default_value)
+Argument_Reader & Argument_Reader::opt(D_boolean &xvalue_out)
   {
-    return this->do_get_optional_value(value_out, default_value);
+    return this->do_read_typed_argument_optional(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::opt(D_integer &value_out, D_integer default_value)
+Argument_Reader & Argument_Reader::opt(D_integer &xvalue_out)
   {
-    return this->do_get_optional_value(value_out, default_value);
+    return this->do_read_typed_argument_optional(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::opt(D_real &value_out, D_real default_value)
+Argument_Reader & Argument_Reader::opt(D_real &xvalue_out)
   {
-    return this->do_get_optional_value(value_out, default_value);
+    return this->do_read_typed_argument_optional(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::opt(D_string &value_out, const D_string &default_value)
+Argument_Reader & Argument_Reader::opt(D_string &xvalue_out)
   {
-    return this->do_get_optional_value(value_out, default_value);
+    return this->do_read_typed_argument_optional(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::opt(D_opaque &value_out, const D_opaque &default_value)
+Argument_Reader & Argument_Reader::opt(D_opaque &xvalue_out)
   {
-    return this->do_get_optional_value(value_out, default_value);
+    return this->do_read_typed_argument_optional(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::opt(D_function &value_out, const D_function &default_value)
+Argument_Reader & Argument_Reader::opt(D_function &xvalue_out)
   {
-    return this->do_get_optional_value(value_out, default_value);
+    return this->do_read_typed_argument_optional(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::opt(D_array &value_out, const D_array &default_value)
+Argument_Reader & Argument_Reader::opt(D_array &xvalue_out)
   {
-    return this->do_get_optional_value(value_out, default_value);
+    return this->do_read_typed_argument_optional(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::opt(D_object &value_out, const D_object &default_value)
+Argument_Reader & Argument_Reader::opt(D_object &xvalue_out)
   {
-    return this->do_get_optional_value(value_out, default_value);
+    return this->do_read_typed_argument_optional(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::req(D_null &value_out)
+Argument_Reader & Argument_Reader::req(D_boolean &xvalue_out)
   {
-    return this->do_get_required_value(value_out);
+    return this->do_read_typed_argument_required(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::req(D_boolean &value_out)
+Argument_Reader & Argument_Reader::req(D_integer &xvalue_out)
   {
-    return this->do_get_required_value(value_out);
+    return this->do_read_typed_argument_required(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::req(D_integer &value_out)
+Argument_Reader & Argument_Reader::req(D_real &xvalue_out)
   {
-    return this->do_get_required_value(value_out);
+    return this->do_read_typed_argument_required(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::req(D_real &value_out)
+Argument_Reader & Argument_Reader::req(D_string &xvalue_out)
   {
-    return this->do_get_required_value(value_out);
+    return this->do_read_typed_argument_required(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::req(D_string &value_out)
+Argument_Reader & Argument_Reader::req(D_opaque &xvalue_out)
   {
-    return this->do_get_required_value(value_out);
+    return this->do_read_typed_argument_required(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::req(D_opaque &value_out)
+Argument_Reader & Argument_Reader::req(D_function &xvalue_out)
   {
-    return this->do_get_required_value(value_out);
+    return this->do_read_typed_argument_required(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::req(D_function &value_out)
+Argument_Reader & Argument_Reader::req(D_array &xvalue_out)
   {
-    return this->do_get_required_value(value_out);
+    return this->do_read_typed_argument_required(xvalue_out);
   }
 
-Argument_Reader & Argument_Reader::req(D_array &value_out)
+Argument_Reader & Argument_Reader::req(D_object &xvalue_out)
   {
-    return this->do_get_required_value(value_out);
-  }
-
-Argument_Reader & Argument_Reader::req(D_object &value_out)
-  {
-    return this->do_get_required_value(value_out);
+    return this->do_read_typed_argument_required(xvalue_out);
   }
 
 Argument_Reader & Argument_Reader::finish()
   {
-    // Check for the end of operation.
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished, hence cannot be finished a second time.");
     }
-    // Record this overload, despite potential previous failures.
-    unsigned nparams = static_cast<unsigned>(this->m_state.history.size());
+    // Record this overload.
     std::size_t offset = this->m_overloads.size();
+    std::size_t nparams = this->m_state.prototype.size();
     this->m_overloads.append(sizeof(nparams) + nparams);
-    // 0) Append the number of parameters in native byte order.
+    // Append the number of parameters in native byte order.
     std::memcpy(this->m_overloads.mut_data() + offset, &nparams, sizeof(nparams));
     offset += sizeof(nparams);
-    // 1) Append all parameters.
-    std::memcpy(this->m_overloads.mut_data() + offset, this->m_state.history.data(), nparams);
-    offset += nparams;
-    ROCKET_ASSERT(offset == this->m_overloads.size());
+    if(nparams != 0) {
+      // Append all parameters.
+      std::memcpy(this->m_overloads.mut_data() + offset, this->m_state.prototype.data(), nparams);
+      offset += nparams;
+      ROCKET_ASSERT(offset == this->m_overloads.size());
+    }
     // Check for previous failures.
     if(!this->m_state.succeeded) {
-      if(this->m_throw_on_failure) {
-        ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
-      }
-      this->m_state.succeeded = false;
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
       return *this;
     }
-    // Check for the end of arguments.
-    if(this->m_state.offset != this->m_args.get().size()) {
-      if(this->m_throw_on_failure) {
-        ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (expecting exactly ", this->m_state.offset, ").");
-      }
-      this->m_state.succeeded = false;
+    // There shall be no more arguments than parameters.
+    if(nparams < this->m_args.get().size()) {
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (fewer than `", nparams, "` were expected, "
+                                                     "but got `", this->m_args.get().size(), "`).");  });
       return *this;
     }
-    // Succeed.
-    this->m_state.finished = true;
+    // Accept the end of argument list.
     return *this;
   }
 
@@ -272,14 +310,14 @@ void Argument_Reader::throw_no_matching_function_call() const
     rocket::insertable_ostream mos;
     mos << "There was no matching overload for function call `" << name << "("
         << rocket::ostream_implode(args.data(), args.size(), ", ",
-                                   [&](const Reference &arg) { return Value::get_type_name(arg.read().type());  })
+                                   [](const Reference &arg) { return Value::get_type_name(arg.read().type());  })
         << ")`.";
     // If overload information is available, append the list of overloads.
     if(!this->m_overloads.empty()) {
       mos << "\n[list of overloads: ";
       // Decode overloads one by one.
       std::size_t offset = 0;
-      unsigned nparams;
+      std::size_t nparams;
       for(;;) {
         // 0) Decode the number of parameters in native byte order.
         ROCKET_ASSERT(offset + sizeof(nparams) <= this->m_overloads.size());
@@ -288,8 +326,7 @@ void Argument_Reader::throw_no_matching_function_call() const
         // Append this overload.
         mos << "`" << name << "("
             << rocket::ostream_implode(this->m_overloads.data() + offset, nparams, ", ",
-                                       [&](unsigned char param) { return (param == 0xFF) ? "<generic>"
-                                                                                         : Value::get_type_name(static_cast<Value_Type>(param));  })
+                                       [](std::uint8_t byte) { return Decoded_Param(byte);  })
             << ")`";
         offset += nparams;
         // Break if there are no more data.

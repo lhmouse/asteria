@@ -77,7 +77,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
           debug.try_emplace(rocket::sref("var_dump"),
             D_function(make_simple_binding(
               // Description
-              rocket::sref("std.debug.var_dump(value[, indent_increment]):\n"
+              rocket::sref("std.debug.var_dump(value, [indent_increment]):\n"
                            "* Prints the value to the standard error stream with detailed information.\n"
                            "  `indent_increment` is the number of spaces used as a single level of indent.\n"
                            "  Its value is clamped within the range [0, 10] inclusive. If it is set to `0`,\n"
@@ -89,8 +89,8 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   Argument_Reader reader(rocket::sref("std.debug.var_dump"), args);
                   // Parse arguments.
                   Value value;
-                  D_integer indent_increment;
-                  if(!reader.start().opt(value).opt(indent_increment, 2).finish()) {
+                  D_integer indent_increment = 2;
+                  if(!reader.start().opt(value).opt(indent_increment).finish()) {
                     reader.throw_no_matching_function_call();
                   }
                   indent_increment = rocket::mclamp(0, indent_increment, 2);

@@ -15,8 +15,7 @@ class Argument_Reader
   public:
     struct State
       {
-        Cow_Vector<unsigned char> history;
-        std::uint32_t offset;
+        Cow_Vector<std::uint8_t> prototype;
         bool finished;
         bool succeeded;
       };
@@ -28,7 +27,7 @@ class Argument_Reader
 
     // This string stores all overloads that have been tested so far.
     // Overloads are encoded in binary formats.
-    Cow_Vector<unsigned char> m_overloads;
+    Cow_Vector<std::uint8_t> m_overloads;
     // N.B. The contents of `m_state` can be copied elsewhere and back.
     // Any further operations will resume from that point.
     State m_state;
@@ -46,9 +45,11 @@ class Argument_Reader
       = delete;
 
   private:
-    inline const Reference * do_peek_argument(bool required);
-    template<typename XvalueT> inline Argument_Reader & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
-    template<typename XvalueT> inline Argument_Reader & do_get_required_value(XvalueT &value_out);
+    template<typename HandlerT> inline void do_fail(HandlerT &&handler);
+    inline const Reference * do_peek_argument_optional_opt();
+    template<typename XvalueT> inline Argument_Reader & do_read_typed_argument_optional(XvalueT &xvalue_out);
+    inline const Reference * do_peek_argument_required_opt();
+    template<typename XvalueT> inline Argument_Reader & do_read_typed_argument_required(XvalueT &xvalue_out);
 
   public:
     const Cow_String & get_name() const noexcept
@@ -89,33 +90,31 @@ class Argument_Reader
     // Start recording an overload.
     Argument_Reader & start() noexcept;
     // Get an OPTIONAL argument.
-    // The argument must exist (and must be of the desired type or `null` for the overloads taking two arguments); otherwise this operation fails.
-    // N.B. These functions provide STRONG exception safety guarantee.
     Argument_Reader & opt(Reference &ref_out);
     Argument_Reader & opt(Value &value_out);
-    Argument_Reader & opt(D_boolean &value_out, D_boolean default_value = false);
-    Argument_Reader & opt(D_integer &value_out, D_integer default_value = 0);
-    Argument_Reader & opt(D_real &value_out, D_real default_value = 0);
-    Argument_Reader & opt(D_string &value_out, const D_string &default_value = { });
-    Argument_Reader & opt(D_opaque &value_out, const D_opaque &default_value /* no default value */);
-    Argument_Reader & opt(D_function &value_out, const D_function &default_value /* no default value */);
-    Argument_Reader & opt(D_array &value_out, const D_array &default_value = { });
-    Argument_Reader & opt(D_object &value_out, const D_object &default_value = { });
+    // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
+    // If the argument is `null`, the operation succeeds without clobbering `xvalue_out`.
+    Argument_Reader & opt(D_boolean &xvalue_out);
+    Argument_Reader & opt(D_integer &xvalue_out);
+    Argument_Reader & opt(D_real &xvalue_out);
+    Argument_Reader & opt(D_string &xvalue_out);
+    Argument_Reader & opt(D_opaque &xvalue_out);
+    Argument_Reader & opt(D_function &xvalue_out);
+    Argument_Reader & opt(D_array &xvalue_out);
+    Argument_Reader & opt(D_object &xvalue_out);
     // Get a REQUIRED argument.
-    // The argument must exist and must be of the desired type; otherwise this operation fails.
-    // N.B. These functions provide STRONG exception safety guarantee.
-    Argument_Reader & req(D_null &value_out);
-    Argument_Reader & req(D_boolean &value_out);
-    Argument_Reader & req(D_integer &value_out);
-    Argument_Reader & req(D_real &value_out);
-    Argument_Reader & req(D_string &value_out);
-    Argument_Reader & req(D_opaque &value_out);
-    Argument_Reader & req(D_function &value_out);
-    Argument_Reader & req(D_array &value_out);
-    Argument_Reader & req(D_object &value_out);
+    // The argument must exist and must be of the desired type; otherwise the operation fails.
+    // Particularly, if the argument is `null`, the operation fails.
+    Argument_Reader & req(D_boolean &xvalue_out);
+    Argument_Reader & req(D_integer &xvalue_out);
+    Argument_Reader & req(D_real &xvalue_out);
+    Argument_Reader & req(D_string &xvalue_out);
+    Argument_Reader & req(D_opaque &xvalue_out);
+    Argument_Reader & req(D_function &xvalue_out);
+    Argument_Reader & req(D_array &xvalue_out);
+    Argument_Reader & req(D_object &xvalue_out);
     // Terminate the argument list and finish this overload.
-    // There will be no more argument; otherwise this operation fails.
-    // N.B. This function provides STRONG exception safety guarantee.
+    // There shall be no more argument; otherwise this operation fails.
     Argument_Reader & finish();
 
     // Throw an exception saying there are no viable overloads.
