@@ -46,7 +46,7 @@ class Argument_Reader
       = delete;
 
   private:
-    inline const Reference * do_peek_argument();
+    inline const Reference * do_peek_argument(bool required);
     template<typename XvalueT> inline Argument_Reader & do_get_optional_value(XvalueT &value_out, const XvalueT &default_value);
     template<typename XvalueT> inline Argument_Reader & do_get_required_value(XvalueT &value_out);
 

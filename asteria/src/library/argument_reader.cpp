@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-const Reference * Argument_Reader::do_peek_argument()
+const Reference * Argument_Reader::do_peek_argument(bool required)
   {
     // Check for the end of operation.
     if(this->m_state.finished) {
@@ -15,6 +15,9 @@ const Reference * Argument_Reader::do_peek_argument()
     }
     // Check for previous failures.
     if(!this->m_state.succeeded) {
+      if(!required) {
+        return nullptr;
+      }
       if(this->m_throw_on_failure) {
         ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");
       }
@@ -23,6 +26,9 @@ const Reference * Argument_Reader::do_peek_argument()
     }
     // Check for the end of arguments.
     if(this->m_state.offset >= this->m_args.get().size()) {
+      if(!required) {
+        return nullptr;
+      }
       if(this->m_throw_on_failure) {
         ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", this->m_state.offset + 1, ").");
       }
@@ -40,7 +46,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_optional_va
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
     // Get the next argument.
-    auto arg = this->do_peek_argument();
+    auto arg = this->do_peek_argument(false);
     if(!arg) {
       return *this;
     }
@@ -72,7 +78,7 @@ template<typename XvalueT> Argument_Reader & Argument_Reader::do_get_required_va
     // Record the type of this parameter.
     this->m_state.history.push_back(Value::Variant::index_of<XvalueT>::value);
     // Get the next argument.
-    auto arg = this->do_peek_argument();
+    auto arg = this->do_peek_argument(true);
     if(!arg) {
       return *this;
     }
@@ -108,7 +114,7 @@ Argument_Reader & Argument_Reader::opt(Reference &ref_out)
     // Record a type-generic or output-only parameter.
     this->m_state.history.push_back(0xFF);
     // Get the next argument.
-    auto arg = this->do_peek_argument();
+    auto arg = this->do_peek_argument(false);
     if(!arg) {
       return *this;
     }
@@ -124,7 +130,7 @@ Argument_Reader & Argument_Reader::opt(Value &value_out)
     // Record a type-generic or output-only parameter.
     this->m_state.history.push_back(0xFF);
     // Get the next argument.
-    auto arg = this->do_peek_argument();
+    auto arg = this->do_peek_argument(false);
     if(!arg) {
       return *this;
     }

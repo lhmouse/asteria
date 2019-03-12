@@ -266,14 +266,14 @@ void Value::print(std::ostream &os) const
       {
         const auto &alt = this->check<D_opaque>();
         // [[`my opaque`]]
-        os << "[[`" << alt.get() << "`]]";
+        os << "<opaque> [[`" << alt.get() << "`]]";
         return;
       }
     case type_function:
       {
         const auto &alt = this->check<D_function>();
         // [[`my function`]]
-        os << "[[`" << alt.get() << "`]]";
+        os << "<function> [[`" << alt.get() << "`]]";
         return;
       }
     case type_array:
@@ -296,6 +296,8 @@ void Value::print(std::ostream &os) const
         os << '{';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           os << ' ';
+          os << quote(it->first);
+          os << " = ";
           it->second.print(os);
           os << ';';
         }
