@@ -17,8 +17,8 @@ namespace Asteria {
 
     namespace {
 
-    template<typename XrefT> void do_safe_set_named_reference(Cow_Vector<PreHashed_String> *names_out_opt, Abstract_Context &ctx_io,
-                                                              const char *desc, const PreHashed_String &name, XrefT &&xref)
+    template<typename XrefT> void do_set_user_declared_reference(Cow_Vector<PreHashed_String> *names_out_opt, Abstract_Context &ctx_io,
+                                                                 const char *desc, const PreHashed_String &name, XrefT &&xref)
       {
         if(name.empty()) {
           return;
@@ -37,12 +37,12 @@ namespace Asteria {
       {
         auto var = global.create_variable();
         Reference_Root::S_variable ref_c = { var };
-        do_safe_set_named_reference(names_out_opt, ctx_io, desc, name, rocket::move(ref_c));
+        do_set_user_declared_reference(names_out_opt, ctx_io, desc, name, rocket::move(ref_c));
         return var;
       }
 
     Cow_Vector<Air_Node> do_generate_code_statement_list(Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io,
-                                                             const Cow_Vector<Statement> &stmts)
+                                                         const Cow_Vector<Statement> &stmts)
       {
         Cow_Vector<Air_Node> code;
         rocket::for_each(stmts, [&](const Statement &stmt) { stmt.generate_code(code, names_out_opt, ctx_io);  });
@@ -229,7 +229,7 @@ namespace Asteria {
               // Decode arguments.
               const auto &names = p.at(index_case + 2).as<Cow_Vector<PreHashed_String>>();
               // Recreate references.
-              rocket::for_each(names, [&](const PreHashed_String &name) { do_safe_set_named_reference(nullptr, ctx_body, "skipped reference",
+              rocket::for_each(names, [&](const PreHashed_String &name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
                                                                                                       name, Reference_Root::S_null());  });
               index_case += 3;
             }
@@ -254,7 +254,7 @@ namespace Asteria {
             index_def = index_case;
           }
           // Inject all names into this scope.
-          rocket::for_each(names, [&](const PreHashed_String &name) { do_safe_set_named_reference(nullptr, ctx_body, "skipped reference",
+          rocket::for_each(names, [&](const PreHashed_String &name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
                                                                                                   name, Reference_Root::S_null());  });
           index_case += 3;
         }
@@ -378,7 +378,7 @@ namespace Asteria {
         // This is the same as a ranged-`for` loop in C++.
         Executive_Context ctx_for(&ctx_io);
         auto key_var = do_safe_create_variable(nullptr, ctx_for, "key variable", key_name, global);
-        do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, Reference_Root::S_null());
+        do_set_user_declared_reference(nullptr, ctx_for, "mapped reference", mapped_name, Reference_Root::S_null());
         // Evaluate the range initializer.
         do_evaluate_expression(stack, ctx_for, code_init, func, global);
         auto range_ref = rocket::move(stack.open_top_reference());
@@ -396,7 +396,7 @@ namespace Asteria {
               // Set up the mapped reference.
               Reference_Modifier::S_array_index refm_c = { it - array.begin() };
               range_ref.zoom_in(rocket::move(refm_c));
-              do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, range_ref);
+              do_set_user_declared_reference(nullptr, ctx_for, "mapped reference", mapped_name, range_ref);
               range_ref.zoom_out();
               // Execute the loop body.
               auto status = do_execute_statement_list(stack, ctx_body, code_body, func, global);
@@ -420,7 +420,7 @@ namespace Asteria {
               // Set up the mapped reference.
               Reference_Modifier::S_object_key refm_c = { it->first };
               range_ref.zoom_in(rocket::move(refm_c));
-              do_safe_set_named_reference(nullptr, ctx_for, "mapped reference", mapped_name, range_ref);
+              do_set_user_declared_reference(nullptr, ctx_for, "mapped reference", mapped_name, range_ref);
               range_ref.zoom_out();
               // Execute the loop body.
               auto status = do_execute_statement_list(stack, ctx_body, code_body, func, global);
@@ -459,7 +459,7 @@ namespace Asteria {
           Executive_Context ctx_catch(&ctx_io);
           auto traceable = trace_exception(rocket::move(stdex));
           Reference_Root::S_temporary exref_c = { traceable.get_value() };
-          do_safe_set_named_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(exref_c));
+          do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(exref_c));
           // Provide backtrace information.
           D_array backtrace;
           for(std::size_t i = 0; i < traceable.get_frame_count(); ++i) {
@@ -566,7 +566,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       {
         const auto &alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_null());
+        do_set_user_declared_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_null());
         // Distinguish uninitialized variables from initialized ones.
         if(alt.init.empty()) {
           Cow_Vector<Air_Node::Variant> p;
@@ -593,7 +593,7 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       {
         const auto &alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
-        do_safe_set_named_reference(names_out_opt, ctx_io, "function placeholder", alt.name, Reference_Root::S_null());
+        do_set_user_declared_reference(names_out_opt, ctx_io, "function placeholder", alt.name, Reference_Root::S_null());
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.sloc);  // 0
@@ -683,8 +683,8 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         const auto &alt = this->m_stor.as<S_for_each>();
         // Create a fresh context for the `for` loop.
         Analytic_Context ctx_for(&ctx_io);
-        do_safe_set_named_reference(nullptr, ctx_for, "key placeholder", alt.key_name, Reference_Root::S_null());
-        do_safe_set_named_reference(nullptr, ctx_for, "mapped placeholder", alt.mapped_name, Reference_Root::S_null());
+        do_set_user_declared_reference(nullptr, ctx_for, "key placeholder", alt.key_name, Reference_Root::S_null());
+        do_set_user_declared_reference(nullptr, ctx_for, "mapped placeholder", alt.mapped_name, Reference_Root::S_null());
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(alt.key_name);  // 0
@@ -699,7 +699,8 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         const auto &alt = this->m_stor.as<S_try>();
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(&ctx_io);
-        do_safe_set_named_reference(nullptr, ctx_catch, "exception placeholder", alt.except_name, Reference_Root::S_null());
+        do_set_user_declared_reference(nullptr, ctx_catch, "exception placeholder", alt.except_name, Reference_Root::S_null());
+        ctx_catch.open_named_reference(rocket::sref("__backtrace")) /*= Reference_Root::S_null()*/;
         // Encode arguments.
         Cow_Vector<Air_Node::Variant> p;
         p.emplace_back(do_generate_code_block(ctx_io, alt.body_try));  // 0
