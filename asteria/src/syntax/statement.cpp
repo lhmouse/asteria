@@ -362,7 +362,9 @@ namespace Asteria {
             return status;
           }
           // Evaluate the step expression and discard its value.
-          do_evaluate_expression(stack, ctx_for, code_step, func, global);
+          if(!code_step.empty()) {
+            do_evaluate_expression(stack, ctx_for, code_step, func, global);
+          }
         }
         return Air_Node::status_next;
       }
@@ -542,6 +544,10 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
     case index_expression:
       {
         const auto &alt = this->m_stor.as<S_expression>();
+        if(alt.expr.empty()) {
+          // Generate nothing for empty expressions.
+          return;
+        }
         // Generate preparation code.
         Cow_Vector<Air_Node::Variant> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
