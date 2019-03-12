@@ -1259,7 +1259,7 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
         // variable-definition ::=
-        //   "var" identifier equal-initailizer-opt ";"
+        //   "var" identifier equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
         // equal-initializer-opt ::=
         //   equal-initializer | ""
         // equal-initializer ::=
@@ -1267,22 +1267,27 @@ namespace Asteria {
         if(!do_match_keyword(tstrm_io, Token::keyword_var)) {
           return false;
         }
-        Cow_String name;
-        if(!do_accept_identifier(name, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
-        }
-        Cow_Vector<Xprunit> init;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
-          // The initializer is optional.
-          if(!do_accept_expression(init, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        for(;;) {
+          Cow_String name;
+          if(!do_accept_identifier(name, tstrm_io)) {
+            throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+          }
+          Cow_Vector<Xprunit> init;
+          if(do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
+            // The initializer is optional.
+            if(!do_accept_expression(init, tstrm_io)) {
+              throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+            }
+          }
+          Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), false, rocket::move(init) };
+          stmts_out.emplace_back(rocket::move(stmt_c));
+          if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
+            break;
           }
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), false, rocket::move(init) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1291,28 +1296,33 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
         // immutable-variable-definition ::=
-        //   "const" identifier equal-initailizer ";"
+        //   "const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
         // equal-initializer ::=
         //   "=" expression
         if(!do_match_keyword(tstrm_io, Token::keyword_const)) {
           return false;
         }
-        Cow_String name;
-        if(!do_accept_identifier(name, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
-        }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_equals_sign_expected);
-        }
-        Cow_Vector<Xprunit> init;
-        if(!do_accept_expression(init, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        for(;;) {
+          Cow_String name;
+          if(!do_accept_identifier(name, tstrm_io)) {
+            throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+          }
+          if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
+            throw do_make_parser_error(tstrm_io, Parser_Error::code_equals_sign_expected);
+          }
+          Cow_Vector<Xprunit> init;
+          if(!do_accept_expression(init, tstrm_io)) {
+            throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+          }
+          Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), true, rocket::move(init) };
+          stmts_out.emplace_back(rocket::move(stmt_c));
+          if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
+            break;
+          }
         }
         if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), true, rocket::move(init) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
         return true;
       }
 

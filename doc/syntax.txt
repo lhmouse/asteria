@@ -56,13 +56,13 @@ null-statement ::=
 	";"
 
 variable-definition ::=
-	"var" identifier equal-initailizer-opt ";"
+	"var" identifier equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
 equal-initializer-opt ::=
 	equal-initializer | ""
 equal-initializer ::=
 	"=" expression
 immutable-variable-definition ::=
-	"const" identifier equal-initailizer ";"
+	"const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
 function-definition ::=
 	"func" identifier "(" identifier-list-opt ")" statement
 identifier-list-opt ::=
