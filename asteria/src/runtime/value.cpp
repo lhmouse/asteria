@@ -225,6 +225,88 @@ Value::Compare Value::compare(const Value &other) const noexcept
     }
   }
 
+void Value::print(std::ostream &os) const
+  {
+    switch(this->type()) {
+    case type_null:
+      {
+        // null
+        os << "null";
+        return;
+      }
+    case type_boolean:
+      {
+        const auto &alt = this->check<D_boolean>();
+        // true
+        os << std::boolalpha << std::nouppercase << alt;
+        return;
+      }
+    case type_integer:
+      {
+        const auto &alt = this->check<D_integer>();
+        // 42
+        os << std::dec << alt;
+        return;
+      }
+    case type_real:
+      {
+        const auto &alt = this->check<D_real>();
+        // 123.456
+        os << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
+        return;
+      }
+    case type_string:
+      {
+        const auto &alt = this->check<D_string>();
+        // hello
+        os << alt;
+        return;
+      }
+    case type_opaque:
+      {
+        const auto &alt = this->check<D_opaque>();
+        // [[`my opaque`]]
+        os << "[[`" << alt.get() << "`]]";
+        return;
+      }
+    case type_function:
+      {
+        const auto &alt = this->check<D_function>();
+        // [[`my function`]]
+        os << "[[`" << alt.get() << "`]]";
+        return;
+      }
+    case type_array:
+      {
+        const auto &alt = this->check<D_array>();
+        // [ 1; 2; 3; ]
+        os << '[';
+        for(auto it = alt.begin(); it != alt.end(); ++it) {
+          os << ' ';
+          it->print(os);
+          os << ';';
+        }
+        os << ' ' << ']';
+        return;
+      }
+    case type_object:
+      {
+        const auto &alt = this->check<D_object>();
+        // { "one" = 1; "two" = 2; "three" = 3; }
+        os << '{';
+        for(auto it = alt.begin(); it != alt.end(); ++it) {
+          os << ' ';
+          it->second.print(os);
+          os << ';';
+        }
+        os << ' ' << '}';
+        return;
+      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+    }
+  }
+
     namespace {
 
     constexpr Indent do_indent_or_space(std::size_t indent_increment, std::size_t indent_next)
@@ -234,7 +316,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
 
     }  // namespace
 
-void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
+void Value::var_dump(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->type()) {
     case type_null:
@@ -274,14 +356,14 @@ void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t in
     case type_opaque:
       {
         const auto &alt = this->check<D_opaque>();
-        // opaque("typeid") "my opaque"
+        // opaque("typeid") [[`my opaque`]]
         os << "opaque(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
     case type_function:
       {
         const auto &alt = this->check<D_function>();
-        // function("typeid") "my function"
+        // function("typeid") [[`my function`]]
         os << "function(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
@@ -298,7 +380,7 @@ void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t in
         os << do_indent_or_space(indent_increment, indent_next + 1) << '[';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           os << do_indent_or_space(indent_increment, indent_next + indent_increment) << std::dec << (it - alt.begin()) << " = ";
-          it->print(os, indent_increment, indent_next + indent_increment);
+          it->var_dump(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
         os << do_indent_or_space(indent_increment, indent_next + 1) << ']';
@@ -317,7 +399,7 @@ void Value::print(std::ostream &os, std::size_t indent_increment, std::size_t in
         os << do_indent_or_space(indent_increment, indent_next + 1) << '{';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           os << do_indent_or_space(indent_increment, indent_next + indent_increment) << quote(it->first) << " = ";
-          it->second.print(os, indent_increment, indent_next + indent_increment);
+          it->second.var_dump(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
         os << do_indent_or_space(indent_increment, indent_next + 1) << '}';
