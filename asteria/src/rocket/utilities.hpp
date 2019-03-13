@@ -171,10 +171,9 @@ template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhs
                        : ::std::forward<lhsT>(lhs);
   }
 
-// Note that the order of parameters is different from `std::clamp()` from C++17.
-template<typename lowerT, typename testT, typename upperT> constexpr decltype(0 ? ::std::declval<lowerT>()
-                                                                                : 0 ? ::std::declval<testT>()
-                                                                                    : ::std::declval<upperT>()) mclamp(lowerT &&lower, testT &&test, upperT &&upper)
+template<typename testT, typename lowerT, typename upperT> constexpr decltype(0 ? ::std::declval<lowerT>()
+                                                                                : 0 ? ::std::declval<upperT>()
+                                                                                    : ::std::declval<testT>()) clamp(testT &&test, lowerT &&lower, upperT &&upper)
   {
     return (test < lower) ? ::std::forward<lowerT>(lower)
                           : (upper < test) ? ::std::forward<upperT>(upper)

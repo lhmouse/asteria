@@ -112,8 +112,10 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   Value value;
                   D_integer indent_increment = 2;
                   if(reader.start().opt(value).opt(indent_increment).finish()) {
+                    // Clamp `indent_increment`.
+                    auto rindent = static_cast<std::size_t>(rocket::clamp(indent_increment, 0, 10));
                     // Call the binding function.
-                    if(!std_debug_dump(value, static_cast<std::size_t>(rocket::mclamp(0, indent_increment, 10)))) {
+                    if(!std_debug_dump(value, rindent)) {
                       // Fail.
                       return Reference_Root::S_null();
                     }
