@@ -574,7 +574,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         auto target_value = stack_io.get_top_reference().read();
         // Make sure it is really a function.
         if(target_value.type() != type_function) {
-          ASTERIA_THROW_RUNTIME_ERROR("The value `", target_value, "` is not a function and cannot be called.");
+          ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", target_value, "` which is not a function.");
         }
         const auto &target = target_value.check<D_function>().get();
         // Make the `this` reference. On the function's return it is reused to store the result of the function.
