@@ -77,9 +77,12 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   std::for_each(values.mut_begin(), values.mut_end(), [&](Value &value) { reader.opt(value);  });
                   if(reader.finish()) {
                     // Call the binding function.
-                    bool succ = std_debug_print(values);
-                    // Forward the result.
-                    Reference_Root::S_temporary ref_c = { D_boolean(succ) };
+                    if(!std_debug_print(values)) {
+                      // Fail.
+                      return Reference_Root::S_null();
+                    }
+                    // Return `true`.
+                    Reference_Root::S_temporary ref_c = { D_boolean(true) };
                     return rocket::move(ref_c);
                   }
                   reader.throw_no_matching_function_call();
@@ -110,9 +113,12 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   D_integer indent_increment = 2;
                   if(reader.start().opt(value).opt(indent_increment).finish()) {
                     // Call the binding function.
-                    bool succ = std_debug_dump(value, static_cast<std::size_t>(rocket::mclamp(0, indent_increment, 10)));
-                    // Forward the result.
-                    Reference_Root::S_temporary ref_c = { D_boolean(succ) };
+                    if(!std_debug_dump(value, static_cast<std::size_t>(rocket::mclamp(0, indent_increment, 10)))) {
+                      // Fail.
+                      return Reference_Root::S_null();
+                    }
+                    // Return `true`.
+                    Reference_Root::S_temporary ref_c = { D_boolean(true) };
                     return rocket::move(ref_c);
                   }
                   reader.throw_no_matching_function_call();

@@ -3,7 +3,7 @@
 	* Prints all `args` to the standard error stream, separated by
 	  spaces. A line break is appended to terminate the line.
 
-	* Returns `true` if the operation succeeds.
+	* Returns `true` if the operation succeeds; otherwise `null`.
 
 `std.debug.dump(value, [indent_increment])`
 
@@ -14,4 +14,4 @@
 	  inserted and output lines are not indented. It has a default
 	  value of `2`.
 
-	* Returns `true` if the operation succeeds.
+	* Returns `true` if the operation succeeds; otherwise `null`.
