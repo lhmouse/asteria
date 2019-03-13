@@ -265,14 +265,14 @@ void Value::print(std::ostream &os) const
     case type_opaque:
       {
         const auto &alt = this->check<D_opaque>();
-        // [[`my opaque`]]
+        // <opaque> [[`my opaque`]]
         os << "<opaque> [[`" << alt.get() << "`]]";
         return;
       }
     case type_function:
       {
         const auto &alt = this->check<D_function>();
-        // [[`my function`]]
+        // <function> [[`my function`]]
         os << "<function> [[`" << alt.get() << "`]]";
         return;
       }
