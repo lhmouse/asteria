@@ -12,11 +12,27 @@ namespace Asteria {
 D_boolean std_debug_print(const Cow_Vector<Value> &values)
   {
     rocket::insertable_ostream mos;
-    rocket::for_each(values, [&](const Value &value) { value.print(mos);  });
+    // Deal with nasty separators.
+    auto cur = values.begin();
+    auto rem = values.size();
+    switch(rem) {
+    default:
+      while(--rem != 0) {
+        cur->print(mos);
+        mos << ' ';
+        ++cur;
+      }
+      // Fallthrough.
+    case 1:
+      cur->print(mos);
+      // Fallthrough.
+    case 0:
+      break;
+    }
     return write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
   }
 
-D_boolean std_debug_var_dump(const Value &value, std::size_t indent_increment)
+D_boolean std_debug_dump(const Value &value, std::size_t indent_increment)
   {
     rocket::insertable_ostream mos;
     value.dump(mos, indent_increment);
@@ -48,7 +64,8 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
             D_function(make_simple_binding(
               // Description
               rocket::sref("std.debug.print([args...]):\n"
-                           "* Prints all `args` to the standard error stream, followed by a line break.\n"
+                           "* Prints all `args` to the standard error stream, separated by spaces.\n"
+                           "  A line break is appended to terminate the line\n"
                            "* Returns `true` if the operation succeeds."),
               // Definition
               [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
@@ -91,7 +108,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   D_integer indent_increment = 2;
                   if(reader.start().opt(value).opt(indent_increment).finish()) {
                     // Call the binding function.
-                    bool succ = std_debug_var_dump(value, static_cast<std::size_t>(rocket::mclamp(0, indent_increment, 10)));
+                    bool succ = std_debug_dump(value, static_cast<std::size_t>(rocket::mclamp(0, indent_increment, 10)));
                     // Forward the result.
                     Reference_Root::S_temporary ref_c = { D_boolean(succ) };
                     return rocket::move(ref_c);

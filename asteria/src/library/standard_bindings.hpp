@@ -12,7 +12,7 @@ namespace Asteria {
 
 // `std.debug`
 extern D_boolean std_debug_print(const Cow_Vector<Value> &values);
-extern D_boolean std_debug_var_dump(const Value &value, std::size_t indent_increment);
+extern D_boolean std_debug_dump(const Value &value, std::size_t indent_increment);
 
 // Create an object that is to be referenced as `std`.
 extern D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll);

@@ -53,9 +53,9 @@ template<typename charT, typename traitsT,
          typename iteratorT, typename differenceT, typename delimiterT, typename filterT>
   basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os, const ostream_imploder<iteratorT, differenceT, delimiterT, filterT> &imploder)
   {
+    // Deal with nasty commas.
     auto cur = imploder.begin();
     auto rem = imploder.count();
-    // Deal with nasty commas.
     switch(rem) {
     default:
       while(--rem != 0) {
