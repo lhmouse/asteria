@@ -5,14 +5,10 @@
 #define ASTERIA_LIBRARY_STANDARD_BINDINGS_HPP_
 
 #include "../fwd.hpp"
-#include "../runtime/reference.hpp"
-#include "../runtime/value.hpp"
+#include "standard_bindings_debug.hpp"
+#include "standard_bindings_chrono.hpp"
 
 namespace Asteria {
-
-// `std.debug`
-extern D_boolean std_debug_print(const Cow_Vector<Value> &values);
-extern D_boolean std_debug_dump(const Value &value, std::size_t indent_increment);
 
 // Create an object that is to be referenced as `std`.
 extern D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll);
