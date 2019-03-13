@@ -58,14 +58,14 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   Cow_Vector<Value> values(args.size());
                   reader.start();
                   std::for_each(values.mut_begin(), values.mut_end(), [&](Value &value) { reader.opt(value);  });
-                  if(!reader.finish()) {
-                    reader.throw_no_matching_function_call();
+                  if(reader.finish()) {
+                    // Call the binding function.
+                    bool succ = std_debug_print(values);
+                    // Forward the result.
+                    Reference_Root::S_temporary ref_c = { D_boolean(succ) };
+                    return rocket::move(ref_c);
                   }
-                  // Call the binding function.
-                  auto succ = std_debug_print(values);
-                  // Forward the result.
-                  Reference_Root::S_temporary ref_c = { D_boolean(succ) };
-                  return rocket::move(ref_c);
+                  reader.throw_no_matching_function_call();
                 },
               // Opaque parameters
               { }
@@ -89,15 +89,14 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                   // Parse arguments.
                   Value value;
                   D_integer indent_increment = 2;
-                  if(!reader.start().opt(value).opt(indent_increment).finish()) {
-                    reader.throw_no_matching_function_call();
+                  if(reader.start().opt(value).opt(indent_increment).finish()) {
+                    // Call the binding function.
+                    bool succ = std_debug_var_dump(value, static_cast<std::size_t>(rocket::mclamp(0, indent_increment, 10)));
+                    // Forward the result.
+                    Reference_Root::S_temporary ref_c = { D_boolean(succ) };
+                    return rocket::move(ref_c);
                   }
-                  indent_increment = rocket::mclamp(0, indent_increment, 10);
-                  // Call the binding function.
-                  auto succ = std_debug_var_dump(value, static_cast<std::size_t>(indent_increment));
-                  // Forward the result.
-                  Reference_Root::S_temporary ref_c = { D_boolean(succ) };
-                  return rocket::move(ref_c);
+                  reader.throw_no_matching_function_call();
                 },
               // Opaque parameters
               { }
