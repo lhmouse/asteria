@@ -80,7 +80,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                            "* Prints the value to the standard error stream with detailed information.\n"
                            "  `indent_increment` is the number of spaces used as a single level of indent.\n"
                            "  Its value is clamped within the range [0, 10] inclusive. If it is set to `0`,\n"
-                           "  no line break is inserted and the output is not indented. The default value is `2`.\n"
+                           "  no line break is inserted and the output is not indented. It has a default value of `2`.\n"
                            "* Returns `true` if the operation succeeds."),
               // Definition
               [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
