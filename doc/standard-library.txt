@@ -15,3 +15,77 @@
 	  value of `2`.
 
 	* Returns `true` if the operation succeeds; otherwise `null`.
+
+`std.chrono.utc_now()`
+
+	* Retrieves the wall clock time in UTC.
+
+	* Returns the number of milliseconds since the Unix epoch,
+	  represented as an `integer`.
+
+`std.chrono.local_now()`
+
+	* Retrieves the wall clock time in the local time zone.
+
+	* Returns the number of milliseconds since `1970-01-01 00:00:00`
+	  in the local time zone, represented as an `integer`.
+
+`std.chrono.hires_now()`
+
+	* Retrieves a time point from a high resolution clock. The clock
+	  goes monotonically and cannot be adjusted, being suitable for
+	  time measurement. This function provides accuracy and might be
+	  quite heavyweight.
+
+	* Returns the number of milliseconds since an unspecified time
+	  point, represented as a `real`.
+
+`std.chrono.steady_now()`
+
+	* Retrieves a time point from a steady clock. The clock goes
+	  monotonically and cannot be adjusted, being suitable for time
+	  measurement. This function is supposed to be fast and might
+	  have poor accuracy.
+
+	* Returns the number of milliseconds since an unspecified time
+	  point, represented as an `integer`.
+
+`std.chrono.local_from_utc(time_utc)`
+
+	* Converts a UTC time point to a local one. `time_utc` shall be
+	  the number of milliseconds since the Unix epoch.
+
+	* Returns the number of milliseconds since `1970-01-01 00:00:00`
+	  in the local time zone, represented as an `integer`.
+
+`std.chrono.utc_from_local(time_local)`
+
+	* Converts a local time point to a UTC one. `time_local` shall
+	  be the number of milliseconds since `1970-01-01 00:00:00` in
+	  the local time zone.
+
+	* Returns the number of milliseconds since the Unix epoch,
+	  represented as an `integer`.
+
+`std.chrono.parse_datetime(time_str)`
+
+	* Parses `time_str`, which is an ASCII string representing a time
+	  point in the format `1970-01-01 00:00:00.000`, according to the
+	  ISO 8601 standard. The string may contain only the YYYY-MM-DD
+	  part, or the YYYY-MM-DD and HH:MM:SS parts; absent parts are
+	  treated as being all zeroes. Leading or trailing spaces are
+	  not allowed.
+
+	* Returns the number of milliseconds since `1970-01-01 00:00:00`
+	  if the time string has been parsed successfully; otherwise
+	  `null`.
+
+`std.chrono.format_datetime(time_point, [with_ms])`
+
+	* Converts `time_point`, which represents the number of
+	  milliseconds since `1970-01-01 00:00:00`, to an ASCII string in
+	  the aforementioned format, according to the ISO 8601 standard.
+	  If `with_ms` is set to `true`, the string will have a 3-digit
+	  fractional part. By default, no fractional part is added.
+
+	* Returns a `string` representing the time point.
