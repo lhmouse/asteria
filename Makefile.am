@@ -1,10 +1,9 @@
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -pipe -pthread -fno-math-errno -fno-trapping-math -finline-limit=2400  \
-  -Wall -Wextra -Wconversion -Wsign-conversion -Winvalid-pch  \
-  -Wwrite-strings -Wswitch-enum -Wsuggest-attribute=noreturn -Wundef -Wshadow  \
-  -Wstrict-aliasing -Wstrict-overflow -Wmissing-field-initializers  \
-  -Wno-error=unused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}  \
-  -Wno-error={pragmas,invalid-pch,inline}
+AM_CPPFLAGS = -D_POSIX_SOURCE -D_DEFAULT_SOURCE -D_GNU_SOURCE -pipe -pthread -Wall -Wextra \
+  -f{no-{math-errno,trapping-math},inline-limit=2400,strict-{aliasing,overflow}}  \
+  -Werror={{,sign-}conversion,write-strings}  \
+  -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow,missing-field-initializers}  \
+  -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
 AM_CXXFLAGS = -std=c++14 -Wnon-virtual-dtor
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
