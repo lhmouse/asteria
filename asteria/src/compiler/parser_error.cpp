@@ -83,7 +83,7 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
       }
     case code_integer_literal_overflow:
       {
-        return "The exponent of this integer literal was too large.";
+        return "This integer literal was too large and could not be represented.";
       }
     case code_integer_literal_exponent_negative:
       {

@@ -158,11 +158,12 @@ class Token
     ROCKET_PURE_FUNCTION static const char * get_punctuator(Punctuator punct) noexcept;
 
   private:
+    // Metadata
     Cow_String m_file;
     std::uint32_t m_line;
     std::size_t m_offset;
     std::size_t m_length;
-
+    // Data
     Variant m_stor;
 
   public:

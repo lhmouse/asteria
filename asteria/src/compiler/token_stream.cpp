@@ -579,6 +579,71 @@ namespace Asteria {
         return true;
       }
 
+    Token * do_check_mergeability(Cow_Vector<Token> &seq, const Line_Reader &reader)
+      {
+        if(seq.empty()) {
+          // No previuos token exists.
+          return nullptr;
+        }
+        auto qstok = std::addressof(seq.mut_back());
+        if(qstok->line() != reader.line()) {
+          // Not on the same line.
+          return nullptr;
+        }
+        if(qstok->offset() + qstok->length() != reader.offset()) {
+          // Not contiguous.
+          return nullptr;
+        }
+        if(qstok->index() != Token::index_punctuator) {
+          // Only an immediate `+` or `-` can be merged.
+          return nullptr;
+        }
+        if(rocket::is_none_of(qstok->check<Token::S_punctuator>().punct, { Token::punctuator_add, Token::punctuator_sub })) {
+          // Only an immediate `+` or `-` can be merged.
+          return nullptr;
+        }
+        if(seq.size() >= 2) {
+          // Check whether the previous token may be an infix operator.
+          const auto &pt = seq.rbegin()[1];
+          switch(pt.index()) {
+          case Token::index_keyword:
+            {
+              const auto &alt = pt.check<Token::S_keyword>();
+              // Mergeable unless the keyword denotes a value or reference.
+              bool mergeable = rocket::is_none_of(alt.keyword, { Token::keyword_null, Token::keyword_true, Token::keyword_false,
+                                                                 Token::keyword_nan, Token::keyword_infinity, Token::keyword_this });
+              if(!mergeable) {
+                return nullptr;
+              }
+              break;
+            }
+          case Token::index_punctuator:
+            {
+              const auto &alt = pt.check<Token::S_punctuator>();
+              // Mergeable unless the punctuator terminates an expression.
+              bool mergeable = rocket::is_none_of(alt.punct, { Token::punctuator_inc, Token::punctuator_dec, Token::punctuator_parenth_cl,
+                                                               Token::punctuator_bracket_cl, Token::punctuator_brace_cl });
+              if(!mergeable) {
+                return nullptr;
+              }
+              break;
+            }
+          case Token::index_identifier:
+          case Token::index_integer_literal:
+          case Token::index_real_literal:
+          case Token::index_string_literal:
+            {
+              // Not mergeable, always.
+              return nullptr;
+            }
+          default:
+            ASTERIA_TERMINATE("An unknown token type enumeration `", pt.index(), "` has been encountered.");
+          }
+        }
+        // Mergeable.
+        return qstok;
+      }
+
     bool do_accept_numeric_literal(Cow_Vector<Token> &seq_out, Line_Reader &reader_io, bool integer_as_real)
       {
         // numeric-literal ::=
@@ -618,18 +683,14 @@ namespace Asteria {
           switch(next) {
           case 'B':
           case 'b':
-            {
-              radix = 2;
-              int_begin += 2;
-              break;
-            }
+            radix = 2;
+            int_begin += 2;
+            break;
           case 'X':
           case 'x':
-            {
-              radix = 16;
-              int_begin += 2;
-              break;
-            }
+            radix = 16;
+            int_begin += 2;
+            break;
           }
         }
         auto max_digits = static_cast<std::size_t>(radix * 2);
@@ -658,34 +719,26 @@ namespace Asteria {
         switch(next) {
         case 'E':
         case 'e':
-          {
-            exp_base = 10;
-            ++exp_begin;
-            break;
-          }
+          exp_base = 10;
+          ++exp_begin;
+          break;
         case 'P':
         case 'p':
-          {
-            exp_base = 2;
-            ++exp_begin;
-            break;
-          }
+          exp_base = 2;
+          ++exp_begin;
+          break;
         }
         if(exp_base != 0) {
           next = bptr[exp_begin];
           switch(next) {
           case '+':
-            {
-              exp_sign = false;
-              ++exp_begin;
-              break;
-            }
+            exp_sign = false;
+            ++exp_begin;
+            break;
           case '-':
-            {
-              exp_sign = true;
-              ++exp_begin;
-              break;
-            }
+            exp_sign = true;
+            ++exp_begin;
+            break;
           }
           tptr = std::find_if_not(bptr + exp_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, 20, ch);  });
           exp_end = static_cast<std::size_t>(tptr - bptr);
@@ -709,7 +762,7 @@ namespace Asteria {
             continue;
           }
           auto dvalue = static_cast<int>((dptr - s_digits) / 2);
-          auto bound = (INT_MAX - dvalue) / 10;
+          int bound = (INT_MAX - dvalue) / 10;
           if(exp > bound) {
             throw do_make_parser_error(reader_io, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
           }
@@ -726,31 +779,44 @@ namespace Asteria {
             throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_exponent_negative);
           }
           // Parse the significant part.
-          std::int64_t value = 0;
+          std::uint64_t value = 0;
           for(auto i = int_begin; i != int_end; ++i) {
             auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
             if(!dptr) {
               continue;
             }
-            auto dvalue = static_cast<std::int64_t>((dptr - s_digits) / 2);
-            auto bound = (INT64_MAX - dvalue) / radix;
+            auto dvalue = static_cast<std::uint64_t>((dptr - s_digits) / 2);
+            std::uint64_t bound = ((UINT64_C(1) << 63) - dvalue) / static_cast<unsigned>(radix);
             if(value > bound) {
               throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
             }
-            value = value * radix + dvalue;
+            value = value * static_cast<unsigned>(radix) + dvalue;
           }
           // Raise the significant part to the power of `exp`.
           if(value != 0) {
             for(int i = 0; i < exp; ++i) {
-              auto bound = INT64_MAX / exp_base;
+              std::uint64_t bound = (UINT64_C(1) << 63) / static_cast<unsigned>(exp_base);
               if(value > bound) {
                 throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
               }
-              value *= exp_base;
+              value *= static_cast<unsigned>(exp_base);
             }
           }
+          // Check for a previous sign symbol.
+          auto qstok = do_check_mergeability(seq_out, reader_io);
+          std::uint64_t smask = (qstok && qstok->check<Token::S_punctuator>().punct == Token::punctuator_sub) ? UINT64_MAX : 0;
+          // The special value `0x1p63` is only allowed if a contiguous minus symbol precedes it.
+          if((value == (UINT64_C(1) << 63)) && (smask == 0)) {
+            throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
+          }
+          if(qstok) {
+            // Overwrite the previous token.
+            tlen += reader_io.offset() - qstok->offset();
+            reader_io.rewind(qstok->offset());
+            seq_out.pop_back();
+          }
           // Push an integer literal.
-          Token::S_integer_literal token_c = { value };
+          Token::S_integer_literal token_c = { static_cast<std::int64_t>((value ^ -smask) - smask) };
           do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
           return true;
         }
@@ -797,8 +863,17 @@ namespace Asteria {
         if((fpc == FP_ZERO) && !zero) {
           throw do_make_parser_error(reader_io, tlen, Parser_Error::code_real_literal_underflow);
         }
+        // Check for a previous sign symbol.
+        auto qstok = do_check_mergeability(seq_out, reader_io);
+        double fmask = (qstok && qstok->check<Token::S_punctuator>().punct == Token::punctuator_sub) ? -1 : 0;
+        if(qstok) {
+          // Overwrite the previous token.
+          tlen += reader_io.offset() - qstok->offset();
+          reader_io.rewind(qstok->offset());
+          seq_out.pop_back();
+        }
         // Push a floating-point literal.
-        Token::S_real_literal token_c = { value };
+        Token::S_real_literal token_c = { std::copysign(value, fmask) };
         do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
         return true;
       }
