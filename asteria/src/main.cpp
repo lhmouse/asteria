@@ -4,9 +4,10 @@
 #include "compiler/simple_source_file.hpp"
 #include "runtime/global_context.hpp"
 #include "runtime/traceable_exception.hpp"
+#include "library/standard_bindings_chrono.hpp"
 #include "rocket/insertable_istream.hpp"
 #include <iostream>
-#include <chrono>
+#include <iomanip>
 
 using namespace Asteria;
 
@@ -46,13 +47,13 @@ int main(int argc, char **argv)
 #endif
     Global_Context global;
     // run it and measure the time.
-    auto t1 = std::chrono::high_resolution_clock::now();
+    auto t1 = std_chrono_hires_now();
     auto res = code.execute(global, rocket::move(args));
-    auto t2 = std::chrono::high_resolution_clock::now();
+    auto t2 = std_chrono_hires_now();
     // print the time elasped and the result.
     std::cerr << std::endl
               << "---" << std::endl
-              << "Finished in " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count() << " ms:" << std::endl
+              << "Finished in " << std::fixed << std::setprecision(3) << (t2 - t1) << " ms:" << std::endl
               << "---" << std::endl;
     std::cout << res.read() << std::endl;
     // finish.
@@ -64,7 +65,8 @@ int main(int argc, char **argv)
               << "# Caught `Traceable_Exception`:" << std::endl
               << e.get_value() << std::endl;
     for(std::size_t i = 0; i < e.get_frame_count(); ++i) {
-      std::cerr << "[thrown from `" << e.get_frame(i).function_signature() << "` at '" << e.get_frame(i).source_location() << "']" << std::endl;
+      std::cerr << "[thrown from `" << e.get_frame(i).function_signature() << "` "
+                << "at '" << e.get_frame(i).source_location() << "']" << std::endl;
     }
     return 1;
   } catch(std::exception &e) {
