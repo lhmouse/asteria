@@ -1088,7 +1088,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
           if(lhs.type() == type_integer) {
             auto &reg = rhs.check<D_integer>();
-            rhs = do_operator_sll(lhs.check<D_integer>(), reg);
+            reg = do_operator_sll(lhs.check<D_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the right and discard characters from the left.
@@ -1120,7 +1120,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
           if(lhs.type() == type_integer) {
             auto &reg = rhs.check<D_integer>();
-            rhs = do_operator_srl(lhs.check<D_integer>(), reg);
+            reg = do_operator_srl(lhs.check<D_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the left and discard characters from the right.
@@ -1153,7 +1153,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
           if(lhs.type() == type_integer) {
             auto &reg = rhs.check<D_integer>();
-            rhs = do_operator_sla(lhs.check<D_integer>(), reg);
+            reg = do_operator_sla(lhs.check<D_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the right.
@@ -1184,7 +1184,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
           if(lhs.type() == type_integer) {
             auto &reg = rhs.check<D_integer>();
-            rhs = do_operator_sra(lhs.check<D_integer>(), reg);
+            reg = do_operator_sra(lhs.check<D_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, discard characters from the right.

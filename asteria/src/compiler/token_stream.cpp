@@ -813,10 +813,11 @@ namespace Asteria {
             // Overwrite the previous token.
             tlen += reader_io.offset() - qstok->offset();
             reader_io.rewind(qstok->offset());
+            qstok = nullptr;
             seq_out.pop_back();
           }
           // Push an integer literal.
-          Token::S_integer_literal token_c = { static_cast<std::int64_t>((value ^ -smask) - smask) };
+          Token::S_integer_literal token_c = { static_cast<std::int64_t>((value ^ smask) - smask) };
           do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
           return true;
         }
@@ -870,6 +871,7 @@ namespace Asteria {
           // Overwrite the previous token.
           tlen += reader_io.offset() - qstok->offset();
           reader_io.rewind(qstok->offset());
+          qstok = nullptr;
           seq_out.pop_back();
         }
         // Push a floating-point literal.
