@@ -115,12 +115,12 @@ using ::std::underflow_error;
 
 struct identity
   {
+    using is_transparent = void;
+
     template<typename paramT> constexpr paramT && operator()(paramT &&param) const noexcept
       {
         return ::std::forward<paramT>(param);
       }
-
-    using is_transparent = void;
   };
 
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type * = nullptr
