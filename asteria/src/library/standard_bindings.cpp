@@ -85,6 +85,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                     Reference_Root::S_temporary ref_c = { D_boolean(true) };
                     return rocket::move(ref_c);
                   }
+                  // Fail.
                   reader.throw_no_matching_function_call();
                 },
               // Opaque parameters
@@ -123,6 +124,7 @@ D_object create_standard_bindings(const Rcptr<Generational_Collector> &coll)
                     Reference_Root::S_temporary ref_c = { D_boolean(true) };
                     return rocket::move(ref_c);
                   }
+                  // Fail.
                   reader.throw_no_matching_function_call();
                 },
               // Opaque parameters
