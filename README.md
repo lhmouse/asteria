@@ -10,8 +10,8 @@
 |**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.                            |
 |**GCC 6**   |:1st_place_medal:Primary   |                                                            |
 |**GCC 5**   |:1st_place_medal:Primary   |                                                            |
-|**GCC 4.9** |:2nd_place_medal:Secondary |Lack of test environments.                                  |
-|**MSVC 19** |:no_entry:Obsolete         |Little build system support. Internal compiler errors.      |
+|**GCC 4.9** |:warning:Unknown           |Lack of test environments.                                  |
+|**MSVC 19** |:no_entry:Abandoned        |Little build system support. Internal compiler errors.      |
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
 
