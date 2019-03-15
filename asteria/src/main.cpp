@@ -4,7 +4,7 @@
 #include "compiler/simple_source_file.hpp"
 #include "runtime/global_context.hpp"
 #include "runtime/traceable_exception.hpp"
-#include "library/standard_bindings_chrono.hpp"
+#include "library/bindings_chrono.hpp"
 #include "rocket/insertable_istream.hpp"
 #include <iostream>
 #include <iomanip>

@@ -5,7 +5,7 @@
 #include "global_context.hpp"
 #include "generational_collector.hpp"
 #include "variable.hpp"
-#include "../library/standard_bindings.hpp"
+#include "../library/bindings.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -21,7 +21,7 @@ void Global_Context::do_initialize_runtime(void * /*reserved*/)
     this->tie_collector(collector);
     this->m_collector = collector;
     // Create the `std` variable.
-    auto std_bindings = create_standard_bindings(collector);
+    auto std_bindings = create_bindings(collector);
     auto std_var = collector->create_variable();
     std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_bindings), true);
     Reference_Root::S_variable std_ref_c = { std_var };
