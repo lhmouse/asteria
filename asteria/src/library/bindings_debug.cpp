@@ -51,9 +51,9 @@ D_object create_bindings_debug()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.debug.print([args...])`"
-                     "\n  * Prints all `args` to the standard error stream, separated by"
-                     "\n    spaces. A line break is appended to terminate the line."
-                     "\n  * Returns `true` if the operation succeeds."),
+                     "\n  * Prints all `args` to the standard error stream, separated by   "
+                     "\n    spaces. A line break is appended to terminate the line.        "
+                     "\n  * Returns `true` if the operation succeeds.                      "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
@@ -85,13 +85,13 @@ D_object create_bindings_debug()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.debug.dump(value, [indent_increment])`"
-                     "\n  * Prints the value to the standard error stream with detailed"
-                     "\n    information. `indent_increment` specifies the number of spaces"
-                     "\n    used as a single level of indent. Its value is clamped between"
+                     "\n  * Prints the value to the standard error stream with detailed    "
+                     "\n    information. `indent_increment` specifies the number of spaces "
+                     "\n    used as a single level of indent. Its value is clamped between "
                      "\n    `0` and `10` inclusively. If it is set to `0`, no line break is"
-                     "\n    inserted and output lines are not indented. It has a default"
-                     "\n    value of `2`."
-                     "\n  * Returns `true` if the operation succeeds."),
+                     "\n    inserted and output lines are not indented. It has a default   "
+                     "\n    value of `2`.                                                  "
+                     "\n  * Returns `true` if the operation succeeds.                      "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
