@@ -264,19 +264,13 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
   {
     // Return strings that are allocated statically for special time point values.
     if(time_point <= -11644473600000) {
-      if(with_ms) {
-        time_str_out = rocket::sref("1601-01-01 00:00:00.000");
-      } else {
-        time_str_out = rocket::sref("1601-01-01 00:00:00");
-      }
+      time_str_out = rocket::sref(with_ms ? "1601-01-01 00:00:00.000"
+                                          : "1601-01-01 00:00:00");
       return;
     }
     if(time_point >= 253370764800000) {
-      if(with_ms) {
-        time_str_out = rocket::sref("9999-01-01 00:00:00.000");
-      } else {
-        time_str_out = rocket::sref("9999-01-01 00:00:00");
-      }
+      time_str_out = rocket::sref(with_ms ? "9999-01-01 00:00:00.000"
+                                          : "9999-01-01 00:00:00");
       return;
     }
     // Break the time point down.
@@ -312,34 +306,47 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
     min  = tr.tm_min;
     sec  = tr.tm_sec;
 #endif
-    // Format the string.
-    // Note that the length of the result string is fixed.
-    const auto put_field = [](char *ptr, int width, int value)
+    // Notice that the length of the result string is fixed.
+    time_str_out.resize(std::char_traits<char>::length(with_ms ? "1601-01-01 00:00:00.000"
+                                                               : "1601-01-01 00:00:00"));
+    // Characters are written backwards.
+    auto wpos = time_str_out.mut_rbegin();
+    // Define a function to write each field.
+    // Be adviced that this function modifies `wpos`.
+    const auto write_int = [&](int value, int width)
       {
         int r = value;
-        for(int i = width - 1; i >= 0; --i) {
+        for(int i = 0; i < width; ++i) {
           int d = r % 10;
           r /= 10;
-          ptr[i] = static_cast<char>('0' + d);
+          *wpos = static_cast<char>('0' + d);
+          ++wpos;
         }
-        return width;
+        return true;
       };
-    char *p;
+    const auto write_sep = [&](char sep)
+      {
+        *wpos = sep;
+        ++wpos;
+        return true;
+      };
+    // Write fields backwards.
     if(with_ms) {
-      time_str_out.assign("@@@@-@@-@@ @@:@@:@@.@@@");
-      p = time_str_out.mut_data();
-      put_field(p + 20, 3, msec);
-    } else {
-      time_str_out.assign("@@@@-@@-@@ @@:@@:@@");
-      p = time_str_out.mut_data();
+      write_int(msec, 3);
+      write_sep('.');
     }
-    // Format common fields.
-    put_field(p +  0, 4, year);
-    put_field(p +  5, 2, mon );
-    put_field(p +  8, 2, day );
-    put_field(p + 11, 2, hour);
-    put_field(p + 14, 2, min );
-    put_field(p + 17, 2, sec );
+    write_int(sec, 2);
+    write_sep(':');
+    write_int(min, 2);
+    write_sep(':');
+    write_int(hour, 2);
+    write_sep(' ');
+    write_int(day, 2);
+    write_sep('-');
+    write_int(mon, 2);
+    write_sep('-');
+    write_int(year, 4);
+    ROCKET_ASSERT(wpos == time_str_out.rend());
   }
 
 Cow_String std_chrono_min_datetime(bool with_ms)
