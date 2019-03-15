@@ -36,7 +36,6 @@ int main()
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_punctuator>().punct == Token::punctuator_dot);
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_keyword>().keyword == Token::keyword_false);
     ASTERIA_TEST_CHECK(ts.shift().check<Token::S_punctuator>().punct == Token::punctuator_semicol);
-    ASTERIA_TEST_CHECK(ts.shift().check<Token::S_punctuator>().punct == Token::punctuator_sub);
-    ASTERIA_TEST_CHECK(ts.shift().check<Token::S_integer_literal>().value == 420000000000000);
+    ASTERIA_TEST_CHECK(ts.shift().check<Token::S_integer_literal>().value == -420000000000000);
     ASTERIA_TEST_CHECK(ts.peek_opt() == nullptr);
   }
