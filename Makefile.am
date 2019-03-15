@@ -2,6 +2,7 @@ ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -pipe -pthread -Wall -Wextra \
   -D_POSIX_SOURCE -D_DEFAULT_SOURCE -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
   -f{no-{math-errno,trapping-math},inline-limit=2400,strict-{aliasing,overflow}}  \
+  -f{conserve-stack,no-devirtualize-speculatively}  \
   -Werror={{,sign-}conversion,write-strings}  \
   -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
