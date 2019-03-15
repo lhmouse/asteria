@@ -43,13 +43,12 @@ bool are_debug_logs_enabled() noexcept
 
     int do_ltoa_fixed(char *buf, int width, long num) noexcept
       {
-        static constexpr char s_digits[] = "0123456789";
         // Write digits from the right to the left.
-        auto reg = num;
+        long reg = num;
         for(int i = width - 1; i >= 0; --i) {
-          auto d = reg % 10;
+          long d = reg % 10;
           reg /= 10;
-          buf[i] = s_digits[d];
+          buf[i] = static_cast<char>('0' + d);
         }
         // Return the number of characters written.
         return width;
