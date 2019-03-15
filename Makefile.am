@@ -127,9 +127,9 @@ pkginclude_librarydir = ${pkgincludedir}/library
 pkginclude_library_HEADERS =  \
   asteria/src/library/argument_reader.hpp  \
   asteria/src/library/simple_binding_wrapper.hpp  \
-  asteria/src/library/standard_bindings_debug.hpp  \
-  asteria/src/library/standard_bindings_chrono.hpp  \
-  asteria/src/library/standard_bindings.hpp
+  asteria/src/library/bindings_debug.hpp  \
+  asteria/src/library/bindings_chrono.hpp  \
+  asteria/src/library/bindings.hpp
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
@@ -166,9 +166,9 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/simple_source_file.cpp  \
   asteria/src/library/argument_reader.cpp  \
   asteria/src/library/simple_binding_wrapper.cpp  \
-  asteria/src/library/standard_bindings_debug.cpp  \
-  asteria/src/library/standard_bindings_chrono.cpp  \
-  asteria/src/library/standard_bindings.cpp
+  asteria/src/library/bindings_debug.cpp  \
+  asteria/src/library/bindings_chrono.cpp  \
+  asteria/src/library/bindings.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp

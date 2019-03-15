@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_LIBRARY_STANDARD_BINDINGS_CHRONO_HPP_
-#define ASTERIA_LIBRARY_STANDARD_BINDINGS_CHRONO_HPP_
+#ifndef ASTERIA_LIBRARY_BINDINGS_CHRONO_HPP_
+#define ASTERIA_LIBRARY_BINDINGS_CHRONO_HPP_
 
 #include "../fwd.hpp"
 
@@ -20,7 +20,7 @@ extern bool std_chrono_parse_datetime(D_integer &time_point_out, const D_string 
 extern D_string std_chrono_format_datetime(D_integer time_point);
 
 // Create an object that is to be referenced as `std.chrono`.
-extern D_object create_standard_bindings_chrono();
+extern D_object create_bindings_chrono();
 
 }  // namespace Asteria
 

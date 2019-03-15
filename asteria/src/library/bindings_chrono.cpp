@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "standard_bindings_chrono.hpp"
+#include "bindings_chrono.hpp"
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
@@ -169,7 +169,7 @@ D_integer std_chrono_utc_from_local(D_integer time_local)
 bool std_chrono_parse_datetime(D_integer &time_point_out, const D_string &time_str);
 D_string std_chrono_format_datetime(D_integer time_point);
 
-D_object create_standard_bindings_chrono()
+D_object create_bindings_chrono()
   {
     D_object chrono;
     //===================================================================

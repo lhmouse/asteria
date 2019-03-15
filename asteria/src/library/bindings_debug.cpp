@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "standard_bindings_debug.hpp"
+#include "bindings_debug.hpp"
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
@@ -41,7 +41,7 @@ bool std_debug_dump(const Value &value, std::size_t indent_increment)
     return succ;
   }
 
-D_object create_standard_bindings_debug()
+D_object create_bindings_debug()
   {
     D_object debug;
     //===================================================================
