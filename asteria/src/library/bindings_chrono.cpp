@@ -156,80 +156,70 @@ std::int64_t std_chrono_utc_from_local(std::int64_t time_local)
 
 bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &time_str)
   {
-    // Declare the broken-down time parameters.
-    int year, mon, day, hour, min, sec, msec;
-    // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
-    bool succ = (time_str.size() >= 19) &&
-                (time_str[ 4] == '-') &&
-                (time_str[ 7] == '-') &&
-                (time_str[10] == ' ') &&
-                (time_str[13] == ':') &&
-                (time_str[16] == ':');
-    if(!succ) {
-      return false;
-    }
-    const auto get_field = [](int &rvalue, const char *ptr, int width)
+    // Characters are read forwards, unlike `format_datetime()`.
+    auto rpos = time_str.begin();
+    // Define functions to read each field.
+    // Be adviced that these functions modify `rpos`.
+    const auto read_int = [&](auto &out, int width)
       {
-        int r = 0;
-        for(int i = 0; i < width; ++i) {
-          int d = ptr[i] - '0';
-          if((d < 0) || (d > 9)) {
-            return false;
-          }
-          r = r * 10 + d;
-        }
-        rvalue = r;
-        return true;
-      };
-    // Parse common fields.
-    const char *p = time_str.data();
-    succ = get_field(year, p +  0, 4) &&
-           get_field(mon , p +  5, 2) &&
-           get_field(day , p +  8, 2) &&
-           get_field(hour, p + 11, 2) &&
-           get_field(min , p + 14, 2) &&
-           get_field(sec , p + 17, 2);
-    if(!succ) {
-      return false;
-    }
-    // Parse the subsecond part.
-    if(time_str.size() >= 20) {
-      // Check the decimal point.
-      if(time_str[19] != '.') {
-        return false;
-      }
-      double f = 0;
-      for(auto i = time_str.size() - 1; i > 19; --i) {
-        int d = p[i] - '0';
-        if((d < 0) || (d > 9)) {
+        // The first digit is required.
+        if(rpos == time_str.end()) {
           return false;
         }
-        f = (f + d) / 10;
-      }
-      msec = static_cast<int>(std::lround(f * 1000));
-    } else {
-      // No subsecond part.
-      msec = 0;
-    }
-    // Handle special time values.
-    if(year <= 1601) {
-      time_point_out = INT64_MIN;
-      return true;
-    }
-    if(year >= 9999) {
-      time_point_out = INT64_MAX;
-      return true;
-    }
+        int d = *rpos - '0';
+        if((d < 0) || (9 < d)) {
+          return false;
+        }
+        ++rpos;
+        // Parse as many digits as possible.
+        int r = d;
+        for(int i = 1; i < width; ++i) {
+          if(rpos == time_str.end()) {
+            break;
+          }
+          d = *rpos - '0';
+          if((d < 0) || (9 < d)) {
+            break;
+          }
+          ++rpos;
+          r = r * 10 + d;
+        }
+        out = static_cast<typename std::decay<decltype(out)>::type>(r);
+        return true;
+      };
+    const auto read_sep = [&](char sep)
+      {
+        if(rpos == time_str.end()) {
+          return false;
+        }
+        if(*rpos != sep) {
+          return false;
+        }
+        ++rpos;
+        return true;
+      };
+    // The millisecond part is optional so we have to declare some intermediate results here.
+    bool succ;
+    std::int64_t time_point;
 #ifdef _WIN32
-    // Assemble the parts.
+    // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::SYSTEMTIME st;
-    st.wYear         = static_cast<unsigned short>(year);
-    st.wMonth        = static_cast<unsigned short>(mon );
-    st.wDay          = static_cast<unsigned short>(day );
-    st.wHour         = static_cast<unsigned short>(hour);
-    st.wMinute       = static_cast<unsigned short>(min );
-    st.wSecond       = static_cast<unsigned short>(sec );
-    st.wMilliseconds = static_cast<unsigned short>(msec);
+    succ = read_int(st.wYear, 4) &&
+           read_sep('-') &&
+           read_int(st.wMonth, 2) &&
+           read_sep('-') &&
+           read_int(st.wDay, 2) &&
+           (read_sep(' ') || read_sep('T')) &&
+           read_int(st.wHour, 2) &&
+           read_sep(':') &&
+           read_int(st.wMinute, 2) &&
+           read_sep(':') &&
+           read_int(st.wSecond, 2);
+    if(!succ) {
+      return false;
+    }
+    // Assemble the parts, assuming the millisecond field is zero..
+    st.wMilliseconds = 0;
     ::FILETIME ft;
     if(!::SystemTimeToFileTime(&st, &ft)) {
       return false;
@@ -239,24 +229,64 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
     ti.HighPart = ft.dwHighDateTime;
     // Convert it to the number of milliseconds.
     // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    time_point_out = static_cast<std::int64_t>(ti.QuadPart - 116444736000000000) / 10000;
+    time_point = static_cast<std::int64_t>(ti.QuadPart - 116444736000000000) / 10000;
 #else
-    // Assemble the parts except milliseconds.
+    // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::tm tr;
-    tr.tm_year  = year - 1900;
-    tr.tm_mon   = mon - 1;
-    tr.tm_mday  = day;
-    tr.tm_hour  = hour;
-    tr.tm_min   = min;
-    tr.tm_sec   = sec;
+    succ = read_int(tr.tm_year, 4) &&
+           read_sep('-') &&
+           read_int(tr.tm_mon, 2) &&
+           read_sep('-') &&
+           read_int(tr.tm_mday, 2) &&
+           (read_sep(' ') || read_sep('T')) &&
+           read_int(tr.tm_hour, 2) &&
+           read_sep(':') &&
+           read_int(tr.tm_min, 2) &&
+           read_sep(':') &&
+           read_int(tr.tm_sec, 2);
+    if(!succ) {
+      return false;
+    }
+    // Assemble the parts without milliseconds.
+    tr.tm_year -= 1900;
+    tr.tm_mon -= 1;
     tr.tm_isdst = 0;
     ::time_t tp = ::timegm(&tr);
-    if(tp == ::time_t(-1)) {
+    if(tp == static_cast<::time_t>(-1)) {
       return false;
     }
     // Convert it to the number of milliseconds.
-    time_point_out = static_cast<std::int64_t>(tp) * 1000 + msec;
+    time_point = static_cast<std::int64_t>(tp) * 1000;
 #endif
+    // Parse the subsecond part if any.
+    if(read_sep('.')) {
+      // Parse digits backwards.
+      // Use `rpos` as the loop counter.
+      double r = 0;
+      for(auto kpos = time_str.rbegin(); rpos != time_str.end(); ++kpos) {
+        int d = *kpos - '0';
+        if((d < 0) || (9 < d)) {
+          return false;
+        }
+        ++rpos;
+        r = (r + d) / 10;
+      }
+      time_point += static_cast<std::int64_t>(r * 1000);
+    }
+    // Reject invalid characters in the end of `time_str`.
+    if(rpos != time_str.end()) {
+      return false;
+    }
+    // Handle special time values.
+    if(time_point <= -11644473600000) {
+      time_point_out = INT64_MIN;
+      return true;
+    }
+    if(time_point >= 253370764800000) {
+      time_point_out = INT64_MAX;
+      return true;
+    }
+    time_point_out = time_point;
     return true;
   }
 
@@ -279,7 +309,7 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
     // Characters are written backwards, unlike `parse_datetime()`.
     auto wpos = time_str_out.mut_rbegin();
     // Define functions to write each field.
-    // Be adviced that this function modifies `wpos`.
+    // Be adviced that these functions modify `wpos`.
     const auto write_int = [&](int value, int width)
       {
         int r = value;
