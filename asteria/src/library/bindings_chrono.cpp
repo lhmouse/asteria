@@ -298,7 +298,6 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
         return true;
       };
     // Break the time point down.
-    int year, mon, day, hour, min, sec, msec;
 #ifdef _WIN32
     // Convert the time point to Windows NT time.
     // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
@@ -309,43 +308,44 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
     ft.dwHighDateTime = ti.HighPart;
     ::SYSTEMTIME st;
     ::FileTimeToSystemTime(&ft, &st);
-    year = st.wYear;
-    mon  = st.wMonth;
-    day  = st.wDay;
-    hour = st.wHour;
-    min  = st.wMinute;
-    sec  = st.wSecond;
-    msec = st.wMilliseconds;
+    // Write fields backwards.
+    if(with_ms) {
+      write_int(st.wMilliseconds, 3);
+      write_sep('.');
+    }
+    write_int(st.wSecond, 2);
+    write_sep(':');
+    write_int(st.wMinute, 2);
+    write_sep(':');
+    write_int(st.wHour, 2);
+    write_sep(' ');
+    write_int(st.wDay, 2);
+    write_sep('-');
+    write_int(st.wMonth, 2);
+    write_sep('-');
+    write_int(st,wYear, 4);
 #else
-    // Get the number of milliseconds.
-    msec = static_cast<int>(time_point % 1000);
+    // Write fields backwards.
     // Be advised that POSIX APIs handle seconds only.
+    if(with_ms) {
+      write_int(static_cast<int>(time_point % 1000), 3);
+      write_sep('.');
+    }
     ::time_t tp = time_point / 1000;
     ::tm tr;
     ::gmtime_r(&tp, &tr);
-    year = tr.tm_year + 1900;
-    mon  = tr.tm_mon + 1;
-    day  = tr.tm_mday;
-    hour = tr.tm_hour;
-    min  = tr.tm_min;
-    sec  = tr.tm_sec;
-#endif
-    // Write fields backwards.
-    if(with_ms) {
-      write_int(msec, 3);
-      write_sep('.');
-    }
-    write_int(sec, 2);
+    write_int(tr.tm_sec, 2);
     write_sep(':');
-    write_int(min, 2);
+    write_int(tr.tm_min, 2);
     write_sep(':');
-    write_int(hour, 2);
+    write_int(tr.tm_hour, 2);
     write_sep(' ');
-    write_int(day, 2);
+    write_int(tr.tm_mday, 2);
     write_sep('-');
-    write_int(mon, 2);
+    write_int(tr.tm_mon + 1, 2);
     write_sep('-');
-    write_int(year, 4);
+    write_int(tr.tm_year + 1900, 4);
+#endif
     ROCKET_ASSERT(wpos == time_str_out.rend());
   }
 
