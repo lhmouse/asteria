@@ -187,12 +187,12 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
         out = static_cast<typename std::decay<decltype(out)>::type>(r);
         return true;
       };
-    const auto read_sep = [&](char sep)
+    const auto read_sep = [&](auto &&...seps)
       {
         if(rpos == time_str.end()) {
           return false;
         }
-        if(*rpos != sep) {
+        if(rocket::is_none_of(*rpos, { seps... })) {
           return false;
         }
         ++rpos;
@@ -209,7 +209,7 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
            read_int(st.wMonth, 2) &&
            read_sep('-') &&
            read_int(st.wDay, 2) &&
-           (read_sep(' ') || read_sep('T')) &&
+           read_sep(' ', 'T') &&
            read_int(st.wHour, 2) &&
            read_sep(':') &&
            read_int(st.wMinute, 2) &&
