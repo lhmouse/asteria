@@ -24,7 +24,7 @@ Executive_Context::~Executive_Context()
 
 void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args)
   {
-    // Set parameters, which are local variables.
+    // Set parameters, which are local references.
     for(std::size_t i = 0; i < params.size(); ++i) {
       const auto &param = params.at(i);
       if(param.empty()) {
