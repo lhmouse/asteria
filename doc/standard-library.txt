@@ -1,13 +1,13 @@
 ### `std.debug`
 
-#### `std.debug.print([args...])`
+`std.debug.print([args...])`
 
 	* Prints all `args` to the standard error stream, separated by
 	  spaces. A line break is appended to terminate the line.
 
 	* Returns `true` if the operation succeeds; otherwise `null`.
 
-#### `std.debug.dump(value, [indent_increment])`
+`std.debug.dump(value, [indent_increment])`
 
 	* Prints the value to the standard error stream with detailed
 	  information. `indent_increment` specifies the number of spaces
@@ -20,21 +20,21 @@
 
 ### `std.chrono`
 
-#### `std.chrono.utc_now()`
+`std.chrono.utc_now()`
 
 	* Retrieves the wall clock time in UTC.
 
 	* Returns the number of milliseconds since the Unix epoch,
 	  represented as an `integer`.
 
-#### `std.chrono.local_now()`
+`std.chrono.local_now()`
 
 	* Retrieves the wall clock time in the local time zone.
 
 	* Returns the number of milliseconds since `1970-01-01 00:00:00`
 	  in the local time zone, represented as an `integer`.
 
-#### `std.chrono.hires_now()`
+`std.chrono.hires_now()`
 
 	* Retrieves a time point from a high resolution clock. The clock
 	  goes monotonically and cannot be adjusted, being suitable for
@@ -44,7 +44,7 @@
 	* Returns the number of milliseconds since an unspecified time
 	  point, represented as a `real`.
 
-#### `std.chrono.steady_now()`
+`std.chrono.steady_now()`
 
 	* Retrieves a time point from a steady clock. The clock goes
 	  monotonically and cannot be adjusted, being suitable for time
@@ -54,7 +54,7 @@
 	* Returns the number of milliseconds since an unspecified time
 	  point, represented as an `integer`.
 
-#### `std.chrono.local_from_utc(time_utc)`
+`std.chrono.local_from_utc(time_utc)`
 
 	* Converts a UTC time point to a local one. `time_utc` shall be
 	  the number of milliseconds since the Unix epoch.
@@ -62,7 +62,7 @@
 	* Returns the number of milliseconds since `1970-01-01 00:00:00`
 	  in the local time zone, represented as an `integer`.
 
-#### `std.chrono.utc_from_local(time_local)`
+`std.chrono.utc_from_local(time_local)`
 
 	* Converts a local time point to a UTC one. `time_local` shall
 	  be the number of milliseconds since `1970-01-01 00:00:00` in
@@ -71,7 +71,7 @@
 	* Returns the number of milliseconds since the Unix epoch,
 	  represented as an `integer`.
 
-#### `std.chrono.parse_datetime(time_str)`
+`std.chrono.parse_datetime(time_str)`
 
 	* Parses `time_str`, which is an ASCII string representing a time
 	  point in the format `1970-01-01 00:00:00.000`, according to the
@@ -83,7 +83,7 @@
 	  if the time string has been parsed successfully; otherwise
 	  `null`.
 
-#### `std.chrono.format_datetime(time_point, [with_ms])`
+`std.chrono.format_datetime(time_point, [with_ms])`
 
 	* Converts `time_point`, which represents the number of
 	  milliseconds since `1970-01-01 00:00:00`, to an ASCII string in
@@ -93,7 +93,7 @@
 
 	* Returns a `string` representing the time point.
 
-#### `std.chrono.min_datetime([with_ms])`
+`std.chrono.min_datetime([with_ms])`
 
 	* Gets the special string that denotes the negative infinity time
 	  point. Calling this function has the same effect as calling
@@ -102,7 +102,7 @@
 	* Returns the string `'1601-01-01 00:00:00'` or the string
 	  `'1601-01-01 00:00:00.000'` according to `with_ms`.
 
-#### `std.chrono.max_datetime([with_ms])`
+`std.chrono.max_datetime([with_ms])`
 
 	* Gets the special string that denotes the positive infinity time
 	  point. Calling this function has the same effect as calling
