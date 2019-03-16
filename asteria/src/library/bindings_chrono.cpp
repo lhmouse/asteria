@@ -273,6 +273,30 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
                                           : "9999-01-01 00:00:00");
       return;
     }
+    // Notice that the length of the result string is fixed.
+    time_str_out.resize(std::char_traits<char>::length(with_ms ? "1601-01-01 00:00:00.000"
+                                                               : "1601-01-01 00:00:00"));
+    // Characters are written backwards.
+    auto wpos = time_str_out.mut_rbegin();
+    // Define a function to write each field.
+    // Be adviced that this function modifies `wpos`.
+    const auto write_int = [&](int value, int width)
+      {
+        int r = value;
+        for(int i = 0; i < width; ++i) {
+          int d = r % 10;
+          r /= 10;
+          *wpos = static_cast<char>('0' + d);
+          ++wpos;
+        }
+        return true;
+      };
+    const auto write_sep = [&](char sep)
+      {
+        *wpos = sep;
+        ++wpos;
+        return true;
+      };
     // Break the time point down.
     int year, mon, day, hour, min, sec, msec;
 #ifdef _WIN32
@@ -306,30 +330,6 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
     min  = tr.tm_min;
     sec  = tr.tm_sec;
 #endif
-    // Notice that the length of the result string is fixed.
-    time_str_out.resize(std::char_traits<char>::length(with_ms ? "1601-01-01 00:00:00.000"
-                                                               : "1601-01-01 00:00:00"));
-    // Characters are written backwards.
-    auto wpos = time_str_out.mut_rbegin();
-    // Define a function to write each field.
-    // Be adviced that this function modifies `wpos`.
-    const auto write_int = [&](int value, int width)
-      {
-        int r = value;
-        for(int i = 0; i < width; ++i) {
-          int d = r % 10;
-          r /= 10;
-          *wpos = static_cast<char>('0' + d);
-          ++wpos;
-        }
-        return true;
-      };
-    const auto write_sep = [&](char sep)
-      {
-        *wpos = sep;
-        ++wpos;
-        return true;
-      };
     // Write fields backwards.
     if(with_ms) {
       write_int(msec, 3);
