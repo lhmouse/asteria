@@ -353,7 +353,7 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
     write_sep('-');
     write_int(st.wMonth, 2);
     write_sep('-');
-    write_int(st,wYear, 4);
+    write_int(st.wYear, 4);
 #else
     // Write fields backwards.
     // Be advised that POSIX APIs handle seconds only.
