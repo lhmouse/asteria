@@ -1,3 +1,5 @@
+### `std.debug`
+
 `std.debug.print([args...])`
 
 	* Prints all `args` to the standard error stream, separated by
@@ -15,6 +17,8 @@
 	  value of `2`.
 
 	* Returns `true` if the operation succeeds; otherwise `null`.
+
+### `std.chrono`
 
 `std.chrono.utc_now()`
 
