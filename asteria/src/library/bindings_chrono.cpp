@@ -655,8 +655,7 @@ D_object create_bindings_chrono()
         rocket::sref("`std.chrono.min_datetime([with_ms])`"
                      "\n  * Gets the special string that denotes the negative infinity time"
                      "\n    point. Calling this function has the same effect as calling    "
-                     "\n    `format_datetime()` with the `time_point` argument set to      "
-                     "\n    `-0x8000000000000000`.                                         "
+                     "\n    `format_datetime(-0x8000000000000000, with_ms)`.               "
                      "\n  * Returns the string `'1601-01-01 00:00:00'` or the string       "
                      "\n    `'1601-01-01 00:00:00.000'` according to `with_ms`.            "),
         // Definition
@@ -687,8 +686,7 @@ D_object create_bindings_chrono()
         rocket::sref("`std.chrono.max_datetime([with_ms])`"
                      "\n  * Gets the special string that denotes the positive infinity time"
                      "\n    point. Calling this function has the same effect as calling    "
-                     "\n    `format_datetime()` with the `time_point` argument set to      "
-                     "\n    `0x7FFFFFFFFFFFFFFF`.                                          "
+                     "\n    `format_datetime(0x7FFFFFFFFFFFFFFF, with_ms)`.                "
                      "\n  * Returns the string `'9999-01-01 00:00:00'` or the string       "
                      "\n    `'9999-01-01 00:00:00.000'` according to `with_ms`.            "),
         // Definition
