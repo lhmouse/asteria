@@ -238,7 +238,7 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
            read_int(tr.tm_mon, 2) &&
            read_sep('-') &&
            read_int(tr.tm_mday, 2) &&
-           (read_sep(' ') || read_sep('T')) &&
+           read_sep(' ', 'T') &&
            read_int(tr.tm_hour, 2) &&
            read_sep(':') &&
            read_int(tr.tm_min, 2) &&
@@ -293,19 +293,20 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
 void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_point, bool with_ms)
   {
     // Return strings that are allocated statically for special time point values.
+    static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
+                                               "1601-01-01 00:00:00.000" };
+    static constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00",
+                                               "9999-01-01 00:00:00.000" };
     if(time_point <= -11644473600000) {
-      time_str_out = rocket::sref(with_ms ? "1601-01-01 00:00:00.000"
-                                          : "1601-01-01 00:00:00");
+      time_str_out = rocket::sref(s_min_str[with_ms]);
       return;
     }
     if(time_point >= 253370764800000) {
-      time_str_out = rocket::sref(with_ms ? "9999-01-01 00:00:00.000"
-                                          : "9999-01-01 00:00:00");
+      time_str_out = rocket::sref(s_max_str[with_ms]);
       return;
     }
     // Notice that the length of the result string is fixed.
-    time_str_out.resize(std::char_traits<char>::length(with_ms ? "1601-01-01 00:00:00.000"
-                                                               : "1601-01-01 00:00:00"));
+    time_str_out.resize(std::char_traits<char>::length(s_min_str[with_ms]));
     // Characters are written backwards, unlike `parse_datetime()`.
     auto wpos = time_str_out.mut_rbegin();
     // Define functions to write each field.
