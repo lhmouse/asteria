@@ -15,7 +15,7 @@
 
 namespace Asteria {
 
-std::int64_t std_chrono_utc_now()
+D_integer std_chrono_utc_now()
   {
 #ifdef _WIN32
     // Get UTC time from the system.
@@ -36,7 +36,7 @@ std::int64_t std_chrono_utc_now()
 #endif
   }
 
-std::int64_t std_chrono_local_now()
+D_integer std_chrono_local_now()
   {
 #ifdef _WIN32
     // Get local time from the system.
@@ -61,12 +61,12 @@ std::int64_t std_chrono_local_now()
 #endif
   }
 
-double std_chrono_hires_now()
+D_real std_chrono_hires_now()
   {
 #ifdef _WIN32
     // Read the performance counter.
     // The performance counter frequency has to be obtained only once.
-    static std::atomic<double> s_freq_recip;
+    static std::atomic<D_real> s_freq_recip;
     ::LARGE_INTEGER ti;
     auto freq_recip = s_freq_recip.load(std::memory_order_relaxed);
     if(ROCKET_UNEXPECT(!(freq_recip > 0))) {
@@ -88,7 +88,7 @@ double std_chrono_hires_now()
 #endif
   }
 
-std::int64_t std_chrono_steady_now()
+D_integer std_chrono_steady_now()
   {
 #ifdef _WIN32
     // Get the system tick count.
@@ -104,7 +104,7 @@ std::int64_t std_chrono_steady_now()
 #endif
   }
 
-std::int64_t std_chrono_local_from_utc(std::int64_t time_utc)
+D_integer std_chrono_local_from_utc(D_integer time_utc)
   {
     // Handle special time values.
     if(time_utc <= -11644473600000) {
@@ -114,7 +114,7 @@ std::int64_t std_chrono_local_from_utc(std::int64_t time_utc)
       return INT64_MAX;
     }
     // Calculate the local time.
-    std::int64_t time_local;
+    D_integer time_local;
 #ifdef _WIN32
     ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
     ::GetDynamicTimeZoneInformation(&dtz);
@@ -135,7 +135,7 @@ std::int64_t std_chrono_local_from_utc(std::int64_t time_utc)
     return time_local;
   }
 
-std::int64_t std_chrono_utc_from_local(std::int64_t time_local)
+D_integer std_chrono_utc_from_local(D_integer time_local)
   {
     // Handle special time values.
     if(time_local <= -11644473600000) {
@@ -145,7 +145,7 @@ std::int64_t std_chrono_utc_from_local(std::int64_t time_local)
       return INT64_MAX;
     }
     // Calculate the UTC time.
-    std::int64_t time_utc;
+    D_integer time_utc;
 #ifdef _WIN32
     ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
     ::GetDynamicTimeZoneInformation(&dtz);
@@ -166,7 +166,7 @@ std::int64_t std_chrono_utc_from_local(std::int64_t time_local)
     return time_utc;
   }
 
-bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &time_str)
+bool std_chrono_parse_datetime(D_integer &time_point_out, const D_string &time_str)
   {
     // Characters are read forwards, unlike `format_datetime()`.
     auto rpos = time_str.begin();
@@ -212,14 +212,14 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
       };
     // The millisecond part is optional so we have to declare some intermediate results here.
     bool succ;
-    std::int64_t time_point;
+    D_integer time_point;
 #ifdef _WIN32
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::SYSTEMTIME st;
     succ = read_int(st.wYear, 4) &&
-           read_sep('-') &&
+           read_sep('-', '/') &&
            read_int(st.wMonth, 2) &&
-           read_sep('-') &&
+           read_sep('-', '/') &&
            read_int(st.wDay, 2) &&
            read_sep(' ', 'T') &&
            read_int(st.wHour, 2) &&
@@ -246,9 +246,9 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::tm tr;
     succ = read_int(tr.tm_year, 4) &&
-           read_sep('-') &&
+           read_sep('-', '/') &&
            read_int(tr.tm_mon, 2) &&
-           read_sep('-') &&
+           read_sep('-', '/') &&
            read_int(tr.tm_mday, 2) &&
            read_sep(' ', 'T') &&
            read_int(tr.tm_hour, 2) &&
@@ -271,7 +271,7 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
     time_point = static_cast<std::int64_t>(tp) * 1000;
 #endif
     // Parse the subsecond part if any.
-    if(read_sep('.')) {
+    if(read_sep('.', ',')) {
       // Parse digits backwards.
       // Use `rpos` as the loop counter.
       double r = 0;
@@ -302,7 +302,7 @@ bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &t
     return true;
   }
 
-void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_point, bool with_ms)
+void std_chrono_format_datetime(D_string &time_str_out, D_integer time_point, bool with_ms)
   {
     // Return strings that are allocated statically for special time point values.
     static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
@@ -392,16 +392,16 @@ void std_chrono_format_datetime(Cow_String &time_str_out, std::int64_t time_poin
     ROCKET_ASSERT(wpos == time_str_out.rend());
   }
 
-Cow_String std_chrono_min_datetime(bool with_ms)
+D_string std_chrono_min_datetime(bool with_ms)
   {
-    Cow_String time_str;
+    D_string time_str;
     std_chrono_format_datetime(time_str, INT64_MIN, with_ms);
     return time_str;
   }
 
-Cow_String std_chrono_max_datetime(bool with_ms)
+D_string std_chrono_max_datetime(bool with_ms)
   {
-    Cow_String time_str;
+    D_string time_str;
     std_chrono_format_datetime(time_str, INT64_MAX, with_ms);
     return time_str;
   }
@@ -426,7 +426,7 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              D_integer time_utc = std_chrono_utc_now();
+              auto time_utc = std_chrono_utc_now();
               // Return it.
               Reference_Root::S_temporary ref_c = { time_utc };
               return rocket::move(ref_c);
@@ -454,7 +454,7 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              D_integer time_local = std_chrono_local_now();
+              auto time_local = std_chrono_local_now();
               // Return it.
               Reference_Root::S_temporary ref_c = { time_local };
               return rocket::move(ref_c);
@@ -485,7 +485,7 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              D_real time_hires = std_chrono_hires_now();
+              auto time_hires = std_chrono_hires_now();
               // Return it.
               Reference_Root::S_temporary ref_c = { time_hires };
               return rocket::move(ref_c);
@@ -516,7 +516,7 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              D_integer time_steady = std_chrono_steady_now();
+              auto time_steady = std_chrono_steady_now();
               // Return it.
               Reference_Root::S_temporary ref_c = { time_steady };
               return rocket::move(ref_c);
@@ -546,7 +546,7 @@ D_object create_bindings_chrono()
             D_integer time_utc;
             if(reader.start().req(time_utc).finish()) {
               // Call the binding function.
-              D_integer time_local = std_chrono_local_from_utc(time_utc);
+              auto time_local = std_chrono_local_from_utc(time_utc);
               // Return it.
               Reference_Root::S_temporary ref_c = { time_local };
               return rocket::move(ref_c);
@@ -577,7 +577,7 @@ D_object create_bindings_chrono()
             D_integer time_local;
             if(reader.start().req(time_local).finish()) {
               // Call the binding function.
-              D_integer time_utc = std_chrono_utc_from_local(time_local);
+              auto time_utc = std_chrono_utc_from_local(time_local);
               // Return it.
               Reference_Root::S_temporary ref_c = { time_utc };
               return rocket::move(ref_c);
@@ -679,7 +679,7 @@ D_object create_bindings_chrono()
             D_boolean with_ms = false;
             if(reader.start().opt(with_ms).finish()) {
               // Call the binding function.
-              D_string time_str = std_chrono_min_datetime(with_ms);
+              auto time_str = std_chrono_min_datetime(with_ms);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(time_str) };
               return rocket::move(ref_c);
@@ -710,7 +710,7 @@ D_object create_bindings_chrono()
             D_boolean with_ms = false;
             if(reader.start().opt(with_ms).finish()) {
               // Call the binding function.
-              D_string time_str = std_chrono_max_datetime(with_ms);
+              auto time_str = std_chrono_max_datetime(with_ms);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(time_str) };
               return rocket::move(ref_c);

@@ -33,10 +33,10 @@ bool std_debug_print(const Cow_Vector<Value> &values)
     return succ;
   }
 
-bool std_debug_dump(const Value &value, std::size_t indent_increment)
+bool std_debug_dump(const Value &value, D_integer indent_increment)
   {
     rocket::insertable_ostream mos;
-    value.dump(mos, indent_increment);
+    value.dump(mos, static_cast<std::size_t>(rocket::clamp(indent_increment, 0, 10)));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
     return succ;
   }
@@ -69,7 +69,7 @@ D_object create_bindings_debug()
                 return Reference_Root::S_null();
               }
               // Return `true`.
-              Reference_Root::S_temporary ref_c = { D_boolean(true) };
+              Reference_Root::S_temporary ref_c = { true };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -100,15 +100,13 @@ D_object create_bindings_debug()
             Value value;
             D_integer indent_increment = 2;
             if(reader.start().opt(value).opt(indent_increment).finish()) {
-              // Clamp `indent_increment`.
-              auto rindent = static_cast<std::size_t>(rocket::clamp(indent_increment, 0, 10));
               // Call the binding function.
-              if(!std_debug_dump(value, rindent)) {
+              if(!std_debug_dump(value, indent_increment)) {
                 // Fail.
                 return Reference_Root::S_null();
               }
               // Return `true`.
-              Reference_Root::S_temporary ref_c = { D_boolean(true) };
+              Reference_Root::S_temporary ref_c = { true };
               return rocket::move(ref_c);
             }
             // Fail.
