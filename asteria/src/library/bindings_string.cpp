@@ -9,25 +9,34 @@
 
 namespace Asteria {
 
-int std_string_compare(const Cow_String &text_one, const Cow_String &text_two, std::size_t length)
+D_integer std_string_compare(const D_string &text_one, const D_string &text_two, D_integer length)
   {
-    return ROCKET_UNEXPECT(length < PTRDIFF_MAX) ? text_one.compare(0, length, text_two, 0, length)
-                                                 : text_one.compare(text_two);
+    if(length <= 0) {
+      // No character is to be compared.
+      return 0;
+    }
+    if(length >= PTRDIFF_MAX) {
+      // Compare the entire strings.
+      return text_one.compare(text_two);
+    }
+    // Compare two substrings.
+    return text_one.compare(0, static_cast<std::size_t>(length), text_two, 0, static_cast<std::size_t>(length));
   }
 
-Cow_String std_string_reverse(const Cow_String &text)
+D_string std_string_reverse(const D_string &text)
   {
-    return Cow_String(text.rbegin(), text.rend());
+    // This is an easy matter, isn't it?
+    return D_string(text.rbegin(), text.rend());
   }
 
-Cow_String std_string_trim(const Cow_String &text, const Cow_String &reject)
+D_string std_string_trim(const D_string &text, const D_string &reject)
   {
     if(reject.empty()) {
       // There is no character to strip. Make use of reference counting.
       return text;
     }
     auto start = text.find_first_not_of(reject);
-    if(start == Cow_String::npos) {
+    if(start == D_string::npos) {
       // There is no character to keep. Return an empty string.
       return rocket::sref("");
     }
@@ -40,14 +49,14 @@ Cow_String std_string_trim(const Cow_String &text, const Cow_String &reject)
     return text.substr(start, end + 1 - start);
   }
 
-Cow_String std_string_trim_left(const Cow_String &text, const Cow_String &reject)
+D_string std_string_trim_left(const D_string &text, const D_string &reject)
   {
     if(reject.empty()) {
       // There is no character to strip. Make use of reference counting.
       return text;
     }
     auto start = text.find_first_not_of(reject);
-    if(start == Cow_String::npos) {
+    if(start == D_string::npos) {
       // There is no character to keep. Return an empty string.
       return rocket::sref("");
     }
@@ -59,14 +68,14 @@ Cow_String std_string_trim_left(const Cow_String &text, const Cow_String &reject
     return text.substr(start);
   }
 
-Cow_String std_string_trim_right(const Cow_String &text, const Cow_String &reject)
+D_string std_string_trim_right(const D_string &text, const D_string &reject)
   {
     if(reject.empty()) {
       // There is no character to strip. Make use of reference counting.
       return text;
     }
     auto end = text.find_last_not_of(reject);
-    if(end == Cow_String::npos) {
+    if(end == D_string::npos) {
       // There is no character to keep. Return an empty string.
       return rocket::sref("");
     }
@@ -98,12 +107,12 @@ D_object create_bindings_string()
           {
             Argument_Reader reader(rocket::sref("std.string.compare"), args);
             // Parse arguments.
-            Cow_String text_one;
-            Cow_String text_two;
+            D_string text_one;
+            D_string text_two;
             D_integer length = INT64_MAX;
             if(reader.start().req(text_one).req(text_two).opt(length).finish()) {
               // Call the binding function.
-              D_integer cmp = std_string_compare(text_one, text_two, static_cast<std::size_t>(rocket::clamp(length, 0, PTRDIFF_MAX)));
+              auto cmp = std_string_compare(text_one, text_two, length);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { cmp };
               return rocket::move(ref_c);
@@ -128,10 +137,10 @@ D_object create_bindings_string()
           {
             Argument_Reader reader(rocket::sref("std.string.reverse"), args);
             // Parse arguments.
-            Cow_String text;
+            D_string text;
             if(reader.start().req(text).finish()) {
               // Call the binding function.
-              D_string rev = std_string_reverse(text);
+              auto rev = std_string_reverse(text);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(rev) };
               return rocket::move(ref_c);
@@ -158,11 +167,11 @@ D_object create_bindings_string()
           {
             Argument_Reader reader(rocket::sref("std.string.trim"), args);
             // Parse arguments.
-            Cow_String text;
-            Cow_String reject = rocket::sref(" \t");
+            D_string text;
+            D_string reject = rocket::sref(" \t");
             if(reader.start().req(text).opt(reject).finish()) {
               // Call the binding function.
-              D_string res = std_string_trim(text, reject);
+              auto res = std_string_trim(text, reject);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(res) };
               return rocket::move(ref_c);
@@ -189,11 +198,11 @@ D_object create_bindings_string()
           {
             Argument_Reader reader(rocket::sref("std.string.trim_left"), args);
             // Parse arguments.
-            Cow_String text;
-            Cow_String reject = rocket::sref(" \t");
+            D_string text;
+            D_string reject = rocket::sref(" \t");
             if(reader.start().req(text).opt(reject).finish()) {
               // Call the binding function.
-              D_string res = std_string_trim_left(text, reject);
+              auto res = std_string_trim_left(text, reject);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(res) };
               return rocket::move(ref_c);
@@ -220,11 +229,11 @@ D_object create_bindings_string()
           {
             Argument_Reader reader(rocket::sref("std.string.trim_right"), args);
             // Parse arguments.
-            Cow_String text;
-            Cow_String reject = rocket::sref(" \t");
+            D_string text;
+            D_string reject = rocket::sref(" \t");
             if(reader.start().req(text).opt(reject).finish()) {
               // Call the binding function.
-              D_string res = std_string_trim_right(text, reject);
+              auto res = std_string_trim_right(text, reject);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(res) };
               return rocket::move(ref_c);
