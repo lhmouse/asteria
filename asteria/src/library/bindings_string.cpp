@@ -12,7 +12,7 @@ namespace Asteria {
 D_integer std_string_compare(const D_string &text_one, const D_string &text_two, D_integer length)
   {
     if(length <= 0) {
-      // No character is to be compared.
+      // No byte is to be compared.
       return 0;
     }
     if(length >= PTRDIFF_MAX) {
@@ -32,17 +32,17 @@ D_string std_string_reverse(const D_string &text)
 D_string std_string_trim(const D_string &text, const D_string &reject)
   {
     if(reject.empty()) {
-      // There is no character to strip. Make use of reference counting.
+      // There is no byte to strip. Make use of reference counting.
       return text;
     }
     auto start = text.find_first_not_of(reject);
     if(start == D_string::npos) {
-      // There is no character to keep. Return an empty string.
+      // There is no byte to keep. Return an empty string.
       return rocket::sref("");
     }
     auto end = text.find_last_not_of(reject);
     if((start == 0) && (end == text.size() - 1)) {
-      // There is no character to strip. Make use of reference counting.
+      // There is no byte to strip. Make use of reference counting.
       return text;
     }
     // Return the remaining part of `text`.
@@ -52,16 +52,16 @@ D_string std_string_trim(const D_string &text, const D_string &reject)
 D_string std_string_trim_left(const D_string &text, const D_string &reject)
   {
     if(reject.empty()) {
-      // There is no character to strip. Make use of reference counting.
+      // There is no byte to strip. Make use of reference counting.
       return text;
     }
     auto start = text.find_first_not_of(reject);
     if(start == D_string::npos) {
-      // There is no character to keep. Return an empty string.
+      // There is no byte to keep. Return an empty string.
       return rocket::sref("");
     }
     if(start == 0) {
-      // There is no character to strip. Make use of reference counting.
+      // There is no byte to strip. Make use of reference counting.
       return text;
     }
     // Return the remaining part of `text`.
@@ -71,16 +71,16 @@ D_string std_string_trim_left(const D_string &text, const D_string &reject)
 D_string std_string_trim_right(const D_string &text, const D_string &reject)
   {
     if(reject.empty()) {
-      // There is no character to strip. Make use of reference counting.
+      // There is no byte to strip. Make use of reference counting.
       return text;
     }
     auto end = text.find_last_not_of(reject);
     if(end == D_string::npos) {
-      // There is no character to keep. Return an empty string.
+      // There is no byte to keep. Return an empty string.
       return rocket::sref("");
     }
     if(end == text.size() - 1) {
-      // There is no character to strip. Make use of reference counting.
+      // There is no byte to strip. Make use of reference counting.
       return text;
     }
     // Return the remaining part of `text`.
@@ -159,8 +159,8 @@ D_object create_bindings_string()
         // Description
         rocket::sref("`std.string.trim(text, [reject])`"
                      "\n  * Removes the longest prefix and suffix consisting solely bytes  "
-                     "\n    from `reject`. If `reject` is empty, no character is removed.  "
-                     "\n    If `reject` is not specified, spaces and tabs are removed.     "
+                     "\n    from `reject`. If `reject` is empty, no byte is removed. If    "
+                     "\n    `reject` is not specified, spaces and tabs are removed.        "
                      "\n  * Returns the trimmed string.                                    "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
@@ -190,8 +190,8 @@ D_object create_bindings_string()
         // Description
         rocket::sref("`std.string.trim_left(text, [reject])`"
                      "\n  * Removes the longest prefix consisting solely bytes from        "
-                     "\n    `reject`. If `reject` is empty, no character is removed. If    "
-                     "\n    `reject` is not specified, spaces and tabs are removed.        "
+                     "\n    `reject`. If `reject` is empty, no byte is removed. If `reject`"
+                     "\n    is not specified, spaces and tabs are removed.                 "
                      "\n  * Returns the trimmed string.                                    "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
@@ -221,8 +221,8 @@ D_object create_bindings_string()
         // Description
         rocket::sref("`std.string.trim_right(text, [reject])`"
                      "\n  * Removes the longest suffix consisting solely bytes from        "
-                     "\n    `reject`. If `reject` is empty, no character is removed. If    "
-                     "\n    `reject` is not specified, spaces and tabs are removed.        "
+                     "\n    `reject`. If `reject` is empty, no byte is removed. If `reject`"
+                     "\n    is not specified, spaces and tabs are removed.                 "
                      "\n  * Returns the trimmed string.                                    "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
