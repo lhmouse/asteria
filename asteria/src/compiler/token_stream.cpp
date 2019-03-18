@@ -525,6 +525,12 @@ namespace Asteria {
                   auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
                   code_point = code_point * 16 + dvalue;
                 }
+                if(next == 'x') {
+                  // Write the character verbatim.
+                  value.push_back(static_cast<char>(code_point));
+                  break;
+                }
+                // Write a Unicode code point.
                 if((0xD800 <= code_point) && (code_point < 0xE000)) {
                   // Surrogates are not allowed.
                   throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
