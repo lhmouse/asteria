@@ -15,8 +15,9 @@ class Global_Context : public Abstract_Context
   public:
     enum API_Version : std::uint32_t
       {
-        api_1_0     = 0x00010000,
-        api_newest  // maximum
+        api_none    = 0x00000000,  // no standard library
+        api_1_0     = 0x00010000,  // `debug`, `chrono`, `string`
+        api_newest  = 0xFFFFFFFF,  // everything
       };
 
   private:

@@ -15,7 +15,7 @@ Global_Context::~Global_Context()
   {
   }
 
-void Global_Context::initialize()
+void Global_Context::initialize(API_Version api_ver)
   {
     // Purge the context.
     this->clear_named_references();
@@ -25,8 +25,10 @@ void Global_Context::initialize()
     this->m_collector = collector;
     // Create the `std` object.
     D_object std_obj;
-    std_obj.insert_or_assign(rocket::sref("debug"), create_bindings_debug());
-    std_obj.insert_or_assign(rocket::sref("chrono"), create_bindings_chrono());
+    if(api_ver >= api_1_0) {
+      std_obj.insert_or_assign(rocket::sref("debug"), create_bindings_debug());
+      std_obj.insert_or_assign(rocket::sref("chrono"), create_bindings_chrono());
+    }
     auto std_var = collector->create_variable();
     std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_obj), true);
     Reference_Root::S_variable std_ref_c = { std_var };
