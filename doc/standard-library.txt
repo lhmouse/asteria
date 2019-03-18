@@ -130,3 +130,27 @@
 	* Reverses a byte string.
 
 	* Returns the reversed byte string.
+
+`std.string.trim(text, [reject])`
+
+	* Removes the longest prefix and suffix consisting solely bytes
+	  from `reject`. If `reject` is empty, no character is removed.
+	  If `reject` is not specified, spaces and tabs are removed.
+
+	* Returns the trimmed string.
+
+`std.string.trim_left(text, [reject])`
+
+	* Removes the longest prefix consisting solely bytes from
+	  `reject`. If `reject` is empty, no character is removed. If
+	  `reject` is not specified, spaces and tabs are removed.
+
+	* Returns the trimmed string.
+
+`std.string.trim_right(text, [reject])`
+
+	* Removes the longest suffix consisting solely bytes from
+	  `reject`. If `reject` is empty, no character is removed. If
+	  `reject` is not specified, spaces and tabs are removed.
+
+	* Returns the trimmed string.
