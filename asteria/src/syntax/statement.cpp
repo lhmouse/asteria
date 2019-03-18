@@ -209,58 +209,49 @@ namespace Asteria {
         // This is different from a C `switch` statement where `case` labels must have constant operands.
         // Evaluate the control expression.
         auto ctrl_value = stack.get_top_reference().read();
-        // Note that all clauses share the same context.
-        Executive_Context ctx_body(&ctx_io);
-        std::size_t index_def = SIZE_MAX;
-        std::size_t index_case = 0;
+        // Set the target clause.
+        auto target = p.end();
         // Iterate over all `case` labels and evaluate them. Stop if the result value equals `ctrl_value`.
-        for(;;) {
-          if(index_case >= p.size()) {
-            // No `case` label equals `ctrl_value`.
-            if(index_def == SIZE_MAX) {
-              // There is no `default` label. Skip this block.
-              return Air_Node::status_next;
-            }
-            // Jump back to the `default` label.
-            // Rebuild the context.
-            ctx_body.clear_named_references();
-            index_case = 0;
-            while(index_case != index_def) {
-              // Decode arguments.
-              const auto &names = p.at(index_case + 2).as<Cow_Vector<PreHashed_String>>();
-              // Recreate references.
-              rocket::for_each(names, [&](const PreHashed_String &name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
-                                                                                                         name, Reference_Root::S_null());  });
-              index_case += 3;
-            }
-            break;
-          }
+        // In this loop, `target` points to the `default` clause.
+        for(auto it = p.begin(); it != p.end(); it += 3) {
           // Decode arguments.
-          const auto &code_case = p.at(index_case).as<Cow_Vector<Air_Node>>();
-          const auto &names = p.at(index_case + 2).as<Cow_Vector<PreHashed_String>>();
-          if(!code_case.empty()) {
-            // This is a `case` clause.
-            // Evaluate the operand and check whether it equals `ctrl_value`.
-            do_evaluate_expression(stack, ctx_body, code_case, func, global);
-            if(stack.get_top_reference().read().compare(ctrl_value) == Value::compare_equal) {
-              // Found a `case` label.
-              break;
-            }
-          } else {
+          const auto &code_case = it[0].as<Cow_Vector<Air_Node>>();
+          if(code_case.empty()) {
             // This is a `default` clause.
-            if(index_def != SIZE_MAX) {
+            if(target != p.end()) {
               ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses have been found in this `switch` statement.");
             }
-            index_def = index_case;
+            target = it;
+            continue;
           }
+          // This is a `case` clause.
+          // Evaluate the operand and check whether it equals `ctrl_value`.
+          do_evaluate_expression(stack, ctx_io, code_case, func, global);
+          if(stack.get_top_reference().read().compare(ctrl_value) == Value::compare_equal) {
+            // Found a `case` label. Stop.
+            target = it;
+            break;
+          }
+        }
+        if(target == p.end()) {
+          // No match clause has been found.
+          return Air_Node::status_next;
+        }
+        // Jump to the clause denoted by `target`.
+        // Note that all clauses share the same context.
+        Executive_Context ctx_body(&ctx_io);
+        // Skip clauses that precede `target`.
+        for(auto it = p.begin(); it != target; it += 3) {
+          // Decode arguments.
+          const auto &names = it[2].as<Cow_Vector<PreHashed_String>>();
           // Inject all names into this scope.
           rocket::for_each(names, [&](const PreHashed_String &name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
                                                                                                      name, Reference_Root::S_null());  });
-          index_case += 3;
         }
-        for(;;) {
+        // Execute all clauses from `target` to the end of this block.
+        for(auto it = target; it != p.end(); it += 3) {
           // Decode arguments.
-          const auto &code_clause = p.at(index_case + 1).as<Cow_Vector<Air_Node>>();
+          const auto &code_clause = it[1].as<Cow_Vector<Air_Node>>();
           // Execute the clause. Break out of the block if requested. Forward any status codes unexpected to the caller.
           auto status = do_execute_statement_list(stack, ctx_body, code_clause, func, global);
           if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
@@ -268,12 +259,6 @@ namespace Asteria {
           }
           if(rocket::is_none_of(status, { Air_Node::status_next })) {
             return status;
-          }
-          // Execute the next clause.
-          index_case += 3;
-          // No more clauses?
-          if(index_case >= p.size()) {
-            break;
           }
         }
         return Air_Node::status_next;
@@ -633,11 +618,12 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
         // Encode arguments.
         p.clear();
         // Note that this node takes variable number of arguments.
+        // Names are accumulated.
+        Cow_Vector<PreHashed_String> names;
         for(auto it = alt.clauses.begin(); it != alt.clauses.end(); ++it) {
           p.emplace_back(do_generate_code_expression(ctx_switch, it->first));  // n * 3 + 0
-          Cow_Vector<PreHashed_String> names;
           p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, it->second));  // n * 3 + 1
-          p.emplace_back(rocket::move(names));  // n * 3 + 2
+          p.emplace_back(names);  // n * 3 + 2
         }
         code_out.emplace_back(&do_execute_select, rocket::move(p));
         return;
