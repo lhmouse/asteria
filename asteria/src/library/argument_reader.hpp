@@ -73,13 +73,21 @@ class Argument_Reader
       {
         this->m_throw_on_failure = throw_on_failure;
       }
-    const State & get_state() const noexcept
+
+    const Argument_Reader & save_state(State &state_out) const noexcept
       {
-        return this->m_state;
+        state_out = this->m_state;
+        return *this;
       }
-    void set_state(const State &state) noexcept
+    Argument_Reader & save_state(State &state_out) noexcept
+      {
+        state_out = this->m_state;
+        return *this;
+      }
+    Argument_Reader & load_state(const State &state) noexcept
       {
         this->m_state = state;
+        return *this;
       }
 
     // Reader objects are allowed in `if` and `while` conditions, just like `std::istream`s.
