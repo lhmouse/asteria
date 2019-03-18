@@ -256,7 +256,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
             ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
             noadl::construct_at(noadl::unfancy(ptr), this->as_allocator(), nblk);
-            auto len = size_type(0);
+            size_type len = 0;
             if(ROCKET_UNEXPECT(len_one + len_two != 0)) {
               // Copy characters into the new block.
               ROCKET_ASSERT(len_one <= cap - len);
@@ -564,7 +564,6 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
       {
         str->push_back(::std::forward<paramsT>(params)...);
       }
-
 
     // Implement the FNV-1a hash algorithm.
     template<typename charT, typename traitsT> class basic_hasher
@@ -1174,11 +1173,11 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         if(first == last) {
           return *this;
         }
-        auto temp = basic_cow_string(this->m_sth.as_allocator());
-        temp.reserve(this->size(), noadl::estimate_distance(first, last));
-        temp.append(*this);
-        noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT &it) { temp.push_back(*it);  });
-        this->assign(noadl::move(temp));
+        basic_cow_string other(this->m_sth.as_allocator());
+        other.reserve(this->size() + noadl::estimate_distance(first, last));
+        other.append(this->data(), this->size());
+        noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT &it) { other.push_back(*it);  });
+        this->assign(noadl::move(other));
         return *this;
       }
     // N.B. The return type is a non-standard extension.
