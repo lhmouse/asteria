@@ -20,6 +20,64 @@ Cow_String std_string_reverse(const Cow_String &text)
     return Cow_String(text.rbegin(), text.rend());
   }
 
+Cow_String std_string_trim(const Cow_String &text, const Cow_String &reject)
+  {
+    if(reject.empty()) {
+      // There is no character to strip. Make use of reference counting.
+      return text;
+    }
+    auto start = text.find_first_not_of(reject);
+    if(start == Cow_String::npos) {
+      // There is no character to keep. Return an empty string.
+      return rocket::sref("");
+    }
+    auto end = text.find_last_not_of(reject);
+    if((start == 0) && (end == text.size() - 1)) {
+      // There is no character to strip. Make use of reference counting.
+      return text;
+    }
+    // Return the remaining part of `text`.
+    return text.substr(start, end + 1 - start);
+  }
+
+Cow_String std_string_trim_left(const Cow_String &text, const Cow_String &reject)
+  {
+    if(reject.empty()) {
+      // There is no character to strip. Make use of reference counting.
+      return text;
+    }
+    auto start = text.find_first_not_of(reject);
+    if(start == Cow_String::npos) {
+      // There is no character to keep. Return an empty string.
+      return rocket::sref("");
+    }
+    if(start == 0) {
+      // There is no character to strip. Make use of reference counting.
+      return text;
+    }
+    // Return the remaining part of `text`.
+    return text.substr(start);
+  }
+
+Cow_String std_string_trim_right(const Cow_String &text, const Cow_String &reject)
+  {
+    if(reject.empty()) {
+      // There is no character to strip. Make use of reference counting.
+      return text;
+    }
+    auto end = text.find_last_not_of(reject);
+    if(end == Cow_String::npos) {
+      // There is no character to keep. Return an empty string.
+      return rocket::sref("");
+    }
+    if(end == text.size() - 1) {
+      // There is no character to strip. Make use of reference counting.
+      return text;
+    }
+    // Return the remaining part of `text`.
+    return text.substr(0, end + 1);
+  }
+
 D_object create_bindings_string()
   {
     D_object ro;
@@ -76,6 +134,99 @@ D_object create_bindings_string()
               D_string rev = std_string_reverse(text);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(rev) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
+    // `std.string.trim()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("trim"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.trim(text, [reject])`"
+                     "\n  * Removes the longest prefix and suffix consisting solely bytes  "
+                     "\n    from `reject`. If `reject` is empty, no character is removed.  "
+                     "\n    If `reject` is not specified, spaces and tabs are removed.     "
+                     "\n  * Returns the trimmed string.                                    "),
+        // Definition
+        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.trim"), args);
+            // Parse arguments.
+            Cow_String text;
+            Cow_String reject = rocket::sref(" \t");
+            if(reader.start().req(text).opt(reject).finish()) {
+              // Call the binding function.
+              D_string res = std_string_trim(text, reject);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
+    // `std.string.trim_left()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("trim_left"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.trim_left(text, [reject])`"
+                     "\n  * Removes the longest prefix consisting solely bytes from        "
+                     "\n    `reject`. If `reject` is empty, no character is removed. If    "
+                     "\n    `reject` is not specified, spaces and tabs are removed.        "
+                     "\n  * Returns the trimmed string.                                    "),
+        // Definition
+        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.trim_left"), args);
+            // Parse arguments.
+            Cow_String text;
+            Cow_String reject = rocket::sref(" \t");
+            if(reader.start().req(text).opt(reject).finish()) {
+              // Call the binding function.
+              D_string res = std_string_trim_left(text, reject);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
+    // `std.string.trim_right()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("trim_right"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.trim_right(text, [reject])`"
+                     "\n  * Removes the longest suffix consisting solely bytes from        "
+                     "\n    `reject`. If `reject` is empty, no character is removed. If    "
+                     "\n    `reject` is not specified, spaces and tabs are removed.        "
+                     "\n  * Returns the trimmed string.                                    "),
+        // Definition
+        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.trim_right"), args);
+            // Parse arguments.
+            Cow_String text;
+            Cow_String reject = rocket::sref(" \t");
+            if(reader.start().req(text).opt(reject).finish()) {
+              // Call the binding function.
+              D_string res = std_string_trim_right(text, reject);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
               return rocket::move(ref_c);
             }
             // Fail.
