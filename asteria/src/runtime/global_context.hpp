@@ -12,6 +12,13 @@ namespace Asteria {
 
 class Global_Context : public Abstract_Context
   {
+  public:
+    enum API_Version : std::uint32_t
+      {
+        api_1_0     = 0x00010000,
+        api_newest  // maximum
+      };
+
   private:
     // This is the global garbage collector.
     Rcptr<Rcbase> m_collector;
@@ -20,14 +27,11 @@ class Global_Context : public Abstract_Context
 
   public:
     // A global context does not have a parent context.
-    explicit Global_Context(std::nullptr_t reserved = nullptr)
+    explicit Global_Context(API_Version api_ver = api_newest)
       {
-        this->do_initialize_runtime(reserved);
+        this->initialize(api_ver);
       }
     ~Global_Context() override;
-
-  private:
-    void do_initialize_runtime(void *reserved);
 
   public:
     bool is_analytic() const noexcept override
@@ -38,6 +42,9 @@ class Global_Context : public Abstract_Context
       {
         return nullptr;
       }
+
+    // Clear all references, perform a full garbage collection, then reload the standard library.
+    void initialize(API_Version api_ver = api_newest);
 
     // These are interfaces of the global garbage collector/
     Rcptr<Variable> create_variable() const;

@@ -5,7 +5,8 @@
 #include "global_context.hpp"
 #include "generational_collector.hpp"
 #include "variable.hpp"
-#include "../library/bindings.hpp"
+#include "../library/bindings_debug.hpp"
+#include "../library/bindings_chrono.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -14,16 +15,20 @@ Global_Context::~Global_Context()
   {
   }
 
-void Global_Context::do_initialize_runtime(void * /*reserved*/)
+void Global_Context::initialize()
   {
+    // Purge the context.
+    this->clear_named_references();
     // Initialize the global garbage collector.
     auto collector = rocket::make_refcnt<Generational_Collector>();
     this->tie_collector(collector);
     this->m_collector = collector;
-    // Create the `std` variable.
-    auto std_bindings = create_bindings(collector);
+    // Create the `std` object.
+    D_object std_obj;
+    std_obj.insert_or_assign(rocket::sref("debug"), create_bindings_debug());
+    std_obj.insert_or_assign(rocket::sref("chrono"), create_bindings_chrono());
     auto std_var = collector->create_variable();
-    std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_bindings), true);
+    std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_obj), true);
     Reference_Root::S_variable std_ref_c = { std_var };
     this->open_named_reference(rocket::sref("std")) = rocket::move(std_ref_c);
     this->m_std_var = std_var;
