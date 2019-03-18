@@ -97,6 +97,46 @@ D_string std_string_trim_right(const D_string &text, const D_string &reject)
     return text.substr(0, end + 1);
   }
 
+D_string std_string_to_upper(const D_string &text)
+  {
+    // Use reference counting as our advantage.
+    D_string res = text;
+    char *wptr = nullptr;
+    // Translate each character.
+    for(std::size_t i = 0; i < text.size(); ++i) {
+      char ch = text[i];
+      if((ch < 'a') || ('z' < ch)) {
+        continue;
+      }
+      // Fork the string as needed.
+      if(ROCKET_UNEXPECT(!wptr)) {
+        wptr = res.mut_data();
+      }
+      wptr[i] = static_cast<char>(ch - 'a' + 'A');
+    }
+    return res;
+  }
+
+D_string std_string_to_lower(const D_string &text)
+  {
+    // Use reference counting as our advantage.
+    D_string res = text;
+    char *wptr = nullptr;
+    // Translate each character.
+    for(std::size_t i = 0; i < text.size(); ++i) {
+      char ch = text[i];
+      if((ch < 'A') || ('Z' < ch)) {
+        continue;
+      }
+      // Fork the string as needed.
+      if(ROCKET_UNEXPECT(!wptr)) {
+        wptr = res.mut_data();
+      }
+      wptr[i] = static_cast<char>(ch - 'A' + 'a');
+    }
+    return res;
+  }
+
 D_object create_bindings_string()
   {
     D_object ro;
@@ -306,6 +346,64 @@ D_object create_bindings_string()
             if(reader.start().req(text).opt(reject).finish()) {
               // Call the binding function.
               auto res = std_string_trim_right(text, reject);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
+    // `std.string.to_upper()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("to_upper"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.to_upper(text)`"
+                     "\n  * Converts all lowercase English letters in `text` to their      "
+                     "\n    uppercase counterparts.                                        "
+                     "\n  * Returns a new string after the conversion.                     "),
+        // Definition
+        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.to_upper"), args);
+            // Parse arguments.
+            D_string text;
+            if(reader.start().req(text).finish()) {
+              // Call the binding function.
+              auto res = std_string_to_upper(text);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
+    // `std.string.to_upper()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("to_lower"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.to_lower(text)`"
+                     "\n  * Converts all lowercase English letters in `text` to their      "
+                     "\n    uppercase counterparts.                                        "
+                     "\n  * Returns a new string after the conversion.                     "),
+        // Definition
+        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.to_lower"), args);
+            // Parse arguments.
+            D_string text;
+            if(reader.start().req(text).finish()) {
+              // Call the binding function.
+              auto res = std_string_to_lower(text);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(res) };
               return rocket::move(ref_c);

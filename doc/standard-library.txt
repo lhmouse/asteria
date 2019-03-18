@@ -170,3 +170,17 @@
 	  is not specified, spaces and tabs are removed.
 
 	* Returns the trimmed string.
+
+`std.string.to_upper(text)`
+
+	* Converts all lowercase English letters in `text` to their
+	  uppercase counterparts.
+
+	* Returns a new string after the conversion.
+
+`std.string.to_lower(text)`
+
+	* Converts all uppercase English letters in `text` to their
+	  lowercase counterparts.
+
+	* Returns a new string after the conversion.

@@ -13,10 +13,11 @@ extern D_boolean std_string_starts_with(const D_string &text, const D_string &pr
 extern D_boolean std_string_ends_with(const D_string &text, const D_string &suffix);
 
 extern D_string std_string_reverse(const D_string &text);
-
 extern D_string std_string_trim(const D_string &text, const D_string &reject);
 extern D_string std_string_trim_left(const D_string &text, const D_string &reject);
 extern D_string std_string_trim_right(const D_string &text, const D_string &reject);
+extern D_string std_string_to_upper(const D_string &text);
+extern D_string std_string_to_lower(const D_string &text);
 
 // Create an object that is to be referenced as `std.string`.
 extern D_object create_bindings_string();
