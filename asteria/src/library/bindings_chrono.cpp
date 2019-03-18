@@ -528,7 +528,7 @@ D_object create_bindings_chrono()
         { }
       )));
     //===================================================================
-    // `std.chrono.local_from_utc(time_utc)`
+    // `std.chrono.local_from_utc()`
     //===================================================================
     chrono.try_emplace(rocket::sref("local_from_utc"),
       D_function(make_simple_binding(
@@ -558,7 +558,7 @@ D_object create_bindings_chrono()
         { }
       )));
     //===================================================================
-    // `std.chrono.utc_from_local(time_local)`
+    // `std.chrono.utc_from_local()`
     //===================================================================
     chrono.try_emplace(rocket::sref("utc_from_local"),
       D_function(make_simple_binding(
@@ -589,7 +589,7 @@ D_object create_bindings_chrono()
         { }
       )));
     //===================================================================
-    // `std.chrono.parse_datetime(time_str)`
+    // `std.chrono.parse_datetime()`
     //===================================================================
     chrono.try_emplace(rocket::sref("parse_datetime"),
       D_function(make_simple_binding(
@@ -627,7 +627,7 @@ D_object create_bindings_chrono()
         { }
       )));
     //===================================================================
-    // `std.chrono.format_datetime(time_point, [with_ms])`
+    // `std.chrono.format_datetime()`
     //===================================================================
     chrono.try_emplace(rocket::sref("format_datetime"),
       D_function(make_simple_binding(
@@ -660,7 +660,7 @@ D_object create_bindings_chrono()
         { }
       )));
     //===================================================================
-    // `std.chrono.min_datetime([with_ms])`
+    // `std.chrono.min_datetime()`
     //===================================================================
     chrono.try_emplace(rocket::sref("min_datetime"),
       D_function(make_simple_binding(
@@ -691,7 +691,7 @@ D_object create_bindings_chrono()
         { }
       )));
     //===================================================================
-    // `std.chrono.max_datetime([with_ms])`
+    // `std.chrono.max_datetime()`
     //===================================================================
     chrono.try_emplace(rocket::sref("max_datetime"),
       D_function(make_simple_binding(
