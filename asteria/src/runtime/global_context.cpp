@@ -7,6 +7,7 @@
 #include "variable.hpp"
 #include "../library/bindings_debug.hpp"
 #include "../library/bindings_chrono.hpp"
+#include "../library/bindings_string.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -28,6 +29,7 @@ void Global_Context::initialize(API_Version api_ver)
     if(api_ver >= api_1_0) {
       std_obj.insert_or_assign(rocket::sref("debug"), create_bindings_debug());
       std_obj.insert_or_assign(rocket::sref("chrono"), create_bindings_chrono());
+      std_obj.insert_or_assign(rocket::sref("string"), create_bindings_string());
     }
     auto std_var = collector->create_variable();
     std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_obj), true);
