@@ -106,52 +106,64 @@ std::int64_t std_chrono_steady_now()
 
 std::int64_t std_chrono_local_from_utc(std::int64_t time_utc)
   {
-    // Get the offset of the local time from UTC in milliseconds.
-    std::int64_t offset;
+    // Handle special time values.
+    if(time_utc <= -11644473600000) {
+      return INT64_MIN;
+    }
+    if(time_utc >= 253370764800000) {
+      return INT64_MAX;
+    }
+    // Calculate the local time.
+    std::int64_t time_local;
 #ifdef _WIN32
     ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
     ::GetDynamicTimeZoneInformation(&dtz);
-    offset = dtz.Bias * -60000;
+    time_local = time_utc + dtz.Bias * -60000;
 #else
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    offset = tr.tm_gmtoff * 1000;
+    time_local = time_utc + tr.tm_gmtoff * 1000;
 #endif
-    // Add the time zone offset to `time_local` to get the local time.
-    // Watch out for integral overflows.
-    if((offset >= 0) && (time_utc > INT64_MAX - offset)) {
-      return INT64_MAX;
-    }
-    if((offset < 0) && (time_utc < INT64_MIN - offset)) {
+    // Handle results that are out of the finite range.
+    if(time_local <= -11644473600000) {
       return INT64_MIN;
     }
-    return time_utc + offset;
+    if(time_local >= 253370764800000) {
+      return INT64_MAX;
+    }
+    return time_local;
   }
 
 std::int64_t std_chrono_utc_from_local(std::int64_t time_local)
   {
-    // Get the offset of the local time from UTC in milliseconds.
-    std::int64_t offset;
+    // Handle special time values.
+    if(time_local <= -11644473600000) {
+      return INT64_MIN;
+    }
+    if(time_local >= 253370764800000) {
+      return INT64_MAX;
+    }
+    // Calculate the UTC time.
+    std::int64_t time_utc;
 #ifdef _WIN32
     ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
     ::GetDynamicTimeZoneInformation(&dtz);
-    offset = dtz.Bias * -60000;
+    time_utc = time_local - dtz.Bias * -60000;
 #else
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    offset = tr.tm_gmtoff * 1000;
+    time_utc = time_local - tr.tm_gmtoff * 1000;
 #endif
-    // Subtract the time zone offset from `time_local` to get the UTC time.
-    // Watch out for integral overflows.
-    if((offset >= 0) && (time_local < INT64_MIN + offset)) {
+    // Handle results that are out of the finite range.
+    if(time_utc <= -11644473600000) {
       return INT64_MIN;
     }
-    if((offset < 0) && (time_local > INT64_MAX + offset)) {
+    if(time_utc >= 253370764800000) {
       return INT64_MAX;
     }
-    return time_local - offset;
+    return time_utc;
   }
 
 bool std_chrono_parse_datetime(std::int64_t &time_point_out, const Cow_String &time_str)
