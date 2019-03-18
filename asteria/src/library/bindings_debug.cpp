@@ -43,11 +43,11 @@ bool std_debug_dump(const Value &value, std::size_t indent_increment)
 
 D_object create_bindings_debug()
   {
-    D_object debug;
+    D_object ro;
     //===================================================================
     // `std.debug.print()`
     //===================================================================
-    debug.try_emplace(rocket::sref("print"),
+    ro.try_emplace(rocket::sref("print"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.debug.print([args...])`"
@@ -81,7 +81,7 @@ D_object create_bindings_debug()
     //===================================================================
     // `std.debug.dump()`
     //===================================================================
-    debug.try_emplace(rocket::sref("dump"),
+    ro.try_emplace(rocket::sref("dump"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.debug.dump(value, [indent_increment])`"
@@ -120,7 +120,7 @@ D_object create_bindings_debug()
     //===================================================================
     // End of `std.debug`
     //===================================================================
-    return debug;
+    return ro;
   }
 
 }  // namespace Asteria

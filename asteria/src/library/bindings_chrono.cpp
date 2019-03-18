@@ -408,11 +408,11 @@ Cow_String std_chrono_max_datetime(bool with_ms)
 
 D_object create_bindings_chrono()
   {
-    D_object chrono;
+    D_object ro;
     //===================================================================
     // `std.chrono.utc_now()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("utc_now"),
+    ro.try_emplace(rocket::sref("utc_now"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.utc_now()`"
@@ -440,7 +440,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.local_now()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("local_now"),
+    ro.try_emplace(rocket::sref("local_now"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.local_now()`"
@@ -468,7 +468,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.hires_now()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("hires_now"),
+    ro.try_emplace(rocket::sref("hires_now"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.hires_now()`"
@@ -499,7 +499,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.steady_now()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("steady_now"),
+    ro.try_emplace(rocket::sref("steady_now"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.steady_now()`"
@@ -530,7 +530,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.local_from_utc()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("local_from_utc"),
+    ro.try_emplace(rocket::sref("local_from_utc"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.local_from_utc(time_utc)`"
@@ -560,7 +560,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.utc_from_local()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("utc_from_local"),
+    ro.try_emplace(rocket::sref("utc_from_local"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.utc_from_local(time_local)`"
@@ -591,7 +591,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.parse_datetime()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("parse_datetime"),
+    ro.try_emplace(rocket::sref("parse_datetime"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.parse_datetime(time_str)`"
@@ -629,7 +629,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.format_datetime()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("format_datetime"),
+    ro.try_emplace(rocket::sref("format_datetime"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.format_datetime(time_point, [with_ms])`"
@@ -662,7 +662,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.min_datetime()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("min_datetime"),
+    ro.try_emplace(rocket::sref("min_datetime"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.min_datetime([with_ms])`"
@@ -693,7 +693,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // `std.chrono.max_datetime()`
     //===================================================================
-    chrono.try_emplace(rocket::sref("max_datetime"),
+    ro.try_emplace(rocket::sref("max_datetime"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.max_datetime([with_ms])`"
@@ -724,7 +724,7 @@ D_object create_bindings_chrono()
     //===================================================================
     // End of `std.chrono`
     //===================================================================
-    return chrono;
+    return ro;
   }
 
 }  // namespace Asteria
