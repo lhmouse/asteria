@@ -110,3 +110,23 @@
 
 	* Returns the string `'9999-01-01 00:00:00'` or the string
 	  `'9999-01-01 00:00:00.000'` according to `with_ms`.
+
+### `std.string`
+
+`std.string.compare(text_one, text_two, [length])`
+
+	* Performs lexicographical comparison on two byte strings. If
+	  `length` is set to an `integer`, no more than this number of
+	  bytes are compared. This function behaves like the `strncmp()`
+	  function in C, except that null characters do not terminate
+	  strings.
+
+	* Returns `1` if `text_one` compares greater than `text_two`,
+	  `-1` if `text_one` compares less than `text_two`, and `0` if
+	  `text_one` compares equal to `text_two`.
+
+`std.string.reverse(text)`
+
+	* Reverses a byte string.
+
+	* Returns the reversed byte string.
