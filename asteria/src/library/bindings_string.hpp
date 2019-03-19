@@ -8,7 +8,6 @@
 
 namespace Asteria {
 
-extern D_integer std_string_compare(const D_string &text_one, const D_string &text_two);
 extern D_integer std_string_compare(const D_string &text_one, const D_string &text_two, D_integer length);
 extern D_boolean std_string_starts_with(const D_string &text, const D_string &prefix);
 extern D_boolean std_string_ends_with(const D_string &text, const D_string &suffix);
