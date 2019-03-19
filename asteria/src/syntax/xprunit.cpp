@@ -368,8 +368,13 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
         }
         auto times = static_cast<std::size_t>(rhs);
+        if(nchars == 1) {
+          // Fast fill.
+          res.assign(times, lhs.front());
+          return res;
+        }
         // Reserve space for the result string.
-        auto ptr = rocket::unfancy(res.insert(res.begin(), nchars * times, ' '));
+        auto ptr = res.assign(nchars * times, 0).mut_data();
         // Copy the source string once.
         std::memcpy(ptr, lhs.data(), nchars);
         // Append the result string to itself, doubling its length, until more than half of the result string has been populated.
