@@ -115,7 +115,7 @@
 
 `std.string.compare(text_one, text_two, [length])`
 
-	* Performs lexicographical comparison on two byte strings. If
+	* Performs lexicographical comparison on two byte `string`s. If
 	  `length` is set to an `integer`, no more than this number of
 	  bytes are compared. This function behaves like the `strncmp()`
 	  function in C, except that null characters do not terminate
@@ -127,25 +127,25 @@
 
 `std.string.starts_with(text, prefix)`
 
-	* Checks whether `prefix` is a prefix of `text`. An empty string
-	  is considered to be a prefix of any string.
+	* Checks whether `prefix` is a prefix of `text`. An empty
+	  `string` is considered to be a prefix of any string.
 
 	* Returns `true` if `prefix` is a prefix of `text`; otherwise
 	  `false`.
 
 `std.string.ends_with(text, suffix)`
 
-	* Checks whether `suffix` is a suffix of `text`. An empty string
-	  is considered to be a suffix of any string.
+	* Checks whether `suffix` is a suffix of `text`. An empty
+	  `string` is considered to be a suffix of any string.
 
 	* Returns `true` if `suffix` is a suffix of `text`; otherwise
 	  `false`.
 
 `std.string.reverse(text)`
 
-	* Reverses a byte string.
+	* Reverses a byte `string`.
 
-	* Returns the reversed byte string.
+	* Returns the reversed `string`.
 
 `std.string.trim(text, [reject])`
 
@@ -153,7 +153,7 @@
 	  from `reject`. If `reject` is empty, no byte is removed. If
 	  `reject` is not specified, spaces and tabs are removed.
 
-	* Returns the trimmed string.
+	* Returns the trimmed `string`.
 
 `std.string.trim_left(text, [reject])`
 
@@ -161,7 +161,7 @@
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`
 	  is not specified, spaces and tabs are removed.
 
-	* Returns the trimmed string.
+	* Returns the trimmed `string`.
 
 `std.string.trim_right(text, [reject])`
 
@@ -176,11 +176,11 @@
 	* Converts all lowercase English letters in `text` to their
 	  uppercase counterparts.
 
-	* Returns a new string after the conversion.
+	* Returns a new `string` after the conversion.
 
 `std.string.to_lower(text)`
 
 	* Converts all uppercase English letters in `text` to their
 	  lowercase counterparts.
 
-	* Returns a new string after the conversion.
+	* Returns a new `string` after the conversion.

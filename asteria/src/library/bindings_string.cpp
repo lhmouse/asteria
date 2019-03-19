@@ -147,7 +147,7 @@ D_object create_bindings_string()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.compare(text_one, text_two, [length])`"
-                     "\n  * Performs lexicographical comparison on two byte strings. If    "
+                     "\n  * Performs lexicographical comparison on two byte `string`s. If  "
                      "\n    `length` is set to an `integer`, no more than this number of   "
                      "\n    bytes are compared. This function behaves like the `strncmp()` "
                      "\n    function in C, except that null characters do not terminate    "
@@ -180,8 +180,8 @@ D_object create_bindings_string()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.starts_with(text, prefix)`"
-                     "\n  * Checks whether `prefix` is a prefix of `text`. An empty string "
-                     "\n    is considered to be a prefix of any string.                    "
+                     "\n  * Checks whether `prefix` is a prefix of `text`. An empty        "
+                     "\n    `string` is considered to be a prefix of any string.           "
                      "\n  * Returns `true` if `prefix` is a prefix of `text`; otherwise    "
                      "\n    `false`.                                                       "),
         // Definition
@@ -211,8 +211,8 @@ D_object create_bindings_string()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.ends_with(text, suffix)`"
-                     "\n  * Checks whether `suffix` is a suffix of `text`. An empty string "
-                     "\n    is considered to be a suffix of any string.                    "
+                     "\n  * Checks whether `suffix` is a suffix of `text`. An empty        "
+                     "\n    `string` is considered to be a suffix of any string.           "
                      "\n  * Returns `true` if `suffix` is a suffix of `text`; otherwise    "
                      "\n    `false`.                                                       "),
         // Definition
@@ -242,8 +242,8 @@ D_object create_bindings_string()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.reverse(text)`"
-                     "\n  * Reverses a byte string.                                        "
-                     "\n  * Returns the reversed byte string.                              "),
+                     "\n  * Reverses a byte `string`.                                      "
+                     "\n  * Returns the reversed `string`.                                 "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
@@ -273,7 +273,7 @@ D_object create_bindings_string()
                      "\n  * Removes the longest prefix and suffix consisting solely bytes  "
                      "\n    from `reject`. If `reject` is empty, no byte is removed. If    "
                      "\n    `reject` is not specified, spaces and tabs are removed.        "
-                     "\n  * Returns the trimmed string.                                    "),
+                     "\n  * Returns the trimmed `string`.                                  "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
@@ -304,7 +304,7 @@ D_object create_bindings_string()
                      "\n  * Removes the longest prefix consisting solely bytes from        "
                      "\n    `reject`. If `reject` is empty, no byte is removed. If `reject`"
                      "\n    is not specified, spaces and tabs are removed.                 "
-                     "\n  * Returns the trimmed string.                                    "),
+                     "\n  * Returns the trimmed `string`.                                  "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
@@ -335,7 +335,7 @@ D_object create_bindings_string()
                      "\n  * Removes the longest suffix consisting solely bytes from        "
                      "\n    `reject`. If `reject` is empty, no byte is removed. If `reject`"
                      "\n    is not specified, spaces and tabs are removed.                 "
-                     "\n  * Returns the trimmed string.                                    "),
+                     "\n  * Returns the trimmed `string`.                                  "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
@@ -365,7 +365,7 @@ D_object create_bindings_string()
         rocket::sref("`std.string.to_upper(text)`"
                      "\n  * Converts all lowercase English letters in `text` to their      "
                      "\n    uppercase counterparts.                                        "
-                     "\n  * Returns a new string after the conversion.                     "),
+                     "\n  * Returns a new `string` after the conversion.                   "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
@@ -394,7 +394,7 @@ D_object create_bindings_string()
         rocket::sref("`std.string.to_lower(text)`"
                      "\n  * Converts all lowercase English letters in `text` to their      "
                      "\n    uppercase counterparts.                                        "
-                     "\n  * Returns a new string after the conversion.                     "),
+                     "\n  * Returns a new `string` after the conversion.                   "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
