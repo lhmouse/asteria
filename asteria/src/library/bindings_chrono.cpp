@@ -669,8 +669,8 @@ D_object create_bindings_chrono()
                      "\n  * Gets the special string that denotes the negative infinity time"
                      "\n    point. Calling this function has the same effect as calling    "
                      "\n    `format_datetime(-0x8000000000000000, with_ms)`.               "
-                     "\n  * Returns the string `'1601-01-01 00:00:00'` or the string       "
-                     "\n    `'1601-01-01 00:00:00.000'` according to `with_ms`.            "),
+                     "\n  * Returns `'1601-01-01 00:00:00'` or `'1601-01-01 00:00:00.000'` "
+                     "\n    according to `with_ms`.                                        "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
@@ -700,8 +700,8 @@ D_object create_bindings_chrono()
                      "\n  * Gets the special string that denotes the positive infinity time"
                      "\n    point. Calling this function has the same effect as calling    "
                      "\n    `format_datetime(0x7FFFFFFFFFFFFFFF, with_ms)`.                "
-                     "\n  * Returns the string `'9999-01-01 00:00:00'` or the string       "
-                     "\n    `'9999-01-01 00:00:00.000'` according to `with_ms`.            "),
+                     "\n  * Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'` "
+                     "\n    according to `with_ms`.                                        "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
           {
