@@ -296,7 +296,7 @@ Argument_Reader & Argument_Reader::finish()
     }
     // There shall be no more arguments than parameters.
     if(nparams < this->m_args.get().size()) {
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Wrong number of arguments were provided (fewer than `", nparams, "` were expected, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided for this overload (expecting no more than `", nparams, "`, "
                                                      "but got `", this->m_args.get().size(), "`).");  });
       return *this;
     }
