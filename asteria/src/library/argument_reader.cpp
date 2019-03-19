@@ -51,12 +51,14 @@ template<typename HandlerT> void Argument_Reader::do_fail(HandlerT &&handler)
     inline std::ostream & operator<<(std::ostream &os, const Decoded_Param &p)
       {
         if(p.generic) {
-          // generic (and optional always)
+          // type-generic parameter (and optional always)
           return os << "<generic>";
         }
         if(p.required) {
+          // required parameter
           return os << Value::get_type_name(p.type);
         }
+        // optional parameter
         return os << '[' << Value::get_type_name(p.type) << ']';
       }
 
@@ -285,8 +287,8 @@ Argument_Reader & Argument_Reader::finish()
       // Append all parameters.
       std::memcpy(this->m_overloads.mut_data() + offset, this->m_state.prototype.data(), nparams);
       offset += nparams;
-      ROCKET_ASSERT(offset == this->m_overloads.size());
     }
+    ROCKET_ASSERT(offset == this->m_overloads.size());
     // Check for previous failures.
     if(!this->m_state.succeeded) {
       this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
