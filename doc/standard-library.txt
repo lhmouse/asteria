@@ -143,7 +143,8 @@
 
 `std.string.reverse(text)`
 
-	* Reverses a byte `string`.
+	* Reverses a byte `string`. This function returns a new string
+	  without modifying `text`.
 
 	* Returns the reversed `string`.
 
@@ -151,7 +152,8 @@
 
 	* Removes the longest prefix and suffix consisting solely bytes
 	  from `reject`. If `reject` is empty, no byte is removed. If
-	  `reject` is not specified, spaces and tabs are removed.
+	  `reject` is not specified, spaces and tabs are removed. This
+	  function returns a new string without modifying `text`.
 
 	* Returns the trimmed `string`.
 
@@ -159,7 +161,8 @@
 
 	* Removes the longest prefix consisting solely bytes from
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`
-	  is not specified, spaces and tabs are removed.
+	  is not specified, spaces and tabs are removed. This function
+	  returns a new string without modifying `text`.
 
 	* Returns the trimmed `string`.
 
@@ -167,20 +170,23 @@
 
 	* Removes the longest suffix consisting solely bytes from
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`
-	  is not specified, spaces and tabs are removed.
+	  is not specified, spaces and tabs are removed. This function
+	  returns a new string without modifying `text`.
 
 	* Returns the trimmed string.
 
 `std.string.to_upper(text)`
 
 	* Converts all lowercase English letters in `text` to their
-	  uppercase counterparts.
+	  uppercase counterparts. This function returns a new string
+	  without modifying `text`.
 
 	* Returns a new `string` after the conversion.
 
 `std.string.to_lower(text)`
 
 	* Converts all uppercase English letters in `text` to their
-	  lowercase counterparts.
+	  lowercase counterparts. This function returns a new string
+	  without modifying `text`.
 
 	* Returns a new `string` after the conversion.

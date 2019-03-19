@@ -242,7 +242,8 @@ D_object create_bindings_string()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.reverse(text)`"
-                     "\n  * Reverses a byte `string`.                                      "
+                     "\n  * Reverses a byte `string`. This function returns a new string   "
+                     "\n    without modifying `text`.                                      "
                      "\n  * Returns the reversed `string`.                                 "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
@@ -272,7 +273,8 @@ D_object create_bindings_string()
         rocket::sref("`std.string.trim(text, [reject])`"
                      "\n  * Removes the longest prefix and suffix consisting solely bytes  "
                      "\n    from `reject`. If `reject` is empty, no byte is removed. If    "
-                     "\n    `reject` is not specified, spaces and tabs are removed.        "
+                     "\n    `reject` is not specified, spaces and tabs are removed. This   "
+                     "\n    function returns a new string without modifying `text`.        "
                      "\n  * Returns the trimmed `string`.                                  "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
@@ -303,7 +305,8 @@ D_object create_bindings_string()
         rocket::sref("`std.string.trim_left(text, [reject])`"
                      "\n  * Removes the longest prefix consisting solely bytes from        "
                      "\n    `reject`. If `reject` is empty, no byte is removed. If `reject`"
-                     "\n    is not specified, spaces and tabs are removed.                 "
+                     "\n    is not specified, spaces and tabs are removed. This function   "
+                     "\n    returns a new string without modifying `text`.                 "
                      "\n  * Returns the trimmed `string`.                                  "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
@@ -334,7 +337,8 @@ D_object create_bindings_string()
         rocket::sref("`std.string.trim_right(text, [reject])`"
                      "\n  * Removes the longest suffix consisting solely bytes from        "
                      "\n    `reject`. If `reject` is empty, no byte is removed. If `reject`"
-                     "\n    is not specified, spaces and tabs are removed.                 "
+                     "\n    is not specified, spaces and tabs are removed. This function   "
+                     "\n    returns a new string without modifying `text`.                 "
                      "\n  * Returns the trimmed `string`.                                  "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
@@ -364,7 +368,8 @@ D_object create_bindings_string()
         // Description
         rocket::sref("`std.string.to_upper(text)`"
                      "\n  * Converts all lowercase English letters in `text` to their      "
-                     "\n    uppercase counterparts.                                        "
+                     "\n    uppercase counterparts. This function  returns a new string    "
+                     "\n    without modifying `text`.                                      "
                      "\n  * Returns a new `string` after the conversion.                   "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
@@ -393,7 +398,8 @@ D_object create_bindings_string()
         // Description
         rocket::sref("`std.string.to_lower(text)`"
                      "\n  * Converts all lowercase English letters in `text` to their      "
-                     "\n    uppercase counterparts.                                        "
+                     "\n    uppercase counterparts. This function  returns a new string    "
+                     "\n    without modifying `text`.                                      "
                      "\n  * Returns a new `string` after the conversion.                   "),
         // Definition
         [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
