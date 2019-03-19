@@ -127,7 +127,7 @@
 
 `std.string.starts_with(text, prefix)`
 
-	* Checks whether `prefix` is a prefix of `text`. An empty
+	* Checks whether `prefix` is a prefix of `text`. The empty
 	  `string` is considered to be a prefix of any string.
 
 	* Returns `true` if `prefix` is a prefix of `text`; otherwise
@@ -135,7 +135,7 @@
 
 `std.string.ends_with(text, suffix)`
 
-	* Checks whether `suffix` is a suffix of `text`. An empty
+	* Checks whether `suffix` is a suffix of `text`. The empty
 	  `string` is considered to be a suffix of any string.
 
 	* Returns `true` if `suffix` is a suffix of `text`; otherwise

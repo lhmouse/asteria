@@ -180,7 +180,7 @@ D_object create_bindings_string()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.starts_with(text, prefix)`"
-                     "\n  * Checks whether `prefix` is a prefix of `text`. An empty        "
+                     "\n  * Checks whether `prefix` is a prefix of `text`. The empty       "
                      "\n    `string` is considered to be a prefix of any string.           "
                      "\n  * Returns `true` if `prefix` is a prefix of `text`; otherwise    "
                      "\n    `false`.                                                       "),
@@ -211,7 +211,7 @@ D_object create_bindings_string()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.ends_with(text, suffix)`"
-                     "\n  * Checks whether `suffix` is a suffix of `text`. An empty        "
+                     "\n  * Checks whether `suffix` is a suffix of `text`. The empty       "
                      "\n    `string` is considered to be a suffix of any string.           "
                      "\n  * Returns `true` if `suffix` is a suffix of `text`; otherwise    "
                      "\n    `false`.                                                       "),
