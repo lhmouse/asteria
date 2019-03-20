@@ -62,7 +62,7 @@ int main()
     }
     Cow_Vector<Air_Node> expr_code;
     Analytic_Context actx(&ctx);
-    rocket::for_each(nodes, [&](const Xprunit &node) { node.generate_code(expr_code, actx);  });
+    rocket::for_each(nodes, [&](const Xprunit &xpru) { xpru.generate_code(expr_code, actx);  });
 
     Evaluation_Stack stack;
     rocket::for_each(expr_code, [&](const Air_Node &node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
