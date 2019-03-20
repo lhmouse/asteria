@@ -426,9 +426,7 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              auto time_utc = std_chrono_utc_now();
-              // Return it.
-              Reference_Root::S_temporary ref_c = { time_utc };
+              Reference_Root::S_temporary ref_c = { std_chrono_utc_now() };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -454,9 +452,7 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              auto time_local = std_chrono_local_now();
-              // Return it.
-              Reference_Root::S_temporary ref_c = { time_local };
+              Reference_Root::S_temporary ref_c = { std_chrono_local_now() };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -485,9 +481,7 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              auto time_hires = std_chrono_hires_now();
-              // Return it.
-              Reference_Root::S_temporary ref_c = { time_hires };
+              Reference_Root::S_temporary ref_c = { std_chrono_hires_now() };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -516,9 +510,7 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              auto time_steady = std_chrono_steady_now();
-              // Return it.
-              Reference_Root::S_temporary ref_c = { time_steady };
+              Reference_Root::S_temporary ref_c = { std_chrono_steady_now() };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -546,9 +538,7 @@ D_object create_bindings_chrono()
             D_integer time_utc;
             if(reader.start().req(time_utc).finish()) {
               // Call the binding function.
-              auto time_local = std_chrono_local_from_utc(time_utc);
-              // Return it.
-              Reference_Root::S_temporary ref_c = { time_local };
+              Reference_Root::S_temporary ref_c = { std_chrono_local_from_utc(time_utc) };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -577,9 +567,7 @@ D_object create_bindings_chrono()
             D_integer time_local;
             if(reader.start().req(time_local).finish()) {
               // Call the binding function.
-              auto time_utc = std_chrono_utc_from_local(time_local);
-              // Return it.
-              Reference_Root::S_temporary ref_c = { time_utc };
+              Reference_Root::S_temporary ref_c = { std_chrono_utc_from_local(time_local) };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -613,10 +601,8 @@ D_object create_bindings_chrono()
               // Call the binding function.
               D_integer time_point;
               if(!std_chrono_parse_datetime(time_point, time_str)) {
-                // Fail.
                 return Reference_Root::S_null();
               }
-              // Return the time point.
               Reference_Root::S_temporary ref_c = { time_point };
               return rocket::move(ref_c);
             }
@@ -649,7 +635,6 @@ D_object create_bindings_chrono()
               // Call the binding function.
               D_string time_str;
               std_chrono_format_datetime(time_str, time_point, with_ms);
-              // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(time_str) };
               return rocket::move(ref_c);
             }
@@ -679,9 +664,7 @@ D_object create_bindings_chrono()
             D_boolean with_ms = false;
             if(reader.start().opt(with_ms).finish()) {
               // Call the binding function.
-              auto time_str = std_chrono_min_datetime(with_ms);
-              // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(time_str) };
+              Reference_Root::S_temporary ref_c = { std_chrono_min_datetime(with_ms) };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -710,9 +693,7 @@ D_object create_bindings_chrono()
             D_boolean with_ms = false;
             if(reader.start().opt(with_ms).finish()) {
               // Call the binding function.
-              auto time_str = std_chrono_max_datetime(with_ms);
-              // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(time_str) };
+              Reference_Root::S_temporary ref_c = { std_chrono_max_datetime(with_ms) };
               return rocket::move(ref_c);
             }
             // Fail.
