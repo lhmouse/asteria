@@ -12,19 +12,12 @@ namespace Asteria {
 bool std_debug_print(const Cow_Vector<Value> &values)
   {
     rocket::insertable_ostream mos;
-    // Deal with nasty separators.
-    auto cur = values.begin();
-    auto rem = values.size();
-    switch(rem) {
+    switch(values.size()) {
     default:
-      while(--rem != 0) {
-        cur->print(mos);
-        mos << ' ';
-        ++cur;
-      }
+      std::for_each(values.begin(), values.end() - 1, [&](const Value &r) { r.print(mos), mos << ' ';  });
       // Fallthrough.
     case 1:
-      cur->print(mos);
+      values.back().print(mos);
       // Fallthrough.
     case 0:
       break;
