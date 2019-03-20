@@ -190,3 +190,25 @@
 	  without modifying `text`.
 
 	* Returns a new `string` after the conversion.
+
+`std.string.explode(text, [delim], [limit])`
+
+	* Breaks `text` down into segments, separated by `delim`. If
+	  `delim` is `null` or an empty `string`, every byte becomes a
+	  segment. If `limit` is set to a positive `integer`, there will
+	  be no more segments than this number; the last segment will
+	  contain all the remaining bytes of the `text`.
+
+	* Returns an `array` containing the broken-down segments. If
+	  `text` is empty, an empty `array` is returned.
+
+	* Throws an exception if `limit` is zero or negative.
+
+`std.string.implode(segments, [delim])`
+
+	* Concatenates elements of an array, `segments`, to create a new
+	  `string`. All segments shall be `string`s. If `delim` is
+	  specified, it is inserted between adjacent segments.
+
+	* Returns a `string` containing all segments. If `segments` is
+	  empty, an empty `string` is returned.

@@ -19,6 +19,9 @@ extern D_string std_string_trim_right(const D_string &text, const D_string &reje
 extern D_string std_string_to_upper(const D_string &text);
 extern D_string std_string_to_lower(const D_string &text);
 
+extern D_array std_string_explode(const D_string &text, const D_string &delim, D_integer limit);
+extern D_string std_string_implode(const D_array &segments, const D_string &delim);
+
 // Create an object that is to be referenced as `std.string`.
 extern D_object create_bindings_string();
 

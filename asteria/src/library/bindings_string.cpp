@@ -137,6 +137,57 @@ D_string std_string_to_lower(const D_string &text)
     return res;
   }
 
+D_array std_string_explode(const D_string &text, const D_string &delim, D_integer limit)
+  {
+    if(limit <= 0) {
+      ASTERIA_THROW_RUNTIME_ERROR("The limit of number of segments must be greater than zero (got `", limit, "`).");
+    }
+    D_array segments;
+    if(text.empty()) {
+      // Return an empty array.
+      return segments;
+    }
+    if(delim.empty()) {
+      // Split every byte.
+      segments.reserve(text.size());
+      rocket::for_each(text, [&](char ch) { segments.emplace_back(D_string(1, ch));  });
+      return segments;
+    }
+    // Break `text` down.
+    std::size_t bpos = 0;
+    std::size_t epos;
+    for(;;) {
+      if(segments.size() >= static_cast<std::uint64_t>(limit - 1)) {
+        segments.emplace_back(text.substr(bpos));
+        break;
+      }
+      epos = text.find(delim, bpos);
+      segments.emplace_back(text.substr(bpos, epos - bpos));
+      if(epos == Cow_String::npos) {
+        break;
+      }
+      bpos = epos + delim.size();
+    }
+    return segments;
+  }
+
+D_string std_string_implode(const D_array &segments, const D_string &delim)
+  {
+    D_string text;
+    // Deal with nasty separators.
+    switch(segments.size()) {
+    default:
+      std::for_each(segments.begin(), segments.end() - 1, [&](const Value &r) { text.append(r.check<D_string>()).append(delim);  });
+      // Fallthrough.
+    case 1:
+      text.append(segments.back().check<D_string>());
+      // Fallthrough.
+    case 0:
+      break;
+    }
+    return text;
+  }
+
 D_object create_bindings_string()
   {
     D_object ro;
@@ -410,6 +461,74 @@ D_object create_bindings_string()
             if(reader.start().req(text).finish()) {
               // Call the binding function.
               auto res = std_string_to_lower(text);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
+    // `std.string.explode(text, [delim], [limit])`
+    //===================================================================
+    ro.try_emplace(rocket::sref("explode"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.explode(text, [delim], [limit])`"
+                     "\n  * Breaks `text` down into segments, separated by `delim`. If     "
+                     "\n    `delim` is `null` or an empty `string`, every byte becomes a   "
+                     "\n    segment. If `limit` is set to a positive `integer`, there will "
+                     "\n    be no more segments than this number; the last segment will    "
+                     "\n    contain all the remaining bytes of the `text`.                 "
+                     "\n  * Returns an `array` containing the broken-down segments. If     "
+                     "\n    `text` is empty, an empty `array` is returned.                 "
+                     "\n  * Throws an exception if `limit` is zero or negative.            "),
+        // Definition
+        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.explode"), args);
+            // Parse arguments.
+            D_string text;
+            D_string delim;
+            D_integer limit = INT64_MAX;
+            if(reader.start().req(text).opt(delim).opt(limit).finish()) {
+              // Call the binding function.
+              auto res = std_string_explode(text, delim, limit);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
+    // `std.string.implode(segments, [delim])`
+    //===================================================================
+    ro.try_emplace(rocket::sref("implode"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.implode(segments, [delim])`"
+                     "\n  * Concatenates elements of an array, `segments`, to create a new "
+                     "\n    `string`. All segments shall be `string`s. If `delim` is       "
+                     "\n    specified, it is inserted between adjacent segments.           "
+                     "\n  * Returns a `string` containing all segments. If `segments` is   "
+                     "\n    empty, an empty `string` is returned.                          "),
+        // Definition
+        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.implode"), args);
+            // Parse arguments.
+            D_array segments;
+            D_string delim;
+            if(reader.start().req(segments).opt(delim).finish()) {
+              // Call the binding function.
+              auto res = std_string_implode(segments, delim);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(res) };
               return rocket::move(ref_c);
