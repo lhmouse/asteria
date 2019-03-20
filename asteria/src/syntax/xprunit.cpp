@@ -374,7 +374,7 @@ const char * Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           return res;
         }
         // Reserve space for the result string.
-        auto ptr = res.assign(nchars * times, 0).mut_data();
+        auto ptr = res.assign(nchars * times, '*').mut_data();
         // Copy the source string once.
         std::memcpy(ptr, lhs.data(), nchars);
         // Append the result string to itself, doubling its length, until more than half of the result string has been populated.
