@@ -39,6 +39,33 @@ D_string std_string_reverse(const D_string &text)
     return D_string(text.rbegin(), text.rend());
   }
 
+D_string std_string_substr(const D_string &text, D_integer from, D_integer length)
+  {
+    if(length <= 0) {
+      // No byte is to be copied.
+      return rocket::sref("");
+    }
+    auto slen = static_cast<std::ptrdiff_t>(text.size());
+    if(from >= 0) {
+      // This is the same as `std::string::substr()` except that no `std::out_of_range` is thrown.
+      if(from >= slen) {
+        // Return an empty string if `from` is out of range.
+        return rocket::sref("");
+      }
+      auto rlen = rocket::min(length, slen);
+      return text.substr(static_cast<std::size_t>(from), static_cast<std::size_t>(rlen));
+    }
+    // Wrap `from` from the end of the string.
+    // Notice that if `from` is negative and `length` is positive, `from + length` cannot overflow.
+    auto wto = from + length;
+    if(wto <= -slen) {
+      // Return an empty string if `from` is out of range.
+      return rocket::sref("");
+    }
+    auto wfrom = rocket::max(from, -slen);
+    return text.substr(static_cast<std::size_t>(slen + wfrom), static_cast<std::size_t>(wto - wfrom));
+  }
+
 D_string std_string_trim(const D_string &text, const D_string &reject)
   {
     if(reject.empty()) {
@@ -287,6 +314,42 @@ D_object create_bindings_string()
         { }
       )));
     //===================================================================
+    // `std.string.substr()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("substr"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.substr(text, from, [length])`"
+                     "\n  * Copies a subrange of `text` to create a new byte string. Bytes "
+                     "\n    are copied from `from` if it is non-negative, and from         "
+                     "\n    `lengthof(text) + from` otherwise. If `length` is set to an    "
+                     "\n    `integer`, no more than this number of bytes will be copied. If"
+                     "\n    it is absent, all bytes from `from` to the end of `text` will  "
+                     "\n    be copied. If `from` is outside `text`, an empty `string` is   "
+                     "\n    returned.                                                      "
+                     "\n  * Returns the specified substring of `text`.                     "),
+        // Definition
+        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.substr"), args);
+            // Parse arguments.
+            D_string text;
+            D_integer from;
+            D_integer length = INT64_MAX;
+            if(reader.start().req(text).req(from).opt(length).finish()) {
+              // Call the binding function.
+              auto res = std_string_substr(text, from, length);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
     // `std.string.reverse()`
     //===================================================================
     ro.try_emplace(rocket::sref("reverse"),
@@ -472,7 +535,7 @@ D_object create_bindings_string()
         { }
       )));
     //===================================================================
-    // `std.string.explode(text, [delim], [limit])`
+    // `std.string.explode()`
     //===================================================================
     ro.try_emplace(rocket::sref("explode"),
       D_function(make_simple_binding(
@@ -508,7 +571,7 @@ D_object create_bindings_string()
         { }
       )));
     //===================================================================
-    // `std.string.implode(segments, [delim])`
+    // `std.string.implode()`
     //===================================================================
     ro.try_emplace(rocket::sref("implode"),
       D_function(make_simple_binding(

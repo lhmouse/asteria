@@ -141,6 +141,18 @@
 	* Returns `true` if `suffix` is a suffix of `text`; otherwise
 	  `false`.
 
+`std.string.substr(text, from, [length])`
+
+	* Copies a subrange of `text` to create a new byte string. Bytes
+	  are copied from `from` if it is non-negative, and from
+	  `lengthof(text) + from` otherwise. If `length` is set to an
+	  `integer`, no more than this number of bytes will be copied. If
+	  it is absent, all bytes from `from` to the end of `text` will
+	  be copied. If `from` is outside `text`, an empty `string` is
+	  returned.
+
+	* Returns the specified substring of `text`.
+
 `std.string.reverse(text)`
 
 	* Reverses a byte `string`. This function returns a new `string`

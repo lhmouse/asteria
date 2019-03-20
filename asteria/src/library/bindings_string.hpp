@@ -12,6 +12,7 @@ extern D_integer std_string_compare(const D_string &text_one, const D_string &te
 extern D_boolean std_string_starts_with(const D_string &text, const D_string &prefix);
 extern D_boolean std_string_ends_with(const D_string &text, const D_string &suffix);
 
+extern D_string std_string_substr(const D_string &text, D_integer from, D_integer length);
 extern D_string std_string_reverse(const D_string &text);
 extern D_string std_string_trim(const D_string &text, const D_string &reject);
 extern D_string std_string_trim_left(const D_string &text, const D_string &reject);
