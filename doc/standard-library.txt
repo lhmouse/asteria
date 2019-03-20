@@ -71,18 +71,6 @@
 	* Returns the number of milliseconds since the Unix epoch,
 	  represented as an `integer`.
 
-`std.chrono.parse_datetime(time_str)`
-
-	* Parses `time_str`, which is an ASCII string representing a time
-	  point in the format `1970-01-01 00:00:00.000`, according to the
-	  ISO 8601 standard; the subsecond part is optional and may have
-	  fewer or more digits. There shall be no leading or trailing
-	  spaces.
-
-	* Returns the number of milliseconds since `1970-01-01 00:00:00`
-	  if the time string has been parsed successfully; otherwise
-	  `null`.
-
 `std.chrono.format_datetime(time_point, [with_ms])`
 
 	* Converts `time_point`, which represents the number of
@@ -110,6 +98,18 @@
 
 	* Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'`
 	  according to `with_ms`.
+
+`std.chrono.parse_datetime(time_str)`
+
+	* Parses `time_str`, which is an ASCII string representing a time
+	  point in the format `1970-01-01 00:00:00.000`, according to the
+	  ISO 8601 standard; the subsecond part is optional and may have
+	  fewer or more digits. There shall be no leading or trailing
+	  spaces.
+
+	* Returns the number of milliseconds since `1970-01-01 00:00:00`
+	  if the time string has been parsed successfully; otherwise
+	  `null`.
 
 ### `std.string`
 

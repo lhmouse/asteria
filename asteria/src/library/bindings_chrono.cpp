@@ -166,6 +166,110 @@ D_integer std_chrono_utc_from_local(D_integer time_local)
     return time_utc;
   }
 
+void std_chrono_format_datetime(D_string &time_str_out, D_integer time_point, bool with_ms)
+  {
+    // Return strings that are allocated statically for special time point values.
+    static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
+                                               "1601-01-01 00:00:00.000" };
+    static constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00",
+                                               "9999-01-01 00:00:00.000" };
+    if(time_point <= -11644473600000) {
+      time_str_out = rocket::sref(s_min_str[with_ms]);
+      return;
+    }
+    if(time_point >= 253370764800000) {
+      time_str_out = rocket::sref(s_max_str[with_ms]);
+      return;
+    }
+    // Notice that the length of the result string is fixed.
+    time_str_out.resize(std::char_traits<char>::length(s_min_str[with_ms]));
+    // Characters are written backwards, unlike `parse_datetime()`.
+    auto wpos = time_str_out.mut_rbegin();
+    // Define functions to write each field.
+    // Be adviced that these functions modify `wpos`.
+    const auto write_int = [&](int value, int width)
+      {
+        int r = value;
+        for(int i = 0; i < width; ++i) {
+          int d = r % 10;
+          r /= 10;
+          *wpos = static_cast<char>('0' + d);
+          ++wpos;
+        }
+        return true;
+      };
+    const auto write_sep = [&](char sep)
+      {
+        *wpos = sep;
+        ++wpos;
+        return true;
+      };
+    // Break the time point down.
+#ifdef _WIN32
+    // Convert the time point to Windows NT time.
+    // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
+    ::ULARGE_INTEGER ti;
+    ti.QuadPart = static_cast<std::uint64_t>(time_point) * 10000 + 116444736000000000;
+    ::FILETIME ft;
+    ft.dwLowDateTime = ti.LowPart;
+    ft.dwHighDateTime = ti.HighPart;
+    ::SYSTEMTIME st;
+    ::FileTimeToSystemTime(&ft, &st);
+    // Write fields backwards.
+    if(with_ms) {
+      write_int(st.wMilliseconds, 3);
+      write_sep('.');
+    }
+    write_int(st.wSecond, 2);
+    write_sep(':');
+    write_int(st.wMinute, 2);
+    write_sep(':');
+    write_int(st.wHour, 2);
+    write_sep(' ');
+    write_int(st.wDay, 2);
+    write_sep('-');
+    write_int(st.wMonth, 2);
+    write_sep('-');
+    write_int(st.wYear, 4);
+#else
+    // Write fields backwards.
+    // Be advised that POSIX APIs handle seconds only.
+    if(with_ms) {
+      write_int(static_cast<int>(time_point % 1000), 3);
+      write_sep('.');
+    }
+    ::time_t tp = time_point / 1000;
+    ::tm tr;
+    ::gmtime_r(&tp, &tr);
+    write_int(tr.tm_sec, 2);
+    write_sep(':');
+    write_int(tr.tm_min, 2);
+    write_sep(':');
+    write_int(tr.tm_hour, 2);
+    write_sep(' ');
+    write_int(tr.tm_mday, 2);
+    write_sep('-');
+    write_int(tr.tm_mon + 1, 2);
+    write_sep('-');
+    write_int(tr.tm_year + 1900, 4);
+#endif
+    ROCKET_ASSERT(wpos == time_str_out.rend());
+  }
+
+D_string std_chrono_min_datetime(bool with_ms)
+  {
+    D_string time_str;
+    std_chrono_format_datetime(time_str, INT64_MIN, with_ms);
+    return time_str;
+  }
+
+D_string std_chrono_max_datetime(bool with_ms)
+  {
+    D_string time_str;
+    std_chrono_format_datetime(time_str, INT64_MAX, with_ms);
+    return time_str;
+  }
+
 bool std_chrono_parse_datetime(D_integer &time_point_out, const D_string &time_str)
   {
     // Characters are read forwards, unlike `format_datetime()`.
@@ -300,110 +404,6 @@ bool std_chrono_parse_datetime(D_integer &time_point_out, const D_string &time_s
     }
     time_point_out = time_point;
     return true;
-  }
-
-void std_chrono_format_datetime(D_string &time_str_out, D_integer time_point, bool with_ms)
-  {
-    // Return strings that are allocated statically for special time point values.
-    static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
-                                               "1601-01-01 00:00:00.000" };
-    static constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00",
-                                               "9999-01-01 00:00:00.000" };
-    if(time_point <= -11644473600000) {
-      time_str_out = rocket::sref(s_min_str[with_ms]);
-      return;
-    }
-    if(time_point >= 253370764800000) {
-      time_str_out = rocket::sref(s_max_str[with_ms]);
-      return;
-    }
-    // Notice that the length of the result string is fixed.
-    time_str_out.resize(std::char_traits<char>::length(s_min_str[with_ms]));
-    // Characters are written backwards, unlike `parse_datetime()`.
-    auto wpos = time_str_out.mut_rbegin();
-    // Define functions to write each field.
-    // Be adviced that these functions modify `wpos`.
-    const auto write_int = [&](int value, int width)
-      {
-        int r = value;
-        for(int i = 0; i < width; ++i) {
-          int d = r % 10;
-          r /= 10;
-          *wpos = static_cast<char>('0' + d);
-          ++wpos;
-        }
-        return true;
-      };
-    const auto write_sep = [&](char sep)
-      {
-        *wpos = sep;
-        ++wpos;
-        return true;
-      };
-    // Break the time point down.
-#ifdef _WIN32
-    // Convert the time point to Windows NT time.
-    // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    ::ULARGE_INTEGER ti;
-    ti.QuadPart = static_cast<std::uint64_t>(time_point) * 10000 + 116444736000000000;
-    ::FILETIME ft;
-    ft.dwLowDateTime = ti.LowPart;
-    ft.dwHighDateTime = ti.HighPart;
-    ::SYSTEMTIME st;
-    ::FileTimeToSystemTime(&ft, &st);
-    // Write fields backwards.
-    if(with_ms) {
-      write_int(st.wMilliseconds, 3);
-      write_sep('.');
-    }
-    write_int(st.wSecond, 2);
-    write_sep(':');
-    write_int(st.wMinute, 2);
-    write_sep(':');
-    write_int(st.wHour, 2);
-    write_sep(' ');
-    write_int(st.wDay, 2);
-    write_sep('-');
-    write_int(st.wMonth, 2);
-    write_sep('-');
-    write_int(st.wYear, 4);
-#else
-    // Write fields backwards.
-    // Be advised that POSIX APIs handle seconds only.
-    if(with_ms) {
-      write_int(static_cast<int>(time_point % 1000), 3);
-      write_sep('.');
-    }
-    ::time_t tp = time_point / 1000;
-    ::tm tr;
-    ::gmtime_r(&tp, &tr);
-    write_int(tr.tm_sec, 2);
-    write_sep(':');
-    write_int(tr.tm_min, 2);
-    write_sep(':');
-    write_int(tr.tm_hour, 2);
-    write_sep(' ');
-    write_int(tr.tm_mday, 2);
-    write_sep('-');
-    write_int(tr.tm_mon + 1, 2);
-    write_sep('-');
-    write_int(tr.tm_year + 1900, 4);
-#endif
-    ROCKET_ASSERT(wpos == time_str_out.rend());
-  }
-
-D_string std_chrono_min_datetime(bool with_ms)
-  {
-    D_string time_str;
-    std_chrono_format_datetime(time_str, INT64_MIN, with_ms);
-    return time_str;
-  }
-
-D_string std_chrono_max_datetime(bool with_ms)
-  {
-    D_string time_str;
-    std_chrono_format_datetime(time_str, INT64_MAX, with_ms);
-    return time_str;
   }
 
 D_object create_bindings_chrono()
