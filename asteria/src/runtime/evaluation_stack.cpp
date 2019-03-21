@@ -11,7 +11,7 @@ Evaluation_Stack::~Evaluation_Stack()
   {
   }
 
-void Evaluation_Stack::set_temporary_result(bool assign, Value &&value)
+void Evaluation_Stack::set_temporary_result(bool assign, Value&& value)
   {
     // Do not play with this at home.
     ROCKET_ASSERT(this->m_refs.size() >= 1);

@@ -12,7 +12,7 @@ void Reference::do_throw_unset_no_modifier() const
     ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
   }
 
-const Value & Reference::do_read_with_modifiers() const
+const Value& Reference::do_read_with_modifiers() const
   {
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_const());
@@ -28,7 +28,7 @@ const Value & Reference::do_read_with_modifiers() const
     return cur;
   }
 
-Value & Reference::do_open_with_modifiers() const
+Value& Reference::do_open_with_modifiers() const
   {
     // Dereference the root.
     auto cur = std::ref(this->m_root.dereference_mutable());

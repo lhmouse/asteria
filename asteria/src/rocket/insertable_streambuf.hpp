@@ -74,7 +74,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
           return 0;
         }
       }
-    streamsize xsgetn(char_type *s, streamsize n) override
+    streamsize xsgetn(char_type* s, streamsize n) override
       {
         if(this->m_which & ios_base::in) {
           // Tidy the get area.
@@ -123,7 +123,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
         }
       }
 
-    streamsize xsputn(const char_type *s, streamsize n) override
+    streamsize xsputn(const char_type* s, streamsize n) override
       {
         if(this->m_which & ios_base::out) {
           // Tidy the get area, as the internal buffer is subject to reallocation.
@@ -169,7 +169,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
       }
 
   public:
-    string_type & get_string()
+    string_type& get_string()
       {
         this->basic_insertable_streambuf::sync();
         return this->m_str;

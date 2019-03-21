@@ -22,29 +22,29 @@ namespace Asteria {
         std::size_t m_offset;
 
       public:
-        Line_Reader(std::istream &xstrm, const Cow_String &xfile)
+        Line_Reader(std::istream& xstrm, const Cow_String& xfile)
           : m_strm(xstrm), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
             // Check whether the stream can be read from.
             // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
-            auto &strm = this->m_strm.get();
+            auto& strm = this->m_strm.get();
             if(strm.fail()) {
               throw Parser_Error(0, 0, 0, Parser_Error::code_istream_open_failure);
             }
           }
 
-        Line_Reader(const Line_Reader &)
+        Line_Reader(const Line_Reader&)
           = delete;
-        Line_Reader & operator=(const Line_Reader &)
+        Line_Reader& operator=(const Line_Reader&)
           = delete;
 
       public:
-        std::istream & stream() const noexcept
+        std::istream& stream() const noexcept
           {
             return this->m_strm;
           }
-        const Cow_String & file() const noexcept
+        const Cow_String& file() const noexcept
           {
             return this->m_file;
           }
@@ -56,7 +56,7 @@ namespace Asteria {
         bool advance_line()
           {
             // Call `getline()` via ADL.
-            auto &strm = this->m_strm.get();
+            auto& strm = this->m_strm.get();
             getline(strm, this->m_str);
             // Check `bad()` before `fail()` because the latter checks for both `badbit` and `failbit`.
             if(strm.bad()) {
@@ -75,7 +75,7 @@ namespace Asteria {
           {
             return this->m_offset;
           }
-        const char * data_avail() const noexcept
+        const char* data_avail() const noexcept
           {
             return this->m_str.data() + this->m_offset;
           }
@@ -103,7 +103,7 @@ namespace Asteria {
           }
       };
 
-    inline Parser_Error do_make_parser_error(const Line_Reader &reader, std::size_t length, Parser_Error::Code code)
+    inline Parser_Error do_make_parser_error(const Line_Reader& reader, std::size_t length, Parser_Error::Code code)
       {
         return Parser_Error(reader.line(), reader.offset(), length, code);
       }
@@ -138,21 +138,21 @@ namespace Asteria {
           {
             return this->m_line != 0;
           }
-        Tack & set(const Line_Reader &reader, std::size_t xlength) noexcept
+        Tack& set(const Line_Reader& reader, std::size_t xlength) noexcept
           {
             this->m_line = reader.line();
             this->m_offset = reader.offset();
             this->m_length = xlength;
             return *this;
           }
-        Tack & clear() noexcept
+        Tack& clear() noexcept
           {
             this->m_line = 0;
             return *this;
           }
       };
 
-    char32_t do_get_utf8_code_point(Line_Reader &reader)
+    char32_t do_get_utf8_code_point(Line_Reader& reader)
       {
         // Read the first byte.
         char32_t code_point = reader.peek() & 0xFF;
@@ -206,29 +206,29 @@ namespace Asteria {
         return code_point;
       }
 
-    template<typename TokenT> void do_push_token(Cow_Vector<Token> &seq_out, Line_Reader &reader_io, std::size_t length, TokenT &&token_c)
+    template<typename XtokenT> void do_push_token(Cow_Vector<Token>& seq_out, Line_Reader& reader_io, std::size_t length, XtokenT&& xtoken)
       {
-        seq_out.emplace_back(reader_io.file(), reader_io.line(), reader_io.offset(), length, std::forward<TokenT>(token_c));
+        seq_out.emplace_back(reader_io.file(), reader_io.line(), reader_io.offset(), length, std::forward<XtokenT>(xtoken));
         reader_io.consume(length);
       }
 
     struct Prefix_Comparator
       {
-        template<typename ElementT> bool operator()(const ElementT &lhs, const ElementT &rhs) const noexcept
+        template<typename ElementT> bool operator()(const ElementT& lhs, const ElementT& rhs) const noexcept
           {
             return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
           }
-        template<typename ElementT> bool operator()(char lhs, const ElementT &rhs) const noexcept
+        template<typename ElementT> bool operator()(char lhs, const ElementT& rhs) const noexcept
           {
             return std::char_traits<char>::lt(lhs, rhs.first[0]);
           }
-        template<typename ElementT> bool operator()(const ElementT &lhs, char rhs) const noexcept
+        template<typename ElementT> bool operator()(const ElementT& lhs, char rhs) const noexcept
           {
             return std::char_traits<char>::lt(lhs.first[0], rhs);
           }
       };
 
-    bool do_accept_identifier_or_keyword(Cow_Vector<Token> &seq_out, Line_Reader &reader_io, bool keyword_as_identifier)
+    bool do_accept_identifier_or_keyword(Cow_Vector<Token>& seq_out, Line_Reader& reader_io, bool keyword_as_identifier)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -293,7 +293,7 @@ namespace Asteria {
               // No matching keyword has been found so far.
               break;
             }
-            const auto &cur = range.first[0];
+            const auto& cur = range.first[0];
             if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
               // A keyword has been found.
               Token::S_keyword token_c = { cur.second };
@@ -308,7 +308,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_punctuator(Cow_Vector<Token> &seq_out, Line_Reader &reader_io)
+    bool do_accept_punctuator(Cow_Vector<Token>& seq_out, Line_Reader& reader_io)
       {
         static constexpr char s_punct_chars[] = "!%&()*+,-./:;<=>?[]^{|}~";
         auto bptr = reader_io.data_avail();
@@ -390,7 +390,7 @@ namespace Asteria {
           if(range.first == range.second) {
             break;
           }
-          const auto &cur = range.second[-1];
+          const auto& cur = range.second[-1];
           auto tlen = std::char_traits<char>::length(cur.first);
           if((tlen <= reader_io.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
             // A punctuator has been found.
@@ -405,7 +405,7 @@ namespace Asteria {
         ASTERIA_TERMINATE("The punctuator `", bptr[0], "` is unhandled.");
       }
 
-    bool do_accept_string_literal(Cow_Vector<Token> &seq_out, Line_Reader &reader_io, char head, bool escapable)
+    bool do_accept_string_literal(Cow_Vector<Token>& seq_out, Line_Reader& reader_io, char head, bool escapable)
       {
         // string-literal ::=
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
@@ -585,7 +585,7 @@ namespace Asteria {
         return true;
       }
 
-    Token * do_check_mergeability(Cow_Vector<Token> &seq, const Line_Reader &reader)
+    Token* do_check_mergeability(Cow_Vector<Token>& seq, const Line_Reader& reader)
       {
         if(seq.empty()) {
           // No previuos token exists.
@@ -610,11 +610,11 @@ namespace Asteria {
         }
         if(seq.size() >= 2) {
           // Check whether the previous token may be an infix operator.
-          const auto &pt = seq.rbegin()[1];
+          const auto& pt = seq.rbegin()[1];
           switch(pt.index()) {
           case Token::index_keyword:
             {
-              const auto &alt = pt.check<Token::S_keyword>();
+              const auto& alt = pt.check<Token::S_keyword>();
               // Mergeable unless the keyword denotes a value or reference.
               bool mergeable = rocket::is_none_of(alt.keyword, { Token::keyword_null, Token::keyword_true, Token::keyword_false,
                                                                  Token::keyword_nan, Token::keyword_infinity, Token::keyword_this });
@@ -625,7 +625,7 @@ namespace Asteria {
             }
           case Token::index_punctuator:
             {
-              const auto &alt = pt.check<Token::S_punctuator>();
+              const auto& alt = pt.check<Token::S_punctuator>();
               // Mergeable unless the punctuator terminates an expression.
               bool mergeable = rocket::is_none_of(alt.punct, { Token::punctuator_inc, Token::punctuator_dec, Token::punctuator_parenth_cl,
                                                                Token::punctuator_bracket_cl, Token::punctuator_brace_cl });
@@ -650,7 +650,7 @@ namespace Asteria {
         return qstok;
       }
 
-    bool do_accept_numeric_literal(Cow_Vector<Token> &seq_out, Line_Reader &reader_io, bool integer_as_real)
+    bool do_accept_numeric_literal(Cow_Vector<Token>& seq_out, Line_Reader& reader_io, bool integer_as_real)
       {
         // numeric-literal ::=
         //   ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -928,7 +928,7 @@ bool Token_Stream::empty() const noexcept
     }
   }
 
-bool Token_Stream::load(std::istream &cstrm_io, const Cow_String &file, const Parser_Options &options)
+bool Token_Stream::load(std::istream& cstrm_io, const Cow_String& file, const Parser_Options& options)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -1018,7 +1018,7 @@ bool Token_Stream::load(std::istream &cstrm_io, const Cow_String &file, const Pa
     std::reverse(seq.mut_begin(), seq.mut_end());
     this->m_stor = rocket::move(seq);
     return true;
-  } catch(Parser_Error &err) {  // Don't play with this at home.
+  } catch(Parser_Error& err) {  // Don't play with this at home.
     ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
                       "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
                       "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
@@ -1031,7 +1031,7 @@ void Token_Stream::clear() noexcept
     this->m_stor = nullptr;
   }
 
-const Token * Token_Stream::peek_opt() const noexcept
+const Token* Token_Stream::peek_opt() const noexcept
   {
     switch(this->state()) {
     case state_empty:
@@ -1044,7 +1044,7 @@ const Token * Token_Stream::peek_opt() const noexcept
       }
     case state_success:
       {
-        const auto &alt = this->m_stor.as<Cow_Vector<Token>>();
+        const auto& alt = this->m_stor.as<Cow_Vector<Token>>();
         if(alt.empty()) {
           return nullptr;
         }
@@ -1068,7 +1068,7 @@ Token Token_Stream::shift()
       }
     case state_success:
       {
-        auto &alt = this->m_stor.as<Cow_Vector<Token>>();
+        auto& alt = this->m_stor.as<Cow_Vector<Token>>();
         if(alt.empty()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
         }

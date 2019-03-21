@@ -23,13 +23,13 @@ class Reference
       {
       }
     // This constructor does not accept lvalues.
-    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)> Reference(XrootT &&xroot) noexcept
+    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Xvariant::index_of<XrootT>::value)> Reference(XrootT&& xroot) noexcept
       : m_root(std::forward<XrootT>(xroot)),
         m_mods()
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Variant::index_of<XrootT>::value)> Reference & operator=(XrootT &&xroot) noexcept
+    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Xvariant::index_of<XrootT>::value)> Reference& operator=(XrootT&& xroot) noexcept
       {
         this->m_root = std::forward<XrootT>(xroot);
         this->m_mods.clear();
@@ -39,8 +39,8 @@ class Reference
   private:
     [[noreturn]] void do_throw_unset_no_modifier() const;
 
-    const Value & do_read_with_modifiers() const;
-    Value & do_open_with_modifiers() const;
+    const Value& do_read_with_modifiers() const;
+    Value& do_open_with_modifiers() const;
     Value do_unset_with_modifiers() const;
 
   public:
@@ -53,14 +53,14 @@ class Reference
         return this->m_root.index() == Reference_Root::index_temporary;
       }
 
-    const Value & read() const
+    const Value& read() const
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
           return this->m_root.dereference_const();
         }
         return this->do_read_with_modifiers();
       }
-    Value & open() const
+    Value& open() const
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
           return this->m_root.dereference_mutable();
@@ -75,13 +75,13 @@ class Reference
         return this->do_unset_with_modifiers();
       }
 
-    template<typename XmodT> Reference & zoom_in(XmodT &&xmod)
+    template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
       {
         // Append a modifier.
         this->m_mods.emplace_back(std::forward<XmodT>(xmod));
         return *this;
       }
-    Reference & zoom_out()
+    Reference& zoom_out()
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
           // If there is no modifier, set `this` to `null`.
@@ -93,7 +93,7 @@ class Reference
         return *this;
       }
 
-    void enumerate_variables(const Abstract_Variable_Callback &callback) const
+    void enumerate_variables(const Abstract_Variable_Callback& callback) const
       {
         this->m_root.enumerate_variables(callback);
       }

@@ -7,7 +7,6 @@
 #include "../fwd.hpp"
 #include "parser_options.hpp"
 #include "parser_error.hpp"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -22,7 +21,7 @@ class Parser
       };
 
   private:
-    rocket::variant<std::nullptr_t, Parser_Error, Cow_Vector<Statement>> m_stor;
+    Variant<std::nullptr_t, Parser_Error, Cow_Vector<Statement>> m_stor;
 
   public:
     Parser() noexcept
@@ -30,9 +29,9 @@ class Parser
       {
       }
 
-    Parser(const Parser &)
+    Parser(const Parser&)
       = delete;
-    Parser & operator=(const Parser &)
+    Parser& operator=(const Parser&)
       = delete;
 
   public:
@@ -48,9 +47,9 @@ class Parser
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(Token_Stream &tstrm_io, const Parser_Options &options);
+    bool load(Token_Stream& tstrm_io, const Parser_Options& options);
     void clear() noexcept;
-    const Cow_Vector<Statement> & get_statements() const noexcept;
+    const Cow_Vector<Statement>& get_statements() const noexcept;
   };
 
 }  // namespace Asteria

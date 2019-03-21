@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-D_integer std_string_compare(const D_string &text_one, const D_string &text_two, D_integer length)
+D_integer std_string_compare(const D_string& text_one, const D_string& text_two, D_integer length)
   {
     if(length <= 0) {
       // No byte is to be compared.
@@ -23,23 +23,23 @@ D_integer std_string_compare(const D_string &text_one, const D_string &text_two,
     return text_one.compare(0, static_cast<std::size_t>(length), text_two, 0, static_cast<std::size_t>(length));
   }
 
-D_boolean std_string_starts_with(const D_string &text, const D_string &prefix)
+D_boolean std_string_starts_with(const D_string& text, const D_string& prefix)
   {
     return text.starts_with(prefix);
   }
 
-D_boolean std_string_ends_with(const D_string &text, const D_string &suffix)
+D_boolean std_string_ends_with(const D_string& text, const D_string& suffix)
   {
     return text.ends_with(suffix);
   }
 
-D_string std_string_reverse(const D_string &text)
+D_string std_string_reverse(const D_string& text)
   {
     // This is an easy matter, isn't it?
     return D_string(text.rbegin(), text.rend());
   }
 
-D_string std_string_substr(const D_string &text, D_integer from, D_integer length)
+D_string std_string_substr(const D_string& text, D_integer from, D_integer length)
   {
     if(length <= 0) {
       // No byte is to be copied.
@@ -66,7 +66,7 @@ D_string std_string_substr(const D_string &text, D_integer from, D_integer lengt
     return text.substr(static_cast<std::size_t>(slen + wfrom), static_cast<std::size_t>(wto - wfrom));
   }
 
-D_string std_string_trim(const D_string &text, const D_string &reject)
+D_string std_string_trim(const D_string& text, const D_string& reject)
   {
     if(reject.empty()) {
       // There is no byte to strip. Make use of reference counting.
@@ -86,7 +86,7 @@ D_string std_string_trim(const D_string &text, const D_string &reject)
     return text.substr(start, end + 1 - start);
   }
 
-D_string std_string_trim_left(const D_string &text, const D_string &reject)
+D_string std_string_trim_left(const D_string& text, const D_string& reject)
   {
     if(reject.empty()) {
       // There is no byte to strip. Make use of reference counting.
@@ -105,7 +105,7 @@ D_string std_string_trim_left(const D_string &text, const D_string &reject)
     return text.substr(start);
   }
 
-D_string std_string_trim_right(const D_string &text, const D_string &reject)
+D_string std_string_trim_right(const D_string& text, const D_string& reject)
   {
     if(reject.empty()) {
       // There is no byte to strip. Make use of reference counting.
@@ -124,11 +124,11 @@ D_string std_string_trim_right(const D_string &text, const D_string &reject)
     return text.substr(0, end + 1);
   }
 
-D_string std_string_to_upper(const D_string &text)
+D_string std_string_to_upper(const D_string& text)
   {
     // Use reference counting as our advantage.
     D_string res = text;
-    char *wptr = nullptr;
+    char* wptr = nullptr;
     // Translate each character.
     for(std::size_t i = 0; i < text.size(); ++i) {
       char ch = text[i];
@@ -144,11 +144,11 @@ D_string std_string_to_upper(const D_string &text)
     return res;
   }
 
-D_string std_string_to_lower(const D_string &text)
+D_string std_string_to_lower(const D_string& text)
   {
     // Use reference counting as our advantage.
     D_string res = text;
-    char *wptr = nullptr;
+    char* wptr = nullptr;
     // Translate each character.
     for(std::size_t i = 0; i < text.size(); ++i) {
       char ch = text[i];
@@ -164,7 +164,7 @@ D_string std_string_to_lower(const D_string &text)
     return res;
   }
 
-D_array std_string_explode(const D_string &text, const D_string &delim, D_integer limit)
+D_array std_string_explode(const D_string& text, const D_string& delim, D_integer limit)
   {
     if(limit <= 0) {
       ASTERIA_THROW_RUNTIME_ERROR("The limit of number of segments must be greater than zero (got `", limit, "`).");
@@ -198,13 +198,13 @@ D_array std_string_explode(const D_string &text, const D_string &delim, D_intege
     return segments;
   }
 
-D_string std_string_implode(const D_array &segments, const D_string &delim)
+D_string std_string_implode(const D_array& segments, const D_string& delim)
   {
     D_string text;
     // Deal with nasty separators.
     switch(segments.size()) {
     default:
-      std::for_each(segments.begin(), segments.end() - 1, [&](const Value &r) { text.append(r.check<D_string>()).append(delim);  });
+      std::for_each(segments.begin(), segments.end() - 1, [&](const Value& r) { text.append(r.check<D_string>()).append(delim);  });
       // Fallthrough.
     case 1:
       text.append(segments.back().check<D_string>());
@@ -231,7 +231,7 @@ D_object create_bindings_string()
                      "\n    function in C, except that null characters do not terminate"
                      "\n    strings."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.compare"), args);
             // Parse arguments.
@@ -263,7 +263,7 @@ D_object create_bindings_string()
                      "\n  * Returns `true` if `prefix` is a prefix of `text`; otherwise"
                      "\n    `false`."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
             // Parse arguments.
@@ -294,7 +294,7 @@ D_object create_bindings_string()
                      "\n  * Returns `true` if `suffix` is a suffix of `text`; otherwise"
                      "\n    `false`."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
             // Parse arguments.
@@ -329,7 +329,7 @@ D_object create_bindings_string()
                      "\n    returned."
                      "\n  * Returns the specified substring of `text`."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.substr"), args);
             // Parse arguments.
@@ -360,7 +360,7 @@ D_object create_bindings_string()
                      "\n    without modifying `text`."
                      "\n  * Returns the reversed `string`."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.reverse"), args);
             // Parse arguments.
@@ -391,7 +391,7 @@ D_object create_bindings_string()
                      "\n    function returns a new `string` without modifying `text`."
                      "\n  * Returns the trimmed `string`."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.trim"), args);
             // Parse arguments.
@@ -423,7 +423,7 @@ D_object create_bindings_string()
                      "\n    returns a new `string` without modifying `text`."
                      "\n  * Returns the trimmed `string`."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.trim_left"), args);
             // Parse arguments.
@@ -455,7 +455,7 @@ D_object create_bindings_string()
                      "\n    returns a new `string` without modifying `text`."
                      "\n  * Returns the trimmed `string`."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.trim_right"), args);
             // Parse arguments.
@@ -486,7 +486,7 @@ D_object create_bindings_string()
                      "\n    without modifying `text`."
                      "\n  * Returns a new `string` after the conversion."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.to_upper"), args);
             // Parse arguments.
@@ -516,7 +516,7 @@ D_object create_bindings_string()
                      "\n    without modifying `text`."
                      "\n  * Returns a new `string` after the conversion."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.to_lower"), args);
             // Parse arguments.
@@ -550,7 +550,7 @@ D_object create_bindings_string()
                      "\n    `text` is empty, an empty `array` is returned."
                      "\n  * Throws an exception if `limit` is zero or negative."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.explode"), args);
             // Parse arguments.
@@ -583,7 +583,7 @@ D_object create_bindings_string()
                      "\n  * Returns a `string` containing all segments. If `segments` is"
                      "\n    empty, an empty `string` is returned."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.implode"), args);
             // Parse arguments.

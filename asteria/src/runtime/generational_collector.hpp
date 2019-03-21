@@ -29,13 +29,13 @@ class Generational_Collector : public virtual Rcbase
       }
     ~Generational_Collector() override;
 
-    Generational_Collector(const Generational_Collector &)
+    Generational_Collector(const Generational_Collector&)
       = delete;
-    Generational_Collector & operator=(const Generational_Collector &)
+    Generational_Collector& operator=(const Generational_Collector&)
       = delete;
 
   public:
-    Collector * get_collector_opt(unsigned gen_limit) noexcept;
+    Collector* get_collector_opt(unsigned gen_limit) noexcept;
 
     Rcptr<Variable> create_variable();
     bool collect_variables(unsigned gen_limit);

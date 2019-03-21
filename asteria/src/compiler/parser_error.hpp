@@ -70,8 +70,8 @@ class Parser_Error
       };
 
   public:
-    ROCKET_PURE_FUNCTION static const char * get_code_description(Code xcode) noexcept;
-    [[noreturn]] static void convert_to_runtime_error_and_throw(const Parser_Error &err);
+    ROCKET_PURE_FUNCTION static const char* get_code_description(Code xcode) noexcept;
+    [[noreturn]] static void convert_to_runtime_error_and_throw(const Parser_Error& err);
 
   private:
     std::uint32_t m_line;
@@ -104,20 +104,20 @@ class Parser_Error
       }
   };
 
-constexpr bool operator==(const Parser_Error &lhs, Parser_Error::Code rhs) noexcept
+constexpr bool operator==(const Parser_Error& lhs, Parser_Error::Code rhs) noexcept
   {
     return lhs.code() == rhs;
   }
-constexpr bool operator!=(const Parser_Error &lhs, Parser_Error::Code rhs) noexcept
+constexpr bool operator!=(const Parser_Error& lhs, Parser_Error::Code rhs) noexcept
   {
     return lhs.code() != rhs;
   }
 
-constexpr bool operator==(Parser_Error::Code lhs, const Parser_Error &rhs) noexcept
+constexpr bool operator==(Parser_Error::Code lhs, const Parser_Error& rhs) noexcept
   {
     return lhs == rhs.code();
   }
-constexpr bool operator!=(Parser_Error::Code lhs, const Parser_Error &rhs) noexcept
+constexpr bool operator!=(Parser_Error::Code lhs, const Parser_Error& rhs) noexcept
   {
     return lhs != rhs.code();
   }

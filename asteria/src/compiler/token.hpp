@@ -6,8 +6,6 @@
 
 #include "../fwd.hpp"
 #include "parser_error.hpp"
-#include "../rocket/preprocessor_utilities.h"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -142,7 +140,7 @@ class Token
         index_real_literal     = 4,
         index_string_literal   = 5,
       };
-    using Variant = rocket::variant<
+    using Xvariant = Variant<
       ROCKET_CDR(
         , S_keyword          // 0,
         , S_punctuator       // 1,
@@ -151,11 +149,11 @@ class Token
         , S_real_literal     // 4,
         , S_string_literal   // 5,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   public:
-    ROCKET_PURE_FUNCTION static const char * get_keyword(Keyword keyword) noexcept;
-    ROCKET_PURE_FUNCTION static const char * get_punctuator(Punctuator punct) noexcept;
+    ROCKET_PURE_FUNCTION static const char* get_keyword(Keyword keyword) noexcept;
+    ROCKET_PURE_FUNCTION static const char* get_punctuator(Punctuator punct) noexcept;
 
   private:
     // Metadata
@@ -164,18 +162,18 @@ class Token
     std::size_t m_offset;
     std::size_t m_length;
     // Data
-    Variant m_stor;
+    Xvariant m_stor;
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT> Token(const Cow_String &xfile, std::uint32_t xline, std::size_t xoffset, std::size_t xlength, AltT &&alt)
+    template<typename AltT> Token(const Cow_String& xfile, std::uint32_t xline, std::size_t xoffset, std::size_t xlength, AltT&& alt)
       : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
         m_stor(std::forward<AltT>(alt))
       {
       }
 
   public:
-    const Cow_String & file() const noexcept
+    const Cow_String& file() const noexcept
       {
         return this->m_file;
       }
@@ -196,19 +194,19 @@ class Token
       {
         return static_cast<Index>(this->m_stor.index());
       }
-    template<typename AltT> const AltT * opt() const noexcept
+    template<typename AltT> const AltT* opt() const noexcept
       {
         return this->m_stor.get<AltT>();
       }
-    template<typename AltT> const AltT & check() const
+    template<typename AltT> const AltT& check() const
       {
         return this->m_stor.as<AltT>();
       }
 
-    void print(std::ostream &os) const;
+    void print(std::ostream& os) const;
   };
 
-inline std::ostream & operator<<(std::ostream &os, const Token &token)
+inline std::ostream& operator<<(std::ostream& os, const Token& token)
   {
     token.print(os);
     return os;

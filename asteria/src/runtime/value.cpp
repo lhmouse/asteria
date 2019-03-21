@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-const char * Value::get_type_name(Value_Type etype) noexcept
+const char* Value::get_type_name(Value_Type etype) noexcept
   {
     switch(etype) {
     case type_null:
@@ -61,10 +61,10 @@ const char * Value::get_type_name(Value_Type etype) noexcept
 
     }  // namespace
 
-const Value & Value::get_null() noexcept
+const Value& Value::get_null() noexcept
   {
-    auto vptr = static_cast<const void *>(s_null.bytes);
-    return *static_cast<const Value *>(vptr);
+    auto vptr = static_cast<const void*>(s_null.bytes);
+    return *static_cast<const Value*>(vptr);
   }
 
 bool Value::test() const noexcept
@@ -110,7 +110,7 @@ bool Value::test() const noexcept
 
     namespace {
 
-    template<typename ElementT> Value::Compare do_three_way_compare(const ElementT &lhs, const ElementT &rhs)
+    template<typename ElementT> Value::Compare do_three_way_compare(const ElementT& lhs, const ElementT& rhs)
       {
         if(lhs < rhs) {
           return Value::compare_less;
@@ -142,7 +142,7 @@ bool Value::test() const noexcept
 
     }  // namespace
 
-Value::Compare Value::compare(const Value &other) const noexcept
+Value::Compare Value::compare(const Value& other) const noexcept
   {
     // Values of different types can only be compared if either of them is `null`.
     if(this->type() != other.type()) {
@@ -163,20 +163,20 @@ Value::Compare Value::compare(const Value &other) const noexcept
       }
     case type_boolean:
       {
-        const auto &lhs = this->check<D_boolean>();
-        const auto &rhs = other.check<D_boolean>();
+        const auto& lhs = this->check<D_boolean>();
+        const auto& rhs = other.check<D_boolean>();
         return do_three_way_compare(lhs, rhs);
       }
     case type_integer:
       {
-        const auto &lhs = this->check<D_integer>();
-        const auto &rhs = other.check<D_integer>();
+        const auto& lhs = this->check<D_integer>();
+        const auto& rhs = other.check<D_integer>();
         return do_three_way_compare(lhs, rhs);
       }
     case type_real:
       {
-        const auto &lhs = this->check<D_real>();
-        const auto &rhs = other.check<D_real>();
+        const auto& lhs = this->check<D_real>();
+        const auto& rhs = other.check<D_real>();
         if(std::isunordered(lhs, rhs)) {
           return Value::compare_unordered;
         }
@@ -184,8 +184,8 @@ Value::Compare Value::compare(const Value &other) const noexcept
       }
     case type_string:
       {
-        const auto &lhs = this->check<D_string>();
-        const auto &rhs = other.check<D_string>();
+        const auto& lhs = this->check<D_string>();
+        const auto& rhs = other.check<D_string>();
         return do_three_way_compare(lhs.compare(rhs), 0);
       }
     case type_opaque:
@@ -195,8 +195,8 @@ Value::Compare Value::compare(const Value &other) const noexcept
       }
     case type_array:
       {
-        const auto &lhs = this->check<D_array>();
-        const auto &rhs = other.check<D_array>();
+        const auto& lhs = this->check<D_array>();
+        const auto& rhs = other.check<D_array>();
         // Compare elements lexicographically.
         auto nlhs = lhs.size();
         auto nrhs = rhs.size();
@@ -225,7 +225,7 @@ Value::Compare Value::compare(const Value &other) const noexcept
     }
   }
 
-void Value::print(std::ostream &os) const
+void Value::print(std::ostream& os) const
   {
     switch(this->type()) {
     case type_null:
@@ -236,49 +236,49 @@ void Value::print(std::ostream &os) const
       }
     case type_boolean:
       {
-        const auto &alt = this->check<D_boolean>();
+        const auto& alt = this->check<D_boolean>();
         // true
         os << std::boolalpha << std::nouppercase << alt;
         return;
       }
     case type_integer:
       {
-        const auto &alt = this->check<D_integer>();
+        const auto& alt = this->check<D_integer>();
         // 42
         os << std::dec << alt;
         return;
       }
     case type_real:
       {
-        const auto &alt = this->check<D_real>();
+        const auto& alt = this->check<D_real>();
         // 123.456
         os << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
         return;
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
+        const auto& alt = this->check<D_string>();
         // hello
         os << alt;
         return;
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
+        const auto& alt = this->check<D_opaque>();
         // <opaque> [[`my opaque`]]
         os << "<opaque> [[`" << alt.get() << "`]]";
         return;
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
+        const auto& alt = this->check<D_function>();
         // <function> [[`my function`]]
         os << "<function> [[`" << alt.get() << "`]]";
         return;
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
+        const auto& alt = this->check<D_array>();
         // [ 1; 2; 3; ]
         os << '[';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
@@ -291,7 +291,7 @@ void Value::print(std::ostream &os) const
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
+        const auto& alt = this->check<D_object>();
         // { "one" = 1; "two" = 2; "three" = 3; }
         os << '{';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
@@ -318,7 +318,7 @@ void Value::print(std::ostream &os) const
 
     }  // namespace
 
-void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t indent_next) const
+void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->type()) {
     case type_null:
@@ -329,49 +329,49 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
       }
     case type_boolean:
       {
-        const auto &alt = this->check<D_boolean>();
+        const auto& alt = this->check<D_boolean>();
         // boolean true
         os << "boolean " << std::boolalpha << std::nouppercase << alt;
         return;
       }
     case type_integer:
       {
-        const auto &alt = this->check<D_integer>();
+        const auto& alt = this->check<D_integer>();
         // integer 42
         os << "integer " << std::dec << alt;
         return;
       }
     case type_real:
       {
-        const auto &alt = this->check<D_real>();
+        const auto& alt = this->check<D_real>();
         // real 123.456
         os << "real " << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
         return;
       }
     case type_string:
       {
-        const auto &alt = this->check<D_string>();
+        const auto& alt = this->check<D_string>();
         // string(5) "hello"
         os << "string(" << std::dec << alt.size() << ") " << quote(alt);
         return;
       }
     case type_opaque:
       {
-        const auto &alt = this->check<D_opaque>();
+        const auto& alt = this->check<D_opaque>();
         // opaque("typeid") [[`my opaque`]]
         os << "opaque(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
     case type_function:
       {
-        const auto &alt = this->check<D_function>();
+        const auto& alt = this->check<D_function>();
         // function("typeid") [[`my function`]]
         os << "function(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
     case type_array:
       {
-        const auto &alt = this->check<D_array>();
+        const auto& alt = this->check<D_array>();
         // array(3) =
         //  [
         //   0 = integer 1;
@@ -390,7 +390,7 @@ void Value::dump(std::ostream &os, std::size_t indent_increment, std::size_t ind
       }
     case type_object:
       {
-        const auto &alt = this->check<D_object>();
+        const auto& alt = this->check<D_object>();
         // object(3) =
         //  {
         //   "one" = integer 1;
@@ -485,7 +485,7 @@ long Value::use_count() const noexcept
     }
   }
 
-void Value::enumerate_variables(const Abstract_Variable_Callback &callback) const
+void Value::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     switch(this->type()) {
     case type_null:
@@ -508,12 +508,12 @@ void Value::enumerate_variables(const Abstract_Variable_Callback &callback) cons
       }
     case type_array:
       {
-        rocket::for_each(this->check<D_array>(), [&](const auto &elem) { elem.enumerate_variables(callback);  });
+        rocket::for_each(this->check<D_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  });
         return;
       }
     case type_object:
       {
-        rocket::for_each(this->check<D_object>(), [&](const auto &pair) { pair.second.enumerate_variables(callback);  });
+        rocket::for_each(this->check<D_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
         return;
       }
     default:

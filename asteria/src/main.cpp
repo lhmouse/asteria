@@ -11,7 +11,7 @@
 
 using namespace Asteria;
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
   try {
     Cow_Vector<Reference> args;
     for(int i = 0; i < argc; ++i) {
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     std::cout << res.read() << std::endl;
     // finish.
     return 0;
-  } catch(Traceable_Exception &e) {
+  } catch(Traceable_Exception& e) {
     // print the exception.
     std::cerr << std::endl
               << "---" << std::endl
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
                 << "at '" << e.get_frame(i).source_location() << "']" << std::endl;
     }
     return 1;
-  } catch(std::exception &e) {
+  } catch(std::exception& e) {
     // print the exception.
     std::cerr << std::endl
               << "---" << std::endl

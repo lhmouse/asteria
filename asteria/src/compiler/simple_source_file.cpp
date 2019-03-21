@@ -14,14 +14,14 @@
 
 namespace Asteria {
 
-Parser_Error Simple_Source_File::do_reload_file(bool throw_on_failure, const Cow_String &filename)
+Parser_Error Simple_Source_File::do_reload_file(bool throw_on_failure, const Cow_String& filename)
   {
     std::ifstream ifstrm(filename.c_str());
     auto err = this->do_reload_stream(throw_on_failure, ifstrm, filename);
     return err;
   }
 
-Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::istream &cstrm_io, const Cow_String &filename)
+Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::istream& cstrm_io, const Cow_String& filename)
   {
     // Use default options.
     static constexpr Parser_Options options = { };
@@ -50,14 +50,14 @@ Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::is
     Cow_Vector<Air_Node> code_func;
     Analytic_Context ctx_func(nullptr);
     ctx_func.prepare_function_parameters(params);
-    rocket::for_each(parser.get_statements(), [&](const Statement &stmt) { stmt.generate_code(code_func, nullptr, ctx_func);  });
+    rocket::for_each(parser.get_statements(), [&](const Statement& stmt) { stmt.generate_code(code_func, nullptr, ctx_func);  });
     // Accept the code.
     this->m_codev.clear();
     this->m_codev.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code_func));
     return Parser_Error(0, 0, 0, Parser_Error::code_success);
   }
 
-Reference Simple_Source_File::execute(const Global_Context &global, Cow_Vector<Reference> &&args) const
+Reference Simple_Source_File::execute(const Global_Context& global, Cow_Vector<Reference>&& args) const
   {
     // This is initialized to `null`.
     Reference result;

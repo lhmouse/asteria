@@ -50,12 +50,12 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
     ~basic_insertable_istream() override;
 
   public:
-    streambuf_type * rdbuf() const noexcept
+    streambuf_type* rdbuf() const noexcept
       {
         return &(this->m_sb);
       }
 
-    const string_type & get_string() const
+    const string_type& get_string() const
       {
         return this->rdbuf()->get_string();
       }

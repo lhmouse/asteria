@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexcept
+const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcept
   {
     switch(xcode) {
       // Special
@@ -210,7 +210,7 @@ const char * Parser_Error::get_code_description(Parser_Error::Code xcode) noexce
     }
   }
 
-void Parser_Error::convert_to_runtime_error_and_throw(const Parser_Error &err)
+void Parser_Error::convert_to_runtime_error_and_throw(const Parser_Error& err)
   {
     rocket::insertable_ostream mos;
     mos << "An error was encountered while parsing source data: " << Parser_Error::get_code_description(err.code());

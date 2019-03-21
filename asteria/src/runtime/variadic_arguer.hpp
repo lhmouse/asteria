@@ -19,25 +19,25 @@ class Variadic_Arguer : public Abstract_Function
     Cow_Vector<Reference> m_vargs;
 
   public:
-    template<typename ...XvargsT> Variadic_Arguer(const Source_Location &sloc, const PreHashed_String &func,
-                                                  XvargsT &&...xvargs)
+    template<typename... XvargsT> Variadic_Arguer(const Source_Location& sloc, const PreHashed_String& func,
+                                                  XvargsT&&... xvargs)
       : m_sloc(sloc), m_func(func),
         m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
-    template<typename ...XvargsT> Variadic_Arguer(const Variadic_Arguer &other,
-                                                  XvargsT &&...xvargs)
+    template<typename... XvargsT> Variadic_Arguer(const Variadic_Arguer& other,
+                                                  XvargsT&&... xvargs)
       : m_sloc(other.m_sloc), m_func(other.m_func),
         m_vargs(std::forward<XvargsT>(xvargs)...)
       {
       }
 
   public:
-    const Source_Location & get_source_location() const noexcept
+    const Source_Location& get_source_location() const noexcept
       {
         return this->m_sloc;
       }
-    const Cow_String & get_source_file() const noexcept
+    const Cow_String& get_source_file() const noexcept
       {
         return this->m_sloc.file();
       }
@@ -45,7 +45,7 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_sloc.line();
       }
-    const PreHashed_String & get_function_signature() const noexcept
+    const PreHashed_String& get_function_signature() const noexcept
       {
         return this->m_func;
       }
@@ -53,14 +53,14 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_vargs.size();
       }
-    const Reference & get_argument(std::size_t index) const
+    const Reference& get_argument(std::size_t index) const
       {
         return this->m_vargs.at(index);
       }
 
-    void describe(std::ostream &os) const override;
-    void invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const override;
-    void enumerate_variables(const Abstract_Variable_Callback &callback) const override;
+    void describe(std::ostream& os) const override;
+    void invoke(Reference& self_io, const Global_Context& global, Cow_Vector<Reference>&& args) const override;
+    void enumerate_variables(const Abstract_Variable_Callback& callback) const override;
   };
 
 }  // namespace Asteria

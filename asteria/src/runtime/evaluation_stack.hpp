@@ -21,9 +21,9 @@ class Evaluation_Stack
       }
     virtual ~Evaluation_Stack();
 
-    Evaluation_Stack(const Evaluation_Stack &)
+    Evaluation_Stack(const Evaluation_Stack&)
       = delete;
-    Evaluation_Stack & operator=(const Evaluation_Stack &)
+    Evaluation_Stack& operator=(const Evaluation_Stack&)
       = delete;
 
   public:
@@ -36,15 +36,15 @@ class Evaluation_Stack
         this->m_refs.clear();
       }
 
-    const Reference & get_top_reference() const noexcept
+    const Reference& get_top_reference() const noexcept
       {
         return this->m_refs.get(0);
       }
-    Reference & open_top_reference() noexcept
+    Reference& open_top_reference() noexcept
       {
         return this->m_refs.mut(0);
       }
-    template<typename ParamT> Reference & push_reference(ParamT &&param)
+    template<typename ParamT> Reference& push_reference(ParamT&& param)
       {
         return this->m_refs.push(std::forward<ParamT>(param));
       }
@@ -53,7 +53,7 @@ class Evaluation_Stack
         this->m_refs.pop();
       }
 
-    void set_last_variable(Rcptr<Variable> &&var_opt) noexcept
+    void set_last_variable(Rcptr<Variable>&& var_opt) noexcept
       {
         this->m_lvar_opt = rocket::move(var_opt);
       }
@@ -64,7 +64,7 @@ class Evaluation_Stack
 
     // These are auxiliary functions purely for evaluation of expressions/
     // Do not play with these at home.
-    void set_temporary_result(bool assign, Value &&value);
+    void set_temporary_result(bool assign, Value&& value);
     void forward_result(bool assign);
   };
 

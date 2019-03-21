@@ -15,13 +15,13 @@ class Source_Location
     std::uint32_t m_line;
 
   public:
-    Source_Location(const Cow_String &xfile, std::uint32_t xline) noexcept
+    Source_Location(const Cow_String& xfile, std::uint32_t xline) noexcept
       : m_file(xfile), m_line(xline)
       {
       }
 
   public:
-    const Cow_String & file() const noexcept
+    const Cow_String& file() const noexcept
       {
         return this->m_file;
       }
@@ -30,10 +30,10 @@ class Source_Location
         return this->m_line;
       }
 
-    void print(std::ostream &os) const;
+    void print(std::ostream& os) const;
   };
 
-inline std::ostream & operator<<(std::ostream &os, const Source_Location &sloc)
+inline std::ostream& operator<<(std::ostream& os, const Source_Location& sloc)
   {
     sloc.print(os);
     return os;

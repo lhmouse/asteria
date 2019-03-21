@@ -6,7 +6,7 @@
 
 namespace Asteria {
 
-void Source_Location::print(std::ostream &os) const
+void Source_Location::print(std::ostream& os) const
   {
     os << this->file() << ':' << this->line();
   }

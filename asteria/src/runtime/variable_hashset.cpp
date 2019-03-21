@@ -17,7 +17,7 @@ Variable_HashSet::Bucket::operator bool () const noexcept
     return this->first != nullptr;
   }
 
-void Variable_HashSet::Bucket::do_attach(Variable_HashSet::Bucket *ipos) noexcept
+void Variable_HashSet::Bucket::do_attach(Variable_HashSet::Bucket* ipos) noexcept
   {
     auto iprev = ipos->prev;
     auto inext = ipos;
@@ -79,11 +79,11 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
     // In reality the first reserved bucket need not be moved, either.
     // But `.empty()` is faster than `.size()`...
     while(!stor.empty()) {
-      auto &rbkt = stor.mut_back();
+      auto& rbkt = stor.mut_back();
       if(ROCKET_UNEXPECT(rbkt)) {
         // Find a bucket for the new element.
         auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.first.get()));
-        auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false;  });
+        auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket&) { return false;  });
         ROCKET_ASSERT(bkt);
         // Insert it into the new bucket.
         ROCKET_ASSERT(!*bkt);
@@ -96,7 +96,7 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
     }
   }
 
-void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
+void Variable_HashSet::do_check_relocation(Bucket* to, Bucket* from)
   {
     // Get table bounds.
     auto pre = this->m_stor.mut_data();
@@ -106,7 +106,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
       // Only probe non-erased buckets.
       pre + 1, to, from, end,
       // Relocate every bucket found.
-      [&](Bucket &rbkt)
+      [&](Bucket& rbkt)
         {
           Rcptr<Variable> var;
           // Release the old element.
@@ -114,7 +114,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
           var.swap(rbkt.first);
           // Find a new bucket for it using linear probing.
           auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-          auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &) { return false;  });
+          auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket&) { return false;  });
           ROCKET_ASSERT(bkt);
           // Insert it into the new bucket.
           ROCKET_ASSERT(!*bkt);
@@ -125,7 +125,7 @@ void Variable_HashSet::do_check_relocation(Bucket *to, Bucket *from)
       );
   }
 
-bool Variable_HashSet::has(const Rcptr<Variable> &var) const noexcept
+bool Variable_HashSet::has(const Rcptr<Variable>& var) const noexcept
   {
     if(ROCKET_UNEXPECT(!var)) {
       return false;
@@ -138,7 +138,7 @@ bool Variable_HashSet::has(const Rcptr<Variable> &var) const noexcept
     auto end = pre + (this->m_stor.size() - 1);
     // Find the element using linear probing.
     auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
+    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket& rbkt) { return rbkt.first == var;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(!*bkt) {
@@ -148,7 +148,7 @@ bool Variable_HashSet::has(const Rcptr<Variable> &var) const noexcept
     return true;
   }
 
-void Variable_HashSet::for_each(const Abstract_Variable_Callback &callback) const
+void Variable_HashSet::for_each(const Abstract_Variable_Callback& callback) const
   {
     if(ROCKET_UNEXPECT(this->m_stor.empty())) {
       return;
@@ -163,7 +163,7 @@ void Variable_HashSet::for_each(const Abstract_Variable_Callback &callback) cons
     }
   }
 
-bool Variable_HashSet::insert(const Rcptr<Variable> &var)
+bool Variable_HashSet::insert(const Rcptr<Variable>& var)
   {
     if(ROCKET_UNEXPECT(!var)) {
       ASTERIA_THROW_RUNTIME_ERROR("Null variable pointers are not allowed in a `Variable_HashSet`.");
@@ -176,7 +176,7 @@ bool Variable_HashSet::insert(const Rcptr<Variable> &var)
     auto end = pre + (this->m_stor.size() - 1);
     // Find a bucket for the new element.
     auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
+    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket& rbkt) { return rbkt.first == var;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(*bkt) {
@@ -191,7 +191,7 @@ bool Variable_HashSet::insert(const Rcptr<Variable> &var)
     return true;
   }
 
-bool Variable_HashSet::erase(const Rcptr<Variable> &var) noexcept
+bool Variable_HashSet::erase(const Rcptr<Variable>& var) noexcept
   {
     if(ROCKET_UNEXPECT(!var)) {
       return false;
@@ -204,7 +204,7 @@ bool Variable_HashSet::erase(const Rcptr<Variable> &var) noexcept
     auto end = pre + (this->m_stor.size() - 1);
     // Find the element using linear probing.
     auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(var.get()));
-    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket &rbkt) { return rbkt.first == var;  });
+    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket& rbkt) { return rbkt.first == var;  });
     // There will always be some empty buckets in the table.
     ROCKET_ASSERT(bkt);
     if(!*bkt) {

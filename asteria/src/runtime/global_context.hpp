@@ -39,7 +39,7 @@ class Global_Context : public Abstract_Context
       {
         return false;
       }
-    const Abstract_Context * get_parent_opt() const noexcept override
+    const Abstract_Context* get_parent_opt() const noexcept override
       {
         return nullptr;
       }
@@ -52,9 +52,9 @@ class Global_Context : public Abstract_Context
     bool collect_variables(unsigned gen_limit = 0x7F) const;
 
     // These are interfaces of the standard library.
-    const Value & get_std_member(const PreHashed_String &name) const;
-    Value & open_std_member(const PreHashed_String &name);
-    bool remove_std_member(const PreHashed_String &name);
+    const Value& get_std_member(const PreHashed_String& name) const;
+    Value& open_std_member(const PreHashed_String& name);
+    bool remove_std_member(const PreHashed_String& name);
   };
 
 }  // namespace Asteria

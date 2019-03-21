@@ -52,21 +52,21 @@ bool Global_Context::collect_variables(unsigned gen_limit) const
     return collector->collect_variables(gen_limit);
   }
 
-const Value & Global_Context::get_std_member(const PreHashed_String &name) const
+const Value& Global_Context::get_std_member(const PreHashed_String& name) const
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
     return std_var->get_value().check<D_object>().get_or(name, Value::get_null());
   }
 
-Value & Global_Context::open_std_member(const PreHashed_String &name)
+Value& Global_Context::open_std_member(const PreHashed_String& name)
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
     return std_var->open_value().check<D_object>()[name];
   }
 
-bool Global_Context::remove_std_member(const PreHashed_String &name)
+bool Global_Context::remove_std_member(const PreHashed_String& name)
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);

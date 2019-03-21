@@ -13,7 +13,7 @@ int main()
       except.append_frame(Source_Location(rocket::sref("file2"), 2), rocket::sref("func2"));
       except.append_frame(Source_Location(rocket::sref("file3"), 3), rocket::sref("func3"));
       throw except;
-    } catch(Traceable_Exception &e) {
+    } catch(Traceable_Exception& e) {
       ASTERIA_TEST_CHECK(e.get_value().check<D_integer>() == 42);
       ASTERIA_TEST_CHECK(e.get_frame_count() == 3);
       ASTERIA_TEST_CHECK(e.get_frame(0).source_file() ==        "file1");

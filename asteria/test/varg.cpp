@@ -27,7 +27,7 @@ int main()
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     auto res = code.execute(global, { });
-    auto &array = res.read().check<D_array>();
+    auto& array = res.read().check<D_array>();
     ASTERIA_TEST_CHECK(array.size() == 5);
     ASTERIA_TEST_CHECK(array.at(0).check<D_array>().at(0).check<D_integer>() == 0);
     ASTERIA_TEST_CHECK(array.at(0).check<D_array>().at(1).check<D_null>() == nullptr);

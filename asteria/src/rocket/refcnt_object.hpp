@@ -20,39 +20,39 @@ template<typename elementT> class refcnt_object
     refcnt_ptr<element_type> m_ptr;
 
   public:
-    template<typename ...paramsT, ROCKET_ENABLE_IF(is_constructible<element_type,
-                                                                    paramsT &&...>::value)> explicit refcnt_object(paramsT &&...params)
+    template<typename... paramsT, ROCKET_ENABLE_IF(is_constructible<element_type,
+                                                                    paramsT&&...>::value)> explicit refcnt_object(paramsT&&... params)
       : m_ptr(noadl::make_refcnt<element_type>(::std::forward<paramsT>(params)...))
       {
       }
     // We shall not leave a null pointer in `other`, so this serves as both the copy constructor and the move constructor.
-    refcnt_object(const refcnt_object &other) noexcept
+    refcnt_object(const refcnt_object& other) noexcept
       : m_ptr(other.m_ptr)
       {
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_object(const refcnt_object<yelementT> &other) noexcept
+                                                                 pointer>::value)> refcnt_object(const refcnt_object<yelementT>& other) noexcept
       : m_ptr(other.m_ptr)
       {
       }
-    refcnt_object & operator=(const refcnt_object &other) noexcept
+    refcnt_object& operator=(const refcnt_object& other) noexcept
       {
         this->m_ptr = other.m_ptr;
         return *this;
       }
-    refcnt_object & operator=(refcnt_object &&other) noexcept
+    refcnt_object& operator=(refcnt_object&& other) noexcept
       {
         this->m_ptr.swap(other.m_ptr);  // We shall not leave a null pointer in `other`.
         return *this;
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_object & operator=(const refcnt_object<yelementT> &other) noexcept
+                                                                 pointer>::value)> refcnt_object& operator=(const refcnt_object<yelementT>& other) noexcept
       {
         this->m_ptr = other.m_ptr;
         return *this;
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_object & operator=(refcnt_object<yelementT> &&other) noexcept
+                                                                 pointer>::value)> refcnt_object& operator=(refcnt_object<yelementT>&& other) noexcept
       {
         this->m_ptr.swap(other.m_ptr);  // We shall not leave a null pointer in `other`.
         return *this;
@@ -68,11 +68,11 @@ template<typename elementT> class refcnt_object
         return this->m_ptr.use_count();
       }
 
-    constexpr const element_type & get() const noexcept
+    constexpr const element_type& get() const noexcept
       {
         return *(this->m_ptr);
       }
-    element_type & mut() noexcept
+    element_type& mut() noexcept
       {
         return *(this->m_ptr);
       }
@@ -81,16 +81,16 @@ template<typename elementT> class refcnt_object
         return this->m_ptr;
       }
 
-    void swap(refcnt_object &other) noexcept
+    void swap(refcnt_object& other) noexcept
       {
         this->m_ptr.swap(other.m_ptr);
       }
 
-    constexpr operator const element_type & () const noexcept
+    constexpr operator const element_type& () const noexcept
       {
         return this->get();
       }
-    constexpr const element_type & operator*() const noexcept
+    constexpr const element_type& operator*() const noexcept
       {
         return this->get();
       }
@@ -100,15 +100,15 @@ template<typename elementT> class refcnt_object
       }
   };
 
-template<typename elementT> inline void swap(refcnt_object<elementT> &lhs,
-                                             refcnt_object<elementT> &rhs) noexcept
+template<typename elementT> inline void swap(refcnt_object<elementT>& lhs,
+                                             refcnt_object<elementT>& rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,
-         typename elementT> inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os,
-                                                                              const refcnt_object<elementT> &rhs)
+         typename elementT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+                                                                              const refcnt_object<elementT>& rhs)
   {
     return os << rhs.get();
   }

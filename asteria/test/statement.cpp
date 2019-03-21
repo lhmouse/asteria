@@ -84,11 +84,11 @@ int main()
     // Generate code.
     Cow_Vector<Air_Node> stmt_code;
     Analytic_Context actx(&ctx);
-    rocket::for_each(text, [&](const Statement &stmt) { stmt.generate_code(stmt_code, nullptr, actx);  });
+    rocket::for_each(text, [&](const Statement& stmt) { stmt.generate_code(stmt_code, nullptr, actx);  });
 
     auto status = Air_Node::status_next;
     Evaluation_Stack stack;
-    rocket::any_of(stmt_code, [&](const Air_Node &node) { return (status = node.execute(stack, ctx, rocket::sref("dummy_function"), global)) != Air_Node::status_next;  });
+    rocket::any_of(stmt_code, [&](const Air_Node& node) { return (status = node.execute(stack, ctx, rocket::sref("dummy_function"), global)) != Air_Node::status_next;  });
     ASTERIA_TEST_CHECK(status == Air_Node::status_next);
     auto qref = ctx.get_named_reference_opt(rocket::sref("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);

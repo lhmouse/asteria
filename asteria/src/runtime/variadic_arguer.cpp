@@ -8,12 +8,12 @@
 
 namespace Asteria {
 
-void Variadic_Arguer::describe(std::ostream &os) const
+void Variadic_Arguer::describe(std::ostream& os) const
   {
     os << "<builtin>.__varg() @ " << this->m_sloc;
   }
 
-void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) const
+void Variadic_Arguer::invoke(Reference& self_io, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) const
   {
     Argument_Reader reader(rocket::sref("<builtin>.__varg"), args);
     // `__varg()`
@@ -41,9 +41,9 @@ void Variadic_Arguer::invoke(Reference &self_io, const Global_Context & /*global
     reader.throw_no_matching_function_call();
   }
 
-void Variadic_Arguer::enumerate_variables(const Abstract_Variable_Callback &callback) const
+void Variadic_Arguer::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    rocket::for_each(this->m_vargs, [&](const Reference &arg) { arg.enumerate_variables(callback);  });
+    rocket::for_each(this->m_vargs, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
   }
 
 }  // namespace Asteria

@@ -12,8 +12,8 @@ namespace Asteria {
 class Collector
   {
   private:
-    Variable_HashSet *m_output_opt;
-    Collector *m_tied_opt;
+    Variable_HashSet* m_output_opt;
+    Collector* m_tied_opt;
     unsigned m_threshold;
 
     unsigned m_counter;
@@ -22,35 +22,35 @@ class Collector
     Variable_HashSet m_staging;
 
   public:
-    Collector(Variable_HashSet *output_opt, Collector *tied_opt, unsigned threshold) noexcept
+    Collector(Variable_HashSet* output_opt, Collector* tied_opt, unsigned threshold) noexcept
       : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold),
         m_counter(0), m_recur(0)
       {
       }
 
-    Collector(const Collector &)
+    Collector(const Collector&)
       = delete;
-    Collector & operator=(const Collector &)
+    Collector& operator=(const Collector&)
       = delete;
 
   private:
-    Collector * do_collect_once();
+    Collector* do_collect_once();
 
   public:
-    Variable_HashSet * get_output_pool_opt() const noexcept
+    Variable_HashSet* get_output_pool_opt() const noexcept
       {
         return this->m_output_opt;
       }
-    void set_output_pool(Variable_HashSet *output_opt) noexcept
+    void set_output_pool(Variable_HashSet* output_opt) noexcept
       {
         this->m_output_opt = output_opt;
       }
 
-    Collector * get_tied_collector_opt() const noexcept
+    Collector* get_tied_collector_opt() const noexcept
       {
         return this->m_tied_opt;
       }
-    void tie_collector(Collector *tied_opt) noexcept
+    void tie_collector(Collector* tied_opt) noexcept
       {
         this->m_tied_opt = tied_opt;
       }
@@ -68,8 +68,8 @@ class Collector
       {
         return this->m_tracked.size();
       }
-    bool track_variable(const Rcptr<Variable> &var);
-    bool untrack_variable(const Rcptr<Variable> &var) noexcept;
+    bool track_variable(const Rcptr<Variable>& var);
+    bool untrack_variable(const Rcptr<Variable>& var) noexcept;
     void collect();
   };
 

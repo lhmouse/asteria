@@ -38,9 +38,9 @@ class Formatter
     ~Formatter();
 
   private:
-    std::ostream & do_open_stream();
+    std::ostream& do_open_stream();
 
-    template<typename ValueT> void do_put(const ValueT &value)
+    template<typename ValueT> void do_put(const ValueT& value)
       {
         this->do_open_stream() << value;
       }
@@ -92,25 +92,25 @@ class Formatter
       {
         this->do_open_stream() << value;
       }
-    void do_put(const char *value)
+    void do_put(const char* value)
       {
         this->do_open_stream() << value;
       }
-    void do_put(const signed char *value)
+    void do_put(const signed char* value)
       {
-        this->do_open_stream() << static_cast<const void *>(value);
+        this->do_open_stream() << static_cast<const void*>(value);
       }
-    void do_put(const unsigned char *value)
+    void do_put(const unsigned char* value)
       {
-        this->do_open_stream() << static_cast<const void *>(value);
+        this->do_open_stream() << static_cast<const void*>(value);
       }
-    void do_put(const void *value)
+    void do_put(const void* value)
       {
         this->do_open_stream() << value;
       }
 
   public:
-    template<typename ValueT> Formatter & operator,(const ValueT &value) noexcept
+    template<typename ValueT> Formatter& operator,(const ValueT& value) noexcept
       try {
         this->do_put(value);
         return *this;
@@ -126,7 +126,7 @@ class Formatter
 #define ASTERIA_XFORMAT_(...)      ((::Asteria::Formatter(), __VA_ARGS__).extract_string())
 
 extern bool are_debug_logs_enabled() noexcept;
-extern bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) noexcept;
+extern bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) noexcept;
 
 // If `are_debug_logs_enabled()` returns `true`, evaluate arguments and write the result to `std::cerr`; otherwise, do nothing.
 #define ASTERIA_DEBUG_LOG(...)     ASTERIA_AND_(ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()),  \
@@ -146,24 +146,24 @@ class Runtime_Error : public virtual std::exception
     rocket::cow_string m_msg;
 
   public:
-    explicit Runtime_Error(const rocket::cow_string &msg) noexcept
+    explicit Runtime_Error(const rocket::cow_string& msg) noexcept
       : m_msg(msg)
       {
       }
-    explicit Runtime_Error(rocket::cow_string &&msg) noexcept
+    explicit Runtime_Error(rocket::cow_string&& msg) noexcept
       : m_msg(rocket::move(msg))
       {
       }
     ~Runtime_Error() override;
 
   public:
-    const char * what() const noexcept override
+    const char* what() const noexcept override
       {
         return this->m_msg.c_str();
       }
   };
 
-[[noreturn]] extern bool throw_runtime_error(const char *func, rocket::cow_string &&msg);
+[[noreturn]] extern bool throw_runtime_error(const char* func, rocket::cow_string&& msg);
 
 // Evaluate arguments to create a string, then throw an exception containing this string.
 #define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
@@ -201,7 +201,7 @@ constexpr Indent indent(char head, std::size_t count) noexcept
     return Indent(head, count);
   }
 
-extern std::ostream & operator<<(std::ostream &os, const Indent &n);
+extern std::ostream& operator<<(std::ostream& os, const Indent& n);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Quote
@@ -210,17 +210,17 @@ extern std::ostream & operator<<(std::ostream &os, const Indent &n);
 class Quote
   {
   private:
-    const char *m_data;
+    const char* m_data;
     std::size_t m_size;
 
   public:
-    constexpr Quote(const char *xdata, std::size_t xsize) noexcept
+    constexpr Quote(const char* xdata, std::size_t xsize) noexcept
       : m_data(xdata), m_size(xsize)
       {
       }
 
   public:
-    const char * data() const noexcept
+    const char* data() const noexcept
       {
         return this->m_data;
       }
@@ -230,20 +230,20 @@ class Quote
       }
   };
 
-constexpr Quote quote(const char *data, std::size_t size) noexcept
+constexpr Quote quote(const char* data, std::size_t size) noexcept
   {
     return Quote(data, size);
   }
-inline Quote quote(const char *str) noexcept
+inline Quote quote(const char* str) noexcept
   {
     return Quote(str, std::char_traits<char>::length(str));
   }
-inline Quote quote(const rocket::cow_string &str) noexcept
+inline Quote quote(const rocket::cow_string& str) noexcept
   {
     return Quote(str.data(), str.size());
   }
 
-extern std::ostream & operator<<(std::ostream &os, const Quote &q);
+extern std::ostream& operator<<(std::ostream& os, const Quote& q);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Wrappable Index

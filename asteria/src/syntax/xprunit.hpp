@@ -8,8 +8,6 @@
 #include "source_location.hpp"
 #include "../runtime/value.hpp"
 #include "../runtime/reference.hpp"
-#include "../rocket/preprocessor_utilities.h"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -117,7 +115,7 @@ class Xprunit
         index_unnamed_object    =  8,
         index_coalescence       =  9,
       };
-    using Variant = rocket::variant<
+    using Xvariant = Variant<
       ROCKET_CDR(
         , S_literal           //  0,
         , S_named_reference   //  1,
@@ -130,29 +128,29 @@ class Xprunit
         , S_unnamed_object    //  8,
         , S_coalescence       //  9,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   public:
-    ROCKET_PURE_FUNCTION static const char * get_operator_name(Xop xop) noexcept;
+    ROCKET_PURE_FUNCTION static const char* get_operator_name(Xop xop) noexcept;
 
   private:
-    Variant m_stor;
+    Xvariant m_stor;
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Xprunit(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Xprunit(AltT&& alt)
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Xprunit & operator=(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Xprunit& operator=(AltT&& alt)
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
       }
 
   public:
-    void generate_code(Cow_Vector<Air_Node> &code_out, const Analytic_Context &ctx) const;
+    void generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Context& ctx) const;
   };
 
 }  // namespace Asteria

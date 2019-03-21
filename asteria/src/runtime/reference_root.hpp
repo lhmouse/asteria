@@ -7,8 +7,6 @@
 #include "../fwd.hpp"
 #include "value.hpp"
 #include "variable.hpp"
-#include "../rocket/preprocessor_utilities.h"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -38,17 +36,17 @@ class Reference_Root
         index_temporary  = 2,
         index_variable   = 3,
       };
-    using Variant = rocket::variant<
+    using Xvariant = Variant<
       ROCKET_CDR(
         , S_null       // 0,
         , S_constant   // 1,
         , S_temporary  // 2,
         , S_variable   // 3,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   private:
-    Variant m_stor;
+    Xvariant m_stor;
 
   public:
     Reference_Root() noexcept
@@ -56,12 +54,12 @@ class Reference_Root
       {
       }
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Root(AltT &&alt) noexcept
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Reference_Root(AltT&& alt) noexcept
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Root & operator=(AltT &&alt) noexcept
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Reference_Root& operator=(AltT&& alt) noexcept
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
@@ -72,18 +70,18 @@ class Reference_Root
       {
         return static_cast<Index>(this->m_stor.index());
       }
-    template<typename AltT> const AltT * opt() const noexcept
+    template<typename AltT> const AltT* opt() const noexcept
       {
         return this->m_stor.get<AltT>();
       }
-    template<typename AltT> const AltT & check() const
+    template<typename AltT> const AltT& check() const
       {
         return this->m_stor.as<AltT>();
       }
 
-    const Value & dereference_const() const;
-    Value & dereference_mutable() const;
-    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
+    const Value& dereference_const() const;
+    Value& dereference_mutable() const;
+    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
 }  // namespace Asteria

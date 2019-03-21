@@ -14,7 +14,7 @@ class Abstract_Context
   private:
     struct Collection_Trigger
       {
-        void operator()(Rcbase *base_opt) noexcept;
+        void operator()(Rcbase* base_opt) noexcept;
       };
 
   private:
@@ -28,19 +28,19 @@ class Abstract_Context
       }
     virtual ~Abstract_Context();
 
-    Abstract_Context(const Abstract_Context &)
+    Abstract_Context(const Abstract_Context&)
       = delete;
-    Abstract_Context & operator=(const Abstract_Context &)
+    Abstract_Context& operator=(const Abstract_Context&)
       = delete;
 
   public:
     void tie_collector(Rcptr<Generational_Collector> coll_opt) noexcept;
 
-    const Reference * get_named_reference_opt(const PreHashed_String &name) const
+    const Reference* get_named_reference_opt(const PreHashed_String& name) const
       {
         return this->m_named_refs.get_opt(name);
       }
-    Reference & open_named_reference(const PreHashed_String &name)
+    Reference& open_named_reference(const PreHashed_String& name)
       {
         return this->m_named_refs.open(name);
       }
@@ -50,7 +50,7 @@ class Abstract_Context
       }
 
     virtual bool is_analytic() const noexcept = 0;
-    virtual const Abstract_Context * get_parent_opt() const noexcept = 0;
+    virtual const Abstract_Context* get_parent_opt() const noexcept = 0;
   };
 
 }  // namespace Asteria

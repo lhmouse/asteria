@@ -21,9 +21,9 @@ Formatter::~Formatter()
   {
   }
 
-std::ostream & Formatter::do_open_stream()
+std::ostream& Formatter::do_open_stream()
   {
-    auto &strm = this->m_strm_opt;
+    auto& strm = this->m_strm_opt;
     if(!strm) {
       strm = rocket::make_unique<rocket::insertable_ostream>();
     }
@@ -41,7 +41,7 @@ bool are_debug_logs_enabled() noexcept
 
     namespace {
 
-    int do_ltoa_fixed(char *buf, int width, long num) noexcept
+    int do_ltoa_fixed(char* buf, int width, long num) noexcept
       {
         // Write digits from the right to the left.
         long reg = num;
@@ -54,7 +54,7 @@ bool are_debug_logs_enabled() noexcept
         return width;
       }
 
-    int do_print_timestamp(char *buf, long year, long mon, long day, long hour, long min, long sec, long msec) noexcept
+    int do_print_timestamp(char* buf, long year, long mon, long day, long hour, long min, long sec, long msec) noexcept
       {
         int len = 0;
         // YYYY-MM-DD hh:mm:ss.sss
@@ -76,10 +76,10 @@ bool are_debug_logs_enabled() noexcept
 
     }  // namespace
 
-bool write_log_to_stderr(const char *file, long line, rocket::cow_string &&msg) noexcept
+bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) noexcept
   {
     // Behaves like an UnformattedOutputFunction.
-    auto &os = std::cerr;
+    auto& os = std::cerr;
     const std::ostream::sentry sentry(os);
     if(!sentry) {
       return false;
@@ -219,7 +219,7 @@ Runtime_Error::~Runtime_Error()
   {
   }
 
-bool throw_runtime_error(const char *func, rocket::cow_string &&msg)
+bool throw_runtime_error(const char* func, rocket::cow_string&& msg)
   {
     // Append the function signature.
     msg << "\n[thrown from native function `" << func << "(...)`]";
@@ -231,7 +231,7 @@ bool throw_runtime_error(const char *func, rocket::cow_string &&msg)
 // Indent
 ///////////////////////////////////////////////////////////////////////////////
 
-std::ostream & operator<<(std::ostream &os, const Indent &n)
+std::ostream& operator<<(std::ostream& os, const Indent& n)
   {
     const std::ostream::sentry sentry(os);
     if(!sentry) {
@@ -270,7 +270,7 @@ std::ostream & operator<<(std::ostream &os, const Indent &n)
 // Quote
 ///////////////////////////////////////////////////////////////////////////////
 
-std::ostream & operator<<(std::ostream &os, const Quote &q)
+std::ostream& operator<<(std::ostream& os, const Quote& q)
   {
     const std::ostream::sentry sentry(os);
     if(!sentry) {

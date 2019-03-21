@@ -14,21 +14,21 @@ Instantiated_Function::~Instantiated_Function()
   {
   }
 
-void Instantiated_Function::describe(std::ostream &os) const
+void Instantiated_Function::describe(std::ostream& os) const
   {
     os << this->m_zvarg->get_function_signature() << " @ " << this->m_zvarg->get_source_location();
   }
 
-void Instantiated_Function::invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const
+void Instantiated_Function::invoke(Reference& self_io, const Global_Context& global, Cow_Vector<Reference>&& args) const
   {
     // Create a stack and a context for this function.
     Evaluation_Stack stack;
     Executive_Context ctx_func(nullptr);
     ctx_func.prepare_function_arguments(this->m_zvarg, this->m_params, rocket::move(self_io), rocket::move(args));
-    const auto &func = this->m_zvarg->get_function_signature();
+    const auto& func = this->m_zvarg->get_function_signature();
     // Execute AIR nodes one by one.
     auto status = Air_Node::status_next;
-    rocket::any_of(this->m_code, [&](const Air_Node &node) { return (status = node.execute(stack, ctx_func, func, global))
+    rocket::any_of(this->m_code, [&](const Air_Node& node) { return (status = node.execute(stack, ctx_func, func, global))
                                                                     != Air_Node::status_next;  });
     switch(status) {
     case Air_Node::status_next:
@@ -61,10 +61,10 @@ void Instantiated_Function::invoke(Reference &self_io, const Global_Context &glo
     }
   }
 
-void Instantiated_Function::enumerate_variables(const Abstract_Variable_Callback &callback) const
+void Instantiated_Function::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     // Enumerate all variables inside the function body.
-    rocket::for_each(this->m_code, [&](const Air_Node &node) { node.enumerate_variables(callback);  });
+    rocket::for_each(this->m_code, [&](const Air_Node& node) { node.enumerate_variables(callback);  });
   }
 
 }  // namespace Asteria

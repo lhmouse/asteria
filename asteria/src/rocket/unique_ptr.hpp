@@ -17,7 +17,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
     namespace details_unique_ptr {
 
     template<typename elementT, typename deleterT,
-             typename = void> struct pointer_of : enable_if<true, elementT *>
+             typename = void> struct pointer_of : enable_if<true, elementT*>
       {
       };
     template<typename elementT, typename deleterT
@@ -29,7 +29,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
     template<typename resultT, typename sourceT,
              typename = void> struct static_cast_or_dynamic_cast_helper
       {
-        constexpr resultT operator()(sourceT &&src) const
+        constexpr resultT operator()(sourceT&& src) const
           {
             return dynamic_cast<resultT>(::std::forward<sourceT>(src));
           }
@@ -38,7 +38,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
              > struct static_cast_or_dynamic_cast_helper<resultT, sourceT,
                                                          typename make_void<decltype(static_cast<resultT>(::std::declval<sourceT>()))>::type>
       {
-        constexpr resultT operator()(sourceT &&src) const
+        constexpr resultT operator()(sourceT&& src) const
           {
             return static_cast<resultT>(::std::forward<sourceT>(src));
           }
@@ -62,12 +62,12 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
             m_ptr()
           {
           }
-        explicit constexpr stored_pointer(const deleter_type &del) noexcept
+        explicit constexpr stored_pointer(const deleter_type& del) noexcept
           : deleter_base(del),
             m_ptr()
           {
           }
-        explicit constexpr stored_pointer(deleter_type &&del) noexcept
+        explicit constexpr stored_pointer(deleter_type&& del) noexcept
           : deleter_base(noadl::move(del)),
             m_ptr()
           {
@@ -77,19 +77,19 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
             this->reset(pointer());
           }
 
-        stored_pointer(const stored_pointer &)
+        stored_pointer(const stored_pointer&)
           = delete;
-        stored_pointer & operator=(const stored_pointer &)
+        stored_pointer& operator=(const stored_pointer&)
           = delete;
 
       public:
-        const deleter_type & as_deleter() const noexcept
+        const deleter_type& as_deleter() const noexcept
           {
-            return static_cast<const deleter_base &>(*this);
+            return static_cast<const deleter_base&>(*this);
           }
-        deleter_type & as_deleter() noexcept
+        deleter_type& as_deleter() noexcept
           {
-            return static_cast<deleter_base &>(*this);
+            return static_cast<deleter_base&>(*this);
           }
 
         constexpr pointer get() const noexcept
@@ -108,7 +108,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
             }
             this->as_deleter()(ptr_old);
           }
-        void exchange(stored_pointer &other) noexcept
+        void exchange(stored_pointer& other) noexcept
           {
             ::std::swap(this->m_ptr, other.m_ptr);
           }
@@ -116,21 +116,21 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
 
     struct static_caster
       {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT &&src)
+        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
             return static_cast<resultT>(::std::forward<sourceT>(src));
           }
       };
     struct dynamic_caster
       {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT &&src)
+        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
             return dynamic_cast<resultT>(::std::forward<sourceT>(src));
           }
       };
     struct const_caster
       {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT &&src)
+        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
             return const_cast<resultT>(::std::forward<sourceT>(src));
           }
@@ -138,7 +138,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
 
     template<typename resultptrT, typename casterT> struct pointer_cast_helper
       {
-        template<typename sourceptrT> resultptrT operator()(sourceptrT &&sptr) const
+        template<typename sourceptrT> resultptrT operator()(sourceptrT&& sptr) const
           {
             auto ptr = casterT::template do_cast<typename resultptrT::pointer>(sptr.get());
             if(!ptr) {
@@ -172,7 +172,7 @@ template<typename elementT, typename deleterT> class unique_ptr
       : m_sth()
       {
       }
-    explicit constexpr unique_ptr(const deleter_type &del) noexcept
+    explicit constexpr unique_ptr(const deleter_type& del) noexcept
       : m_sth(del)
       {
       }
@@ -181,17 +181,17 @@ template<typename elementT, typename deleterT> class unique_ptr
       {
         this->reset(ptr);
       }
-    unique_ptr(pointer ptr, const deleter_type &del) noexcept
+    unique_ptr(pointer ptr, const deleter_type& del) noexcept
       : unique_ptr(del)
       {
         this->reset(ptr);
       }
-    unique_ptr(unique_ptr &&other) noexcept
+    unique_ptr(unique_ptr&& other) noexcept
       : unique_ptr(noadl::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
       }
-    unique_ptr(unique_ptr &&other, const deleter_type &del) noexcept
+    unique_ptr(unique_ptr&& other, const deleter_type& del) noexcept
       : unique_ptr(del)
       {
         this->reset(other.m_sth.release());
@@ -200,13 +200,13 @@ template<typename elementT, typename deleterT> class unique_ptr
                                                                                                  pointer>,
                                                                                   is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type,
                                                                                                  deleter_type>>::value)
-             > unique_ptr(unique_ptr<yelementT, ydeleterT> &&other) noexcept
+             > unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       : unique_ptr(noadl::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
       }
     // 23.11.1.2.3, assignment
-    unique_ptr & operator=(unique_ptr &&other) noexcept
+    unique_ptr& operator=(unique_ptr&& other) noexcept
       {
         allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), noadl::move(other.m_sth.as_deleter()));
         this->reset(other.m_sth.release());
@@ -216,7 +216,7 @@ template<typename elementT, typename deleterT> class unique_ptr
                                                                                                  pointer>,
                                                                                   is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type,
                                                                                                  deleter_type>>::value)
-             > unique_ptr & operator=(unique_ptr<yelementT, ydeleterT> &&other) noexcept
+             > unique_ptr& operator=(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       {
         allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), noadl::move(other.m_sth.as_deleter()));
         this->reset(other.m_sth.release());
@@ -249,11 +249,11 @@ template<typename elementT, typename deleterT> class unique_ptr
       {
         return this->get();
       }
-    constexpr const deleter_type & get_deleter() const noexcept
+    constexpr const deleter_type& get_deleter() const noexcept
       {
         return this->m_sth.as_deleter();
       }
-    deleter_type & get_deleter() noexcept
+    deleter_type& get_deleter() noexcept
       {
         return this->m_sth.as_deleter();
       }
@@ -264,13 +264,13 @@ template<typename elementT, typename deleterT> class unique_ptr
         return this->m_sth.release();
       }
     // N.B. The return type differs from `std::unique_ptr`.
-    unique_ptr & reset(pointer ptr_new = pointer()) noexcept
+    unique_ptr& reset(pointer ptr_new = pointer()) noexcept
       {
         this->m_sth.reset(ptr_new);
         return *this;
       }
 
-    void swap(unique_ptr &other) noexcept
+    void swap(unique_ptr& other) noexcept
       {
         allocator_swapper<deleter_type, true>()(this->m_sth.as_deleter(), other.m_sth.as_deleter());
         this->m_sth.exchange(other.m_sth);
@@ -278,87 +278,87 @@ template<typename elementT, typename deleterT> class unique_ptr
   };
 
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator==(const unique_ptr<xelementT, xdeleterT> &lhs,
-                                                                        const unique_ptr<yelementT, ydeleterT> &rhs) noexcept
+         typename yelementT, typename ydeleterT> inline bool operator==(const unique_ptr<xelementT, xdeleterT>& lhs,
+                                                                        const unique_ptr<yelementT, ydeleterT>& rhs) noexcept
   {
     return lhs.get() == rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator!=(const unique_ptr<xelementT, xdeleterT> &lhs,
-                                                                        const unique_ptr<yelementT, ydeleterT> &rhs) noexcept
+         typename yelementT, typename ydeleterT> inline bool operator!=(const unique_ptr<xelementT, xdeleterT>& lhs,
+                                                                        const unique_ptr<yelementT, ydeleterT>& rhs) noexcept
   {
     return lhs.get() != rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator<(const unique_ptr<xelementT, xdeleterT> &lhs,
-                                                                       const unique_ptr<yelementT, ydeleterT> &rhs)
+         typename yelementT, typename ydeleterT> inline bool operator<(const unique_ptr<xelementT, xdeleterT>& lhs,
+                                                                       const unique_ptr<yelementT, ydeleterT>& rhs)
   {
     return lhs.get() < rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator>(const unique_ptr<xelementT, xdeleterT> &lhs,
-                                                                       const unique_ptr<yelementT, ydeleterT> &rhs)
+         typename yelementT, typename ydeleterT> inline bool operator>(const unique_ptr<xelementT, xdeleterT>& lhs,
+                                                                       const unique_ptr<yelementT, ydeleterT>& rhs)
   {
     return lhs.get() > rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator<=(const unique_ptr<xelementT, xdeleterT> &lhs,
-                                                                        const unique_ptr<yelementT, ydeleterT> &rhs)
+         typename yelementT, typename ydeleterT> inline bool operator<=(const unique_ptr<xelementT, xdeleterT>& lhs,
+                                                                        const unique_ptr<yelementT, ydeleterT>& rhs)
   {
     return lhs.get() <= rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator>=(const unique_ptr<xelementT, xdeleterT> &lhs,
-                                                                        const unique_ptr<yelementT, ydeleterT> &rhs)
+         typename yelementT, typename ydeleterT> inline bool operator>=(const unique_ptr<xelementT, xdeleterT>& lhs,
+                                                                        const unique_ptr<yelementT, ydeleterT>& rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
-template<typename elementT, typename deleterT> inline bool operator==(const unique_ptr<elementT, deleterT> &lhs, nullptr_t) noexcept
+template<typename elementT, typename deleterT> inline bool operator==(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
   {
     return +!(lhs.get());
   }
-template<typename elementT, typename deleterT> inline bool operator!=(const unique_ptr<elementT, deleterT> &lhs, nullptr_t) noexcept
+template<typename elementT, typename deleterT> inline bool operator!=(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
   {
     return !!(lhs.get());
   }
 
-template<typename elementT, typename deleterT> inline bool operator==(nullptr_t, const unique_ptr<elementT, deleterT> &rhs) noexcept
+template<typename elementT, typename deleterT> inline bool operator==(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
   {
     return +!(rhs.get());
   }
-template<typename elementT, typename deleterT> inline bool operator!=(nullptr_t, const unique_ptr<elementT, deleterT> &rhs) noexcept
+template<typename elementT, typename deleterT> inline bool operator!=(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
   {
     return !!(rhs.get());
   }
 
-template<typename elementT, typename deleterT> inline void swap(unique_ptr<elementT, deleterT> &lhs,
-                                                                unique_ptr<elementT, deleterT> &rhs) noexcept
+template<typename elementT, typename deleterT> inline void swap(unique_ptr<elementT, deleterT>& lhs,
+                                                                unique_ptr<elementT, deleterT>& rhs) noexcept
   {
     lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,
-         typename elementT, typename deleterT> inline basic_ostream<charT, traitsT> & operator<<(basic_ostream<charT, traitsT> &os,
-                                                                                                 const unique_ptr<elementT, deleterT> &rhs)
+         typename elementT, typename deleterT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+                                                                                                 const unique_ptr<elementT, deleterT>& rhs)
   {
     return os << rhs.get();
   }
 
-template<typename resultT, typename sourceT> inline unique_ptr<resultT> static_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
+template<typename resultT, typename sourceT> inline unique_ptr<resultT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::static_caster>()(noadl::move(sptr));
   }
-template<typename resultT, typename sourceT> inline unique_ptr<resultT> dynamic_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
+template<typename resultT, typename sourceT> inline unique_ptr<resultT> dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::dynamic_caster>()(noadl::move(sptr));
   }
-template<typename resultT, typename sourceT> inline unique_ptr<resultT> const_pointer_cast(unique_ptr<sourceT> &&sptr) noexcept
+template<typename resultT, typename sourceT> inline unique_ptr<resultT> const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::const_caster>()(noadl::move(sptr));
   }
 
-template<typename elementT, typename ...paramsT> inline unique_ptr<elementT> make_unique(paramsT &&...params)
+template<typename elementT, typename... paramsT> inline unique_ptr<elementT> make_unique(paramsT&&... params)
   {
     return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
   }

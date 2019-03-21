@@ -12,11 +12,11 @@ namespace Asteria {
 class Executive_Context : public Abstract_Context
   {
   private:
-    const Executive_Context *const m_parent_opt;
+    const Executive_Context* m_parent_opt;
 
   public:
     // An executive context can only be created on another executive context (not an analytic one).
-    explicit Executive_Context(const Executive_Context *parent_opt) noexcept
+    explicit Executive_Context(const Executive_Context* parent_opt) noexcept
       : m_parent_opt(parent_opt)
       {
       }
@@ -27,12 +27,12 @@ class Executive_Context : public Abstract_Context
       {
         return false;
       }
-    const Executive_Context * get_parent_opt() const noexcept override
+    const Executive_Context* get_parent_opt() const noexcept override
       {
         return this->m_parent_opt;
       }
 
-    void prepare_function_arguments(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args);
+    void prepare_function_arguments(const Rcobj<Variadic_Arguer>& zvarg, const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args);
   };
 
 }  // namespace Asteria

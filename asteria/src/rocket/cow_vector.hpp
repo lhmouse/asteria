@@ -61,7 +61,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
         size_type nblk;
         union { value_type data[0];  };
 
-        basic_storage(void (*xdtor)(...), const allocator_type &xalloc, size_type xnblk) noexcept
+        basic_storage(void (*xdtor)(...), const allocator_type& xalloc, size_type xnblk) noexcept
           : storage_header(xdtor),
             alloc(xalloc), nblk(xnblk)
           {
@@ -79,9 +79,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
 #endif
           }
 
-        basic_storage(const basic_storage &)
+        basic_storage(const basic_storage&)
           = delete;
-        basic_storage & operator=(const basic_storage &)
+        basic_storage& operator=(const basic_storage&)
           = delete;
       };
 
@@ -123,7 +123,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             auto nelem = ptr->nelem;
             auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            ::std::memcpy(static_cast<void *>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocatorT::value_type) * cnt);
+            ::std::memcpy(static_cast<void*>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocatorT::value_type) * cnt);
             ptr->nelem = (nelem += cnt);
           }
       };
@@ -166,7 +166,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             auto nelem = ptr->nelem;
             auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            ::std::memcpy(static_cast<void *>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocatorT::value_type) * cnt);
+            ::std::memcpy(static_cast<void*>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocatorT::value_type) * cnt);
             ptr->nelem = (nelem += cnt);
           }
       };
@@ -188,12 +188,12 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
         storage_pointer m_ptr;
 
       public:
-        explicit constexpr storage_handle(const allocator_type &alloc) noexcept
+        explicit constexpr storage_handle(const allocator_type& alloc) noexcept
           : allocator_base(alloc),
             m_ptr()
           {
           }
-        explicit constexpr storage_handle(allocator_type &&alloc) noexcept
+        explicit constexpr storage_handle(allocator_type&& alloc) noexcept
           : allocator_base(noadl::move(alloc)),
             m_ptr()
           {
@@ -203,9 +203,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             this->deallocate();
           }
 
-        storage_handle(const storage_handle &)
+        storage_handle(const storage_handle&)
           = delete;
-        storage_handle & operator=(const storage_handle &)
+        storage_handle& operator=(const storage_handle&)
           = delete;
 
       private:
@@ -216,7 +216,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
               return;
             }
             // This is needed for incomplete type support.
-            (*reinterpret_cast<void (*)(storage_pointer)>(reinterpret_cast<const storage_header *>(noadl::unfancy(ptr))->dtor))(ptr);
+            (*reinterpret_cast<void (*)(storage_pointer)>(reinterpret_cast<const storage_header*>(noadl::unfancy(ptr))->dtor))(ptr);
           }
 
         ROCKET_NOINLINE static void do_drop_reference(storage_pointer ptr) noexcept
@@ -230,7 +230,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
+            ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '~', sizeof(storage) * nblk);
 #endif
             allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
           }
@@ -242,13 +242,13 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
           }
 
       public:
-        const allocator_type & as_allocator() const noexcept
+        const allocator_type& as_allocator() const noexcept
           {
-            return static_cast<const allocator_base &>(*this);
+            return static_cast<const allocator_base&>(*this);
           }
-        allocator_type & as_allocator() noexcept
+        allocator_type& as_allocator() noexcept
           {
-            return static_cast<allocator_base &>(*this);
+            return static_cast<allocator_base&>(*this);
           }
 
         bool unique() const noexcept
@@ -300,7 +300,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             auto nblk = storage::min_nblk_for_nelem(cap);
             return storage::max_nelem_for_nblk(nblk);
           }
-        const value_type * data() const noexcept
+        const value_type* data() const noexcept
           {
             auto ptr = this->m_ptr;
             if(!ptr) {
@@ -314,9 +314,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             if(!ptr) {
               return 0;
             }
-            return reinterpret_cast<const storage_header *>(ptr)->nelem;
+            return reinterpret_cast<const storage_header*>(ptr)->nelem;
           }
-        ROCKET_NOINLINE value_type * reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+        ROCKET_NOINLINE value_type* reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
           {
             if(res_arg == 0) {
               // Deallocate the block.
@@ -329,7 +329,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             auto st_alloc = storage_allocator(this->as_allocator());
             auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
-            ::std::memset(static_cast<void *>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
+            ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
             noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_drop_reference), this->as_allocator(), nblk);
             auto ptr_old = this->m_ptr;
@@ -360,16 +360,16 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             this->do_reset(storage_pointer());
           }
 
-        void share_with(const storage_handle &other) noexcept
+        void share_with(const storage_handle& other) noexcept
           {
             auto ptr = other.m_ptr;
             if(ptr) {
               // Increment the reference count.
-              reinterpret_cast<storage_header *>(noadl::unfancy(ptr))->nref.increment();
+              reinterpret_cast<storage_header*>(noadl::unfancy(ptr))->nref.increment();
             }
             this->do_reset(ptr);
           }
-        void share_with(storage_handle &&other) noexcept
+        void share_with(storage_handle&& other) noexcept
           {
             auto ptr = other.m_ptr;
             if(ptr) {
@@ -378,21 +378,21 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             }
             this->do_reset(ptr);
           }
-        void exchange_with(storage_handle &other) noexcept
+        void exchange_with(storage_handle& other) noexcept
           {
             ::std::swap(this->m_ptr, other.m_ptr);
           }
 
-        constexpr operator const storage_handle * () const noexcept
+        constexpr operator const storage_handle* () const noexcept
           {
             return this;
           }
-        operator storage_handle * () noexcept
+        operator storage_handle* () noexcept
           {
             return this;
           }
 
-        value_type * mut_data_unchecked() noexcept
+        value_type* mut_data_unchecked() noexcept
           {
             auto ptr = this->m_ptr;
             if(!ptr) {
@@ -401,7 +401,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
             ROCKET_ASSERT(this->unique());
             return ptr->data;
           }
-        template<typename ...paramsT> value_type * emplace_back_unchecked(paramsT &&...params)
+        template<typename... paramsT> value_type* emplace_back_unchecked(paramsT&&... params)
           {
             ROCKET_ASSERT(this->unique());
             ROCKET_ASSERT(this->size() < this->capacity());
@@ -437,18 +437,18 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       public:
         using iterator_category  = ::std::random_access_iterator_tag;
         using value_type         = valueT;
-        using pointer            = value_type *;
-        using reference          = value_type &;
+        using pointer            = value_type*;
+        using reference          = value_type&;
         using difference_type    = ptrdiff_t;
 
         using parent_type   = storage_handle<typename vectorT::allocator_type>;
 
       private:
-        const parent_type *m_ref;
-        value_type *m_ptr;
+        const parent_type* m_ref;
+        value_type* m_ptr;
 
       private:
-        constexpr vector_iterator(const parent_type *ref, value_type *ptr) noexcept
+        constexpr vector_iterator(const parent_type* ref, value_type* ptr) noexcept
           : m_ref(ref), m_ptr(ptr)
           {
           }
@@ -458,13 +458,13 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
           : vector_iterator(nullptr, nullptr)
           {
           }
-        template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT *, valueT *>::value)> constexpr vector_iterator(const vector_iterator<vectorT, yvalueT> &other) noexcept
+        template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)> constexpr vector_iterator(const vector_iterator<vectorT, yvalueT>& other) noexcept
           : vector_iterator(other.m_ref, other.m_ptr)
           {
           }
 
       private:
-        value_type * do_assert_valid_pointer(value_type *ptr, bool to_dereference) const noexcept
+        value_type* do_assert_valid_pointer(value_type* ptr, bool to_dereference) const noexcept
           {
             auto ref = this->m_ref;
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
@@ -475,22 +475,22 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
           }
 
       public:
-        const parent_type * parent() const noexcept
+        const parent_type* parent() const noexcept
           {
             return this->m_ref;
           }
 
-        value_type * tell() const noexcept
+        value_type* tell() const noexcept
           {
             auto ptr = this->do_assert_valid_pointer(this->m_ptr, false);
             return ptr;
           }
-        value_type * tell_owned_by(const parent_type *ref) const noexcept
+        value_type* tell_owned_by(const parent_type* ref) const noexcept
           {
             ROCKET_ASSERT_MSG(this->m_ref == ref, "This iterator does not refer to an element in the same container.");
             return this->tell();
           }
-        vector_iterator & seek(value_type *ptr) noexcept
+        vector_iterator& seek(value_type* ptr) noexcept
           {
             this->m_ptr = this->do_assert_valid_pointer(ptr, false);
             return *this;
@@ -516,47 +516,47 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
           }
       };
 
-    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> & operator++(vector_iterator<vectorT, valueT> &rhs) noexcept
+    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT>& operator++(vector_iterator<vectorT, valueT>& rhs) noexcept
       {
         return rhs.seek(rhs.tell() + 1);
       }
-    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> & operator--(vector_iterator<vectorT, valueT> &rhs) noexcept
+    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT>& operator--(vector_iterator<vectorT, valueT>& rhs) noexcept
       {
         return rhs.seek(rhs.tell() - 1);
       }
 
-    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator++(vector_iterator<vectorT, valueT> &lhs, int) noexcept
+    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator++(vector_iterator<vectorT, valueT>& lhs, int) noexcept
       {
         auto res = lhs;
         lhs.seek(lhs.tell() + 1);
         return res;
       }
-    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator--(vector_iterator<vectorT, valueT> &lhs, int) noexcept
+    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator--(vector_iterator<vectorT, valueT>& lhs, int) noexcept
       {
         auto res = lhs;
         lhs.seek(lhs.tell() - 1);
         return res;
       }
 
-    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> & operator+=(vector_iterator<vectorT, valueT> &lhs,
+    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT>& operator+=(vector_iterator<vectorT, valueT>& lhs,
                                                                                                      typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
       {
         return lhs.seek(lhs.tell() + rhs);
       }
-    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> & operator-=(vector_iterator<vectorT, valueT> &lhs,
+    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT>& operator-=(vector_iterator<vectorT, valueT>& lhs,
                                                                                                      typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
       {
         return lhs.seek(lhs.tell() - rhs);
       }
 
-    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator+(const vector_iterator<vectorT, valueT> &lhs,
+    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator+(const vector_iterator<vectorT, valueT>& lhs,
                                                                                                   typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
       {
         auto res = lhs;
         res.seek(res.tell() + rhs);
         return res;
       }
-    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator-(const vector_iterator<vectorT, valueT> &lhs,
+    template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator-(const vector_iterator<vectorT, valueT>& lhs,
                                                                                                   typename vector_iterator<vectorT, valueT>::difference_type rhs) noexcept
       {
         auto res = lhs;
@@ -565,53 +565,53 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       }
 
     template<typename vectorT, typename valueT> inline vector_iterator<vectorT, valueT> operator+(typename vector_iterator<vectorT, valueT>::difference_type lhs,
-                                                                                                  const vector_iterator<vectorT, valueT> &rhs) noexcept
+                                                                                                  const vector_iterator<vectorT, valueT>& rhs) noexcept
       {
         auto res = rhs;
         res.seek(res.tell() + lhs);
         return res;
       }
     template<typename vectorT, typename xvalueT,
-                               typename yvalueT> inline typename vector_iterator<vectorT, xvalueT>::difference_type operator-(const vector_iterator<vectorT, xvalueT> &lhs,
-                                                                                                                              const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+                               typename yvalueT> inline typename vector_iterator<vectorT, xvalueT>::difference_type operator-(const vector_iterator<vectorT, xvalueT>& lhs,
+                                                                                                                              const vector_iterator<vectorT, yvalueT>& rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) - rhs.tell();
       }
 
     template<typename vectorT, typename xvalueT,
-                               typename yvalueT> inline bool operator==(const vector_iterator<vectorT, xvalueT> &lhs,
-                                                                        const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+                               typename yvalueT> inline bool operator==(const vector_iterator<vectorT, xvalueT>& lhs,
+                                                                        const vector_iterator<vectorT, yvalueT>& rhs) noexcept
       {
         return lhs.tell() == rhs.tell();
       }
     template<typename vectorT, typename xvalueT,
-                               typename yvalueT> inline bool operator!=(const vector_iterator<vectorT, xvalueT> &lhs,
-                                                                        const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+                               typename yvalueT> inline bool operator!=(const vector_iterator<vectorT, xvalueT>& lhs,
+                                                                        const vector_iterator<vectorT, yvalueT>& rhs) noexcept
       {
         return lhs.tell() != rhs.tell();
       }
 
     template<typename vectorT, typename xvalueT,
-                               typename yvalueT> inline bool operator<(const vector_iterator<vectorT, xvalueT> &lhs,
-                                                                       const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+                               typename yvalueT> inline bool operator<(const vector_iterator<vectorT, xvalueT>& lhs,
+                                                                       const vector_iterator<vectorT, yvalueT>& rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) < rhs.tell();
       }
     template<typename vectorT, typename xvalueT,
-                               typename yvalueT> inline bool operator>(const vector_iterator<vectorT, xvalueT> &lhs,
-                                                                       const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+                               typename yvalueT> inline bool operator>(const vector_iterator<vectorT, xvalueT>& lhs,
+                                                                       const vector_iterator<vectorT, yvalueT>& rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) > rhs.tell();
       }
     template<typename vectorT, typename xvalueT,
-                               typename yvalueT> inline bool operator<=(const vector_iterator<vectorT, xvalueT> &lhs,
-                                                                        const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+                               typename yvalueT> inline bool operator<=(const vector_iterator<vectorT, xvalueT>& lhs,
+                                                                        const vector_iterator<vectorT, yvalueT>& rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) <= rhs.tell();
       }
     template<typename vectorT, typename xvalueT,
-                               typename yvalueT> inline bool operator>=(const vector_iterator<vectorT, xvalueT> &lhs,
-                                                                        const vector_iterator<vectorT, yvalueT> &rhs) noexcept
+                               typename yvalueT> inline bool operator>=(const vector_iterator<vectorT, xvalueT>& lhs,
+                                                                        const vector_iterator<vectorT, yvalueT>& rhs) noexcept
       {
         return lhs.tell_owned_by(rhs.parent()) >= rhs.tell();
       }
@@ -622,7 +622,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       }
     constexpr append;
 
-    template<typename vectorT, typename ...paramsT> inline void tagged_append(vectorT *vec, append_tag, paramsT &&...params)
+    template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, append_tag, paramsT&&... params)
       {
         vec->append(::std::forward<paramsT>(params)...);
       }
@@ -632,7 +632,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       }
     constexpr emplace_back;
 
-    template<typename vectorT, typename ...paramsT> inline void tagged_append(vectorT *vec, emplace_back_tag, paramsT &&...params)
+    template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
       {
         vec->emplace_back(::std::forward<paramsT>(params)...);
       }
@@ -642,7 +642,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       }
     constexpr push_back;
 
-    template<typename vectorT, typename ...paramsT> inline void tagged_append(vectorT *vec, push_back_tag, paramsT &&...params)
+    template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
       {
         vec->push_back(::std::forward<paramsT>(params)...);
       }
@@ -661,8 +661,8 @@ template<typename valueT, typename allocatorT> class cow_vector
 
     using size_type        = typename allocator_traits<allocator_type>::size_type;
     using difference_type  = typename allocator_traits<allocator_type>::difference_type;
-    using const_reference  = const value_type &;
-    using reference        = value_type &;
+    using const_reference  = const value_type&;
+    using reference        = value_type&;
 
     using const_iterator          = details_cow_vector::vector_iterator<cow_vector, const value_type>;
     using iterator                = details_cow_vector::vector_iterator<cow_vector, value_type>;
@@ -674,7 +674,7 @@ template<typename valueT, typename allocatorT> class cow_vector
 
   public:
     // 26.3.11.2, construct/copy/destroy
-    explicit constexpr cow_vector(const allocator_type &alloc) noexcept
+    explicit constexpr cow_vector(const allocator_type& alloc) noexcept
       : m_sth(alloc)
       {
       }
@@ -682,67 +682,67 @@ template<typename valueT, typename allocatorT> class cow_vector
       : cow_vector(allocator_type())
       {
       }
-    cow_vector(const cow_vector &other) noexcept
+    cow_vector(const cow_vector& other) noexcept
       : cow_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
-    cow_vector(const cow_vector &other, const allocator_type &alloc) noexcept
+    cow_vector(const cow_vector& other, const allocator_type& alloc) noexcept
       : cow_vector(alloc)
       {
         this->assign(other);
       }
-    cow_vector(cow_vector &&other) noexcept
+    cow_vector(cow_vector&& other) noexcept
       : cow_vector(noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
-    cow_vector(cow_vector &&other, const allocator_type &alloc) noexcept
+    cow_vector(cow_vector&& other, const allocator_type& alloc) noexcept
       : cow_vector(alloc)
       {
         this->assign(noadl::move(other));
       }
-    explicit cow_vector(size_type n, const allocator_type &alloc = allocator_type())
+    explicit cow_vector(size_type n, const allocator_type& alloc = allocator_type())
       : cow_vector(alloc)
       {
         this->assign(n);
       }
-    cow_vector(size_type n, const value_type &value, const allocator_type &alloc = allocator_type())
+    cow_vector(size_type n, const value_type& value, const allocator_type& alloc = allocator_type())
       : cow_vector(alloc)
       {
         this->assign(n, value);
       }
     // N.B. This is a non-standard extension.
-    template<typename firstT, typename ...restT, ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type,
-                                                                           allocator_type>::value)> cow_vector(size_type n, const firstT &first, const restT &...rest)
+    template<typename firstT, typename... restT, ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type,
+                                                                           allocator_type>::value)> cow_vector(size_type n, const firstT& first, const restT&... rest)
       : cow_vector(allocator_type())
       {
         this->assign(n, first, rest...);
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector(inputT first, inputT last,
-                                                                                                                const allocator_type &alloc = allocator_type())
+                                                                                                                const allocator_type& alloc = allocator_type())
       : cow_vector(alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
-    cow_vector(initializer_list<value_type> init, const allocator_type &alloc = allocator_type())
+    cow_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
       : cow_vector(alloc)
       {
         this->assign(init);
       }
-    cow_vector & operator=(const cow_vector &other) noexcept
+    cow_vector& operator=(const cow_vector& other) noexcept
       {
         this->assign(other);
         allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return *this;
       }
-    cow_vector & operator=(cow_vector &&other) noexcept
+    cow_vector& operator=(cow_vector&& other) noexcept
       {
         this->assign(noadl::move(other));
         allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         return *this;
       }
-    cow_vector & operator=(initializer_list<value_type> init)
+    cow_vector& operator=(initializer_list<value_type> init)
       {
         this->assign(init);
         return *this;
@@ -751,7 +751,7 @@ template<typename valueT, typename allocatorT> class cow_vector
   private:
     // Reallocate the storage to `res_arg` elements.
     // The storage is owned by the current vector exclusively after this function returns normally.
-    value_type * do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
+    value_type* do_reallocate(size_type cnt_one, size_type off_two, size_type cnt_two, size_type res_arg)
       {
         ROCKET_ASSERT(cnt_one <= off_two);
         ROCKET_ASSERT(off_two <= this->m_sth.size());
@@ -806,7 +806,7 @@ template<typename valueT, typename allocatorT> class cow_vector
         return noadl::min(tcnt - tpos, tn);
       }
 
-    template<typename ...paramsT> value_type * do_insert_no_bound_check(size_type tpos, paramsT &&...params)
+    template<typename... paramsT> value_type* do_insert_no_bound_check(size_type tpos, paramsT&&... params)
       {
         auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
@@ -817,7 +817,7 @@ template<typename valueT, typename allocatorT> class cow_vector
         noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
         return ptr + tpos;
       }
-    value_type * do_erase_no_bound_check(size_type tpos, size_type tn)
+    value_type* do_erase_no_bound_check(size_type tpos, size_type tn)
       {
         auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
@@ -907,7 +907,7 @@ template<typename valueT, typename allocatorT> class cow_vector
         return this->m_sth.max_size();
       }
     // N.B. The parameter pack is a non-standard extension.
-    template<typename ...paramsT> void resize(size_type n, const paramsT &...params)
+    template<typename... paramsT> void resize(size_type n, const paramsT&... params)
       {
         auto cnt_old = this->size();
         if(cnt_old == n) {
@@ -1018,44 +1018,44 @@ template<typename valueT, typename allocatorT> class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    template<typename ...paramsT> cow_vector & append(size_type n, const paramsT &...params)
+    template<typename... paramsT> cow_vector& append(size_type n, const paramsT&... params)
       {
         if(n == 0) {
           return *this;
         }
         this->do_reserve_more(n);
-        noadl::ranged_do_while(size_type(0), n, [&](size_type, const paramsT &...fwdp) { this->m_sth.emplace_back_unchecked(fwdp...);  }, params...);
+        noadl::ranged_do_while(size_type(0), n, [&](size_type, const paramsT&... fwdp) { this->m_sth.emplace_back_unchecked(fwdp...);  }, params...);
         return *this;
       }
     // N.B. This is a non-standard extension.
-    cow_vector & append(initializer_list<value_type> init)
+    cow_vector& append(initializer_list<value_type> init)
       {
         return this->append(init.begin(), init.end());
       }
     // N.B. This is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector & append(inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector& append(inputT first, inputT last)
       {
         if(first == last) {
           return *this;
         }
         auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
-          noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT &it) { this->emplace_back(*it);  });
+          noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT& it) { this->emplace_back(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
-        noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT &it) { this->m_sth.emplace_back_unchecked(*it);  });
+        noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
         return *this;
       }
     // 26.3.11.5, modifiers
-    template<typename ...paramsT> reference emplace_back(paramsT &&...params)
+    template<typename... paramsT> reference emplace_back(paramsT&&... params)
       {
         this->do_reserve_more(1);
         auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
         return *ptr;
       }
     // N.B. The return type is a non-standard extension.
-    reference push_back(const value_type &value)
+    reference push_back(const value_type& value)
       {
         auto cnt_old = this->size();
         // Check for overlapped elements before `do_reserve_more()`.
@@ -1069,7 +1069,7 @@ template<typename valueT, typename allocatorT> class cow_vector
         return *ptr;
       }
     // N.B. The return type is a non-standard extension.
-    reference push_back(value_type &&value)
+    reference push_back(value_type&& value)
       {
         this->do_reserve_more(1);
         auto ptr = this->m_sth.emplace_back_unchecked(noadl::move(value));
@@ -1077,49 +1077,49 @@ template<typename valueT, typename allocatorT> class cow_vector
       }
 
     // N.B. This is a non-standard extension.
-    cow_vector & insert(size_type tpos, const value_type &value)
+    cow_vector& insert(size_type tpos, const value_type& value)
       {
         this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::push_back, value);
         return *this;
       }
     // N.B. This is a non-standard extension.
-    cow_vector & insert(size_type tpos, value_type &&value)
+    cow_vector& insert(size_type tpos, value_type&& value)
       {
         this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::push_back, noadl::move(value));
         return *this;
       }
     // N.B. This is a non-standard extension.
-    template<typename ...paramsT> cow_vector & insert(size_type tpos, size_type n, const paramsT &...params)
+    template<typename... paramsT> cow_vector& insert(size_type tpos, size_type n, const paramsT&... params)
       {
         this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::append, n, params...);
         return *this;
       }
     // N.B. This is a non-standard extension.
-    cow_vector & insert(size_type tpos, initializer_list<value_type> init)
+    cow_vector& insert(size_type tpos, initializer_list<value_type> init)
       {
         this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::append, init);
         return *this;
       }
     // N.B. This is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector & insert(size_type tpos, inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector& insert(size_type tpos, inputT first, inputT last)
       {
         this->do_insert_no_bound_check(this->do_clamp_subrange(tpos, 0), details_cow_vector::append, noadl::move(first), noadl::move(last));
         return *this;
       }
-    iterator insert(const_iterator tins, const value_type &value)
+    iterator insert(const_iterator tins, const value_type& value)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::push_back, value);
         return iterator(this->m_sth, ptr);
       }
-    iterator insert(const_iterator tins, value_type &&value)
+    iterator insert(const_iterator tins, value_type&& value)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::push_back, noadl::move(value));
         return iterator(this->m_sth, ptr);
       }
     // N.B. The parameter pack is a non-standard extension.
-    template<typename ...paramsT> iterator insert(const_iterator tins, size_type n, const paramsT &...params)
+    template<typename... paramsT> iterator insert(const_iterator tins, size_type n, const paramsT&... params)
       {
         auto tpos = static_cast<size_type>(tins.tell_owned_by(this->m_sth) - this->data());
         auto ptr = this->do_insert_no_bound_check(tpos, details_cow_vector::append, n, params...);
@@ -1140,7 +1140,7 @@ template<typename valueT, typename allocatorT> class cow_vector
 
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
-    cow_vector & erase(size_type tpos = 0, size_type tn = size_type(-1))
+    cow_vector& erase(size_type tpos = 0, size_type tn = size_type(-1))
       {
         this->do_erase_no_bound_check(tpos, this->do_clamp_subrange(tpos, tn));
         return *this;
@@ -1162,7 +1162,7 @@ template<typename valueT, typename allocatorT> class cow_vector
       }
     // N.B. This function may throw `std::bad_alloc`.
     // N.B. The return type and parameter are non-standard extensions.
-    cow_vector & pop_back(size_type n = 1)
+    cow_vector& pop_back(size_type n = 1)
       {
         auto cnt_old = this->size();
         ROCKET_ASSERT(n <= cnt_old);
@@ -1178,55 +1178,55 @@ template<typename valueT, typename allocatorT> class cow_vector
       }
 
     // N.B. The return type is a non-standard extension.
-    cow_vector & assign(const cow_vector &other) noexcept
+    cow_vector& assign(const cow_vector& other) noexcept
       {
         this->m_sth.share_with(other.m_sth);
         return *this;
       }
     // N.B. The return type is a non-standard extension.
-    cow_vector & assign(cow_vector &&other) noexcept
+    cow_vector& assign(cow_vector&& other) noexcept
       {
         this->m_sth.share_with(noadl::move(other.m_sth));
         return *this;
       }
     // N.B. The parameter pack is a non-standard extension.
     // N.B. The return type is a non-standard extension.
-    template<typename ...paramsT> cow_vector & assign(size_type n, const paramsT &...params)
+    template<typename... paramsT> cow_vector& assign(size_type n, const paramsT&... params)
       {
         this->clear();
         this->append(n, params...);
         return *this;
       }
     // N.B. The return type is a non-standard extension.
-    cow_vector & assign(initializer_list<value_type> init)
+    cow_vector& assign(initializer_list<value_type> init)
       {
         this->clear();
         this->append(init);
         return *this;
       }
     // N.B. The return type is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector & assign(inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_vector& assign(inputT first, inputT last)
       {
         this->clear();
         this->append(noadl::move(first), noadl::move(last));
         return *this;
       }
 
-    void swap(cow_vector &other) noexcept
+    void swap(cow_vector& other) noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
         allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
       }
 
     // 26.3.11.4, data access
-    const value_type * data() const noexcept
+    const value_type* data() const noexcept
       {
         return this->m_sth.data();
       }
 
     // Get a pointer to mutable data. This function may throw `std::bad_alloc`.
     // N.B. This is a non-standard extension.
-    value_type * mut_data()
+    value_type* mut_data()
       {
         if(!this->unique()) {
           this->do_reallocate(0, 0, this->size(), this->size() | 1);
@@ -1235,18 +1235,18 @@ template<typename valueT, typename allocatorT> class cow_vector
       }
 
     // N.B. The return type differs from `std::vector`.
-    const allocator_type & get_allocator() const noexcept
+    const allocator_type& get_allocator() const noexcept
       {
         return this->m_sth.as_allocator();
       }
-    allocator_type & get_allocator() noexcept
+    allocator_type& get_allocator() noexcept
       {
         return this->m_sth.as_allocator();
       }
   };
 
-template<typename valueT, typename allocatorT> inline void swap(cow_vector<valueT, allocatorT> &lhs,
-                                                                cow_vector<valueT, allocatorT> &rhs) noexcept
+template<typename valueT, typename allocatorT> inline void swap(cow_vector<valueT, allocatorT>& lhs,
+                                                                cow_vector<valueT, allocatorT>& rhs) noexcept
   {
     lhs.swap(rhs);
   }

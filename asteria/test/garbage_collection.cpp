@@ -10,7 +10,7 @@ using namespace Asteria;
 
 std::atomic<long> bcnt;
 
-void * operator new(std::size_t cb)
+void* operator new(std::size_t cb)
   {
     auto ptr = std::malloc(cb);
     if(!ptr) {
@@ -20,7 +20,7 @@ void * operator new(std::size_t cb)
     return ptr;
   }
 
-void operator delete(void *ptr) noexcept
+void operator delete(void* ptr) noexcept
   {
     if(!ptr) {
       return;
@@ -30,7 +30,7 @@ void operator delete(void *ptr) noexcept
   }
 
 #if __cplusplus >= 201402
-void operator delete(void *ptr, std::size_t) noexcept
+void operator delete(void* ptr, std::size_t) noexcept
   {
     operator delete(ptr);
   }

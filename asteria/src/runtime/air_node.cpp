@@ -8,9 +8,9 @@
 
 namespace Asteria {
 
-void Air_Node::enumerate_variables(const Abstract_Variable_Callback &callback) const
+void Air_Node::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    const auto enumerate_variables_recursively = [&](const Variant &param)
+    const auto enumerate_variables_recursively = [&](const Param& param)
       {
         switch(static_cast<Index>(param.index())) {
         case index_int64:
@@ -33,7 +33,7 @@ void Air_Node::enumerate_variables(const Abstract_Variable_Callback &callback) c
           }
         case index_vector_air_node:
           {
-            rocket::for_each(param.as<Cow_Vector<Air_Node>>(), [&](const Air_Node &node) { node.enumerate_variables(callback);  });
+            rocket::for_each(param.as<Cow_Vector<Air_Node>>(), [&](const Air_Node& node) { node.enumerate_variables(callback);  });
             return;
           }
         default:

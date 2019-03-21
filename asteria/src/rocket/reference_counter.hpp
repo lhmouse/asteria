@@ -25,11 +25,11 @@ template<typename valueT> class reference_counter
       : m_nref(nref)
       {
       }
-    constexpr reference_counter(const reference_counter &) noexcept
+    constexpr reference_counter(const reference_counter&) noexcept
       : reference_counter()
       {
       }
-    reference_counter & operator=(const reference_counter &) noexcept
+    reference_counter& operator=(const reference_counter&) noexcept
       {
         return *this;
       }

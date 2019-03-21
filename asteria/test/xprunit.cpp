@@ -62,10 +62,10 @@ int main()
     }
     Cow_Vector<Air_Node> expr_code;
     Analytic_Context actx(&ctx);
-    rocket::for_each(nodes, [&](const Xprunit &xpru) { xpru.generate_code(expr_code, actx);  });
+    rocket::for_each(nodes, [&](const Xprunit& xpru) { xpru.generate_code(expr_code, actx);  });
 
     Evaluation_Stack stack;
-    rocket::for_each(expr_code, [&](const Air_Node &node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
+    rocket::for_each(expr_code, [&](const Air_Node& node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
     ASTERIA_TEST_CHECK(stack.get_reference_count() == 1);
     auto value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);
@@ -77,7 +77,7 @@ int main()
     ASTERIA_TEST_CHECK(value.check<D_real>() == 1.75);
 
     cond->open_value() = D_integer(42);
-    rocket::for_each(expr_code, [&](const Air_Node &node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
+    rocket::for_each(expr_code, [&](const Air_Node& node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
     ASTERIA_TEST_CHECK(stack.get_reference_count() == 2);
     value = dval->get_value();
     ASTERIA_TEST_CHECK(value.check<D_real>() == 2.5);

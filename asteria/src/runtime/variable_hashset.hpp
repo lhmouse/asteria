@@ -18,23 +18,23 @@ class Variable_HashSet
         Rcptr<Variable> first;
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
         // For every other bucket: `prev` points to the previous non-empty bucket.
-        union { std::size_t size;  Bucket *prev;  };
+        union { std::size_t size;  Bucket* prev;  };
         // For the last bucket:   `reserved` is reserved for future use.
         // For every other bucket: `next` points to the next non-empty bucket.
-        union { std::size_t reserved;  Bucket *next;  };
+        union { std::size_t reserved;  Bucket* next;  };
 
         Bucket() noexcept
           {
           }
         inline ~Bucket();
 
-        Bucket(const Bucket &)
+        Bucket(const Bucket&)
           = delete;
-        Bucket & operator=(const Bucket &)
+        Bucket& operator=(const Bucket&)
           = delete;
 
         explicit inline operator bool () const noexcept;
-        inline void do_attach(Bucket *ipos) noexcept;
+        inline void do_attach(Bucket* ipos) noexcept;
         inline void do_detach() noexcept;
       };
 
@@ -48,15 +48,15 @@ class Variable_HashSet
       {
       }
 
-    Variable_HashSet(const Variable_HashSet &)
+    Variable_HashSet(const Variable_HashSet&)
       = delete;
-    Variable_HashSet & operator=(const Variable_HashSet &)
+    Variable_HashSet& operator=(const Variable_HashSet&)
       = delete;
 
   private:
     void do_clear() noexcept;
     void do_rehash(std::size_t res_arg);
-    void do_check_relocation(Bucket *to, Bucket *from);
+    void do_check_relocation(Bucket* to, Bucket* from);
 
   public:
     bool empty() const noexcept
@@ -81,10 +81,10 @@ class Variable_HashSet
         this->do_clear();
       }
 
-    bool has(const Rcptr<Variable> &var) const noexcept;
-    void for_each(const Abstract_Variable_Callback &callback) const;
-    bool insert(const Rcptr<Variable> &var);
-    bool erase(const Rcptr<Variable> &var) noexcept;
+    bool has(const Rcptr<Variable>& var) const noexcept;
+    void for_each(const Abstract_Variable_Callback& callback) const;
+    bool insert(const Rcptr<Variable>& var);
+    bool erase(const Rcptr<Variable>& var) noexcept;
     Rcptr<Variable> erase_random_opt() noexcept;
   };
 

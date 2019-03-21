@@ -29,21 +29,21 @@ namespace rocket {
           : m_alloc()
           {
           }
-        explicit constexpr final_wrapper(const allocatorT &alloc) noexcept
+        explicit constexpr final_wrapper(const allocatorT& alloc) noexcept
           : m_alloc(alloc)
           {
           }
-        explicit constexpr final_wrapper(allocatorT &&alloc) noexcept
+        explicit constexpr final_wrapper(allocatorT&& alloc) noexcept
           : m_alloc(noadl::move(alloc))
           {
           }
 
       public:
-        constexpr operator const allocatorT & () const noexcept
+        constexpr operator const allocatorT& () const noexcept
           {
             return this->m_alloc;
           }
-        operator allocatorT & () noexcept
+        operator allocatorT& () noexcept
           {
             return this->m_alloc;
           }
@@ -61,14 +61,14 @@ template<typename allocatorT,
          bool propagateT = allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value
          > struct allocator_copy_assigner
   {
-    void operator()(allocatorT & /*lhs*/, const allocatorT & /*rhs*/) const
+    void operator()(allocatorT&  /*lhs*/, const allocatorT&  /*rhs*/) const
       {
       }
   };
 template<typename allocatorT> struct allocator_copy_assigner<allocatorT,
                                                              true>  // propagateT
   {
-    void operator()(allocatorT &lhs, const allocatorT &rhs) const
+    void operator()(allocatorT& lhs, const allocatorT& rhs) const
       {
         lhs = rhs;
       }
@@ -78,14 +78,14 @@ template<typename allocatorT,
          bool propagateT = allocator_traits<allocatorT>::propagate_on_container_move_assignment::value
          > struct allocator_move_assigner
   {
-    void operator()(allocatorT & /*lhs*/, allocatorT && /*rhs*/) const
+    void operator()(allocatorT&  /*lhs*/, allocatorT&&  /*rhs*/) const
       {
       }
   };
 template<typename allocatorT> struct allocator_move_assigner<allocatorT,
                                                              true>  // propagateT
   {
-    void operator()(allocatorT &lhs, allocatorT &&rhs) const
+    void operator()(allocatorT& lhs, allocatorT&& rhs) const
       {
         lhs = noadl::move(rhs);
       }
@@ -95,14 +95,14 @@ template<typename allocatorT,
          bool propagateT = allocator_traits<allocatorT>::propagate_on_container_swap::value
          > struct allocator_swapper
   {
-    void operator()(allocatorT & /*lhs*/, allocatorT & /*rhs*/) const
+    void operator()(allocatorT&  /*lhs*/, allocatorT&  /*rhs*/) const
       {
       }
   };
 template<typename allocatorT> struct allocator_swapper<allocatorT,
                                                        true>  // propagateT
   {
-    void operator()(allocatorT &lhs, allocatorT &rhs) const
+    void operator()(allocatorT& lhs, allocatorT& rhs) const
       {
         noadl::adl_swap(lhs, rhs);
       }
@@ -121,7 +121,7 @@ template<typename xpointerT>
 #else
                              inline
 #endif
-                                       typename ::std::remove_reference<decltype(*(::std::declval<xpointerT>()))>::type * unfancy(xpointerT &&xptr) noexcept
+                                       typename ::std::remove_reference<decltype(*(::std::declval<xpointerT>()))>::type* unfancy(xpointerT&& xptr) noexcept
   {
     return ::std::addressof(*xptr);
   }

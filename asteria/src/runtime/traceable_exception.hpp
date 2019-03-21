@@ -17,8 +17,8 @@ class Traceable_Exception : public virtual std::exception
     Cow_Vector<Backtrace_Frame> m_frames;
 
   public:
-    template<typename XvalueT> Traceable_Exception(XvalueT &&xvalue,
-                                                   const Source_Location &sloc, const Cow_String &func)
+    template<typename XvalueT> Traceable_Exception(XvalueT&& xvalue,
+                                                   const Source_Location& sloc, const Cow_String& func)
       : m_value(std::forward<XvalueT>(xvalue)),
         m_frames(1, sloc, func)
       {
@@ -26,16 +26,16 @@ class Traceable_Exception : public virtual std::exception
     ~Traceable_Exception() override;
 
   public:
-    const char * what() const noexcept override
+    const char* what() const noexcept override
       {
         return "Asteria::Traceable_Exception";
       }
 
-    const Value & get_value() const noexcept
+    const Value& get_value() const noexcept
       {
         return this->m_value;
       }
-    Value & mut_value() noexcept
+    Value& mut_value() noexcept
       {
         return this->m_value;
       }
@@ -44,28 +44,28 @@ class Traceable_Exception : public virtual std::exception
       {
         return this->m_frames.size();
       }
-    const Backtrace_Frame & get_frame(std::size_t index) const
+    const Backtrace_Frame& get_frame(std::size_t index) const
       {
         return this->m_frames.at(index);
       }
-    void append_frame(const Source_Location &sloc, const Cow_String &func)
+    void append_frame(const Source_Location& sloc, const Cow_String& func)
       {
         this->m_frames.emplace_back(sloc, func);
       }
   };
 
-template<typename ExceptionT> Traceable_Exception trace_exception(ExceptionT &&except)
+template<typename ExceptionT> Traceable_Exception trace_exception(ExceptionT&& except)
   {
     // Is `except` an lvalue reference or a const reference (i.e. it isn't a non-const rvalue reference)?
-    static constexpr bool copy_or_move = std::is_lvalue_reference<ExceptionT &&>::value || std::is_const<typename std::remove_reference<ExceptionT &&>::type>::value;
+    static constexpr bool copy_or_move = std::is_lvalue_reference<ExceptionT&&>::value || std::is_const<typename std::remove_reference<ExceptionT&&>::type>::value;
     // Is `except` derived from `Traceable_Exception`?
-    auto traceable = dynamic_cast<typename std::conditional<copy_or_move, const Traceable_Exception *, Traceable_Exception *>::type>(std::addressof(except));
+    auto traceable = dynamic_cast<typename std::conditional<copy_or_move, const Traceable_Exception*, Traceable_Exception*>::type>(std::addressof(except));
     if(!traceable) {
       // Say the exception was thrown from native code.
       return Traceable_Exception(D_string(except.what()), Source_Location(rocket::sref("<native code>"), 0), rocket::sref("<native code>"));
     }
     // Copy or move it.
-    return static_cast<typename std::conditional<copy_or_move, const Traceable_Exception &, Traceable_Exception &&>::type>(*traceable);
+    return static_cast<typename std::conditional<copy_or_move, const Traceable_Exception&, Traceable_Exception&&>::type>(*traceable);
   }
 
 }  // namespace Asteria

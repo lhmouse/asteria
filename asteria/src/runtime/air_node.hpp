@@ -8,8 +8,6 @@
 #include "value.hpp"
 #include "reference.hpp"
 #include "../syntax/source_location.hpp"
-#include "../rocket/preprocessor_utilities.h"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -40,7 +38,7 @@ class Air_Node
         index_reference         = 6,
         index_vector_air_node   = 7,
       };
-    using Variant = rocket::variant<
+    using Param = Variant<
       ROCKET_CDR(
         , std::int64_t                  // 0,
         , PreHashed_String              // 1,
@@ -51,24 +49,24 @@ class Air_Node
         , Reference                     // 6,
         , Cow_Vector<Air_Node>          // 7,
       )>;
-    using Executor = Status (Evaluation_Stack &stack_io, Executive_Context &ctx_io, const Cow_Vector<Variant> &params, const Cow_String &func, const Global_Context &global);
+    using Executor = Status (Evaluation_Stack& stack_io, Executive_Context& ctx_io, const Cow_Vector<Param>& params, const Cow_String& func, const Global_Context& global);
 
   private:
-    Executor *m_fptr;
-    Cow_Vector<Variant> m_params;
+    Executor* m_fptr;
+    Cow_Vector<Param> m_params;
 
   public:
-    Air_Node(Executor *fptr, Cow_Vector<Variant> &&params) noexcept
+    Air_Node(Executor* fptr, Cow_Vector<Param>&& params) noexcept
       : m_fptr(fptr), m_params(rocket::move(params))
       {
       }
 
   public:
-    Status execute(Evaluation_Stack &stack_io, Executive_Context &ctx_io, const Cow_String &func, const Global_Context &global) const
+    Status execute(Evaluation_Stack& stack_io, Executive_Context& ctx_io, const Cow_String& func, const Global_Context& global) const
       {
         return (*(this->m_fptr))(stack_io, ctx_io, this->m_params, func, global);
       }
-    void enumerate_variables(const Abstract_Variable_Callback &callback) const;
+    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
 }  // namespace Asteria

@@ -13,7 +13,7 @@ Generational_Collector::~Generational_Collector()
   {
   }
 
-Collector * Generational_Collector::get_collector_opt(unsigned gen_limit) noexcept
+Collector* Generational_Collector::get_collector_opt(unsigned gen_limit) noexcept
   {
     auto qcoll = &(this->m_gen_zero);
     // Find the collector with the given generation from the newest generation to the oldest.

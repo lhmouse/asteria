@@ -15,11 +15,11 @@ class Rcbase : public rocket::refcnt_base<Rcbase>
     Rcbase() noexcept
       {
       }
-    Rcbase(const Rcbase &) noexcept
+    Rcbase(const Rcbase&) noexcept
       : Rcbase()
       {
       }
-    Rcbase & operator=(const Rcbase &) noexcept
+    Rcbase& operator=(const Rcbase&) noexcept
       {
         return *this;
       }

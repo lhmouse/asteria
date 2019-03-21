@@ -5,8 +5,6 @@
 #define ASTERIA_RUNTIME_REFERENCE_MODIFIER_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/preprocessor_utilities.h"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -27,33 +25,33 @@ class Reference_Modifier
         index_array_index  = 0,
         index_object_key   = 1,
       };
-    using Variant = rocket::variant<
+    using Xvariant = Variant<
       ROCKET_CDR(
         , S_array_index  // 0,
         , S_object_key   // 1,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   private:
-    Variant m_stor;
+    Xvariant m_stor;
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Modifier(AltT &&alt) noexcept
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Reference_Modifier(AltT&& alt) noexcept
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Reference_Modifier & operator=(AltT &&alt) noexcept
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Reference_Modifier& operator=(AltT&& alt) noexcept
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
       }
 
   public:
-    const Value * apply_const_opt(const Value &parent) const;
-    Value * apply_mutable_opt(Value &parent, bool create_new) const;
-    Value apply_and_erase(Value &parent) const;
+    const Value* apply_const_opt(const Value& parent) const;
+    Value* apply_mutable_opt(Value& parent, bool create_new) const;
+    Value apply_and_erase(Value& parent) const;
   };
 
 }  // namespace Asteria

@@ -17,8 +17,8 @@ namespace Asteria {
 
     namespace {
 
-    template<typename XrefT> void do_set_user_declared_reference(Cow_Vector<PreHashed_String> *names_out_opt, Abstract_Context &ctx_io,
-                                                                 const char *desc, const PreHashed_String &name, XrefT &&xref)
+    template<typename XrefT> void do_set_user_declared_reference(Cow_Vector<PreHashed_String>* names_out_opt, Abstract_Context& ctx_io,
+                                                                 const char* desc, const PreHashed_String& name, XrefT&& xref)
       {
         if(name.empty()) {
           return;
@@ -32,8 +32,8 @@ namespace Asteria {
         ctx_io.open_named_reference(name) = std::forward<XrefT>(xref);
       }
 
-    Rcptr<Variable> do_safe_create_variable(Cow_Vector<PreHashed_String> *names_out_opt, Abstract_Context &ctx_io,
-                                            const char *desc, const PreHashed_String &name, const Global_Context &global)
+    Rcptr<Variable> do_safe_create_variable(Cow_Vector<PreHashed_String>* names_out_opt, Abstract_Context& ctx_io,
+                                            const char* desc, const PreHashed_String& name, const Global_Context& global)
       {
         auto var = global.create_variable();
         Reference_Root::S_variable ref_c = { var };
@@ -41,58 +41,58 @@ namespace Asteria {
         return var;
       }
 
-    Cow_Vector<Air_Node> do_generate_code_statement_list(Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io,
-                                                         const Cow_Vector<Statement> &stmts)
+    Cow_Vector<Air_Node> do_generate_code_statement_list(Cow_Vector<PreHashed_String>* names_out_opt, Analytic_Context& ctx_io,
+                                                         const Cow_Vector<Statement>& stmts)
       {
         Cow_Vector<Air_Node> code;
-        rocket::for_each(stmts, [&](const Statement &stmt) { stmt.generate_code(code, names_out_opt, ctx_io);  });
+        rocket::for_each(stmts, [&](const Statement& stmt) { stmt.generate_code(code, names_out_opt, ctx_io);  });
         return code;
       }
 
-    Cow_Vector<Air_Node> do_generate_code_block(const Analytic_Context &ctx, const Cow_Vector<Statement> &block)
+    Cow_Vector<Air_Node> do_generate_code_block(const Analytic_Context& ctx, const Cow_Vector<Statement>& block)
       {
         Analytic_Context ctx_next(&ctx);
         auto code = do_generate_code_statement_list(nullptr, ctx_next, block);
         return code;
       }
 
-    Air_Node::Status do_execute_statement_list(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                               const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_statement_list(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                               const Cow_Vector<Air_Node>& code, const Cow_String& func, const Global_Context& global)
       {
         auto status = Air_Node::status_next;
-        rocket::any_of(code, [&](const Air_Node &node) { return (status = node.execute(stack, ctx_io, func, global))
+        rocket::any_of(code, [&](const Air_Node& node) { return (status = node.execute(stack, ctx_io, func, global))
                                                                  != Air_Node::status_next;  });
         return status;
       }
 
-    Air_Node::Status do_execute_block(Evaluation_Stack &stack,
-                                      const Executive_Context &ctx, const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_block(Evaluation_Stack& stack,
+                                      const Executive_Context& ctx, const Cow_Vector<Air_Node>& code, const Cow_String& func, const Global_Context& global)
       {
         Executive_Context ctx_next(&ctx);
         auto status = do_execute_statement_list(stack, ctx_next, code, func, global);
         return status;
       }
 
-    Cow_Vector<Air_Node> do_generate_code_expression(const Analytic_Context &ctx, const Cow_Vector<Xprunit> &expr)
+    Cow_Vector<Air_Node> do_generate_code_expression(const Analytic_Context& ctx, const Cow_Vector<Xprunit>& expr)
       {
         Cow_Vector<Air_Node> code;
-        rocket::for_each(expr, [&](const Xprunit &xpru) { xpru.generate_code(code, ctx);  });
+        rocket::for_each(expr, [&](const Xprunit& xpru) { xpru.generate_code(code, ctx);  });
         return code;
       }
 
-    void do_evaluate_expression(Evaluation_Stack &stack, Executive_Context &ctx,
-                                const Cow_Vector<Air_Node> &code, const Cow_String &func, const Global_Context &global)
+    void do_evaluate_expression(Evaluation_Stack& stack, Executive_Context& ctx,
+                                const Cow_Vector<Air_Node>& code, const Cow_String& func, const Global_Context& global)
       {
         // We push a null reference in case of empty expressions.
         stack.clear_references();
         stack.push_reference(Reference_Root::S_null());
         // Evaluate the expression.
         // If it is empty, the result will be pushed on `stack`; otherwise the aforementioned null reference will be on the top.
-        rocket::for_each(code, [&](const Air_Node &node) { node.execute(stack, ctx, func, global);  });
+        rocket::for_each(code, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
       }
 
-    Air_Node::Status do_execute_clear_stack(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
-                                            const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+    Air_Node::Status do_execute_clear_stack(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
+                                            const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
       {
         // We push a null reference in case of empty expressions.
         stack.clear_references();
@@ -100,23 +100,23 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_block_callback(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                               const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_block_callback(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                               const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &code = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto& code = p.at(0).as<Cow_Vector<Air_Node>>();
         // Execute the block without affecting `ctx_io`.
         auto status = do_execute_block(stack, ctx_io, code, func, global);
         return status;
       }
 
-    Air_Node::Status do_define_uninitialized_variable(Evaluation_Stack & /*stack*/, Executive_Context &ctx_io,
-                                                      const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
+    Air_Node::Status do_define_uninitialized_variable(Evaluation_Stack&  /*stack*/, Executive_Context& ctx_io,
+                                                      const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &sloc = p.at(0).as<Source_Location>();
-        const auto &name = p.at(1).as<PreHashed_String>();
-        const auto &immutable = static_cast<bool>(p.at(2).as<std::int64_t>());
+        const auto& sloc = p.at(0).as<Source_Location>();
+        const auto& name = p.at(1).as<PreHashed_String>();
+        const auto& immutable = static_cast<bool>(p.at(2).as<std::int64_t>());
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx_io, "variable", name, global);
         // Initialize the variable.
@@ -124,11 +124,11 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-   Air_Node::Status do_declare_variable_and_clear_stack(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
+   Air_Node::Status do_declare_variable_and_clear_stack(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &name = p.at(0).as<PreHashed_String>();
+        const auto& name = p.at(0).as<PreHashed_String>();
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx_io, "variable placeholder", name, global);
         stack.set_last_variable(rocket::move(var));
@@ -137,12 +137,12 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_initialize_variable(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
-                                            const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
+    Air_Node::Status do_initialize_variable(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
+                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
       {
         // Decode arguments.
-        const auto &sloc = p.at(0).as<Source_Location>();
-        const auto &immutable = static_cast<bool>(p.at(1).as<std::int64_t>());
+        const auto& sloc = p.at(0).as<Source_Location>();
+        const auto& immutable = static_cast<bool>(p.at(1).as<std::int64_t>());
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this code.
         auto value = stack.get_top_reference().read();
@@ -154,14 +154,14 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_define_function(Evaluation_Stack & /*stack*/, Executive_Context &ctx_io,
-                                        const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context &global)
+    Air_Node::Status do_define_function(Evaluation_Stack&  /*stack*/, Executive_Context& ctx_io,
+                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &sloc = p.at(0).as<Source_Location>();
-        const auto &name = p.at(1).as<PreHashed_String>();
-        const auto &params = p.at(2).as<Cow_Vector<PreHashed_String>>();
-        const auto &body = p.at(3).as<Cow_Vector<Statement>>();
+        const auto& sloc = p.at(0).as<Source_Location>();
+        const auto& name = p.at(1).as<PreHashed_String>();
+        const auto& params = p.at(2).as<Cow_Vector<PreHashed_String>>();
+        const auto& body = p.at(3).as<Cow_Vector<Statement>>();
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
         auto var = do_safe_create_variable(nullptr, ctx_io, "function", name, global);
@@ -169,7 +169,7 @@ namespace Asteria {
         Cow_Vector<Air_Node> code_func;
         Analytic_Context ctx_func(&ctx_io);
         ctx_func.prepare_function_parameters(params);
-        rocket::for_each(body, [&](const Statement &stmt) { stmt.generate_code(code_func, nullptr, ctx_func);  });
+        rocket::for_each(body, [&](const Statement& stmt) { stmt.generate_code(code_func, nullptr, ctx_func);  });
         // Instantiate the function.
         rocket::insertable_ostream nos;
         nos << name << "(" << rocket::ostream_implode(params.begin(), params.size(), ", ") <<")";
@@ -179,13 +179,13 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_branch(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_branch(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &negative = static_cast<bool>(p.at(0).as<std::int64_t>());
-        const auto &code_true = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto &code_false = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& negative = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& code_true = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto& code_false = p.at(2).as<Cow_Vector<Air_Node>>();
         // Pick a branch basing on the condition.
         if(stack.get_top_reference().read().test() != negative) {
           // Execute the true branch. Forward any status codes unexpected to the caller.
@@ -203,8 +203,8 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_select(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_select(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // This is different from a C `switch` statement where `case` labels must have constant operands.
         // Evaluate the control expression.
@@ -215,7 +215,7 @@ namespace Asteria {
         // In this loop, `target` points to the `default` clause.
         for(auto it = p.begin(); it != p.end(); it += 3) {
           // Decode arguments.
-          const auto &code_case = it[0].as<Cow_Vector<Air_Node>>();
+          const auto& code_case = it[0].as<Cow_Vector<Air_Node>>();
           if(code_case.empty()) {
             // This is a `default` clause.
             if(target != p.end()) {
@@ -243,15 +243,15 @@ namespace Asteria {
         // Skip clauses that precede `target`.
         for(auto it = p.begin(); it != target; it += 3) {
           // Decode arguments.
-          const auto &names = it[2].as<Cow_Vector<PreHashed_String>>();
+          const auto& names = it[2].as<Cow_Vector<PreHashed_String>>();
           // Inject all names into this scope.
-          rocket::for_each(names, [&](const PreHashed_String &name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
+          rocket::for_each(names, [&](const PreHashed_String& name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
                                                                                                      name, Reference_Root::S_null());  });
         }
         // Execute all clauses from `target` to the end of this block.
         for(auto it = target; it != p.end(); it += 3) {
           // Decode arguments.
-          const auto &code_clause = it[1].as<Cow_Vector<Air_Node>>();
+          const auto& code_clause = it[1].as<Cow_Vector<Air_Node>>();
           // Execute the clause. Break out of the block if requested. Forward any status codes unexpected to the caller.
           auto status = do_execute_statement_list(stack, ctx_body, code_clause, func, global);
           if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
@@ -264,13 +264,13 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_do_while(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_do_while(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &code_body = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto &negative = static_cast<bool>(p.at(1).as<std::int64_t>());
-        const auto &code_cond = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto& negative = static_cast<bool>(p.at(1).as<std::int64_t>());
+        const auto& code_cond = p.at(2).as<Cow_Vector<Air_Node>>();
         // This is the same as a `do...while` loop in C.
         for(;;) {
           // Execute the body. Break out of the loop if requested. Forward any status codes unexpected to the caller.
@@ -290,13 +290,13 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_while(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                      const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_while(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                      const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &negative = static_cast<bool>(p.at(0).as<std::int64_t>());
-        const auto &code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto &code_body = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& negative = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p.at(2).as<Cow_Vector<Air_Node>>();
         // This is the same as a `while` loop in C.
         for(;;) {
           // Check the condition.
@@ -316,14 +316,14 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_for(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                    const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_for(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                    const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &code_init = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto &code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto &code_step = p.at(2).as<Cow_Vector<Air_Node>>();
-        const auto &code_body = p.at(3).as<Cow_Vector<Air_Node>>();
+        const auto& code_init = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto& code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto& code_step = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p.at(3).as<Cow_Vector<Air_Node>>();
         // This is the same as a `for` loop in C.
         Executive_Context ctx_for(&ctx_io);
         do_execute_statement_list(stack, ctx_for, code_init, func, global);
@@ -352,14 +352,14 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_for_each(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                         const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_for_each(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &key_name = p.at(0).as<PreHashed_String>();
-        const auto &mapped_name = p.at(1).as<PreHashed_String>();
-        const auto &code_init = p.at(2).as<Cow_Vector<Air_Node>>();
-        const auto &code_body = p.at(3).as<Cow_Vector<Air_Node>>();
+        const auto& key_name = p.at(0).as<PreHashed_String>();
+        const auto& mapped_name = p.at(1).as<PreHashed_String>();
+        const auto& code_init = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p.at(3).as<Cow_Vector<Air_Node>>();
         // This is the same as a ranged-`for` loop in C++.
         Executive_Context ctx_for(&ctx_io);
         auto key_var = do_safe_create_variable(nullptr, ctx_for, "key variable", key_name, global);
@@ -372,7 +372,7 @@ namespace Asteria {
         switch(rocket::weaken_enum(range_value.type())) {
         case type_array:
           {
-            const auto &array = range_value.check<D_array>();
+            const auto& array = range_value.check<D_array>();
             for(auto it = array.begin(); it != array.end(); ++it) {
               // Create a fresh context for the loop body.
               Executive_Context ctx_body(&ctx_for);
@@ -396,7 +396,7 @@ namespace Asteria {
           }
         case type_object:
           {
-            const auto &object = range_value.check<D_object>();
+            const auto& object = range_value.check<D_object>();
             for(auto it = object.begin(); it != object.end(); ++it) {
               // Create a fresh context for the loop body.
               Executive_Context ctx_body(&ctx_for);
@@ -424,13 +424,13 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_try(Evaluation_Stack &stack, Executive_Context &ctx_io,
-                                    const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context &global)
+    Air_Node::Status do_execute_try(Evaluation_Stack& stack, Executive_Context& ctx_io,
+                                    const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto &code_try = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto &except_name = p.at(1).as<PreHashed_String>();
-        const auto &code_catch = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& code_try = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto& except_name = p.at(1).as<PreHashed_String>();
+        const auto& code_catch = p.at(2).as<Cow_Vector<Air_Node>>();
         // This is the same as a `try...catch` block in C++.
         try {
           // Execute the `try` clause. If no exception is thrown, this will have little cost.
@@ -438,7 +438,7 @@ namespace Asteria {
           if(rocket::is_none_of(status, { Air_Node::status_next })) {
             return status;
           }
-        } catch(std::exception &stdex) {
+        } catch(std::exception& stdex) {
           // Translate the exception.
           // The exception object shall not outlast the `catch` body.
           Executive_Context ctx_catch(&ctx_io);
@@ -448,7 +448,7 @@ namespace Asteria {
           // Provide backtrace information.
           D_array backtrace;
           for(std::size_t i = 0; i < traceable.get_frame_count(); ++i) {
-            const auto &frame = traceable.get_frame(i);
+            const auto& frame = traceable.get_frame(i);
             D_object elem;
             elem.try_emplace(rocket::sref("file"), D_string(frame.source_file()));
             elem.try_emplace(rocket::sref("line"), D_integer(frame.source_line()));
@@ -467,26 +467,26 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_return_status_simple(Evaluation_Stack & /*stack*/, Executive_Context & /*ctx_io*/,
-                                             const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
+    Air_Node::Status do_return_status_simple(Evaluation_Stack&  /*stack*/, Executive_Context&  /*ctx_io*/,
+                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
       {
         // Decode arguments.
-        const auto &status = static_cast<Air_Node::Status>(p.at(0).as<std::int64_t>());
+        const auto& status = static_cast<Air_Node::Status>(p.at(0).as<std::int64_t>());
         // Return the status as is.
         return status;
       }
 
-    [[noreturn]] Air_Node::Status do_execute_throw(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
-                                                   const Cow_Vector<Air_Node::Variant> &p, const Cow_String &func, const Global_Context & /*global*/)
+    [[noreturn]] Air_Node::Status do_execute_throw(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
+                                                   const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context&  /*global*/)
       {
         // Decode arguments.
-        const auto &sloc = p.at(0).as<Source_Location>();
+        const auto& sloc = p.at(0).as<Source_Location>();
         // Throw the value; we don't throw by reference.
         throw Traceable_Exception(stack.get_top_reference().read(), sloc, func);
       }
 
-    Air_Node::Status do_execute_convert_to_temporary(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
-                                                     const Cow_Vector<Air_Node::Variant> & /*p*/, const Cow_String & /*func*/, const Global_Context & /*global*/)
+    Air_Node::Status do_execute_convert_to_temporary(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
+                                                     const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
       {
         // Replace the result with a temporary value, if it isn't.
         if(stack.get_top_reference().is_temporary()) {
@@ -497,13 +497,13 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_assert(Evaluation_Stack &stack, Executive_Context & /*ctx_io*/,
-                                       const Cow_Vector<Air_Node::Variant> &p, const Cow_String & /*func*/, const Global_Context & /*global*/)
+    Air_Node::Status do_execute_assert(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
+                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
       {
         // Decode arguments.
-        const auto &sloc = p.at(0).as<Source_Location>();
-        const auto &negative = static_cast<bool>(p.at(1).as<std::int64_t>());
-        const auto &msg = p.at(2).as<PreHashed_String>();
+        const auto& sloc = p.at(0).as<Source_Location>();
+        const auto& negative = static_cast<bool>(p.at(1).as<std::int64_t>());
+        const auto& msg = p.at(2).as<PreHashed_String>();
         // If the assertion succeeds, there is no effect.
         if(ROCKET_EXPECT(stack.get_top_reference().read().test() != negative)) {
           return Air_Node::status_next;
@@ -521,40 +521,40 @@ namespace Asteria {
 
     }  // namespace
 
-void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const
+void Statement::generate_code(Cow_Vector<Air_Node>& code_out, Cow_Vector<PreHashed_String>* names_out_opt, Analytic_Context& ctx_io) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
       {
-        const auto &alt = this->m_stor.as<S_expression>();
+        const auto& alt = this->m_stor.as<S_expression>();
         if(alt.expr.empty()) {
           // Generate nothing for empty expressions.
           return;
         }
         // Generate preparation code.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the expression.
-        rocket::for_each(alt.expr, [&](const Xprunit &xpru) { xpru.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.expr, [&](const Xprunit& xpru) { xpru.generate_code(code_out, ctx_io);  });
         return;
       }
     case index_block:
       {
-        const auto &alt = this->m_stor.as<S_block>();
+        const auto& alt = this->m_stor.as<S_block>();
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         p.emplace_back(do_generate_code_block(ctx_io, alt.body));  // 0
         code_out.emplace_back(&do_execute_block_callback, rocket::move(p));
         return;
       }
     case index_variable:
       {
-        const auto &alt = this->m_stor.as<S_variable>();
+        const auto& alt = this->m_stor.as<S_variable>();
         // Create a dummy reference for further name lookups.
         do_set_user_declared_reference(names_out_opt, ctx_io, "variable placeholder", alt.name, Reference_Root::S_null());
         // Distinguish uninitialized variables from initialized ones.
         if(alt.init.empty()) {
-          Cow_Vector<Air_Node::Variant> p;
+          Cow_Vector<Air_Node::Param> p;
           p.emplace_back(alt.sloc);  // 0
           p.emplace_back(alt.name);  // 1
           p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 2
@@ -562,11 +562,11 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
           return;
         }
         // A variable becomes visible before its initializer, where it is initialized to `null`.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.name);  // 0
         code_out.emplace_back(&do_declare_variable_and_clear_stack, rocket::move(p));
         // Generate inline code for the initializer.
-        rocket::for_each(alt.init, [&](const Xprunit &xpru) { xpru.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.init, [&](const Xprunit& xpru) { xpru.generate_code(code_out, ctx_io);  });
         // Generate code to initialize the variable.
         p.clear();
         p.emplace_back(alt.sloc);  // 0
@@ -576,11 +576,11 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_function:
       {
-        const auto &alt = this->m_stor.as<S_function>();
+        const auto& alt = this->m_stor.as<S_function>();
         // Create a dummy reference for further name lookups.
         do_set_user_declared_reference(names_out_opt, ctx_io, "function placeholder", alt.name, Reference_Root::S_null());
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(alt.name);  // 1
         p.emplace_back(alt.params);  // 2
@@ -590,12 +590,12 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_if:
       {
-        const auto &alt = this->m_stor.as<S_if>();
+        const auto& alt = this->m_stor.as<S_if>();
         // Generate preparation code.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the condition expression.
-        rocket::for_each(alt.cond, [&](const Xprunit &xpru) { xpru.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.cond, [&](const Xprunit& xpru) { xpru.generate_code(code_out, ctx_io);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 0
@@ -606,12 +606,12 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_switch:
       {
-        const auto &alt = this->m_stor.as<S_switch>();
+        const auto& alt = this->m_stor.as<S_switch>();
         // Generate preparation code.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the condition expression.
-        rocket::for_each(alt.ctrl, [&](const Xprunit &xpru) { xpru.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.ctrl, [&](const Xprunit& xpru) { xpru.generate_code(code_out, ctx_io);  });
         // Create a fresh context for the `switch` body.
         // Note that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_switch(&ctx_io);
@@ -630,9 +630,9 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_do_while:
       {
-        const auto &alt = this->m_stor.as<S_do_while>();
+        const auto& alt = this->m_stor.as<S_do_while>();
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         p.emplace_back(do_generate_code_block(ctx_io, alt.body));  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 1
         p.emplace_back(do_generate_code_expression(ctx_io, alt.cond));  // 2
@@ -641,9 +641,9 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_while:
       {
-        const auto &alt = this->m_stor.as<S_while>();
+        const auto& alt = this->m_stor.as<S_while>();
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 0
         p.emplace_back(do_generate_code_expression(ctx_io, alt.cond));  // 1
         p.emplace_back(do_generate_code_block(ctx_io, alt.body));  // 2
@@ -652,11 +652,11 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_for:
       {
-        const auto &alt = this->m_stor.as<S_for>();
+        const auto& alt = this->m_stor.as<S_for>();
         // Create a fresh context for the `for` loop.
         Analytic_Context ctx_for(&ctx_io);
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         p.emplace_back(do_generate_code_statement_list(nullptr, ctx_for, alt.init));  // 0
         p.emplace_back(do_generate_code_expression(ctx_for, alt.cond));  // 1
         p.emplace_back(do_generate_code_expression(ctx_for, alt.step));  // 2
@@ -666,13 +666,13 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_for_each:
       {
-        const auto &alt = this->m_stor.as<S_for_each>();
+        const auto& alt = this->m_stor.as<S_for_each>();
         // Create a fresh context for the `for` loop.
         Analytic_Context ctx_for(&ctx_io);
         do_set_user_declared_reference(nullptr, ctx_for, "key placeholder", alt.key_name, Reference_Root::S_null());
         do_set_user_declared_reference(nullptr, ctx_for, "mapped placeholder", alt.mapped_name, Reference_Root::S_null());
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.key_name);  // 0
         p.emplace_back(alt.mapped_name);  // 1
         p.emplace_back(do_generate_code_expression(ctx_for, alt.init));  // 2
@@ -682,13 +682,13 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_try:
       {
-        const auto &alt = this->m_stor.as<S_try>();
+        const auto& alt = this->m_stor.as<S_try>();
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(&ctx_io);
         do_set_user_declared_reference(nullptr, ctx_catch, "exception placeholder", alt.except_name, Reference_Root::S_null());
         ctx_catch.open_named_reference(rocket::sref("__backtrace")) /*= Reference_Root::S_null()*/;
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         p.emplace_back(do_generate_code_block(ctx_io, alt.body_try));  // 0
         p.emplace_back(alt.except_name);  // 1
         p.emplace_back(do_generate_code_statement_list(nullptr, ctx_catch, alt.body_catch));  // 2
@@ -697,9 +697,9 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_break:
       {
-        const auto &alt = this->m_stor.as<S_break>();
+        const auto& alt = this->m_stor.as<S_break>();
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         switch(alt.target) {
         case Statement::target_unspec:
           {
@@ -729,9 +729,9 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_continue:
       {
-        const auto &alt = this->m_stor.as<S_continue>();
+        const auto& alt = this->m_stor.as<S_continue>();
         // Encode arguments.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         switch(alt.target) {
         case Statement::target_unspec:
           {
@@ -760,12 +760,12 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_throw:
       {
-        const auto &alt = this->m_stor.as<S_throw>();
+        const auto& alt = this->m_stor.as<S_throw>();
         // Generate preparation code.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
-        rocket::for_each(alt.expr, [&](const Xprunit &xpru) { xpru.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.expr, [&](const Xprunit& xpru) { xpru.generate_code(code_out, ctx_io);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(alt.sloc);  // 0
@@ -774,12 +774,12 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_return:
       {
-        const auto &alt = this->m_stor.as<S_return>();
+        const auto& alt = this->m_stor.as<S_return>();
         // Generate preparation code.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
-        rocket::for_each(alt.expr, [&](const Xprunit &xpru) { xpru.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.expr, [&](const Xprunit& xpru) { xpru.generate_code(code_out, ctx_io);  });
         if(!alt.by_ref) {
           // If the result is to be passed by value, convert it as necessary.
           p.clear();
@@ -793,12 +793,12 @@ void Statement::generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHash
       }
     case index_assert:
       {
-        const auto &alt = this->m_stor.as<S_assert>();
+        const auto& alt = this->m_stor.as<S_assert>();
         // Generate preparation code.
-        Cow_Vector<Air_Node::Variant> p;
+        Cow_Vector<Air_Node::Param> p;
         code_out.emplace_back(&do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
-        rocket::for_each(alt.expr, [&](const Xprunit &xpru) { xpru.generate_code(code_out, ctx_io);  });
+        rocket::for_each(alt.expr, [&](const Xprunit& xpru) { xpru.generate_code(code_out, ctx_io);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(alt.sloc);  // 0

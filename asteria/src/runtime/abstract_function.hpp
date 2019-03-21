@@ -18,12 +18,12 @@ class Abstract_Function : public virtual Rcbase
     ~Abstract_Function() override;
 
   public:
-    virtual void describe(std::ostream &os) const = 0;
-    virtual void invoke(Reference &self_io, const Global_Context &global, Cow_Vector<Reference> &&args) const = 0;
-    virtual void enumerate_variables(const Abstract_Variable_Callback &callback) const = 0;
+    virtual void describe(std::ostream& os) const = 0;
+    virtual void invoke(Reference& self_io, const Global_Context& global, Cow_Vector<Reference>&& args) const = 0;
+    virtual void enumerate_variables(const Abstract_Variable_Callback& callback) const = 0;
   };
 
-inline std::ostream & operator<<(std::ostream &os, const Abstract_Function &func)
+inline std::ostream& operator<<(std::ostream& os, const Abstract_Function& func)
   {
     func.describe(os);
     return os;

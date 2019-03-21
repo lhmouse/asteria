@@ -6,8 +6,6 @@
 
 #include "../fwd.hpp"
 #include "source_location.hpp"
-#include "../rocket/preprocessor_utilities.h"
-#include "../rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -135,7 +133,7 @@ class Statement
         index_return      = 14,
         index_assert      = 15,
       };
-    using Variant = rocket::variant<
+    using Xvariant = Variant<
       ROCKET_CDR(
         , S_expression  //  0,
         , S_block       //  1,
@@ -154,26 +152,26 @@ class Statement
         , S_return      // 14,
         , S_assert      // 15,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Variant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   private:
-    Variant m_stor;
+    Xvariant m_stor;
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Statement(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Statement(AltT&& alt)
       : m_stor(std::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Variant::index_of<AltT>::value)> Statement & operator=(AltT &&alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Statement& operator=(AltT&& alt)
       {
         this->m_stor = std::forward<AltT>(alt);
         return *this;
       }
 
   public:
-    void generate_code(Cow_Vector<Air_Node> &code_out, Cow_Vector<PreHashed_String> *names_out_opt, Analytic_Context &ctx_io) const;
+    void generate_code(Cow_Vector<Air_Node>& code_out, Cow_Vector<PreHashed_String>* names_out_opt, Analytic_Context& ctx_io) const;
   };
 
 }  // namespace Asteria

@@ -9,12 +9,12 @@
 
 namespace Asteria {
 
-bool std_debug_print(const Cow_Vector<Value> &values)
+bool std_debug_print(const Cow_Vector<Value>& values)
   {
     rocket::insertable_ostream mos;
     switch(values.size()) {
     default:
-      std::for_each(values.begin(), values.end() - 1, [&](const Value &r) { r.print(mos), mos << ' ';  });
+      std::for_each(values.begin(), values.end() - 1, [&](const Value& r) { r.print(mos), mos << ' ';  });
       // Fallthrough.
     case 1:
       values.back().print(mos);
@@ -26,7 +26,7 @@ bool std_debug_print(const Cow_Vector<Value> &values)
     return succ;
   }
 
-bool std_debug_dump(const Value &value, D_integer indent_increment)
+bool std_debug_dump(const Value& value, D_integer indent_increment)
   {
     rocket::insertable_ostream mos;
     value.dump(mos, static_cast<std::size_t>(rocket::clamp(indent_increment, 0, 10)));
@@ -48,13 +48,13 @@ D_object create_bindings_debug()
                      "\n    spaces. A line break is appended to terminate the line."
                      "\n  * Returns `true` if the operation succeeds."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.debug.print"), args);
             // Parse variadic arguments.
             Cow_Vector<Value> values(args.size());
             reader.start();
-            std::for_each(values.mut_begin(), values.mut_end(), [&](Value &value) { reader.opt(value);  });
+            std::for_each(values.mut_begin(), values.mut_end(), [&](Value& value) { reader.opt(value);  });
             if(reader.finish()) {
               // Call the binding function.
               if(!std_debug_print(values)) {
@@ -86,7 +86,7 @@ D_object create_bindings_debug()
                      "\n    value of `2`."
                      "\n  * Returns `true` if the operation succeeds."),
         // Definition
-        [](const Cow_Vector<Value> & /*opaque*/, const Global_Context & /*global*/, Cow_Vector<Reference> &&args) -> Reference
+        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.debug.dump"), args);
             // Parse arguments.

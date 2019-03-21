@@ -15,6 +15,7 @@
 #include <utility>  // std::pair<>, rocket::move(), std::forward()
 #include <cstddef>  // std::nullptr_t
 #include <cstdint>  // std::uint8_t, std::int64_t
+#include "rocket/preprocessor_utilities.h"
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
@@ -24,6 +25,7 @@
 #include "rocket/unique_ptr.hpp"
 #include "rocket/refcnt_ptr.hpp"
 #include "rocket/refcnt_object.hpp"
+#include "rocket/variant.hpp"
 
 namespace Asteria {
 
@@ -84,8 +86,10 @@ template<typename E> using Rcptr = rocket::refcnt_ptr<E>;
 template<typename E> using Rcobj = rocket::refcnt_object<E>;
 
 template<typename E> using Cow_Vector = rocket::cow_vector<E>;
-template<typename K, typename V, typename H, typename E = rocket::transparent_equal_to> using Cow_HashMap = rocket::cow_hashmap<K, V, H, E>;
+template<typename K, typename V, typename H> using Cow_HashMap = rocket::cow_hashmap<K, V, H, rocket::transparent_equal_to>;
 template<typename E, std::size_t k> using Static_Vector = rocket::static_vector<E, k>;
+
+template<typename... P> using Variant = rocket::variant<P...>;
 
 // Fundamental Types
 using D_null      = std::nullptr_t;

@@ -117,37 +117,37 @@ struct identity
   {
     using is_transparent = void;
 
-    template<typename paramT> constexpr paramT && operator()(paramT &&param) const noexcept
+    template<typename paramT> constexpr paramT&& operator()(paramT&& param) const noexcept
       {
         return ::std::forward<paramT>(param);
       }
   };
 
-#define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type * = nullptr
-#define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type * = nullptr
+#define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type* = nullptr
+#define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
-template<typename ...unusedT> struct make_void
+template<typename... unusedT> struct make_void
   {
     using type = void;
   };
 
-#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type * = nullptr
-#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof(__VA_ARGS__) || true>::type * = nullptr
+#define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type* = nullptr
+#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof(__VA_ARGS__) || true>::type* = nullptr
 
-template<typename valueT, ROCKET_ENABLE_IF(is_same<typename remove_cv<valueT>::type, valueT>::value)> typename remove_reference<valueT>::type && move(valueT &value) noexcept
+template<typename valueT, ROCKET_ENABLE_IF(is_same<typename remove_cv<valueT>::type, valueT>::value)> typename remove_reference<valueT>::type&& move(valueT& value) noexcept
   {
-    return static_cast<typename remove_reference<valueT>::type &&>(value);
+    return static_cast<typename remove_reference<valueT>::type&&>(value);
   }
 
     namespace details_utilities {
 
     using ::std::swap;
 
-    template<typename typeT> struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT &>(), ::std::declval<typeT &>()))>
+    template<typename typeT> struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
       {
       };
 
-    template<typename typeT> void adl_swap(typeT &lhs, typeT &rhs) noexcept(is_nothrow_swappable<typeT>::value)
+    template<typename typeT> void adl_swap(typeT& lhs, typeT& rhs) noexcept(is_nothrow_swappable<typeT>::value)
       {
         swap(lhs, rhs);
       }
@@ -158,14 +158,14 @@ using details_utilities::is_nothrow_swappable;
 using details_utilities::adl_swap;
 
 template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
-                                                            : ::std::declval<rhsT>()) min(lhsT &&lhs, rhsT &&rhs)
+                                                            : ::std::declval<rhsT>()) min(lhsT&& lhs, rhsT&& rhs)
   {
     return (rhs < lhs) ? ::std::forward<rhsT>(rhs)
                        : ::std::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
-                                                            : ::std::declval<rhsT>()) max(lhsT &&lhs, rhsT &&rhs)
+                                                            : ::std::declval<rhsT>()) max(lhsT&& lhs, rhsT&& rhs)
   {
     return (lhs < rhs) ? ::std::forward<rhsT>(rhs)
                        : ::std::forward<lhsT>(lhs);
@@ -173,14 +173,14 @@ template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhs
 
 template<typename testT, typename lowerT, typename upperT> constexpr decltype(0 ? ::std::declval<lowerT>()
                                                                                 : 0 ? ::std::declval<upperT>()
-                                                                                    : ::std::declval<testT>()) clamp(testT &&test, lowerT &&lower, upperT &&upper)
+                                                                                    : ::std::declval<testT>()) clamp(testT&& test, lowerT&& lower, upperT&& upper)
   {
     return (test < lower) ? ::std::forward<lowerT>(lower)
                           : (upper < test) ? ::std::forward<upperT>(upper)
                                            : ::std::forward<testT>(test);
   }
 
-template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<charT, traitsT> &ios, typename basic_ios<charT, traitsT>::iostate &state)
+template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<charT, traitsT>& ios, typename basic_ios<charT, traitsT>::iostate& state)
   {
     // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
     // Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
@@ -198,8 +198,8 @@ template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<c
   }
 
 template<typename iteratorT, typename eiteratorT,
-         typename functionT, typename ...paramsT> inline void ranged_for(iteratorT first, eiteratorT last,
-                                                                         functionT &&func, const paramsT &...params)
+         typename functionT, typename... paramsT> inline void ranged_for(iteratorT first, eiteratorT last,
+                                                                         functionT&& func, const paramsT&... params)
   {
     for(auto qit = noadl::move(first); qit != last; ++qit) {
       ::std::forward<functionT>(func)(qit, params...);
@@ -207,8 +207,8 @@ template<typename iteratorT, typename eiteratorT,
   }
 
 template<typename iteratorT, typename eiteratorT,
-         typename functionT, typename ...paramsT> inline void ranged_do_while(iteratorT first, eiteratorT last,
-                                                                              functionT &&func, const paramsT &...params)
+         typename functionT, typename... paramsT> inline void ranged_do_while(iteratorT first, eiteratorT last,
+                                                                              functionT&& func, const paramsT&... params)
   {
     auto qit = noadl::move(first);
     do {
@@ -216,17 +216,17 @@ template<typename iteratorT, typename eiteratorT,
     } while(++qit != last);
   }
 
-template<typename ...typesT> struct conjunction : true_type
+template<typename... typesT> struct conjunction : true_type
   {
   };
-template<typename firstT, typename ...restT> struct conjunction<firstT, restT...> : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
+template<typename firstT, typename... restT> struct conjunction<firstT, restT...> : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
   {
   };
 
-template<typename ...typesT> struct disjunction : false_type
+template<typename... typesT> struct disjunction : false_type
   {
   };
-template<typename firstT, typename ...restT> struct disjunction<firstT, restT...> : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
+template<typename firstT, typename... restT> struct disjunction<firstT, restT...> : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
   {
   };
 
@@ -256,34 +256,34 @@ template<typename iteratorT> constexpr size_t estimate_distance(iteratorT first,
     return details_utilities::tagged_estimate_distance(typename iterator_traits<iteratorT>::iterator_category(), noadl::move(first), noadl::move(last));
   }
 
-template<typename elementT, typename ...paramsT> elementT * construct_at(elementT *ptr, paramsT &&...params) noexcept(is_nothrow_constructible<elementT, paramsT &&...>::value)
+template<typename elementT, typename... paramsT> elementT* construct_at(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
   {
 #ifdef ROCKET_DEBUG
-    ::std::memset(static_cast<void *>(ptr), 0xAA, sizeof(elementT));
+    ::std::memset(static_cast<void*>(ptr), 0xAA, sizeof(elementT));
 #endif
-    return ::new(static_cast<void *>(ptr)) elementT(::std::forward<paramsT>(params)...);
+    return ::new(static_cast<void*>(ptr)) elementT(::std::forward<paramsT>(params)...);
   }
 
-template<typename elementT> elementT * default_construct_at(elementT *ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
+template<typename elementT> elementT* default_construct_at(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
   {
 #ifdef ROCKET_DEBUG
-    ::std::memset(static_cast<void *>(ptr), 0xBE, sizeof(elementT));
+    ::std::memset(static_cast<void*>(ptr), 0xBE, sizeof(elementT));
 #endif
-    return ::new(static_cast<void *>(ptr)) elementT;
+    return ::new(static_cast<void*>(ptr)) elementT;
   }
 
-template<typename elementT> void destroy_at(elementT *ptr) noexcept(is_nothrow_destructible<elementT>::value)
+template<typename elementT> void destroy_at(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     if(is_trivially_destructible<elementT>::value) {
       return;
     }
     ptr->~elementT();
 #ifdef ROCKET_DEBUG
-    ::std::memset(static_cast<void *>(ptr), 0xD9, sizeof(elementT));
+    ::std::memset(static_cast<void*>(ptr), 0xD9, sizeof(elementT));
 #endif
   }
 
-template<typename elementT> void rotate(elementT *ptr, size_t begin, size_t seek, size_t end)
+template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek, size_t end)
   {
     auto bot = begin;
     auto brk = seek;
@@ -345,29 +345,29 @@ template<typename elementT> void rotate(elementT *ptr, size_t begin, size_t seek
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline void for_each_nonconstexpr(containerT &&container, callbackT &&callback)
+    template<typename containerT, typename callbackT> inline void for_each_nonconstexpr(containerT&& container, callbackT&& callback)
       {
-        for(auto &&qelem : container) {
+        for(auto&& qelem : container) {
           ::std::forward<callbackT>(callback)(qelem);
         }
       }
 
     }  // namespace details_utilities
 
-template<typename containerT, typename callbackT> inline void for_each(containerT &&container, callbackT &&callback)
+template<typename containerT, typename callbackT> inline void for_each(containerT&& container, callbackT&& callback)
   {
     return details_utilities::for_each_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
   }
-template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT &&callback)
+template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT&& callback)
   {
     return details_utilities::for_each_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline bool any_of_nonconstexpr(containerT &&container, callbackT &&callback)
+    template<typename containerT, typename callbackT> inline bool any_of_nonconstexpr(containerT&& container, callbackT&& callback)
       {
-        for(auto &&qelem : container) {
+        for(auto&& qelem : container) {
           if(::std::forward<callbackT>(callback)(qelem)) {
             return true;
           }
@@ -377,20 +377,20 @@ template<typename elementT, typename callbackT> inline void for_each(initializer
 
     }  // namespace details_utilities
 
-template<typename containerT, typename callbackT> constexpr bool any_of(containerT &&container, callbackT &&callback)
+template<typename containerT, typename callbackT> constexpr bool any_of(containerT&& container, callbackT&& callback)
   {
     return details_utilities::any_of_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
   }
-template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT &&callback)
+template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT&& callback)
   {
     return details_utilities::any_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline bool none_of_nonconstexpr(containerT &&container, callbackT &&callback)
+    template<typename containerT, typename callbackT> inline bool none_of_nonconstexpr(containerT&& container, callbackT&& callback)
       {
-        for(auto &&qelem : container) {
+        for(auto&& qelem : container) {
           if(::std::forward<callbackT>(callback)(qelem)) {
             return false;
           }
@@ -400,20 +400,20 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
 
     }  // namespace details_utilities
 
-template<typename containerT, typename callbackT> constexpr bool none_of(containerT &&container, callbackT &&callback)
+template<typename containerT, typename callbackT> constexpr bool none_of(containerT&& container, callbackT&& callback)
   {
     return details_utilities::none_of_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
   }
-template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT &&callback)
+template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT&& callback)
   {
     return details_utilities::none_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
 
-    template<typename targetT, typename containerT> inline bool is_any_of_nonconstexpr(targetT &&targ, containerT &&container)
+    template<typename targetT, typename containerT> inline bool is_any_of_nonconstexpr(targetT&& targ, containerT&& container)
       {
-        for(auto &&qelem : container) {
+        for(auto&& qelem : container) {
           if(::std::forward<targetT>(targ) == qelem) {
             return true;
           }
@@ -423,20 +423,20 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
 
     }  // namespace details_utilities
 
-template<typename targetT, typename containerT> constexpr bool is_any_of(targetT &&targ, containerT &&container)
+template<typename targetT, typename containerT> constexpr bool is_any_of(targetT&& targ, containerT&& container)
   {
     return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), ::std::forward<containerT>(container));
   }
-template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &&targ, initializer_list<elementT> init)
+template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&& targ, initializer_list<elementT> init)
   {
     return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), init);
   }
 
     namespace details_utilities {
 
-    template<typename targetT, typename containerT> inline bool is_none_of_nonconstexpr(targetT &&targ, containerT &&container)
+    template<typename targetT, typename containerT> inline bool is_none_of_nonconstexpr(targetT&& targ, containerT&& container)
       {
-        for(auto &&qelem : container) {
+        for(auto&& qelem : container) {
           if(::std::forward<targetT>(targ) == qelem) {
             return false;
           }
@@ -446,11 +446,11 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT &
 
     }  // namespace details_utilities
 
-template<typename targetT, typename containerT> constexpr bool is_none_of(targetT &&targ, containerT &&container)
+template<typename targetT, typename containerT> constexpr bool is_none_of(targetT&& targ, containerT&& container)
   {
     return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), ::std::forward<containerT>(container));
   }
-template<typename targetT, typename elementT> constexpr bool is_none_of(targetT &&targ, initializer_list<elementT> init)
+template<typename targetT, typename elementT> constexpr bool is_none_of(targetT&& targ, initializer_list<elementT> init)
   {
     return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), init);
   }
@@ -468,11 +468,11 @@ template<typename elementT, size_t countT> constexpr size_t countof(const elemen
     namespace details_utilities {
 
     template<typename integerT, integerT valueT,
-             typename ...candidatesT> struct integer_selector  // Be SFINAE-friendly.
+             typename... candidatesT> struct integer_selector  // Be SFINAE-friendly.
       {
       };
     template<typename integerT, integerT valueT,
-             typename firstT, typename ...remainingT> struct integer_selector<integerT, valueT,
+             typename firstT, typename... remainingT> struct integer_selector<integerT, valueT,
                                                                               firstT, remainingT...> : conditional<static_cast<firstT>(valueT) == valueT,
                                                                                                                    enable_if<true, firstT>,
                                                                                                                    integer_selector<integerT, valueT, remainingT...>>::type

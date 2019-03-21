@@ -14,7 +14,7 @@ Executive_Context::~Executive_Context()
 
     namespace {
 
-    template<typename XvalueT, typename ...ParamsT> Reference_Root::S_constant do_make_constant(ParamsT &&...params)
+    template<typename XvalueT, typename... ParamsT> Reference_Root::S_constant do_make_constant(ParamsT&&... params)
       {
         Reference_Root::S_constant ref_c = { XvalueT(std::forward<ParamsT>(params)...) };
         return ref_c;
@@ -22,11 +22,11 @@ Executive_Context::~Executive_Context()
 
     }  // namespace
 
-void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer> &zvarg, const Cow_Vector<PreHashed_String> &params, Reference &&self, Cow_Vector<Reference> &&args)
+void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>& zvarg, const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args)
   {
     // Set parameters, which are local references.
     for(std::size_t i = 0; i < params.size(); ++i) {
-      const auto &param = params.at(i);
+      const auto& param = params.at(i);
       if(param.empty()) {
         continue;
       }

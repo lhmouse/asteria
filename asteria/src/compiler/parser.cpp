@@ -13,7 +13,7 @@ namespace Asteria {
 
     namespace {
 
-    Parser_Error do_make_parser_error(const Token_Stream &tstrm_io, Parser_Error::Code code)
+    Parser_Error do_make_parser_error(const Token_Stream& tstrm_io, Parser_Error::Code code)
       {
         auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -22,7 +22,7 @@ namespace Asteria {
         return { qtok->line(), qtok->offset(), qtok->length(), code };
       }
 
-    Source_Location do_tell_source_location(const Token_Stream &tstrm_io)
+    Source_Location do_tell_source_location(const Token_Stream& tstrm_io)
       {
         auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -31,7 +31,7 @@ namespace Asteria {
         return { qtok->file(), qtok->line() };
       }
 
-    bool do_match_keyword(Token_Stream &tstrm_io, Token::Keyword keyword)
+    bool do_match_keyword(Token_Stream& tstrm_io, Token::Keyword keyword)
       {
         auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -48,7 +48,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_match_punctuator(Token_Stream &tstrm_io, Token::Punctuator punct)
+    bool do_match_punctuator(Token_Stream& tstrm_io, Token::Punctuator punct)
       {
         auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -65,7 +65,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_identifier(Cow_String &name_out, Token_Stream &tstrm_io)
+    bool do_accept_identifier(Cow_String& name_out, Token_Stream& tstrm_io)
       {
         auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -80,7 +80,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_string_literal(Cow_String &value_out, Token_Stream &tstrm_io)
+    bool do_accept_string_literal(Cow_String& value_out, Token_Stream& tstrm_io)
       {
         auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -95,7 +95,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_keyword_as_identifier(Cow_String &name_out, Token_Stream &tstrm_io)
+    bool do_accept_keyword_as_identifier(Cow_String& name_out, Token_Stream& tstrm_io)
       {
         auto qtok = tstrm_io.peek_opt();
         if(!qtok) {
@@ -110,7 +110,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_prefix_operator(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_prefix_operator(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
@@ -122,7 +122,7 @@ namespace Asteria {
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            const auto &alt = qtok->check<Token::S_keyword>();
+            const auto& alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_unset:
               {
@@ -155,7 +155,7 @@ namespace Asteria {
           }
         case Token::index_punctuator:
           {
-            const auto &alt = qtok->check<Token::S_punctuator>();
+            const auto& alt = qtok->check<Token::S_punctuator>();
             switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_add:
               {
@@ -206,7 +206,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_postfix_operator(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_operator(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // postfix-operator ::=
         //   "++" | "--"
@@ -240,7 +240,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_literal(Value &value_out, Token_Stream &tstrm_io)
+    bool do_accept_literal(Value& value_out, Token_Stream& tstrm_io)
       {
         // literal ::=
         //   null-literal | boolean-literal | string-literal | noescape-string-literal |
@@ -260,7 +260,7 @@ namespace Asteria {
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            const auto &alt = qtok->check<Token::S_keyword>();
+            const auto& alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_null:
               {
@@ -299,21 +299,21 @@ namespace Asteria {
           }
         case Token::index_integer_literal:
           {
-            const auto &alt = qtok->check<Token::S_integer_literal>();
+            const auto& alt = qtok->check<Token::S_integer_literal>();
             value_out = D_integer(alt.value);
             tstrm_io.shift();
             break;
           }
         case Token::index_real_literal:
           {
-            const auto &alt = qtok->check<Token::S_real_literal>();
+            const auto& alt = qtok->check<Token::S_real_literal>();
             value_out = D_real(alt.value);
             tstrm_io.shift();
             break;
           }
         case Token::index_string_literal:
           {
-            const auto &alt = qtok->check<Token::S_string_literal>();
+            const auto& alt = qtok->check<Token::S_string_literal>();
             value_out = D_string(alt.value);
             tstrm_io.shift();
             break;
@@ -324,7 +324,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_negation(bool &negative_out, Token_Stream &tstrm_io)
+    bool do_accept_negation(bool& negative_out, Token_Stream& tstrm_io)
       {
         // negation ::=
         //   "!" | "not"
@@ -335,7 +335,7 @@ namespace Asteria {
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
-            const auto &alt = qtok->check<Token::S_keyword>();
+            const auto& alt = qtok->check<Token::S_keyword>();
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_not:
               {
@@ -350,7 +350,7 @@ namespace Asteria {
           }
         case Token::index_punctuator:
           {
-            const auto &alt = qtok->check<Token::S_punctuator>();
+            const auto& alt = qtok->check<Token::S_punctuator>();
             switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_notl:
               {
@@ -369,11 +369,11 @@ namespace Asteria {
         return true;
       }
 
-    extern bool do_accept_statement_as_block(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
-    extern bool do_accept_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io);
-    extern bool do_accept_expression(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io);
+    extern bool do_accept_statement_as_block(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io);
+    extern bool do_accept_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io);
+    extern bool do_accept_expression(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io);
 
-    bool do_accept_block_statement_list(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_block_statement_list(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // block ::=
         //   "{" statement-list-opt "}"
@@ -396,7 +396,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_block_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_block_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         Cow_Vector<Statement> stmts;
         if(!do_accept_block_statement_list(stmts, tstrm_io)) {
@@ -407,7 +407,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_identifier_list(Cow_Vector<PreHashed_String> &names_out, Token_Stream &tstrm_io)
+    bool do_accept_identifier_list(Cow_Vector<PreHashed_String>& names_out, Token_Stream& tstrm_io)
       {
         // identifier-list-opt ::=
         //   identifier-list | ""
@@ -429,7 +429,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_named_reference(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_named_reference(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -454,7 +454,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_literal(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_literal(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         Value value;
         if(!do_accept_literal(value, tstrm_io)) {
@@ -465,7 +465,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_this(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_this(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         if(!do_match_keyword(tstrm_io, Token::keyword_this)) {
           return false;
@@ -475,7 +475,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_closure_function(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_closure_function(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -509,7 +509,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_unnamed_array(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_unnamed_array(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // unnamed-array ::=
         //   "[" array-element-list-opt "]"
@@ -540,7 +540,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_unnamed_object(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_unnamed_object(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // unnamed-object ::=
         //   "{" key-mapped-list-opt "}"
@@ -587,7 +587,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_nested_expression(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_nested_expression(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // nested-expression ::=
         //   "(" expression ")"
@@ -603,7 +603,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_primary_expression(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_primary_expression(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // primary-expression ::=
         //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
@@ -616,7 +616,7 @@ namespace Asteria {
                do_accept_nested_expression(xpns_out, tstrm_io);
       }
 
-    bool do_accept_postfix_function_call(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_function_call(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -649,7 +649,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_postfix_subscript(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // postfix-subscript ::=
         //   "[" expression "]"
@@ -667,7 +667,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_postfix_member_access(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // postfix-member-access ::=
         //   "." ( string-literal | identifier )
@@ -686,7 +686,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_element(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_element(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // infix-element ::=
         //   ( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
@@ -760,8 +760,8 @@ namespace Asteria {
 
       public:
         virtual Precedence precedence() const noexcept = 0;
-        virtual void extract(Cow_Vector<Xprunit> &xpns_out) = 0;
-        virtual void append(Infix_Element_Base &&elem) = 0;
+        virtual void extract(Cow_Vector<Xprunit>& xpns_out) = 0;
+        virtual void append(Infix_Element_Base&& elem) = 0;
       };
 
     class Infix_Head : public Infix_Element_Base
@@ -770,7 +770,7 @@ namespace Asteria {
         Cow_Vector<Xprunit> m_xpns;
 
       public:
-        explicit Infix_Head(Cow_Vector<Xprunit> &&xpns)
+        explicit Infix_Head(Cow_Vector<Xprunit>&& xpns)
           : m_xpns(rocket::move(xpns))
           {
           }
@@ -780,17 +780,17 @@ namespace Asteria {
           {
             return precedence_max;
           }
-        void extract(Cow_Vector<Xprunit> &xpns_out) override
+        void extract(Cow_Vector<Xprunit>& xpns_out) override
           {
             xpns_out.append(std::make_move_iterator(this->m_xpns.mut_begin()), std::make_move_iterator(this->m_xpns.mut_end()));
           }
-        void append(Infix_Element_Base &&elem) override
+        void append(Infix_Element_Base&& elem) override
           {
             elem.extract(this->m_xpns);
           }
       };
 
-    bool do_accept_infix_head(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_head(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
       {
         Cow_Vector<Xprunit> xpns;
         if(!do_accept_infix_element(xpns, tstrm_io)) {
@@ -818,7 +818,7 @@ namespace Asteria {
         Cow_Vector<Xprunit> m_branch_false;
 
       public:
-        Infix_Selection(Sop sop, bool assign, Cow_Vector<Xprunit> &&branch_true, Cow_Vector<Xprunit> &&branch_false)
+        Infix_Selection(Sop sop, bool assign, Cow_Vector<Xprunit>&& branch_true, Cow_Vector<Xprunit>&& branch_false)
           : m_sop(sop), m_assign(assign), m_branch_true(rocket::move(branch_true)), m_branch_false(rocket::move(branch_false))
           {
           }
@@ -850,7 +850,7 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix selection `", this->m_sop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xprunit> &xpns_out) override
+        void extract(Cow_Vector<Xprunit>& xpns_out) override
           {
             if(this->m_sop == sop_coales) {
               Xprunit::S_coalescence node_c = { rocket::move(this->m_branch_false), this->m_assign };
@@ -860,13 +860,13 @@ namespace Asteria {
             Xprunit::S_branch node_c = { rocket::move(this->m_branch_true), rocket::move(this->m_branch_false), this->m_assign };
             xpns_out.emplace_back(rocket::move(node_c));
           }
-        void append(Infix_Element_Base &&elem) override
+        void append(Infix_Element_Base&& elem) override
           {
             elem.extract(this->m_branch_false);
           }
       };
 
-    bool do_accept_infix_selection_quest(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_selection_quest(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_quest)) {
@@ -890,7 +890,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_selection_and(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_selection_and(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_andl) && !do_match_keyword(tstrm_io, Token::keyword_and)) {
@@ -907,7 +907,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_selection_or(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_selection_or(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_orl) && !do_match_keyword(tstrm_io, Token::keyword_or)) {
@@ -924,7 +924,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_selection_coales(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_selection_coales(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
       {
         bool assign = false;
         if(!do_match_punctuator(tstrm_io, Token::punctuator_coales)) {
@@ -949,7 +949,7 @@ namespace Asteria {
         Cow_Vector<Xprunit> m_rhs;
 
       public:
-        Infix_Carriage(Xprunit::Xop xop, bool assign, Cow_Vector<Xprunit> &&rhs)
+        Infix_Carriage(Xprunit::Xop xop, bool assign, Cow_Vector<Xprunit>&& rhs)
           : m_xop(xop), m_assign(assign), m_rhs(rocket::move(rhs))
           {
           }
@@ -1012,20 +1012,20 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix operator `", this->m_xop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xprunit> &xpns_out) override
+        void extract(Cow_Vector<Xprunit>& xpns_out) override
           {
             xpns_out.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
             // Don't forget the operator!
             Xprunit::S_operator_rpn node_c = { this->m_xop, this->m_assign };
             xpns_out.emplace_back(rocket::move(node_c));
           }
-        void append(Infix_Element_Base &&elem) override
+        void append(Infix_Element_Base&& elem) override
           {
             elem.extract(this->m_rhs);
           }
       };
 
-    bool do_accept_infix_carriage(Uptr<Infix_Element_Base> &elem_out, Token_Stream &tstrm_io)
+    bool do_accept_infix_carriage(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
       {
         // infix-carriage ::=
         //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
@@ -1209,7 +1209,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_expression(Cow_Vector<Xprunit> &xpns_out, Token_Stream &tstrm_io)
+    bool do_accept_expression(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
       {
         // expression ::=
         //   infix-element infix-carriage-list-opt
@@ -1254,7 +1254,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_variable_definition(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_variable_definition(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -1291,7 +1291,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_immutable_variable_definition(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_immutable_variable_definition(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -1326,7 +1326,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_function_definition(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_function_definition(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -1358,7 +1358,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_expression_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_expression_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // expression-statement ::=
         //   expression ";"
@@ -1374,7 +1374,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_if_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_if_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // if-statement ::=
         //   "if" negation-opt "(" expression ")" statement ( "else" statement | "" )
@@ -1413,7 +1413,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_switch_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_switch_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // switch-statement ::=
         //   "switch" "(" expression ")" switch-block
@@ -1471,7 +1471,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_do_while_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_do_while_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // do-while-statement ::=
         //   "do" statement "while" negation-opt "(" expression ")" ";"
@@ -1507,7 +1507,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_while_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_while_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // while-statement ::=
         //   "while" negation-opt "(" expression ")" statement
@@ -1537,7 +1537,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_for_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_for_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // for-statement ::=
         //   "for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
@@ -1607,7 +1607,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_break_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_break_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // break-statement ::=
         //   "break" ( "switch" | "while" | "for" ) ";"
@@ -1636,7 +1636,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_continue_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_continue_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // continue-statement ::=
         //   "continue" ( "while" | "for" ) ";"
@@ -1661,7 +1661,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_throw_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_throw_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -1682,7 +1682,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_return_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_return_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // return-statement ::=
         //   "return" ( "&" | "" ) expression-opt ";"
@@ -1706,7 +1706,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_assert_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_assert_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -1738,7 +1738,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_try_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_try_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm_io);
@@ -1773,7 +1773,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_nonblock_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_nonblock_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // nonblock-statement ::=
         //   null-statement |
@@ -1801,7 +1801,7 @@ namespace Asteria {
                do_accept_try_statement(stmts_out, tstrm_io);
       }
 
-    bool do_accept_statement_as_block(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_statement_as_block(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // statement ::=
         //   block-statement | nonblock-statement
@@ -1809,7 +1809,7 @@ namespace Asteria {
                do_accept_nonblock_statement(stmts_out, tstrm_io);
       }
 
-    bool do_accept_statement(Cow_Vector<Statement> &stmts_out, Token_Stream &tstrm_io)
+    bool do_accept_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
       {
         // statement ::=
         //   block-statement | nonblock-statement
@@ -1859,7 +1859,7 @@ bool Parser::empty() const noexcept
     }
   }
 
-bool Parser::load(Token_Stream &tstrm_io, const Parser_Options & /*options*/)
+bool Parser::load(Token_Stream& tstrm_io, const Parser_Options&  /*options*/)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -1884,7 +1884,7 @@ bool Parser::load(Token_Stream &tstrm_io, const Parser_Options & /*options*/)
     ///////////////////////////////////////////////////////////////////////////
     this->m_stor = rocket::move(stmts);
     return true;
-  } catch(Parser_Error &err) {  // Don't play with this at home.
+  } catch(Parser_Error& err) {  // Don't play with this at home.
     ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
                       "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
                       "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
@@ -1897,7 +1897,7 @@ void Parser::clear() noexcept
     this->m_stor = nullptr;
   }
 
-const Cow_Vector<Statement> & Parser::get_statements() const noexcept
+const Cow_Vector<Statement>& Parser::get_statements() const noexcept
   {
     switch(this->state()) {
     case state_empty:
