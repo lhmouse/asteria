@@ -8,6 +8,10 @@
 #  include <config.h>
 #endif
 
+#ifdef __FAST_MATH__
+#  error Please turn off `-ffast-math`.
+#endif
+
 #include <utility>  // std::pair<>, rocket::move(), std::forward()
 #include <cstddef>  // std::nullptr_t
 #include <cstdint>  // std::uint8_t, std::int64_t
