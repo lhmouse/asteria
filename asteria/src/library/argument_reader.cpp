@@ -83,7 +83,7 @@ const Reference* Argument_Reader::do_peek_argument_optional_opt()
     return qarg;
   }
 
-template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argument_optional(XvalueT& xvalue_out)
+template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argument_optional(XvalueT& xvalue)
   {
     // Record a parameter.
     constexpr auto xtype = static_cast<Value_Type>(Value::Xvariant::index_of<XvalueT>::value);
@@ -103,7 +103,7 @@ template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argum
         return *this;
       }
       // Copy the value.
-      xvalue_out = value.check<XvalueT>();
+      xvalue = value.check<XvalueT>();
     }
     return *this;
   }
@@ -129,7 +129,7 @@ const Reference* Argument_Reader::do_peek_argument_required_opt()
     return qarg;
   }
 
-template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argument_required(XvalueT& xvalue_out)
+template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argument_required(XvalueT& xvalue)
   {
     // Record a parameter.
     constexpr auto xtype = static_cast<Value_Type>(Value::Xvariant::index_of<XvalueT>::value);
@@ -148,7 +148,7 @@ template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argum
       return *this;
     }
     // Copy the value.
-    xvalue_out = value.check<XvalueT>();
+    xvalue = value.check<XvalueT>();
     return *this;
   }
 
@@ -161,7 +161,7 @@ Argument_Reader& Argument_Reader::start() noexcept
     return *this;
   }
 
-Argument_Reader& Argument_Reader::opt(Reference& ref_out)
+Argument_Reader& Argument_Reader::opt(Reference& ref)
   {
     // Record a parameter.
     this->m_state.prototype.emplace_back(do_encode_generic_param(false));
@@ -171,11 +171,11 @@ Argument_Reader& Argument_Reader::opt(Reference& ref_out)
       return *this;
     }
     // Copy the reference as is.
-    ref_out = *qarg;
+    ref = *qarg;
     return *this;
   }
 
-Argument_Reader& Argument_Reader::opt(Value& value_out)
+Argument_Reader& Argument_Reader::opt(Value& value)
   {
     // Record a parameter.
     this->m_state.prototype.emplace_back(do_encode_generic_param(false));
@@ -184,91 +184,89 @@ Argument_Reader& Argument_Reader::opt(Value& value_out)
     if(!qarg) {
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = qarg->read();
-    // Copy the value as is.
-    value_out = value;
+    // Read a value from the argument and copy it as is.
+    value = qarg->read();
     return *this;
   }
 
-Argument_Reader& Argument_Reader::opt(D_boolean& xvalue_out)
+Argument_Reader& Argument_Reader::opt(D_boolean& xvalue)
   {
-    return this->do_read_typed_argument_optional(xvalue_out);
+    return this->do_read_typed_argument_optional(xvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_integer& xvalue_out)
+Argument_Reader& Argument_Reader::opt(D_integer& xvalue)
   {
-    return this->do_read_typed_argument_optional(xvalue_out);
+    return this->do_read_typed_argument_optional(xvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_real& xvalue_out)
+Argument_Reader& Argument_Reader::opt(D_real& xvalue)
   {
-    return this->do_read_typed_argument_optional(xvalue_out);
+    return this->do_read_typed_argument_optional(xvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_string& xvalue_out)
+Argument_Reader& Argument_Reader::opt(D_string& xvalue)
   {
-    return this->do_read_typed_argument_optional(xvalue_out);
+    return this->do_read_typed_argument_optional(xvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_opaque& xvalue_out)
+Argument_Reader& Argument_Reader::opt(D_opaque& xvalue)
   {
-    return this->do_read_typed_argument_optional(xvalue_out);
+    return this->do_read_typed_argument_optional(xvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_function& xvalue_out)
+Argument_Reader& Argument_Reader::opt(D_function& xvalue)
   {
-    return this->do_read_typed_argument_optional(xvalue_out);
+    return this->do_read_typed_argument_optional(xvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_array& xvalue_out)
+Argument_Reader& Argument_Reader::opt(D_array& xvalue)
   {
-    return this->do_read_typed_argument_optional(xvalue_out);
+    return this->do_read_typed_argument_optional(xvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_object& xvalue_out)
+Argument_Reader& Argument_Reader::opt(D_object& xvalue)
   {
-    return this->do_read_typed_argument_optional(xvalue_out);
+    return this->do_read_typed_argument_optional(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_boolean& xvalue_out)
+Argument_Reader& Argument_Reader::req(D_boolean& xvalue)
   {
-    return this->do_read_typed_argument_required(xvalue_out);
+    return this->do_read_typed_argument_required(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_integer& xvalue_out)
+Argument_Reader& Argument_Reader::req(D_integer& xvalue)
   {
-    return this->do_read_typed_argument_required(xvalue_out);
+    return this->do_read_typed_argument_required(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_real& xvalue_out)
+Argument_Reader& Argument_Reader::req(D_real& xvalue)
   {
-    return this->do_read_typed_argument_required(xvalue_out);
+    return this->do_read_typed_argument_required(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_string& xvalue_out)
+Argument_Reader& Argument_Reader::req(D_string& xvalue)
   {
-    return this->do_read_typed_argument_required(xvalue_out);
+    return this->do_read_typed_argument_required(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_opaque& xvalue_out)
+Argument_Reader& Argument_Reader::req(D_opaque& xvalue)
   {
-    return this->do_read_typed_argument_required(xvalue_out);
+    return this->do_read_typed_argument_required(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_function& xvalue_out)
+Argument_Reader& Argument_Reader::req(D_function& xvalue)
   {
-    return this->do_read_typed_argument_required(xvalue_out);
+    return this->do_read_typed_argument_required(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_array& xvalue_out)
+Argument_Reader& Argument_Reader::req(D_array& xvalue)
   {
-    return this->do_read_typed_argument_required(xvalue_out);
+    return this->do_read_typed_argument_required(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_object& xvalue_out)
+Argument_Reader& Argument_Reader::req(D_object& xvalue)
   {
-    return this->do_read_typed_argument_required(xvalue_out);
+    return this->do_read_typed_argument_required(xvalue);
   }
 
 Argument_Reader& Argument_Reader::finish()

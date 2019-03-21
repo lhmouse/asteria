@@ -13,27 +13,27 @@ namespace Asteria {
 
     namespace {
 
-    Parser_Error do_make_parser_error(const Token_Stream& tstrm_io, Parser_Error::Code code)
+    Parser_Error do_make_parser_error(const Token_Stream& tstrm, Parser_Error::Code code)
       {
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return { 0, SIZE_MAX, 0, code };
         }
         return { qtok->line(), qtok->offset(), qtok->length(), code };
       }
 
-    Source_Location do_tell_source_location(const Token_Stream& tstrm_io)
+    Source_Location do_tell_source_location(const Token_Stream& tstrm)
       {
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return { rocket::sref("<end of stream>"), 0 };
         }
         return { qtok->file(), qtok->line() };
       }
 
-    bool do_match_keyword(Token_Stream& tstrm_io, Token::Keyword keyword)
+    bool do_match_keyword(Token_Stream& tstrm, Token::Keyword keyword)
       {
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -44,13 +44,13 @@ namespace Asteria {
         if(qalt->keyword != keyword) {
           return false;
         }
-        tstrm_io.shift();
+        tstrm.shift();
         return true;
       }
 
-    bool do_match_punctuator(Token_Stream& tstrm_io, Token::Punctuator punct)
+    bool do_match_punctuator(Token_Stream& tstrm, Token::Punctuator punct)
       {
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -61,13 +61,13 @@ namespace Asteria {
         if(qalt->punct != punct) {
           return false;
         }
-        tstrm_io.shift();
+        tstrm.shift();
         return true;
       }
 
-    bool do_accept_identifier(Cow_String& name_out, Token_Stream& tstrm_io)
+    bool do_accept_identifier(Cow_String& name, Token_Stream& tstrm)
       {
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -75,14 +75,14 @@ namespace Asteria {
         if(!qalt) {
           return false;
         }
-        name_out = qalt->name;
-        tstrm_io.shift();
+        name = qalt->name;
+        tstrm.shift();
         return true;
       }
 
-    bool do_accept_string_literal(Cow_String& value_out, Token_Stream& tstrm_io)
+    bool do_accept_string_literal(Cow_String& value, Token_Stream& tstrm)
       {
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -90,14 +90,14 @@ namespace Asteria {
         if(!qalt) {
           return false;
         }
-        value_out = qalt->value;
-        tstrm_io.shift();
+        value = qalt->value;
+        tstrm.shift();
         return true;
       }
 
-    bool do_accept_keyword_as_identifier(Cow_String& name_out, Token_Stream& tstrm_io)
+    bool do_accept_keyword_as_identifier(Cow_String& name, Token_Stream& tstrm)
       {
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -105,16 +105,16 @@ namespace Asteria {
         if(!qalt) {
           return false;
         }
-        name_out = rocket::sref(Token::get_keyword(qalt->keyword));
-        tstrm_io.shift();
+        name = rocket::sref(Token::get_keyword(qalt->keyword));
+        tstrm.shift();
         return true;
       }
 
-    bool do_accept_prefix_operator(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_prefix_operator(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -127,25 +127,25 @@ namespace Asteria {
             case Token::keyword_unset:
               {
                 xop = Xprunit::xop_prefix_unset;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             case Token::keyword_lengthof:
               {
                 xop = Xprunit::xop_prefix_lengthof;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             case Token::keyword_typeof:
               {
                 xop = Xprunit::xop_prefix_typeof;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             case Token::keyword_not:
               {
                 xop = Xprunit::xop_prefix_notl;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             default:
@@ -160,37 +160,37 @@ namespace Asteria {
             case Token::punctuator_add:
               {
                 xop = Xprunit::xop_prefix_pos;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             case Token::punctuator_sub:
               {
                 xop = Xprunit::xop_prefix_neg;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             case Token::punctuator_notb:
               {
                 xop = Xprunit::xop_prefix_notb;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             case Token::punctuator_notl:
               {
                 xop = Xprunit::xop_prefix_notl;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             case Token::punctuator_inc:
               {
                 xop = Xprunit::xop_prefix_inc;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             case Token::punctuator_dec:
               {
                 xop = Xprunit::xop_prefix_dec;
-                tstrm_io.shift();
+                tstrm.shift();
                 break;
               }
             default:
@@ -202,15 +202,15 @@ namespace Asteria {
           return false;
         }
         Xprunit::S_operator_rpn node_c = { xop, false };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_postfix_operator(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_postfix_operator(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // postfix-operator ::=
         //   "++" | "--"
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -223,24 +223,24 @@ namespace Asteria {
         case Token::punctuator_inc:
           {
             xop = Xprunit::xop_postfix_inc;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_dec:
           {
             xop = Xprunit::xop_postfix_dec;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         default:
           return false;
         }
         Xprunit::S_operator_rpn node_c = { xop, false };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_literal(Value& value_out, Token_Stream& tstrm_io)
+    bool do_accept_literal(Value& value, Token_Stream& tstrm)
       {
         // literal ::=
         //   null-literal | boolean-literal | string-literal | noescape-string-literal |
@@ -253,7 +253,7 @@ namespace Asteria {
         //   "nan"
         // infinity-literal ::=
         //   "infinity"
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -264,32 +264,32 @@ namespace Asteria {
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_null:
               {
-                value_out = D_null();
-                tstrm_io.shift();
+                value = D_null();
+                tstrm.shift();
                 break;
               }
             case Token::keyword_false:
               {
-                value_out = D_boolean(false);
-                tstrm_io.shift();
+                value = D_boolean(false);
+                tstrm.shift();
                 break;
               }
             case Token::keyword_true:
               {
-                value_out = D_boolean(true);
-                tstrm_io.shift();
+                value = D_boolean(true);
+                tstrm.shift();
                 break;
               }
             case Token::keyword_nan:
               {
-                value_out = D_real(NAN);
-                tstrm_io.shift();
+                value = D_real(NAN);
+                tstrm.shift();
                 break;
               }
             case Token::keyword_infinity:
               {
-                value_out = D_real(INFINITY);
-                tstrm_io.shift();
+                value = D_real(INFINITY);
+                tstrm.shift();
                 break;
               }
             default:
@@ -300,22 +300,22 @@ namespace Asteria {
         case Token::index_integer_literal:
           {
             const auto& alt = qtok->check<Token::S_integer_literal>();
-            value_out = D_integer(alt.value);
-            tstrm_io.shift();
+            value = D_integer(alt.value);
+            tstrm.shift();
             break;
           }
         case Token::index_real_literal:
           {
             const auto& alt = qtok->check<Token::S_real_literal>();
-            value_out = D_real(alt.value);
-            tstrm_io.shift();
+            value = D_real(alt.value);
+            tstrm.shift();
             break;
           }
         case Token::index_string_literal:
           {
             const auto& alt = qtok->check<Token::S_string_literal>();
-            value_out = D_string(alt.value);
-            tstrm_io.shift();
+            value = D_string(alt.value);
+            tstrm.shift();
             break;
           }
         default:
@@ -324,11 +324,11 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_negation(bool& negative_out, Token_Stream& tstrm_io)
+    bool do_accept_negation(bool& negative, Token_Stream& tstrm)
       {
         // negation ::=
         //   "!" | "not"
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -339,8 +339,8 @@ namespace Asteria {
             switch(rocket::weaken_enum(alt.keyword)) {
             case Token::keyword_not:
               {
-                negative_out = true;
-                tstrm_io.shift();
+                negative = true;
+                tstrm.shift();
                 break;
               }
             default:
@@ -354,8 +354,8 @@ namespace Asteria {
             switch(rocket::weaken_enum(alt.punct)) {
             case Token::punctuator_notl:
               {
-                negative_out = true;
-                tstrm_io.shift();
+                negative = true;
+                tstrm.shift();
                 break;
               }
             default:
@@ -369,11 +369,11 @@ namespace Asteria {
         return true;
       }
 
-    extern bool do_accept_statement_as_block(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io);
-    extern bool do_accept_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io);
-    extern bool do_accept_expression(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io);
+    extern bool do_accept_statement_as_block(Cow_Vector<Statement>& stmts, Token_Stream& tstrm);
+    extern bool do_accept_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm);
+    extern bool do_accept_expression(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm);
 
-    bool do_accept_block_statement_list(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_block_statement_list(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // block ::=
         //   "{" statement-list-opt "}"
@@ -381,135 +381,135 @@ namespace Asteria {
         //   statement-list | ""
         // statement-list ::=
         //   statement statement-list-opt
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_brace_op)) {
           return false;
         }
         for(;;) {
-          bool stmt_got = do_accept_statement(stmts_out, tstrm_io);
+          bool stmt_got = do_accept_statement(stmts, tstrm);
           if(!stmt_got) {
             break;
           }
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_statement_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_statement_expected);
         }
         return true;
       }
 
-    bool do_accept_block_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_block_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
-        Cow_Vector<Statement> stmts;
-        if(!do_accept_block_statement_list(stmts, tstrm_io)) {
+        Cow_Vector<Statement> body;
+        if(!do_accept_block_statement_list(body, tstrm)) {
           return false;
         }
-        Statement::S_block stmt_c = { rocket::move(stmts) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        Statement::S_block stmt_c = { rocket::move(body) };
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_identifier_list(Cow_Vector<PreHashed_String>& names_out, Token_Stream& tstrm_io)
+    bool do_accept_identifier_list(Cow_Vector<PreHashed_String>& names, Token_Stream& tstrm)
       {
         // identifier-list-opt ::=
         //   identifier-list | ""
         // identifier-list ::=
         //   identifier ( "," identifier-list | "" )
         Cow_String name;
-        if(!do_accept_identifier(name, tstrm_io)) {
+        if(!do_accept_identifier(name, tstrm)) {
           return false;
         }
         for(;;) {
-          names_out.emplace_back(rocket::move(name));
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
+          names.emplace_back(rocket::move(name));
+          if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
           }
-          if(!do_accept_identifier(name, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+          if(!do_accept_identifier(name, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
           }
         }
         return true;
       }
 
-    bool do_accept_named_reference(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_named_reference(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // Get a name first.
         Cow_String name;
-        if(!do_accept_identifier(name, tstrm_io)) {
+        if(!do_accept_identifier(name, tstrm)) {
           return false;
         }
         // Handle special names.
         if(name == "__file") {
           Xprunit::S_literal node_c = { D_string(sloc.file()) };
-          xpns_out.emplace_back(rocket::move(node_c));
+          xpns.emplace_back(rocket::move(node_c));
           return true;
         }
         if(name == "__line") {
           Xprunit::S_literal node_c = { D_integer(sloc.line()) };
-          xpns_out.emplace_back(rocket::move(node_c));
+          xpns.emplace_back(rocket::move(node_c));
           return true;
         }
         Xprunit::S_named_reference node_c = { rocket::move(name) };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_literal(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_literal(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         Value value;
-        if(!do_accept_literal(value, tstrm_io)) {
+        if(!do_accept_literal(value, tstrm)) {
           return false;
         }
         Xprunit::S_literal node_c = { rocket::move(value) };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_this(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_this(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
-        if(!do_match_keyword(tstrm_io, Token::keyword_this)) {
+        if(!do_match_keyword(tstrm, Token::keyword_this)) {
           return false;
         }
         Xprunit::S_named_reference node_c = { rocket::sref("__this") };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_closure_function(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_closure_function(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // closure-function ::=
         //   "func" "(" identifier-list-opt ")" ( block | expression )
-        if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
+        if(!do_match_keyword(tstrm, Token::keyword_func)) {
           return false;
         }
         Cow_Vector<PreHashed_String> params;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
-        if(do_accept_identifier_list(params, tstrm_io)) {
+        if(do_accept_identifier_list(params, tstrm)) {
           // This is optional.
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         Cow_Vector<Statement> body;
-        if(!do_accept_block_statement_list(body, tstrm_io)) {
+        if(!do_accept_block_statement_list(body, tstrm)) {
           // An expression is expected, which behaves as if it was the operand of a `return&` ststement.
           Cow_Vector<Xprunit> xpns_ret;
-          if(!do_accept_expression(xpns_ret, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_or_expression_expected);
+          if(!do_accept_expression(xpns_ret, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_or_expression_expected);
           }
           Statement::S_return stmt_c = { true, rocket::move(xpns_ret) };
           body.emplace_back(rocket::move(stmt_c));
         }
         Xprunit::S_closure_function node_c = { rocket::move(sloc), rocket::move(params), rocket::move(body) };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_unnamed_array(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_unnamed_array(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // unnamed-array ::=
         //   "[" array-element-list-opt "]"
@@ -517,30 +517,30 @@ namespace Asteria {
         //   array-element-list | ""
         // array-element-list ::=
         //   expression ( ( "," | ";" ) array-element-list-opt | "" )
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_op)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_bracket_op)) {
           return false;
         }
         std::size_t nelems = 0;
         for(;;) {
-          if(!do_accept_expression(xpns_out, tstrm_io)) {
+          if(!do_accept_expression(xpns, tstrm)) {
             break;
           }
           ++nelems;
-          bool has_next = do_match_punctuator(tstrm_io, Token::punctuator_comma) ||
-                          do_match_punctuator(tstrm_io, Token::punctuator_semicol);
+          bool has_next = do_match_punctuator(tstrm, Token::punctuator_comma) ||
+                          do_match_punctuator(tstrm, Token::punctuator_semicol);
           if(!has_next) {
             break;
           }
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_bracket_or_expression_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_bracket_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_or_expression_expected);
         }
         Xprunit::S_unnamed_array node_c = { nelems };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_unnamed_object(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_unnamed_object(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // unnamed-object ::=
         //   "{" key-mapped-list-opt "}"
@@ -548,145 +548,145 @@ namespace Asteria {
         //   key-mapped-list | ""
         // key-mapped-list ::=
         //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) key-mapped-list-opt | "" )
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_brace_op)) {
           return false;
         }
         Cow_Vector<PreHashed_String> keys;
         for(;;) {
-          auto duplicate_key_error = do_make_parser_error(tstrm_io, Parser_Error::code_duplicate_object_key);
+          auto duplicate_key_error = do_make_parser_error(tstrm, Parser_Error::code_duplicate_object_key);
           Cow_String key;
-          bool key_got = do_accept_string_literal(key, tstrm_io) ||
-                         do_accept_identifier(key, tstrm_io) ||
-                         do_accept_keyword_as_identifier(key, tstrm_io);
+          bool key_got = do_accept_string_literal(key, tstrm) ||
+                         do_accept_identifier(key, tstrm) ||
+                         do_accept_keyword_as_identifier(key, tstrm);
           if(!key_got) {
             break;
           }
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
-            if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
-              throw do_make_parser_error(tstrm_io, Parser_Error::code_equals_sign_or_colon_expected);
+          if(!do_match_punctuator(tstrm, Token::punctuator_assign)) {
+            if(!do_match_punctuator(tstrm, Token::punctuator_colon)) {
+              throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_or_colon_expected);
             }
           }
           if(std::find(keys.begin(), keys.end(), key) != keys.end()) {
             throw duplicate_key_error;
           }
-          if(!do_accept_expression(xpns_out, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+          if(!do_accept_expression(xpns, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
           keys.emplace_back(rocket::move(key));
-          bool has_next = do_match_punctuator(tstrm_io, Token::punctuator_comma) ||
-                          do_match_punctuator(tstrm_io, Token::punctuator_semicol);
+          bool has_next = do_match_punctuator(tstrm, Token::punctuator_comma) ||
+                          do_match_punctuator(tstrm, Token::punctuator_semicol);
           if(!has_next) {
             break;
           }
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_object_key_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_object_key_expected);
         }
         Xprunit::S_unnamed_object node_c = { rocket::move(keys) };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_nested_expression(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_nested_expression(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // nested-expression ::=
         //   "(" expression ")"
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
           return false;
         }
-        if(!do_accept_expression(xpns_out, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(xpns, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         return true;
       }
 
-    bool do_accept_primary_expression(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_primary_expression(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // primary-expression ::=
         //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
-        return do_accept_named_reference(xpns_out, tstrm_io) ||
-               do_accept_literal(xpns_out, tstrm_io) ||
-               do_accept_this(xpns_out, tstrm_io) ||
-               do_accept_closure_function(xpns_out, tstrm_io) ||
-               do_accept_unnamed_object(xpns_out, tstrm_io) ||
-               do_accept_unnamed_array(xpns_out, tstrm_io) ||
-               do_accept_nested_expression(xpns_out, tstrm_io);
+        return do_accept_named_reference(xpns, tstrm) ||
+               do_accept_literal(xpns, tstrm) ||
+               do_accept_this(xpns, tstrm) ||
+               do_accept_closure_function(xpns, tstrm) ||
+               do_accept_unnamed_object(xpns, tstrm) ||
+               do_accept_unnamed_array(xpns, tstrm) ||
+               do_accept_nested_expression(xpns, tstrm);
       }
 
-    bool do_accept_postfix_function_call(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_postfix_function_call(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // postfix-function-call ::=
         //   "(" argument-list-opt ")"
         // argument-list-opt ::=
         //   argument-list | ""
         // argument-list ::=
         //   expression ( "," argument-list | "" )
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
           return false;
         }
         std::size_t nargs = 0;
-        if(do_accept_expression(xpns_out, tstrm_io)) {
+        if(do_accept_expression(xpns, tstrm)) {
           for(;;) {
             ++nargs;
-            if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
+            if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
               break;
             }
-            if(!do_accept_expression(xpns_out, tstrm_io)) {
-              throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+            if(!do_accept_expression(xpns, tstrm)) {
+              throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
             }
           }
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_or_argument_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
         Xprunit::S_function_call node_c = { rocket::move(sloc), nargs };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // postfix-subscript ::=
         //   "[" expression "]"
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_op)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_bracket_op)) {
           return false;
         }
-        if(!do_accept_expression(xpns_out, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(xpns, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_bracket_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_bracket_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_bracket_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
         Xprunit::S_operator_rpn node_c = { Xprunit::xop_postfix_at, false };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // postfix-member-access ::=
         //   "." ( string-literal | identifier )
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_dot)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_dot)) {
           return false;
         }
         Cow_String key;
-        bool key_got = do_accept_string_literal(key, tstrm_io) ||
-                       do_accept_identifier(key, tstrm_io) ||
-                       do_accept_keyword_as_identifier(key, tstrm_io);
+        bool key_got = do_accept_string_literal(key, tstrm) ||
+                       do_accept_identifier(key, tstrm) ||
+                       do_accept_keyword_as_identifier(key, tstrm);
         if(!key_got) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
         Xprunit::S_member_access node_c = { rocket::move(key) };
-        xpns_out.emplace_back(rocket::move(node_c));
+        xpns.emplace_back(rocket::move(node_c));
         return true;
       }
 
-    bool do_accept_infix_element(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_infix_element(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // infix-element ::=
         //   ( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
@@ -699,32 +699,32 @@ namespace Asteria {
         // postfix-operator-list ::=
         //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
         Cow_Vector<Xprunit> prefixes;
-        if(!do_accept_prefix_operator(prefixes, tstrm_io)) {
-          if(!do_accept_primary_expression(xpns_out, tstrm_io)) {
+        if(!do_accept_prefix_operator(prefixes, tstrm)) {
+          if(!do_accept_primary_expression(xpns, tstrm)) {
             return false;
           }
         } else {
           for(;;) {
-            bool prefix_got = do_accept_prefix_operator(prefixes, tstrm_io);
+            bool prefix_got = do_accept_prefix_operator(prefixes, tstrm);
             if(!prefix_got) {
               break;
             }
           }
-          if(!do_accept_primary_expression(xpns_out, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+          if(!do_accept_primary_expression(xpns, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
         }
         for(;;) {
-          bool postfix_got = do_accept_postfix_operator(xpns_out, tstrm_io) ||
-                             do_accept_postfix_function_call(xpns_out, tstrm_io) ||
-                             do_accept_postfix_subscript(xpns_out, tstrm_io) ||
-                             do_accept_postfix_member_access(xpns_out, tstrm_io);
+          bool postfix_got = do_accept_postfix_operator(xpns, tstrm) ||
+                             do_accept_postfix_function_call(xpns, tstrm) ||
+                             do_accept_postfix_subscript(xpns, tstrm) ||
+                             do_accept_postfix_member_access(xpns, tstrm);
           if(!postfix_got) {
             break;
           }
         }
         while(!prefixes.empty()) {
-          xpns_out.emplace_back(rocket::move(prefixes.mut_back()));
+          xpns.emplace_back(rocket::move(prefixes.mut_back()));
           prefixes.pop_back();
         }
         return true;
@@ -760,7 +760,7 @@ namespace Asteria {
 
       public:
         virtual Precedence precedence() const noexcept = 0;
-        virtual void extract(Cow_Vector<Xprunit>& xpns_out) = 0;
+        virtual void extract(Cow_Vector<Xprunit>& xpns) = 0;
         virtual void append(Infix_Element_Base&& elem) = 0;
       };
 
@@ -780,9 +780,9 @@ namespace Asteria {
           {
             return precedence_max;
           }
-        void extract(Cow_Vector<Xprunit>& xpns_out) override
+        void extract(Cow_Vector<Xprunit>& xpns) override
           {
-            xpns_out.append(std::make_move_iterator(this->m_xpns.mut_begin()), std::make_move_iterator(this->m_xpns.mut_end()));
+            xpns.append(std::make_move_iterator(this->m_xpns.mut_begin()), std::make_move_iterator(this->m_xpns.mut_end()));
           }
         void append(Infix_Element_Base&& elem) override
           {
@@ -790,13 +790,13 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_infix_head(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
+    bool do_accept_infix_head(Uptr<Infix_Element_Base>& elem, Token_Stream& tstrm)
       {
         Cow_Vector<Xprunit> xpns;
-        if(!do_accept_infix_element(xpns, tstrm_io)) {
+        if(!do_accept_infix_element(xpns, tstrm)) {
           return false;
         }
-        elem_out = rocket::make_unique<Infix_Head>(rocket::move(xpns));
+        elem = rocket::make_unique<Infix_Head>(rocket::move(xpns));
         return true;
       }
 
@@ -850,15 +850,15 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix selection `", this->m_sop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xprunit>& xpns_out) override
+        void extract(Cow_Vector<Xprunit>& xpns) override
           {
             if(this->m_sop == sop_coales) {
               Xprunit::S_coalescence node_c = { rocket::move(this->m_branch_false), this->m_assign };
-              xpns_out.emplace_back(rocket::move(node_c));
+              xpns.emplace_back(rocket::move(node_c));
               return;
             }
             Xprunit::S_branch node_c = { rocket::move(this->m_branch_true), rocket::move(this->m_branch_false), this->m_assign };
-            xpns_out.emplace_back(rocket::move(node_c));
+            xpns.emplace_back(rocket::move(node_c));
           }
         void append(Infix_Element_Base&& elem) override
           {
@@ -866,78 +866,78 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_infix_selection_quest(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
+    bool do_accept_infix_selection_quest(Uptr<Infix_Element_Base>& elem, Token_Stream& tstrm)
       {
         bool assign = false;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_quest)) {
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_quest_eq)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_quest)) {
+          if(!do_match_punctuator(tstrm, Token::punctuator_quest_eq)) {
             return false;
           }
           assign = true;
         }
         Cow_Vector<Xprunit> branch_true;
-        if(!do_accept_expression(branch_true, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(branch_true, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_colon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_colon)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
         }
         Cow_Vector<Xprunit> branch_false;
-        if(!do_accept_infix_element(branch_false, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_infix_element(branch_false, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_quest, assign, rocket::move(branch_true), rocket::move(branch_false));
+        elem = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_quest, assign, rocket::move(branch_true), rocket::move(branch_false));
         return true;
       }
 
-    bool do_accept_infix_selection_and(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
+    bool do_accept_infix_selection_and(Uptr<Infix_Element_Base>& elem, Token_Stream& tstrm)
       {
         bool assign = false;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_andl) && !do_match_keyword(tstrm_io, Token::keyword_and)) {
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_andl_eq)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_andl) && !do_match_keyword(tstrm, Token::keyword_and)) {
+          if(!do_match_punctuator(tstrm, Token::punctuator_andl_eq)) {
             return false;
           }
           assign = true;
         }
         Cow_Vector<Xprunit> branch_true;
-        if(!do_accept_infix_element(branch_true, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_infix_element(branch_true, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_and, assign, rocket::move(branch_true), Cow_Vector<Xprunit>());
+        elem = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_and, assign, rocket::move(branch_true), Cow_Vector<Xprunit>());
         return true;
       }
 
-    bool do_accept_infix_selection_or(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
+    bool do_accept_infix_selection_or(Uptr<Infix_Element_Base>& elem, Token_Stream& tstrm)
       {
         bool assign = false;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_orl) && !do_match_keyword(tstrm_io, Token::keyword_or)) {
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_orl_eq)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_orl) && !do_match_keyword(tstrm, Token::keyword_or)) {
+          if(!do_match_punctuator(tstrm, Token::punctuator_orl_eq)) {
             return false;
           }
           assign = true;
         }
         Cow_Vector<Xprunit> branch_false;
-        if(!do_accept_infix_element(branch_false, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_infix_element(branch_false, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_or, assign, Cow_Vector<Xprunit>(), rocket::move(branch_false));
+        elem = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_or, assign, Cow_Vector<Xprunit>(), rocket::move(branch_false));
         return true;
       }
 
-    bool do_accept_infix_selection_coales(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
+    bool do_accept_infix_selection_coales(Uptr<Infix_Element_Base>& elem, Token_Stream& tstrm)
       {
         bool assign = false;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_coales)) {
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_coales_eq)) {
+        if(!do_match_punctuator(tstrm, Token::punctuator_coales)) {
+          if(!do_match_punctuator(tstrm, Token::punctuator_coales_eq)) {
             return false;
           }
           assign = true;
         }
         Cow_Vector<Xprunit> branch_null;
-        if(!do_accept_infix_element(branch_null, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_infix_element(branch_null, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_coales, assign, Cow_Vector<Xprunit>(), rocket::move(branch_null));
+        elem = rocket::make_unique<Infix_Selection>(Infix_Selection::sop_coales, assign, Cow_Vector<Xprunit>(), rocket::move(branch_null));
         return true;
       }
 
@@ -1012,12 +1012,12 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix operator `", this->m_xop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xprunit>& xpns_out) override
+        void extract(Cow_Vector<Xprunit>& xpns) override
           {
-            xpns_out.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
+            xpns.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
             // Don't forget the operator!
             Xprunit::S_operator_rpn node_c = { this->m_xop, this->m_assign };
-            xpns_out.emplace_back(rocket::move(node_c));
+            xpns.emplace_back(rocket::move(node_c));
           }
         void append(Infix_Element_Base&& elem) override
           {
@@ -1025,13 +1025,13 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_infix_carriage(Uptr<Infix_Element_Base>& elem_out, Token_Stream& tstrm_io)
+    bool do_accept_infix_carriage(Uptr<Infix_Element_Base>& elem, Token_Stream& tstrm)
       {
         // infix-carriage ::=
         //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
         //     "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
         //     "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  ) infix-element
-        auto qtok = tstrm_io.peek_opt();
+        auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
         }
@@ -1048,7 +1048,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_add:
             xop = Xprunit::xop_infix_add;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_sub_eq:
@@ -1057,7 +1057,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_sub:
             xop = Xprunit::xop_infix_sub;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_mul_eq:
@@ -1066,7 +1066,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_mul:
             xop = Xprunit::xop_infix_mul;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_div_eq:
@@ -1075,7 +1075,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_div:
             xop = Xprunit::xop_infix_div;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_mod_eq:
@@ -1084,7 +1084,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_mod:
             xop = Xprunit::xop_infix_mod;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_sla_eq:
@@ -1093,7 +1093,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_sla:
             xop = Xprunit::xop_infix_sla;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_sra_eq:
@@ -1102,7 +1102,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_sra:
             xop = Xprunit::xop_infix_sra;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_sll_eq:
@@ -1111,7 +1111,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_sll:
             xop = Xprunit::xop_infix_sll;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_srl_eq:
@@ -1120,7 +1120,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_srl:
             xop = Xprunit::xop_infix_srl;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_andb_eq:
@@ -1129,7 +1129,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_andb:
             xop = Xprunit::xop_infix_andb;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_orb_eq:
@@ -1138,7 +1138,7 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_orb:
             xop = Xprunit::xop_infix_orb;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_xorb_eq:
@@ -1147,69 +1147,69 @@ namespace Asteria {
             // Fallthrough.
         case Token::punctuator_xorb:
             xop = Xprunit::xop_infix_xorb;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_assign:
           {
             xop = Xprunit::xop_infix_assign;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_cmp_eq:
           {
             xop = Xprunit::xop_infix_cmp_eq;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_cmp_ne:
           {
             xop = Xprunit::xop_infix_cmp_ne;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_cmp_lt:
           {
             xop = Xprunit::xop_infix_cmp_lt;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_cmp_gt:
           {
             xop = Xprunit::xop_infix_cmp_gt;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_cmp_lte:
           {
             xop = Xprunit::xop_infix_cmp_lte;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_cmp_gte:
           {
             xop = Xprunit::xop_infix_cmp_gte;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         case Token::punctuator_spaceship:
           {
             xop = Xprunit::xop_infix_cmp_3way;
-            tstrm_io.shift();
+            tstrm.shift();
             break;
           }
         default:
           return false;
         }
         Cow_Vector<Xprunit> rhs;
-        if(!do_accept_infix_element(rhs, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_infix_element(rhs, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        elem_out = rocket::make_unique<Infix_Carriage>(xop, assign, rocket::move(rhs));
+        elem = rocket::make_unique<Infix_Carriage>(xop, assign, rocket::move(rhs));
         return true;
       }
 
-    bool do_accept_expression(Cow_Vector<Xprunit>& xpns_out, Token_Stream& tstrm_io)
+    bool do_accept_expression(Cow_Vector<Xprunit>& xpns, Token_Stream& tstrm)
       {
         // expression ::=
         //   infix-element infix-carriage-list-opt
@@ -1222,17 +1222,17 @@ namespace Asteria {
         //     "?=" expression ":" | "&&=" | "||=" | "??=" |
         //     "and" | "or" ) infix-element
         Uptr<Infix_Element_Base> elem;
-        if(!do_accept_infix_head(elem, tstrm_io)) {
+        if(!do_accept_infix_head(elem, tstrm)) {
           return false;
         }
         Cow_Vector<Uptr<Infix_Element_Base>> stack;
         stack.emplace_back(rocket::move(elem));
         for(;;) {
-          bool elem_got = do_accept_infix_selection_quest(elem, tstrm_io) ||
-                          do_accept_infix_selection_and(elem, tstrm_io) ||
-                          do_accept_infix_selection_or(elem, tstrm_io) ||
-                          do_accept_infix_selection_coales(elem, tstrm_io) ||
-                          do_accept_infix_carriage(elem, tstrm_io);
+          bool elem_got = do_accept_infix_selection_quest(elem, tstrm) ||
+                          do_accept_infix_selection_and(elem, tstrm) ||
+                          do_accept_infix_selection_or(elem, tstrm) ||
+                          do_accept_infix_selection_coales(elem, tstrm) ||
+                          do_accept_infix_carriage(elem, tstrm);
           if(!elem_got) {
             break;
           }
@@ -1250,170 +1250,170 @@ namespace Asteria {
           stack.rbegin()[1]->append(rocket::move(*(stack.back())));
           stack.pop_back();
         }
-        stack.front()->extract(xpns_out);
+        stack.front()->extract(xpns);
         return true;
       }
 
-    bool do_accept_variable_definition(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_variable_definition(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // variable-definition ::=
         //   "var" identifier equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
         // equal-initializer-opt ::=
         //   equal-initializer | ""
         // equal-initializer ::=
         //   "=" expression
-        if(!do_match_keyword(tstrm_io, Token::keyword_var)) {
+        if(!do_match_keyword(tstrm, Token::keyword_var)) {
           return false;
         }
         for(;;) {
           Cow_String name;
-          if(!do_accept_identifier(name, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+          if(!do_accept_identifier(name, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
           }
           Cow_Vector<Xprunit> init;
-          if(do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
+          if(do_match_punctuator(tstrm, Token::punctuator_assign)) {
             // The initializer is optional.
-            if(!do_accept_expression(init, tstrm_io)) {
-              throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+            if(!do_accept_expression(init, tstrm)) {
+              throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
             }
           }
           Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), false, rocket::move(init) };
-          stmts_out.emplace_back(rocket::move(stmt_c));
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
+          stmts.emplace_back(rocket::move(stmt_c));
+          if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
           }
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         return true;
       }
 
-    bool do_accept_immutable_variable_definition(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_immutable_variable_definition(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // immutable-variable-definition ::=
         //   "const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
         // equal-initializer ::=
         //   "=" expression
-        if(!do_match_keyword(tstrm_io, Token::keyword_const)) {
+        if(!do_match_keyword(tstrm, Token::keyword_const)) {
           return false;
         }
         for(;;) {
           Cow_String name;
-          if(!do_accept_identifier(name, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+          if(!do_accept_identifier(name, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
           }
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_assign)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_equals_sign_expected);
+          if(!do_match_punctuator(tstrm, Token::punctuator_assign)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_expected);
           }
           Cow_Vector<Xprunit> init;
-          if(!do_accept_expression(init, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+          if(!do_accept_expression(init, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
           Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), true, rocket::move(init) };
-          stmts_out.emplace_back(rocket::move(stmt_c));
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
+          stmts.emplace_back(rocket::move(stmt_c));
+          if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
           }
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         return true;
       }
 
-    bool do_accept_function_definition(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_function_definition(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // function-definition ::=
         //   "func" identifier "(" identifier-list-opt ")" statement
-        if(!do_match_keyword(tstrm_io, Token::keyword_func)) {
+        if(!do_match_keyword(tstrm, Token::keyword_func)) {
           return false;
         }
         Cow_String name;
-        if(!do_accept_identifier(name, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+        if(!do_accept_identifier(name, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
         Cow_Vector<PreHashed_String> params;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
-        if(do_accept_identifier_list(params, tstrm_io)) {
+        if(do_accept_identifier_list(params, tstrm)) {
           // This is optional.
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         Cow_Vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+        if(!do_accept_statement_as_block(body, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
         Statement::S_function stmt_c = { rocket::move(sloc), rocket::move(name), rocket::move(params), rocket::move(body) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_expression_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_expression_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // expression-statement ::=
         //   expression ";"
         Cow_Vector<Xprunit> expr;
-        if(!do_accept_expression(expr, tstrm_io)) {
+        if(!do_accept_expression(expr, tstrm)) {
           return false;
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         Statement::S_expression stmt_c = { rocket::move(expr) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_if_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_if_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // if-statement ::=
         //   "if" negation-opt "(" expression ")" statement ( "else" statement | "" )
         // negation-opt ::=
         //   negation | ""
-        if(!do_match_keyword(tstrm_io, Token::keyword_if)) {
+        if(!do_match_keyword(tstrm, Token::keyword_if)) {
           return false;
         }
         bool negative = false;
-        if(do_accept_negation(negative, tstrm_io)) {
+        if(do_accept_negation(negative, tstrm)) {
           // This is optional.
         }
         Cow_Vector<Xprunit> cond;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
-        if(!do_accept_expression(cond, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(cond, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         Cow_Vector<Statement> branch_true;
-        if(!do_accept_statement_as_block(branch_true, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+        if(!do_accept_statement_as_block(branch_true, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
         Cow_Vector<Statement> branch_false;
-        if(do_match_keyword(tstrm_io, Token::keyword_else)) {
+        if(do_match_keyword(tstrm, Token::keyword_else)) {
           // The `else` branch is optional.
-          if(!do_accept_statement_as_block(branch_false, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+          if(!do_accept_statement_as_block(branch_false, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
           }
         }
         Statement::S_if stmt_c = { negative, rocket::move(cond), rocket::move(branch_true), rocket::move(branch_false) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_switch_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_switch_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // switch-statement ::=
         //   "switch" "(" expression ")" switch-block
@@ -1423,121 +1423,121 @@ namespace Asteria {
         //   switch-clause-list | ""
         // switch-clause-list ::=
         //   ( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
-        if(!do_match_keyword(tstrm_io, Token::keyword_switch)) {
+        if(!do_match_keyword(tstrm, Token::keyword_switch)) {
           return false;
         }
         Cow_Vector<Xprunit> ctrl;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
-        if(!do_accept_expression(ctrl, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(ctrl, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         Cow_Vector<std::pair<Cow_Vector<Xprunit>,  // This is empty on `default` clauses and non-empty on `case` clauses.
                              Cow_Vector<Statement>>> clauses;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_brace_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_brace_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_expected);
         }
         for(;;) {
           Cow_Vector<Xprunit> cond;
-          if(!do_match_keyword(tstrm_io, Token::keyword_default)) {
-            if(!do_match_keyword(tstrm_io, Token::keyword_case)) {
+          if(!do_match_keyword(tstrm, Token::keyword_default)) {
+            if(!do_match_keyword(tstrm, Token::keyword_case)) {
               break;
             }
-            if(!do_accept_expression(cond, tstrm_io)) {
-              throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+            if(!do_accept_expression(cond, tstrm)) {
+              throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
             }
           }
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_colon_expected);
+          if(!do_match_punctuator(tstrm, Token::punctuator_colon)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
           }
-          Cow_Vector<Statement> stmts;
+          Cow_Vector<Statement> clause;
           for(;;) {
-            bool stmt_got = do_accept_statement(stmts, tstrm_io);
+            bool stmt_got = do_accept_statement(clause, tstrm);
             if(!stmt_got) {
               break;
             }
           }
-          clauses.emplace_back(rocket::move(cond), rocket::move(stmts));
+          clauses.emplace_back(rocket::move(cond), rocket::move(clause));
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_brace_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_brace_or_switch_clause_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_switch_clause_expected);
         }
         Statement::S_switch stmt_c = { rocket::move(ctrl), rocket::move(clauses) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_do_while_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_do_while_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // do-while-statement ::=
         //   "do" statement "while" negation-opt "(" expression ")" ";"
-        if(!do_match_keyword(tstrm_io, Token::keyword_do)) {
+        if(!do_match_keyword(tstrm, Token::keyword_do)) {
           return false;
         }
         Cow_Vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+        if(!do_accept_statement_as_block(body, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_keyword_while_expected);
+        if(!do_match_keyword(tstrm, Token::keyword_while)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_keyword_while_expected);
         }
         bool negative = false;
-        if(do_accept_negation(negative, tstrm_io)) {
+        if(do_accept_negation(negative, tstrm)) {
           // This is optional.
         }
         Cow_Vector<Xprunit> cond;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
-        if(!do_accept_expression(cond, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(cond, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         Statement::S_do_while stmt_c = { rocket::move(body), negative, rocket::move(cond) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_while_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_while_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // while-statement ::=
         //   "while" negation-opt "(" expression ")" statement
-        if(!do_match_keyword(tstrm_io, Token::keyword_while)) {
+        if(!do_match_keyword(tstrm, Token::keyword_while)) {
           return false;
         }
         bool negative = false;
-        if(do_accept_negation(negative, tstrm_io)) {
+        if(do_accept_negation(negative, tstrm)) {
           // This is optional.
         }
         Cow_Vector<Xprunit> cond;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
-        if(!do_accept_expression(cond, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(cond, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         Cow_Vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+        if(!do_accept_statement_as_block(body, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
         Statement::S_while stmt_c = { negative, rocket::move(cond), rocket::move(body) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_for_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_for_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // for-statement ::=
         //   "for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
@@ -1545,7 +1545,7 @@ namespace Asteria {
         //   "each" identifier ( "," identifier | "") ":" expression
         // for-statement-triplet ::=
         //   ( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
-        if(!do_match_keyword(tstrm_io, Token::keyword_for)) {
+        if(!do_match_keyword(tstrm, Token::keyword_for)) {
           return false;
         }
         // This for-statement is ranged if and only if `key_name` is non-empty, where `step` is used as the range initializer.
@@ -1554,226 +1554,226 @@ namespace Asteria {
         Cow_Vector<Statement> init;
         Cow_Vector<Xprunit> cond;
         Cow_Vector<Xprunit> step;
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_each)) {
-          if(!do_accept_identifier(key_name, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+        if(do_match_keyword(tstrm, Token::keyword_each)) {
+          if(!do_accept_identifier(key_name, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
           }
-          if(do_match_punctuator(tstrm_io, Token::punctuator_comma)) {
+          if(do_match_punctuator(tstrm, Token::punctuator_comma)) {
             // The mapped reference is optional.
-            if(!do_accept_identifier(mapped_name, tstrm_io)) {
-              throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+            if(!do_accept_identifier(mapped_name, tstrm)) {
+              throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
             }
           }
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_colon_expected);
+          if(!do_match_punctuator(tstrm, Token::punctuator_colon)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
           }
-          if(!do_accept_expression(step, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+          if(!do_accept_expression(step, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
         } else {
-          bool init_got = do_accept_variable_definition(init, tstrm_io) ||
-                          do_match_punctuator(tstrm_io, Token::punctuator_semicol) ||
-                          do_accept_expression_statement(init, tstrm_io);
+          bool init_got = do_accept_variable_definition(init, tstrm) ||
+                          do_match_punctuator(tstrm, Token::punctuator_semicol) ||
+                          do_accept_expression_statement(init, tstrm);
           if(!init_got) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_for_statement_initializer_expected);
+            throw do_make_parser_error(tstrm, Parser_Error::code_for_statement_initializer_expected);
           }
-          if(do_accept_expression(cond, tstrm_io)) {
+          if(do_accept_expression(cond, tstrm)) {
             // This is optional.
           }
-          if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+          if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
           }
-          if(do_accept_expression(step, tstrm_io)) {
+          if(do_accept_expression(step, tstrm)) {
             // This is optional.
           }
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         Cow_Vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+        if(!do_accept_statement_as_block(body, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
         if(key_name.empty()) {
           Statement::S_for stmt_c = { rocket::move(init), rocket::move(cond), rocket::move(step), rocket::move(body) };
-          stmts_out.emplace_back(rocket::move(stmt_c));
+          stmts.emplace_back(rocket::move(stmt_c));
           return true;
         }
         Statement::S_for_each stmt_c = { rocket::move(key_name), rocket::move(mapped_name), rocket::move(step), rocket::move(body) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_break_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_break_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // break-statement ::=
         //   "break" ( "switch" | "while" | "for" ) ";"
-        if(!do_match_keyword(tstrm_io, Token::keyword_break)) {
+        if(!do_match_keyword(tstrm, Token::keyword_break)) {
           return false;
         }
         Statement::Target target = Statement::target_unspec;
-        if(do_match_keyword(tstrm_io, Token::keyword_switch)) {
+        if(do_match_keyword(tstrm, Token::keyword_switch)) {
           target = Statement::target_switch;
           goto z;
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_while)) {
+        if(do_match_keyword(tstrm, Token::keyword_while)) {
           target = Statement::target_while;
           goto z;
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_for)) {
+        if(do_match_keyword(tstrm, Token::keyword_for)) {
           target = Statement::target_for;
           goto z;
         }
       z:
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         Statement::S_break stmt_c = { target };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_continue_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_continue_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // continue-statement ::=
         //   "continue" ( "while" | "for" ) ";"
-        if(!do_match_keyword(tstrm_io, Token::keyword_continue)) {
+        if(!do_match_keyword(tstrm, Token::keyword_continue)) {
           return false;
         }
         Statement::Target target = Statement::target_unspec;
-        if(do_match_keyword(tstrm_io, Token::keyword_while)) {
+        if(do_match_keyword(tstrm, Token::keyword_while)) {
           target = Statement::target_while;
           goto z;
         }
-        if(do_match_keyword(tstrm_io, Token::keyword_for)) {
+        if(do_match_keyword(tstrm, Token::keyword_for)) {
           target = Statement::target_for;
           goto z;
         }
       z:
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         Statement::S_continue stmt_c = { target };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_throw_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_throw_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // throw-statement ::=
         //   "throw" expression ";"
-        if(!do_match_keyword(tstrm_io, Token::keyword_throw)) {
+        if(!do_match_keyword(tstrm, Token::keyword_throw)) {
           return false;
         }
         Cow_Vector<Xprunit> expr;
-        if(!do_accept_expression(expr, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(expr, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         Statement::S_throw stmt_c = { rocket::move(sloc), rocket::move(expr) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_return_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_return_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // return-statement ::=
         //   "return" ( "&" | "" ) expression-opt ";"
-        if(!do_match_keyword(tstrm_io, Token::keyword_return)) {
+        if(!do_match_keyword(tstrm, Token::keyword_return)) {
           return false;
         }
         bool by_ref = false;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_andb)) {
+        if(do_match_punctuator(tstrm, Token::punctuator_andb)) {
           // The reference specifier is optional.
           by_ref = true;
         }
         Cow_Vector<Xprunit> expr;
-        if(do_accept_expression(expr, tstrm_io)) {
+        if(do_accept_expression(expr, tstrm)) {
           // This is optional.
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_or_expression_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_or_expression_expected);
         }
         Statement::S_return stmt_c = { by_ref, rocket::move(expr) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_assert_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_assert_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // assert-statement ::=
         //  "assert" negation-opt expression ( ":" string-literal | "" ) ";"
-        if(!do_match_keyword(tstrm_io, Token::keyword_assert)) {
+        if(!do_match_keyword(tstrm, Token::keyword_assert)) {
           return false;
         }
         bool negative = false;
-        if(do_accept_negation(negative, tstrm_io)) {
+        if(do_accept_negation(negative, tstrm)) {
           // This is optional.
         }
         Cow_Vector<Xprunit> expr;
-        if(!do_accept_expression(expr, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_expression_expected);
+        if(!do_accept_expression(expr, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
         Cow_String msg;
-        if(do_match_punctuator(tstrm_io, Token::punctuator_colon)) {
+        if(do_match_punctuator(tstrm, Token::punctuator_colon)) {
           // The descriptive message is optional.
-          if(!do_accept_string_literal(msg, tstrm_io)) {
-            throw do_make_parser_error(tstrm_io, Parser_Error::code_string_literal_expected);
+          if(!do_accept_string_literal(msg, tstrm)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_string_literal_expected);
           }
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_semicolon_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         Statement::S_assert stmt_c = { rocket::move(sloc), negative, rocket::move(expr), rocket::move(msg) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_try_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_try_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm_io);
+        auto sloc = do_tell_source_location(tstrm);
         // try-statement ::=
         //   "try" statement "catch" "(" identifier ")" statement
-        if(!do_match_keyword(tstrm_io, Token::keyword_try)) {
+        if(!do_match_keyword(tstrm, Token::keyword_try)) {
           return false;
         }
         Cow_Vector<Statement> body_try;
-        if(!do_accept_statement_as_block(body_try, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+        if(!do_accept_statement_as_block(body_try, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        if(!do_match_keyword(tstrm_io, Token::keyword_catch)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_keyword_catch_expected);
+        if(!do_match_keyword(tstrm, Token::keyword_catch)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_keyword_catch_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_open_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
         Cow_String except_name;
-        if(!do_accept_identifier(except_name, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_identifier_expected);
+        if(!do_accept_identifier(except_name, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        if(!do_match_punctuator(tstrm_io, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_closed_parenthesis_expected);
+        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         Cow_Vector<Statement> body_catch;
-        if(!do_accept_statement_as_block(body_catch, tstrm_io)) {
-          throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+        if(!do_accept_statement_as_block(body_catch, tstrm)) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
         Statement::S_try stmt_c = { rocket::move(body_try), rocket::move(sloc), rocket::move(except_name), rocket::move(body_catch) };
-        stmts_out.emplace_back(rocket::move(stmt_c));
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
-    bool do_accept_nonblock_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_nonblock_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // nonblock-statement ::=
         //   null-statement |
@@ -1783,38 +1783,38 @@ namespace Asteria {
         //   do-while-statement | while-statement | for-statement |
         //   break-statement | continue-statement | throw-statement | return-statement | assert-statement |
         //   try-statement
-        return do_match_punctuator(tstrm_io, Token::punctuator_semicol) ||
-               do_accept_variable_definition(stmts_out, tstrm_io) ||
-               do_accept_immutable_variable_definition(stmts_out, tstrm_io) ||
-               do_accept_function_definition(stmts_out, tstrm_io) ||
-               do_accept_expression_statement(stmts_out, tstrm_io) ||
-               do_accept_if_statement(stmts_out, tstrm_io) ||
-               do_accept_switch_statement(stmts_out, tstrm_io) ||
-               do_accept_do_while_statement(stmts_out, tstrm_io) ||
-               do_accept_while_statement(stmts_out, tstrm_io) ||
-               do_accept_for_statement(stmts_out, tstrm_io) ||
-               do_accept_break_statement(stmts_out, tstrm_io) ||
-               do_accept_continue_statement(stmts_out, tstrm_io) ||
-               do_accept_throw_statement(stmts_out, tstrm_io) ||
-               do_accept_return_statement(stmts_out, tstrm_io) ||
-               do_accept_assert_statement(stmts_out, tstrm_io) ||
-               do_accept_try_statement(stmts_out, tstrm_io);
+        return do_match_punctuator(tstrm, Token::punctuator_semicol) ||
+               do_accept_variable_definition(stmts, tstrm) ||
+               do_accept_immutable_variable_definition(stmts, tstrm) ||
+               do_accept_function_definition(stmts, tstrm) ||
+               do_accept_expression_statement(stmts, tstrm) ||
+               do_accept_if_statement(stmts, tstrm) ||
+               do_accept_switch_statement(stmts, tstrm) ||
+               do_accept_do_while_statement(stmts, tstrm) ||
+               do_accept_while_statement(stmts, tstrm) ||
+               do_accept_for_statement(stmts, tstrm) ||
+               do_accept_break_statement(stmts, tstrm) ||
+               do_accept_continue_statement(stmts, tstrm) ||
+               do_accept_throw_statement(stmts, tstrm) ||
+               do_accept_return_statement(stmts, tstrm) ||
+               do_accept_assert_statement(stmts, tstrm) ||
+               do_accept_try_statement(stmts, tstrm);
       }
 
-    bool do_accept_statement_as_block(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_statement_as_block(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // statement ::=
         //   block-statement | nonblock-statement
-        return do_accept_block_statement_list(stmts_out, tstrm_io) ||
-               do_accept_nonblock_statement(stmts_out, tstrm_io);
+        return do_accept_block_statement_list(stmts, tstrm) ||
+               do_accept_nonblock_statement(stmts, tstrm);
       }
 
-    bool do_accept_statement(Cow_Vector<Statement>& stmts_out, Token_Stream& tstrm_io)
+    bool do_accept_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // statement ::=
         //   block-statement | nonblock-statement
-        return do_accept_block_statement(stmts_out, tstrm_io) ||
-               do_accept_nonblock_statement(stmts_out, tstrm_io);
+        return do_accept_block_statement(stmts, tstrm) ||
+               do_accept_nonblock_statement(stmts, tstrm);
       }
 
     }  // namespace
@@ -1859,7 +1859,7 @@ bool Parser::empty() const noexcept
     }
   }
 
-bool Parser::load(Token_Stream& tstrm_io, const Parser_Options& /*options*/)
+bool Parser::load(Token_Stream& tstrm, const Parser_Options& /*options*/)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -1871,13 +1871,13 @@ bool Parser::load(Token_Stream& tstrm_io, const Parser_Options& /*options*/)
     // document ::=
     //   statement-list-opt
     for(;;) {
-      bool stmt_got = do_accept_statement(stmts, tstrm_io);
+      bool stmt_got = do_accept_statement(stmts, tstrm);
       if(!stmt_got) {
         break;
       }
     }
-    if(!tstrm_io.empty()) {
-      throw do_make_parser_error(tstrm_io, Parser_Error::code_statement_expected);
+    if(!tstrm.empty()) {
+      throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
     }
     ///////////////////////////////////////////////////////////////////////////
     // Finish

@@ -47,9 +47,9 @@ class Argument_Reader
   private:
     template<typename HandlerT> inline void do_fail(HandlerT&& handler);
     inline const Reference* do_peek_argument_optional_opt();
-    template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_optional(XvalueT& xvalue_out);
+    template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_optional(XvalueT& xvalue);
     inline const Reference* do_peek_argument_required_opt();
-    template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_required(XvalueT& xvalue_out);
+    template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_required(XvalueT& xvalue);
 
   public:
     const Cow_String& get_name() const noexcept
@@ -74,14 +74,14 @@ class Argument_Reader
         this->m_throw_on_failure = throw_on_failure;
       }
 
-    const Argument_Reader& save_state(State& state_out) const noexcept
+    const Argument_Reader& save_state(State& state) const noexcept
       {
-        state_out = this->m_state;
+        state = this->m_state;
         return *this;
       }
-    Argument_Reader& save_state(State& state_out) noexcept
+    Argument_Reader& save_state(State& state) noexcept
       {
-        state_out = this->m_state;
+        state = this->m_state;
         return *this;
       }
     Argument_Reader& load_state(const State& state) noexcept
@@ -98,29 +98,29 @@ class Argument_Reader
     // Start recording an overload.
     Argument_Reader& start() noexcept;
     // Get an OPTIONAL argument.
-    Argument_Reader& opt(Reference& ref_out);
-    Argument_Reader& opt(Value& value_out);
+    Argument_Reader& opt(Reference& ref);
+    Argument_Reader& opt(Value& value);
     // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
-    // If the argument is `null`, the operation succeeds without clobbering `xvalue_out`.
-    Argument_Reader& opt(D_boolean& xvalue_out);
-    Argument_Reader& opt(D_integer& xvalue_out);
-    Argument_Reader& opt(D_real& xvalue_out);
-    Argument_Reader& opt(D_string& xvalue_out);
-    Argument_Reader& opt(D_opaque& xvalue_out);
-    Argument_Reader& opt(D_function& xvalue_out);
-    Argument_Reader& opt(D_array& xvalue_out);
-    Argument_Reader& opt(D_object& xvalue_out);
+    // If the argument is `null`, the operation succeeds without clobbering `xvalue`.
+    Argument_Reader& opt(D_boolean& xvalue);
+    Argument_Reader& opt(D_integer& xvalue);
+    Argument_Reader& opt(D_real& xvalue);
+    Argument_Reader& opt(D_string& xvalue);
+    Argument_Reader& opt(D_opaque& xvalue);
+    Argument_Reader& opt(D_function& xvalue);
+    Argument_Reader& opt(D_array& xvalue);
+    Argument_Reader& opt(D_object& xvalue);
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise the operation fails.
     // Particularly, if the argument is `null`, the operation fails.
-    Argument_Reader& req(D_boolean& xvalue_out);
-    Argument_Reader& req(D_integer& xvalue_out);
-    Argument_Reader& req(D_real& xvalue_out);
-    Argument_Reader& req(D_string& xvalue_out);
-    Argument_Reader& req(D_opaque& xvalue_out);
-    Argument_Reader& req(D_function& xvalue_out);
-    Argument_Reader& req(D_array& xvalue_out);
-    Argument_Reader& req(D_object& xvalue_out);
+    Argument_Reader& req(D_boolean& xvalue);
+    Argument_Reader& req(D_integer& xvalue);
+    Argument_Reader& req(D_real& xvalue);
+    Argument_Reader& req(D_string& xvalue);
+    Argument_Reader& req(D_opaque& xvalue);
+    Argument_Reader& req(D_function& xvalue);
+    Argument_Reader& req(D_array& xvalue);
+    Argument_Reader& req(D_object& xvalue);
     // Terminate the argument list and finish this overload.
     // There shall be no more argument; otherwise this operation fails.
     Argument_Reader& finish();

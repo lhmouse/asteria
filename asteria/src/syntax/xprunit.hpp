@@ -150,7 +150,7 @@ class Xprunit
       }
 
   public:
-    void generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Context& ctx) const;
+    void generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& ctx) const;
   };
 
 }  // namespace Asteria

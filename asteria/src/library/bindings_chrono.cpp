@@ -166,7 +166,7 @@ D_integer std_chrono_utc_from_local(D_integer time_local)
     return time_utc;
   }
 
-void std_chrono_format_datetime(D_string& time_str_out, D_integer time_point, bool with_ms)
+D_string std_chrono_format_datetime(D_integer time_point, bool with_ms)
   {
     // Return strings that are allocated statically for special time point values.
     static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
@@ -174,17 +174,15 @@ void std_chrono_format_datetime(D_string& time_str_out, D_integer time_point, bo
     static constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00",
                                                "9999-01-01 00:00:00.000" };
     if(time_point <= -11644473600000) {
-      time_str_out = rocket::sref(s_min_str[with_ms]);
-      return;
+      return rocket::sref(s_min_str[with_ms]);
     }
     if(time_point >= 253370764800000) {
-      time_str_out = rocket::sref(s_max_str[with_ms]);
-      return;
+      return rocket::sref(s_max_str[with_ms]);
     }
     // Notice that the length of the result string is fixed.
-    time_str_out.resize(std::char_traits<char>::length(s_min_str[with_ms]));
+    D_string time_str(rocket::sref(s_min_str[with_ms]));
     // Characters are written backwards, unlike `parse_datetime()`.
-    auto wpos = time_str_out.mut_rbegin();
+    auto wpos = time_str.mut_rbegin();
     // Define functions to write each field.
     // Be adviced that these functions modify `wpos`.
     const auto write_int = [&](int value, int width)
@@ -253,24 +251,21 @@ void std_chrono_format_datetime(D_string& time_str_out, D_integer time_point, bo
     write_sep('-');
     write_int(tr.tm_year + 1900, 4);
 #endif
-    ROCKET_ASSERT(wpos == time_str_out.rend());
+    ROCKET_ASSERT(wpos == time_str.rend());
+    return time_str;
   }
 
 D_string std_chrono_min_datetime(bool with_ms)
   {
-    D_string time_str;
-    std_chrono_format_datetime(time_str, INT64_MIN, with_ms);
-    return time_str;
+    return std_chrono_format_datetime(INT64_MIN, with_ms);
   }
 
 D_string std_chrono_max_datetime(bool with_ms)
   {
-    D_string time_str;
-    std_chrono_format_datetime(time_str, INT64_MAX, with_ms);
-    return time_str;
+    return std_chrono_format_datetime(INT64_MAX, with_ms);
   }
 
-bool std_chrono_parse_datetime(D_integer& time_point_out, const D_string& time_str)
+Optional<D_integer> std_chrono_parse_datetime(const D_string& time_str)
   {
     // Characters are read forwards, unlike `format_datetime()`.
     auto rpos = time_str.begin();
@@ -315,8 +310,8 @@ bool std_chrono_parse_datetime(D_integer& time_point_out, const D_string& time_s
         return true;
       };
     // The millisecond part is optional so we have to declare some intermediate results here.
-    bool succ;
     D_integer time_point;
+    bool succ;
 #ifdef _WIN32
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::SYSTEMTIME st;
@@ -332,13 +327,13 @@ bool std_chrono_parse_datetime(D_integer& time_point_out, const D_string& time_s
            read_sep(':') &&
            read_int(st.wSecond, 2);
     if(!succ) {
-      return false;
+      return rocket::nullopt;
     }
     // Assemble the parts, assuming the millisecond field is zero..
     st.wMilliseconds = 0;
     ::FILETIME ft;
     if(!::SystemTimeToFileTime(&st, &ft)) {
-      return false;
+      return rocket::nullopt;
     }
     ::ULARGE_INTEGER ti;
     ti.LowPart = ft.dwLowDateTime;
@@ -361,7 +356,7 @@ bool std_chrono_parse_datetime(D_integer& time_point_out, const D_string& time_s
            read_sep(':') &&
            read_int(tr.tm_sec, 2);
     if(!succ) {
-      return false;
+      return rocket::nullopt;
     }
     // Assemble the parts without milliseconds.
     tr.tm_year -= 1900;
@@ -369,7 +364,7 @@ bool std_chrono_parse_datetime(D_integer& time_point_out, const D_string& time_s
     tr.tm_isdst = 0;
     ::time_t tp = ::timegm(&tr);
     if(tp == static_cast<::time_t>(-1)) {
-      return false;
+      return rocket::nullopt;
     }
     // Convert it to the number of milliseconds.
     time_point = static_cast<std::int64_t>(tp) * 1000;
@@ -382,7 +377,7 @@ bool std_chrono_parse_datetime(D_integer& time_point_out, const D_string& time_s
       for(auto kpos = time_str.rbegin(); rpos != time_str.end(); ++kpos) {
         int d = *kpos - '0';
         if((d < 0) || (9 < d)) {
-          return false;
+          return rocket::nullopt;
         }
         ++rpos;
         r = (r + d) / 10;
@@ -391,19 +386,16 @@ bool std_chrono_parse_datetime(D_integer& time_point_out, const D_string& time_s
     }
     // Reject invalid characters in the end of `time_str`.
     if(rpos != time_str.end()) {
-      return false;
+      return rocket::nullopt;
     }
     // Handle special time values.
     if(time_point <= -11644473600000) {
-      time_point_out = INT64_MIN;
-      return true;
+      return INT64_MIN;
     }
     if(time_point >= 253370764800000) {
-      time_point_out = INT64_MAX;
-      return true;
+      return INT64_MIN;
     }
-    time_point_out = time_point;
-    return true;
+    return time_point;
   }
 
 D_object create_bindings_chrono()
@@ -577,42 +569,6 @@ D_object create_bindings_chrono()
         { }
       )));
     //===================================================================
-    // `std.chrono.parse_datetime()`
-    //===================================================================
-    ro.try_emplace(rocket::sref("parse_datetime"),
-      D_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.chrono.parse_datetime(time_str)`"
-                     "\n  * Parses `time_str`, which is an ASCII string representing a time"
-                     "\n    point in the format `1970-01-01 00:00:00.000`, according to the"
-                     "\n    ISO 8601 standard; the subsecond part is optional and may have"
-                     "\n    fewer or more digits. There shall be no leading or trailing"
-                     "\n    spaces."
-                     "\n  * Returns the number of milliseconds since `1970-01-01 00:00:00`"
-                     "\n    if the time string has been parsed successfully; otherwise"
-                     "\n    `null`."),
-        // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.parse_datetime"), args);
-            // Parse arguments.
-            D_string time_str;
-            if(reader.start().req(time_str).finish()) {
-              // Call the binding function.
-              D_integer time_point;
-              if(!std_chrono_parse_datetime(time_point, time_str)) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary ref_c = { time_point };
-              return rocket::move(ref_c);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameters
-        { }
-      )));
-    //===================================================================
     // `std.chrono.format_datetime()`
     //===================================================================
     ro.try_emplace(rocket::sref("format_datetime"),
@@ -633,9 +589,7 @@ D_object create_bindings_chrono()
             D_boolean with_ms = false;
             if(reader.start().req(time_point).opt(with_ms).finish()) {
               // Call the binding function.
-              D_string time_str;
-              std_chrono_format_datetime(time_str, time_point, with_ms);
-              Reference_Root::S_temporary ref_c = { rocket::move(time_str) };
+              Reference_Root::S_temporary ref_c = { std_chrono_format_datetime(time_point, with_ms) };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -694,6 +648,42 @@ D_object create_bindings_chrono()
             if(reader.start().opt(with_ms).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary ref_c = { std_chrono_max_datetime(with_ms) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameters
+        { }
+      )));
+    //===================================================================
+    // `std.chrono.parse_datetime()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("parse_datetime"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.chrono.parse_datetime(time_str)`"
+                     "\n  * Parses `time_str`, which is an ASCII string representing a time"
+                     "\n    point in the format `1970-01-01 00:00:00.000`, according to the"
+                     "\n    ISO 8601 standard; the subsecond part is optional and may have"
+                     "\n    fewer or more digits. There shall be no leading or trailing"
+                     "\n    spaces."
+                     "\n  * Returns the number of milliseconds since `1970-01-01 00:00:00`"
+                     "\n    if the time string has been parsed successfully; otherwise"
+                     "\n    `null`."),
+        // Definition
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.chrono.parse_datetime"), args);
+            // Parse arguments.
+            D_string time_str;
+            if(reader.start().req(time_str).finish()) {
+              // Call the binding function.
+              auto opt = std_chrono_parse_datetime(time_str);
+              if(!opt) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary ref_c = { *opt };
               return rocket::move(ref_c);
             }
             // Fail.

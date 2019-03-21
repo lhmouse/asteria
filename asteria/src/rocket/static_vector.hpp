@@ -480,7 +480,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
         ROCKET_ASSERT(this->capacity() >= cap);
       }
 
-    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_out_of_range(size_type pos) const
+    [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
       {
         noadl::sprintf_and_throw<out_of_range>("static_vector: The subscript `%lld` is not a valid position within this vector of size `%lld`.",
                                                static_cast<long long>(pos), static_cast<long long>(this->size()));
@@ -617,7 +617,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       {
         auto cnt = this->size();
         if(pos >= cnt) {
-          this->do_throw_subscript_out_of_range(pos);
+          this->do_throw_subscript_of_range(pos);
         }
         return this->data()[pos];
       }
@@ -646,7 +646,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       {
         auto cnt = this->size();
         if(pos >= cnt) {
-          this->do_throw_subscript_out_of_range(pos);
+          this->do_throw_subscript_of_range(pos);
         }
         return this->mut_data()[pos];
       }

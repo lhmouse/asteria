@@ -206,10 +206,10 @@ namespace Asteria {
         return code_point;
       }
 
-    template<typename XtokenT> void do_push_token(Cow_Vector<Token>& seq_out, Line_Reader& reader_io, std::size_t length, XtokenT&& xtoken)
+    template<typename XtokenT> void do_push_token(Cow_Vector<Token>& seq, Line_Reader& reader, std::size_t length, XtokenT&& xtoken)
       {
-        seq_out.emplace_back(reader_io.file(), reader_io.line(), reader_io.offset(), length, std::forward<XtokenT>(xtoken));
-        reader_io.consume(length);
+        seq.emplace_back(reader.file(), reader.line(), reader.offset(), length, std::forward<XtokenT>(xtoken));
+        reader.consume(length);
       }
 
     struct Prefix_Comparator
@@ -228,17 +228,17 @@ namespace Asteria {
           }
       };
 
-    bool do_accept_identifier_or_keyword(Cow_Vector<Token>& seq_out, Line_Reader& reader_io, bool keyword_as_identifier)
+    bool do_accept_identifier_or_keyword(Cow_Vector<Token>& seq, Line_Reader& reader, bool keyword_as_identifier)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
         static constexpr char s_name_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789";
-        auto bptr = reader_io.data_avail();
+        auto bptr = reader.data_avail();
         if(std::char_traits<char>::find(s_name_chars, 53, bptr[0]) == nullptr) {
           return false;
         }
         // Get an identifier.
-        auto eptr = bptr + reader_io.size_avail();
+        auto eptr = bptr + reader.size_avail();
         auto tptr = std::find_if_not(bptr, eptr, [&](char ch) { return std::char_traits<char>::find(s_name_chars, 63, ch);  });
         auto tlen = static_cast<std::size_t>(tptr - bptr);
         if(!keyword_as_identifier) {
@@ -297,21 +297,21 @@ namespace Asteria {
             if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
               // A keyword has been found.
               Token::S_keyword token_c = { cur.second };
-              do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
+              do_push_token(seq, reader, tlen, rocket::move(token_c));
               return true;
             }
             range.first++;
           }
         }
         Token::S_identifier token_c = { Cow_String(bptr, tlen) };
-        do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
+        do_push_token(seq, reader, tlen, rocket::move(token_c));
         return true;
       }
 
-    bool do_accept_punctuator(Cow_Vector<Token>& seq_out, Line_Reader& reader_io)
+    bool do_accept_punctuator(Cow_Vector<Token>& seq, Line_Reader& reader)
       {
         static constexpr char s_punct_chars[] = "!%&()*+,-./:;<=>?[]^{|}~";
-        auto bptr = reader_io.data_avail();
+        auto bptr = reader.data_avail();
         if(std::char_traits<char>::find(s_punct_chars, std::char_traits<char>::length(s_punct_chars), bptr[0]) == nullptr) {
           return false;
         }
@@ -392,10 +392,10 @@ namespace Asteria {
           }
           const auto& cur = range.second[-1];
           auto tlen = std::char_traits<char>::length(cur.first);
-          if((tlen <= reader_io.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
+          if((tlen <= reader.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
             // A punctuator has been found.
             Token::S_punctuator token_c = { cur.second };
-            do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
+            do_push_token(seq, reader, tlen, rocket::move(token_c));
             return true;
           }
           range.second--;
@@ -405,13 +405,13 @@ namespace Asteria {
         ASTERIA_TERMINATE("The punctuator `", bptr[0], "` is unhandled.");
       }
 
-    bool do_accept_string_literal(Cow_Vector<Token>& seq_out, Line_Reader& reader_io, char head, bool escapable)
+    bool do_accept_string_literal(Cow_Vector<Token>& seq, Line_Reader& reader, char head, bool escapable)
       {
         // string-literal ::=
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
         // noescape-string-literal ::=
         //   PCRE('[^']*?')
-        auto bptr = reader_io.data_avail();
+        auto bptr = reader.data_avail();
         if(bptr[0] != head) {
           return false;
         }
@@ -421,9 +421,9 @@ namespace Asteria {
         if(escapable) {
           // Translate escape sequences as needed.
           for(;;) {
-            auto qavail = reader_io.size_avail() - tlen;
+            auto qavail = reader.size_avail() - tlen;
             if(qavail == 0) {
-              throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_string_literal_unclosed);
+              throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_string_literal_unclosed);
             }
             auto next = bptr[tlen];
             ++tlen;
@@ -438,7 +438,7 @@ namespace Asteria {
             }
             // Translate this escape sequence.
             if(qavail < 2) {
-              throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_incomplete);
+              throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_escape_sequence_incomplete);
             }
             next = bptr[tlen];
             ++tlen;
@@ -513,14 +513,14 @@ namespace Asteria {
                 xcnt += 2;  // 2: "\x12"
                 // Read hex digits.
                 if(qavail < xcnt + 2) {
-                  throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_escape_sequence_incomplete);
+                  throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_escape_sequence_incomplete);
                 }
                 char32_t code_point = 0;
                 for(auto i = tlen; i < tlen + xcnt; ++i) {
                   static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
                   auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
                   if(!dptr) {
-                    throw do_make_parser_error(reader_io, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
+                    throw do_make_parser_error(reader, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                   }
                   auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
                   code_point = code_point * 16 + dvalue;
@@ -533,11 +533,11 @@ namespace Asteria {
                 // Write a Unicode code point.
                 if((0xD800 <= code_point) && (code_point < 0xE000)) {
                   // Surrogates are not allowed.
-                  throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
+                  throw do_make_parser_error(reader, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
                 }
                 if(code_point >= 0x110000) {
                   // Code point value is too large.
-                  throw do_make_parser_error(reader_io, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
+                  throw do_make_parser_error(reader, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
                 }
                 // Encode it.
                 auto encode_one = [&](unsigned shift, unsigned mask)
@@ -566,22 +566,22 @@ namespace Asteria {
                 break;
               }
             default:
-              throw do_make_parser_error(reader_io, tlen, Parser_Error::code_escape_sequence_unknown);
+              throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_unknown);
             }
             tlen += xcnt;
           }
         } else {
           // Copy escape sequences verbatim.
-          auto tptr = std::char_traits<char>::find(bptr + 1, reader_io.size_avail() - 1, head);
+          auto tptr = std::char_traits<char>::find(bptr + 1, reader.size_avail() - 1, head);
           if(!tptr) {
-            throw do_make_parser_error(reader_io, reader_io.size_avail(), Parser_Error::code_string_literal_unclosed);
+            throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_string_literal_unclosed);
           }
           ++tptr;
           value.append(bptr + 1, tptr - 1);
           tlen = static_cast<std::size_t>(tptr - bptr);
         }
         Token::S_string_literal token_c = { rocket::move(value) };
-        do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
+        do_push_token(seq, reader, tlen, rocket::move(token_c));
         return true;
       }
 
@@ -650,7 +650,7 @@ namespace Asteria {
         return qstok;
       }
 
-    bool do_accept_numeric_literal(Cow_Vector<Token>& seq_out, Line_Reader& reader_io, bool integer_as_real)
+    bool do_accept_numeric_literal(Cow_Vector<Token>& seq, Line_Reader& reader, bool integer_as_real)
       {
         // numeric-literal ::=
         //   ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -667,11 +667,11 @@ namespace Asteria {
         // binary-exponent-suffix ::=
         //   PCRE([pP][-+]?[0-9`]+)
         static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
-        auto bptr = reader_io.data_avail();
+        auto bptr = reader.data_avail();
         if(std::char_traits<char>::find(s_digits, 20, bptr[0]) == nullptr) {
           return false;
         }
-        auto eptr = bptr + reader_io.size_avail();
+        auto eptr = bptr + reader.size_avail();
         // Get a numeric literal.
         // Declare everything that will be calculated later.
         // 0. The integral part is required. The fractional and exponent parts are optional.
@@ -704,7 +704,7 @@ namespace Asteria {
         auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch);  });
         int_end = static_cast<std::size_t>(tptr - bptr);
         if(int_end == int_begin) {
-          throw do_make_parser_error(reader_io, int_end, Parser_Error::code_numeric_literal_incomplete);
+          throw do_make_parser_error(reader, int_end, Parser_Error::code_numeric_literal_incomplete);
         }
         // Look for the fractional part.
         frac_begin = int_end;
@@ -715,7 +715,7 @@ namespace Asteria {
           tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch);  });
           frac_end = static_cast<std::size_t>(tptr - bptr);
           if(frac_end == frac_begin) {
-            throw do_make_parser_error(reader_io, frac_end, Parser_Error::code_numeric_literal_incomplete);
+            throw do_make_parser_error(reader, frac_end, Parser_Error::code_numeric_literal_incomplete);
           }
         }
         // Look for the exponent.
@@ -749,7 +749,7 @@ namespace Asteria {
           tptr = std::find_if_not(bptr + exp_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, 20, ch);  });
           exp_end = static_cast<std::size_t>(tptr - bptr);
           if(exp_end == exp_begin) {
-            throw do_make_parser_error(reader_io, exp_end, Parser_Error::code_numeric_literal_incomplete);
+            throw do_make_parser_error(reader, exp_end, Parser_Error::code_numeric_literal_incomplete);
           }
         }
         // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
@@ -758,7 +758,7 @@ namespace Asteria {
         tptr = std::find_if_not(bptr + exp_end, eptr, [&](char ch) { return std::char_traits<char>::find(s_suffix_chars, 64, ch);  });
         auto tlen = static_cast<std::size_t>(tptr - bptr);
         if(tlen != exp_end) {
-          throw do_make_parser_error(reader_io, tlen, Parser_Error::code_numeric_literal_suffix_disallowed);
+          throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_suffix_disallowed);
         }
         // Parse the exponent.
         int exp = 0;
@@ -770,7 +770,7 @@ namespace Asteria {
           auto dvalue = static_cast<int>((dptr - s_digits) / 2);
           int bound = (INT_MAX - dvalue) / 10;
           if(exp > bound) {
-            throw do_make_parser_error(reader_io, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
+            throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
           }
           exp = exp * 10 + dvalue;
         }
@@ -782,7 +782,7 @@ namespace Asteria {
           // Parse the literal as an integer.
           // Negative exponents are not allowed, even when the significant part is zero.
           if(exp < 0) {
-            throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_exponent_negative);
+            throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_exponent_negative);
           }
           // Parse the significant part.
           std::uint64_t value = 0;
@@ -794,7 +794,7 @@ namespace Asteria {
             auto dvalue = static_cast<std::uint64_t>((dptr - s_digits) / 2);
             std::uint64_t bound = ((UINT64_C(1) << 63) - dvalue) / static_cast<unsigned>(radix);
             if(value > bound) {
-              throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
+              throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
             }
             value = value * static_cast<unsigned>(radix) + dvalue;
           }
@@ -803,28 +803,28 @@ namespace Asteria {
             for(int i = 0; i < exp; ++i) {
               std::uint64_t bound = (UINT64_C(1) << 63) / static_cast<unsigned>(exp_base);
               if(value > bound) {
-                throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
+                throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
               }
               value *= static_cast<unsigned>(exp_base);
             }
           }
           // Check for a previous sign symbol.
-          auto qstok = do_check_mergeability(seq_out, reader_io);
+          auto qstok = do_check_mergeability(seq, reader);
           std::uint64_t smask = (qstok && qstok->check<Token::S_punctuator>().punct == Token::punctuator_sub) ? UINT64_MAX : 0;
           // The special value `0x1p63` is only allowed if a contiguous minus symbol precedes it.
           if((value == (UINT64_C(1) << 63)) && (smask == 0)) {
-            throw do_make_parser_error(reader_io, tlen, Parser_Error::code_integer_literal_overflow);
+            throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
           }
           if(qstok) {
             // Overwrite the previous token.
-            tlen += reader_io.offset() - qstok->offset();
-            reader_io.rewind(qstok->offset());
+            tlen += reader.offset() - qstok->offset();
+            reader.rewind(qstok->offset());
             qstok = nullptr;
-            seq_out.pop_back();
+            seq.pop_back();
           }
           // Push an integer literal.
           Token::S_integer_literal token_c = { static_cast<std::int64_t>((value ^ smask) - smask) };
-          do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
+          do_push_token(seq, reader, tlen, rocket::move(token_c));
           return true;
         }
         // Parse the literal as a floating-point number.
@@ -865,24 +865,24 @@ namespace Asteria {
         // Check for overflow or underflow.
         int fpc = std::fpclassify(value);
         if(fpc == FP_INFINITE) {
-          throw do_make_parser_error(reader_io, tlen, Parser_Error::code_real_literal_overflow);
+          throw do_make_parser_error(reader, tlen, Parser_Error::code_real_literal_overflow);
         }
         if((fpc == FP_ZERO) && !zero) {
-          throw do_make_parser_error(reader_io, tlen, Parser_Error::code_real_literal_underflow);
+          throw do_make_parser_error(reader, tlen, Parser_Error::code_real_literal_underflow);
         }
         // Check for a previous sign symbol.
-        auto qstok = do_check_mergeability(seq_out, reader_io);
+        auto qstok = do_check_mergeability(seq, reader);
         double fmask = (qstok && qstok->check<Token::S_punctuator>().punct == Token::punctuator_sub) ? -1 : 0;
         if(qstok) {
           // Overwrite the previous token.
-          tlen += reader_io.offset() - qstok->offset();
-          reader_io.rewind(qstok->offset());
+          tlen += reader.offset() - qstok->offset();
+          reader.rewind(qstok->offset());
           qstok = nullptr;
-          seq_out.pop_back();
+          seq.pop_back();
         }
         // Push a floating-point literal.
         Token::S_real_literal token_c = { std::copysign(value, fmask) };
-        do_push_token(seq_out, reader_io, tlen, rocket::move(token_c));
+        do_push_token(seq, reader, tlen, rocket::move(token_c));
         return true;
       }
 
@@ -928,7 +928,7 @@ bool Token_Stream::empty() const noexcept
     }
   }
 
-bool Token_Stream::load(std::istream& cstrm_io, const Cow_String& file, const Parser_Options& options)
+bool Token_Stream::load(std::istream& cstrm, const Cow_String& file, const Parser_Options& options)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -938,7 +938,7 @@ bool Token_Stream::load(std::istream& cstrm_io, const Cow_String& file, const Pa
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Line_Reader reader(cstrm_io, file);
+    Line_Reader reader(cstrm, file);
     while(reader.advance_line()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::char_traits<char>::compare(reader.data_avail(), "#!", 2) == 0)) {

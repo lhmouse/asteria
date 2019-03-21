@@ -23,15 +23,15 @@ class Simple_Source_File
       {
         this->do_reload_file(true, filename);
       }
-    Simple_Source_File(std::istream& cstrm_io, const Cow_String& filename)
+    Simple_Source_File(std::istream& cstrm, const Cow_String& filename)
       {
-        this->do_reload_stream(true, cstrm_io, filename);
+        this->do_reload_stream(true, cstrm, filename);
       }
 
   private:
-    // For these two functions, if `error_out_opt` is null, an exception is thrown.
+    // For these two functions, if `error_opt` is null, an exception is thrown.
     Parser_Error do_reload_file(bool throw_on_failure, const Cow_String& filename);
-    Parser_Error do_reload_stream(bool throw_on_failure, std::istream& cstrm_io, const Cow_String& filename);
+    Parser_Error do_reload_stream(bool throw_on_failure, std::istream& cstrm, const Cow_String& filename);
 
   public:
     bool empty() const noexcept
@@ -46,9 +46,9 @@ class Simple_Source_File
       {
         return this->do_reload_file(false, filename);
       }
-    Parser_Error load_stream(std::istream& cstrm_io, const Cow_String& filename)
+    Parser_Error load_stream(std::istream& cstrm, const Cow_String& filename)
       {
-        return this->do_reload_stream(false, cstrm_io, filename);
+        return this->do_reload_stream(false, cstrm, filename);
       }
     void clear() noexcept;
 

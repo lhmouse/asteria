@@ -19,12 +19,12 @@ void Instantiated_Function::describe(std::ostream& os) const
     os << this->m_zvarg->get_function_signature() << " @ " << this->m_zvarg->get_source_location();
   }
 
-void Instantiated_Function::invoke(Reference& self_io, const Global_Context& global, Cow_Vector<Reference>&& args) const
+void Instantiated_Function::invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const
   {
     // Create a stack and a context for this function.
     Evaluation_Stack stack;
     Executive_Context ctx_func(nullptr);
-    ctx_func.prepare_function_arguments(this->m_zvarg, this->m_params, rocket::move(self_io), rocket::move(args));
+    ctx_func.prepare_function_arguments(this->m_zvarg, this->m_params, rocket::move(self), rocket::move(args));
     const auto& func = this->m_zvarg->get_function_signature();
     // Execute AIR nodes one by one.
     auto status = Air_Node::status_next;
@@ -34,13 +34,13 @@ void Instantiated_Function::invoke(Reference& self_io, const Global_Context& glo
     case Air_Node::status_next:
       {
         // Return `null` if the control flow reached the end of the function.
-        self_io = Reference_Root::S_null();
+        self = Reference_Root::S_null();
         break;
       }
     case Air_Node::status_return:
       {
         // Return the reference at the top of `stack`.
-        self_io = rocket::move(stack.open_top_reference());
+        self = rocket::move(stack.open_top_reference());
         break;
       }
     case Air_Node::status_break_unspec:

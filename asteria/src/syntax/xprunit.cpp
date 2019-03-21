@@ -459,28 +459,28 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    Air_Node::Status do_push_literal(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_push_literal(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                      const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& value = p.at(0).as<Value>();
         // Push the constant.
         Reference_Root::S_constant ref_c = { value };
-        stack_io.push_reference(rocket::move(ref_c));
+        stack.push_reference(rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_push_bound_reference(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_push_bound_reference(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                              const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& ref = p.at(0).as<Reference>();
         // Push the reference as is.
-        stack_io.push_reference(ref);
+        stack.push_reference(ref);
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_find_named_reference_local(Evaluation_Stack& stack_io, Executive_Context& ctx,
+    Air_Node::Status do_find_named_reference_local(Evaluation_Stack& stack, Executive_Context& ctx,
                                                    const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
@@ -497,11 +497,11 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(!qref) {
           ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
         }
-        stack_io.push_reference(*qref);
+        stack.push_reference(*qref);
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_find_named_reference_global(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_find_named_reference_global(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                     const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
@@ -511,11 +511,11 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(!qref) {
           ASTERIA_THROW_RUNTIME_ERROR("The identifier `", name, "` has not been declared yet.");
         }
-        stack_io.push_reference(*qref);
+        stack.push_reference(*qref);
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_closure_function(Evaluation_Stack& stack_io, Executive_Context& ctx,
+    Air_Node::Status do_execute_closure_function(Evaluation_Stack& stack, Executive_Context& ctx,
                                                  const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
@@ -532,11 +532,11 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         ASTERIA_DEBUG_LOG("New closure function: ", closure);
         // Push the function object.
         Reference_Root::S_temporary ref_c = { D_function(rocket::move(closure)) };
-        stack_io.push_reference(rocket::move(ref_c));
+        stack.push_reference(rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_branch(Evaluation_Stack& stack_io, Executive_Context& ctx,
+    Air_Node::Status do_execute_branch(Evaluation_Stack& stack, Executive_Context& ctx,
                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
@@ -544,25 +544,25 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& code_false = p.at(1).as<Cow_Vector<Air_Node>>();
         const auto& assign = static_cast<bool>(p.at(2).as<std::int64_t>());
         // Pick a branch basing on the condition.
-        if(stack_io.get_top_reference().read().test()) {
+        if(stack.get_top_reference().read().test()) {
           // Execute the true branch. If the branch is empty, leave the condition on the stack.
           if(code_true.empty()) {
             return Air_Node::status_next;
           }
-          rocket::for_each(code_true, [&](const Air_Node& node) { node.execute(stack_io, ctx, func, global);  });
-          stack_io.forward_result(assign);
+          rocket::for_each(code_true, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+          stack.forward_result(assign);
           return Air_Node::status_next;
         }
         // Execute the false branch. If the branch is empty, leave the condition on the stack.
         if(code_false.empty()) {
           return Air_Node::status_next;
         }
-        rocket::for_each(code_false, [&](const Air_Node& node) { node.execute(stack_io, ctx, func, global);  });
-        stack_io.forward_result(assign);
+        rocket::for_each(code_false, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+        stack.forward_result(assign);
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_function_call(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_function_call(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                               const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
@@ -572,18 +572,18 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         Cow_Vector<Reference> args;
         args.resize(nargs);
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
-         * it = rocket::move(stack_io.open_top_reference());
-          stack_io.pop_reference();
+         * it = rocket::move(stack.open_top_reference());
+          stack.pop_reference();
         }
         // Get the target reference.
-        auto target_value = stack_io.get_top_reference().read();
+        auto target_value = stack.get_top_reference().read();
         // Make sure it is really a function.
         if(target_value.type() != type_function) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", target_value, "` which is not a function.");
         }
         const auto& target = target_value.check<D_function>().get();
         // Make the `this` reference. On the function's return it is reused to store the result of the function.
-        auto& self_result = stack_io.open_top_reference().zoom_out();
+        auto& self_result = stack.open_top_reference().zoom_out();
         // Call the function now.
         ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", this = ", self_result.read());
         try {
@@ -600,32 +600,32 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_member_access(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_member_access(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                               const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& name = p.at(0).as<PreHashed_String>();
         // Append a modifier.
         Reference_Modifier::S_object_key mod_c = { name };
-        stack_io.open_top_reference().zoom_in(rocket::move(mod_c));
+        stack.open_top_reference().zoom_in(rocket::move(mod_c));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_inc(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_postfix_inc(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                          const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Increment the operand and return the old value.
         // `alt.assign` is ignored.
-        auto& lhs = stack_io.get_top_reference().open();
+        auto& lhs = stack.get_top_reference().open();
         if(lhs.type() == type_integer) {
           auto& reg = lhs.check<D_integer>();
-          stack_io.set_temporary_result(false, rocket::move(lhs));
+          stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_add(reg, D_integer(1));
           goto z;
         }
         if(lhs.type() == type_real) {
           auto& reg = lhs.check<D_real>();
-          stack_io.set_temporary_result(false, rocket::move(lhs));
+          stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_add(reg, D_real(1));
           goto z;
         }
@@ -634,21 +634,21 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_dec(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_postfix_dec(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                          const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decrement the operand and return the old value.
         // `alt.assign` is ignored.
-        auto& lhs = stack_io.get_top_reference().open();
+        auto& lhs = stack.get_top_reference().open();
         if(lhs.type() == type_integer) {
           auto& reg = lhs.check<D_integer>();
-          stack_io.set_temporary_result(false, rocket::move(lhs));
+          stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_sub(reg, D_integer(1));
           goto z;
         }
         if(lhs.type() == type_real) {
           auto& reg = lhs.check<D_real>();
-          stack_io.set_temporary_result(false, rocket::move(lhs));
+          stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_sub(reg, D_real(1));
           goto z;
         }
@@ -657,23 +657,23 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_at(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_postfix_at(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Append a reference modifier.
         // `alt.assign` is ignored.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
         if(rhs.type() == type_integer) {
           auto& reg = rhs.check<D_integer>();
           Reference_Modifier::S_array_index mod_c = { rocket::move(reg) };
-          stack_io.open_top_reference().zoom_in(rocket::move(mod_c));
+          stack.open_top_reference().zoom_in(rocket::move(mod_c));
           goto z;
         }
         if(rhs.type() == type_string) {
           auto& reg = rhs.check<D_string>();
           Reference_Modifier::S_object_key mod_c = { rocket::move(reg) };
-          stack_io.open_top_reference().zoom_in(rocket::move(mod_c));
+          stack.open_top_reference().zoom_in(rocket::move(mod_c));
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The value `", rhs, "` cannot be used as a subscript.");
@@ -681,26 +681,26 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_pos(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_pos(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        auto rhs = stack.get_top_reference().read();
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_neg(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_neg(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Negate the operand to create a temporary value, then return it.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
         if(rhs.type() == type_integer) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_neg(reg);
@@ -713,17 +713,17 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_neg), " operation is not defined for `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_notb(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_notb(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
-        auto rhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
         if(rhs.type() == type_boolean) {
           auto& reg = rhs.check<D_boolean>();
           reg = do_operator_not(reg);
@@ -736,28 +736,28 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_notb), " operation is not defined for `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_notl(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_notl(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        const auto& rhs = stack_io.get_top_reference().read();
-        stack_io.set_temporary_result(assign, D_boolean(do_operator_not(rhs.test())));
+        const auto& rhs = stack.get_top_reference().read();
+        stack.set_temporary_result(assign, D_boolean(do_operator_not(rhs.test())));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_inc(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_inc(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Increment the operand and return it.
         // `alt.assign` is ignored.
-        auto& rhs = stack_io.get_top_reference().open();
+        auto& rhs = stack.get_top_reference().open();
         if(rhs.type() == type_integer) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_add(reg, D_integer(1));
@@ -773,12 +773,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_dec(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_dec(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decrement the operand and return it.
         // `alt.assign` is ignored.
-        auto& rhs = stack_io.get_top_reference().open();
+        auto& rhs = stack.get_top_reference().open();
         if(rhs.type() == type_integer) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_sub(reg, D_integer(1));
@@ -792,38 +792,38 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_dec), " operation is not defined for `", rhs, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_unset(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_unset(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                           const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Unset the reference and return the old value.
-        auto rhs = stack_io.get_top_reference().unset();
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        auto rhs = stack.get_top_reference().unset();
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_lengthof(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_lengthof(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                              const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Return the number of elements in the operand.
-        const auto& rhs = stack_io.get_top_reference().read();
+        const auto& rhs = stack.get_top_reference().read();
         if(rhs.type() == type_null) {
-          stack_io.set_temporary_result(assign, D_integer(0));
+          stack.set_temporary_result(assign, D_integer(0));
           goto z;
         }
         if(rhs.type() == type_string) {
-          stack_io.set_temporary_result(assign, D_integer(rhs.check<D_string>().size()));
+          stack.set_temporary_result(assign, D_integer(rhs.check<D_string>().size()));
           goto z;
         }
         if(rhs.type() == type_array) {
-          stack_io.set_temporary_result(assign, D_integer(rhs.check<D_array>().size()));
+          stack.set_temporary_result(assign, D_integer(rhs.check<D_array>().size()));
           goto z;
         }
         if(rhs.type() == type_object) {
-          stack_io.set_temporary_result(assign, D_integer(rhs.check<D_object>().size()));
+          stack.set_temporary_result(assign, D_integer(rhs.check<D_object>().size()));
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_lengthof), " operation is not defined for `", rhs, "`.");
@@ -831,37 +831,37 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_typeof(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_prefix_typeof(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
-        const auto& rhs = stack_io.get_top_reference().read();
-        stack_io.set_temporary_result(assign, D_string(rocket::sref(Value::get_type_name(rhs.type()))));
+        const auto& rhs = stack.get_top_reference().read();
+        stack.set_temporary_result(assign, D_string(rocket::sref(Value::get_type_name(rhs.type()))));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_xeq(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_xeq(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         const auto& negative = static_cast<bool>(p.at(1).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
         rhs = D_boolean((comp == Value::compare_equal) != negative);
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_xrel(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_xrel(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
@@ -869,9 +869,9 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& expect = static_cast<Value::Compare>(p.at(1).as<std::int64_t>());
         const auto& negative = static_cast<bool>(p.at(2).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
@@ -879,19 +879,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", rhs, "` are unordered.");
         }
         rhs = D_boolean((comp == expect) != negative);
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_3way(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_3way(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
@@ -909,19 +909,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         rhs = D_integer(0);
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_add(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_add(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
         if((lhs.type() == type_boolean) && (rhs.type() == type_boolean)) {
           auto& reg = rhs.check<D_boolean>();
@@ -947,19 +947,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_add), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sub(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_sub(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if((lhs.type() == type_boolean) && (rhs.type() == type_boolean)) {
           auto& reg = rhs.check<D_boolean>();
@@ -979,19 +979,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sub), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_mul(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_mul(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
         if((lhs.type() == type_boolean) && (rhs.type() == type_boolean)) {
           auto& reg = rhs.check<D_boolean>();
@@ -1022,19 +1022,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_mul), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_div(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_div(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // For the `integer` and `real` types, return the quotient of both operands.
         if((lhs.type() == type_integer) && (rhs.type() == type_integer)) {
           auto& reg = rhs.check<D_integer>();
@@ -1048,19 +1048,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_div), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_mod(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_mod(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // For the `integer` and `real` types, return the remainder of both operands.
         if((lhs.type() == type_integer) && (rhs.type() == type_integer)) {
           auto& reg = rhs.check<D_integer>();
@@ -1074,19 +1074,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_mod), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sll(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_sll(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
         if(rhs.type() == type_integer) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
@@ -1106,19 +1106,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sll), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_srl(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_srl(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
         if(rhs.type() == type_integer) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
@@ -1138,19 +1138,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_srl), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sla(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_sla(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
         if(rhs.type() == type_integer) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
@@ -1170,19 +1170,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sla), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sra(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_sra(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
         if(rhs.type() == type_integer) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
@@ -1201,19 +1201,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sra), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_andb(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_andb(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
         if((lhs.type() == type_boolean) && (rhs.type() == type_boolean)) {
           auto& reg = rhs.check<D_boolean>();
@@ -1228,19 +1228,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_andb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_orb(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_orb(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
         if((lhs.type() == type_boolean) && (rhs.type() == type_boolean)) {
           auto& reg = rhs.check<D_boolean>();
@@ -1255,19 +1255,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_orb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_xorb(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_xorb(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Pop the RHS operand followed by the LHS operand.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
-        const auto& lhs = stack_io.get_top_reference().read();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if((lhs.type() == type_boolean) && (rhs.type() == type_boolean)) {
           auto& reg = rhs.check<D_boolean>();
@@ -1282,23 +1282,23 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_orb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
-        stack_io.set_temporary_result(assign, rocket::move(rhs));
+        stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_assign(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_operator_rpn_infix_assign(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                           const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Pop the RHS operand followed.
-        auto rhs = stack_io.get_top_reference().read();
-        stack_io.pop_reference();
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
         // Copy the value to the LHS operand which is write-only.
         // `alt.assign` is ignored.
-        stack_io.set_temporary_result(true, rocket::move(rhs));
+        stack.set_temporary_result(true, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_unnamed_array(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_unnamed_array(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                               const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
@@ -1307,16 +1307,16 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         D_array array;
         array.resize(nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
-         * it = stack_io.get_top_reference().read();
-          stack_io.pop_reference();
+         * it = stack.get_top_reference().read();
+          stack.pop_reference();
         }
         // Push the array as a temporary.
         Reference_Root::S_temporary ref_c = { rocket::move(array) };
-        stack_io.push_reference(rocket::move(ref_c));
+        stack.push_reference(rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_unnamed_object(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+    Air_Node::Status do_execute_unnamed_object(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
@@ -1325,23 +1325,23 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         D_object object;
         object.reserve(keys.size());
         for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
-          object.try_emplace(*it, stack_io.get_top_reference().read());
-          stack_io.pop_reference();
+          object.try_emplace(*it, stack.get_top_reference().read());
+          stack.pop_reference();
         }
         // Push the object as a temporary.
         Reference_Root::S_temporary ref_c = { rocket::move(object) };
-        stack_io.push_reference(rocket::move(ref_c));
+        stack.push_reference(rocket::move(ref_c));
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_coalescence(Evaluation_Stack& stack_io, Executive_Context& ctx,
+    Air_Node::Status do_execute_coalescence(Evaluation_Stack& stack, Executive_Context& ctx,
                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
         const auto& code_null = p.at(0).as<Cow_Vector<Air_Node>>();
         const auto& assign = static_cast<bool>(p.at(1).as<std::int64_t>());
         // Pick a branch basing on the condition.
-        if(stack_io.get_top_reference().read().type() != type_null) {
+        if(stack.get_top_reference().read().type() != type_null) {
           // Leave the condition on the stack.
           return Air_Node::status_next;
         }
@@ -1350,14 +1350,14 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           return Air_Node::status_next;
         }
         // Evaluate the branch.
-        rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack_io, ctx, func, global);  });
-        stack_io.forward_result(assign);
+        rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+        stack.forward_result(assign);
         return Air_Node::status_next;
       }
 
     }  // namespace
 
-void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Context& ctx) const
+void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& ctx) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
@@ -1366,7 +1366,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.value);  // 0
-        code_out.emplace_back(&do_push_literal, rocket::move(p));
+        code.emplace_back(&do_push_literal, rocket::move(p));
         return;
       }
     case index_named_reference:
@@ -1383,7 +1383,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
               // Bind the reference.
               Cow_Vector<Air_Node::Param> p;
               p.emplace_back(*qref);  // 0
-              code_out.emplace_back(&do_push_bound_reference, rocket::move(p));
+              code.emplace_back(&do_push_bound_reference, rocket::move(p));
               return;
             }
             // A later-declared reference has been found.
@@ -1391,7 +1391,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
             Cow_Vector<Air_Node::Param> p;
             p.emplace_back(alt.name);  // 0
             p.emplace_back(static_cast<std::int64_t>(depth));  // 1
-            code_out.emplace_back(&do_find_named_reference_local, rocket::move(p));
+            code.emplace_back(&do_find_named_reference_local, rocket::move(p));
             return;
           }
           qctx = qctx->get_parent_opt();
@@ -1403,7 +1403,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         // No name has been found so far.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.name);  // 0
-        code_out.emplace_back(&do_find_named_reference_global, rocket::move(p));
+        code.emplace_back(&do_find_named_reference_global, rocket::move(p));
         return;
       }
     case index_closure_function:
@@ -1414,7 +1414,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(alt.params);  // 1
         p.emplace_back(alt.body);  // 2
-        code_out.emplace_back(&do_execute_closure_function, rocket::move(p));
+        code.emplace_back(&do_execute_closure_function, rocket::move(p));
         return;
       }
     case index_branch:
@@ -1422,14 +1422,14 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         const auto& alt = this->m_stor.as<S_branch>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
-        Cow_Vector<Air_Node> code;
-        rocket::for_each(alt.branch_true, [&](const Xprunit& xpru) { xpru.generate_code(code, ctx);  });
-        p.emplace_back(rocket::move(code));  // 0
-        code.clear();
-        rocket::for_each(alt.branch_false, [&](const Xprunit& xpru) { xpru.generate_code(code, ctx);  });
-        p.emplace_back(rocket::move(code));  // 1
+        Cow_Vector<Air_Node> code_branch;
+        rocket::for_each(alt.branch_true, [&](const Xprunit& xpru) { xpru.generate_code(code_branch, ctx);  });
+        p.emplace_back(rocket::move(code_branch));  // 0
+        code_branch.clear();
+        rocket::for_each(alt.branch_false, [&](const Xprunit& xpru) { xpru.generate_code(code_branch, ctx);  });
+        p.emplace_back(rocket::move(code_branch));  // 1
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 2
-        code_out.emplace_back(&do_execute_branch, rocket::move(p));
+        code.emplace_back(&do_execute_branch, rocket::move(p));
         return;
       }
     case index_function_call:
@@ -1439,7 +1439,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.nargs));  // 1
-        code_out.emplace_back(&do_execute_function_call, rocket::move(p));
+        code.emplace_back(&do_execute_function_call, rocket::move(p));
         return;
       }
     case index_member_access:
@@ -1448,7 +1448,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.name);  // 0
-        code_out.emplace_back(&do_execute_member_access, rocket::move(p));
+        code.emplace_back(&do_execute_member_access, rocket::move(p));
         return;
       }
     case index_operator_rpn:
@@ -1460,172 +1460,172 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         switch(alt.xop) {
         case xop_postfix_inc:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_inc, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_postfix_inc, rocket::move(p));
             return;
           }
         case xop_postfix_dec:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_dec, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_postfix_dec, rocket::move(p));
             return;
           }
         case xop_postfix_at:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_postfix_at, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_postfix_at, rocket::move(p));
             return;
           }
         case xop_prefix_pos:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_pos, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_pos, rocket::move(p));
             return;
           }
         case xop_prefix_neg:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_neg, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_neg, rocket::move(p));
             return;
           }
         case xop_prefix_notb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_notb, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_notb, rocket::move(p));
             return;
           }
         case xop_prefix_notl:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_notl, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_notl, rocket::move(p));
             return;
           }
         case xop_prefix_inc:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_inc, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_inc, rocket::move(p));
             return;
           }
         case xop_prefix_dec:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_dec, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_dec, rocket::move(p));
             return;
           }
         case xop_prefix_unset:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_unset, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_unset, rocket::move(p));
             return;
           }
         case xop_prefix_lengthof:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_lengthof, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_lengthof, rocket::move(p));
             return;
           }
         case xop_prefix_typeof:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_prefix_typeof, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_prefix_typeof, rocket::move(p));
             return;
           }
         case xop_infix_cmp_eq:
           {
             p.emplace_back(static_cast<std::int64_t>(false));  // 1
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_xeq, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xeq, rocket::move(p));
             return;
           }
         case xop_infix_cmp_ne:
           {
             p.emplace_back(static_cast<std::int64_t>(true));  // 1
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_xeq, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xeq, rocket::move(p));
             return;
           }
         case xop_infix_cmp_lt:
           {
             p.emplace_back(static_cast<std::int64_t>(Value::compare_less));  // 1
             p.emplace_back(static_cast<std::int64_t>(false));  // 2
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
             return;
           }
         case xop_infix_cmp_gt:
           {
             p.emplace_back(static_cast<std::int64_t>(Value::compare_greater));  // 1
             p.emplace_back(static_cast<std::int64_t>(false));  // 2
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
             return;
           }
         case xop_infix_cmp_lte:
           {
             p.emplace_back(static_cast<std::int64_t>(Value::compare_greater));  // 1
             p.emplace_back(static_cast<std::int64_t>(true));  // 2
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
             return;
           }
         case xop_infix_cmp_gte:
           {
             p.emplace_back(static_cast<std::int64_t>(Value::compare_less));  // 1
             p.emplace_back(static_cast<std::int64_t>(true));  // 2
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
             return;
           }
         case xop_infix_cmp_3way:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_cmp_3way, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_cmp_3way, rocket::move(p));
             return;
           }
         case xop_infix_add:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_add, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_add, rocket::move(p));
             return;
           }
         case xop_infix_sub:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sub, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_sub, rocket::move(p));
             return;
           }
         case xop_infix_mul:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_mul, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_mul, rocket::move(p));
             return;
           }
         case xop_infix_div:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_div, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_div, rocket::move(p));
             return;
           }
         case xop_infix_mod:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_mod, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_mod, rocket::move(p));
             return;
           }
         case xop_infix_sll:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sll, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_sll, rocket::move(p));
             return;
           }
         case xop_infix_srl:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_srl, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_srl, rocket::move(p));
             return;
           }
         case xop_infix_sla:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sla, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_sla, rocket::move(p));
             return;
           }
         case xop_infix_sra:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_sra, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_sra, rocket::move(p));
             return;
           }
         case xop_infix_andb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_andb, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_andb, rocket::move(p));
             return;
           }
         case xop_infix_orb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_orb, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_orb, rocket::move(p));
             return;
           }
         case xop_infix_xorb:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_xorb, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_xorb, rocket::move(p));
             return;
           }
         case xop_infix_assign:
           {
-            code_out.emplace_back(&do_execute_operator_rpn_infix_assign, rocket::move(p));
+            code.emplace_back(&do_execute_operator_rpn_infix_assign, rocket::move(p));
             return;
           }
         default:
@@ -1638,7 +1638,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(static_cast<std::int64_t>(alt.nelems));  // 0
-        code_out.emplace_back(&do_execute_unnamed_array, rocket::move(p));
+        code.emplace_back(&do_execute_unnamed_array, rocket::move(p));
         return;
       }
     case index_unnamed_object:
@@ -1647,7 +1647,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.keys);  // 0
-        code_out.emplace_back(&do_execute_unnamed_object, rocket::move(p));
+        code.emplace_back(&do_execute_unnamed_object, rocket::move(p));
         return;
       }
     case index_coalescence:
@@ -1655,11 +1655,11 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code_out, const Analytic_Conte
         const auto& alt = this->m_stor.as<S_coalescence>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
-        Cow_Vector<Air_Node> code;
-        rocket::for_each(alt.branch_null, [&](const Xprunit& xpru) { xpru.generate_code(code, ctx);  });
-        p.emplace_back(rocket::move(code));  // 0
+        Cow_Vector<Air_Node> code_branch;
+        rocket::for_each(alt.branch_null, [&](const Xprunit& xpru) { xpru.generate_code(code_branch, ctx);  });
+        p.emplace_back(rocket::move(code_branch));  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 1
-        code_out.emplace_back(&do_execute_coalescence, rocket::move(p));
+        code.emplace_back(&do_execute_coalescence, rocket::move(p));
         return;
       }
     default:

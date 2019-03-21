@@ -47,7 +47,7 @@ class Parser
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
 
-    bool load(Token_Stream& tstrm_io, const Parser_Options& options);
+    bool load(Token_Stream& tstrm, const Parser_Options& options);
     void clear() noexcept;
     const Cow_Vector<Statement>& get_statements() const noexcept;
   };

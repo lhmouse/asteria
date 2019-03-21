@@ -77,7 +77,7 @@ Collector* Collector::do_collect_once()
     if(!sentry) {
       return nullptr;
     }
-    auto output = this->m_output_opt;
+    auto output = this->mput_opt;
     auto tied = this->m_tied_opt;
     bool collect_tied = false;
     // The algorithm here is basically described at

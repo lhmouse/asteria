@@ -21,13 +21,13 @@ Parser_Error Simple_Source_File::do_reload_file(bool throw_on_failure, const Cow
     return err;
   }
 
-Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::istream& cstrm_io, const Cow_String& filename)
+Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::istream& cstrm, const Cow_String& filename)
   {
     // Use default options.
     static constexpr Parser_Options options = { };
     // Tokenize the character stream.
     Token_Stream tstrm;
-    if(!tstrm.load(cstrm_io, filename, options)) {
+    if(!tstrm.load(cstrm, filename, options)) {
       auto err = tstrm.get_parser_error();
       if(throw_on_failure) {
         Parser_Error::convert_to_runtime_error_and_throw(err);

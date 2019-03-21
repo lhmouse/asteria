@@ -17,9 +17,9 @@ void Simple_Binding_Wrapper::describe(std::ostream& os) const
     os << this->m_desc;
   }
 
-void Simple_Binding_Wrapper::invoke(Reference& self_io, const Global_Context& global, Cow_Vector<Reference>&& args) const
+void Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const
   {
-    self_io = (*(this->m_fptr))(this->m_opaque, global, rocket::move(args));
+    self = (*(this->m_fptr))(this->m_opaque, global, rocket::move(args));
   }
 
 void Simple_Binding_Wrapper::enumerate_variables(const Abstract_Variable_Callback& callback) const
