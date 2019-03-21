@@ -48,7 +48,7 @@ D_object create_bindings_debug()
                      "\n    spaces. A line break is appended to terminate the line."
                      "\n  * Returns `true` if the operation succeeds."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.debug.print"), args);
             // Parse variadic arguments.
@@ -86,7 +86,7 @@ D_object create_bindings_debug()
                      "\n    value of `2`."
                      "\n  * Returns `true` if the operation succeeds."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.debug.dump"), args);
             // Parse arguments.

@@ -231,7 +231,7 @@ D_object create_bindings_string()
                      "\n    function in C, except that null characters do not terminate"
                      "\n    strings."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.compare"), args);
             // Parse arguments.
@@ -263,7 +263,7 @@ D_object create_bindings_string()
                      "\n  * Returns `true` if `prefix` is a prefix of `text`; otherwise"
                      "\n    `false`."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
             // Parse arguments.
@@ -294,7 +294,7 @@ D_object create_bindings_string()
                      "\n  * Returns `true` if `suffix` is a suffix of `text`; otherwise"
                      "\n    `false`."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
             // Parse arguments.
@@ -329,7 +329,7 @@ D_object create_bindings_string()
                      "\n    returned."
                      "\n  * Returns the specified substring of `text`."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.substr"), args);
             // Parse arguments.
@@ -360,7 +360,7 @@ D_object create_bindings_string()
                      "\n    without modifying `text`."
                      "\n  * Returns the reversed `string`."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.reverse"), args);
             // Parse arguments.
@@ -391,7 +391,7 @@ D_object create_bindings_string()
                      "\n    function returns a new `string` without modifying `text`."
                      "\n  * Returns the trimmed `string`."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.trim"), args);
             // Parse arguments.
@@ -423,7 +423,7 @@ D_object create_bindings_string()
                      "\n    returns a new `string` without modifying `text`."
                      "\n  * Returns the trimmed `string`."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.trim_left"), args);
             // Parse arguments.
@@ -455,7 +455,7 @@ D_object create_bindings_string()
                      "\n    returns a new `string` without modifying `text`."
                      "\n  * Returns the trimmed `string`."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.trim_right"), args);
             // Parse arguments.
@@ -486,7 +486,7 @@ D_object create_bindings_string()
                      "\n    without modifying `text`."
                      "\n  * Returns a new `string` after the conversion."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.to_upper"), args);
             // Parse arguments.
@@ -516,7 +516,7 @@ D_object create_bindings_string()
                      "\n    without modifying `text`."
                      "\n  * Returns a new `string` after the conversion."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.to_lower"), args);
             // Parse arguments.
@@ -550,7 +550,7 @@ D_object create_bindings_string()
                      "\n    `text` is empty, an empty `array` is returned."
                      "\n  * Throws an exception if `limit` is zero or negative."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.explode"), args);
             // Parse arguments.
@@ -583,7 +583,7 @@ D_object create_bindings_string()
                      "\n  * Returns a `string` containing all segments. If `segments` is"
                      "\n    empty, an empty `string` is returned."),
         // Definition
-        [](const Cow_Vector<Value>&  /*opaque*/, const Global_Context&  /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.implode"), args);
             // Parse arguments.

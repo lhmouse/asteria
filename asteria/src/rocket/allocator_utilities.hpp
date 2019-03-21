@@ -61,7 +61,7 @@ template<typename allocatorT,
          bool propagateT = allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value
          > struct allocator_copy_assigner
   {
-    void operator()(allocatorT&  /*lhs*/, const allocatorT&  /*rhs*/) const
+    void operator()(allocatorT& /*lhs*/, const allocatorT& /*rhs*/) const
       {
       }
   };
@@ -78,7 +78,7 @@ template<typename allocatorT,
          bool propagateT = allocator_traits<allocatorT>::propagate_on_container_move_assignment::value
          > struct allocator_move_assigner
   {
-    void operator()(allocatorT&  /*lhs*/, allocatorT&&  /*rhs*/) const
+    void operator()(allocatorT& /*lhs*/, allocatorT&& /*rhs*/) const
       {
       }
   };
@@ -95,7 +95,7 @@ template<typename allocatorT,
          bool propagateT = allocator_traits<allocatorT>::propagate_on_container_swap::value
          > struct allocator_swapper
   {
-    void operator()(allocatorT&  /*lhs*/, allocatorT&  /*rhs*/) const
+    void operator()(allocatorT& /*lhs*/, allocatorT& /*rhs*/) const
       {
       }
   };

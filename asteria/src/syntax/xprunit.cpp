@@ -459,8 +459,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    Air_Node::Status do_push_literal(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                     const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_push_literal(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                     const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& value = p.at(0).as<Value>();
@@ -470,8 +470,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_push_bound_reference(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_push_bound_reference(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& ref = p.at(0).as<Reference>();
@@ -481,7 +481,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       }
 
     Air_Node::Status do_find_named_reference_local(Evaluation_Stack& stack_io, Executive_Context& ctx,
-                                                   const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+                                                   const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& name = p.at(0).as<PreHashed_String>();
@@ -501,8 +501,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_find_named_reference_global(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                    const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context& global)
+    Air_Node::Status do_find_named_reference_global(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                    const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
         const auto& name = p.at(0).as<PreHashed_String>();
@@ -516,7 +516,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_closure_function(Evaluation_Stack& stack_io, Executive_Context& ctx,
-                                                 const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+                                                 const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
@@ -562,7 +562,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_function_call(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
+    Air_Node::Status do_execute_function_call(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
                                               const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
@@ -600,8 +600,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_member_access(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                              const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_member_access(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                              const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& name = p.at(0).as<PreHashed_String>();
@@ -611,8 +611,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_inc(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                         const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_postfix_inc(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                         const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Increment the operand and return the old value.
         // `alt.assign` is ignored.
@@ -634,8 +634,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_dec(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                         const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_postfix_dec(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                         const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decrement the operand and return the old value.
         // `alt.assign` is ignored.
@@ -657,8 +657,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_postfix_at(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                        const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_postfix_at(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Append a reference modifier.
         // `alt.assign` is ignored.
@@ -681,8 +681,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_pos(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_pos(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -693,8 +693,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_neg(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_neg(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -717,8 +717,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_notb(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_notb(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -740,8 +740,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_notl(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_notl(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -752,8 +752,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_inc(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                        const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_inc(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Increment the operand and return it.
         // `alt.assign` is ignored.
@@ -773,8 +773,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_dec(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                        const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_dec(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decrement the operand and return it.
         // `alt.assign` is ignored.
@@ -792,8 +792,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_dec), " operation is not defined for `", rhs, "`.");
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_unset(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_unset(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -803,8 +803,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_lengthof(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_lengthof(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -831,8 +831,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_typeof(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                           const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_prefix_typeof(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                           const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -843,8 +843,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_xeq(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                           const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_xeq(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                           const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -861,8 +861,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_xrel(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_xrel(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -883,8 +883,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_cmp_3way(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_cmp_3way(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -913,8 +913,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_add(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_add(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -951,8 +951,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sub(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_sub(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -983,8 +983,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_mul(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_mul(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1026,8 +1026,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_div(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_div(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1052,8 +1052,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_mod(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_mod(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1078,8 +1078,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sll(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_sll(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1110,8 +1110,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_srl(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_srl(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1142,8 +1142,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sla(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_sla(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1174,8 +1174,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_sra(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_sra(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1205,8 +1205,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_andb(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_andb(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1232,8 +1232,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_orb(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_orb(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1259,8 +1259,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_xorb(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_xorb(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -1286,8 +1286,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_infix_assign(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                                          const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_operator_rpn_infix_assign(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                                          const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Pop the RHS operand followed.
         auto rhs = stack_io.get_top_reference().read();
@@ -1298,8 +1298,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_unnamed_array(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                              const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_unnamed_array(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                              const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& nelems = static_cast<std::size_t>(p.at(0).as<std::int64_t>());
@@ -1316,8 +1316,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_unnamed_object(Evaluation_Stack& stack_io, Executive_Context&  /*ctx*/,
-                                               const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_unnamed_object(Evaluation_Stack& stack_io, Executive_Context& /*ctx*/,
+                                               const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& keys = p.at(0).as<Cow_Vector<PreHashed_String>>();

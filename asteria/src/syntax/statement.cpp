@@ -91,8 +91,8 @@ namespace Asteria {
         rocket::for_each(code, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
       }
 
-    Air_Node::Status do_execute_clear_stack(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
-                                            const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_clear_stack(Evaluation_Stack& stack, Executive_Context& /*ctx_io*/,
+                                            const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // We push a null reference in case of empty expressions.
         stack.clear_references();
@@ -110,8 +110,8 @@ namespace Asteria {
         return status;
       }
 
-    Air_Node::Status do_define_uninitialized_variable(Evaluation_Stack&  /*stack*/, Executive_Context& ctx_io,
-                                                      const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context& global)
+    Air_Node::Status do_define_uninitialized_variable(Evaluation_Stack& /*stack*/, Executive_Context& ctx_io,
+                                                      const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
@@ -125,7 +125,7 @@ namespace Asteria {
       }
 
    Air_Node::Status do_declare_variable_and_clear_stack(Evaluation_Stack& stack, Executive_Context& ctx_io,
-                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context& global)
+                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
         const auto& name = p.at(0).as<PreHashed_String>();
@@ -137,8 +137,8 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_initialize_variable(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
-                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_initialize_variable(Evaluation_Stack& stack, Executive_Context& /*ctx_io*/,
+                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
@@ -154,8 +154,8 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_define_function(Evaluation_Stack&  /*stack*/, Executive_Context& ctx_io,
-                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context& global)
+    Air_Node::Status do_define_function(Evaluation_Stack& /*stack*/, Executive_Context& ctx_io,
+                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
@@ -467,8 +467,8 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_return_status_simple(Evaluation_Stack&  /*stack*/, Executive_Context&  /*ctx_io*/,
-                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_return_status_simple(Evaluation_Stack& /*stack*/, Executive_Context& /*ctx_io*/,
+                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& status = static_cast<Air_Node::Status>(p.at(0).as<std::int64_t>());
@@ -476,8 +476,8 @@ namespace Asteria {
         return status;
       }
 
-    [[noreturn]] Air_Node::Status do_execute_throw(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
-                                                   const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context&  /*global*/)
+    [[noreturn]] Air_Node::Status do_execute_throw(Evaluation_Stack& stack, Executive_Context& /*ctx_io*/,
+                                                   const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
@@ -485,8 +485,8 @@ namespace Asteria {
         throw Traceable_Exception(stack.get_top_reference().read(), sloc, func);
       }
 
-    Air_Node::Status do_execute_convert_to_temporary(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
-                                                     const Cow_Vector<Air_Node::Param>&  /*p*/, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_convert_to_temporary(Evaluation_Stack& stack, Executive_Context& /*ctx_io*/,
+                                                     const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Replace the result with a temporary value, if it isn't.
         if(stack.get_top_reference().is_temporary()) {
@@ -497,8 +497,8 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_assert(Evaluation_Stack& stack, Executive_Context&  /*ctx_io*/,
-                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String&  /*func*/, const Global_Context&  /*global*/)
+    Air_Node::Status do_execute_assert(Evaluation_Stack& stack, Executive_Context& /*ctx_io*/,
+                                       const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();

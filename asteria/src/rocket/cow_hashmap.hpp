@@ -200,7 +200,7 @@ template<typename keyT, typename mappedT,
     template<typename pointerT, typename hashT, typename allocatorT> struct copy_storage_helper<pointerT, hashT, allocatorT,
                                                                                                 false>     // copyableT
       {
-        [[noreturn]] void operator()(pointerT /*ptr*/, const hashT&  /*hf*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
+        [[noreturn]] void operator()(pointerT /*ptr*/, const hashT& /*hf*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
             // `allocatorT::value_type` is not copy-constructible.
             // Throw an exception unconditionally, even when there is nothing to copy.
