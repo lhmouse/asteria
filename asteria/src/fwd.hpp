@@ -26,6 +26,7 @@
 #include "rocket/refcnt_ptr.hpp"
 #include "rocket/refcnt_object.hpp"
 #include "rocket/variant.hpp"
+#include "rocket/optional.hpp"
 
 namespace Asteria {
 
@@ -84,12 +85,11 @@ using PreHashed_String = rocket::prehashed_string;
 template<typename E, typename D = std::default_delete<const E>> using Uptr = rocket::unique_ptr<E, D>;
 template<typename E> using Rcptr = rocket::refcnt_ptr<E>;
 template<typename E> using Rcobj = rocket::refcnt_object<E>;
-
 template<typename E> using Cow_Vector = rocket::cow_vector<E>;
 template<typename K, typename V, typename H> using Cow_HashMap = rocket::cow_hashmap<K, V, H, rocket::transparent_equal_to>;
 template<typename E, std::size_t k> using Static_Vector = rocket::static_vector<E, k>;
-
 template<typename... P> using Variant = rocket::variant<P...>;
+template<typename T> using Optional = rocket::optional<T>;
 
 // Fundamental Types
 using D_null      = std::nullptr_t;

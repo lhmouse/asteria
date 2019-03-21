@@ -451,13 +451,15 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       {
         this->assign(init);
       }
-    static_vector& operator=(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>, is_nothrow_copy_constructible<value_type>>::value)
+    static_vector& operator=(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
+                                                                              is_nothrow_copy_constructible<value_type>>::value)
       {
         this->assign(other);
         allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return *this;
       }
-    static_vector& operator=(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>, is_nothrow_move_constructible<value_type>>::value)
+    static_vector& operator=(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
+                                                                         is_nothrow_move_constructible<value_type>>::value)
       {
         this->assign(noadl::move(other));
         allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
@@ -780,7 +782,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       }
 
     // N.B. The return type is a non-standard extension.
-    static_vector& assign(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>, is_nothrow_copy_constructible<value_type>>::value)
+    static_vector& assign(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
+                                                                           is_nothrow_copy_constructible<value_type>>::value)
       {
         auto sl = this->size();
         auto sr = other.size();
@@ -800,7 +803,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
         return *this;
       }
     // N.B. The return type is a non-standard extension.
-    static_vector& assign(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>, is_nothrow_move_constructible<value_type>>::value)
+    static_vector& assign(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
+                                                                      is_nothrow_move_constructible<value_type>>::value)
       {
         auto sl = this->size();
         auto sr = other.size();
@@ -842,7 +846,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
         return *this;
       }
 
-    void swap(static_vector& other) noexcept(conjunction<is_nothrow_swappable<value_type>, is_nothrow_move_constructible<value_type>>::value)
+    void swap(static_vector& other) noexcept(conjunction<is_nothrow_swappable<value_type>,
+                                                         is_nothrow_move_constructible<value_type>>::value)
       {
         auto sl = this->size();
         auto sr = other.size();

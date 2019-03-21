@@ -52,6 +52,7 @@
 #include "rocket/refcnt_ptr.hpp"
 #include "rocket/refcnt_object.hpp"
 #include "rocket/static_vector.hpp"
+#include "rocket/optional.hpp"
 #include "rocket/prehashed_string.hpp"
 #include "rocket/ostream_implode.hpp"
 
