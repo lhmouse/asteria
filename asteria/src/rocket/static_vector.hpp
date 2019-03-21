@@ -440,7 +440,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       {
         this->assign(n, value);
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> static_vector(inputT first, inputT last,
+                                                                                                                   const allocator_type& alloc = allocator_type())
       : static_vector(alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
@@ -889,7 +890,8 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       }
   };
 
-template<typename valueT, size_t capacityT, typename allocatorT> inline void swap(static_vector<valueT, capacityT, allocatorT>& lhs, static_vector<valueT, capacityT, allocatorT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename valueT, size_t capacityT, typename allocatorT> inline void swap(static_vector<valueT, capacityT, allocatorT>& lhs,
+                                                                                  static_vector<valueT, capacityT, allocatorT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     lhs.swap(rhs);
   }
