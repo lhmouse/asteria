@@ -177,6 +177,13 @@ template<typename valueT> void swap(optional<valueT>& lhs,
     lhs.swap(rhs);
   }
 
+template<typename charT, typename traitsT,
+         typename valueT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+                                                                           const optional<valueT>& rhs)
+  {
+    return rhs ? (os << *rhs) : (os << "<nullopt>");
+  }
+
 }  // namespace rocket
 
 #endif
