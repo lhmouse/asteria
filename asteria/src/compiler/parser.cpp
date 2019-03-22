@@ -201,8 +201,8 @@ namespace Asteria {
         default:
           return false;
         }
-        Xprunit::S_operator_rpn node_c = { xop, false };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_operator_rpn xpru_c = { xop, false };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -235,8 +235,8 @@ namespace Asteria {
         default:
           return false;
         }
-        Xprunit::S_operator_rpn node_c = { xop, false };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_operator_rpn xpru_c = { xop, false };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -440,17 +440,17 @@ namespace Asteria {
         }
         // Handle special names.
         if(name == "__file") {
-          Xprunit::S_literal node_c = { D_string(sloc.file()) };
-          xprus.emplace_back(rocket::move(node_c));
+          Xprunit::S_literal xpru_c = { D_string(sloc.file()) };
+          xprus.emplace_back(rocket::move(xpru_c));
           return true;
         }
         if(name == "__line") {
-          Xprunit::S_literal node_c = { D_integer(sloc.line()) };
-          xprus.emplace_back(rocket::move(node_c));
+          Xprunit::S_literal xpru_c = { D_integer(sloc.line()) };
+          xprus.emplace_back(rocket::move(xpru_c));
           return true;
         }
-        Xprunit::S_named_reference node_c = { rocket::move(name) };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_named_reference xpru_c = { rocket::move(name) };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -460,8 +460,8 @@ namespace Asteria {
         if(!do_accept_literal(value, tstrm)) {
           return false;
         }
-        Xprunit::S_literal node_c = { rocket::move(value) };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_literal xpru_c = { rocket::move(value) };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -470,8 +470,8 @@ namespace Asteria {
         if(!do_match_keyword(tstrm, Token::keyword_this)) {
           return false;
         }
-        Xprunit::S_named_reference node_c = { rocket::sref("__this") };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_named_reference xpru_c = { rocket::sref("__this") };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -504,8 +504,8 @@ namespace Asteria {
           Statement::S_return stmt_c = { true, rocket::move(xprus_ret) };
           body.emplace_back(rocket::move(stmt_c));
         }
-        Xprunit::S_closure_function node_c = { rocket::move(sloc), rocket::move(params), rocket::move(body) };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_closure_function xpru_c = { rocket::move(sloc), rocket::move(params), rocket::move(body) };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -535,8 +535,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_bracket_cl)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_or_expression_expected);
         }
-        Xprunit::S_unnamed_array node_c = { nelems };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_unnamed_array xpru_c = { nelems };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -582,8 +582,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_object_key_expected);
         }
-        Xprunit::S_unnamed_object node_c = { rocket::move(keys) };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_unnamed_object xpru_c = { rocket::move(keys) };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -644,8 +644,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
-        Xprunit::S_function_call node_c = { rocket::move(sloc), nargs };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_function_call xpru_c = { rocket::move(sloc), nargs };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -662,8 +662,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_bracket_cl)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
-        Xprunit::S_operator_rpn node_c = { Xprunit::xop_postfix_at, false };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_operator_rpn xpru_c = { Xprunit::xop_postfix_at, false };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -681,8 +681,8 @@ namespace Asteria {
         if(!key_got) {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        Xprunit::S_member_access node_c = { rocket::move(key) };
-        xprus.emplace_back(rocket::move(node_c));
+        Xprunit::S_member_access xpru_c = { rocket::move(key) };
+        xprus.emplace_back(rocket::move(xpru_c));
         return true;
       }
 
@@ -853,12 +853,12 @@ namespace Asteria {
         void extract(Cow_Vector<Xprunit>& xprus) override
           {
             if(this->m_sop == sop_coales) {
-              Xprunit::S_coalescence node_c = { rocket::move(this->m_branch_false), this->m_assign };
-              xprus.emplace_back(rocket::move(node_c));
+              Xprunit::S_coalescence xpru_c = { rocket::move(this->m_branch_false), this->m_assign };
+              xprus.emplace_back(rocket::move(xpru_c));
               return;
             }
-            Xprunit::S_branch node_c = { rocket::move(this->m_branch_true), rocket::move(this->m_branch_false), this->m_assign };
-            xprus.emplace_back(rocket::move(node_c));
+            Xprunit::S_branch xpru_c = { rocket::move(this->m_branch_true), rocket::move(this->m_branch_false), this->m_assign };
+            xprus.emplace_back(rocket::move(xpru_c));
           }
         void append(Infix_Element_Base&& elem) override
           {
@@ -1016,8 +1016,8 @@ namespace Asteria {
           {
             xprus.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
             // Don't forget the operator!
-            Xprunit::S_operator_rpn node_c = { this->m_xop, this->m_assign };
-            xprus.emplace_back(rocket::move(node_c));
+            Xprunit::S_operator_rpn xpru_c = { this->m_xop, this->m_assign };
+            xprus.emplace_back(rocket::move(xpru_c));
           }
         void append(Infix_Element_Base&& elem) override
           {
