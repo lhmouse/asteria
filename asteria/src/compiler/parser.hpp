@@ -37,7 +37,7 @@ class Parser
   public:
     explicit operator bool () const noexcept
       {
-        return this->m_stor.get<Cow_Vector<Statement>>() != nullptr;
+        return this->m_stor.index() == state_success;
       }
     State state() const noexcept
       {

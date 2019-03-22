@@ -38,7 +38,7 @@ class Token_Stream
   public:
     explicit operator bool () const noexcept
       {
-        return this->m_stor.get<Cow_Vector<Token>>() != nullptr;
+        return this->m_stor.index() == state_success;
       }
     State state() const noexcept
       {
