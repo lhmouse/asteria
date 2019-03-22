@@ -20,6 +20,19 @@ class Statement
         target_for     = 3,
       };
 
+    struct Variable_Declaration
+      {
+        PreHashed_String name;
+        bool immutable;
+        Cow_Vector<Xprunit> init;
+      };
+
+    struct Switch_Clause
+      {
+        Cow_Vector<Xprunit> cond;  // This is empty on `default` clauses and non-empty on `case` clauses.
+        Cow_Vector<Statement> body;
+      };
+
     struct S_expression
       {
         Cow_Vector<Xprunit> expr;
@@ -31,9 +44,7 @@ class Statement
     struct S_variable
       {
         Source_Location sloc;
-        PreHashed_String name;
-        bool immutable;
-        Cow_Vector<Xprunit> init;
+        Cow_Vector<Variable_Declaration> vars;
       };
     struct S_function
       {
@@ -52,8 +63,7 @@ class Statement
     struct S_switch
       {
         Cow_Vector<Xprunit> ctrl;
-        Cow_Vector<std::pair<Cow_Vector<Xprunit>,  // This is empty on `default` clauses and non-empty on `case` clauses.
-                             Cow_Vector<Statement>>> clauses;
+        Cow_Vector<Switch_Clause> clauses;
       };
     struct S_do_while
       {

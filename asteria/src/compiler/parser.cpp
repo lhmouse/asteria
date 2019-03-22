@@ -1267,6 +1267,7 @@ namespace Asteria {
         if(!do_match_keyword(tstrm, Token::keyword_var)) {
           return false;
         }
+        Cow_Vector<Statement::Variable_Declaration> vars;
         for(;;) {
           Cow_String name;
           if(!do_accept_identifier(name, tstrm)) {
@@ -1279,8 +1280,8 @@ namespace Asteria {
               throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
             }
           }
-          Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), false, rocket::move(init) };
-          stmts.emplace_back(rocket::move(stmt_c));
+          Statement::Variable_Declaration var = { rocket::move(name), false, rocket::move(init) };
+          vars.emplace_back(rocket::move(var));
           if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
           }
@@ -1288,6 +1289,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
+        Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(vars) };
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1302,6 +1305,7 @@ namespace Asteria {
         if(!do_match_keyword(tstrm, Token::keyword_const)) {
           return false;
         }
+        Cow_Vector<Statement::Variable_Declaration> vars;
         for(;;) {
           Cow_String name;
           if(!do_accept_identifier(name, tstrm)) {
@@ -1314,8 +1318,8 @@ namespace Asteria {
           if(!do_accept_expression(init, tstrm)) {
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
-          Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(name), true, rocket::move(init) };
-          stmts.emplace_back(rocket::move(stmt_c));
+          Statement::Variable_Declaration var = { rocket::move(name), true, rocket::move(init) };
+          vars.emplace_back(rocket::move(var));
           if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
           }
@@ -1323,6 +1327,8 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
+        Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(vars) };
+        stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
 
@@ -1436,8 +1442,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
-        Cow_Vector<std::pair<Cow_Vector<Xprunit>,  // This is empty on `default` clauses and non-empty on `case` clauses.
-                             Cow_Vector<Statement>>> clauses;
+        Cow_Vector<Statement::Switch_Clause> clauses;
         if(!do_match_punctuator(tstrm, Token::punctuator_brace_op)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_expected);
         }
@@ -1454,14 +1459,15 @@ namespace Asteria {
           if(!do_match_punctuator(tstrm, Token::punctuator_colon)) {
             throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
           }
-          Cow_Vector<Statement> clause;
+          Cow_Vector<Statement> body;
           for(;;) {
-            bool stmt_got = do_accept_statement(clause, tstrm);
+            bool stmt_got = do_accept_statement(body, tstrm);
             if(!stmt_got) {
               break;
             }
           }
-          clauses.emplace_back(rocket::move(cond), rocket::move(clause));
+          Statement::Switch_Clause clause = { rocket::move(cond), rocket::move(body) };
+          clauses.emplace_back(rocket::move(clause));
         }
         if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_switch_clause_expected);

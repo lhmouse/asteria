@@ -215,8 +215,8 @@ namespace Asteria {
         // In this loop, `target` points to the `default` clause.
         for(auto it = p.begin(); it != p.end(); it += 3) {
           // Decode arguments.
-          const auto& code_case = it[0].as<Cow_Vector<Air_Node>>();
-          if(code_case.empty()) {
+          const auto& code_cond = it[0].as<Cow_Vector<Air_Node>>();
+          if(code_cond.empty()) {
             // This is a `default` clause.
             if(target != p.end()) {
               ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses have been found in this `switch` statement.");
@@ -226,39 +226,37 @@ namespace Asteria {
           }
           // This is a `case` clause.
           // Evaluate the operand and check whether it equals `ctrl_value`.
-          do_evaluate_expression(stack, ctx, code_case, func, global);
+          do_evaluate_expression(stack, ctx, code_cond, func, global);
           if(stack.get_top_reference().read().compare(ctrl_value) == Value::compare_equal) {
             // Found a `case` label. Stop.
             target = it;
             break;
           }
         }
-        if(target == p.end()) {
-          // No match clause has been found.
-          return Air_Node::status_next;
-        }
-        // Jump to the clause denoted by `target`.
-        // Note that all clauses share the same context.
-        Executive_Context ctx_body(&ctx);
-        // Skip clauses that precede `target`.
-        for(auto it = p.begin(); it != target; it += 3) {
-          // Decode arguments.
-          const auto& names = it[2].as<Cow_Vector<PreHashed_String>>();
-          // Inject all names into this scope.
-          rocket::for_each(names, [&](const PreHashed_String& name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
-                                                                                                     name, Reference_Root::S_null());  });
-        }
-        // Execute all clauses from `target` to the end of this block.
-        for(auto it = target; it != p.end(); it += 3) {
-          // Decode arguments.
-          const auto& code_clause = it[1].as<Cow_Vector<Air_Node>>();
-          // Execute the clause. Break out of the block if requested. Forward any status codes unexpected to the caller.
-          auto status = do_execute_statement_list(stack, ctx_body, code_clause, func, global);
-          if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
-            break;
+        if(target != p.end()) {
+          // Jump to the clause denoted by `target`.
+          // Note that all clauses share the same context.
+          Executive_Context ctx_body(&ctx);
+          // Skip clauses that precede `target`.
+          for(auto it = p.begin(); it != target; it += 3) {
+            // Decode arguments.
+            const auto& names = it[2].as<Cow_Vector<PreHashed_String>>();
+            // Inject all names into this scope.
+            rocket::for_each(names, [&](const PreHashed_String& name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
+                                                                                                       name, Reference_Root::S_null());  });
           }
-          if(rocket::is_none_of(status, { Air_Node::status_next })) {
-            return status;
+          // Execute all clauses from `target` to the end of this block.
+          for(auto it = target; it != p.end(); it += 3) {
+            // Decode arguments.
+            const auto& code_clause = it[1].as<Cow_Vector<Air_Node>>();
+            // Execute the clause. Break out of the block if requested. Forward any status codes unexpected to the caller.
+            auto status = do_execute_statement_list(stack, ctx_body, code_clause, func, global);
+            if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
+              break;
+            }
+            if(rocket::is_none_of(status, { Air_Node::status_next })) {
+              return status;
+            }
           }
         }
         return Air_Node::status_next;
@@ -550,28 +548,31 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
     case index_variable:
       {
         const auto& alt = this->m_stor.as<S_variable>();
-        // Create a dummy reference for further name lookups.
-        do_set_user_declared_reference(names_opt, ctx, "variable placeholder", alt.name, Reference_Root::S_null());
-        // Distinguish uninitialized variables from initialized ones.
-        if(alt.init.empty()) {
+        // There may be multiple variables.
+        for(const auto& var : alt.vars) {
+          // Create a dummy reference for further name lookups.
+          do_set_user_declared_reference(names_opt, ctx, "variable placeholder", var.name, Reference_Root::S_null());
+          // Distinguish uninitialized variables from initialized ones.
+          if(var.init.empty()) {
+            Cow_Vector<Air_Node::Param> p;
+            p.emplace_back(alt.sloc);  // 0
+            p.emplace_back(var.name);  // 1
+            p.emplace_back(static_cast<std::int64_t>(var.immutable));  // 2
+            code.emplace_back(&do_define_uninitialized_variable, rocket::move(p));
+            continue;
+          }
+          // A variable becomes visible before its initializer, where it is initialized to `null`.
           Cow_Vector<Air_Node::Param> p;
+          p.emplace_back(var.name);  // 0
+          code.emplace_back(&do_declare_variable_and_clear_stack, rocket::move(p));
+          // Generate inline code for the initializer.
+          rocket::for_each(var.init, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+          // Generate code to initialize the variable.
+          p.clear();
           p.emplace_back(alt.sloc);  // 0
-          p.emplace_back(alt.name);  // 1
-          p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 2
-          code.emplace_back(&do_define_uninitialized_variable, rocket::move(p));
-          return;
+          p.emplace_back(static_cast<std::int64_t>(var.immutable));  // 1
+          code.emplace_back(&do_initialize_variable, rocket::move(p));
         }
-        // A variable becomes visible before its initializer, where it is initialized to `null`.
-        Cow_Vector<Air_Node::Param> p;
-        p.emplace_back(alt.name);  // 0
-        code.emplace_back(&do_declare_variable_and_clear_stack, rocket::move(p));
-        // Generate inline code for the initializer.
-        rocket::for_each(alt.init, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
-        // Generate code to initialize the variable.
-        p.clear();
-        p.emplace_back(alt.sloc);  // 0
-        p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 1
-        code.emplace_back(&do_initialize_variable, rocket::move(p));
         return;
       }
     case index_function:
@@ -621,8 +622,8 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         // Names are accumulated.
         Cow_Vector<PreHashed_String> names;
         for(auto it = alt.clauses.begin(); it != alt.clauses.end(); ++it) {
-          p.emplace_back(do_generate_code_expression(ctx_switch, it->first));  // n * 3 + 0
-          p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, it->second));  // n * 3 + 1
+          p.emplace_back(do_generate_code_expression(ctx_switch, it->cond));  // n * 3 + 0
+          p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, it->body));  // n * 3 + 1
           p.emplace_back(names);  // n * 3 + 2
         }
         code.emplace_back(&do_execute_select, rocket::move(p));
