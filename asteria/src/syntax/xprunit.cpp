@@ -1423,10 +1423,10 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(alt.branch_true, [&](const Xprunit& xpru) { xpru.generate_code(code_branch, ctx);  });
+        rocket::for_each(alt.branch_true, [&](const Xprunit& unit) { unit.generate_code(code_branch, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         code_branch.clear();
-        rocket::for_each(alt.branch_false, [&](const Xprunit& xpru) { xpru.generate_code(code_branch, ctx);  });
+        rocket::for_each(alt.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 1
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 2
         code.emplace_back(&do_execute_branch, rocket::move(p));
@@ -1656,7 +1656,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(alt.branch_null, [&](const Xprunit& xpru) { xpru.generate_code(code_branch, ctx);  });
+        rocket::for_each(alt.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 1
         code.emplace_back(&do_execute_coalescence, rocket::move(p));
