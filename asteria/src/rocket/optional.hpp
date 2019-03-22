@@ -120,20 +120,64 @@ template<typename valueT> class optional
         return this->m_stor.size() != 0;
       }
 
-    constexpr const_reference value() const
+    const_reference value() const
       {
         if(this->m_stor.empty()) {
           this->do_throw_valueless();
         }
         return this->m_stor.front();
       }
-    constexpr reference value()
+    reference value()
       {
         if(this->m_stor.empty()) {
           this->do_throw_valueless();
         }
         return this->m_stor.mut_front();
       }
+    // N.B. This is a non-standard extension
+    const value_type* value_ptr() const
+      {
+        if(this->m_stor.empty()) {
+          return nullptr;
+        }
+        return ::std::addressof(this->m_stor.front());
+      }
+    // N.B. This is a non-standard extension
+    value_type* value_ptr()
+      {
+        if(this->m_stor.empty()) {
+          return nullptr;
+        }
+        return ::std::addressof(this->m_stor.mut_front());
+      }
+    // N.B. The return type differs from `std::variant`.
+    template<typename dvalueT> decltype(0 ? ::std::declval<const_reference>()
+                                          : ::std::declval<dvalueT>()) value_or(dvalueT&& dvalue) const
+      {
+        if(this->m_stor.empty()) {
+          return ::std::forward<dvalueT>(dvalue);
+        }
+        return this->m_stor.front();
+      }
+    // N.B. The return type differs from `std::variant`.
+    template<typename dvalueT> decltype(0 ? ::std::declval<reference>()
+                                          : ::std::declval<dvalueT>()) value_or(dvalueT&& dvalue)
+      {
+        if(this->m_stor.empty()) {
+          return ::std::forward<dvalueT>(dvalue);
+        }
+        return this->m_stor.mut_front();
+      }
+    // N.B. This is a non-standard extension
+    template<typename dvalueT> decltype(0 ? ::std::declval<value_type>()
+                                          : ::std::declval<dvalueT>()) move_value_or(dvalueT&& dvalue)
+      {
+        if(this->m_stor.empty()) {
+          return ::std::forward<dvalueT>(dvalue);
+        }
+        return noadl::move(this->m_stor.mut_front());
+      }
+
     constexpr const_reference operator*() const
       {
         return this->m_stor.front();
@@ -156,7 +200,7 @@ template<typename valueT> class optional
       {
         this->m_stor.clear();
       }
-    template<typename... paramsT> value_type& emplace(paramsT&&... params)
+    template<typename... paramsT> reference emplace(paramsT&&... params)
       {
         this->m_stor.clear();
         auto& elem = this->m_stor.emplace_back(::std::forward<paramsT>(params)...);
