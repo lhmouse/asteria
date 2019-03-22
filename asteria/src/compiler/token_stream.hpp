@@ -51,7 +51,7 @@ class Token_Stream
     bool load(std::istream& cstrm, const Cow_String& file, const Parser_Options& options);
     void clear() noexcept;
     const Token* peek_opt() const noexcept;
-    Token shift();
+    void shift();
   };
 
 }  // namespace Asteria

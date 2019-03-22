@@ -1055,7 +1055,7 @@ const Token* Token_Stream::peek_opt() const noexcept
     }
   }
 
-Token Token_Stream::shift()
+void Token_Stream::shift()
   {
     switch(this->state()) {
     case state_empty:
@@ -1072,9 +1072,8 @@ Token Token_Stream::shift()
         if(alt.empty()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
         }
-        auto token = rocket::move(alt.mut_back());
         alt.pop_back();
-        return rocket::move(token);
+        return;
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
