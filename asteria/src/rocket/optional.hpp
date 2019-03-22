@@ -19,6 +19,7 @@ constexpr nullopt;
 template<typename valueT> class optional
   {
     static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
+    static_assert(!is_same<valueT, nullopt_t>::value, "`valueT` shall not be `nullopt_t`.");
 
   public:
     using value_type       = valueT;
