@@ -17,18 +17,18 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return { 0, SIZE_MAX, 0, code };
+          return Parser_Error(UINT32_MAX, SIZE_MAX, 0, code);
         }
-        return { qtok->line(), qtok->offset(), qtok->length(), code };
+        return Parser_Error(qtok->line(), qtok->offset(), qtok->length(), code);
       }
 
     Source_Location do_tell_source_location(const Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return { rocket::sref("<end of stream>"), 0 };
+          return Source_Location(rocket::sref("<end of stream>"), UINT32_MAX);
         }
-        return { qtok->file(), qtok->line() };
+        return Source_Location(qtok->file(), qtok->line());
       }
 
     bool do_match_keyword(Token_Stream& tstrm, Token::Keyword keyword)

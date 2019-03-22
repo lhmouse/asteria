@@ -216,7 +216,7 @@ void Parser_Error::convert_to_runtime_error_and_throw(const Parser_Error& err)
     mos << "An error was encountered while parsing source data: " << Parser_Error::get_code_description(err.code());
     // Append error location information.
     mos << "\n[parser error " << err.code() << " encountered at ";
-    if(err.line() == 0) {
+    if(err.line() == UINT32_MAX) {
       mos << "the end of stream";
     } else {
       mos << "line " << err.line() << ", offset " << err.offset() << ", length " << err.length();
