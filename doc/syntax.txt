@@ -64,7 +64,7 @@ equal-initializer ::=
 immutable-variable-definition ::=
 	"const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
 function-definition ::=
-	"func" identifier parameter-list statement
+	"func" identifier parameter-list block
 parameter-list ::=
 	"(" ( identifier-list | "" ) ")"
 identifier-list ::=
@@ -130,7 +130,7 @@ prefix-operator ::=
 primary-expression ::=
 	identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
 closure-function ::=
-	"func" parameter-list ( block | "return" expression )
+	"func" parameter-list ( block | equal-initializer )
 unnamed-array ::=
 	"[" array-element-list-opt "]"
 array-element-list-opt ::=

@@ -480,7 +480,7 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // closure-function ::=
-        //   "func" parameter-list ( block | "return" expression )
+        //   "func" parameter-list ( block | equal-initializer )
         if(!do_match_keyword(tstrm, Token::keyword_func)) {
           return false;
         }
@@ -496,7 +496,10 @@ namespace Asteria {
         }
         Cow_Vector<Statement> body;
         if(!do_accept_block_statement_list(body, tstrm)) {
-          // An expression is expected, which behaves as if it was the operand of a `return&` ststement.
+          // An equals sign followed by an expression is expected, which behaves as if it was the operand of a `return&` ststement.
+          if(!do_match_punctuator(tstrm, Token::punctuator_assign)) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_expected);
+          }
           Cow_Vector<Xprunit> xprus_ret;
           if(!do_accept_expression(xprus_ret, tstrm)) {
             throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_or_expression_expected);
@@ -1335,7 +1338,7 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // function-definition ::=
-        //   "func" identifier parameter-list statement
+        //   "func" identifier parameter-list block
         // parameter-list ::=
         //   "(" ( identifier-list | "" ) ")"
         if(!do_match_keyword(tstrm, Token::keyword_func)) {
@@ -1356,7 +1359,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         Cow_Vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm)) {
+        if(!do_accept_block_statement_list(body, tstrm)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
         Statement::S_function stmt_c = { rocket::move(sloc), rocket::move(name), rocket::move(params), rocket::move(body) };
