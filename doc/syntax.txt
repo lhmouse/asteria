@@ -47,8 +47,7 @@ nonblock-statement ::=
 	null-statement |
 	variable-definition | immutable-variable-definition | function-definition |
 	expression-statement |
-	if-statement | switch-statement |
-	do-while-statement | while-statement | for-statement |
+	if-statement | switch-statement | do-while-statement | while-statement | for-statement |
 	break-statement | continue-statement | throw-statement | return-statement | assert-statement |
 	try-statement
 
@@ -74,11 +73,13 @@ expression-statement ::=
 	expression ";"
 
 if-statement ::=
-	"if" negation-opt "(" expression ")" statement ( "else" statement | "" )
+	"if" negation-opt "(" expression ")" statement else-branch-opt
 negation-opt ::=
 	negation | ""
 negation ::=
 	"!" | "not"
+else-branch-opt ::=
+	"else" statement | ""
 switch-statement ::=
 	"switch" "(" expression ")" switch-block
 switch-block ::=
@@ -86,29 +87,47 @@ switch-block ::=
 switch-clause-list-opt ::=
 	switch-clause-list | ""
 switch-clause-list ::=
-	( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
+	switch-clause switch-clause-list-opt
+switch-clause ::=
+	case-clause | default-clause
+case-clause ::=
+	"case" expression ":" statement-list-opt
+default-clause ::=
+	"default" ":" statement-list-opt
 
 do-while-statement ::=
 	"do" statement "while" negation-opt "(" expression ")" ";"
 while-statement ::=
 	"while" negation-opt "(" expression ")" statement
 for-statement ::=
-	"for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
-for-statement-range ::=
-	"each" identifier ( "," identifier | "") ":" expression
-for-statement-triplet ::=
-	( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
+	"for" "(" for-complement
+for-complement ::=
+	for-complement-range | for-complement-triplet
+for-complement-range ::=
+	"each" identifier "," identifier ":" expression ")" statement
+for-complement-triplet ::=
+	for-initializer expression-opt ";" expression-opt ")" statement
+for-initializer ::=
+	null-statement | variable-definition | immutable-variable-definition | expression-statement
 
 break-statement ::=
-	"break" ( "switch" | "while" | "for" ) ";"
+	"break" break-target-opt ";"
+break-target-opt ::=
+	"switch" | "while" | "for" | ""
 continue-statement ::=
-	"continue" ( "while" | "for" ) ";"
+	"continue" continue-target-opt ";"
+continue-target-opt ::=
+	"while" | "for" | ""
 throw-statement ::=
 	"throw" expression ";"
 return-statement ::=
-	"return" ( "&" | "" ) expression-opt ";"
+	"return" reference-specifier-opt expression-opt ";"
+reference-specifier-opt ::=
+	"&" | ""
 assert-statement ::=
-	"assert" negation-opt expression ( ":" string-literal | "" ) ";"
+	"assert" negation-opt expression assert-message-opt ";"
+assert-message ::=
+	":" string-literal | ""
 
 try-statement ::=
 	"try" statement "catch" "(" identifier ")" statement

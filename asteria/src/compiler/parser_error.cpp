@@ -169,7 +169,7 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
       }
     case code_for_statement_initializer_expected:
       {
-        return "Expectation failed while looking for an `each`, variable definition or expression statement.";
+        return "Expectation failed while looking for an `each`, `;`, variable definition or expression statement.";
       }
     case code_closed_bracket_or_expression_expected:
       {

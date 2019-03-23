@@ -31,216 +31,234 @@ namespace Asteria {
         return Source_Location(qtok->file(), qtok->line());
       }
 
-    bool do_match_keyword(Token_Stream& tstrm, Token::Keyword keyword)
+    Optional<Token::Keyword> do_accept_keyword_opt(Token_Stream& tstrm, std::initializer_list<Token::Keyword> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
+        // See whether it is one of acceptable keywords.
         auto qalt = qtok->opt<Token::S_keyword>();
         if(!qalt) {
-          return false;
+          return rocket::nullopt;
         }
-        if(qalt->keyword != keyword) {
-          return false;
+        if(rocket::is_none_of(qalt->keyword, accept)) {
+          return rocket::nullopt;
         }
+        // Return the keyword and discard this token.
+        auto keyword = qalt->keyword;
         tstrm.shift();
-        return true;
+        return keyword;
       }
 
-    bool do_match_punctuator(Token_Stream& tstrm, Token::Punctuator punct)
+    Optional<Token::Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Token::Punctuator> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
+        // See whether it is one of acceptable punctuator.
         auto qalt = qtok->opt<Token::S_punctuator>();
         if(!qalt) {
-          return false;
+          return rocket::nullopt;
         }
-        if(qalt->punct != punct) {
-          return false;
+        if(rocket::is_none_of(qalt->punct, accept)) {
+          return rocket::nullopt;
         }
+        // Return the punctuator and discard this token.
+        auto punct = qalt->punct;
         tstrm.shift();
-        return true;
+        return punct;
       }
 
-    bool do_accept_identifier(Cow_String& name, Token_Stream& tstrm)
+    Optional<Cow_String> do_accept_identifier_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
+        // See whether it is an identifier.
         auto qalt = qtok->opt<Token::S_identifier>();
         if(!qalt) {
-          return false;
+          return rocket::nullopt;
         }
-        name = qalt->name;
+        // Return the identifier and discard this token.
+        auto name = qalt->name;
         tstrm.shift();
-        return true;
+        return name;
       }
 
-    bool do_accept_string_literal(Cow_String& value, Token_Stream& tstrm)
+    Optional<Cow_String> do_accept_string_literal_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
+        // See whether it is an string literal.
         auto qalt = qtok->opt<Token::S_string_literal>();
         if(!qalt) {
-          return false;
+          return rocket::nullopt;
         }
-        value = qalt->value;
+        // Return the string literal and discard this token.
+        auto value = qalt->value;
         tstrm.shift();
-        return true;
+        return value;
       }
 
-    bool do_accept_keyword_as_identifier(Cow_String& name, Token_Stream& tstrm)
+    Optional<Cow_String> do_accept_json5_key_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
-        auto qalt = qtok->opt<Token::S_keyword>();
-        if(!qalt) {
-          return false;
+        Optional<Cow_String> qname;
+        switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_keyword:
+          {
+            const auto& alt = qtok->check<Token::S_keyword>();
+            // Treat the keyword as a plain identifier.
+            qname = rocket::sref(Token::get_keyword(alt.keyword));
+            break;
+          }
+        case Token::index_identifier:
+          {
+            const auto& alt = qtok->check<Token::S_identifier>();
+            // Return the identifier as is.
+            qname = alt.name;
+            break;
+          }
+        case Token::index_string_literal:
+          {
+            const auto& alt = qtok->check<Token::S_string_literal>();
+            // Return the string literal as is.
+            qname = alt.value;
+            break;
+          }
+        default:
+          return rocket::nullopt;
         }
-        name = rocket::sref(Token::get_keyword(qalt->keyword));
+        // Discard this token.
         tstrm.shift();
-        return true;
+        return qname;
       }
 
-    bool do_accept_prefix_operator(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    Optional<Xprunit> do_accept_prefix_operator_opt(Token_Stream& tstrm)
       {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
-        Xprunit::Xop xop;
+        Optional<Xprunit> qunit;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
             const auto& alt = qtok->check<Token::S_keyword>();
-            switch(rocket::weaken_enum(alt.keyword)) {
-            case Token::keyword_unset:
+            // Hmm... use a lookup table?
+            struct Keyword_Table
               {
-                xop = Xprunit::xop_prefix_unset;
-                tstrm.shift();
-                break;
+                Token::Keyword keyword;
+                Xprunit::Xop xop;
               }
-            case Token::keyword_lengthof:
+            static constexpr s_table[] =
               {
-                xop = Xprunit::xop_prefix_lengthof;
-                tstrm.shift();
-                break;
-              }
-            case Token::keyword_typeof:
-              {
-                xop = Xprunit::xop_prefix_typeof;
-                tstrm.shift();
-                break;
-              }
-            case Token::keyword_not:
-              {
-                xop = Xprunit::xop_prefix_notl;
-                tstrm.shift();
-                break;
-              }
-            default:
-              return false;
+                { Token::keyword_unset,     Xprunit::xop_prefix_unset    },
+                { Token::keyword_lengthof,  Xprunit::xop_prefix_lengthof },
+                { Token::keyword_typeof,    Xprunit::xop_prefix_typeof   },
+              };
+            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+                                      [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
+            if(qelem == std::end(s_table)) {
+              // Not acceptable.
+              return rocket::nullopt;
             }
+            // Return the prefix operator.
+            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            qunit = rocket::move(unit_c);
             break;
           }
         case Token::index_punctuator:
           {
             const auto& alt = qtok->check<Token::S_punctuator>();
-            switch(rocket::weaken_enum(alt.punct)) {
-            case Token::punctuator_add:
+            // Hmm... use a lookup table?
+            struct Punctuator_Table
               {
-                xop = Xprunit::xop_prefix_pos;
-                tstrm.shift();
-                break;
+                Token::Punctuator punct;
+                Xprunit::Xop xop;
               }
-            case Token::punctuator_sub:
+            static constexpr s_table[] =
               {
-                xop = Xprunit::xop_prefix_neg;
-                tstrm.shift();
-                break;
-              }
-            case Token::punctuator_notb:
-              {
-                xop = Xprunit::xop_prefix_notb;
-                tstrm.shift();
-                break;
-              }
-            case Token::punctuator_notl:
-              {
-                xop = Xprunit::xop_prefix_notl;
-                tstrm.shift();
-                break;
-              }
-            case Token::punctuator_inc:
-              {
-                xop = Xprunit::xop_prefix_inc;
-                tstrm.shift();
-                break;
-              }
-            case Token::punctuator_dec:
-              {
-                xop = Xprunit::xop_prefix_dec;
-                tstrm.shift();
-                break;
-              }
-            default:
-              return false;
+                { Token::punctuator_add,   Xprunit::xop_prefix_pos  },
+                { Token::punctuator_sub,   Xprunit::xop_prefix_neg  },
+                { Token::punctuator_notb,  Xprunit::xop_prefix_notb },
+                { Token::punctuator_notl,  Xprunit::xop_prefix_notl },
+                { Token::punctuator_inc,   Xprunit::xop_prefix_inc  },
+                { Token::punctuator_dec,   Xprunit::xop_prefix_dec  },
+              };
+            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
+            if(qelem == std::end(s_table)) {
+              // Not acceptable.
+              return rocket::nullopt;
             }
+            // Return the prefix operator.
+            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            qunit = rocket::move(unit_c);
             break;
           }
         default:
-          return false;
+          return rocket::nullopt;
         }
-        Xprunit::S_operator_rpn xpru_c = { xop, false };
-        xprus.emplace_back(rocket::move(xpru_c));
-        return true;
+        // Discard this token.
+        tstrm.shift();
+        return qunit;
       }
 
-    bool do_accept_postfix_operator(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    Optional<Xprunit> do_accept_postfix_operator_opt(Token_Stream& tstrm)
       {
         // postfix-operator ::=
         //   "++" | "--"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
-        auto qalt = qtok->opt<Token::S_punctuator>();
-        if(!qalt) {
-          return false;
-        }
-        Xprunit::Xop xop;
-        switch(rocket::weaken_enum(qalt->punct)) {
-        case Token::punctuator_inc:
+        Optional<Xprunit> qunit;
+        switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_punctuator:
           {
-            xop = Xprunit::xop_postfix_inc;
-            tstrm.shift();
-            break;
-          }
-        case Token::punctuator_dec:
-          {
-            xop = Xprunit::xop_postfix_dec;
-            tstrm.shift();
+            const auto& alt = qtok->check<Token::S_punctuator>();
+            // Hmm... use a lookup table?
+            struct Punctuator_Table
+              {
+                Token::Punctuator punct;
+                Xprunit::Xop xop;
+              }
+            static constexpr s_table[] =
+              {
+                { Token::punctuator_inc,   Xprunit::xop_postfix_inc  },
+                { Token::punctuator_dec,   Xprunit::xop_postfix_dec  },
+              };
+            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
+            if(qelem == std::end(s_table)) {
+              // Not acceptable.
+              return rocket::nullopt;
+            }
+            // Return the postfix operator.
+            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            qunit = rocket::move(unit_c);
             break;
           }
         default:
-          return false;
+          return rocket::nullopt;
         }
-        Xprunit::S_operator_rpn xpru_c = { xop, false };
-        xprus.emplace_back(rocket::move(xpru_c));
-        return true;
+        // Discard this token.
+        tstrm.shift();
+        return qunit;
       }
 
-    bool do_accept_literal(Value& value, Token_Stream& tstrm)
+    Optional<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
       {
         // literal ::=
         //   null-literal | boolean-literal | string-literal | noescape-string-literal |
@@ -255,125 +273,110 @@ namespace Asteria {
         //   "infinity"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
+        Optional<Value> qvalue;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
             const auto& alt = qtok->check<Token::S_keyword>();
-            switch(rocket::weaken_enum(alt.keyword)) {
-            case Token::keyword_null:
+            // Hmm... use a lookup table?
+            struct Keyword_Table
               {
-                value = D_null();
-                tstrm.shift();
-                break;
+                Token::Keyword keyword;
+                void (*setter)(Optional<Value>&);
               }
-            case Token::keyword_false:
+            static const s_table[] =
               {
-                value = D_boolean(false);
-                tstrm.shift();
-                break;
-              }
-            case Token::keyword_true:
-              {
-                value = D_boolean(true);
-                tstrm.shift();
-                break;
-              }
-            case Token::keyword_nan:
-              {
-                value = D_real(NAN);
-                tstrm.shift();
-                break;
-              }
-            case Token::keyword_infinity:
-              {
-                value = D_real(INFINITY);
-                tstrm.shift();
-                break;
-              }
-            default:
-              return false;
+                { Token::keyword_null,      [](Optional<Value>& r) { r = D_null();  }          },
+                { Token::keyword_false,     [](Optional<Value>& r) { r = D_boolean(false);  }  },
+                { Token::keyword_true,      [](Optional<Value>& r) { r = D_boolean(true);  }   },
+                { Token::keyword_nan,       [](Optional<Value>& r) { r = D_real(NAN);  }       },
+                { Token::keyword_infinity,  [](Optional<Value>& r) { r = D_real(INFINITY);  }  },
+              };
+            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+                                      [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
+            if(qelem == std::end(s_table)) {
+              // Not acceptable.
+              return rocket::nullopt;
             }
+            // Set the value.
+            (*(qelem->setter))(qvalue);
             break;
           }
         case Token::index_integer_literal:
           {
             const auto& alt = qtok->check<Token::S_integer_literal>();
-            value = D_integer(alt.value);
-            tstrm.shift();
+            // Copy the value as is.
+            qvalue = D_integer(alt.value);
             break;
           }
         case Token::index_real_literal:
           {
             const auto& alt = qtok->check<Token::S_real_literal>();
-            value = D_real(alt.value);
-            tstrm.shift();
+            // Copy the value as is.
+            qvalue = D_real(alt.value);
             break;
           }
         case Token::index_string_literal:
           {
             const auto& alt = qtok->check<Token::S_string_literal>();
-            value = D_string(alt.value);
-            tstrm.shift();
+            // Copy the value as is.
+            qvalue = D_string(alt.value);
             break;
           }
         default:
-          return false;
+          return rocket::nullopt;
         }
-        return true;
+        // Discard this token.
+        tstrm.shift();
+        return qvalue;
       }
 
-    bool do_accept_negation(bool& negative, Token_Stream& tstrm)
+    Optional<bool> do_accept_negation_opt(Token_Stream& tstrm)
       {
         // negation ::=
         //   "!" | "not"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return false;
+          return rocket::nullopt;
         }
+        Optional<bool> kneg;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
             const auto& alt = qtok->check<Token::S_keyword>();
-            switch(rocket::weaken_enum(alt.keyword)) {
-            case Token::keyword_not:
-              {
-                negative = true;
-                tstrm.shift();
-                break;
-              }
-            default:
-              return false;
+            if(alt.keyword != Token::keyword_not) {
+              return rocket::nullopt;
             }
+            kneg = true;
             break;
           }
         case Token::index_punctuator:
           {
             const auto& alt = qtok->check<Token::S_punctuator>();
-            switch(rocket::weaken_enum(alt.punct)) {
-            case Token::punctuator_notl:
-              {
-                negative = true;
-                tstrm.shift();
-                break;
-              }
-            default:
-              return false;
+            if(alt.punct != Token::punctuator_notl) {
+              return rocket::nullopt;
             }
+            kneg = true;
             break;
           }
         default:
-          return false;
+          return rocket::nullopt;
         }
-        return true;
+        // Discard this token.
+        tstrm.shift();
+        return kneg;
       }
 
-    extern bool do_accept_statement_as_block(Cow_Vector<Statement>& stmts, Token_Stream& tstrm);
-    extern bool do_accept_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm);
-    extern bool do_accept_expression(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm);
+    // Accept a statement; a blockt is converted to a single statement.
+    extern Optional<Statement> do_accept_statement_opt(Token_Stream& tstrm);
+    // Accept a statement; a non-block statement is converted to a block consisting of a single statement.
+    extern Optional<Cow_Vector<Statement>> do_accept_statement_as_block_opt(Token_Stream& tstrm);
 
-    bool do_accept_block_statement_list(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
+    extern Optional<Cow_Vector<Xprunit>> do_accept_expression_opt(Token_Stream& tstrm);
+
+    Optional<Cow_Vector<Statement>> do_accept_block_opt(Token_Stream& tstrm)
       {
         // block ::=
         //   "{" statement-list-opt "}"
@@ -381,53 +384,887 @@ namespace Asteria {
         //   statement-list | ""
         // statement-list ::=
         //   statement statement-list-opt
-        if(!do_match_punctuator(tstrm, Token::punctuator_brace_op)) {
-          return false;
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_op });
+        if(!kpunct) {
+          return rocket::nullopt;
         }
+        Cow_Vector<Statement> body;
         for(;;) {
-          bool stmt_got = do_accept_statement(stmts, tstrm);
-          if(!stmt_got) {
+          auto qstmt = do_accept_statement_opt(tstrm);
+          if(!qstmt) {
             break;
           }
+          body.emplace_back(rocket::move(*qstmt));
         }
-        if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+        if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_statement_expected);
         }
-        return true;
+        return rocket::move(body);
       }
 
-    bool do_accept_block_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
+    Optional<Statement> do_accept_block_statement_opt(Token_Stream& tstrm)
       {
-        Cow_Vector<Statement> body;
-        if(!do_accept_block_statement_list(body, tstrm)) {
-          return false;
+        auto qbody = do_accept_block_opt(tstrm);
+        if(!qbody) {
+          return rocket::nullopt;
         }
-        Statement::S_block stmt_c = { rocket::move(body) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
+        Statement::S_block stmt_c = { rocket::move(*qbody) };
+        return rocket::move(stmt_c);
       }
 
-    bool do_accept_identifier_list(Cow_Vector<PreHashed_String>& names, Token_Stream& tstrm)
+    Optional<Cow_Vector<Xprunit>> do_accept_equal_initializer_opt(Token_Stream& tstrm)
       {
-        // identifier-list-opt ::=
-        //   identifier-list | ""
-        // identifier-list ::=
-        //   identifier ( "," identifier-list | "" )
-        Cow_String name;
-        if(!do_accept_identifier(name, tstrm)) {
-          return false;
+        // equal-initializer-opt ::=
+        //   equal-initializer | ""
+        // equal-initializer ::=
+        //   "=" expression
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_assign });
+        if(!kpunct) {
+          return rocket::nullopt;
         }
+        return do_accept_expression_opt(tstrm);
+      }
+
+    Optional<Statement> do_accept_null_statement_opt(Token_Stream& tstrm)
+      {
+        // null-statement ::=
+        //   ";"
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          return rocket::nullopt;
+        }
+        Statement::S_expression stmt_c = { rocket::clear };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
+      {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto sloc = do_tell_source_location(tstrm);
+        // variable-definition ::=
+        //   "var" identifier equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_var });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        Cow_Vector<std::pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
         for(;;) {
-          names.emplace_back(rocket::move(name));
-          if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
-            break;
-          }
-          if(!do_accept_identifier(name, tstrm)) {
+          auto qname = do_accept_identifier_opt(tstrm);
+          if(!qname) {
             throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
           }
+          auto qinit = do_accept_equal_initializer_opt(tstrm);
+          if(!qinit) {
+            qinit.emplace();
+          }
+          vars.emplace_back(rocket::move(*qname), rocket::move(*qinit));
+          // Look for the separator. The first declaration is required.
+          auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+          if(!kpunct) {
+            break;
+          }
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_variable stmt_c = { rocket::move(sloc), false, rocket::move(vars) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
+      {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto sloc = do_tell_source_location(tstrm);
+        // immutable-variable-definition ::=
+        //   "const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_const });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        Cow_Vector<std::pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
+        for(;;) {
+          auto qname = do_accept_identifier_opt(tstrm);
+          if(!qname) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
+          }
+          auto qinit = do_accept_equal_initializer_opt(tstrm);
+          if(!qinit) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_expected);
+          }
+          vars.emplace_back(rocket::move(*qname), rocket::move(*qinit));
+          // Look for the separator. The first declaration is required.
+          auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+          if(!kpunct) {
+            break;
+          }
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_variable stmt_c = { rocket::move(sloc), true, rocket::move(vars) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Cow_Vector<PreHashed_String>> do_accept_parameter_list_opt(Token_Stream& tstrm)
+      {
+        // parameter-list ::=
+        //   "(" ( identifier-list | "" ) ")"
+        // identifier-list ::=
+        //   identifier ( "," identifier-list | "" )
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
+          return rocket::nullopt;
+        }
+        Cow_Vector<PreHashed_String> names;
+        for(;;) {
+          auto qname = do_accept_identifier_opt(tstrm);
+          if(!qname) {
+            if(names.empty()) {
+              break;
+            }
+            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
+          }
+          names.emplace_back(rocket::move(*qname));
+          // Look for the separator.
+          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+          if(!kpunct) {
+            break;
+          }
+        }
+        return rocket::move(names);
+      }
+
+    Optional<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
+      {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto sloc = do_tell_source_location(tstrm);
+        // function-definition ::=
+        //   "func" identifier parameter-list block
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_func });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qname = do_accept_identifier_opt(tstrm);
+        if(!qname) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
+        }
+        auto kparams = do_accept_parameter_list_opt(tstrm);
+        if(!kparams) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
+        }
+        auto qbody = do_accept_block_opt(tstrm);
+        if(!qbody) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_expected);
+        }
+        Statement::S_function stmt_c = { rocket::move(sloc), rocket::move(*qname), rocket::move(*kparams), rocket::move(*qbody) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
+      {
+        // expression-statement ::=
+        //   expression ";"
+        auto kexpr = do_accept_expression_opt(tstrm);
+        if(!kexpr) {
+          return rocket::nullopt;
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_expression stmt_c = { rocket::move(*kexpr) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Cow_Vector<Statement>> do_accept_else_branch_opt(Token_Stream& tstrm)
+      {
+        // else-branch-opt ::=
+        //   "else" statement | ""
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_else });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qbody = do_accept_statement_as_block_opt(tstrm);
+        if(!qbody) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+        }
+        return rocket::move(*qbody);
+      }
+
+    Optional<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
+      {
+        // if-statement ::=
+        //   "if" negation-opt "(" expression ")" statement else-branch-opt
+        // negation-opt ::=
+        //   negation | ""
+        // negation ::=
+        //   "!" | "not"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_if });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto kneg = do_accept_negation_opt(tstrm);
+        if(!kneg) {
+          kneg.emplace();
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
+        }
+        auto qcond = do_accept_expression_opt(tstrm);
+        if(!qcond) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
+        }
+        auto qbtrue = do_accept_statement_as_block_opt(tstrm);
+        if(!qbtrue) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+        }
+        auto qbfalse = do_accept_else_branch_opt(tstrm);
+        if(!qbfalse) {
+          qbfalse.emplace();
+        }
+        Statement::S_if stmt_c = { *kneg, rocket::move(*qcond), rocket::move(*qbtrue), rocket::move(*qbfalse) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_case_clause_opt(Token_Stream& tstrm)
+      {
+        // case-clause ::=
+        //   "case" expression ":" statement-list-opt
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_case });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qcond = do_accept_expression_opt(tstrm);
+        if(!qcond) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
+        }
+        auto qclause = do_accept_statement_as_block_opt(tstrm);
+        if(!qclause) {
+          qclause.emplace();
+        }
+        return std::make_pair(rocket::move(*qcond), rocket::move(*qclause));
+      }
+
+    Optional<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_default_clause_opt(Token_Stream& tstrm)
+      {
+        // default-clause ::=
+        //   "default" ":" statement-list-opt
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_default });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
+        }
+        auto qclause = do_accept_statement_as_block_opt(tstrm);
+        if(!qclause) {
+          qclause.emplace();
+        }
+        return std::make_pair(rocket::clear, rocket::move(*qclause));
+      }
+
+    Optional<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_switch_clause_opt(Token_Stream& tstrm)
+      {
+        // switch-clause ::=
+        //   case-clause | default-clause
+        auto qclause = do_accept_case_clause_opt(tstrm);
+        if(qclause) {
+          return qclause;
+        }
+        qclause = do_accept_default_clause_opt(tstrm);
+        if(qclause) {
+          return qclause;
+        }
+        return qclause;
+      }
+
+    Optional<Cow_Vector<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>>> do_accept_switch_clause_list_opt(Token_Stream& tstrm)
+      {
+        // switch-clause-list ::=
+        //   switch-clause switch-clause-list-opt
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_op });
+        if(!kpunct) {
+          return rocket::nullopt;
+        }
+        Cow_Vector<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> clauses;
+        for(;;) {
+          auto qclause = do_accept_switch_clause_opt(tstrm);
+          if(!qclause) {
+            break;
+          }
+          clauses.emplace_back(rocket::move(*qclause));
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_switch_clause_expected);
+        }
+        return rocket::move(clauses);
+      }
+
+    Optional<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
+      {
+        // switch-statement ::=
+        //   "switch" "(" expression ")" switch-block
+        // switch-block ::=
+        //   "{" swtich-clause-list-opt "}"
+        // switch-clause-list-opt ::=
+        //   switch-clause-list | ""
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_switch });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
+        }
+        auto qctrl = do_accept_expression_opt(tstrm);
+        if(!qctrl) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
+        }
+        auto qclauses = do_accept_switch_clause_list_opt(tstrm);
+        if(!qclauses) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_expected);
+        }
+        Statement::S_switch stmt_c = { rocket::move(*qctrl), rocket::move(*qclauses) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
+      {
+        // do-while-statement ::=
+        //   "do" statement "while" negation-opt "(" expression ")" ";"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_do });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qbody = do_accept_statement_as_block_opt(tstrm);
+        if(!qbody) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+        }
+        qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_while });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto kneg = do_accept_negation_opt(tstrm);
+        if(!kneg) {
+          kneg.emplace();
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
+        }
+        auto qcond = do_accept_expression_opt(tstrm);
+        if(!qcond) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
+        }
+        Statement::S_do_while stmt_c = { rocket::move(*qbody), *kneg, rocket::move(*qcond) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
+      {
+        // while-statement ::=
+        //   "while" negation-opt "(" expression ")" statement
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_while });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto kneg = do_accept_negation_opt(tstrm);
+        if(!kneg) {
+          kneg.emplace();
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
+        }
+        auto qcond = do_accept_expression_opt(tstrm);
+        if(!qcond) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
+        }
+        auto qbody = do_accept_statement_as_block_opt(tstrm);
+        if(!qbody) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+        }
+        Statement::S_while stmt_c = { *kneg, rocket::move(*qcond), rocket::move(*qbody) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
+      {
+        // for-complement-range ::=
+        //   "each" identifier "," identifier ":" expression ")" statement
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_each });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qkname = do_accept_identifier_opt(tstrm);
+        if(!qkname) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_comma_expected);
+        }
+        auto qmname = do_accept_identifier_opt(tstrm);
+        if(!qmname) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
+        }
+        auto qinit = do_accept_expression_opt(tstrm);
+        if(!qinit) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
+        }
+        auto qbody = do_accept_statement_as_block_opt(tstrm);
+        if(!qbody) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+        }
+        Statement::S_for_each stmt_c = { rocket::move(*qkname), rocket::move(*qmname), rocket::move(*qinit), rocket::move(*qbody) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_for_initializer_opt(Token_Stream& tstrm)
+      {
+        // for-initializer ::=
+        //   null-statement | variable-definition | immutable-variable-definition | expression-statement
+        auto qinit = do_accept_null_statement_opt(tstrm);
+        if(qinit) {
+          return qinit;
+        }
+        qinit = do_accept_variable_definition_opt(tstrm);
+        if(qinit) {
+          return qinit;
+        }
+        qinit = do_accept_immutable_variable_definition_opt(tstrm);
+        if(qinit) {
+          return qinit;
+        }
+        return qinit;
+      }
+
+    Optional<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
+      {
+        // for-complement-triplet ::=
+        //   for-initializer expression-opt ";" expression-opt ")" statement
+        auto qinit = do_accept_for_initializer_opt(tstrm);
+        if(!qinit) {
+          return rocket::nullopt;
+        }
+        auto qcond = do_accept_expression_opt(tstrm);
+        if(!qcond) {
+          qcond.emplace();
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        auto kstep = do_accept_expression_opt(tstrm);
+        if(!kstep) {
+          kstep.emplace();
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
+        }
+        auto qbody = do_accept_statement_as_block_opt(tstrm);
+        if(!qbody) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+        }
+        Cow_Vector<Statement> rvinit;
+        rvinit.emplace_back(rocket::move(*qinit));
+        Statement::S_for stmt_c = { rocket::move(rvinit), rocket::move(*qcond), rocket::move(*kstep), rocket::move(*qbody) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
+      {
+        // for-complement ::=
+        //   for-complement-range | for-complement-triplet
+        auto qcompl = do_accept_for_complement_range_opt(tstrm);
+        if(qcompl) {
+          return qcompl;
+        }
+        qcompl = do_accept_for_complement_triplet_opt(tstrm);
+        if(qcompl) {
+          return qcompl;
+        }
+        return qcompl;
+      }
+
+    Optional<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
+      {
+        // for-statement ::=
+        //   "for" "(" for-complement
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_while });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
+        }
+        auto qcompl = do_accept_for_complement_opt(tstrm);
+        if(!qcompl) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_for_statement_initializer_expected);
+        }
+        return rocket::move(*qcompl);
+      }
+
+    Optional<Statement::Target> do_accept_break_target_opt(Token_Stream& tstrm)
+      {
+        // break-target-opt ::=
+        //   "switch" | "while" | "for" | ""
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_switch, Token::keyword_while, Token::keyword_for });
+        if(qkwrd == Token::keyword_switch) {
+          return Statement::target_switch;
+        }
+        if(qkwrd == Token::keyword_while) {
+          return Statement::target_while;
+        }
+        if(qkwrd == Token::keyword_for) {
+          return Statement::target_for;
+        }
+        return rocket::nullopt;
+      }
+
+    Optional<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
+      {
+        // break-statement ::=
+        //   "break" break-target-opt ";"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_break });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qtarget = do_accept_break_target_opt(tstrm);
+        if(!qtarget) {
+          qtarget.emplace();
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_break stmt_c = { *qtarget };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement::Target> do_accept_continue_target_opt(Token_Stream& tstrm)
+      {
+        // continue-target-opt ::=
+        //   "while" | "for" | ""
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_while, Token::keyword_for });
+        if(qkwrd == Token::keyword_while) {
+          return Statement::target_while;
+        }
+        if(qkwrd == Token::keyword_for) {
+          return Statement::target_for;
+        }
+        return rocket::nullopt;
+      }
+
+    Optional<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
+      {
+        // continue-statement ::=
+        //   "continue" continue-target-opt ";"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_continue });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qtarget = do_accept_continue_target_opt(tstrm);
+        if(!qtarget) {
+          qtarget.emplace();
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_continue stmt_c = { *qtarget };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
+      {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto sloc = do_tell_source_location(tstrm);
+        // throw-statement ::=
+        //   "throw" expression ";"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_throw });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto kexpr = do_accept_expression_opt(tstrm);
+        if(!kexpr) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_throw stmt_c = { rocket::move(sloc), rocket::move(*kexpr) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<bool> do_accept_reference_specifier_opt(Token_Stream& tstrm)
+      {
+        // reference-specifier-opt ::=
+        //   "&" | ""
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_andb });
+        if(!kpunct) {
+          return rocket::nullopt;
         }
         return true;
       }
+
+    Optional<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
+      {
+        // return-statement ::=
+        //   "return" reference-specifier-opt expression-opt ";"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_return });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qref = do_accept_reference_specifier_opt(tstrm);
+        if(!qref) {
+          qref.emplace();
+        }
+        auto kexpr = do_accept_expression_opt(tstrm);
+        if(!kexpr) {
+          kexpr.emplace();
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_return stmt_c = { *qref, rocket::move(*kexpr) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Cow_String> do_accept_assert_message_opt(Token_Stream& tstrm)
+      {
+        // assert-message ::=
+        //   ":" string-literal | ""
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        if(!kpunct) {
+          return rocket::nullopt;
+        }
+        auto kmsg = do_accept_string_literal_opt(tstrm);
+        if(!kmsg) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_string_literal_expected);
+        }
+        return rocket::move(*kmsg);
+      }
+
+    Optional<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
+      {
+        // Copy these parameters before reading from the stream which is destructive.
+        auto sloc = do_tell_source_location(tstrm);
+        // assert-statement ::=
+        //   "assert" negation-opt expression assert-message-opt ";"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_assert });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto kneg = do_accept_negation_opt(tstrm);
+        if(!kneg) {
+          kneg.emplace();
+        }
+        auto kexpr = do_accept_expression_opt(tstrm);
+        if(!kexpr) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        auto kmsg = do_accept_assert_message_opt(tstrm);
+        if(!kmsg) {
+          kmsg.emplace();
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
+        Statement::S_assert stmt_c = { rocket::move(sloc), *kneg, rocket::move(*kexpr), rocket::move(*kmsg) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
+      {
+        // try-statement ::=
+        //   "try" statement "catch" "(" identifier ")" statement
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_try });
+        if(!qkwrd) {
+          return rocket::nullopt;
+        }
+        auto qbtry = do_accept_statement_as_block_opt(tstrm);
+        if(!qbtry) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+        }
+        qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_catch });
+        if(!qkwrd) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_keyword_catch_expected);
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
+        }
+        auto kexcept = do_accept_identifier_opt(tstrm);
+        if(!kexcept) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
+        }
+        auto qbcatch = do_accept_statement_as_block_opt(tstrm);
+        if(!qbcatch) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+        }
+        Statement::S_try stmt_c = { rocket::move(*qbtry), rocket::move(*kexcept), rocket::move(*qbcatch) };
+        return rocket::move(stmt_c);
+      }
+
+    Optional<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
+      {
+        // nonblock-statement ::=
+        //   null-statement |
+        //   variable-definition | immutable-variable-definition | function-definition |
+        //   expression-statement |
+        //   if-statement | switch-statement | do-while-statement | while-statement | for-statement |
+        //   break-statement | continue-statement | throw-statement | return-statement | assert-statement |
+        //   try-statement
+        auto qstmt = do_accept_null_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_variable_definition_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_immutable_variable_definition_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_function_definition_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_expression_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_if_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_switch_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_do_while_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_while_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_for_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_break_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_continue_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_throw_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_return_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_assert_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_try_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        return qstmt;
+      }
+
+    Optional<Statement> do_accept_statement_opt(Token_Stream& tstrm)
+      {
+        // statement ::=
+        //   block | nonblock-statement
+        auto qstmt = do_accept_block_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        qstmt = do_accept_nonblock_statement_opt(tstrm);
+        if(qstmt) {
+          return qstmt;
+        }
+        return qstmt;
+      }
+
+    Optional<Cow_Vector<Statement>> do_accept_statement_as_block_opt(Token_Stream& tstrm)
+      {
+        // statement ::=
+        //   block | nonblock-statement
+        auto qblock = do_accept_block_opt(tstrm);
+        if(qblock) {
+          return qblock;
+        }
+        auto qstmt = do_accept_nonblock_statement_opt(tstrm);
+        if(qstmt) {
+          qblock.emplace().emplace_back(rocket::move(*qstmt));
+          return qblock;
+        }
+        return qblock;
+      }
+
+
+
+
+
+#if 0
+
+
+
 
     bool do_accept_named_reference(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
       {
@@ -1255,528 +2092,6 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_variable_definition(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
-        // variable-definition ::=
-        //   "var" identifier equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
-        // equal-initializer-opt ::=
-        //   equal-initializer | ""
-        // equal-initializer ::=
-        //   "=" expression
-        if(!do_match_keyword(tstrm, Token::keyword_var)) {
-          return false;
-        }
-        Cow_Vector<std::pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
-        for(;;) {
-          Cow_String name;
-          if(!do_accept_identifier(name, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
-          }
-          Cow_Vector<Xprunit> init;
-          if(do_match_punctuator(tstrm, Token::punctuator_assign)) {
-            // The initializer is optional.
-            if(!do_accept_expression(init, tstrm)) {
-              throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-            }
-          }
-          vars.emplace_back(rocket::move(name), rocket::move(init));
-          if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
-            break;
-          }
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-        }
-        Statement::S_variable stmt_c = { rocket::move(sloc), false, rocket::move(vars) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_immutable_variable_definition(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
-        // immutable-variable-definition ::=
-        //   "const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
-        // equal-initializer ::=
-        //   "=" expression
-        if(!do_match_keyword(tstrm, Token::keyword_const)) {
-          return false;
-        }
-        Cow_Vector<std::pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
-        for(;;) {
-          Cow_String name;
-          if(!do_accept_identifier(name, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
-          }
-          if(!do_match_punctuator(tstrm, Token::punctuator_assign)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_expected);
-          }
-          Cow_Vector<Xprunit> init;
-          if(!do_accept_expression(init, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-          }
-          vars.emplace_back(rocket::move(name), rocket::move(init));
-          if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
-            break;
-          }
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-        }
-        Statement::S_variable stmt_c = { rocket::move(sloc), true, rocket::move(vars) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_function_definition(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
-        // function-definition ::=
-        //   "func" identifier parameter-list block
-        // parameter-list ::=
-        //   "(" ( identifier-list | "" ) ")"
-        if(!do_match_keyword(tstrm, Token::keyword_func)) {
-          return false;
-        }
-        Cow_String name;
-        if(!do_accept_identifier(name, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
-        }
-        Cow_Vector<PreHashed_String> params;
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
-        }
-        if(do_accept_identifier_list(params, tstrm)) {
-          // This is optional.
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
-        }
-        Cow_Vector<Statement> body;
-        if(!do_accept_block_statement_list(body, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-        }
-        Statement::S_function stmt_c = { rocket::move(sloc), rocket::move(name), rocket::move(params), rocket::move(body) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_expression_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // expression-statement ::=
-        //   expression ";"
-        Cow_Vector<Xprunit> expr;
-        if(!do_accept_expression(expr, tstrm)) {
-          return false;
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-        }
-        Statement::S_expression stmt_c = { rocket::move(expr) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_if_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // if-statement ::=
-        //   "if" negation-opt "(" expression ")" statement ( "else" statement | "" )
-        // negation-opt ::=
-        //   negation | ""
-        if(!do_match_keyword(tstrm, Token::keyword_if)) {
-          return false;
-        }
-        bool negative = false;
-        if(do_accept_negation(negative, tstrm)) {
-          // This is optional.
-        }
-        Cow_Vector<Xprunit> cond;
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
-        }
-        if(!do_accept_expression(cond, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
-        }
-        Cow_Vector<Statement> branch_true;
-        if(!do_accept_statement_as_block(branch_true, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-        }
-        Cow_Vector<Statement> branch_false;
-        if(do_match_keyword(tstrm, Token::keyword_else)) {
-          // The `else` branch is optional.
-          if(!do_accept_statement_as_block(branch_false, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-          }
-        }
-        Statement::S_if stmt_c = { negative, rocket::move(cond), rocket::move(branch_true), rocket::move(branch_false) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_switch_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // switch-statement ::=
-        //   "switch" "(" expression ")" switch-block
-        // switch-block ::=
-        //   "{" swtich-clause-list-opt "}"
-        // switch-clause-list-opt ::=
-        //   switch-clause-list | ""
-        // switch-clause-list ::=
-        //   ( "case" expression | "default" ) ":" statement-list-opt switch-clause-list-opt
-        if(!do_match_keyword(tstrm, Token::keyword_switch)) {
-          return false;
-        }
-        Cow_Vector<Xprunit> ctrl;
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
-        }
-        if(!do_accept_expression(ctrl, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
-        }
-        Cow_Vector<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> clauses;
-        if(!do_match_punctuator(tstrm, Token::punctuator_brace_op)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_expected);
-        }
-        for(;;) {
-          Cow_Vector<Xprunit> cond;
-          if(!do_match_keyword(tstrm, Token::keyword_default)) {
-            if(!do_match_keyword(tstrm, Token::keyword_case)) {
-              break;
-            }
-            if(!do_accept_expression(cond, tstrm)) {
-              throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-            }
-          }
-          if(!do_match_punctuator(tstrm, Token::punctuator_colon)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
-          }
-          Cow_Vector<Statement> body;
-          for(;;) {
-            bool stmt_got = do_accept_statement(body, tstrm);
-            if(!stmt_got) {
-              break;
-            }
-          }
-          clauses.emplace_back(rocket::move(cond), rocket::move(body));
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_switch_clause_expected);
-        }
-        Statement::S_switch stmt_c = { rocket::move(ctrl), rocket::move(clauses) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_do_while_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // do-while-statement ::=
-        //   "do" statement "while" negation-opt "(" expression ")" ";"
-        if(!do_match_keyword(tstrm, Token::keyword_do)) {
-          return false;
-        }
-        Cow_Vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-        }
-        if(!do_match_keyword(tstrm, Token::keyword_while)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_keyword_while_expected);
-        }
-        bool negative = false;
-        if(do_accept_negation(negative, tstrm)) {
-          // This is optional.
-        }
-        Cow_Vector<Xprunit> cond;
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
-        }
-        if(!do_accept_expression(cond, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-        }
-        Statement::S_do_while stmt_c = { rocket::move(body), negative, rocket::move(cond) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_while_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // while-statement ::=
-        //   "while" negation-opt "(" expression ")" statement
-        if(!do_match_keyword(tstrm, Token::keyword_while)) {
-          return false;
-        }
-        bool negative = false;
-        if(do_accept_negation(negative, tstrm)) {
-          // This is optional.
-        }
-        Cow_Vector<Xprunit> cond;
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
-        }
-        if(!do_accept_expression(cond, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
-        }
-        Cow_Vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-        }
-        Statement::S_while stmt_c = { negative, rocket::move(cond), rocket::move(body) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_for_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // for-statement ::=
-        //   "for" "(" ( for-statement-range | for-statement-triplet ) ")" statement
-        // for-statement-range ::=
-        //   "each" identifier ( "," identifier | "") ":" expression
-        // for-statement-triplet ::=
-        //   ( null-statement | variable-definition | expression-statement ) expression-opt ";" expression-opt
-        if(!do_match_keyword(tstrm, Token::keyword_for)) {
-          return false;
-        }
-        // This for-statement is ranged if and only if `key_name` is non-empty, where `step` is used as the range initializer.
-        Cow_String key_name;
-        Cow_String mapped_name;
-        Cow_Vector<Statement> init;
-        Cow_Vector<Xprunit> cond;
-        Cow_Vector<Xprunit> step;
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
-        }
-        if(do_match_keyword(tstrm, Token::keyword_each)) {
-          if(!do_accept_identifier(key_name, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
-          }
-          if(do_match_punctuator(tstrm, Token::punctuator_comma)) {
-            // The mapped reference is optional.
-            if(!do_accept_identifier(mapped_name, tstrm)) {
-              throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
-            }
-          }
-          if(!do_match_punctuator(tstrm, Token::punctuator_colon)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
-          }
-          if(!do_accept_expression(step, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-          }
-        } else {
-          bool init_got = do_accept_variable_definition(init, tstrm) ||
-                          do_match_punctuator(tstrm, Token::punctuator_semicol) ||
-                          do_accept_expression_statement(init, tstrm);
-          if(!init_got) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_for_statement_initializer_expected);
-          }
-          if(do_accept_expression(cond, tstrm)) {
-            // This is optional.
-          }
-          if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-          }
-          if(do_accept_expression(step, tstrm)) {
-            // This is optional.
-          }
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
-        }
-        Cow_Vector<Statement> body;
-        if(!do_accept_statement_as_block(body, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-        }
-        if(key_name.empty()) {
-          Statement::S_for stmt_c = { rocket::move(init), rocket::move(cond), rocket::move(step), rocket::move(body) };
-          stmts.emplace_back(rocket::move(stmt_c));
-          return true;
-        }
-        Statement::S_for_each stmt_c = { rocket::move(key_name), rocket::move(mapped_name), rocket::move(step), rocket::move(body) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_break_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // break-statement ::=
-        //   "break" ( "switch" | "while" | "for" ) ";"
-        if(!do_match_keyword(tstrm, Token::keyword_break)) {
-          return false;
-        }
-        Statement::Target target = Statement::target_unspec;
-        if(do_match_keyword(tstrm, Token::keyword_switch)) {
-          target = Statement::target_switch;
-          goto z;
-        }
-        if(do_match_keyword(tstrm, Token::keyword_while)) {
-          target = Statement::target_while;
-          goto z;
-        }
-        if(do_match_keyword(tstrm, Token::keyword_for)) {
-          target = Statement::target_for;
-          goto z;
-        }
-      z:
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-        }
-        Statement::S_break stmt_c = { target };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_continue_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // continue-statement ::=
-        //   "continue" ( "while" | "for" ) ";"
-        if(!do_match_keyword(tstrm, Token::keyword_continue)) {
-          return false;
-        }
-        Statement::Target target = Statement::target_unspec;
-        if(do_match_keyword(tstrm, Token::keyword_while)) {
-          target = Statement::target_while;
-          goto z;
-        }
-        if(do_match_keyword(tstrm, Token::keyword_for)) {
-          target = Statement::target_for;
-          goto z;
-        }
-      z:
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-        }
-        Statement::S_continue stmt_c = { target };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_throw_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
-        // throw-statement ::=
-        //   "throw" expression ";"
-        if(!do_match_keyword(tstrm, Token::keyword_throw)) {
-          return false;
-        }
-        Cow_Vector<Xprunit> expr;
-        if(!do_accept_expression(expr, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-        }
-        Statement::S_throw stmt_c = { rocket::move(sloc), rocket::move(expr) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_return_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // return-statement ::=
-        //   "return" ( "&" | "" ) expression-opt ";"
-        if(!do_match_keyword(tstrm, Token::keyword_return)) {
-          return false;
-        }
-        bool by_ref = false;
-        if(do_match_punctuator(tstrm, Token::punctuator_andb)) {
-          // The reference specifier is optional.
-          by_ref = true;
-        }
-        Cow_Vector<Xprunit> expr;
-        if(do_accept_expression(expr, tstrm)) {
-          // This is optional.
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_or_expression_expected);
-        }
-        Statement::S_return stmt_c = { by_ref, rocket::move(expr) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_assert_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
-        // assert-statement ::=
-        //  "assert" negation-opt expression ( ":" string-literal | "" ) ";"
-        if(!do_match_keyword(tstrm, Token::keyword_assert)) {
-          return false;
-        }
-        bool negative = false;
-        if(do_accept_negation(negative, tstrm)) {
-          // This is optional.
-        }
-        Cow_Vector<Xprunit> expr;
-        if(!do_accept_expression(expr, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-        }
-        Cow_String msg;
-        if(do_match_punctuator(tstrm, Token::punctuator_colon)) {
-          // The descriptive message is optional.
-          if(!do_accept_string_literal(msg, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_string_literal_expected);
-          }
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
-        }
-        Statement::S_assert stmt_c = { rocket::move(sloc), negative, rocket::move(expr), rocket::move(msg) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
-    bool do_accept_try_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // try-statement ::=
-        //   "try" statement "catch" "(" identifier ")" statement
-        if(!do_match_keyword(tstrm, Token::keyword_try)) {
-          return false;
-        }
-        Cow_Vector<Statement> body_try;
-        if(!do_accept_statement_as_block(body_try, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-        }
-        if(!do_match_keyword(tstrm, Token::keyword_catch)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_keyword_catch_expected);
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
-        }
-        Cow_String except_name;
-        if(!do_accept_identifier(except_name, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
-        }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
-        }
-        Cow_Vector<Statement> body_catch;
-        if(!do_accept_statement_as_block(body_catch, tstrm)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-        }
-        Statement::S_try stmt_c = { rocket::move(body_try), rocket::move(except_name), rocket::move(body_catch) };
-        stmts.emplace_back(rocket::move(stmt_c));
-        return true;
-      }
-
     bool do_accept_nonblock_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
         // nonblock-statement ::=
@@ -1820,6 +2135,7 @@ namespace Asteria {
         return do_accept_block_statement(stmts, tstrm) ||
                do_accept_nonblock_statement(stmts, tstrm);
       }
+#endif
 
     }  // namespace
 
@@ -1875,10 +2191,11 @@ bool Parser::load(Token_Stream& tstrm, const Parser_Options& /*options*/)
     // document ::=
     //   statement-list-opt
     for(;;) {
-      bool stmt_got = do_accept_statement(stmts, tstrm);
-      if(!stmt_got) {
+      auto qstmt = do_accept_statement_opt(tstrm);
+      if(!qstmt) {
         break;
       }
+      stmts.emplace_back(rocket::move(*qstmt));
     }
     if(!tstrm.empty()) {
       throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
