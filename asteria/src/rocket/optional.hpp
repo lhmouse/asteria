@@ -135,7 +135,7 @@ template<typename valueT> class optional
         }
         return this->m_stor.mut_front();
       }
-    // N.B. This is a non-standard extension
+    // N.B. This is a non-standard extension.
     const value_type* value_ptr() const
       {
         if(this->m_stor.empty()) {
@@ -143,7 +143,7 @@ template<typename valueT> class optional
         }
         return ::std::addressof(this->m_stor.front());
       }
-    // N.B. This is a non-standard extension
+    // N.B. This is a non-standard extension.
     value_type* value_ptr()
       {
         if(this->m_stor.empty()) {
@@ -169,8 +169,8 @@ template<typename valueT> class optional
         }
         return this->m_stor.mut_front();
       }
-    // N.B. This is a non-standard extension
-    template<typename dvalueT> decltype(0 ? ::std::declval<value_type>()
+    // N.B. This is a non-standard extension.
+    template<typename dvalueT> decltype(0 ? ::std::declval<value_type&&>()
                                           : ::std::declval<dvalueT>()) move_value_or(dvalueT&& dvalue)
       {
         if(this->m_stor.empty()) {
@@ -204,8 +204,13 @@ template<typename valueT> class optional
     template<typename... paramsT> reference emplace(paramsT&&... params)
       {
         this->m_stor.clear();
-        auto& elem = this->m_stor.emplace_back(::std::forward<paramsT>(params)...);
-        return elem;
+        return this->m_stor.emplace_back(::std::forward<paramsT>(params)...);
+      }
+    // N.B. This is a non-standard extension.
+    template<typename... paramsT> reference value_or_emplace(paramsT&&... params)
+      {
+        return this->m_stor.empty() ? this->m_stor.emplace_back(::std::forward<paramsT>(params)...)
+                                    : this->m_stor.mut_front();
       }
 
     // 19.6.3.4, swap
