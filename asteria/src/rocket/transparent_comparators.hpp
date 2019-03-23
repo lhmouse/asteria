@@ -5,7 +5,7 @@
 #define ROCKET_TRANSPARENT_COMPARATORS_HPP_
 
 #include "compatibility.h"
-#include <utility>  // std::declval(), rocket::forward()
+#include "utilities.hpp"
 
 namespace rocket {
 
