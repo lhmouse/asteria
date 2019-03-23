@@ -23,7 +23,6 @@ class Statement
     struct Variable_Declaration
       {
         PreHashed_String name;
-        bool immutable;
         Cow_Vector<Xprunit> init;
       };
 
@@ -44,6 +43,7 @@ class Statement
     struct S_variable
       {
         Source_Location sloc;
+        bool immutable;
         Cow_Vector<Variable_Declaration> vars;
       };
     struct S_function

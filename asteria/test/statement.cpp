@@ -21,8 +21,8 @@ int main()
     // var res = 0;
     Cow_Vector<Xprunit> expr;
     expr.emplace_back(Xprunit::S_literal { D_integer(0) });
-    text.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 1),
-                                              { { rocket::sref("res"), false, std::move(expr) } } });
+    text.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 1), false,
+                                              { { rocket::sref("res"), std::move(expr) } } });
     // const data = [ 1, 2, 3, 2 * 5 ];
     expr.clear();
     expr.emplace_back(Xprunit::S_literal { D_integer(1) });
@@ -32,8 +32,8 @@ int main()
     expr.emplace_back(Xprunit::S_literal { D_integer(5) });
     expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_mul, false });
     expr.emplace_back(Xprunit::S_unnamed_array { 4 });
-    text.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 2),
-                                              { { rocket::sref("data"), true, std::move(expr) } } });
+    text.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 2), true,
+                                              { { rocket::sref("data"), std::move(expr) } } });
     // for(each k, v in data) {
     //   res += k * v;
     // }
@@ -74,8 +74,8 @@ int main()
     expr.clear();
     expr.emplace_back(Xprunit::S_literal { D_integer(0) });
     Cow_Vector<Statement> init;
-    init.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 3),
-                                              { { rocket::sref("j"), false, std::move(expr) } } });
+    init.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 3), false,
+                                              { { rocket::sref("j"), std::move(expr) } } });
     Cow_Vector<Xprunit> cond;
     cond.emplace_back(Xprunit::S_named_reference { rocket::sref("j") });
     cond.emplace_back(Xprunit::S_literal { D_integer(3) });

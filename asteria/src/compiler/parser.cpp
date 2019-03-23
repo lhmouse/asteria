@@ -1280,7 +1280,7 @@ namespace Asteria {
               throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
             }
           }
-          Statement::Variable_Declaration var = { rocket::move(name), false, rocket::move(init) };
+          Statement::Variable_Declaration var = { rocket::move(name), rocket::move(init) };
           vars.emplace_back(rocket::move(var));
           if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
@@ -1289,7 +1289,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(vars) };
+        Statement::S_variable stmt_c = { rocket::move(sloc), false, rocket::move(vars) };
         stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }
@@ -1318,7 +1318,7 @@ namespace Asteria {
           if(!do_accept_expression(init, tstrm)) {
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
-          Statement::Variable_Declaration var = { rocket::move(name), true, rocket::move(init) };
+          Statement::Variable_Declaration var = { rocket::move(name), rocket::move(init) };
           vars.emplace_back(rocket::move(var));
           if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
@@ -1327,7 +1327,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_semicol)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { rocket::move(sloc), rocket::move(vars) };
+        Statement::S_variable stmt_c = { rocket::move(sloc), true, rocket::move(vars) };
         stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }

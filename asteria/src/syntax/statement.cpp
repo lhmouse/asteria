@@ -115,8 +115,8 @@ namespace Asteria {
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
-        const auto& name = p.at(1).as<PreHashed_String>();
-        const auto& immutable = static_cast<bool>(p.at(2).as<std::int64_t>());
+        const auto& immutable = static_cast<bool>(p.at(1).as<std::int64_t>());
+        const auto& name = p.at(2).as<PreHashed_String>();
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx, "variable", name, global);
         // Initialize the variable.
@@ -556,8 +556,8 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
           if(var.init.empty()) {
             Cow_Vector<Air_Node::Param> p;
             p.emplace_back(alt.sloc);  // 0
-            p.emplace_back(var.name);  // 1
-            p.emplace_back(static_cast<std::int64_t>(var.immutable));  // 2
+            p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 1
+            p.emplace_back(var.name);  // 2
             code.emplace_back(&do_define_uninitialized_variable, rocket::move(p));
             continue;
           }
@@ -570,7 +570,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
           // Generate code to initialize the variable.
           p.clear();
           p.emplace_back(alt.sloc);  // 0
-          p.emplace_back(static_cast<std::int64_t>(var.immutable));  // 1
+          p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 1
           code.emplace_back(&do_initialize_variable, rocket::move(p));
         }
         return;
