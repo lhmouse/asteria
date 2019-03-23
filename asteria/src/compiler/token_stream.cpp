@@ -1055,30 +1055,6 @@ const Token* Token_Stream::peek_opt() const
     }
   }
 
-Token* Token_Stream::peek_mut_opt()
-  {
-    switch(this->state()) {
-    case state_empty:
-      {
-        ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
-      }
-    case state_error:
-      {
-        ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
-      }
-    case state_success:
-      {
-        auto& alt = this->m_stor.as<Cow_Vector<Token>>();
-        if(alt.empty()) {
-          return nullptr;
-        }
-        return &(alt.mut_back());
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-    }
-  }
-
 void Token_Stream::shift()
   {
     switch(this->state()) {
