@@ -50,7 +50,8 @@ class Token_Stream
 
     bool load(std::istream& cstrm, const Cow_String& file, const Parser_Options& options);
     void clear() noexcept;
-    const Token* peek_opt() const noexcept;
+    const Token* peek_opt() const;
+    Token* peek_mut_opt();
     void shift();
   };
 
