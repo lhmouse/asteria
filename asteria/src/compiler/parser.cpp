@@ -480,7 +480,7 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // closure-function ::=
-        //   "func" "(" identifier-list-opt ")" ( block | expression )
+        //   "func" parameter-list ( block | "return" expression )
         if(!do_match_keyword(tstrm, Token::keyword_func)) {
           return false;
         }
@@ -621,11 +621,9 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // postfix-function-call ::=
-        //   "(" argument-list-opt ")"
-        // argument-list-opt ::=
-        //   argument-list | ""
-        // argument-list ::=
-        //   expression ( "," argument-list | "" )
+        //   "(" expression-list-opt ")"
+        // expression-list ::=
+        //   expression ( "," expression-list | "" )
         if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
           return false;
         }
@@ -1337,7 +1335,9 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // function-definition ::=
-        //   "func" identifier "(" identifier-list-opt ")" statement
+        //   "func" identifier parameter-list statement
+        // parameter-list ::=
+        //   "(" ( identifier-list | "" ) ")"
         if(!do_match_keyword(tstrm, Token::keyword_func)) {
           return false;
         }

@@ -64,9 +64,9 @@ equal-initializer ::=
 immutable-variable-definition ::=
 	"const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
 function-definition ::=
-	"func" identifier "(" identifier-list-opt ")" statement
-identifier-list-opt ::=
-	identifier-list | ""
+	"func" identifier parameter-list statement
+parameter-list ::=
+	"(" ( identifier-list | "" ) ")"
 identifier-list ::=
 	identifier ( "," identifier-list | "" )
 
@@ -130,7 +130,7 @@ prefix-operator ::=
 primary-expression ::=
 	identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
 closure-function ::=
-	"func" "(" identifier-list-opt ")" ( block | expression )
+	"func" parameter-list ( block | "return" expression )
 unnamed-array ::=
 	"[" array-element-list-opt "]"
 array-element-list-opt ::=
@@ -153,11 +153,9 @@ postfix-operator-list ::=
 postfix-operator ::=
 	"++" | "--"
 postfix-function-call ::=
-	"(" argument-list-opt ")"
-argument-list-opt ::=
-	argument-list | ""
-argument-list ::=
-	expression ( "," argument-list | "" )
+	"(" expression-list-opt ")"
+expression-list ::=
+	expression ( "," expression-list | "" )
 postfix-subscript ::=
 	"[" expression "]"
 postfix-member-access ::=
