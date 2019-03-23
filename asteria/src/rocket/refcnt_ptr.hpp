@@ -380,56 +380,56 @@ template<typename elementT> class refcnt_ptr
   };
 
 template<typename xelementT,
-         typename yelementT> inline bool operator==(const refcnt_ptr<xelementT>& lhs,
+         typename yelementT> constexpr bool operator==(const refcnt_ptr<xelementT>& lhs,
                                                     const refcnt_ptr<yelementT>& rhs) noexcept
   {
     return lhs.get() == rhs.get();
   }
 template<typename xelementT,
-         typename yelementT> inline bool operator!=(const refcnt_ptr<xelementT>& lhs,
+         typename yelementT> constexpr bool operator!=(const refcnt_ptr<xelementT>& lhs,
                                                     const refcnt_ptr<yelementT>& rhs) noexcept
   {
     return lhs.get() != rhs.get();
   }
 template<typename xelementT,
-         typename yelementT> inline bool operator<(const refcnt_ptr<xelementT>& lhs,
+         typename yelementT> constexpr bool operator<(const refcnt_ptr<xelementT>& lhs,
                                                    const refcnt_ptr<yelementT>& rhs)
   {
     return lhs.get() < rhs.get();
   }
 template<typename xelementT,
-         typename yelementT> inline bool operator>(const refcnt_ptr<xelementT>& lhs,
+         typename yelementT> constexpr bool operator>(const refcnt_ptr<xelementT>& lhs,
                                                    const refcnt_ptr<yelementT>& rhs)
   {
     return lhs.get() > rhs.get();
   }
 template<typename xelementT,
-         typename yelementT> inline bool operator<=(const refcnt_ptr<xelementT>& lhs,
+         typename yelementT> constexpr bool operator<=(const refcnt_ptr<xelementT>& lhs,
                                                     const refcnt_ptr<yelementT>& rhs)
   {
     return lhs.get() <= rhs.get();
   }
 template<typename xelementT,
-         typename yelementT> inline bool operator>=(const refcnt_ptr<xelementT>& lhs,
+         typename yelementT> constexpr bool operator>=(const refcnt_ptr<xelementT>& lhs,
                                                     const refcnt_ptr<yelementT>& rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
-template<typename elementT> inline bool operator==(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
+template<typename elementT> constexpr bool operator==(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
   {
     return +!(lhs.get());
   }
-template<typename elementT> inline bool operator!=(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
+template<typename elementT> constexpr bool operator!=(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
   {
     return !!(lhs.get());
   }
 
-template<typename elementT> inline bool operator==(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
+template<typename elementT> constexpr bool operator==(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
   {
     return +!(rhs.get());
   }
-template<typename elementT> inline bool operator!=(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
+template<typename elementT> constexpr bool operator!=(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
   {
     return !!(rhs.get());
   }

@@ -278,56 +278,56 @@ template<typename elementT, typename deleterT> class unique_ptr
   };
 
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator==(const unique_ptr<xelementT, xdeleterT>& lhs,
+         typename yelementT, typename ydeleterT> constexpr bool operator==(const unique_ptr<xelementT, xdeleterT>& lhs,
                                                                         const unique_ptr<yelementT, ydeleterT>& rhs) noexcept
   {
     return lhs.get() == rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator!=(const unique_ptr<xelementT, xdeleterT>& lhs,
+         typename yelementT, typename ydeleterT> constexpr bool operator!=(const unique_ptr<xelementT, xdeleterT>& lhs,
                                                                         const unique_ptr<yelementT, ydeleterT>& rhs) noexcept
   {
     return lhs.get() != rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator<(const unique_ptr<xelementT, xdeleterT>& lhs,
+         typename yelementT, typename ydeleterT> constexpr bool operator<(const unique_ptr<xelementT, xdeleterT>& lhs,
                                                                        const unique_ptr<yelementT, ydeleterT>& rhs)
   {
     return lhs.get() < rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator>(const unique_ptr<xelementT, xdeleterT>& lhs,
+         typename yelementT, typename ydeleterT> constexpr bool operator>(const unique_ptr<xelementT, xdeleterT>& lhs,
                                                                        const unique_ptr<yelementT, ydeleterT>& rhs)
   {
     return lhs.get() > rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator<=(const unique_ptr<xelementT, xdeleterT>& lhs,
+         typename yelementT, typename ydeleterT> constexpr bool operator<=(const unique_ptr<xelementT, xdeleterT>& lhs,
                                                                         const unique_ptr<yelementT, ydeleterT>& rhs)
   {
     return lhs.get() <= rhs.get();
   }
 template<typename xelementT, typename xdeleterT,
-         typename yelementT, typename ydeleterT> inline bool operator>=(const unique_ptr<xelementT, xdeleterT>& lhs,
+         typename yelementT, typename ydeleterT> constexpr bool operator>=(const unique_ptr<xelementT, xdeleterT>& lhs,
                                                                         const unique_ptr<yelementT, ydeleterT>& rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
-template<typename elementT, typename deleterT> inline bool operator==(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
+template<typename elementT, typename deleterT> constexpr bool operator==(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
   {
     return +!(lhs.get());
   }
-template<typename elementT, typename deleterT> inline bool operator!=(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
+template<typename elementT, typename deleterT> constexpr bool operator!=(const unique_ptr<elementT, deleterT>& lhs, nullptr_t) noexcept
   {
     return !!(lhs.get());
   }
 
-template<typename elementT, typename deleterT> inline bool operator==(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
+template<typename elementT, typename deleterT> constexpr bool operator==(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
   {
     return +!(rhs.get());
   }
-template<typename elementT, typename deleterT> inline bool operator!=(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
+template<typename elementT, typename deleterT> constexpr bool operator!=(nullptr_t, const unique_ptr<elementT, deleterT>& rhs) noexcept
   {
     return !!(rhs.get());
   }
