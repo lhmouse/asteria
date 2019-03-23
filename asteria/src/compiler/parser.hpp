@@ -49,7 +49,7 @@ class Parser
 
     bool load(Token_Stream& tstrm, const Parser_Options& options);
     void clear() noexcept;
-    const Cow_Vector<Statement>& get_statements() const noexcept;
+    const Cow_Vector<Statement>& get_statements() const;
   };
 
 }  // namespace Asteria

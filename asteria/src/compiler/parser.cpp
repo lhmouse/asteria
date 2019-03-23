@@ -1903,7 +1903,7 @@ void Parser::clear() noexcept
     this->m_stor = nullptr;
   }
 
-const Cow_Vector<Statement>& Parser::get_statements() const noexcept
+const Cow_Vector<Statement>& Parser::get_statements() const
   {
     switch(this->state()) {
     case state_empty:
