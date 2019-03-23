@@ -227,6 +227,39 @@ template<typename valueT> void swap(optional<valueT>& lhs,
     lhs.swap(rhs);
   }
 
+template<typename valueT> constexpr bool operator==(const optional<valueT>& lhs,
+                                                    const optional<valueT>& rhs) noexcept(noexcept(::std::declval<const valueT&>()
+                                                                                                   == ::std::declval<const valueT&>()))
+  {
+    // `lhs` and `rhs` are equal if they contain values that are equal, or both contain no value.
+    return (lhs && rhs) ? (*lhs == *rhs) : (!lhs == !rhs);
+  }
+template<typename valueT> constexpr bool operator!=(const optional<valueT>& lhs,
+                                                    const optional<valueT>& rhs) noexcept(noexcept(::std::declval<const valueT&>()
+                                                                                                   != ::std::declval<const valueT&>()))
+  {
+    // `lhs` and `rhs` are unequal if they contain values that are not equal, or one contains a value and the other does not.
+    return (lhs && rhs) ? (*lhs != *rhs) : (!lhs != !rhs);
+  }
+
+template<typename valueT> constexpr bool operator==(const optional<valueT>& lhs, nullopt_t) noexcept
+  {
+    return +!lhs;
+  }
+template<typename valueT> constexpr bool operator!=(const optional<valueT>& lhs, nullopt_t) noexcept
+  {
+    return !!lhs;
+  }
+
+template<typename valueT> constexpr bool operator==(nullopt_t, const optional<valueT>& rhs) noexcept
+  {
+    return +!rhs;
+  }
+template<typename valueT> constexpr bool operator!=(nullopt_t, const optional<valueT>& rhs) noexcept
+  {
+    return !!rhs;
+  }
+
 template<typename charT, typename traitsT,
          typename valueT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
                                                                            const optional<valueT>& rhs)
