@@ -24,9 +24,9 @@ template<typename iteratorT, typename differenceT,
                                                                                                     is_nothrow_constructible<differenceT, ydifferenceT&&>,
                                                                                                     is_nothrow_constructible<delimiterT, ydelimiterT&&>,
                                                                                                     is_nothrow_constructible<filterT, yfilterT&&>>::value)
-      : m_begin(::std::forward<yiteratorT>(ybegin)), m_count(::std::forward<ydifferenceT>(ycount)),
-        m_delimiter(::std::forward<ydelimiterT>(ydelimiter)),
-        m_filter(::std::forward<yfilterT>(yfilter))
+      : m_begin(noadl::forward<yiteratorT>(ybegin)), m_count(noadl::forward<ydifferenceT>(ycount)),
+        m_delimiter(noadl::forward<ydelimiterT>(ydelimiter)),
+        m_filter(noadl::forward<yfilterT>(yfilter))
       {
       }
 
@@ -79,7 +79,7 @@ template<typename iteratorT, typename differenceT,
                                                                            typename decay<filterT>::type> ostream_implode(iteratorT&& begin, differenceT&& count,
                                                                                                                           delimiterT&& delimiter, filterT&& filter)
   {
-    return { ::std::forward<iteratorT>(begin), ::std::forward<differenceT>(count), std::forward<delimiterT>(delimiter), std::forward<filterT>(filter) };
+    return { noadl::forward<iteratorT>(begin), noadl::forward<differenceT>(count), rocket::forward<delimiterT>(delimiter), rocket::forward<filterT>(filter) };
   }
 // Use `identity` as the filter.
 template<typename iteratorT, typename differenceT,
@@ -88,7 +88,7 @@ template<typename iteratorT, typename differenceT,
                                                          identity> ostream_implode(iteratorT&& begin, differenceT&& count,
                                                                                    delimiterT&& delimiter)
   {
-    return { ::std::forward<iteratorT>(begin), ::std::forward<differenceT>(count), std::forward<delimiterT>(delimiter), identity() };
+    return { noadl::forward<iteratorT>(begin), noadl::forward<differenceT>(count), rocket::forward<delimiterT>(delimiter), identity() };
   }
 
 }  // namespace rocket

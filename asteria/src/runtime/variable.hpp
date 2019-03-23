@@ -59,7 +59,7 @@ class Variable : public virtual Rcbase
     template<typename XvalueT> void reset(const Source_Location& sloc, XvalueT&& xvalue, bool immutable)
       {
         this->m_sloc = sloc;
-        this->m_value = std::forward<XvalueT>(xvalue);
+        this->m_value = rocket::forward<XvalueT>(xvalue);
         this->m_immutable = immutable;
       }
 

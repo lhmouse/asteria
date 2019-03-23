@@ -326,7 +326,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
         friend stringT;
 
       public:
-        using iterator_category  = ::std::random_access_iterator_tag;
+        using iterator_category  = random_access_iterator_tag;
         using value_type         = charT;
         using pointer            = value_type*;
         using reference          = value_type&;
@@ -552,7 +552,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
     template<typename stringT, typename... paramsT> inline void tagged_append(stringT* str, append_tag, paramsT&&... params)
       {
-        str->append(::std::forward<paramsT>(params)...);
+        str->append(noadl::forward<paramsT>(params)...);
       }
 
     struct push_back_tag
@@ -562,7 +562,7 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
     template<typename stringT, typename... paramsT> inline void tagged_append(stringT* str, push_back_tag, paramsT&&... params)
       {
-        str->push_back(::std::forward<paramsT>(params)...);
+        str->push_back(noadl::forward<paramsT>(params)...);
       }
 
     // Implement the FNV-1a hash algorithm.
@@ -826,7 +826,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       {
         auto len_old = this->size();
         ROCKET_ASSERT(tpos <= len_old);
-        details_cow_string::tagged_append(this, ::std::forward<paramsT>(params)...);
+        details_cow_string::tagged_append(this, noadl::forward<paramsT>(params)...);
         auto len_add = this->size() - len_old;
         auto len_sfx = len_old - (tpos + tn);
         this->do_reserve_more(len_sfx);

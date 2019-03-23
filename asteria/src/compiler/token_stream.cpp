@@ -208,7 +208,7 @@ namespace Asteria {
 
     template<typename XtokenT> void do_push_token(Cow_Vector<Token>& seq, Line_Reader& reader, std::size_t length, XtokenT&& xtoken)
       {
-        seq.emplace_back(reader.file(), reader.line(), reader.offset(), length, std::forward<XtokenT>(xtoken));
+        seq.emplace_back(reader.file(), reader.line(), reader.offset(), length, rocket::forward<XtokenT>(xtoken));
         reader.consume(length);
       }
 

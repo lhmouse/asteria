@@ -39,7 +39,7 @@ template<typename valueT> class optional
              > optional(yvalueT&& yvalue) noexcept(is_nothrow_constructible<value_type, yvalueT&&>::value)
       : m_stor()
       {
-        this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue));
+        this->m_stor.emplace_back(noadl::forward<yvalueT>(yvalue));
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&, value_type>::value)
              > optional(const optional<yvalueT>& other) noexcept(is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>::value)
@@ -69,10 +69,10 @@ template<typename valueT> class optional
              > optional& operator=(yvalueT&& yvalue) noexcept(is_nothrow_constructible<value_type, yvalueT&&>::value)
       {
         if(!this->m_stor.empty()) {
-          this->m_stor.mut_front() = ::std::forward<yvalueT>(yvalue);
+          this->m_stor.mut_front() = noadl::forward<yvalueT>(yvalue);
           return *this;
         }
-        this->m_stor.emplace_back(::std::forward<yvalueT>(yvalue));
+        this->m_stor.emplace_back(noadl::forward<yvalueT>(yvalue));
         return *this;
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, const typename optional<yvalueT>::value_type&>::value)
@@ -156,7 +156,7 @@ template<typename valueT> class optional
                                           : ::std::declval<dvalueT>()) value_or(dvalueT&& dvalue) const
       {
         if(this->m_stor.empty()) {
-          return ::std::forward<dvalueT>(dvalue);
+          return noadl::forward<dvalueT>(dvalue);
         }
         return this->m_stor.front();
       }
@@ -165,7 +165,7 @@ template<typename valueT> class optional
                                           : ::std::declval<dvalueT>()) value_or(dvalueT&& dvalue)
       {
         if(this->m_stor.empty()) {
-          return ::std::forward<dvalueT>(dvalue);
+          return noadl::forward<dvalueT>(dvalue);
         }
         return this->m_stor.mut_front();
       }
@@ -174,7 +174,7 @@ template<typename valueT> class optional
                                           : ::std::declval<dvalueT>()) move_value_or(dvalueT&& dvalue)
       {
         if(this->m_stor.empty()) {
-          return ::std::forward<dvalueT>(dvalue);
+          return noadl::forward<dvalueT>(dvalue);
         }
         return noadl::move(this->m_stor.mut_front());
       }
@@ -204,12 +204,12 @@ template<typename valueT> class optional
     template<typename... paramsT> reference emplace(paramsT&&... params)
       {
         this->m_stor.clear();
-        return this->m_stor.emplace_back(::std::forward<paramsT>(params)...);
+        return this->m_stor.emplace_back(noadl::forward<paramsT>(params)...);
       }
     // N.B. This is a non-standard extension.
     template<typename... paramsT> reference value_or_emplace(paramsT&&... params)
       {
-        return this->m_stor.empty() ? this->m_stor.emplace_back(::std::forward<paramsT>(params)...)
+        return this->m_stor.empty() ? this->m_stor.emplace_back(noadl::forward<paramsT>(params)...)
                                     : this->m_stor.mut_front();
       }
 

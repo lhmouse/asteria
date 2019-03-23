@@ -22,7 +22,7 @@ template<typename elementT> class refcnt_object
   public:
     template<typename... paramsT, ROCKET_ENABLE_IF(is_constructible<element_type,
                                                                     paramsT&&...>::value)> explicit refcnt_object(paramsT&&... params)
-      : m_ptr(noadl::make_refcnt<element_type>(::std::forward<paramsT>(params)...))
+      : m_ptr(noadl::make_refcnt<element_type>(noadl::forward<paramsT>(params)...))
       {
       }
     // We shall not leave a null pointer in `other`, so this serves as both the copy constructor and the move constructor.

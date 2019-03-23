@@ -31,7 +31,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
       {
         constexpr resultT operator()(sourceT&& src) const
           {
-            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
+            return dynamic_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
     template<typename resultT, typename sourceT
@@ -40,7 +40,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
       {
         constexpr resultT operator()(sourceT&& src) const
           {
-            return static_cast<resultT>(::std::forward<sourceT>(src));
+            return static_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
 
@@ -118,21 +118,21 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
       {
         template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
-            return static_cast<resultT>(::std::forward<sourceT>(src));
+            return static_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
     struct dynamic_caster
       {
         template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
-            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
+            return dynamic_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
     struct const_caster
       {
         template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
-            return const_cast<resultT>(::std::forward<sourceT>(src));
+            return const_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
 
@@ -144,7 +144,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
             if(!ptr) {
               return nullptr;
             }
-            auto tptr = ::std::forward<sourceptrT>(sptr);
+            auto tptr = noadl::forward<sourceptrT>(sptr);
             tptr.release();
             return resultptrT(ptr);
           }
@@ -360,7 +360,7 @@ template<typename resultT, typename sourceT> inline unique_ptr<resultT> const_po
 
 template<typename elementT, typename... paramsT> inline unique_ptr<elementT> make_unique(paramsT&&... params)
   {
-    return unique_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
+    return unique_ptr<elementT>(new elementT(noadl::forward<paramsT>(params)...));
   }
 
 }  // namespace rocket

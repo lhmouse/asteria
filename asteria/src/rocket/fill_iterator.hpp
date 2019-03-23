@@ -18,7 +18,7 @@ template<typename elementT> class fill_iterator
     using pointer            = const value_type*;
     using reference          = const value_type&;
     using difference_type    = ptrdiff_t;
-    using iterator_category  = ::std::random_access_iterator_tag;
+    using iterator_category  = random_access_iterator_tag;
 
   private:
     difference_type m_pos;
@@ -26,7 +26,7 @@ template<typename elementT> class fill_iterator
 
   public:
     template<typename... paramsT> explicit fill_iterator(difference_type pos, paramsT&&... params) noexcept(is_nothrow_constructible<value_type, paramsT&&...>::value)
-      : m_pos(pos), m_value(::std::forward<paramsT>(params)...)
+      : m_pos(pos), m_value(noadl::forward<paramsT>(params)...)
       {
       }
 

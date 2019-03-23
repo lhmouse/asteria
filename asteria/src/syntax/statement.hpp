@@ -170,13 +170,13 @@ class Statement
   public:
     // This constructor does not accept lvalues.
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Statement(AltT&& alt)
-      : m_stor(std::forward<AltT>(alt))
+      : m_stor(rocket::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Statement& operator=(AltT&& alt)
       {
-        this->m_stor = std::forward<AltT>(alt);
+        this->m_stor = rocket::forward<AltT>(alt);
         return *this;
       }
 

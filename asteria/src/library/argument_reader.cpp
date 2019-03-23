@@ -10,7 +10,7 @@ namespace Asteria {
 template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
   {
     if(this->m_throw_on_failure) {
-      std::forward<HandlerT>(handler)();
+      rocket::forward<HandlerT>(handler)();
     }
     this->m_state.succeeded = false;
   }

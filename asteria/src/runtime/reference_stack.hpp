@@ -56,10 +56,10 @@ class Reference_Stack
         auto btop = this->m_btop;
         if(ROCKET_EXPECT(btop != this->m_stor.data() + this->m_stor.size())) {
           // Overwrite an existent element.
-         * btop = std::forward<ParamT>(param);
+         * btop = rocket::forward<ParamT>(param);
         } else {
           // Construct a new element.
-          btop = std::addressof(this->m_stor.emplace_back(std::forward<ParamT>(param)));
+          btop = std::addressof(this->m_stor.emplace_back(rocket::forward<ParamT>(param)));
         }
         // Set up the past-the-top pointer.
         ++btop;

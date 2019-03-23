@@ -47,7 +47,7 @@ namespace Asteria {
 
       public:
         explicit Variable_Callback(FunctionT&& func)
-          : m_func(std::forward<FunctionT>(func))
+          : m_func(rocket::forward<FunctionT>(func))
           {
           }
 
@@ -60,12 +60,12 @@ namespace Asteria {
 
     template<typename PointerT, typename FunctionT> void do_enumerate_variables(const PointerT& ptr, FunctionT&& func)
       {
-        ptr->enumerate_variables(Variable_Callback<FunctionT>(std::forward<FunctionT>(func)));
+        ptr->enumerate_variables(Variable_Callback<FunctionT>(rocket::forward<FunctionT>(func)));
       }
 
     template<typename FunctionT> void do_enumerate_variables(const Variable_HashSet& set, FunctionT&& func)
       {
-        set.for_each(Variable_Callback<FunctionT>(std::forward<FunctionT>(func)));
+        set.for_each(Variable_Callback<FunctionT>(rocket::forward<FunctionT>(func)));
       }
 
     }  // namespace

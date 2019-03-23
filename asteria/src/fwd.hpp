@@ -12,7 +12,7 @@
 #  error Please turn off `-ffast-math`.
 #endif
 
-#include <utility>  // std::pair<>, rocket::move(), std::forward()
+#include <utility>  // std::pair<>, rocket::move(), rocket::forward()
 #include <cstddef>  // std::nullptr_t
 #include <cstdint>  // std::uint8_t, std::int64_t
 #include "rocket/preprocessor_utilities.h"

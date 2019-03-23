@@ -168,7 +168,7 @@ class Token
     // This constructor does not accept lvalues.
     template<typename AltT> Token(const Cow_String& xfile, std::uint32_t xline, std::size_t xoffset, std::size_t xlength, AltT&& alt)
       : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
-        m_stor(std::forward<AltT>(alt))
+        m_stor(rocket::forward<AltT>(alt))
       {
       }
 

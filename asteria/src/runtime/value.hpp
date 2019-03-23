@@ -49,12 +49,12 @@ class Value
       {
       }
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<typename std::decay<AltT>::type>::value)> Value(AltT&& alt) noexcept
-      : m_stor(std::forward<AltT>(alt))
+      : m_stor(rocket::forward<AltT>(alt))
       {
       }
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<typename std::decay<AltT>::type>::value)> Value& operator=(AltT&& alt) noexcept
       {
-        this->m_stor = std::forward<AltT>(alt);
+        this->m_stor = rocket::forward<AltT>(alt);
         return *this;
       }
 

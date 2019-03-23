@@ -108,7 +108,7 @@ template<typename... alternativesT> class variant;
       }
     template<typename resultT, typename alternativeT, typename voidT, typename visitorT> resultT wrapped_visit(voidT* tptr, visitorT& visitor)
       {
-        return ::std::forward<visitorT>(visitor)(*static_cast<alternativeT*>(tptr));
+        return noadl::forward<visitorT>(visitor)(*static_cast<alternativeT*>(tptr));
       }
     template<typename alternativeT> void wrapped_swap(void* tptr, void* rptr)
       {
@@ -262,7 +262,7 @@ template<typename... alternativesT> class variant
 #endif
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
-        noadl::construct_at(static_cast<typename type_at<index_new>::type*>(this->m_stor), ::std::forward<paramT>(param));
+        noadl::construct_at(static_cast<typename type_at<index_new>::type*>(this->m_stor), noadl::forward<paramT>(param));
         this->m_index = index_new;
       }
     variant(const variant& other) noexcept(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value)
@@ -488,7 +488,7 @@ template<typename... alternativesT> class variant
           // Destroy the old alternative.
           variant::do_dispatch_destroy(index_old, this->m_stor);
           // Construct the alternative in place.
-          noadl::construct_at(static_cast<typename type_at<index_new>::type*>(this->m_stor), ::std::forward<paramsT>(params)...);
+          noadl::construct_at(static_cast<typename type_at<index_new>::type*>(this->m_stor), noadl::forward<paramsT>(params)...);
           this->m_index = index_new;
           return *static_cast<typename type_at<index_new>::type*>(this->m_stor);
         }
@@ -497,7 +497,7 @@ template<typename... alternativesT> class variant
         variant::do_dispatch_move_construct_then_destroy(index_old, backup, this->m_stor);
         try {
           // Construct the alternative in place.
-          noadl::construct_at(static_cast<typename type_at<index_new>::type*>(this->m_stor), ::std::forward<paramsT>(params)...);
+          noadl::construct_at(static_cast<typename type_at<index_new>::type*>(this->m_stor), noadl::forward<paramsT>(params)...);
           this->m_index = index_new;
         } catch(...) {
           // Move the backup back in case of exceptions.
@@ -511,7 +511,7 @@ template<typename... alternativesT> class variant
              typename... paramsT> targetT& emplace(paramsT&&... params) noexcept(is_nothrow_constructible<targetT,
                                                                                                            paramsT&&...>::value)
       {
-        return this->emplace<index_of<targetT>::value>(::std::forward<paramsT>(params)...);
+        return this->emplace<index_of<targetT>::value>(noadl::forward<paramsT>(params)...);
       }
 
     // 23.7.3.6, swap

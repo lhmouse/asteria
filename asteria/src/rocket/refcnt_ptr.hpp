@@ -24,7 +24,7 @@ template<typename elementT> class refcnt_ptr;
       {
         constexpr resultT operator()(sourceT&& src) const
           {
-            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
+            return dynamic_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
     template<typename resultT, typename sourceT
@@ -33,7 +33,7 @@ template<typename elementT> class refcnt_ptr;
       {
         constexpr resultT operator()(sourceT&& src) const
           {
-            return static_cast<resultT>(::std::forward<sourceT>(src));
+            return static_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
 
@@ -152,21 +152,21 @@ template<typename elementT> class refcnt_ptr;
       {
         template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
-            return static_cast<resultT>(::std::forward<sourceT>(src));
+            return static_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
     struct dynamic_caster
       {
         template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
-            return dynamic_cast<resultT>(::std::forward<sourceT>(src));
+            return dynamic_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
     struct const_caster
       {
         template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
           {
-            return const_cast<resultT>(::std::forward<sourceT>(src));
+            return const_cast<resultT>(noadl::forward<sourceT>(src));
           }
       };
 
@@ -178,7 +178,7 @@ template<typename elementT> class refcnt_ptr;
             if(!ptr) {
               return nullptr;
             }
-            auto tptr = ::std::forward<srcptrT>(sptr);
+            auto tptr = noadl::forward<srcptrT>(sptr);
             tptr.release();
             return resptrT(ptr);
           }
@@ -475,7 +475,7 @@ template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> const_po
 
 template<typename elementT, typename... paramsT> inline refcnt_ptr<elementT> make_refcnt(paramsT&&... params)
   {
-    return refcnt_ptr<elementT>(new elementT(::std::forward<paramsT>(params)...));
+    return refcnt_ptr<elementT>(new elementT(noadl::forward<paramsT>(params)...));
   }
 
 }  // namespace rocket

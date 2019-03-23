@@ -38,13 +38,13 @@ class Reference_Modifier
   public:
     // This constructor does not accept lvalues.
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Reference_Modifier(AltT&& alt) noexcept
-      : m_stor(std::forward<AltT>(alt))
+      : m_stor(rocket::forward<AltT>(alt))
       {
       }
     // This assignment operator does not accept lvalues.
     template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Reference_Modifier& operator=(AltT&& alt) noexcept
       {
-        this->m_stor = std::forward<AltT>(alt);
+        this->m_stor = rocket::forward<AltT>(alt);
         return *this;
       }
 

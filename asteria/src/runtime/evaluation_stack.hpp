@@ -46,7 +46,7 @@ class Evaluation_Stack
       }
     template<typename ParamT> Reference& push_reference(ParamT&& param)
       {
-        return this->m_refs.push(std::forward<ParamT>(param));
+        return this->m_refs.push(rocket::forward<ParamT>(param));
       }
     void pop_reference() noexcept
       {

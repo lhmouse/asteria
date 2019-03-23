@@ -30,7 +30,7 @@ template<typename stringT, typename hashT = hash<stringT>> class basic_prehashed
       public:
         template<typename... paramsT> explicit string_storage(const hasher& hf, paramsT&&... params)
           : hasher_base(hf),
-            m_str(::std::forward<paramsT>(params)...), m_hval(this->as_hasher()(this->m_str))
+            m_str(noadl::forward<paramsT>(params)...), m_hval(this->as_hasher()(this->m_str))
           {
           }
 
@@ -66,7 +66,7 @@ template<typename stringT, typename hashT = hash<stringT>> class basic_prehashed
 
         template<typename... paramsT> void assign(paramsT&&... params)
           {
-            this->m_str.assign(::std::forward<paramsT>(params)...);
+            this->m_str.assign(noadl::forward<paramsT>(params)...);
             this->m_hval = this->as_hasher()(this->m_str);
           }
         void assign(const string_storage& other)
@@ -125,7 +125,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       }
     template<typename... paramsT> explicit basic_prehashed_string(const hasher& hf, paramsT&&... params) noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
                                                                                                                               is_nothrow_copy_constructible<hasher>>::value)
-      : m_sth(hf, ::std::forward<paramsT>(params)...)
+      : m_sth(hf, noadl::forward<paramsT>(params)...)
       {
       }
     basic_prehashed_string(const string_type& str, const hasher& hf = hasher())
@@ -137,7 +137,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       {
       }
     template<typename paramT, ROCKET_ENABLE_IF(is_convertible<paramT, string_type>::value)> basic_prehashed_string(paramT&& param, const hasher& hf = hasher())
-      : m_sth(hf, ::std::forward<paramT>(param))
+      : m_sth(hf, noadl::forward<paramT>(param))
       {
       }
     basic_prehashed_string(initializer_list<value_type> init, const hasher& hf = hasher())
@@ -264,7 +264,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
 
     template<typename... paramsT> basic_prehashed_string& assign(paramsT&&... params)
       {
-        this->m_sth.assign(::std::forward<paramsT>(params)...);
+        this->m_sth.assign(noadl::forward<paramsT>(params)...);
         return *this;
       }
     basic_prehashed_string& assign(initializer_list<value_type> init)

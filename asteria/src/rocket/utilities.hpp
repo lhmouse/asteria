@@ -65,6 +65,8 @@ using ::std::is_const;
 using ::std::add_const;
 using ::std::remove_const;
 using ::std::is_reference;
+using ::std::is_lvalue_reference;
+using ::std::is_rvalue_reference;
 using ::std::add_lvalue_reference;
 using ::std::add_rvalue_reference;
 using ::std::remove_reference;
@@ -87,6 +89,11 @@ using ::std::allocator_traits;
 using ::std::default_delete;
 
 using ::std::iterator_traits;
+using ::std::output_iterator_tag;
+using ::std::input_iterator_tag;
+using ::std::forward_iterator_tag;
+using ::std::bidirectional_iterator_tag;
+using ::std::random_access_iterator_tag;
 
 using ::std::char_traits;
 using ::std::basic_streambuf;
@@ -113,16 +120,6 @@ using ::std::range_error;
 using ::std::overflow_error;
 using ::std::underflow_error;
 
-struct identity
-  {
-    using is_transparent = void;
-
-    template<typename paramT> constexpr paramT&& operator()(paramT&& param) const noexcept
-      {
-        return ::std::forward<paramT>(param);
-      }
-  };
-
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
@@ -134,10 +131,27 @@ template<typename... unusedT> struct make_void
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof(__VA_ARGS__) || true>::type* = nullptr
 
-template<typename valueT, ROCKET_ENABLE_IF(is_same<typename remove_cv<valueT>::type, valueT>::value)> typename remove_reference<valueT>::type&& move(valueT& value) noexcept
+// The argument must be a non-const lvalue.
+template<typename argT, ROCKET_ENABLE_IF(is_same<typename remove_cv<argT>::type, argT>::value)> constexpr typename remove_reference<argT>::type&& move(argT& arg) noexcept
   {
-    return static_cast<typename remove_reference<valueT>::type&&>(value);
+    return static_cast<typename remove_reference<argT>::type&&>(arg);
   }
+
+// The argument must be an lvalue.
+template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_lvalue_reference<argT&&>::value)> constexpr targetT&& forward(argT&& arg) noexcept
+  {
+    return static_cast<targetT&&>(arg);
+  }
+
+struct identity
+  {
+    using is_transparent = void;
+
+    template<typename paramT> constexpr paramT&& operator()(paramT&& param) const noexcept
+      {
+        return noadl::forward<paramT>(param);
+      }
+  };
 
     namespace details_utilities {
 
@@ -160,24 +174,24 @@ using details_utilities::adl_swap;
 template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
                                                             : ::std::declval<rhsT>()) min(lhsT&& lhs, rhsT&& rhs)
   {
-    return (rhs < lhs) ? ::std::forward<rhsT>(rhs)
-                       : ::std::forward<lhsT>(lhs);
+    return (rhs < lhs) ? noadl::forward<rhsT>(rhs)
+                       : noadl::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
                                                             : ::std::declval<rhsT>()) max(lhsT&& lhs, rhsT&& rhs)
   {
-    return (lhs < rhs) ? ::std::forward<rhsT>(rhs)
-                       : ::std::forward<lhsT>(lhs);
+    return (lhs < rhs) ? noadl::forward<rhsT>(rhs)
+                       : noadl::forward<lhsT>(lhs);
   }
 
 template<typename testT, typename lowerT, typename upperT> constexpr decltype(0 ? ::std::declval<lowerT>()
                                                                                 : 0 ? ::std::declval<upperT>()
                                                                                     : ::std::declval<testT>()) clamp(testT&& test, lowerT&& lower, upperT&& upper)
   {
-    return (test < lower) ? ::std::forward<lowerT>(lower)
-                          : (upper < test) ? ::std::forward<upperT>(upper)
-                                           : ::std::forward<testT>(test);
+    return (test < lower) ? noadl::forward<lowerT>(lower)
+                          : (upper < test) ? noadl::forward<upperT>(upper)
+                                           : noadl::forward<testT>(test);
   }
 
 template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<charT, traitsT>& ios, typename basic_ios<charT, traitsT>::iostate& state)
@@ -202,7 +216,7 @@ template<typename iteratorT, typename eiteratorT,
                                                                          functionT&& func, const paramsT&... params)
   {
     for(auto qit = noadl::move(first); qit != last; ++qit) {
-      ::std::forward<functionT>(func)(qit, params...);
+      noadl::forward<functionT>(func)(qit, params...);
     }
   }
 
@@ -212,7 +226,7 @@ template<typename iteratorT, typename eiteratorT,
   {
     auto qit = noadl::move(first);
     do {
-      ::std::forward<functionT>(func)(qit, params...);
+      noadl::forward<functionT>(func)(qit, params...);
     } while(++qit != last);
   }
 
@@ -232,11 +246,11 @@ template<typename firstT, typename... restT> struct disjunction<firstT, restT...
 
     namespace details_utilities {
 
-    template<typename iteratorT> constexpr size_t tagged_estimate_distance(::std::input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
+    template<typename iteratorT> constexpr size_t tagged_estimate_distance(input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
       {
         return 0;
       }
-    template<typename iteratorT> inline size_t tagged_estimate_distance(::std::forward_iterator_tag, iteratorT first, iteratorT last)
+    template<typename iteratorT> inline size_t tagged_estimate_distance(forward_iterator_tag, iteratorT first, iteratorT last)
       {
         size_t total = 0;
         for(auto qit = noadl::move(first); qit != last; ++qit) {
@@ -244,7 +258,7 @@ template<typename firstT, typename... restT> struct disjunction<firstT, restT...
         }
         return total;
       }
-    template<typename iteratorT> constexpr size_t tagged_estimate_distance(::std::random_access_iterator_tag, iteratorT first, iteratorT last)
+    template<typename iteratorT> constexpr size_t tagged_estimate_distance(random_access_iterator_tag, iteratorT first, iteratorT last)
       {
         return static_cast<size_t>(last - first);
       }
@@ -261,7 +275,7 @@ template<typename elementT, typename... paramsT> elementT* construct_at(elementT
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xAA, sizeof(elementT));
 #endif
-    return ::new(static_cast<void*>(ptr)) elementT(::std::forward<paramsT>(params)...);
+    return ::new(static_cast<void*>(ptr)) elementT(noadl::forward<paramsT>(params)...);
   }
 
 template<typename elementT> elementT* default_construct_at(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
@@ -348,7 +362,7 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
     template<typename containerT, typename callbackT> inline void for_each_nonconstexpr(containerT&& container, callbackT&& callback)
       {
         for(auto&& qelem : container) {
-          ::std::forward<callbackT>(callback)(qelem);
+          noadl::forward<callbackT>(callback)(qelem);
         }
       }
 
@@ -356,11 +370,11 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
 
 template<typename containerT, typename callbackT> inline void for_each(containerT&& container, callbackT&& callback)
   {
-    return details_utilities::for_each_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
+    return details_utilities::for_each_nonconstexpr(noadl::forward<containerT>(container), noadl::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::for_each_nonconstexpr(init, ::std::forward<callbackT>(callback));
+    return details_utilities::for_each_nonconstexpr(init, noadl::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
@@ -368,7 +382,7 @@ template<typename elementT, typename callbackT> inline void for_each(initializer
     template<typename containerT, typename callbackT> inline bool any_of_nonconstexpr(containerT&& container, callbackT&& callback)
       {
         for(auto&& qelem : container) {
-          if(::std::forward<callbackT>(callback)(qelem)) {
+          if(noadl::forward<callbackT>(callback)(qelem)) {
             return true;
           }
         }
@@ -379,11 +393,11 @@ template<typename elementT, typename callbackT> inline void for_each(initializer
 
 template<typename containerT, typename callbackT> constexpr bool any_of(containerT&& container, callbackT&& callback)
   {
-    return details_utilities::any_of_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
+    return details_utilities::any_of_nonconstexpr(noadl::forward<containerT>(container), noadl::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::any_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
+    return details_utilities::any_of_nonconstexpr(init, noadl::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
@@ -391,7 +405,7 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
     template<typename containerT, typename callbackT> inline bool none_of_nonconstexpr(containerT&& container, callbackT&& callback)
       {
         for(auto&& qelem : container) {
-          if(::std::forward<callbackT>(callback)(qelem)) {
+          if(noadl::forward<callbackT>(callback)(qelem)) {
             return false;
           }
         }
@@ -402,11 +416,11 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
 
 template<typename containerT, typename callbackT> constexpr bool none_of(containerT&& container, callbackT&& callback)
   {
-    return details_utilities::none_of_nonconstexpr(::std::forward<containerT>(container), ::std::forward<callbackT>(callback));
+    return details_utilities::none_of_nonconstexpr(noadl::forward<containerT>(container), noadl::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT&& callback)
   {
-    return details_utilities::none_of_nonconstexpr(init, ::std::forward<callbackT>(callback));
+    return details_utilities::none_of_nonconstexpr(init, noadl::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
@@ -414,7 +428,7 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
     template<typename targetT, typename containerT> inline bool is_any_of_nonconstexpr(targetT&& targ, containerT&& container)
       {
         for(auto&& qelem : container) {
-          if(::std::forward<targetT>(targ) == qelem) {
+          if(noadl::forward<targetT>(targ) == qelem) {
             return true;
           }
         }
@@ -425,11 +439,11 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
 
 template<typename targetT, typename containerT> constexpr bool is_any_of(targetT&& targ, containerT&& container)
   {
-    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), ::std::forward<containerT>(container));
+    return details_utilities::is_any_of_nonconstexpr(noadl::forward<targetT>(targ), noadl::forward<containerT>(container));
   }
 template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_any_of_nonconstexpr(::std::forward<targetT>(targ), init);
+    return details_utilities::is_any_of_nonconstexpr(noadl::forward<targetT>(targ), init);
   }
 
     namespace details_utilities {
@@ -437,7 +451,7 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&&
     template<typename targetT, typename containerT> inline bool is_none_of_nonconstexpr(targetT&& targ, containerT&& container)
       {
         for(auto&& qelem : container) {
-          if(::std::forward<targetT>(targ) == qelem) {
+          if(noadl::forward<targetT>(targ) == qelem) {
             return false;
           }
         }
@@ -448,11 +462,11 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&&
 
 template<typename targetT, typename containerT> constexpr bool is_none_of(targetT&& targ, containerT&& container)
   {
-    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), ::std::forward<containerT>(container));
+    return details_utilities::is_none_of_nonconstexpr(noadl::forward<targetT>(targ), noadl::forward<containerT>(container));
   }
 template<typename targetT, typename elementT> constexpr bool is_none_of(targetT&& targ, initializer_list<elementT> init)
   {
-    return details_utilities::is_none_of_nonconstexpr(::std::forward<targetT>(targ), init);
+    return details_utilities::is_none_of_nonconstexpr(noadl::forward<targetT>(targ), init);
   }
 
 template<typename enumT> constexpr typename underlying_type<enumT>::type weaken_enum(enumT value) noexcept
@@ -482,20 +496,12 @@ template<typename elementT, size_t countT> constexpr size_t countof(const elemen
     }  // namespace details_utilities
 
 template<long long valueT> struct lowest_signed : details_utilities::integer_selector<long long, valueT,
-                                                                                      signed char,
-                                                                                      short,
-                                                                                      int,
-                                                                                      long,
-                                                                                      long long>
+                                                                                      signed char, short, int, long, long long>
   {
   };
 
 template<unsigned long long valueT> struct lowest_unsigned : details_utilities::integer_selector<unsigned long long, valueT,
-                                                                                                 unsigned char,
-                                                                                                 unsigned short,
-                                                                                                 unsigned,
-                                                                                                 unsigned long,
-                                                                                                 unsigned long long>
+                                                                                                 unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
   {
   };
 

@@ -29,7 +29,7 @@ namespace Asteria {
         if(names_opt) {
           names_opt->emplace_back(name);
         }
-        ctx.open_named_reference(name) = std::forward<XrefT>(xref);
+        ctx.open_named_reference(name) = rocket::forward<XrefT>(xref);
       }
 
     Rcptr<Variable> do_safe_create_variable(Cow_Vector<PreHashed_String>* names_opt, Abstract_Context& ctx,

@@ -140,7 +140,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
             ROCKET_ASSERT(this->size() < this->capacity());
             auto ebase = this->m_ebase;
             size_t nelem = this->m_nelem;
-            allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem, ::std::forward<paramsT>(params)...);
+            allocator_traits<allocator_type>::construct(this->as_allocator(), ebase + nelem, noadl::forward<paramsT>(params)...);
             this->m_nelem = static_cast<decltype(m_nelem)>(++nelem);
             return ebase + nelem - 1;
           }
@@ -165,7 +165,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
         friend vectorT;
 
       public:
-        using iterator_category  = ::std::random_access_iterator_tag;
+        using iterator_category  = random_access_iterator_tag;
         using value_type         = valueT;
         using pointer            = value_type*;
         using reference          = value_type&;
@@ -351,7 +351,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 
     template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, append_tag, paramsT&&... params)
       {
-        vec->append(::std::forward<paramsT>(params)...);
+        vec->append(noadl::forward<paramsT>(params)...);
       }
 
     struct emplace_back_tag
@@ -361,7 +361,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 
     template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
       {
-        vec->emplace_back(::std::forward<paramsT>(params)...);
+        vec->emplace_back(noadl::forward<paramsT>(params)...);
       }
 
     struct push_back_tag
@@ -371,7 +371,7 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 
     template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
       {
-        vec->push_back(::std::forward<paramsT>(params)...);
+        vec->push_back(noadl::forward<paramsT>(params)...);
       }
 
     }  // namespace details_static_vector
@@ -490,7 +490,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       {
         auto cnt_old = this->size();
         ROCKET_ASSERT(tpos <= cnt_old);
-        details_static_vector::tagged_append(this, ::std::forward<paramsT>(params)...);
+        details_static_vector::tagged_append(this, noadl::forward<paramsT>(params)...);
         auto cnt_add = this->size() - cnt_old;
         auto ptr = this->m_sth.mut_data();
         noadl::rotate(ptr, tpos, cnt_old, cnt_old + cnt_add);
@@ -699,7 +699,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
     template<typename... paramsT> reference emplace_back(paramsT&&... params)
       {
         this->do_reserve_more(1);
-        auto ptr = this->m_sth.emplace_back_unchecked(::std::forward<paramsT>(params)...);
+        auto ptr = this->m_sth.emplace_back_unchecked(noadl::forward<paramsT>(params)...);
         return *ptr;
       }
     // N.B. The return type is a non-standard extension.

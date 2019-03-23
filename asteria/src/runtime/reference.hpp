@@ -24,14 +24,14 @@ class Reference
       }
     // This constructor does not accept lvalues.
     template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Xvariant::index_of<XrootT>::value)> Reference(XrootT&& xroot) noexcept
-      : m_root(std::forward<XrootT>(xroot)),
+      : m_root(rocket::forward<XrootT>(xroot)),
         m_mods()
       {
       }
     // This assignment operator does not accept lvalues.
     template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Xvariant::index_of<XrootT>::value)> Reference& operator=(XrootT&& xroot) noexcept
       {
-        this->m_root = std::forward<XrootT>(xroot);
+        this->m_root = rocket::forward<XrootT>(xroot);
         this->m_mods.clear();
         return *this;
       }
@@ -78,7 +78,7 @@ class Reference
     template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
       {
         // Append a modifier.
-        this->m_mods.emplace_back(std::forward<XmodT>(xmod));
+        this->m_mods.emplace_back(rocket::forward<XmodT>(xmod));
         return *this;
       }
     Reference& zoom_out()

@@ -19,7 +19,7 @@ class Traceable_Exception : public virtual std::exception
   public:
     template<typename XvalueT> Traceable_Exception(XvalueT&& xvalue,
                                                    const Source_Location& sloc, const Cow_String& func)
-      : m_value(std::forward<XvalueT>(xvalue)),
+      : m_value(rocket::forward<XvalueT>(xvalue)),
         m_frames(1, sloc, func)
       {
       }
