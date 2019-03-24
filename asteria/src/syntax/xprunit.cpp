@@ -1366,7 +1366,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.value);  // 0
-        code.emplace_back(&do_push_literal, rocket::move(p));
+        code.emplace_back(do_push_literal, rocket::move(p));
         return;
       }
     case index_named_reference:
@@ -1383,7 +1383,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
               // Bind the reference.
               Cow_Vector<Air_Node::Param> p;
               p.emplace_back(*qref);  // 0
-              code.emplace_back(&do_push_bound_reference, rocket::move(p));
+              code.emplace_back(do_push_bound_reference, rocket::move(p));
               return;
             }
             // A later-declared reference has been found.
@@ -1391,7 +1391,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
             Cow_Vector<Air_Node::Param> p;
             p.emplace_back(alt.name);  // 0
             p.emplace_back(static_cast<std::int64_t>(depth));  // 1
-            code.emplace_back(&do_find_named_reference_local, rocket::move(p));
+            code.emplace_back(do_find_named_reference_local, rocket::move(p));
             return;
           }
           qctx = qctx->get_parent_opt();
@@ -1403,7 +1403,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // No name has been found so far.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.name);  // 0
-        code.emplace_back(&do_find_named_reference_global, rocket::move(p));
+        code.emplace_back(do_find_named_reference_global, rocket::move(p));
         return;
       }
     case index_closure_function:
@@ -1414,7 +1414,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(alt.params);  // 1
         p.emplace_back(alt.body);  // 2
-        code.emplace_back(&do_execute_closure_function, rocket::move(p));
+        code.emplace_back(do_execute_closure_function, rocket::move(p));
         return;
       }
     case index_branch:
@@ -1429,7 +1429,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         rocket::for_each(alt.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 1
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 2
-        code.emplace_back(&do_execute_branch, rocket::move(p));
+        code.emplace_back(do_execute_branch, rocket::move(p));
         return;
       }
     case index_function_call:
@@ -1439,7 +1439,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.nargs));  // 1
-        code.emplace_back(&do_execute_function_call, rocket::move(p));
+        code.emplace_back(do_execute_function_call, rocket::move(p));
         return;
       }
     case index_member_access:
@@ -1448,7 +1448,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.name);  // 0
-        code.emplace_back(&do_execute_member_access, rocket::move(p));
+        code.emplace_back(do_execute_member_access, rocket::move(p));
         return;
       }
     case index_operator_rpn:
@@ -1460,172 +1460,172 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         switch(alt.xop) {
         case xop_postfix_inc:
           {
-            code.emplace_back(&do_execute_operator_rpn_postfix_inc, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_postfix_inc, rocket::move(p));
             return;
           }
         case xop_postfix_dec:
           {
-            code.emplace_back(&do_execute_operator_rpn_postfix_dec, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_postfix_dec, rocket::move(p));
             return;
           }
         case xop_postfix_at:
           {
-            code.emplace_back(&do_execute_operator_rpn_postfix_at, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_postfix_at, rocket::move(p));
             return;
           }
         case xop_prefix_pos:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_pos, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_pos, rocket::move(p));
             return;
           }
         case xop_prefix_neg:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_neg, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_neg, rocket::move(p));
             return;
           }
         case xop_prefix_notb:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_notb, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_notb, rocket::move(p));
             return;
           }
         case xop_prefix_notl:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_notl, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_notl, rocket::move(p));
             return;
           }
         case xop_prefix_inc:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_inc, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_inc, rocket::move(p));
             return;
           }
         case xop_prefix_dec:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_dec, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_dec, rocket::move(p));
             return;
           }
         case xop_prefix_unset:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_unset, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_unset, rocket::move(p));
             return;
           }
         case xop_prefix_lengthof:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_lengthof, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_lengthof, rocket::move(p));
             return;
           }
         case xop_prefix_typeof:
           {
-            code.emplace_back(&do_execute_operator_rpn_prefix_typeof, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_prefix_typeof, rocket::move(p));
             return;
           }
         case xop_infix_cmp_eq:
           {
             p.emplace_back(static_cast<std::int64_t>(false));  // 1
-            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xeq, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_cmp_xeq, rocket::move(p));
             return;
           }
         case xop_infix_cmp_ne:
           {
             p.emplace_back(static_cast<std::int64_t>(true));  // 1
-            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xeq, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_cmp_xeq, rocket::move(p));
             return;
           }
         case xop_infix_cmp_lt:
           {
             p.emplace_back(static_cast<std::int64_t>(Value::compare_less));  // 1
             p.emplace_back(static_cast<std::int64_t>(false));  // 2
-            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
             return;
           }
         case xop_infix_cmp_gt:
           {
             p.emplace_back(static_cast<std::int64_t>(Value::compare_greater));  // 1
             p.emplace_back(static_cast<std::int64_t>(false));  // 2
-            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
             return;
           }
         case xop_infix_cmp_lte:
           {
             p.emplace_back(static_cast<std::int64_t>(Value::compare_greater));  // 1
             p.emplace_back(static_cast<std::int64_t>(true));  // 2
-            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
             return;
           }
         case xop_infix_cmp_gte:
           {
             p.emplace_back(static_cast<std::int64_t>(Value::compare_less));  // 1
             p.emplace_back(static_cast<std::int64_t>(true));  // 2
-            code.emplace_back(&do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_cmp_xrel, rocket::move(p));
             return;
           }
         case xop_infix_cmp_3way:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_cmp_3way, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_cmp_3way, rocket::move(p));
             return;
           }
         case xop_infix_add:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_add, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_add, rocket::move(p));
             return;
           }
         case xop_infix_sub:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_sub, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_sub, rocket::move(p));
             return;
           }
         case xop_infix_mul:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_mul, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_mul, rocket::move(p));
             return;
           }
         case xop_infix_div:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_div, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_div, rocket::move(p));
             return;
           }
         case xop_infix_mod:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_mod, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_mod, rocket::move(p));
             return;
           }
         case xop_infix_sll:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_sll, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_sll, rocket::move(p));
             return;
           }
         case xop_infix_srl:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_srl, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_srl, rocket::move(p));
             return;
           }
         case xop_infix_sla:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_sla, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_sla, rocket::move(p));
             return;
           }
         case xop_infix_sra:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_sra, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_sra, rocket::move(p));
             return;
           }
         case xop_infix_andb:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_andb, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_andb, rocket::move(p));
             return;
           }
         case xop_infix_orb:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_orb, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_orb, rocket::move(p));
             return;
           }
         case xop_infix_xorb:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_xorb, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_xorb, rocket::move(p));
             return;
           }
         case xop_infix_assign:
           {
-            code.emplace_back(&do_execute_operator_rpn_infix_assign, rocket::move(p));
+            code.emplace_back(do_execute_operator_rpn_infix_assign, rocket::move(p));
             return;
           }
         default:
@@ -1638,7 +1638,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(static_cast<std::int64_t>(alt.nelems));  // 0
-        code.emplace_back(&do_execute_unnamed_array, rocket::move(p));
+        code.emplace_back(do_execute_unnamed_array, rocket::move(p));
         return;
       }
     case index_unnamed_object:
@@ -1647,7 +1647,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.keys);  // 0
-        code.emplace_back(&do_execute_unnamed_object, rocket::move(p));
+        code.emplace_back(do_execute_unnamed_object, rocket::move(p));
         return;
       }
     case index_coalescence:
@@ -1659,7 +1659,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         rocket::for_each(alt.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 1
-        code.emplace_back(&do_execute_coalescence, rocket::move(p));
+        code.emplace_back(do_execute_coalescence, rocket::move(p));
         return;
       }
     default:

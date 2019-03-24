@@ -531,7 +531,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         }
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
-        code.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the expression.
         rocket::for_each(alt.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
         return;
@@ -542,36 +542,36 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(do_generate_code_block(ctx, alt.body));  // 0
-        code.emplace_back(&do_execute_block_callback, rocket::move(p));
+        code.emplace_back(do_execute_block_callback, rocket::move(p));
         return;
       }
     case index_variable:
       {
         const auto& alt = this->m_stor.as<S_variable>();
         // There may be multiple variables.
-        for(const auto& var : alt.vars) {
+        for(const auto& pair : alt.vars) {
           // Create a dummy reference for further name lookups.
-          do_set_user_declared_reference(names_opt, ctx, "variable placeholder", var.name, Reference_Root::S_null());
+          do_set_user_declared_reference(names_opt, ctx, "variable placeholder", pair.first, Reference_Root::S_null());
           // Distinguish uninitialized variables from initialized ones.
-          if(var.init.empty()) {
+          if(pair.second.empty()) {
             Cow_Vector<Air_Node::Param> p;
             p.emplace_back(alt.sloc);  // 0
             p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 1
-            p.emplace_back(var.name);  // 2
-            code.emplace_back(&do_define_uninitialized_variable, rocket::move(p));
+            p.emplace_back(pair.first);  // 2
+            code.emplace_back(do_define_uninitialized_variable, rocket::move(p));
             continue;
           }
           // A variable becomes visible before its initializer, where it is initialized to `null`.
           Cow_Vector<Air_Node::Param> p;
-          p.emplace_back(var.name);  // 0
-          code.emplace_back(&do_declare_variable_and_clear_stack, rocket::move(p));
+          p.emplace_back(pair.first);  // 0
+          code.emplace_back(do_declare_variable_and_clear_stack, rocket::move(p));
           // Generate inline code for the initializer.
-          rocket::for_each(var.init, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+          rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
           // Generate code to initialize the variable.
           p.clear();
           p.emplace_back(alt.sloc);  // 0
           p.emplace_back(static_cast<std::int64_t>(alt.immutable));  // 1
-          code.emplace_back(&do_initialize_variable, rocket::move(p));
+          code.emplace_back(do_initialize_variable, rocket::move(p));
         }
         return;
       }
@@ -586,7 +586,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(alt.name);  // 1
         p.emplace_back(alt.params);  // 2
         p.emplace_back(alt.body);  // 3
-        code.emplace_back(&do_define_function, rocket::move(p));
+        code.emplace_back(do_define_function, rocket::move(p));
         return;
       }
     case index_if:
@@ -594,7 +594,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         const auto& alt = this->m_stor.as<S_if>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
-        code.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the condition expression.
         rocket::for_each(alt.cond, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
         // Encode arguments.
@@ -602,7 +602,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 0
         p.emplace_back(do_generate_code_block(ctx, alt.branch_true));  // 1
         p.emplace_back(do_generate_code_block(ctx, alt.branch_false));  // 2
-        code.emplace_back(&do_execute_branch, rocket::move(p));
+        code.emplace_back(do_execute_branch, rocket::move(p));
         return;
       }
     case index_switch:
@@ -610,7 +610,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         const auto& alt = this->m_stor.as<S_switch>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
-        code.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the condition expression.
         rocket::for_each(alt.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
         // Create a fresh context for the `switch` body.
@@ -621,12 +621,12 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         // Note that this node takes variable number of arguments.
         // Names are accumulated.
         Cow_Vector<PreHashed_String> names;
-        for(auto it = alt.clauses.begin(); it != alt.clauses.end(); ++it) {
-          p.emplace_back(do_generate_code_expression(ctx_switch, it->cond));  // n * 3 + 0
-          p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, it->body));  // n * 3 + 1
+        for(const auto& pair : alt.clauses) {
+          p.emplace_back(do_generate_code_expression(ctx_switch, pair.first));  // n * 3 + 0
+          p.emplace_back(do_generate_code_statement_list(&names, ctx_switch, pair.second));  // n * 3 + 1
           p.emplace_back(names);  // n * 3 + 2
         }
-        code.emplace_back(&do_execute_select, rocket::move(p));
+        code.emplace_back(do_execute_select, rocket::move(p));
         return;
       }
     case index_do_while:
@@ -637,7 +637,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(do_generate_code_block(ctx, alt.body));  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 1
         p.emplace_back(do_generate_code_expression(ctx, alt.cond));  // 2
-        code.emplace_back(&do_execute_do_while, rocket::move(p));
+        code.emplace_back(do_execute_do_while, rocket::move(p));
         return;
       }
     case index_while:
@@ -648,7 +648,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 0
         p.emplace_back(do_generate_code_expression(ctx, alt.cond));  // 1
         p.emplace_back(do_generate_code_block(ctx, alt.body));  // 2
-        code.emplace_back(&do_execute_while, rocket::move(p));
+        code.emplace_back(do_execute_while, rocket::move(p));
         return;
       }
     case index_for:
@@ -662,7 +662,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(do_generate_code_expression(ctx_for, alt.cond));  // 1
         p.emplace_back(do_generate_code_expression(ctx_for, alt.step));  // 2
         p.emplace_back(do_generate_code_block(ctx_for, alt.body));  // 3
-        code.emplace_back(&do_execute_for, rocket::move(p));
+        code.emplace_back(do_execute_for, rocket::move(p));
         return;
       }
     case index_for_each:
@@ -678,7 +678,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(alt.mapped_name);  // 1
         p.emplace_back(do_generate_code_expression(ctx_for, alt.init));  // 2
         p.emplace_back(do_generate_code_block(ctx_for, alt.body));  // 3
-        code.emplace_back(&do_execute_for_each, rocket::move(p));
+        code.emplace_back(do_execute_for_each, rocket::move(p));
         return;
       }
     case index_try:
@@ -693,7 +693,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(do_generate_code_block(ctx, alt.body_try));  // 0
         p.emplace_back(alt.except_name);  // 1
         p.emplace_back(do_generate_code_statement_list(nullptr, ctx_catch, alt.body_catch));  // 2
-        code.emplace_back(&do_execute_try, rocket::move(p));
+        code.emplace_back(do_execute_try, rocket::move(p));
         return;
       }
     case index_break:
@@ -725,7 +725,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         default:
           ASTERIA_TERMINATE("An unknown target scope type `", alt.target, "` has been encountered.");
         }
-        code.emplace_back(&do_return_status_simple, rocket::move(p));
+        code.emplace_back(do_return_status_simple, rocket::move(p));
         return;
       }
     case index_continue:
@@ -756,7 +756,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         default:
           ASTERIA_TERMINATE("An unknown target scope type `", alt.target, "` has been encountered.");
         }
-        code.emplace_back(&do_return_status_simple, rocket::move(p));
+        code.emplace_back(do_return_status_simple, rocket::move(p));
         return;
       }
     case index_throw:
@@ -764,13 +764,13 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         const auto& alt = this->m_stor.as<S_throw>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
-        code.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
         rocket::for_each(alt.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(alt.sloc);  // 0
-        code.emplace_back(&do_execute_throw, rocket::move(p));
+        code.emplace_back(do_execute_throw, rocket::move(p));
         return;
       }
     case index_return:
@@ -778,18 +778,18 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         const auto& alt = this->m_stor.as<S_return>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
-        code.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
         rocket::for_each(alt.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
         if(!alt.by_ref) {
           // If the result is to be passed by value, convert it as necessary.
           p.clear();
-          code.emplace_back(&do_execute_convert_to_temporary, rocket::move(p));
+          code.emplace_back(do_execute_convert_to_temporary, rocket::move(p));
         }
         // Encode arguments.
         p.clear();
         p.emplace_back(static_cast<std::int64_t>(Air_Node::status_return));  // 0
-        code.emplace_back(&do_return_status_simple, rocket::move(p));
+        code.emplace_back(do_return_status_simple, rocket::move(p));
         return;
       }
     case index_assert:
@@ -797,7 +797,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         const auto& alt = this->m_stor.as<S_assert>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
-        code.emplace_back(&do_execute_clear_stack, rocket::move(p));
+        code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
         rocket::for_each(alt.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
         // Encode arguments.
@@ -805,7 +805,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(alt.sloc);  // 0
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 1
         p.emplace_back(PreHashed_String(alt.msg));  // 2
-        code.emplace_back(&do_execute_assert, rocket::move(p));
+        code.emplace_back(do_execute_assert, rocket::move(p));
         return;
       }
     default:

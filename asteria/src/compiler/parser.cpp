@@ -1268,7 +1268,7 @@ namespace Asteria {
         if(!do_match_keyword(tstrm, Token::keyword_var)) {
           return false;
         }
-        Cow_Vector<Statement::Variable_Declaration> vars;
+        Cow_Vector<std::pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
         for(;;) {
           Cow_String name;
           if(!do_accept_identifier(name, tstrm)) {
@@ -1281,8 +1281,7 @@ namespace Asteria {
               throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
             }
           }
-          Statement::Variable_Declaration var = { rocket::move(name), rocket::move(init) };
-          vars.emplace_back(rocket::move(var));
+          vars.emplace_back(rocket::move(name), rocket::move(init));
           if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
           }
@@ -1306,7 +1305,7 @@ namespace Asteria {
         if(!do_match_keyword(tstrm, Token::keyword_const)) {
           return false;
         }
-        Cow_Vector<Statement::Variable_Declaration> vars;
+        Cow_Vector<std::pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
         for(;;) {
           Cow_String name;
           if(!do_accept_identifier(name, tstrm)) {
@@ -1319,8 +1318,7 @@ namespace Asteria {
           if(!do_accept_expression(init, tstrm)) {
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
-          Statement::Variable_Declaration var = { rocket::move(name), rocket::move(init) };
-          vars.emplace_back(rocket::move(var));
+          vars.emplace_back(rocket::move(name), rocket::move(init));
           if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
             break;
           }
@@ -1445,7 +1443,7 @@ namespace Asteria {
         if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
-        Cow_Vector<Statement::Switch_Clause> clauses;
+        Cow_Vector<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> clauses;
         if(!do_match_punctuator(tstrm, Token::punctuator_brace_op)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_expected);
         }
@@ -1469,8 +1467,7 @@ namespace Asteria {
               break;
             }
           }
-          Statement::Switch_Clause clause = { rocket::move(cond), rocket::move(body) };
-          clauses.emplace_back(rocket::move(clause));
+          clauses.emplace_back(rocket::move(cond), rocket::move(body));
         }
         if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_switch_clause_expected);
