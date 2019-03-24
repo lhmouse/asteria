@@ -798,9 +798,9 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       : m_sth(alloc, hasher(), key_equal())
       {
       }
-    constexpr cow_hashmap() noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
-                                                 is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
-                                                 is_nothrow_constructible<allocator_type>>::value)
+    constexpr cow_hashmap(clear_t = noadl::clear) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+                                                                is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
+                                                                is_nothrow_constructible<allocator_type>>::value)
       : cow_hashmap(allocator_type())
       {
       }
@@ -877,6 +877,11 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
       {
         this->assign(init);
+      }
+    cow_hashmap& operator=(clear_t) noexcept
+      {
+        this->clear();
+        return *this;
       }
     cow_hashmap& operator=(const cow_hashmap& other) noexcept
       {

@@ -119,7 +119,7 @@ class Formatter
       }
     rocket::cow_string extract_string() noexcept
       {
-        return this->m_strm_opt ? this->m_strm_opt->extract_string() : rocket::sref("");
+        return this->m_strm_opt ? this->m_strm_opt->extract_string() : rocket::clear;
       }
   };
 
