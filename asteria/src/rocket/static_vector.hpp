@@ -406,7 +406,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       : m_sth(alloc)
       {
       }
-    static_vector(clear_t = noadl::clear) noexcept(is_nothrow_constructible<allocator_type>::value)
+    static_vector(clear_t = { }) noexcept(is_nothrow_constructible<allocator_type>::value)
       : static_vector(allocator_type())
       {
       }

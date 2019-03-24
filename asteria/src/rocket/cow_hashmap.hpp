@@ -798,7 +798,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       : m_sth(alloc, hasher(), key_equal())
       {
       }
-    constexpr cow_hashmap(clear_t = noadl::clear) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+    constexpr cow_hashmap(clear_t = { }) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
                                                                 is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
                                                                 is_nothrow_constructible<allocator_type>>::value)
       : cow_hashmap(allocator_type())

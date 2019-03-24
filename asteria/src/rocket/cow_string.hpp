@@ -664,7 +664,7 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       : m_ptr(::std::addressof(null_char)), m_len(0), m_sth(alloc)
       {
       }
-    constexpr basic_cow_string(clear_t = noadl::clear) noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr basic_cow_string(clear_t = { }) noexcept(is_nothrow_constructible<allocator_type>::value)
       : basic_cow_string(allocator_type())
       {
       }

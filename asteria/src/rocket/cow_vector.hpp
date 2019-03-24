@@ -678,7 +678,7 @@ template<typename valueT, typename allocatorT> class cow_vector
       : m_sth(alloc)
       {
       }
-    constexpr cow_vector(clear_t = noadl::clear) noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr cow_vector(clear_t = { }) noexcept(is_nothrow_constructible<allocator_type>::value)
       : cow_vector(allocator_type())
       {
       }
