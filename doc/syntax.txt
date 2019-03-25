@@ -1,6 +1,7 @@
 document ::=
 	statement-list-opt
 
+
 identifier ::=
 	PCRE([A-Za-z_][A-Za-z_0-9]*)
 literal ::=
@@ -32,6 +33,7 @@ nan-literal ::=
 	"nan"
 infinity-literal ::=
 	"infinity"
+
 
 statement ::=
 	block | nonblock-statement
@@ -135,7 +137,10 @@ try-statement ::=
 expression-opt ::=
 	expression | ""
 expression ::=
-	infix-element infix-carriage-list-opt
+	infix-head infix-carriage-list-opt
+
+infix-head ::=
+	infix-element
 infix-element ::=
 	prefix-operator-list-opt primary-expression postfix-operator-list-opt
 
@@ -185,12 +190,21 @@ postfix-member-access ::=
 infix-carriage-list-opt ::=
 	infix-carriage-list | ""
 infix-carriage-list ::=
-	( infix-selection | infix-carriage ) infix-carriage-list-opt
-infix-selection ::=
-	( "?"  expression ":" | "&&"  | "||"  | "??"  |
-	  "?=" expression ":" | "&&=" | "||=" | "??=" |
-	  "and" | "or" ) infix-element
+	infix-carriage infix-carriage-list-opt
 infix-carriage ::=
-	( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
-	  "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
-	  "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  ) infix-element
+	infix-operator infix-element
+infix-operator ::=
+	infix-operator-ternary | infix-operator-logical-and | infix-operator-logical-or |
+	infix-operator-coalescence | infix-operator-general
+infix-operator-ternary ::=
+	( "?" | "?=" ) expression ":"
+infix-operator-logical-and ::=
+	"&&" | "&&=" | "and"
+infix-operator-logical-or ::=
+	"||" | "||=" | "or"
+infix-operator-coalescence ::=
+	"??" | "??="
+infix-operator-general ::=
+	"+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
+	"+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
+	"="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"
