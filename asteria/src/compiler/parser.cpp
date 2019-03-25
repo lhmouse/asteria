@@ -142,122 +142,6 @@ namespace Asteria {
         return qname;
       }
 
-    Optional<Xprunit> do_accept_prefix_operator_opt(Token_Stream& tstrm)
-      {
-        // prefix-operator ::=
-        //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof"
-        auto qtok = tstrm.peek_opt();
-        if(!qtok) {
-          return rocket::nullopt;
-        }
-        Optional<Xprunit> qunit;
-        switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_keyword:
-          {
-            const auto& alt = qtok->check<Token::S_keyword>();
-            // Hmm... use a lookup table?
-            struct Keyword_Table
-              {
-                Token::Keyword keyword;
-                Xprunit::Xop xop;
-              }
-            static constexpr s_table[] =
-              {
-                { Token::keyword_unset,     Xprunit::xop_prefix_unset    },
-                { Token::keyword_lengthof,  Xprunit::xop_prefix_lengthof },
-                { Token::keyword_typeof,    Xprunit::xop_prefix_typeof   },
-              };
-            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
-                                      [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
-            if(qelem == std::end(s_table)) {
-              // Not acceptable.
-              return rocket::nullopt;
-            }
-            // Return the prefix operator.
-            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
-            qunit = rocket::move(unit_c);
-            break;
-          }
-        case Token::index_punctuator:
-          {
-            const auto& alt = qtok->check<Token::S_punctuator>();
-            // Hmm... use a lookup table?
-            struct Punctuator_Table
-              {
-                Token::Punctuator punct;
-                Xprunit::Xop xop;
-              }
-            static constexpr s_table[] =
-              {
-                { Token::punctuator_add,   Xprunit::xop_prefix_pos  },
-                { Token::punctuator_sub,   Xprunit::xop_prefix_neg  },
-                { Token::punctuator_notb,  Xprunit::xop_prefix_notb },
-                { Token::punctuator_notl,  Xprunit::xop_prefix_notl },
-                { Token::punctuator_inc,   Xprunit::xop_prefix_inc  },
-                { Token::punctuator_dec,   Xprunit::xop_prefix_dec  },
-              };
-            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
-                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
-            if(qelem == std::end(s_table)) {
-              // Not acceptable.
-              return rocket::nullopt;
-            }
-            // Return the prefix operator.
-            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
-            qunit = rocket::move(unit_c);
-            break;
-          }
-        default:
-          return rocket::nullopt;
-        }
-        // Discard this token.
-        tstrm.shift();
-        return qunit;
-      }
-
-    Optional<Xprunit> do_accept_postfix_operator_opt(Token_Stream& tstrm)
-      {
-        // postfix-operator ::=
-        //   "++" | "--"
-        auto qtok = tstrm.peek_opt();
-        if(!qtok) {
-          return rocket::nullopt;
-        }
-        Optional<Xprunit> qunit;
-        switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_punctuator:
-          {
-            const auto& alt = qtok->check<Token::S_punctuator>();
-            // Hmm... use a lookup table?
-            struct Punctuator_Table
-              {
-                Token::Punctuator punct;
-                Xprunit::Xop xop;
-              }
-            static constexpr s_table[] =
-              {
-                { Token::punctuator_inc,   Xprunit::xop_postfix_inc  },
-                { Token::punctuator_dec,   Xprunit::xop_postfix_dec  },
-              };
-            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
-                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
-            if(qelem == std::end(s_table)) {
-              // Not acceptable.
-              return rocket::nullopt;
-            }
-            // Return the postfix operator.
-            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
-            qunit = rocket::move(unit_c);
-            break;
-          }
-        default:
-          return rocket::nullopt;
-        }
-        // Discard this token.
-        tstrm.shift();
-        return qunit;
-      }
-
     Optional<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
       {
         // literal ::=
@@ -297,7 +181,6 @@ namespace Asteria {
             auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
                                       [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
             if(qelem == std::end(s_table)) {
-              // Not acceptable.
               return rocket::nullopt;
             }
             // Set the value.
@@ -374,7 +257,19 @@ namespace Asteria {
     // Accept a statement; a non-block statement is converted to a block consisting of a single statement.
     extern Optional<Cow_Vector<Statement>> do_accept_statement_as_block_opt(Token_Stream& tstrm);
 
-    extern Optional<Cow_Vector<Xprunit>> do_accept_expression_opt(Token_Stream& tstrm);
+    extern bool do_accept_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm);
+
+    Optional<Cow_Vector<Xprunit>> do_accept_expression_opt(Token_Stream& tstrm)
+      {
+        // expression-opt ::=
+        //   expression | ""
+        Cow_Vector<Xprunit> units;
+        bool succ = do_accept_expression(units, tstrm);
+        if(!succ) {
+          return rocket::nullopt;
+        }
+        return rocket::move(units);
+      }
 
     Optional<Cow_Vector<Statement>> do_accept_block_opt(Token_Stream& tstrm)
       {
@@ -1257,99 +1152,168 @@ namespace Asteria {
         return qblock;
       }
 
+    bool do_accept_prefix_operator(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+      {
+        // prefix-operator ::=
+        //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof" | "not"
+        auto qtok = tstrm.peek_opt();
+        if(!qtok) {
+          return false;
+        }
+        Optional<Xprunit> qunit;
+        switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_keyword:
+          {
+            const auto& alt = qtok->check<Token::S_keyword>();
+            // Hmm... use a lookup table?
+            struct Keyword_Table
+              {
+                Token::Keyword keyword;
+                Xprunit::Xop xop;
+              }
+            static constexpr s_table[] =
+              {
+                { Token::keyword_unset,     Xprunit::xop_prefix_unset    },
+                { Token::keyword_lengthof,  Xprunit::xop_prefix_lengthof },
+                { Token::keyword_typeof,    Xprunit::xop_prefix_typeof   },
+                { Token::keyword_not,       Xprunit::xop_prefix_notl     },
+              };
+            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+                                      [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
+            if(qelem == std::end(s_table)) {
+              return false;
+            }
+            // Return the prefix operator.
+            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            units.emplace_back(rocket::move(unit_c));
+            break;
+          }
+        case Token::index_punctuator:
+          {
+            const auto& alt = qtok->check<Token::S_punctuator>();
+            // Hmm... use a lookup table?
+            struct Punctuator_Table
+              {
+                Token::Punctuator punct;
+                Xprunit::Xop xop;
+              }
+            static constexpr s_table[] =
+              {
+                { Token::punctuator_add,   Xprunit::xop_prefix_pos  },
+                { Token::punctuator_sub,   Xprunit::xop_prefix_neg  },
+                { Token::punctuator_notb,  Xprunit::xop_prefix_notb },
+                { Token::punctuator_notl,  Xprunit::xop_prefix_notl },
+                { Token::punctuator_inc,   Xprunit::xop_prefix_inc  },
+                { Token::punctuator_dec,   Xprunit::xop_prefix_dec  },
+              };
+            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
+            if(qelem == std::end(s_table)) {
+              return false;
+            }
+            // Return the prefix operator.
+            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            units.emplace_back(rocket::move(unit_c));
+            break;
+          }
+        default:
+          return false;
+        }
+        // Discard this token.
+        tstrm.shift();
+        return true;
+      }
 
-
-
-
-#if 0
-
-
-
-
-    bool do_accept_named_reference(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_named_reference(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
-        // Get a name first.
-        Cow_String name;
-        if(!do_accept_identifier(name, tstrm)) {
+        // Get an identifier.
+        auto qname = do_accept_identifier_opt(tstrm);
+        if(!qname) {
           return false;
         }
-        // Handle special names.
-        if(name == "__file") {
-          Xprunit::S_literal xpru_c = { D_string(sloc.file()) };
-          xprus.emplace_back(rocket::move(xpru_c));
+        // Replace special names. This is what macros in C do.
+        if(*qname == "__file") {
+          Xprunit::S_literal unit_c = { D_string(sloc.file()) };
+          units.emplace_back(rocket::move(unit_c));
           return true;
         }
-        if(name == "__line") {
-          Xprunit::S_literal xpru_c = { D_integer(sloc.line()) };
-          xprus.emplace_back(rocket::move(xpru_c));
+        if(*qname == "__line") {
+          Xprunit::S_literal unit_c = { D_integer(sloc.line()) };
+          units.emplace_back(rocket::move(unit_c));
           return true;
         }
-        Xprunit::S_named_reference xpru_c = { rocket::move(name) };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_named_reference unit_c = { rocket::move(*qname) };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_literal(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_literal(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
-        Value value;
-        if(!do_accept_literal(value, tstrm)) {
+        // Get a literal as a `Value`.
+        auto qvalue = do_accept_literal_value_opt(tstrm);
+        if(!qvalue) {
           return false;
         }
-        Xprunit::S_literal xpru_c = { rocket::move(value) };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_literal unit_c = { rocket::move(*qvalue) };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_this(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_this(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
-        if(!do_match_keyword(tstrm, Token::keyword_this)) {
+        // Get the keyword `this`.
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_this });
+        if(!qkwrd) {
           return false;
         }
-        Xprunit::S_named_reference xpru_c = { rocket::sref("__this") };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_named_reference unit_c = { rocket::sref("__this") };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_closure_function(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    Optional<Cow_Vector<Statement>> do_accept_closure_body_opt(Token_Stream& tstrm)
+      {
+        // closure-body ::=
+        //   block | equal-initializer
+        auto qblock = do_accept_block_opt(tstrm);
+        if(qblock) {
+          return qblock;
+        }
+        auto qinit = do_accept_equal_initializer_opt(tstrm);
+        if(qinit) {
+          Statement::S_return stmt_c = { true, rocket::move(*qinit) };
+          qblock.emplace().emplace_back(rocket::move(stmt_c));
+          return qblock;
+        }
+        return qblock;
+      }
+
+    bool do_accept_closure_function(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // closure-function ::=
-        //   "func" parameter-list ( block | equal-initializer )
-        if(!do_match_keyword(tstrm, Token::keyword_func)) {
+        //   "func" parameter-list closure-body
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_func });
+        if(!qkwrd) {
           return false;
         }
-        Cow_Vector<PreHashed_String> params;
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+        auto kparams = do_accept_parameter_list_opt(tstrm);
+        if(!kparams) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
-        if(do_accept_identifier_list(params, tstrm)) {
-          // This is optional.
+        auto qbody = do_accept_closure_body_opt(tstrm);
+        if(!qbody) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_or_equal_initializer_expected);
         }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
-        }
-        Cow_Vector<Statement> body;
-        if(!do_accept_block_statement_list(body, tstrm)) {
-          // An equals sign followed by an expression is expected, which behaves as if it was the operand of a `return&` ststement.
-          if(!do_match_punctuator(tstrm, Token::punctuator_assign)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_expected);
-          }
-          Cow_Vector<Xprunit> xprus_ret;
-          if(!do_accept_expression(xprus_ret, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_or_expression_expected);
-          }
-          Statement::S_return stmt_c = { true, rocket::move(xprus_ret) };
-          body.emplace_back(rocket::move(stmt_c));
-        }
-        Xprunit::S_closure_function xpru_c = { rocket::move(sloc), rocket::move(params), rocket::move(body) };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_closure_function unit_c = { rocket::move(sloc), rocket::move(*kparams), rocket::move(*qbody) };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_unnamed_array(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_unnamed_array(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // unnamed-array ::=
         //   "[" array-element-list-opt "]"
@@ -1357,30 +1321,33 @@ namespace Asteria {
         //   array-element-list | ""
         // array-element-list ::=
         //   expression ( ( "," | ";" ) array-element-list-opt | "" )
-        if(!do_match_punctuator(tstrm, Token::punctuator_bracket_op)) {
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op });
+        if(!kpunct) {
           return false;
         }
         std::size_t nelems = 0;
         for(;;) {
-          if(!do_accept_expression(xprus, tstrm)) {
+          bool succ = do_accept_expression(units, tstrm);
+          if(!succ) {
             break;
           }
-          ++nelems;
-          bool has_next = do_match_punctuator(tstrm, Token::punctuator_comma) ||
-                          do_match_punctuator(tstrm, Token::punctuator_semicol);
-          if(!has_next) {
+          nelems += 1;
+          // Look for the separator.
+          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma, Token::punctuator_semicol });
+          if(!kpunct) {
             break;
           }
         }
-        if(!do_match_punctuator(tstrm, Token::punctuator_bracket_cl)) {
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+        if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_or_expression_expected);
         }
-        Xprunit::S_unnamed_array xpru_c = { nelems };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_unnamed_array unit_c = { nelems };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_unnamed_object(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_unnamed_object(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // unnamed-object ::=
         //   "{" key-mapped-list-opt "}"
@@ -1388,75 +1355,142 @@ namespace Asteria {
         //   key-mapped-list | ""
         // key-mapped-list ::=
         //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) key-mapped-list-opt | "" )
-        if(!do_match_punctuator(tstrm, Token::punctuator_brace_op)) {
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_op });
+        if(!kpunct) {
           return false;
         }
         Cow_Vector<PreHashed_String> keys;
         for(;;) {
           auto duplicate_key_error = do_make_parser_error(tstrm, Parser_Error::code_duplicate_object_key);
-          Cow_String key;
-          bool key_got = do_accept_string_literal(key, tstrm) ||
-                         do_accept_identifier(key, tstrm) ||
-                         do_accept_keyword_as_identifier(key, tstrm);
-          if(!key_got) {
+          auto qkey = do_accept_json5_key_opt(tstrm);
+          if(!qkey) {
             break;
           }
-          if(!do_match_punctuator(tstrm, Token::punctuator_assign)) {
-            if(!do_match_punctuator(tstrm, Token::punctuator_colon)) {
-              throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_or_colon_expected);
-            }
-          }
-          if(std::find(keys.begin(), keys.end(), key) != keys.end()) {
+          if(rocket::any_of(keys, [&](const PreHashed_String& r) { return r == *qkey;  })) {
             throw duplicate_key_error;
           }
-          if(!do_accept_expression(xprus, tstrm)) {
+          // Look for the initializer.
+          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_assign, Token::punctuator_colon });
+          if(!kpunct) {
+            throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_or_colon_expected);
+          }
+          bool succ = do_accept_expression(units, tstrm);
+          if(!succ) {
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
-          keys.emplace_back(rocket::move(key));
-          bool has_next = do_match_punctuator(tstrm, Token::punctuator_comma) ||
-                          do_match_punctuator(tstrm, Token::punctuator_semicol);
-          if(!has_next) {
+          keys.emplace_back(rocket::move(*qkey));
+          // Look for the separator.
+          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma, Token::punctuator_semicol });
+          if(!kpunct) {
             break;
           }
         }
-        if(!do_match_punctuator(tstrm, Token::punctuator_brace_cl)) {
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+        if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_object_key_expected);
         }
-        Xprunit::S_unnamed_object xpru_c = { rocket::move(keys) };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_unnamed_object unit_c = { rocket::move(keys) };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_nested_expression(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_nested_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // nested-expression ::=
         //   "(" expression ")"
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
           return false;
         }
-        if(!do_accept_expression(xprus, tstrm)) {
+        bool succ = do_accept_expression(units, tstrm);
+        if(!succ) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
         return true;
       }
 
-    bool do_accept_primary_expression(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_primary_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // primary-expression ::=
         //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
-        return do_accept_named_reference(xprus, tstrm) ||
-               do_accept_literal(xprus, tstrm) ||
-               do_accept_this(xprus, tstrm) ||
-               do_accept_closure_function(xprus, tstrm) ||
-               do_accept_unnamed_object(xprus, tstrm) ||
-               do_accept_unnamed_array(xprus, tstrm) ||
-               do_accept_nested_expression(xprus, tstrm);
+        bool succ = do_accept_named_reference(units, tstrm);
+        if(succ) {
+          return succ;
+        }
+        succ = do_accept_literal(units, tstrm);
+        if(succ) {
+          return succ;
+        }
+        succ = do_accept_this(units, tstrm);
+        if(succ) {
+          return succ;
+        }
+        succ = do_accept_closure_function(units, tstrm);
+        if(succ) {
+          return succ;
+        }
+        succ = do_accept_unnamed_array(units, tstrm);
+        if(succ) {
+          return succ;
+        }
+        succ = do_accept_unnamed_object(units, tstrm);
+        if(succ) {
+          return succ;
+        }
+        succ = do_accept_nested_expression(units, tstrm);
+        if(succ) {
+          return succ;
+        }
+        return succ;
       }
 
-    bool do_accept_postfix_function_call(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_postfix_operator(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+      {
+        // postfix-operator ::=
+        //   "++" | "--"
+        auto qtok = tstrm.peek_opt();
+        if(!qtok) {
+          return false;
+        }
+        Optional<Xprunit> qunit;
+        switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_punctuator:
+          {
+            const auto& alt = qtok->check<Token::S_punctuator>();
+            // Hmm... use a lookup table?
+            struct Punctuator_Table
+              {
+                Token::Punctuator punct;
+                Xprunit::Xop xop;
+              }
+            static constexpr s_table[] =
+              {
+                { Token::punctuator_inc,   Xprunit::xop_postfix_inc  },
+                { Token::punctuator_dec,   Xprunit::xop_postfix_dec  },
+              };
+            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
+            if(qelem == std::end(s_table)) {
+              return false;
+            }
+            // Return the postfix operator.
+            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            units.emplace_back(rocket::move(unit_c));
+            break;
+          }
+        default:
+          return false;
+        }
+        // Discard this token.
+        tstrm.shift();
+        return true;
+      }
+
+    bool do_accept_postfix_function_call(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -1464,70 +1498,77 @@ namespace Asteria {
         //   "(" expression-list-opt ")"
         // expression-list ::=
         //   expression ( "," expression-list | "" )
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_op)) {
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
           return false;
         }
         std::size_t nargs = 0;
-        if(do_accept_expression(xprus, tstrm)) {
-          for(;;) {
-            ++nargs;
-            if(!do_match_punctuator(tstrm, Token::punctuator_comma)) {
+        for(;;) {
+          bool succ = do_accept_expression(units, tstrm);
+          if(!succ) {
+            if(nargs == 0) {
               break;
             }
-            if(!do_accept_expression(xprus, tstrm)) {
-              throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-            }
+            throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+          }
+          nargs += 1;
+          // Look for the separator.
+          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+          if(!kpunct) {
+            break;
           }
         }
-        if(!do_match_punctuator(tstrm, Token::punctuator_parenth_cl)) {
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
-        Xprunit::S_function_call xpru_c = { rocket::move(sloc), nargs };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_function_call unit_c = { rocket::move(sloc), nargs };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // postfix-subscript ::=
         //   "[" expression "]"
-        if(!do_match_punctuator(tstrm, Token::punctuator_bracket_op)) {
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op });
+        if(!kpunct) {
           return false;
         }
-        if(!do_accept_expression(xprus, tstrm)) {
+        bool succ = do_accept_expression(units, tstrm);
+        if(!succ) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        if(!do_match_punctuator(tstrm, Token::punctuator_bracket_cl)) {
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+        if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
-        Xprunit::S_operator_rpn xpru_c = { Xprunit::xop_postfix_at, false };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_operator_rpn unit_c = { Xprunit::xop_postfix_at, false };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // postfix-member-access ::=
         //   "." ( string-literal | identifier )
-        if(!do_match_punctuator(tstrm, Token::punctuator_dot)) {
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_dot });
+        if(!kpunct) {
           return false;
         }
-        Cow_String key;
-        bool key_got = do_accept_string_literal(key, tstrm) ||
-                       do_accept_identifier(key, tstrm) ||
-                       do_accept_keyword_as_identifier(key, tstrm);
-        if(!key_got) {
+        auto qkey = do_accept_json5_key_opt(tstrm);
+        if(!qkey) {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        Xprunit::S_member_access xpru_c = { rocket::move(key) };
-        xprus.emplace_back(rocket::move(xpru_c));
+        Xprunit::S_member_access unit_c = { rocket::move(*qkey) };
+        units.emplace_back(rocket::move(unit_c));
         return true;
       }
 
-    bool do_accept_infix_element(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_infix_element(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // infix-element ::=
-        //   ( prefix-operator-list primary-expression | primary_expression ) postfix-operator-list-opt
+        //   prefix-operator-list-opt primary-expression postfix-operator-list-opt
         // prefix-operator-list-opt ::=
         //   prefix-operator-list | ""
         // prefix-operator-list ::=
@@ -1537,36 +1578,60 @@ namespace Asteria {
         // postfix-operator-list ::=
         //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
         Cow_Vector<Xprunit> prefixes;
-        if(!do_accept_prefix_operator(prefixes, tstrm)) {
-          if(!do_accept_primary_expression(xprus, tstrm)) {
+        bool succ;
+        do {
+          succ = do_accept_prefix_operator(units, tstrm);
+        } while(succ);
+        // Get a `primary-expression` with suffixes.
+        // Fail if some prefixes have been consumed but no primary expression can be accepted.
+        succ = do_accept_primary_expression(units, tstrm);
+        if(!succ) {
+          if(prefixes.empty()) {
             return false;
           }
-        } else {
-          for(;;) {
-            bool prefix_got = do_accept_prefix_operator(prefixes, tstrm);
-            if(!prefix_got) {
-              break;
-            }
-          }
-          if(!do_accept_primary_expression(xprus, tstrm)) {
-            throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
-          }
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        for(;;) {
-          bool postfix_got = do_accept_postfix_operator(xprus, tstrm) ||
-                             do_accept_postfix_function_call(xprus, tstrm) ||
-                             do_accept_postfix_subscript(xprus, tstrm) ||
-                             do_accept_postfix_member_access(xprus, tstrm);
-          if(!postfix_got) {
-            break;
-          }
-        }
-        while(!prefixes.empty()) {
-          xprus.emplace_back(rocket::move(prefixes.mut_back()));
-          prefixes.pop_back();
-        }
+        do {
+          succ = do_accept_postfix_operator(units, tstrm);
+        } while(succ);
+        // Append prefixes in reverse order.
+        // N.B. Prefix operators have lower precedence than postfix ones.
+        units.append(std::make_move_iterator(prefixes.mut_rbegin()), std::make_move_iterator(prefixes.mut_rend()));
         return true;
       }
+
+
+        // expression ::=
+        //   infix-element infix-carriage-list-opt
+
+
+
+
+        // infix-carriage-list-opt ::=
+        //   infix-carriage-list | ""
+        // infix-carriage-list ::=
+        //   ( infix-selection | infix-carriage ) infix-carriage-list-opt
+        // infix-selection ::=
+        //   ( "?"  expression ":" | "&&"  | "||"  | "??"  |
+        //     "?=" expression ":" | "&&=" | "||=" | "??=" |
+        //     "and" | "or" ) infix-element
+        // infix-carriage ::=
+        //   ( "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
+        //     "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
+        //     "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"  ) infix-element
+
+
+
+
+
+#if 0
+
+
+
+
+
+
+
 
     class Infix_Element_Base
       {
@@ -1598,18 +1663,18 @@ namespace Asteria {
 
       public:
         virtual Precedence precedence() const noexcept = 0;
-        virtual void extract(Cow_Vector<Xprunit>& xprus) = 0;
+        virtual void extract(Cow_Vector<Xprunit>& units) = 0;
         virtual void append(Infix_Element_Base&& elem) = 0;
       };
 
     class Infix_Head : public Infix_Element_Base
       {
       private:
-        Cow_Vector<Xprunit> m_xprus;
+        Cow_Vector<Xprunit> m_units;
 
       public:
-        explicit Infix_Head(Cow_Vector<Xprunit>&& xprus)
-          : m_xprus(rocket::move(xprus))
+        explicit Infix_Head(Cow_Vector<Xprunit>&& units)
+          : m_units(rocket::move(units))
           {
           }
 
@@ -1618,23 +1683,23 @@ namespace Asteria {
           {
             return precedence_max;
           }
-        void extract(Cow_Vector<Xprunit>& xprus) override
+        void extract(Cow_Vector<Xprunit>& units) override
           {
-            xprus.append(std::make_move_iterator(this->m_xprus.mut_begin()), std::make_move_iterator(this->m_xprus.mut_end()));
+            units.append(std::make_move_iterator(this->m_units.mut_begin()), std::make_move_iterator(this->m_units.mut_end()));
           }
         void append(Infix_Element_Base&& elem) override
           {
-            elem.extract(this->m_xprus);
+            elem.extract(this->m_units);
           }
       };
 
     bool do_accept_infix_head(Uptr<Infix_Element_Base>& elem, Token_Stream& tstrm)
       {
-        Cow_Vector<Xprunit> xprus;
-        if(!do_accept_infix_element(xprus, tstrm)) {
+        Cow_Vector<Xprunit> units;
+        if(!do_accept_infix_element(units, tstrm)) {
           return false;
         }
-        elem = rocket::make_unique<Infix_Head>(rocket::move(xprus));
+        elem = rocket::make_unique<Infix_Head>(rocket::move(units));
         return true;
       }
 
@@ -1688,15 +1753,15 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix selection `", this->m_sop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xprunit>& xprus) override
+        void extract(Cow_Vector<Xprunit>& units) override
           {
             if(this->m_sop == sop_coales) {
               Xprunit::S_coalescence xpru_c = { rocket::move(this->m_branch_false), this->m_assign };
-              xprus.emplace_back(rocket::move(xpru_c));
+              units.emplace_back(rocket::move(xpru_c));
               return;
             }
             Xprunit::S_branch xpru_c = { rocket::move(this->m_branch_true), rocket::move(this->m_branch_false), this->m_assign };
-            xprus.emplace_back(rocket::move(xpru_c));
+            units.emplace_back(rocket::move(xpru_c));
           }
         void append(Infix_Element_Base&& elem) override
           {
@@ -1850,12 +1915,12 @@ namespace Asteria {
               ASTERIA_TERMINATE("Invalid infix operator `", this->m_xop, "` has been encountered.");
             }
           }
-        void extract(Cow_Vector<Xprunit>& xprus) override
+        void extract(Cow_Vector<Xprunit>& units) override
           {
-            xprus.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
+            units.append(std::make_move_iterator(this->m_rhs.mut_begin()), std::make_move_iterator(this->m_rhs.mut_end()));
             // Don't forget the operator!
             Xprunit::S_operator_rpn xpru_c = { this->m_xop, this->m_assign };
-            xprus.emplace_back(rocket::move(xpru_c));
+            units.emplace_back(rocket::move(xpru_c));
           }
         void append(Infix_Element_Base&& elem) override
           {
@@ -2047,7 +2112,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_expression(Cow_Vector<Xprunit>& xprus, Token_Stream& tstrm)
+    bool do_accept_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // expression ::=
         //   infix-element infix-carriage-list-opt
@@ -2088,53 +2153,10 @@ namespace Asteria {
           stack.rbegin()[1]->append(rocket::move(*(stack.back())));
           stack.pop_back();
         }
-        stack.front()->extract(xprus);
+        stack.front()->extract(units);
         return true;
       }
 
-    bool do_accept_nonblock_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // nonblock-statement ::=
-        //   null-statement |
-        //   variable-definition | immutable-variable-definition | function-definition |
-        //   expression-statement |
-        //   if-statement | switch-statement |
-        //   do-while-statement | while-statement | for-statement |
-        //   break-statement | continue-statement | throw-statement | return-statement | assert-statement |
-        //   try-statement
-        return do_match_punctuator(tstrm, Token::punctuator_semicol) ||
-               do_accept_variable_definition(stmts, tstrm) ||
-               do_accept_immutable_variable_definition(stmts, tstrm) ||
-               do_accept_function_definition(stmts, tstrm) ||
-               do_accept_expression_statement(stmts, tstrm) ||
-               do_accept_if_statement(stmts, tstrm) ||
-               do_accept_switch_statement(stmts, tstrm) ||
-               do_accept_do_while_statement(stmts, tstrm) ||
-               do_accept_while_statement(stmts, tstrm) ||
-               do_accept_for_statement(stmts, tstrm) ||
-               do_accept_break_statement(stmts, tstrm) ||
-               do_accept_continue_statement(stmts, tstrm) ||
-               do_accept_throw_statement(stmts, tstrm) ||
-               do_accept_return_statement(stmts, tstrm) ||
-               do_accept_assert_statement(stmts, tstrm) ||
-               do_accept_try_statement(stmts, tstrm);
-      }
-
-    bool do_accept_statement_as_block(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // statement ::=
-        //   block-statement | nonblock-statement
-        return do_accept_block_statement_list(stmts, tstrm) ||
-               do_accept_nonblock_statement(stmts, tstrm);
-      }
-
-    bool do_accept_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
-      {
-        // statement ::=
-        //   block-statement | nonblock-statement
-        return do_accept_block_statement(stmts, tstrm) ||
-               do_accept_nonblock_statement(stmts, tstrm);
-      }
 #endif
 
     }  // namespace
