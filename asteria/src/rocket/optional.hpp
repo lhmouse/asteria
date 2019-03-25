@@ -260,6 +260,28 @@ template<typename valueT> constexpr bool operator!=(nullopt_t, const optional<va
     return !!rhs;
   }
 
+template<typename valueT> constexpr bool operator==(const optional<valueT>& lhs, const valueT& rhs) noexcept(noexcept(::std::declval<const valueT&>()
+                                                                                                                      == ::std::declval<const valueT&>()))
+  {
+    return !!lhs && (*lhs == rhs);
+  }
+template<typename valueT> constexpr bool operator!=(const optional<valueT>& lhs, const valueT& rhs) noexcept(noexcept(::std::declval<const valueT&>()
+                                                                                                                      != ::std::declval<const valueT&>()))
+  {
+    return +!lhs || (*lhs != rhs);
+  }
+
+template<typename valueT> constexpr bool operator==(const valueT& lhs, const optional<valueT>& rhs) noexcept(noexcept(::std::declval<const valueT&>()
+                                                                                                                      == ::std::declval<const valueT&>()))
+  {
+    return !!rhs && (lhs == *rhs);
+  }
+template<typename valueT> constexpr bool operator!=(const valueT& lhs, const optional<valueT>& rhs) noexcept(noexcept(::std::declval<const valueT&>()
+                                                                                                                      != ::std::declval<const valueT&>()))
+  {
+    return +!rhs || (lhs != *rhs);
+  }
+
 template<typename charT, typename traitsT,
          typename valueT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
                                                                            const optional<valueT>& rhs)
