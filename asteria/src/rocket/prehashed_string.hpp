@@ -321,23 +321,27 @@ template<typename stringT, typename hashT> inline bool operator!=(const basic_pr
     return (lhs.rdhash() != rhs.rdhash()) || (lhs.rdstr() != rhs.rdstr());
   }
 
-template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>() == ::std::declval<const otherT&>()))
+template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>()
+                                                                                    == ::std::declval<const otherT&>()))
          > inline bool operator==(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
   {
     return lhs.rdstr() == rhs;
   }
-template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>() != ::std::declval<const otherT&>()))
+template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>()
+                                                                                    != ::std::declval<const otherT&>()))
          > inline bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
   {
     return lhs.rdstr() != rhs;
   }
 
-template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>() == ::std::declval<const stringT&>()))
+template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>()
+                                                                                    == ::std::declval<const stringT&>()))
          > inline bool operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return lhs == rhs.rdstr();
   }
-template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>() != ::std::declval<const stringT&>()))
+template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>()
+                                                                                    != ::std::declval<const stringT&>()))
          > inline bool operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return lhs != rhs.rdstr();
@@ -351,7 +355,7 @@ template<typename stringT, typename hashT> inline void swap(basic_prehashed_stri
 
 template<typename charT, typename traitsT,
          typename stringT, typename hashT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
-                                                                                             const basic_prehashed_string<stringT, hashT>& str)
+                                                                                            const basic_prehashed_string<stringT, hashT>& str)
   {
     return os << str.rdstr();
   }
