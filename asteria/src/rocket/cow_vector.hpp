@@ -678,7 +678,7 @@ template<typename valueT, typename allocatorT> class cow_vector
       : m_sth(alloc)
       {
       }
-    constexpr cow_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
+    constexpr cow_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
       : cow_vector(allocator_type())
       {
       }
@@ -729,11 +729,6 @@ template<typename valueT, typename allocatorT> class cow_vector
       : cow_vector(alloc)
       {
         this->assign(init);
-      }
-    cow_vector& operator=(clear_t) noexcept
-      {
-        this->clear();
-        return *this;
       }
     cow_vector& operator=(const cow_vector& other) noexcept
       {

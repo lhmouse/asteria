@@ -43,14 +43,14 @@ D_string std_string_substr(const D_string& text, D_integer from, D_integer lengt
   {
     if(length <= 0) {
       // No byte is to be copied.
-      return rocket::clear;
+      return rocket::nought;
     }
     auto slen = static_cast<std::ptrdiff_t>(text.size());
     if(from >= 0) {
       // This is the same as `std::string::substr()` except that no `std::out_of_range` is thrown.
       if(from >= slen) {
         // Return an empty string if `from` is out of range.
-        return rocket::clear;
+        return rocket::nought;
       }
       auto rlen = rocket::min(length, slen);
       return text.substr(static_cast<std::size_t>(from), static_cast<std::size_t>(rlen));
@@ -60,7 +60,7 @@ D_string std_string_substr(const D_string& text, D_integer from, D_integer lengt
     auto wto = from + length;
     if(wto <= -slen) {
       // Return an empty string if `from` is out of range.
-      return rocket::clear;
+      return rocket::nought;
     }
     auto wfrom = rocket::max(from, -slen);
     return text.substr(static_cast<std::size_t>(slen + wfrom), static_cast<std::size_t>(wto - wfrom));
@@ -75,7 +75,7 @@ D_string std_string_trim(const D_string& text, const D_string& reject)
     auto start = text.find_first_not_of(reject);
     if(start == D_string::npos) {
       // There is no byte to keep. Return an empty string.
-      return rocket::clear;
+      return rocket::nought;
     }
     auto end = text.find_last_not_of(reject);
     if((start == 0) && (end == text.size() - 1)) {
@@ -95,7 +95,7 @@ D_string std_string_trim_left(const D_string& text, const D_string& reject)
     auto start = text.find_first_not_of(reject);
     if(start == D_string::npos) {
       // There is no byte to keep. Return an empty string.
-      return rocket::clear;
+      return rocket::nought;
     }
     if(start == 0) {
       // There is no byte to strip. Make use of reference counting.
@@ -114,7 +114,7 @@ D_string std_string_trim_right(const D_string& text, const D_string& reject)
     auto end = text.find_last_not_of(reject);
     if(end == D_string::npos) {
       // There is no byte to keep. Return an empty string.
-      return rocket::clear;
+      return rocket::nought;
     }
     if(end == text.size() - 1) {
       // There is no byte to strip. Make use of reference counting.
