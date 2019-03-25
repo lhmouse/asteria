@@ -406,7 +406,7 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       : m_sth(alloc)
       {
       }
-    static_vector() noexcept(is_nothrow_constructible<allocator_type>::value)
+    static_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       : static_vector(allocator_type())
       {
       }
@@ -450,6 +450,11 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       : static_vector(alloc)
       {
         this->assign(init);
+      }
+    static_vector& operator=(clear_t) noexcept
+      {
+        this->clear();
+        return *this;
       }
     static_vector& operator=(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                                                                               is_nothrow_copy_constructible<value_type>>::value)

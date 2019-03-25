@@ -505,14 +505,12 @@ template<unsigned long long valueT> struct lowest_unsigned : details_utilities::
   {
   };
 
-struct nought_t
+// This tag value is used to construct an empty container.
+// Assigning `clear` to a container clears it.
+struct clear_t
   {
-    template<typename valueT> constexpr operator valueT () const noexcept(noexcept(conjunction<is_nothrow_constructible<valueT>>::value))
-      {
-        return { };
-      }
   }
-constexpr nought;
+constexpr clear;
 
 }  // namespace rocket
 
