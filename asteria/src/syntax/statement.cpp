@@ -314,42 +314,6 @@ namespace Asteria {
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_for(Evaluation_Stack& stack, Executive_Context& ctx,
-                                    const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
-      {
-        // Decode arguments.
-        const auto& code_init = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto& code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto& code_step = p.at(2).as<Cow_Vector<Air_Node>>();
-        const auto& code_body = p.at(3).as<Cow_Vector<Air_Node>>();
-        // This is the same as a `for` loop in C.
-        Executive_Context ctx_for(&ctx);
-        do_execute_statement_list(stack, ctx_for, code_init, func, global);
-        for(;;) {
-          // Treat an empty condition as being always true.
-          if(!code_cond.empty()) {
-            // Check the condition.
-            do_evaluate_expression(stack, ctx_for, code_cond, func, global);
-            if(stack.get_top_reference().read().test() == false) {
-              break;
-            }
-          }
-          // Execute the body. Break out of the loop if requested. Forward any status codes unexpected to the caller.
-          auto status = do_execute_block(stack, ctx_for, code_body, func, global);
-          if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_for })) {
-            break;
-          }
-          if(rocket::is_none_of(status, { Air_Node::status_next, Air_Node::status_continue_unspec, Air_Node::status_continue_for })) {
-            return status;
-          }
-          // Evaluate the step expression and discard its value.
-          if(!code_step.empty()) {
-            do_evaluate_expression(stack, ctx_for, code_step, func, global);
-          }
-        }
-        return Air_Node::status_next;
-      }
-
     Air_Node::Status do_execute_for_each(Evaluation_Stack& stack, Executive_Context& ctx,
                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
       {
@@ -418,6 +382,42 @@ namespace Asteria {
           }
         default:
           ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_type_name(range_value.type()), "`.");
+        }
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_for(Evaluation_Stack& stack, Executive_Context& ctx,
+                                    const Cow_Vector<Air_Node::Param>& p, const Cow_String& func, const Global_Context& global)
+      {
+        // Decode arguments.
+        const auto& code_init = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto& code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto& code_step = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p.at(3).as<Cow_Vector<Air_Node>>();
+        // This is the same as a `for` loop in C.
+        Executive_Context ctx_for(&ctx);
+        do_execute_statement_list(stack, ctx_for, code_init, func, global);
+        for(;;) {
+          // Treat an empty condition as being always true.
+          if(!code_cond.empty()) {
+            // Check the condition.
+            do_evaluate_expression(stack, ctx_for, code_cond, func, global);
+            if(stack.get_top_reference().read().test() == false) {
+              break;
+            }
+          }
+          // Execute the body. Break out of the loop if requested. Forward any status codes unexpected to the caller.
+          auto status = do_execute_block(stack, ctx_for, code_body, func, global);
+          if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_for })) {
+            break;
+          }
+          if(rocket::is_none_of(status, { Air_Node::status_next, Air_Node::status_continue_unspec, Air_Node::status_continue_for })) {
+            return status;
+          }
+          // Evaluate the step expression and discard its value.
+          if(!code_step.empty()) {
+            do_evaluate_expression(stack, ctx_for, code_step, func, global);
+          }
         }
         return Air_Node::status_next;
       }
@@ -651,20 +651,6 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         code.emplace_back(do_execute_while, rocket::move(p));
         return;
       }
-    case index_for:
-      {
-        const auto& alt = this->m_stor.as<S_for>();
-        // Create a fresh context for the `for` loop.
-        Analytic_Context ctx_for(&ctx);
-        // Encode arguments.
-        Cow_Vector<Air_Node::Param> p;
-        p.emplace_back(do_generate_code_statement_list(nullptr, ctx_for, alt.init));  // 0
-        p.emplace_back(do_generate_code_expression(ctx_for, alt.cond));  // 1
-        p.emplace_back(do_generate_code_expression(ctx_for, alt.step));  // 2
-        p.emplace_back(do_generate_code_block(ctx_for, alt.body));  // 3
-        code.emplace_back(do_execute_for, rocket::move(p));
-        return;
-      }
     case index_for_each:
       {
         const auto& alt = this->m_stor.as<S_for_each>();
@@ -679,6 +665,20 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         p.emplace_back(do_generate_code_expression(ctx_for, alt.init));  // 2
         p.emplace_back(do_generate_code_block(ctx_for, alt.body));  // 3
         code.emplace_back(do_execute_for_each, rocket::move(p));
+        return;
+      }
+    case index_for:
+      {
+        const auto& alt = this->m_stor.as<S_for>();
+        // Create a fresh context for the `for` loop.
+        Analytic_Context ctx_for(&ctx);
+        // Encode arguments.
+        Cow_Vector<Air_Node::Param> p;
+        p.emplace_back(do_generate_code_statement_list(nullptr, ctx_for, alt.init));  // 0
+        p.emplace_back(do_generate_code_expression(ctx_for, alt.cond));  // 1
+        p.emplace_back(do_generate_code_expression(ctx_for, alt.step));  // 2
+        p.emplace_back(do_generate_code_block(ctx_for, alt.body));  // 3
+        code.emplace_back(do_execute_for, rocket::move(p));
         return;
       }
     case index_try:

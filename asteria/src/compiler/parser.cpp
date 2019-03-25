@@ -1746,8 +1746,6 @@ namespace Asteria {
 
     bool do_accept_try_statement(Cow_Vector<Statement>& stmts, Token_Stream& tstrm)
       {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
         // try-statement ::=
         //   "try" statement "catch" "(" identifier ")" statement
         if(!do_match_keyword(tstrm, Token::keyword_try)) {
@@ -1774,7 +1772,7 @@ namespace Asteria {
         if(!do_accept_statement_as_block(body_catch, tstrm)) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        Statement::S_try stmt_c = { rocket::move(body_try), rocket::move(sloc), rocket::move(except_name), rocket::move(body_catch) };
+        Statement::S_try stmt_c = { rocket::move(body_try), rocket::move(except_name), rocket::move(body_catch) };
         stmts.emplace_back(rocket::move(stmt_c));
         return true;
       }

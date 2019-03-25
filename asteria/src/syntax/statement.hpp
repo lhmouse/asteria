@@ -69,13 +69,6 @@ class Statement
         Cow_Vector<Xprunit> cond;
         Cow_Vector<Statement> body;
       };
-    struct S_for
-      {
-        Cow_Vector<Statement> init;
-        Cow_Vector<Xprunit> cond;
-        Cow_Vector<Xprunit> step;
-        Cow_Vector<Statement> body;
-      };
     struct S_for_each
       {
         PreHashed_String key_name;
@@ -83,10 +76,16 @@ class Statement
         Cow_Vector<Xprunit> init;
         Cow_Vector<Statement> body;
       };
+    struct S_for
+      {
+        Cow_Vector<Statement> init;
+        Cow_Vector<Xprunit> cond;
+        Cow_Vector<Xprunit> step;
+        Cow_Vector<Statement> body;
+      };
     struct S_try
       {
         Cow_Vector<Statement> body_try;
-        Source_Location sloc;
         PreHashed_String except_name;
         Cow_Vector<Statement> body_catch;
       };
@@ -126,8 +125,8 @@ class Statement
         index_switch      =  5,
         index_do_while    =  6,
         index_while       =  7,
-        index_for         =  8,
-        index_for_each    =  9,
+        index_for_each    =  8,
+        index_for         =  9,
         index_try         = 10,
         index_break       = 11,
         index_continue    = 12,
@@ -145,8 +144,8 @@ class Statement
         , S_switch      //  5,
         , S_do_while    //  6,
         , S_while       //  7,
-        , S_for         //  8,
-        , S_for_each    //  9,
+        , S_for_each    //  8,
+        , S_for         //  9,
         , S_try         // 10,
         , S_break       // 11,
         , S_continue    // 12,
