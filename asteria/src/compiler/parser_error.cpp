@@ -191,9 +191,9 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
       {
         return "Expectation failed while looking for a `]`.";
       }
-    case code_open_brace_or_expression_expected:
+    case code_open_brace_or_equal_initializer_expected:
       {
-        return "Expectation failed while looking for an `{` or expression.";
+        return "Expectation failed while looking for an `{` or `=`.";
       }
     case code_equals_sign_or_colon_expected:
       {

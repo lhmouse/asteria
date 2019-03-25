@@ -64,7 +64,7 @@ class Parser_Error
         code_duplicate_object_key                       = 4021,
         code_closed_parenthesis_or_argument_expected    = 4022,
         code_closed_bracket_expected                    = 4023,
-        code_open_brace_or_expression_expected          = 4024,
+        code_open_brace_or_equal_initializer_expected   = 4024,
         code_equals_sign_or_colon_expected              = 4025,
         code_semicolon_or_expression_expected           = 4026,
       };
