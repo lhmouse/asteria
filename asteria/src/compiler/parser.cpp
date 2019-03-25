@@ -2143,8 +2143,7 @@ namespace Asteria {
         // infix-operator ::=
         //   infix-operator-ternary | infix-operator-logical-and | infix-operator-logical-or |
         //   infix-operator-coalescence | infix-operator-general
-        Uptr<Infix_Element_Base> qelem;
-        qelem = do_accept_infix_operator_ternary_opt(tstrm);
+        auto qelem = do_accept_infix_operator_ternary_opt(tstrm);
         if(qelem) {
           return qelem;
         }
