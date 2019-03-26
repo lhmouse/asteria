@@ -68,7 +68,7 @@ D_object create_bindings_debug()
             // Fail.
             reader.throw_no_matching_function_call();
           },
-        // Opaque parameters
+        // Opaque parameter
         D_null()
       )));
     //===================================================================
@@ -105,7 +105,7 @@ D_object create_bindings_debug()
             // Fail.
             reader.throw_no_matching_function_call();
           },
-        // Opaque parameters
+        // Opaque parameter
         D_null()
       )));
     //===================================================================
