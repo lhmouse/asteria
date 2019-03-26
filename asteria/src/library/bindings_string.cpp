@@ -242,7 +242,7 @@ D_string std_string_implode(const D_array& segments, const D_string& delim)
     return text;
   }
 
-D_string std_string_hex_encode(const D_string &text, const D_string &delim, D_boolean uppercase)
+D_string std_string_hex_encode(const D_string& text, const D_string& delim, D_boolean uppercase)
   {
     D_string hstr;
     auto rpos = text.begin();
@@ -265,7 +265,7 @@ D_string std_string_hex_encode(const D_string &text, const D_string &delim, D_bo
     return hstr;
   }
 
-Optional<D_string> std_string_hex_decode(const D_string &hstr)
+Optional<D_string> std_string_hex_decode(const D_string& hstr)
   {
     D_string text;
     // Remember the value of a previous digit. `-1` means no such digit exists.
