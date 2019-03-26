@@ -112,35 +112,34 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        Optional<Cow_String> qname;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
             const auto& alt = qtok->check<Token::S_keyword>();
-            // Treat the keyword as a plain identifier.
-            qname = rocket::sref(Token::get_keyword(alt.keyword));
-            break;
+            // Treat the keyword as a plain identifier and discard this token.
+            auto name = rocket::sref(Token::get_keyword(alt.keyword));
+            tstrm.shift();
+            return rocket::move(name);
           }
         case Token::index_identifier:
           {
             const auto& alt = qtok->check<Token::S_identifier>();
-            // Return the identifier as is.
-            qname = alt.name;
-            break;
+            // Return the identifier and discard this token.
+            auto name = alt.name;
+            tstrm.shift();
+            return rocket::move(name);
           }
         case Token::index_string_literal:
           {
             const auto& alt = qtok->check<Token::S_string_literal>();
-            // Return the string literal as is.
-            qname = alt.value;
-            break;
+            // Return the string literal and discard this token.
+            auto name = alt.value;
+            tstrm.shift();
+            return rocket::move(name);
           }
         default:
           return rocket::nullopt;
         }
-        // Discard this token.
-        tstrm.shift();
-        return qname;
       }
 
     Optional<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
@@ -160,7 +159,6 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        Optional<Value> qvalue;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
@@ -169,52 +167,53 @@ namespace Asteria {
             struct Keyword_Table
               {
                 Token::Keyword keyword;
-                void (*setter)(Optional<Value>&);
+                Value (*generator)();
               }
             static const s_table[] =
               {
-                { Token::keyword_null,      [](Optional<Value>& r) { r = D_null();  }          },
-                { Token::keyword_false,     [](Optional<Value>& r) { r = D_boolean(false);  }  },
-                { Token::keyword_true,      [](Optional<Value>& r) { r = D_boolean(true);  }   },
-                { Token::keyword_nan,       [](Optional<Value>& r) { r = D_real(NAN);  }       },
-                { Token::keyword_infinity,  [](Optional<Value>& r) { r = D_real(INFINITY);  }  },
+                { Token::keyword_null,      []() -> Value { return D_null();  }          },
+                { Token::keyword_false,     []() -> Value { return D_boolean(false);  }  },
+                { Token::keyword_true,      []() -> Value { return D_boolean(true);  }   },
+                { Token::keyword_nan,       []() -> Value { return D_real(NAN);  }       },
+                { Token::keyword_infinity,  []() -> Value { return D_real(INFINITY);  }  },
               };
             auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
                                       [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
             if(qconf == std::end(s_table)) {
               return rocket::nullopt;
             }
-            // Set the value.
-            (*(qconf->setter))(qvalue);
-            break;
+            // Discard this token and create a new value using the generator.
+            auto generator = qconf->generator;
+            tstrm.shift();
+            return (*generator)();
           }
         case Token::index_integer_literal:
           {
             const auto& alt = qtok->check<Token::S_integer_literal>();
-            // Copy the value as is.
-            qvalue = D_integer(alt.value);
-            break;
+            // Copy the value and discard this token.
+            auto value = D_integer(alt.value);
+            tstrm.shift();
+            return rocket::move(value);
           }
         case Token::index_real_literal:
           {
             const auto& alt = qtok->check<Token::S_real_literal>();
-            // Copy the value as is.
-            qvalue = D_real(alt.value);
-            break;
+            // Copy the value and discard this token.
+            auto value = D_real(alt.value);
+            tstrm.shift();
+            return rocket::move(value);
           }
         case Token::index_string_literal:
           {
             const auto& alt = qtok->check<Token::S_string_literal>();
-            // Copy the value as is.
-            qvalue = D_string(alt.value);
-            break;
+            // Copy the value and discard this token.
+            auto value = D_string(alt.value);
+            tstrm.shift();
+            return rocket::move(value);
           }
         default:
           return rocket::nullopt;
         }
-        // Discard this token.
-        tstrm.shift();
-        return qvalue;
       }
 
     Optional<bool> do_accept_negation_opt(Token_Stream& tstrm)
@@ -225,7 +224,6 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        Optional<bool> kneg;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
@@ -233,8 +231,9 @@ namespace Asteria {
             if(alt.keyword != Token::keyword_not) {
               return rocket::nullopt;
             }
-            kneg = true;
-            break;
+            // Discard this token.
+            tstrm.shift();
+            return true;
           }
         case Token::index_punctuator:
           {
@@ -242,15 +241,13 @@ namespace Asteria {
             if(alt.punct != Token::punctuator_notl) {
               return rocket::nullopt;
             }
-            kneg = true;
-            break;
+            // Discard this token.
+            tstrm.shift();
+            return true;
           }
         default:
           return rocket::nullopt;
         }
-        // Discard this token.
-        tstrm.shift();
-        return kneg;
       }
 
     // Accept a statement; a blockt is converted to a single statement.
@@ -1165,7 +1162,6 @@ namespace Asteria {
         if(!qtok) {
           return false;
         }
-        Optional<Xprunit> qunit;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_keyword:
           {
@@ -1188,10 +1184,10 @@ namespace Asteria {
             if(qconf == std::end(s_table)) {
               return false;
             }
-            // Return the prefix operator.
+            // Return the prefix operator and discard this token.
             Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
-            units.emplace_back(rocket::move(unit_c));
-            break;
+            tstrm.shift();
+            return units.emplace_back(rocket::move(unit_c)), true;
           }
         case Token::index_punctuator:
           {
@@ -1216,17 +1212,14 @@ namespace Asteria {
             if(qconf == std::end(s_table)) {
               return false;
             }
-            // Return the prefix operator.
+            // Return the prefix operator and discard this token.
             Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
-            units.emplace_back(rocket::move(unit_c));
-            break;
+            tstrm.shift();
+            return units.emplace_back(rocket::move(unit_c)), true;
           }
         default:
           return false;
         }
-        // Discard this token.
-        tstrm.shift();
-        return true;
       }
 
     bool do_accept_named_reference(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1241,17 +1234,14 @@ namespace Asteria {
         // Replace special names. This is what macros in C do.
         if(*qname == "__file") {
           Xprunit::S_literal unit_c = { D_string(sloc.file()) };
-          units.emplace_back(rocket::move(unit_c));
-          return true;
+          return units.emplace_back(rocket::move(unit_c)), true;
         }
         if(*qname == "__line") {
           Xprunit::S_literal unit_c = { D_integer(sloc.line()) };
-          units.emplace_back(rocket::move(unit_c));
-          return true;
+          return units.emplace_back(rocket::move(unit_c)), true;
         }
         Xprunit::S_named_reference unit_c = { rocket::move(*qname) };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     bool do_accept_literal(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1262,8 +1252,7 @@ namespace Asteria {
           return false;
         }
         Xprunit::S_literal unit_c = { rocket::move(*qvalue) };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     bool do_accept_this(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1274,8 +1263,7 @@ namespace Asteria {
           return false;
         }
         Xprunit::S_named_reference unit_c = { rocket::sref("__this") };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     Optional<Cow_Vector<Statement>> do_accept_closure_body_opt(Token_Stream& tstrm)
@@ -1314,8 +1302,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_or_equal_initializer_expected);
         }
         Xprunit::S_closure_function unit_c = { rocket::move(sloc), rocket::move(*kparams), rocket::move(*qbody) };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     bool do_accept_unnamed_array(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1348,8 +1335,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_or_expression_expected);
         }
         Xprunit::S_unnamed_array unit_c = { nelems };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     bool do_accept_unnamed_object(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1395,8 +1381,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_object_key_expected);
         }
         Xprunit::S_unnamed_object unit_c = { rocket::move(keys) };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     bool do_accept_nested_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1461,7 +1446,6 @@ namespace Asteria {
         if(!qtok) {
           return false;
         }
-        Optional<Xprunit> qunit;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_punctuator:
           {
@@ -1482,17 +1466,14 @@ namespace Asteria {
             if(qconf == std::end(s_table)) {
               return false;
             }
-            // Return the postfix operator.
+            // Return the postfix operator and discard this token.
             Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
-            units.emplace_back(rocket::move(unit_c));
-            break;
+            tstrm.shift();
+            return units.emplace_back(rocket::move(unit_c)), true;
           }
         default:
           return false;
         }
-        // Discard this token.
-        tstrm.shift();
-        return true;
       }
 
     bool do_accept_postfix_function_call(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1528,8 +1509,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
         Xprunit::S_function_call unit_c = { rocket::move(sloc), nargs };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1549,8 +1529,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
         Xprunit::S_operator_rpn unit_c = { Xprunit::xop_postfix_at, false };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1566,8 +1545,7 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
         Xprunit::S_member_access unit_c = { rocket::move(*qkey) };
-        units.emplace_back(rocket::move(unit_c));
-        return true;
+        return units.emplace_back(rocket::move(unit_c)), true;
       }
 
     bool do_accept_infix_element(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1695,7 +1673,6 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        Optional<Infix_Element> qelem;
         switch(rocket::weaken_enum(qtok->index())) {
         case Token::index_punctuator:
           {
@@ -1747,17 +1724,14 @@ namespace Asteria {
             if(qconf == std::end(s_table)) {
               return rocket::nullopt;
             }
-            // Return the infix operator.
+            // Return the infix operator and discard this token.
             Infix_Element::S_general elem_c = { qconf->xop, qconf->assign, rocket::clear };
-            qelem.emplace(rocket::move(elem_c));
-            break;
+            tstrm.shift();
+            return rocket::move(elem_c);
           }
         default:
           return rocket::nullopt;
         }
-        // Discard this token.
-        tstrm.shift();
-        return qelem;
       }
 
     Optional<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
