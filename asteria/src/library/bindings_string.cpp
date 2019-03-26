@@ -242,7 +242,7 @@ D_string std_string_implode(const D_array& segments, const D_string& delim)
     return text;
   }
 
-D_string std_string_hex_encode(const D_string &text, D_boolean uppercase, const D_string &delim)
+D_string std_string_hex_encode(const D_string &text, const D_string &delim, D_boolean uppercase)
   {
     D_string hstr;
     auto rpos = text.begin();
@@ -737,12 +737,12 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("hex_encode"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.hex_encode(text, [uppercase], [delim])`"
+        rocket::sref("`std.string.hex_encode(text, [delim], [uppercase])`"
                      "\n  * Encodes all bytes in `text` as 2-digit hexadecimal numbers and"
-                     "\n    concatenates them. If `uppercase` is set to `true`, hexadecimal"
-                     "\n    digits above `9` are encoded as `ABCDEF`; otherwise they are"
-                     "\n    encoded as `abcdef`. If `delim` is specified, it is inserted"
-                     "\n    between adjacent bytes."
+                     "\n    concatenates them. If `delim` is specified, it is inserted"
+                     "\n    between adjacent bytes. If `uppercase` is set to `true`,"
+                     "\n    hexadecimal digits above `9` are encoded as `ABCDEF`; otherwise"
+                     "\n    they are encoded as `abcdef`."
                      "\n  * Returns the encoded `string`. If `text` is empty, an empty"
                      "\n    `string` is returned."),
         // Definition
@@ -751,11 +751,11 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.hex_encode"), args);
             // Parse arguments.
             D_string text;
-            D_boolean uppercase = false;
             D_string delim;
-            if(reader.start().req(text).opt(uppercase).opt(delim).finish()) {
+            D_boolean uppercase = false;
+            if(reader.start().req(text).opt(delim).opt(uppercase).finish()) {
               // Call the binding function.
-              auto hstr = std_string_hex_encode(text, uppercase, delim);
+              auto hstr = std_string_hex_encode(text, delim, uppercase);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(hstr) };
               return rocket::move(ref_c);
