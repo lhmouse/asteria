@@ -1276,7 +1276,7 @@ namespace Asteria {
         }
         auto qinit = do_accept_equal_initializer_opt(tstrm);
         if(qinit) {
-          Statement::S_return stmt_c = { true, rocket::move(*qinit) };
+          Statement::S_return stmt_c = { false, rocket::move(*qinit) };
           qblock.emplace().emplace_back(rocket::move(stmt_c));
           return qblock;
         }
