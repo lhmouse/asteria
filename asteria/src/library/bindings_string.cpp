@@ -802,6 +802,80 @@ D_object create_bindings_string()
         D_null()
       )));
     //===================================================================
+    // `std.string.utf8_encode()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("utf8_encode"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.utf8_encode(code_points, [permissive])`"
+                     "\n  * Encodes code points from `code_points` into an UTF-8 `string`."
+                     "\n    Code points shall be `integer`s. When an invalid code point is"
+                     "\n    encountered, if `permissive` is set to `true`, it is replaced"
+                     "\n    with the replacement character `\"\\uFFFD\"` and consequently"
+                     "\n    encoded as `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails."
+                     "\n  * Returns the encoded `string` on success; otherwise `null`."),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.utf8_encode"), args);
+            // Parse arguments.
+            D_array code_points;
+            D_boolean permissive = false;
+            if(reader.start().req(code_points).opt(permissive).finish()) {
+              // Call the binding function.
+              auto qtext = std_string_utf8_encode(code_points, permissive);
+              if(!qtext) {
+                return Reference_Root::S_null();
+              }
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(*qtext) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.utf8_decode()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("utf8_decode"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.utf8_decode(text, [permissive])`"
+                     "\n  * Decodes `text`, which is expected to be a `string` containing"
+                     "\n    UTF-8 code units, into an `array` of code points, represented"
+                     "\n    as `integer`s. When an invalid code sequence is encountered, if"
+                     "\n    `permissive` is set to `true`, all code units of it are"
+                     "\n    re-interpreted as ISO/IEC 8859-1 and decoded as isolated bytes;"
+                     "\n    otherwise this function fails."
+                     "\n  * Returns an `array` containing decoded code points; otherwise"
+                     "\n    `null`."),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.utf8_decode"), args);
+            // Parse arguments.
+            D_string text;
+            D_boolean permissive = false;
+            if(reader.start().req(text).opt(permissive).finish()) {
+              // Call the binding function.
+              auto qcdpnts = std_string_utf8_decode(text, permissive);
+              if(!qcdpnts) {
+                return Reference_Root::S_null();
+              }
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(*qcdpnts) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
     // End of `std.string`
     //===================================================================
     return ro;

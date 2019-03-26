@@ -259,3 +259,25 @@
 	  `text`.
 
 	* Returns the translated `string`.
+
+`std.string.utf8_encode(code_points, [permissive])`
+
+	* Encodes code points from `code_points` into an UTF-8 `string`.
+	  Code points shall be `integer`s. When an invalid code point is
+	  encountered, if `permissive` is set to `true`, it is replaced
+	  with the replacement character `"\uFFFD"` and consequently
+	  encoded as `"\xEF\xBF\xBD"`; otherwise this function fails.
+
+	* Returns the encoded `string` on success; otherwise `null`.
+
+`std.string.utf8_decode(text, [permissive])`
+
+	* Decodes `text`, which is expected to be a `string` containing
+	  UTF-8 code units, into an `array` of code points, represented
+	  as `integer`s. When an invalid code sequence is encountered, if
+	  `permissive` is set to `true`, all code units of it are
+	  re-interpreted as ISO/IEC 8859-1 and decoded as isolated bytes;
+	  otherwise this function fails.
+
+	* Returns an `array` containing decoded code points; otherwise
+	  `null`.
