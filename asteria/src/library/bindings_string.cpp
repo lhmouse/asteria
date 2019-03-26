@@ -215,6 +215,70 @@ D_string std_string_implode(const D_array& segments, const D_string& delim)
     return text;
   }
 
+D_string std_string_hex_encode(const D_string &text, D_boolean uppercase, const D_string &delim)
+  {
+    D_string hstr;
+    auto rpos = text.begin();
+    if(rpos == text.end()) {
+      // Return an empty string; no delimiter is added.
+      return hstr;
+    }
+    // Reserve storage for digits.
+    hstr.reserve(2 + (delim.size() + 2) * (text.size() - 1));
+    for(;;) {
+      // Encode a byte.
+      static constexpr char s_digits[] = "00112233445566778899aAbBcCdDeEfF";
+      hstr += s_digits[(*rpos & 0xF0) / 8 + uppercase];
+      hstr += s_digits[(*rpos & 0x0F) * 2 + uppercase];
+      if(++rpos == text.end()) {
+        break;
+      }
+      hstr += delim;
+    }
+    return hstr;
+  }
+
+Optional<D_string> std_string_hex_decode(const D_string &hstr)
+  {
+    D_string text;
+    // Remember the value of a previous digit. `-1` means no such digit exists.
+    int dprev = -1;
+    for(char ch : hstr) {
+      // Identify this character.
+      static constexpr char s_table[] = "00112233445566778899aAbBcCdDeEfF \f\n\r\t\v";
+      auto pos = std::char_traits<char>::find(s_table, sizeof(s_table) - 1, ch);
+      if(!pos) {
+        // Fail due to an invalid character.
+        return rocket::nullopt;
+      }
+      auto dcur = static_cast<int>(pos - s_table) / 2;
+      if(dcur >= 16) {
+        // Ignore space characters.
+        // But if we have had a digit, flush it.
+        if(dprev != -1) {
+          text.push_back(static_cast<char>(dprev));
+          dprev = -1;
+        }
+        continue;
+      }
+      if(dprev == -1) {
+        // Save this digit.
+        dprev = dcur;
+        continue;
+      }
+      // We have got two digits now.
+      // Make a byte and write it.
+      text.push_back(static_cast<char>(dprev * 16 + dcur));
+      dprev = -1;
+    }
+    // If we have had a digit, flush it.
+    if(dprev != -1) {
+      text.push_back(static_cast<char>(dprev));
+      dprev = -1;
+    }
+    return rocket::move(text);
+  }
+
 D_object create_bindings_string()
   {
     D_object ro;
@@ -271,9 +335,9 @@ D_object create_bindings_string()
             D_string prefix;
             if(reader.start().req(text).req(prefix).finish()) {
               // Call the binding function.
-              auto res = std_string_starts_with(text, prefix);
+              auto chk = std_string_starts_with(text, prefix);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              Reference_Root::S_temporary ref_c = { rocket::move(chk) };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -302,9 +366,9 @@ D_object create_bindings_string()
             D_string suffix;
             if(reader.start().req(text).req(suffix).finish()) {
               // Call the binding function.
-              auto res = std_string_ends_with(text, suffix);
+              auto chk = std_string_ends_with(text, suffix);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              Reference_Root::S_temporary ref_c = { rocket::move(chk) };
               return rocket::move(ref_c);
             }
             // Fail.
@@ -594,6 +658,76 @@ D_object create_bindings_string()
               auto res = std_string_implode(segments, delim);
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(res) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.hex_encode()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("hex_encode"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.hex_encode(text, [uppercase], [delim])`"
+                     "\n  * Encodes all bytes in `text` as 2-digit hexadecimal numbers and"
+                     "\n    concatenates them. If `uppercase` is set to `true`, hexadecimal"
+                     "\n    digits above `9` are encoded as `ABCDEF`; otherwise they are"
+                     "\n    encoded as `abcdef`. If `delim` is specified, it is inserted"
+                     "\n    between adjacent bytes."
+                     "\n  * Returns the encoded `string`. If `text` is empty, an empty"
+                     "\n    `string` is returned."),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.hex_encode"), args);
+            // Parse arguments.
+            D_string text;
+            D_boolean uppercase = false;
+            D_string delim;
+            if(reader.start().req(text).opt(uppercase).opt(delim).finish()) {
+              // Call the binding function.
+              auto hstr = std_string_hex_encode(text, uppercase, delim);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(hstr) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.hex_decode()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("hex_decode"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.hex_decode(hstr)`"
+                     "\n  * Decodes all hexadecimal digits from `hstr` and converts them to"
+                     "\n    bytes. Whitespaces are ignored. Characters that are neither"
+                     "\n    hexadecimal digits nor whitespaces will cause parse errors."
+                     "\n  * Returns a `string` containing decoded bytes. If `hstr` is empty"
+                     "\n    or consists only whitespaces, an empty `string` is returned. In"
+                     "\n    the case of parse errors, `null` is returned."),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.hex_decode"), args);
+            // Parse arguments.
+            D_string hstr;
+            if(reader.start().req(hstr).finish()) {
+              // Call the binding function.
+              auto qtext = std_string_hex_decode(hstr);
+              if(!qtext) {
+                return Reference_Root::S_null();
+              }
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(*qtext) };
               return rocket::move(ref_c);
             }
             // Fail.
