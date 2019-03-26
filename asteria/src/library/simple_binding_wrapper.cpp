@@ -24,7 +24,7 @@ void Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context& globa
 
 void Simple_Binding_Wrapper::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    rocket::for_each(this->m_opaque, [&](const Value& p) { p.enumerate_variables(callback);  });
+    this->m_opaque.enumerate_variables(callback);
   }
 
 }  // namespace Asteria

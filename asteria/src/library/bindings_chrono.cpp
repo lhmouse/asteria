@@ -412,7 +412,7 @@ D_object create_bindings_chrono()
                      "\n  * Returns the number of milliseconds since the Unix epoch,"
                      "\n    represented as an `integer`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.utc_now"), args);
             // Parse arguments.
@@ -438,7 +438,7 @@ D_object create_bindings_chrono()
                      "\n  * Returns the number of milliseconds since `1970-01-01 00:00:00`"
                      "\n    in the local time zone, represented as an `integer`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.local_now"), args);
             // Parse arguments.
@@ -467,7 +467,7 @@ D_object create_bindings_chrono()
                      "\n  * Returns the number of milliseconds since an unspecified time"
                      "\n    point, represented as a `real`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.hires_now"), args);
             // Parse arguments.
@@ -496,7 +496,7 @@ D_object create_bindings_chrono()
                      "\n  * Returns the number of milliseconds since an unspecified time"
                      "\n    point, represented as an `integer`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.steady_now"), args);
             // Parse arguments.
@@ -523,7 +523,7 @@ D_object create_bindings_chrono()
                      "\n  * Returns the number of milliseconds since `1970-01-01 00:00:00`"
                      "\n    in the local time zone, represented as an `integer`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.local_from_utc"), args);
             // Parse arguments.
@@ -552,7 +552,7 @@ D_object create_bindings_chrono()
                      "\n  * Returns the number of milliseconds since the Unix epoch,"
                      "\n    represented as an `integer`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.utc_from_local"), args);
             // Parse arguments.
@@ -581,7 +581,7 @@ D_object create_bindings_chrono()
                      "\n    If `with_ms` is set to `true`, the string will have a 3-digit"
                      "\n    fractional part. By default, no fractional part is added."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.format_datetime"), args);
             // Parse arguments.
@@ -611,7 +611,7 @@ D_object create_bindings_chrono()
                      "\n  * Returns `'1601-01-01 00:00:00'` or `'1601-01-01 00:00:00.000'`"
                      "\n    according to `with_ms`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.min_datetime"), args);
             // Parse arguments.
@@ -640,7 +640,7 @@ D_object create_bindings_chrono()
                      "\n  * Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'`"
                      "\n    according to `with_ms`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.max_datetime"), args);
             // Parse arguments.
@@ -672,7 +672,7 @@ D_object create_bindings_chrono()
                      "\n    if the time string has been parsed successfully; otherwise"
                      "\n    `null`."),
         // Definition
-        [](const Cow_Vector<Value>& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.chrono.parse_datetime"), args);
             // Parse arguments.
