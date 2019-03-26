@@ -181,7 +181,7 @@ D_string std_chrono_format_datetime(D_integer time_point, bool with_ms)
     }
     // Notice that the length of the result string is fixed.
     D_string time_str(rocket::sref(s_min_str[with_ms]));
-    // Characters are written backwards, unlike `parse_datetime()`.
+    // Characters are written backwards, unlike `datetime_parse()`.
     auto wpos = time_str.mut_rbegin();
     // Define functions to write each field.
     // Be adviced that these functions modify `wpos`.
@@ -267,7 +267,7 @@ D_string std_chrono_max_datetime(bool with_ms)
 
 Optional<D_integer> std_chrono_parse_datetime(const D_string& time_str)
   {
-    // Characters are read forwards, unlike `format_datetime()`.
+    // Characters are read forwards, unlike `datetime_format()`.
     auto rpos = time_str.begin();
     // Define functions to read each field.
     // Be adviced that these functions modify `rpos`.
@@ -569,12 +569,12 @@ D_object create_bindings_chrono()
         D_null()
       )));
     //===================================================================
-    // `std.chrono.format_datetime()`
+    // `std.chrono.datetime_format()`
     //===================================================================
-    ro.try_emplace(rocket::sref("format_datetime"),
+    ro.try_emplace(rocket::sref("datetime_format"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.chrono.format_datetime(time_point, [with_ms])`"
+        rocket::sref("`std.chrono.datetime_format(time_point, [with_ms])`"
                      "\n  * Converts `time_point`, which represents the number of"
                      "\n    milliseconds since `1970-01-01 00:00:00`, to an ASCII string in"
                      "\n    the aforementioned format, according to the ISO 8601 standard."
@@ -583,7 +583,7 @@ D_object create_bindings_chrono()
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.chrono.format_datetime"), args);
+            Argument_Reader reader(rocket::sref("std.chrono.datetime_format"), args);
             // Parse arguments.
             D_integer time_point;
             D_boolean with_ms = false;
@@ -599,21 +599,21 @@ D_object create_bindings_chrono()
         D_null()
       )));
     //===================================================================
-    // `std.chrono.min_datetime()`
+    // `std.chrono.datetime_min()`
     //===================================================================
-    ro.try_emplace(rocket::sref("min_datetime"),
+    ro.try_emplace(rocket::sref("datetime_min"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.chrono.min_datetime([with_ms])`"
+        rocket::sref("`std.chrono.datetime_min([with_ms])`"
                      "\n  * Gets the special string that denotes the negative infinity time"
                      "\n    point. Calling this function has the same effect as calling"
-                     "\n    `format_datetime(-0x8000000000000000, with_ms)`."
+                     "\n    `datetime_format(-0x8000000000000000, with_ms)`."
                      "\n  * Returns `'1601-01-01 00:00:00'` or `'1601-01-01 00:00:00.000'`"
                      "\n    according to `with_ms`."),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.chrono.min_datetime"), args);
+            Argument_Reader reader(rocket::sref("std.chrono.datetime_min"), args);
             // Parse arguments.
             D_boolean with_ms = false;
             if(reader.start().opt(with_ms).finish()) {
@@ -628,21 +628,21 @@ D_object create_bindings_chrono()
         D_null()
       )));
     //===================================================================
-    // `std.chrono.max_datetime()`
+    // `std.chrono.datetime_max()`
     //===================================================================
-    ro.try_emplace(rocket::sref("max_datetime"),
+    ro.try_emplace(rocket::sref("datetime_max"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.chrono.max_datetime([with_ms])`"
+        rocket::sref("`std.chrono.datetime_max([with_ms])`"
                      "\n  * Gets the special string that denotes the positive infinity time"
                      "\n    point. Calling this function has the same effect as calling"
-                     "\n    `format_datetime(0x7FFFFFFFFFFFFFFF, with_ms)`."
+                     "\n    `datetime_format(0x7FFFFFFFFFFFFFFF, with_ms)`."
                      "\n  * Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'`"
                      "\n    according to `with_ms`."),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.chrono.max_datetime"), args);
+            Argument_Reader reader(rocket::sref("std.chrono.datetime_max"), args);
             // Parse arguments.
             D_boolean with_ms = false;
             if(reader.start().opt(with_ms).finish()) {
@@ -657,12 +657,12 @@ D_object create_bindings_chrono()
         D_null()
       )));
     //===================================================================
-    // `std.chrono.parse_datetime()`
+    // `std.chrono.datetime_parse()`
     //===================================================================
-    ro.try_emplace(rocket::sref("parse_datetime"),
+    ro.try_emplace(rocket::sref("datetime_parse"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.chrono.parse_datetime(time_str)`"
+        rocket::sref("`std.chrono.datetime_parse(time_str)`"
                      "\n  * Parses `time_str`, which is an ASCII string representing a time"
                      "\n    point in the format `1970-01-01 00:00:00.000`, according to the"
                      "\n    ISO 8601 standard; the subsecond part is optional and may have"
@@ -674,7 +674,7 @@ D_object create_bindings_chrono()
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.chrono.parse_datetime"), args);
+            Argument_Reader reader(rocket::sref("std.chrono.datetime_parse"), args);
             // Parse arguments.
             D_string time_str;
             if(reader.start().req(time_str).finish()) {

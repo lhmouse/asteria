@@ -71,7 +71,7 @@
 	* Returns the number of milliseconds since the Unix epoch,
 	  represented as an `integer`.
 
-`std.chrono.format_datetime(time_point, [with_ms])`
+`std.chrono.datetime_format(time_point, [with_ms])`
 
 	* Converts `time_point`, which represents the number of
 	  milliseconds since `1970-01-01 00:00:00`, to an ASCII string in
@@ -81,25 +81,25 @@
 
 	* Returns a `string` representing the time point.
 
-`std.chrono.min_datetime([with_ms])`
+`std.chrono.datetime_min([with_ms])`
 
 	* Gets the special string that denotes the negative infinity time
 	  point. Calling this function has the same effect as calling
-	  `format_datetime(-0x8000000000000000, with_ms)`.
+	  `datetime_format(-0x8000000000000000, with_ms)`.
 
 	* Returns `'1601-01-01 00:00:00'` or `'1601-01-01 00:00:00.000'`
 	  according to `with_ms`.
 
-`std.chrono.max_datetime([with_ms])`
+`std.chrono.datetime_max([with_ms])`
 
 	* Gets the special string that denotes the positive infinity time
 	  point. Calling this function has the same effect as calling
-	  `format_datetime(0x7FFFFFFFFFFFFFFF, with_ms)`.
+	  `datetime_format(0x7FFFFFFFFFFFFFFF, with_ms)`.
 
 	* Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'`
 	  according to `with_ms`.
 
-`std.chrono.parse_datetime(time_str)`
+`std.chrono.datetime_parse(time_str)`
 
 	* Parses `time_str`, which is an ASCII string representing a time
 	  point in the format `1970-01-01 00:00:00.000`, according to the
