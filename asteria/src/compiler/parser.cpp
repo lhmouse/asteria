@@ -5,6 +5,7 @@
 #include "parser.hpp"
 #include "token_stream.hpp"
 #include "token.hpp"
+#include "infix_element.hpp"
 #include "../syntax/statement.hpp"
 #include "../syntax/xprunit.hpp"
 #include "../utilities.hpp"
@@ -178,13 +179,13 @@ namespace Asteria {
                 { Token::keyword_nan,       [](Optional<Value>& r) { r = D_real(NAN);  }       },
                 { Token::keyword_infinity,  [](Optional<Value>& r) { r = D_real(INFINITY);  }  },
               };
-            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
                                       [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
-            if(qelem == std::end(s_table)) {
+            if(qconf == std::end(s_table)) {
               return rocket::nullopt;
             }
             // Set the value.
-            (*(qelem->setter))(qvalue);
+            (*(qconf->setter))(qvalue);
             break;
           }
         case Token::index_integer_literal:
@@ -1182,13 +1183,13 @@ namespace Asteria {
                 { Token::keyword_typeof,    Xprunit::xop_prefix_typeof   },
                 { Token::keyword_not,       Xprunit::xop_prefix_notl     },
               };
-            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
                                       [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
-            if(qelem == std::end(s_table)) {
+            if(qconf == std::end(s_table)) {
               return false;
             }
             // Return the prefix operator.
-            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
             units.emplace_back(rocket::move(unit_c));
             break;
           }
@@ -1210,13 +1211,13 @@ namespace Asteria {
                 { Token::punctuator_inc,   Xprunit::xop_prefix_inc  },
                 { Token::punctuator_dec,   Xprunit::xop_prefix_dec  },
               };
-            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
                                       [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
-            if(qelem == std::end(s_table)) {
+            if(qconf == std::end(s_table)) {
               return false;
             }
             // Return the prefix operator.
-            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
             units.emplace_back(rocket::move(unit_c));
             break;
           }
@@ -1476,13 +1477,13 @@ namespace Asteria {
                 { Token::punctuator_inc,   Xprunit::xop_postfix_inc  },
                 { Token::punctuator_dec,   Xprunit::xop_postfix_dec  },
               };
-            auto qelem = std::find_if(std::begin(s_table), std::end(s_table),
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
                                       [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
-            if(qelem == std::end(s_table)) {
+            if(qconf == std::end(s_table)) {
               return false;
             }
             // Return the postfix operator.
-            Xprunit::S_operator_rpn unit_c = { qelem->xop, false };
+            Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
             units.emplace_back(rocket::move(unit_c));
             break;
           }
@@ -1607,122 +1608,26 @@ namespace Asteria {
         return true;
       }
 
-    // This is an abstract base for all classes representing `infix-element`s.
-    class Infix_Element_Base
-      {
-      public:
-        enum Precedence : unsigned
-          {
-            precedence_multiplicative  =  1,
-            precedence_additive        =  2,
-            precedence_shift           =  3,
-            precedence_relational      =  4,
-            precedence_equality        =  5,
-            precedence_bitwise_and     =  6,
-            precedence_bitwise_xor     =  7,
-            precedence_bitwise_or      =  8,
-            precedence_logical_and     =  9,
-            precedence_logical_or      = 10,
-            precedence_coalescence     = 11,
-            precedence_assignment      = 12,
-            precedence_lowest          = 99,
-          };
-
-      public:
-        Infix_Element_Base() noexcept
-          {
-          }
-        virtual ~Infix_Element_Base()
-          {
-          }
-
-      public:
-        // Returns the precedence of this element.
-        virtual Precedence precedence() const noexcept = 0;
-        // Moves all units into `units`.
-        virtual void extract(Cow_Vector<Xprunit>& units) = 0;
-        // Returns a reference where new units will be appended.
-        virtual Cow_Vector<Xprunit>& caret() noexcept = 0;
-      };
-
-    // This can only occur at the beginning of an expression.
-    // It is constructed from a single element with no operators.
-    class Infix_Head : public Infix_Element_Base
-      {
-      private:
-        Cow_Vector<Xprunit> m_units;
-
-      public:
-        explicit Infix_Head(Cow_Vector<Xprunit>&& units) noexcept
-          : m_units(rocket::move(units))
-          {
-          }
-
-      public:
-        Precedence precedence() const noexcept override
-          {
-            return precedence_lowest;
-          }
-        void extract(Cow_Vector<Xprunit>& units) override
-          {
-            std::move(this->m_units.mut_begin(), this->m_units.mut_end(), std::back_inserter(units));
-          }
-        Cow_Vector<Xprunit>& caret() noexcept override
-          {
-            return this->m_units;
-          }
-      };
-
-    Uptr<Infix_Element_Base> do_accept_infix_head_opt(Token_Stream& tstrm)
+    Optional<Infix_Element> do_accept_infix_head_opt(Token_Stream& tstrm)
       {
         // infix-head ::=
         //   infix-element
         Cow_Vector<Xprunit> units;
         bool succ = do_accept_infix_element(units, tstrm);
         if(!succ) {
-          return nullptr;
+          return rocket::nullopt;
         }
-        return rocket::make_unique<Infix_Head>(rocket::move(units));
+        Infix_Element::S_head elem_c = { rocket::move(units) };
+        return rocket::move(elem_c);
       }
 
-    // This can only occur other than at the beginning of an expression.
-    // It is constructed from a ternary operator with a middle operand.
-    class Infix_Carriage_Ternary : public Infix_Element_Base
-      {
-      private:
-        bool m_assign;
-        Cow_Vector<Xprunit> m_branch_true;
-        Cow_Vector<Xprunit> m_branch_false;
-
-      public:
-        explicit Infix_Carriage_Ternary(bool assign, Cow_Vector<Xprunit>&& branch_true) noexcept
-          : m_assign(assign), m_branch_true(rocket::move(branch_true)), m_branch_false()
-          {
-          }
-
-      public:
-        Precedence precedence() const noexcept override
-          {
-            return precedence_assignment;
-          }
-        void extract(Cow_Vector<Xprunit>& units) override
-          {
-            Xprunit::S_branch unit_c = { rocket::move(this->m_branch_true), rocket::move(this->m_branch_false), this->m_assign };
-            units.emplace_back(rocket::move(unit_c));
-          }
-        Cow_Vector<Xprunit>& caret() noexcept override
-          {
-            return this->m_branch_false;
-          }
-      };
-
-    Uptr<Infix_Element_Base> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
+    Optional<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
       {
         // infix-operator-ternary ::=
         //   ( "?" | "?=" ) expression ":"
         auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_quest, Token::punctuator_quest_eq });
         if(!kpunct) {
-          return nullptr;
+          return rocket::nullopt;
         }
         auto qbtrue = do_accept_expression_opt(tstrm);
         if(!qbtrue) {
@@ -1732,43 +1637,11 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
         }
-        return rocket::make_unique<Infix_Carriage_Ternary>(*kpunct == Token::punctuator_quest_eq, rocket::move(*qbtrue));
+        Infix_Element::S_ternary elem_c = { *kpunct == Token::punctuator_quest_eq, rocket::move(*qbtrue), rocket::clear };
+        return rocket::move(elem_c);
       }
 
-    // This can only occur other than at the beginning of an expression.
-    // It is constructed from a logical AND operator.
-    class Infix_Carriage_Logical_AND : public Infix_Element_Base
-      {
-      private:
-        bool m_assign;
-        Cow_Vector<Xprunit> m_branch_true;
-
-      public:
-        explicit Infix_Carriage_Logical_AND(bool assign) noexcept
-          : m_assign(assign), m_branch_true()
-          {
-          }
-
-      public:
-        Precedence precedence() const noexcept override
-          {
-            if(this->m_assign) {
-              return precedence_assignment;
-            }
-            return precedence_logical_and;
-          }
-        void extract(Cow_Vector<Xprunit>& units) override
-          {
-            Xprunit::S_branch unit_c = { rocket::move(this->m_branch_true), rocket::clear, this->m_assign };
-            units.emplace_back(rocket::move(unit_c));
-          }
-        Cow_Vector<Xprunit>& caret() noexcept override
-          {
-            return this->m_branch_true;
-          }
-      };
-
-    Uptr<Infix_Element_Base> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
+    Optional<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
       {
         // infix-operator-logical-and ::=
         //   "&&" | "&&=" | "and"
@@ -1776,47 +1649,15 @@ namespace Asteria {
         if(!kpunct) {
           auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_and });
           if(!qkwrd) {
-            return nullptr;
+            return rocket::nullopt;
           }
           kpunct.emplace(Token::punctuator_andl);
         }
-        return rocket::make_unique<Infix_Carriage_Logical_AND>(*kpunct == Token::punctuator_andl_eq);
+        Infix_Element::S_logical_and elem_c = { *kpunct == Token::punctuator_andl_eq, rocket::clear };
+        return rocket::move(elem_c);
       }
 
-    // This can only occur other than at the beginning of an expression.
-    // It is constructed from a logical OR operator.
-    class Infix_Carriage_Logical_OR : public Infix_Element_Base
-      {
-      private:
-        bool m_assign;
-        Cow_Vector<Xprunit> m_branch_false;
-
-      public:
-        explicit Infix_Carriage_Logical_OR(bool assign) noexcept
-          : m_assign(assign), m_branch_false()
-          {
-          }
-
-      public:
-        Precedence precedence() const noexcept override
-          {
-            if(this->m_assign) {
-              return precedence_assignment;
-            }
-            return precedence_logical_or;
-          }
-        void extract(Cow_Vector<Xprunit>& units) override
-          {
-            Xprunit::S_branch unit_c = { rocket::clear, rocket::move(this->m_branch_false), this->m_assign };
-            units.emplace_back(rocket::move(unit_c));
-          }
-        Cow_Vector<Xprunit>& caret() noexcept override
-          {
-            return this->m_branch_false;
-          }
-      };
-
-    Uptr<Infix_Element_Base> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
+    Optional<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
       {
         // infix-operator-logical-or ::=
         //   "||" | "||=" | "or"
@@ -1824,321 +1665,102 @@ namespace Asteria {
         if(!kpunct) {
           auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_or });
           if(!qkwrd) {
-            return nullptr;
+            return rocket::nullopt;
           }
           kpunct.emplace(Token::punctuator_orl);
         }
-        return rocket::make_unique<Infix_Carriage_Logical_OR>(*kpunct == Token::punctuator_orl_eq);
+        Infix_Element::S_logical_or elem_c = { *kpunct == Token::punctuator_orl_eq, rocket::clear };
+        return rocket::move(elem_c);
       }
 
-    // This can only occur other than at the beginning of an expression.
-    // It is constructed from a coalescence operator.
-    class Infix_Carriage_Coalescence : public Infix_Element_Base
-      {
-      private:
-        bool m_assign;
-        Cow_Vector<Xprunit> m_branch_null;
-
-      public:
-        explicit Infix_Carriage_Coalescence(bool assign) noexcept
-          : m_assign(assign), m_branch_null()
-          {
-          }
-
-      public:
-        Precedence precedence() const noexcept override
-          {
-            if(this->m_assign) {
-              return precedence_assignment;
-            }
-            return precedence_coalescence;
-          }
-        void extract(Cow_Vector<Xprunit>& units) override
-          {
-            Xprunit::S_coalescence unit_c = { rocket::move(this->m_branch_null), this->m_assign };
-            units.emplace_back(rocket::move(unit_c));
-          }
-        Cow_Vector<Xprunit>& caret() noexcept override
-          {
-            return this->m_branch_null;
-          }
-      };
-
-    Uptr<Infix_Element_Base> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
+    Optional<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
       {
         // infix-operator-coalescence ::=
         //   "??" | "??="
         auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_coales, Token::punctuator_coales_eq });
         if(!kpunct) {
-          return nullptr;
+          return rocket::nullopt;
         }
-        return rocket::make_unique<Infix_Carriage_Coalescence>(*kpunct == Token::punctuator_coales_eq);
+        Infix_Element::S_coalescence elem_c = { *kpunct == Token::punctuator_coales_eq, rocket::clear };
+        return rocket::move(elem_c);
       }
 
-    // This can only occur other than at the beginning of an expression.
-    // It is constructed from a non-short-circuit operator.
-    class Infix_Carriage_General : public Infix_Element_Base
-      {
-      private:
-        Xprunit::Xop m_xop;
-        bool m_assign;
-        Cow_Vector<Xprunit> m_rhs;
-
-      public:
-        Infix_Carriage_General(Xprunit::Xop xop, bool assign) noexcept
-          : m_xop(xop), m_assign(assign), m_rhs()
-          {
-          }
-
-      public:
-        Precedence precedence() const noexcept override
-          {
-            if(this->m_assign) {
-              return precedence_assignment;
-            }
-            switch(rocket::weaken_enum(this->m_xop)) {
-            case Xprunit::xop_infix_mul:
-            case Xprunit::xop_infix_div:
-            case Xprunit::xop_infix_mod:
-              {
-                return precedence_multiplicative;
-              }
-            case Xprunit::xop_infix_add:
-            case Xprunit::xop_infix_sub:
-              {
-                return precedence_additive;
-              }
-            case Xprunit::xop_infix_sla:
-            case Xprunit::xop_infix_sra:
-            case Xprunit::xop_infix_sll:
-            case Xprunit::xop_infix_srl:
-              {
-                return precedence_shift;
-              }
-            case Xprunit::xop_infix_cmp_lt:
-            case Xprunit::xop_infix_cmp_lte:
-            case Xprunit::xop_infix_cmp_gt:
-            case Xprunit::xop_infix_cmp_gte:
-              {
-                return precedence_relational;
-              }
-            case Xprunit::xop_infix_cmp_eq:
-            case Xprunit::xop_infix_cmp_ne:
-            case Xprunit::xop_infix_cmp_3way:
-              {
-                return precedence_equality;
-              }
-            case Xprunit::xop_infix_andb:
-              {
-                return precedence_bitwise_and;
-              }
-            case Xprunit::xop_infix_xorb:
-              {
-                return precedence_bitwise_xor;
-              }
-            case Xprunit::xop_infix_orb:
-              {
-                return precedence_bitwise_or;
-              }
-            case Xprunit::xop_infix_assign:
-              {
-                return precedence_assignment;
-              }
-            default:
-              ASTERIA_TERMINATE("An invalid infix operator `", this->m_xop, "` has been encountered.");
-            }
-          }
-        void extract(Cow_Vector<Xprunit>& units) override
-          {
-            // N.B. `units` is the LHS operand.
-            // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish Notation (RPN).
-            std::move(this->m_rhs.mut_begin(), this->m_rhs.mut_end(), std::back_inserter(units));
-            // Append the operator itself.
-            Xprunit::S_operator_rpn unit_c = { this->m_xop, this->m_assign };
-            units.emplace_back(rocket::move(unit_c));
-          }
-        Cow_Vector<Xprunit>& caret() noexcept override
-          {
-            return this->m_rhs;
-          }
-      };
-
-    Uptr<Infix_Element_Base> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
+    Optional<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
       {
         // infix-operator-general ::=
         //   "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
         //   "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=" | "<<<=" | ">>>=" | "&=" | "|=" | "^=" |
         //   "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_add,
-                                                        Token::punctuator_sub,
-                                                        Token::punctuator_mul,
-                                                        Token::punctuator_div,
-                                                        Token::punctuator_mod,
-                                                        Token::punctuator_andb,
-                                                        Token::punctuator_orb,
-                                                        Token::punctuator_xorb,
-                                                        Token::punctuator_sla,
-                                                        Token::punctuator_sra,
-                                                        Token::punctuator_sll,
-                                                        Token::punctuator_srl,
-                                                        Token::punctuator_add_eq,
-                                                        Token::punctuator_sub_eq,
-                                                        Token::punctuator_mul_eq,
-                                                        Token::punctuator_div_eq,
-                                                        Token::punctuator_mod_eq,
-                                                        Token::punctuator_andb_eq,
-                                                        Token::punctuator_orb_eq,
-                                                        Token::punctuator_xorb_eq,
-                                                        Token::punctuator_sla_eq,
-                                                        Token::punctuator_sra_eq,
-                                                        Token::punctuator_sll_eq,
-                                                        Token::punctuator_srl_eq,
-                                                        Token::punctuator_assign,
-                                                        Token::punctuator_cmp_eq,
-                                                        Token::punctuator_cmp_ne,
-                                                        Token::punctuator_cmp_lt,
-                                                        Token::punctuator_cmp_gt,
-                                                        Token::punctuator_cmp_lte,
-                                                        Token::punctuator_cmp_gte,
-                                                        Token::punctuator_spaceship });
-        if(!kpunct) {
-          return nullptr;
+        auto qtok = tstrm.peek_opt();
+        if(!qtok) {
+          return rocket::nullopt;
         }
-        switch(rocket::weaken_enum(*kpunct)) {
-        case Token::punctuator_add:
+        Optional<Infix_Element> qelem;
+        switch(rocket::weaken_enum(qtok->index())) {
+        case Token::index_punctuator:
           {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_add, false);
-          }
-        case Token::punctuator_sub:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_sub, false);
-          }
-        case Token::punctuator_mul:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_mul, false);
-          }
-        case Token::punctuator_div:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_div, false);
-          }
-        case Token::punctuator_mod:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_mod, false);
-          }
-        case Token::punctuator_andb:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_andb, false);
-          }
-        case Token::punctuator_orb:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_orb, false);
-          }
-        case Token::punctuator_xorb:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_xorb, false);
-          }
-        case Token::punctuator_sla:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_sla, false);
-          }
-        case Token::punctuator_sra:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_sra, false);
-          }
-        case Token::punctuator_sll:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_sll, false);
-          }
-        case Token::punctuator_srl:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_srl, false);
-          }
-        case Token::punctuator_add_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_add, true);
-          }
-        case Token::punctuator_sub_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_sub, true);
-          }
-        case Token::punctuator_mul_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_mul, true);
-          }
-        case Token::punctuator_div_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_div, true);
-          }
-        case Token::punctuator_mod_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_mod, true);
-          }
-        case Token::punctuator_andb_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_andb, true);
-          }
-        case Token::punctuator_orb_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_orb, true);
-          }
-        case Token::punctuator_xorb_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_xorb, true);
-          }
-        case Token::punctuator_sla_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_sla, true);
-          }
-        case Token::punctuator_sra_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_sra, true);
-          }
-        case Token::punctuator_sll_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_sll, true);
-          }
-        case Token::punctuator_srl_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_srl, true);
-          }
-        case Token::punctuator_assign:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_assign, true);
-          }
-        case Token::punctuator_cmp_eq:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_cmp_eq, false);
-          }
-        case Token::punctuator_cmp_ne:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_cmp_ne, false);
-          }
-        case Token::punctuator_cmp_lt:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_cmp_lt, false);
-          }
-        case Token::punctuator_cmp_gt:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_cmp_gt, false);
-          }
-        case Token::punctuator_cmp_lte:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_cmp_lte, false);
-          }
-        case Token::punctuator_cmp_gte:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_cmp_gte, false);
-          }
-        case Token::punctuator_spaceship:
-          {
-            return rocket::make_unique<Infix_Carriage_General>(Xprunit::xop_infix_cmp_3way, false);
+            const auto& alt = qtok->check<Token::S_punctuator>();
+            // Hmm... use a lookup table?
+            struct Punctuator_Table
+              {
+                Token::Punctuator punct;
+                Xprunit::Xop xop;
+                bool assign;
+              }
+            static constexpr s_table[] =
+              {
+                { Token::punctuator_add,        Xprunit::xop_infix_add,       false },
+                { Token::punctuator_sub,        Xprunit::xop_infix_sub,       false },
+                { Token::punctuator_mul,        Xprunit::xop_infix_mul,       false },
+                { Token::punctuator_div,        Xprunit::xop_infix_div,       false },
+                { Token::punctuator_mod,        Xprunit::xop_infix_mod,       false },
+                { Token::punctuator_andb,       Xprunit::xop_infix_andb,      false },
+                { Token::punctuator_orb,        Xprunit::xop_infix_orb,       false },
+                { Token::punctuator_xorb,       Xprunit::xop_infix_xorb,      false },
+                { Token::punctuator_sla,        Xprunit::xop_infix_sla,       false },
+                { Token::punctuator_sra,        Xprunit::xop_infix_sra,       false },
+                { Token::punctuator_sll,        Xprunit::xop_infix_sll,       false },
+                { Token::punctuator_srl,        Xprunit::xop_infix_srl,       false },
+                { Token::punctuator_add_eq,     Xprunit::xop_infix_add,       true  },
+                { Token::punctuator_sub_eq,     Xprunit::xop_infix_sub,       true  },
+                { Token::punctuator_mul_eq,     Xprunit::xop_infix_mul,       true  },
+                { Token::punctuator_div_eq,     Xprunit::xop_infix_div,       true  },
+                { Token::punctuator_mod_eq,     Xprunit::xop_infix_mod,       true  },
+                { Token::punctuator_andb_eq,    Xprunit::xop_infix_andb,      true  },
+                { Token::punctuator_orb_eq,     Xprunit::xop_infix_orb,       true  },
+                { Token::punctuator_xorb_eq,    Xprunit::xop_infix_xorb,      true  },
+                { Token::punctuator_sla_eq,     Xprunit::xop_infix_sla,       true  },
+                { Token::punctuator_sra_eq,     Xprunit::xop_infix_sra,       true  },
+                { Token::punctuator_sll_eq,     Xprunit::xop_infix_sll,       true  },
+                { Token::punctuator_srl_eq,     Xprunit::xop_infix_srl,       true  },
+                { Token::punctuator_assign,     Xprunit::xop_infix_assign,    true  },
+                { Token::punctuator_cmp_eq,     Xprunit::xop_infix_cmp_eq,    false },
+                { Token::punctuator_cmp_ne,     Xprunit::xop_infix_cmp_ne,    false },
+                { Token::punctuator_cmp_lt,     Xprunit::xop_infix_cmp_lt,    false },
+                { Token::punctuator_cmp_gt,     Xprunit::xop_infix_cmp_gt,    false },
+                { Token::punctuator_cmp_lte,    Xprunit::xop_infix_cmp_lte,   false },
+                { Token::punctuator_cmp_gte,    Xprunit::xop_infix_cmp_gte,   false },
+                { Token::punctuator_spaceship,  Xprunit::xop_infix_cmp_3way,  false },
+              };
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
+                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
+            if(qconf == std::end(s_table)) {
+              return rocket::nullopt;
+            }
+            // Return the infix operator.
+            Infix_Element::S_general elem_c = { qconf->xop, qconf->assign, rocket::clear };
+            qelem.emplace(rocket::move(elem_c));
+            break;
           }
         default:
-          ROCKET_ASSERT(false);
+          return rocket::nullopt;
         }
+        // Discard this token.
+        tstrm.shift();
+        return qelem;
       }
 
-    Uptr<Infix_Element_Base> do_accept_infix_operator_opt(Token_Stream& tstrm)
+    Optional<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
       {
         // infix-operator ::=
         //   infix-operator-ternary | infix-operator-logical-and | infix-operator-logical-or |
@@ -2180,34 +1802,36 @@ namespace Asteria {
         if(!qelem) {
           return false;
         }
-        Cow_Vector<Uptr<Infix_Element_Base>> stack;
-        stack.emplace_back(rocket::move(qelem));
+        Cow_Vector<Infix_Element> stack;
+        stack.emplace_back(rocket::move(*qelem));
         for(;;) {
-          qelem = do_accept_infix_operator_opt(tstrm);
-          if(!qelem) {
+          auto qnext = do_accept_infix_operator_opt(tstrm);
+          if(!qnext) {
             break;
           }
-          bool succ = do_accept_infix_element(qelem->caret(), tstrm);
+          bool succ = do_accept_infix_element(qnext->open_junction(), tstrm);
           if(!succ) {
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
           // Assignment operations have the lowest precedence and group from right to left.
-          auto prec_top = stack.back()->precedence();
-          if(prec_top < Infix_Element_Base::precedence_assignment) {
-            while((stack.size() > 1) && (prec_top <= qelem->precedence())) {
-              auto rhs = rocket::move(stack.mut_back());
+          auto preced_top = stack.back().tell_precedence();
+          if(preced_top < Infix_Element::precedence_assignment) {
+            auto preced_next = qnext->tell_precedence();
+            // Collapse elements that have no lower precedence and group from left to right.
+            while((stack.size() > 1) && (preced_top <= preced_next)) {
+              qelem = rocket::move(stack.mut_back());
               stack.pop_back();
-              rhs->extract(stack.back()->caret());
+              qelem->extract(stack.mut_back().open_junction());
             }
           }
-          stack.emplace_back(rocket::move(qelem));
+          stack.emplace_back(rocket::move(*qnext));
         }
         while(stack.size() > 1) {
-          auto rhs = rocket::move(stack.mut_back());
+          qelem = rocket::move(stack.mut_back());
           stack.pop_back();
-          rhs->extract(stack.back()->caret());
+          qelem->extract(stack.mut_back().open_junction());
         }
-        stack.front()->extract(units);
+        stack.mut_front().extract(units);
         return true;
       }
 

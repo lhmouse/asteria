@@ -121,6 +121,7 @@ pkginclude_compiler_HEADERS =  \
   asteria/src/compiler/parser_error.hpp  \
   asteria/src/compiler/token.hpp  \
   asteria/src/compiler/token_stream.hpp  \
+  asteria/src/compiler/infix_element.hpp  \
   asteria/src/compiler/parser_options.hpp  \
   asteria/src/compiler/parser.hpp  \
   asteria/src/compiler/simple_source_file.hpp
@@ -164,6 +165,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/parser_error.cpp  \
   asteria/src/compiler/token.cpp  \
   asteria/src/compiler/token_stream.cpp  \
+  asteria/src/compiler/infix_element.cpp  \
   asteria/src/compiler/parser.cpp  \
   asteria/src/compiler/simple_source_file.cpp  \
   asteria/src/library/argument_reader.cpp  \

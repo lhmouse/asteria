@@ -70,6 +70,7 @@ class Air_Node;
 class Parser_Error;
 class Token;
 class Token_Stream;
+class Infix_Element;
 class Parser;
 class Simple_Source_File;
 
