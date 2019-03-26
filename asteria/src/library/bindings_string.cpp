@@ -249,7 +249,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.starts_with()`
@@ -280,7 +280,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.ends_with()`
@@ -311,7 +311,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.substr()`
@@ -347,7 +347,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.reverse()`
@@ -376,7 +376,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.trim()`
@@ -408,7 +408,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.trim_left()`
@@ -440,7 +440,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.trim_right()`
@@ -472,7 +472,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.to_upper()`
@@ -502,7 +502,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.to_upper()`
@@ -532,7 +532,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.explode()`
@@ -568,7 +568,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.string.implode()`
@@ -600,7 +600,7 @@ D_object create_bindings_string()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // End of `std.string`

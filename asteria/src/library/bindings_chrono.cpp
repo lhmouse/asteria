@@ -425,7 +425,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.local_now()`
@@ -451,7 +451,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.hires_now()`
@@ -480,7 +480,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.steady_now()`
@@ -509,7 +509,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.local_from_utc()`
@@ -537,7 +537,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.utc_from_local()`
@@ -566,7 +566,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.format_datetime()`
@@ -596,7 +596,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.min_datetime()`
@@ -625,7 +625,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.max_datetime()`
@@ -654,7 +654,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.chrono.parse_datetime()`
@@ -690,7 +690,7 @@ D_object create_bindings_chrono()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // End of `std.chrono`

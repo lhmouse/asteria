@@ -69,7 +69,7 @@ D_object create_bindings_debug()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // `std.debug.dump()`
@@ -106,7 +106,7 @@ D_object create_bindings_debug()
             reader.throw_no_matching_function_call();
           },
         // Opaque parameters
-        { }
+        D_null()
       )));
     //===================================================================
     // End of `std.debug`
