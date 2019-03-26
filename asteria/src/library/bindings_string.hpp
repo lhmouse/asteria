@@ -26,6 +26,8 @@ extern D_string std_string_implode(const D_array& segments, const D_string& deli
 extern D_string std_string_hex_encode(const D_string &text, D_boolean uppercase, const D_string &delim);
 extern Optional<D_string> std_string_hex_decode(const D_string &hstr);
 
+extern D_string std_string_translate(const D_string& text, const D_string& inputs, const D_string& outputs);
+
 // Create an object that is to be referenced as `std.string`.
 extern D_object create_bindings_string();
 

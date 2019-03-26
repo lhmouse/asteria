@@ -245,3 +245,17 @@
 	* Returns a `string` containing decoded bytes. If `hstr` is empty
 	  or consists only whitespaces, an empty `string` is returned. In
 	  the case of parse errors, `null` is returned.
+
+`std.string.translate(text, inputs, [outputs])`
+
+	* Performs bytewise translation on the given string. For every
+	  byte in `text` that is also found in `inputs`, if there is a
+	  corresponding replacement byte in `outputs` with the same
+	  subscript, it is replaced with the latter; if no replacement
+	  exists, because `outputs` is shorter than `inputs` or is null,
+	  it is deleted. If `outputs` is longer than `inputs`, excess
+	  bytes are ignored. Bytes that do not exist in `inputs` are left
+	  intact. This function returns a new `string` without modifying
+	  `text`.
+
+	* Returns the translated `string`.

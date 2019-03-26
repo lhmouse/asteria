@@ -130,8 +130,8 @@ D_string std_string_to_upper(const D_string& text)
     D_string res = text;
     char* wptr = nullptr;
     // Translate each character.
-    for(std::size_t i = 0; i < text.size(); ++i) {
-      char ch = text[i];
+    for(std::size_t i = 0; i < res.size(); ++i) {
+      char ch = res[i];
       if((ch < 'a') || ('z' < ch)) {
         continue;
       }
@@ -150,8 +150,8 @@ D_string std_string_to_lower(const D_string& text)
     D_string res = text;
     char* wptr = nullptr;
     // Translate each character.
-    for(std::size_t i = 0; i < text.size(); ++i) {
-      char ch = text[i];
+    for(std::size_t i = 0; i < res.size(); ++i) {
+      char ch = res[i];
       if((ch < 'A') || ('Z' < ch)) {
         continue;
       }
@@ -236,6 +236,33 @@ D_string std_string_hex_encode(const D_string &text, D_boolean uppercase, const 
       hstr += delim;
     }
     return hstr;
+  }
+
+D_string std_string_translate(const D_string& text, const D_string& inputs, const D_string& outputs)
+  {
+    // Use reference counting as our advantage.
+    D_string res = text;
+    char* wptr = nullptr;
+    // Translate each character.
+    for(std::size_t i = 0; i < res.size(); ++i) {
+      char ch = res[i];
+      auto ipos = inputs.find(ch);
+      if(ipos == D_string::npos) {
+        continue;
+      }
+      // Fork the string as needed.
+      if(ROCKET_UNEXPECT(!wptr)) {
+        wptr = res.mut_data();
+      }
+      if(ipos >= outputs.size()) {
+        // Erase the byte if there is no replacement.
+        // N.B. This must cause no reallocation.
+        res.erase(i--, 1);
+        continue;
+      }
+      wptr[i] = outputs[ipos];
+    }
+    return res;
   }
 
 Optional<D_string> std_string_hex_decode(const D_string &hstr)
@@ -728,6 +755,44 @@ D_object create_bindings_string()
               }
               // Forward the result.
               Reference_Root::S_temporary ref_c = { rocket::move(*qtext) };
+              return rocket::move(ref_c);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.translate()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("translate"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("``std.string.translate(text, inputs, [outputs])`"
+                     "\n  * Performs bytewise translation on the given string. For every"
+                     "\n    byte in `text` that is also found in `inputs`, if there is a"
+                     "\n    corresponding replacement byte in `outputs` with the same"
+                     "\n    subscript, it is replaced with the latter; if no replacement"
+                     "\n    exists, because `outputs` is shorter than `inputs` or is null,"
+                     "\n    it is deleted. If `outputs` is longer than `inputs`, excess"
+                     "\n    bytes are ignored. Bytes that do not exist in `inputs` are left"
+                     "\n    intact. This function returns a new `string` without modifying"
+                     "\n    `text`."
+                     "\n  * Returns the translated `string`."),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.translate"), args);
+            // Parse arguments.
+            D_string text;
+            D_string inputs;
+            D_string outputs;
+            if(reader.start().req(text).req(inputs).opt(outputs).finish()) {
+              // Call the binding function.
+              auto res = std_string_translate(text, inputs, outputs);
+              // Forward the result.
+              Reference_Root::S_temporary ref_c = { rocket::move(res) };
               return rocket::move(ref_c);
             }
             // Fail.
