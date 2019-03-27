@@ -179,13 +179,13 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
       {
         return "Expectation failed while looking for an `each`, `;`, variable definition or expression statement.";
       }
-    case code_closed_bracket_or_expression_expected:
+    case code_semicolon_or_expression_expected:
       {
-        return "Expectation failed while looking for a `]` or expression.";
+        return "Expectation failed while looking for a `;` or expression.";
       }
-    case code_closed_brace_or_object_key_expected:
+    case code_closed_brace_expected:
       {
-        return "Expectation failed while looking for a `}`, identifier or string literal.";
+        return "Expectation failed while looking for a `}`.";
       }
     case code_duplicate_object_key:
       {
@@ -206,10 +206,6 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
     case code_equals_sign_or_colon_expected:
       {
         return "Expectation failed while looking for an `=` or `:`.";
-      }
-    case code_semicolon_or_expression_expected:
-      {
-        return "Expectation failed while looking for a `;` or expression.";
       }
     default:
       {

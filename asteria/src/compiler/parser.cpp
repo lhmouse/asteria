@@ -1356,7 +1356,7 @@ namespace Asteria {
         }
         kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
         if(!kpunct) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_or_expression_expected);
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
         Xprunit::S_unnamed_array unit_c = { nelems };
         return units.emplace_back(rocket::move(unit_c)), true;
@@ -1402,7 +1402,7 @@ namespace Asteria {
         }
         kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
         if(!kpunct) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_object_key_expected);
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_expected);
         }
         Xprunit::S_unnamed_object unit_c = { rocket::move(keys) };
         return units.emplace_back(rocket::move(unit_c)), true;

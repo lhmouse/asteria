@@ -59,14 +59,13 @@ class Parser_Error
         code_keyword_catch_expected                     = 4016,
         code_comma_expected                             = 4017,
         code_for_statement_initializer_expected         = 4018,
-        code_closed_bracket_or_expression_expected      = 4019,
-        code_closed_brace_or_object_key_expected        = 4020,
+        code_semicolon_or_expression_expected           = 4019,
+        code_closed_brace_expected                      = 4020,
         code_duplicate_object_key                       = 4021,
         code_closed_parenthesis_or_argument_expected    = 4022,
         code_closed_bracket_expected                    = 4023,
         code_open_brace_or_equal_initializer_expected   = 4024,
         code_equals_sign_or_colon_expected              = 4025,
-        code_semicolon_or_expression_expected           = 4026,
       };
 
   public:
