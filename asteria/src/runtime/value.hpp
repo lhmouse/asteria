@@ -83,7 +83,7 @@ class Value
 
     bool test() const noexcept;
     Compare compare(const Value& other) const noexcept;
-    void print(std::ostream& os) const;
+    void print(std::ostream& os, bool quote_strings = false) const;
     void dump(std::ostream& os, std::size_t indent_increment = 2, std::size_t indent_next = 0) const;
 
     bool unique() const noexcept;

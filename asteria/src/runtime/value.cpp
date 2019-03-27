@@ -225,7 +225,7 @@ Value::Compare Value::compare(const Value& other) const noexcept
     }
   }
 
-void Value::print(std::ostream& os) const
+void Value::print(std::ostream& os, bool quote_strings) const
   {
     switch(this->type()) {
     case type_null:
@@ -258,6 +258,11 @@ void Value::print(std::ostream& os) const
     case type_string:
       {
         const auto& alt = this->check<D_string>();
+        if(quote_strings) {
+          // "hello"
+          os << quote(alt);
+          return;
+        }
         // hello
         os << alt;
         return;
@@ -283,7 +288,7 @@ void Value::print(std::ostream& os) const
         os << '[';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
           os << ' ';
-          it->print(os);
+          it->print(os, true);
           os << ';';
         }
         os << ' ' << ']';
@@ -298,7 +303,7 @@ void Value::print(std::ostream& os) const
           os << ' ';
           os << quote(it->first);
           os << " = ";
-          it->second.print(os);
+          it->second.print(os, true);
           os << ';';
         }
         os << ' ' << '}';
