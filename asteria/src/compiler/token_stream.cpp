@@ -174,7 +174,7 @@ namespace Asteria {
           throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_utf8_sequence_incomplete);
         }
         // Unset bits that are not part of the payload.
-        cpnt &= static_cast<unsigned char>(0xFF >> u8len);
+        cpnt &= UINT32_C(0xFF) >> u8len;
         // Accumulate trailing code units.
         for(std::size_t i = 1; i < u8len; ++i) {
           char32_t next = reader.peek(i) & 0xFF;
