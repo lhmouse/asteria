@@ -46,9 +46,12 @@ class Argument_Reader
 
   private:
     template<typename HandlerT> inline void do_fail(HandlerT&& handler);
+
     inline const Reference* do_peek_argument_optional_opt();
-    template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_optional(XvalueT& xvalue);
     inline const Reference* do_peek_argument_required_opt();
+    inline Optional<std::size_t> do_check_finish_opt(bool variadic);
+
+    template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_optional(XvalueT& xvalue);
     template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_required(XvalueT& xvalue);
 
   public:
@@ -122,8 +125,11 @@ class Argument_Reader
     Argument_Reader& req(D_array& xvalue);
     Argument_Reader& req(D_object& xvalue);
     // Terminate the argument list and finish this overload.
-    // There shall be no more argument; otherwise this operation fails.
+    // For the overload taking no arguments, if there are excess arguments, the operation fails.
+    // For the other overloads, excess arguments are copied into `vargs`.
     Argument_Reader& finish();
+    Argument_Reader& finish(Cow_Vector<Reference>& vargs);
+    Argument_Reader& finish(Cow_Vector<Value>& vargs);
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]] void throw_no_matching_function_call() const;

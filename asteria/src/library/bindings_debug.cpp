@@ -43,8 +43,8 @@ D_object create_bindings_debug()
     ro.try_emplace(rocket::sref("print"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.debug.print([args...])`"
-                     "\n  * Prints all `args` to the standard error stream, separated by"
+        rocket::sref("`std.debug.print(...)`"
+                     "\n  * Prints all arguments to the standard error stream, separated by"
                      "\n    spaces. A line break is appended to terminate the line."
                      "\n  * Returns `true` if the operation succeeds."),
         // Definition
@@ -52,10 +52,8 @@ D_object create_bindings_debug()
           {
             Argument_Reader reader(rocket::sref("std.debug.print"), args);
             // Parse variadic arguments.
-            Cow_Vector<Value> values(args.size());
-            reader.start();
-            std::for_each(values.mut_begin(), values.mut_end(), [&](Value& value) { reader.opt(value);  });
-            if(reader.finish()) {
+            Cow_Vector<Value> values;
+            if(reader.start().finish(values)) {
               // Call the binding function.
               if(!std_debug_print(values)) {
                 // Fail.
