@@ -169,13 +169,13 @@ namespace Asteria {
         auto u8len = static_cast<unsigned>(2 + (cpnt >= 0xE0) + (cpnt >= 0xF0));
         ROCKET_ASSERT(u8len >= 2);
         ROCKET_ASSERT(u8len <= 4);
-        // Unset bits that are not part of the payload.
-        cpnt &= static_cast<unsigned char>(0xFF >> u8len);
-        // Accumulate trailing code units.
         if(u8len > reader.size_avail()) {
           // No enough characters have been provided.
           throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_utf8_sequence_incomplete);
         }
+        // Unset bits that are not part of the payload.
+        cpnt &= static_cast<unsigned char>(0xFF >> u8len);
+        // Accumulate trailing code units.
         for(unsigned i = 1; i < u8len; ++i) {
           char32_t next = reader.peek(i) & 0xFF;
           if((next < 0x80) || (0xC0 <= next)) {
