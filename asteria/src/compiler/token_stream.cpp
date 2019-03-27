@@ -166,7 +166,7 @@ namespace Asteria {
           throw do_make_parser_error(reader, 1, Parser_Error::code_utf8_sequence_invalid);
         }
         // Calculate the number of bytes in this code point.
-        auto u8len = static_cast<unsigned>(2 + (cpnt >= 0xE0) + (cpnt >= 0xF0));
+        auto u8len = static_cast<std::size_t>(2 + (cpnt >= 0xE0) + (cpnt >= 0xF0));
         ROCKET_ASSERT(u8len >= 2);
         ROCKET_ASSERT(u8len <= 4);
         if(u8len > reader.size_avail()) {
@@ -176,7 +176,7 @@ namespace Asteria {
         // Unset bits that are not part of the payload.
         cpnt &= static_cast<unsigned char>(0xFF >> u8len);
         // Accumulate trailing code units.
-        for(unsigned i = 1; i < u8len; ++i) {
+        for(std::size_t i = 1; i < u8len; ++i) {
           char32_t next = reader.peek(i) & 0xFF;
           if((next < 0x80) || (0xC0 <= next)) {
             // This trailing character is not valid.
@@ -189,8 +189,8 @@ namespace Asteria {
           throw do_make_parser_error(reader, u8len, Parser_Error::code_utf_code_point_invalid);
         }
         // Re-encode it and check for overlong sequences.
-        auto minlen = static_cast<unsigned>(1 + (cpnt >= 0x80) + (cpnt >= 0x800) + (cpnt >= 0x10000));
-        if(minlen != u8len) {
+        auto mlen = static_cast<std::size_t>(1 + (cpnt >= 0x80) + (cpnt >= 0x800) + (cpnt >= 0x10000));
+        if(mlen != u8len) {
           // Overlong sequences are not allowed.
           throw do_make_parser_error(reader, u8len, Parser_Error::code_utf8_sequence_invalid);
         }
