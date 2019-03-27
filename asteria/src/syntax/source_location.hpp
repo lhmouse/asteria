@@ -15,8 +15,8 @@ class Source_Location
     std::uint32_t m_line;
 
   public:
-    Source_Location(const Cow_String& xfile, std::uint32_t xline) noexcept
-      : m_file(xfile), m_line(xline)
+    Source_Location(Cow_String xfile, std::uint32_t xline) noexcept
+      : m_file(rocket::move(xfile)), m_line(xline)
       {
       }
 
