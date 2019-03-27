@@ -210,18 +210,18 @@ namespace Asteria {
         // Evaluate the control expression.
         auto ctrl_value = stack.get_top_reference().read();
         // Set the target clause.
-        auto target = p.end();
+        Optional<Cow_Vector<Air_Node::Param>::const_iterator> qtarget;
         // Iterate over all `case` labels and evaluate them. Stop if the result value equals `ctrl_value`.
-        // In this loop, `target` points to the `default` clause.
+        // In this loop, `qtarget` points to the `default` clause.
         for(auto it = p.begin(); it != p.end(); it += 3) {
           // Decode arguments.
           const auto& code_cond = it[0].as<Cow_Vector<Air_Node>>();
           if(code_cond.empty()) {
             // This is a `default` clause.
-            if(target != p.end()) {
+            if(qtarget) {
               ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses have been found in this `switch` statement.");
             }
-            target = it;
+            qtarget = it;
             continue;
           }
           // This is a `case` clause.
@@ -229,34 +229,36 @@ namespace Asteria {
           do_evaluate_expression(stack, ctx, code_cond, func, global);
           if(stack.get_top_reference().read().compare(ctrl_value) == Value::compare_equal) {
             // Found a `case` label. Stop.
-            target = it;
+            qtarget = it;
             break;
           }
         }
-        if(target != p.end()) {
-          // Jump to the clause denoted by `target`.
-          // Note that all clauses share the same context.
-          Executive_Context ctx_body(&ctx);
-          // Skip clauses that precede `target`.
-          for(auto it = p.begin(); it != target; it += 3) {
-            // Decode arguments.
-            const auto& names = it[2].as<Cow_Vector<PreHashed_String>>();
-            // Inject all names into this scope.
-            rocket::for_each(names, [&](const PreHashed_String& name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
-                                                                                                       name, Reference_Root::S_null());  });
+        if(!qtarget) {
+          // No match clause has been found.
+          return Air_Node::status_next;
+        }
+        // Jump to the clause denoted by `*qtarget`.
+        // Note that all clauses share the same context.
+        Executive_Context ctx_body(&ctx);
+        // Skip clauses that precede `*qtarget`.
+        for(auto it = p.begin(); it != *qtarget; it += 3) {
+          // Decode arguments.
+          const auto& names = it[2].as<Cow_Vector<PreHashed_String>>();
+          // Inject all names into this scope.
+          rocket::for_each(names, [&](const PreHashed_String& name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
+                                                                                                     name, Reference_Root::S_null());  });
+        }
+        // Execute all clauses from `*qtarget` to the end of this block.
+        for(auto it = *qtarget; it != p.end(); it += 3) {
+          // Decode arguments.
+          const auto& code_clause = it[1].as<Cow_Vector<Air_Node>>();
+          // Execute the clause. Break out of the block if requested. Forward any status codes unexpected to the caller.
+          auto status = do_execute_statement_list(stack, ctx_body, code_clause, func, global);
+          if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
+            break;
           }
-          // Execute all clauses from `target` to the end of this block.
-          for(auto it = target; it != p.end(); it += 3) {
-            // Decode arguments.
-            const auto& code_clause = it[1].as<Cow_Vector<Air_Node>>();
-            // Execute the clause. Break out of the block if requested. Forward any status codes unexpected to the caller.
-            auto status = do_execute_statement_list(stack, ctx_body, code_clause, func, global);
-            if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
-              break;
-            }
-            if(rocket::is_none_of(status, { Air_Node::status_next })) {
-              return status;
-            }
+          if(rocket::is_none_of(status, { Air_Node::status_next })) {
+            return status;
           }
         }
         return Air_Node::status_next;
