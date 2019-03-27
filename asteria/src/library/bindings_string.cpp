@@ -229,15 +229,15 @@ D_string std_string_implode(const D_array& segments, const D_string& delim)
   {
     D_string text;
     // Deal with nasty separators.
-    switch(segments.size()) {
-    default:
-      std::for_each(segments.begin(), segments.end() - 1, [&](const Value& r) { text.append(r.check<D_string>()).append(delim);  });
-      // Fallthrough.
-    case 1:
-      text.append(segments.back().check<D_string>());
-      // Fallthrough.
-    case 0:
-      break;
+    auto rpos = segments.begin();
+    if(rpos != segments.end()) {
+      for(;;) {
+        text += rpos->check<D_string>();
+        if(++rpos == segments.end()) {
+          break;
+        }
+        text += delim;
+      }
     }
     return text;
   }

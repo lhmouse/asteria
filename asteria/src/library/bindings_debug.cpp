@@ -12,15 +12,15 @@ namespace Asteria {
 bool std_debug_print(const Cow_Vector<Value>& values)
   {
     rocket::insertable_ostream mos;
-    switch(values.size()) {
-    default:
-      std::for_each(values.begin(), values.end() - 1, [&](const Value& r) { r.print(mos), mos << ' ';  });
-      // Fallthrough.
-    case 1:
-      values.back().print(mos);
-      // Fallthrough.
-    case 0:
-      break;
+    auto rpos = values.begin();
+    if(rpos != values.end()) {
+      for(;;) {
+        rpos->print(mos);
+        if(++rpos == values.end()) {
+          break;
+        }
+        mos << ' ';
+      }
     }
     bool succ = write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
     return succ;
