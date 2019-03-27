@@ -276,7 +276,7 @@
 	  UTF-8 code units, into an `array` of code points, represented
 	  as `integer`s. When an invalid code sequence is encountered, if
 	  `permissive` is set to `true`, all code units of it are
-	  re-interpreted as ISO/IEC 8859-1 and decoded as isolated bytes;
+	  re-interpreted as isolated bytes according to ISO/IEC 8859-1;
 	  otherwise this function fails.
 
 	* Returns an `array` containing decoded code points; otherwise
