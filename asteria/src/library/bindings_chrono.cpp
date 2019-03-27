@@ -679,11 +679,11 @@ D_object create_bindings_chrono()
             D_string time_str;
             if(reader.start().req(time_str).finish()) {
               // Call the binding function.
-              auto opt = std_chrono_parse_datetime(time_str);
-              if(!opt) {
+              auto qres = std_chrono_parse_datetime(time_str);
+              if(!qres) {
                 return Reference_Root::S_null();
               }
-              Reference_Root::S_temporary ref_c = { *opt };
+              Reference_Root::S_temporary ref_c = { *qres };
               return rocket::move(ref_c);
             }
             // Fail.
