@@ -401,9 +401,9 @@ namespace Asteria {
         return rocket::move(stmt_c);
       }
 
-    Optional<Cow_Vector<PreHashed_String>> do_accept_parameter_list_opt(Token_Stream& tstrm)
+    Optional<Cow_Vector<PreHashed_String>> do_accept_parameter_declaration_opt(Token_Stream& tstrm)
       {
-        // parameter-list ::=
+        // parameter-declaration ::=
         //   "(" ( identifier-list | "" ) ")"
         // identifier-list ::=
         //   identifier ( "," identifier-list | "" )
@@ -439,7 +439,7 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // function-definition ::=
-        //   "func" identifier parameter-list block
+        //   "func" identifier parameter-declaration block
         auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_func });
         if(!qkwrd) {
           return rocket::nullopt;
@@ -448,7 +448,7 @@ namespace Asteria {
         if(!qname) {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        auto kparams = do_accept_parameter_list_opt(tstrm);
+        auto kparams = do_accept_parameter_declaration_opt(tstrm);
         if(!kparams) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1288,12 +1288,12 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // closure-function ::=
-        //   "func" parameter-list closure-body
+        //   "func" parameter-declaration closure-body
         auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_func });
         if(!qkwrd) {
           return false;
         }
-        auto kparams = do_accept_parameter_list_opt(tstrm);
+        auto kparams = do_accept_parameter_declaration_opt(tstrm);
         if(!kparams) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
