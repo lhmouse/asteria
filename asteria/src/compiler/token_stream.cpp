@@ -155,26 +155,26 @@ namespace Asteria {
     char32_t do_get_utf8_code_point(Line_Reader& reader)
       {
         // Read the first byte.
-        char32_t code_point = reader.peek() & 0xFF;
-        if(code_point < 0x80) {
+        char32_t cpnt = reader.peek() & 0xFF;
+        if(cpnt < 0x80) {
           // This sequence contains only one byte.
           reader.consume(1);
-          return code_point;
+          return cpnt;
         }
-        if(code_point < 0xC0) {
+        if(cpnt < 0xC0) {
           // This is not a leading character.
           throw do_make_parser_error(reader, 1, Parser_Error::code_utf8_sequence_invalid);
         }
-        if(code_point >= 0xF8) {
+        if(cpnt >= 0xF8) {
           // If this leading character were valid, it would start a sequence of five bytes or more.
           throw do_make_parser_error(reader, 1, Parser_Error::code_utf8_sequence_invalid);
         }
         // Calculate the number of bytes in this code point.
-        auto u8len = static_cast<unsigned>(2 + (code_point >= 0xE0) + (code_point >= 0xF0));
+        auto u8len = static_cast<unsigned>(2 + (cpnt >= 0xE0) + (cpnt >= 0xF0));
         ROCKET_ASSERT(u8len >= 2);
         ROCKET_ASSERT(u8len <= 4);
         // Unset bits that are not part of the payload.
-        code_point &= static_cast<unsigned char>(0xFF >> u8len);
+        cpnt &= static_cast<unsigned char>(0xFF >> u8len);
         // Accumulate trailing code units.
         if(u8len > reader.size_avail()) {
           // No enough characters have been provided.
@@ -186,24 +186,20 @@ namespace Asteria {
             // This trailing character is not valid.
             throw do_make_parser_error(reader, i + 1, Parser_Error::code_utf8_sequence_invalid);
           }
-          code_point = (code_point << 6) | (next & 0x3F);
+          cpnt = (cpnt << 6) | (next & 0x3F);
         }
-        if((0xD800 <= code_point) && (code_point < 0xE000)) {
-          // Surrogates are not allowed.
-          throw do_make_parser_error(reader, u8len, Parser_Error::code_utf_code_point_invalid);
-        }
-        if(code_point >= 0x110000) {
-          // Code point value is too large.
+        if(((0xD800 <= cpnt) && (cpnt < 0xE000)) || (0x110000 <= cpnt)) {
+          // Code point value is reserved or too large.
           throw do_make_parser_error(reader, u8len, Parser_Error::code_utf_code_point_invalid);
         }
         // Re-encode it and check for overlong sequences.
-        auto minlen = static_cast<unsigned>(1 + (code_point >= 0x80) + (code_point >= 0x800) + (code_point >= 0x10000));
+        auto minlen = static_cast<unsigned>(1 + (cpnt >= 0x80) + (cpnt >= 0x800) + (cpnt >= 0x10000));
         if(minlen != u8len) {
           // Overlong sequences are not allowed.
           throw do_make_parser_error(reader, u8len, Parser_Error::code_utf8_sequence_invalid);
         }
         reader.consume(u8len);
-        return code_point;
+        return cpnt;
       }
 
     template<typename XtokenT> void do_push_token(Cow_Vector<Token>& seq, Line_Reader& reader, std::size_t length, XtokenT&& xtoken)
@@ -515,7 +511,7 @@ namespace Asteria {
                 if(qavail < xcnt + 2) {
                   throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_escape_sequence_incomplete);
                 }
-                char32_t code_point = 0;
+                char32_t cpnt = 0;
                 for(auto i = tlen; i < tlen + xcnt; ++i) {
                   static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
                   auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
@@ -523,37 +519,33 @@ namespace Asteria {
                     throw do_make_parser_error(reader, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                   }
                   auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
-                  code_point = code_point * 16 + dvalue;
+                  cpnt = cpnt * 16 + dvalue;
                 }
                 if(next == 'x') {
                   // Write the character verbatim.
-                  value.push_back(static_cast<char>(code_point));
+                  value.push_back(static_cast<char>(cpnt));
                   break;
                 }
                 // Write a Unicode code point.
-                if((0xD800 <= code_point) && (code_point < 0xE000)) {
-                  // Surrogates are not allowed.
-                  throw do_make_parser_error(reader, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
-                }
-                if(code_point >= 0x110000) {
-                  // Code point value is too large.
+                if(((0xD800 <= cpnt) && (cpnt < 0xE000)) || (0x110000 <= cpnt)) {
+                  // Code point value is reserved or too large.
                   throw do_make_parser_error(reader, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
                 }
                 // Encode it.
                 auto encode_one = [&](unsigned shift, unsigned mask)
                   {
-                    value.push_back(static_cast<char>((~mask << 1) | ((code_point >> shift) & mask)));
+                    value.push_back(static_cast<char>((~mask << 1) | ((cpnt >> shift) & mask)));
                   };
-                if(code_point < 0x80) {
+                if(cpnt < 0x80) {
                   encode_one( 0, 0xFF);
                   break;
                 }
-                if(code_point < 0x800) {
+                if(cpnt < 0x800) {
                   encode_one( 6, 0x1F);
                   encode_one( 0, 0x3F);
                   break;
                 }
-                if(code_point < 0x10000) {
+                if(cpnt < 0x10000) {
                   encode_one(12, 0x0F);
                   encode_one( 6, 0x3F);
                   encode_one( 0, 0x3F);
