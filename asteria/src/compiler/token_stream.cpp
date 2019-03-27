@@ -161,12 +161,8 @@ namespace Asteria {
           reader.consume(1);
           return cpnt;
         }
-        if(cpnt < 0xC0) {
+        if((cpnt < 0xC0) || (0xF8 <= cpnt)) {
           // This is not a leading character.
-          throw do_make_parser_error(reader, 1, Parser_Error::code_utf8_sequence_invalid);
-        }
-        if(cpnt >= 0xF8) {
-          // If this leading character were valid, it would start a sequence of five bytes or more.
           throw do_make_parser_error(reader, 1, Parser_Error::code_utf8_sequence_invalid);
         }
         // Calculate the number of bytes in this code point.
