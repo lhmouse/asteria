@@ -401,37 +401,61 @@ namespace Asteria {
         return rocket::move(stmt_c);
       }
 
-    Optional<Cow_Vector<PreHashed_String>> do_accept_parameter_declaration_opt(Token_Stream& tstrm)
+    Optional<Cow_Vector<PreHashed_String>> do_accept_parameter_list_opt(Token_Stream& tstrm)
       {
-        // parameter-declaration ::=
-        //   "(" ( identifier-list | "" ) ")"
-        // identifier-list ::=
-        //   identifier ( "," identifier-list | "" )
+        // parameter-list-opt ::=
+        //   identifier parameter-list-carriage-opt | "..." | ""
+        // parameter-list-carriage-opt ::=
+        //   "," ( identifier comma-parameter-list-opt | "..." ) | ""
+        auto qname = do_accept_identifier_opt(tstrm);
+        if(qname) {
+          Cow_Vector<PreHashed_String> names;
+          for(;;) {
+            names.emplace_back(rocket::move(*qname));
+            // Look for the separator.
+            auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+            if(!kpunct) {
+              break;
+            }
+            qname = do_accept_identifier_opt(tstrm);
+            if(!qname) {
+              // The parameter list may end with an ellipsis.
+              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_ellipsis });
+              if(kpunct) {
+                names.emplace_back(rocket::sref("..."));
+                break;
+              }
+              throw do_make_parser_error(tstrm, Parser_Error::code_parameter_or_ellipsis_expected);
+            }
+          }
+          return rocket::move(names);
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_ellipsis });
+        if(kpunct) {
+          Cow_Vector<PreHashed_String> names;
+          names.emplace_back(rocket::sref("..."));
+          return rocket::move(names);
+        }
+        return rocket::nullopt;
+      }
+
+    Optional<Cow_Vector<PreHashed_String>> do_accept_parameter_list_declaration_opt(Token_Stream& tstrm)
+      {
+        // parameter-list-declaration ::=
+        //   "(" parameter-list-opt ")"
         auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
         if(!kpunct) {
           return rocket::nullopt;
         }
-        Cow_Vector<PreHashed_String> names;
-        for(;;) {
-          auto qname = do_accept_identifier_opt(tstrm);
-          if(!qname) {
-            if(names.empty()) {
-              break;
-            }
-            throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
-          }
-          names.emplace_back(rocket::move(*qname));
-          // Look for the separator.
-          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
-          if(!kpunct) {
-            break;
-          }
+        auto qnames = do_accept_parameter_list_opt(tstrm);
+        if(!qnames) {
+          qnames.emplace();
         }
         kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
         if(!kpunct) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_parameter_expected);
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
-        return rocket::move(names);
+        return rocket::move(*qnames);
       }
 
     Optional<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
@@ -448,7 +472,7 @@ namespace Asteria {
         if(!qname) {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        auto kparams = do_accept_parameter_declaration_opt(tstrm);
+        auto kparams = do_accept_parameter_list_declaration_opt(tstrm);
         if(!kparams) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1293,7 +1317,7 @@ namespace Asteria {
         if(!qkwrd) {
           return false;
         }
-        auto kparams = do_accept_parameter_declaration_opt(tstrm);
+        auto kparams = do_accept_parameter_list_declaration_opt(tstrm);
         if(!kparams) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }

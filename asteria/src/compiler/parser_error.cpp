@@ -10,7 +10,9 @@ namespace Asteria {
 const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcept
   {
     switch(xcode) {
+      /////////////////////////////////////////////////////////////////////////
       // Special
+      /////////////////////////////////////////////////////////////////////////
     case code_success:
       {
         return "The operation succeeded.";
@@ -19,9 +21,11 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
       {
         return "No data were loaded.";
       }
+      /////////////////////////////////////////////////////////////////////////
       // Phase 1
       //   I/O stream
       //   UTF-8 decoder
+      /////////////////////////////////////////////////////////////////////////
     case code_istream_open_failure:
       {
         return "The source stream could not be opened for reading.";
@@ -42,9 +46,11 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
       {
         return "A UTF-8 byte sequence could not be decoded to a valid UTF code point.";
       }
+      /////////////////////////////////////////////////////////////////////////
       // Phase 2
       //   Comment stripper
       //   Tokenizer
+      /////////////////////////////////////////////////////////////////////////
     case code_token_character_unrecognized:
       {
         return "The character could not form a valid token.";
@@ -101,8 +107,10 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
       {
         return "A block comment was not properly terminated.";
       }
+      /////////////////////////////////////////////////////////////////////////
       // Phase 3
       //   Parser
+      /////////////////////////////////////////////////////////////////////////
     case code_identifier_expected:
       {
         return "Expectation failed while looking for an identifier.";
@@ -139,9 +147,9 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
       {
         return "Expectation failed while looking for an `(`.";
       }
-    case code_closed_parenthesis_or_parameter_expected:
+    case code_parameter_or_ellipsis_expected:
       {
-        return "Expectation failed while looking for a `)` or identifier.";
+        return "Expectation failed while looking for an identifier or `...`.";
       }
     case code_closed_parenthesis_expected:
       {

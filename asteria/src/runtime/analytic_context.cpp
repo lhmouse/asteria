@@ -19,6 +19,11 @@ void Analytic_Context::prepare_function_parameters(const Cow_Vector<PreHashed_St
       if(param.empty()) {
         continue;
       }
+      if(param == "...") {
+        // Nothing is set for the variadic placeholder, but the parameter list terminates here.
+        ROCKET_ASSERT(i == params.size() - 1);
+        break;
+      }
       if(param.rdstr().starts_with("__")) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }

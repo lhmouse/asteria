@@ -11,7 +11,7 @@ using namespace Asteria;
 int main()
   {
     std::istringstream iss(R"__(
-      func binary(a, b) {
+      func binary(a, b, ...) {
         var narg = __varg();
         var arg = __varg(a);
         return [ narg, arg ];

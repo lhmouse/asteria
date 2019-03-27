@@ -45,7 +45,9 @@ Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::is
     }
     // Initialize parameters of the top scope.
     Source_Location sloc(filename, 0);
+    // The file is considered to be a function taking variadic arguments.
     Cow_Vector<PreHashed_String> params;
+    params.emplace_back(rocket::sref("..."));
     // Generate code.
     Cow_Vector<Air_Node> code_func;
     Analytic_Context ctx_func(nullptr);

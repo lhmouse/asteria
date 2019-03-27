@@ -51,7 +51,7 @@ class Parser_Error
         code_open_brace_expected                        = 4008,
         code_closed_brace_or_statement_expected         = 4009,
         code_open_parenthesis_expected                  = 4010,
-        code_closed_parenthesis_or_parameter_expected   = 4011,
+        code_parameter_or_ellipsis_expected             = 4011,
         code_closed_parenthesis_expected                = 4012,
         code_colon_expected                             = 4013,
         code_closed_brace_or_switch_clause_expected     = 4014,
