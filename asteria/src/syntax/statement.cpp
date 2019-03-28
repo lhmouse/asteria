@@ -170,9 +170,14 @@ namespace Asteria {
         Analytic_Context ctx_func(&ctx);
         ctx_func.prepare_function_parameters(params);
         rocket::for_each(body, [&](const Statement& stmt) { stmt.generate_code(code_func, nullptr, ctx_func);  });
-        // Instantiate the function.
+        // Format the prototype string.
         rocket::insertable_ostream nos;
-        nos << name << "(" << rocket::ostream_implode(params.begin(), params.size(), ", ") <<")";
+        nos << name << "(";
+        if(!params.empty()) {
+          std::for_each(params.begin(), params.end() - 1, [&](const PreHashed_String& param) { nos << param << ", ";  });
+          nos << params.back();
+        }
+        nos <<")";
         Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_func));
         // Initialized the function variable.
         var->reset(sloc, D_function(rocket::move(closure)), true);

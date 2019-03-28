@@ -527,8 +527,16 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         Analytic_Context ctx_func(&ctx);
         ctx_func.prepare_function_parameters(params);
         rocket::for_each(body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func);  });
+        // Format the prototype string.
+        rocket::insertable_ostream nos;
+        nos << "<closure> (";
+        if(!params.empty()) {
+          std::for_each(params.begin(), params.end() - 1, [&](const PreHashed_String& param) { nos << param << ", ";  });
+          nos << params.back();
+        }
+        nos <<")";
         // Instantiate the function.
-        Rcobj<Instantiated_Function> closure(sloc, rocket::sref("<closure function>"), params, rocket::move(code_body));
+        Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_body));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);
         // Push the function object.
         Reference_Root::S_temporary ref_c = { D_function(rocket::move(closure)) };

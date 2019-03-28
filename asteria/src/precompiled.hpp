@@ -54,6 +54,5 @@
 #include "rocket/static_vector.hpp"
 #include "rocket/optional.hpp"
 #include "rocket/prehashed_string.hpp"
-#include "rocket/ostream_implode.hpp"
 
 #endif

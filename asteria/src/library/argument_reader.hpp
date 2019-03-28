@@ -12,10 +12,14 @@ namespace Asteria {
 
 class Argument_Reader
   {
+  private:
+    // This opaque struct is used to encode function prototype parameters.
+    struct Mparam;
+
   public:
     struct State
       {
-        Cow_Vector<std::uint8_t> prototype;
+        Cow_Vector<Mparam> prototype;
         bool finished;
         bool succeeded;
       };
@@ -27,7 +31,7 @@ class Argument_Reader
 
     // This string stores all overloads that have been tested so far.
     // Overloads are encoded in binary formats.
-    Cow_Vector<std::uint8_t> m_overloads;
+    Cow_Vector<Mparam> m_overloads;
     // N.B. The contents of `m_state` can be copied elsewhere and back.
     // Any further operations will resume from that point.
     State m_state;
@@ -47,12 +51,15 @@ class Argument_Reader
   private:
     template<typename HandlerT> inline void do_fail(HandlerT&& handler);
 
-    inline const Reference* do_peek_argument_optional_opt();
-    inline const Reference* do_peek_argument_required_opt();
+    inline void do_record_parameter(Dtype dtype, bool required);
+    inline void do_record_parameter_generic();
+    inline void do_record_parameter_finish(bool variadic);
+
+    inline const Reference* do_peek_argument_opt(bool required);
     inline Optional<std::size_t> do_check_finish_opt(bool variadic);
 
-    template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_optional(XvalueT& xvalue);
-    template<typename XvalueT> inline Argument_Reader& do_read_typed_argument_required(XvalueT& xvalue);
+    template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument_optional(typename Value::Xvariant::type_at<dtypeT>::type& xvalue);
+    template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument_required(typename Value::Xvariant::type_at<dtypeT>::type& xvalue);
 
   public:
     const Cow_String& get_name() const noexcept
