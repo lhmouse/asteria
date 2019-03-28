@@ -708,7 +708,6 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Negate the operand to create a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
-        stack.pop_reference();
         if(rhs.type() == dtype_integer) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_neg(reg);
