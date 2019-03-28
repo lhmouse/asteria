@@ -370,7 +370,6 @@ void Argument_Reader::throw_no_matching_function_call() const
       auto bpos = this->m_overloads.begin();
       for(;;) {
         auto epos = std::find_if(bpos, this->m_overloads.end(), [&](const Mparam& pinfo) { return pinfo.tag == Mparam::tag_finish;  });
-        ROCKET_ASSERT(epos != this->m_overloads.end());
         // Append this overload.
         mos << "`" << name << "(";
         if(bpos != epos) {
@@ -379,11 +378,11 @@ void Argument_Reader::throw_no_matching_function_call() const
         }
         mos << ")`";
         // Are there more overloads?
-        bpos = epos + 1;
-        if(bpos == this->m_overloads.end()) {
+        if(this->m_overloads.end() - epos <= 1) {
           break;
         }
         // Read the next overload.
+        bpos = epos + 1;
         mos << ", ";
       }
       mos << "]";
