@@ -104,17 +104,17 @@ using D_array     = Cow_Vector<Value>;
 using D_object    = Cow_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
 
 // Indices of Fundamental Types
-enum Value_Type : std::uint8_t
+enum Dtype : std::uint8_t
   {
-    type_null      = 0,
-    type_boolean   = 1,
-    type_integer   = 2,
-    type_real      = 3,
-    type_string    = 4,
-    type_opaque    = 5,
-    type_function  = 6,
-    type_array     = 7,
-    type_object    = 8,
+    dtype_null      = 0,
+    dtype_boolean   = 1,
+    dtype_integer   = 2,
+    dtype_real      = 3,
+    dtype_string    = 4,
+    dtype_opaque    = 5,
+    dtype_function  = 6,
+    dtype_array     = 7,
+    dtype_object    = 8,
   };
 
 }  // namespace Asteria

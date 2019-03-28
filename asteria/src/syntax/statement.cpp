@@ -334,7 +334,7 @@ namespace Asteria {
         auto range_value = range_ref.read();
         // Iterate over the range.
         switch(rocket::weaken_enum(range_value.type())) {
-        case type_array:
+        case dtype_array:
           {
             const auto& array = range_value.check<D_array>();
             for(auto it = array.begin(); it != array.end(); ++it) {
@@ -358,7 +358,7 @@ namespace Asteria {
             }
             break;
           }
-        case type_object:
+        case dtype_object:
           {
             const auto& object = range_value.check<D_object>();
             for(auto it = object.begin(); it != object.end(); ++it) {

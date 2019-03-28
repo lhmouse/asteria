@@ -32,7 +32,7 @@ template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
      *    11    variadic placeholder
      */
 
-    constexpr std::uint8_t do_encode_optional_parameter(Value_Type type) noexcept
+    constexpr std::uint8_t do_encode_optional_parameter(Dtype type) noexcept
       {
         return std::uint8_t(0x00 | (type & 0x0F));
       }
@@ -40,7 +40,7 @@ template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
       {
         return std::uint8_t(0x10);
       }
-    constexpr std::uint8_t do_encode_required_parameter(Value_Type type) noexcept
+    constexpr std::uint8_t do_encode_required_parameter(Dtype type) noexcept
       {
         return std::uint8_t(0x20 | (type & 0x0F));
       }
@@ -51,12 +51,12 @@ template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
 
     struct Decoded_Param
       {
-        Value_Type type;
+        Dtype type;
         bool generic;
         bool required;
 
         explicit constexpr Decoded_Param(std::uint8_t byte) noexcept
-          : type(static_cast<Value_Type>(byte & 0x0F)),
+          : type(static_cast<Dtype>(byte & 0x0F)),
             generic(byte & 0x10),
             required(byte & 0x20)
           {
@@ -157,7 +157,7 @@ Optional<std::size_t> Argument_Reader::do_check_finish_opt(bool variadic)
 template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argument_optional(XvalueT& xvalue)
   {
     // Record a parameter.
-    constexpr auto xtype = static_cast<Value_Type>(Value::Xvariant::index_of<XvalueT>::value);
+    constexpr auto xtype = static_cast<Dtype>(Value::Xvariant::index_of<XvalueT>::value);
     this->m_state.prototype.emplace_back(do_encode_optional_parameter(xtype));
     // Get the next argument.
     auto qarg = this->do_peek_argument_optional_opt();
@@ -166,7 +166,7 @@ template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argum
     }
     // Read a value from the argument.
     const auto& value = qarg->read();
-    if(value.type() == type_null) {
+    if(value.type() == dtype_null) {
       // Leave `xvalue` alone and succeed.
       return *this;
     }
@@ -184,7 +184,7 @@ template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argum
 template<typename XvalueT> Argument_Reader& Argument_Reader::do_read_typed_argument_required(XvalueT& xvalue)
   {
     // Record a parameter.
-    constexpr auto xtype = static_cast<Value_Type>(Value::Xvariant::index_of<XvalueT>::value);
+    constexpr auto xtype = static_cast<Dtype>(Value::Xvariant::index_of<XvalueT>::value);
     this->m_state.prototype.emplace_back(do_encode_required_parameter(xtype));
     // Get the next argument.
     auto qarg = this->do_peek_argument_required_opt();

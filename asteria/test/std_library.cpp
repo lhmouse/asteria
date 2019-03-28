@@ -19,7 +19,7 @@ int main()
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     auto retv = code.execute(global, { }).read();
-    ASTERIA_TEST_CHECK(retv.type() == type_null);
+    ASTERIA_TEST_CHECK(retv.type() == dtype_null);
 
     global.open_std_member(rocket::sref("meow")) = D_integer(42);
     retv = code.execute(global, { }).read();
@@ -27,5 +27,5 @@ int main()
 
     global.remove_std_member(rocket::sref("meow"));
     retv = code.execute(global, { }).read();
-    ASTERIA_TEST_CHECK(retv.type() == type_null);
+    ASTERIA_TEST_CHECK(retv.type() == dtype_null);
   }

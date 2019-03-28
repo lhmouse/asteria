@@ -37,7 +37,7 @@ class Value
 
   public:
     // The objects returned by these functions are allocated statically and exist throughout the program.
-    ROCKET_PURE_FUNCTION static const char* get_type_name(Value_Type etype) noexcept;
+    ROCKET_PURE_FUNCTION static const char* get_type_name(Dtype etype) noexcept;
     ROCKET_PURE_FUNCTION static const Value& get_null() noexcept;
 
   private:
@@ -59,9 +59,9 @@ class Value
       }
 
   public:
-    Value_Type type() const noexcept
+    Dtype type() const noexcept
       {
-        return static_cast<Value_Type>(this->m_stor.index());
+        return static_cast<Dtype>(this->m_stor.index());
       }
     template<typename AltT> const AltT* opt() const noexcept
       {

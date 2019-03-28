@@ -7,42 +7,42 @@
 
 namespace Asteria {
 
-const char* Value::get_type_name(Value_Type etype) noexcept
+const char* Value::get_type_name(Dtype etype) noexcept
   {
     switch(etype) {
-    case type_null:
+    case dtype_null:
       {
         return "null";
       }
-    case type_boolean:
+    case dtype_boolean:
       {
         return "boolean";
       }
-    case type_integer:
+    case dtype_integer:
       {
         return "integer";
       }
-    case type_real:
+    case dtype_real:
       {
         return "real";
       }
-    case type_string:
+    case dtype_string:
       {
         return "string";
       }
-    case type_opaque:
+    case dtype_opaque:
       {
         return "opaque";
       }
-    case type_function:
+    case dtype_function:
       {
         return "function";
       }
-    case type_array:
+    case dtype_array:
       {
         return "array";
       }
-    case type_object:
+    case dtype_object:
       {
         return "object";
       }
@@ -70,36 +70,36 @@ const Value& Value::get_null() noexcept
 bool Value::test() const noexcept
   {
     switch(this->type()) {
-    case type_null:
+    case dtype_null:
       {
         return false;
       }
-    case type_boolean:
+    case dtype_boolean:
       {
         return this->check<D_boolean>();
       }
-    case type_integer:
+    case dtype_integer:
       {
         return this->check<D_integer>() != 0;
       }
-    case type_real:
+    case dtype_real:
       {
         return std::fpclassify(this->check<D_real>()) != FP_ZERO;
       }
-    case type_string:
+    case dtype_string:
       {
         return this->check<D_string>().size() != 0;
       }
-    case type_opaque:
-    case type_function:
+    case dtype_opaque:
+    case dtype_function:
       {
         return true;
       }
-    case type_array:
+    case dtype_array:
       {
         return this->check<D_array>().size() != 0;
       }
-    case type_object:
+    case dtype_object:
       {
         return true;
       }
@@ -147,33 +147,33 @@ Value::Compare Value::compare(const Value& other) const noexcept
     // Values of different types can only be compared if either of them is `null`.
     if(this->type() != other.type()) {
       // `null` is considered to be equal to `null` and less than anything else.
-      if(this->type() == type_null) {
+      if(this->type() == dtype_null) {
         return Value::compare_less;
       }
-      if(other.type() == type_null) {
+      if(other.type() == dtype_null) {
         return Value::compare_greater;
       }
       return Value::compare_unordered;
     }
     // If both values have the same type, perform normal comparison.
     switch(this->type()) {
-    case type_null:
+    case dtype_null:
       {
         return Value::compare_equal;
       }
-    case type_boolean:
+    case dtype_boolean:
       {
         const auto& lhs = this->check<D_boolean>();
         const auto& rhs = other.check<D_boolean>();
         return do_three_way_compare(lhs, rhs);
       }
-    case type_integer:
+    case dtype_integer:
       {
         const auto& lhs = this->check<D_integer>();
         const auto& rhs = other.check<D_integer>();
         return do_three_way_compare(lhs, rhs);
       }
-    case type_real:
+    case dtype_real:
       {
         const auto& lhs = this->check<D_real>();
         const auto& rhs = other.check<D_real>();
@@ -182,18 +182,18 @@ Value::Compare Value::compare(const Value& other) const noexcept
         }
         return do_three_way_compare(lhs, rhs);
       }
-    case type_string:
+    case dtype_string:
       {
         const auto& lhs = this->check<D_string>();
         const auto& rhs = other.check<D_string>();
         return do_three_way_compare(lhs.compare(rhs), 0);
       }
-    case type_opaque:
-    case type_function:
+    case dtype_opaque:
+    case dtype_function:
       {
         return Value::compare_unordered;
       }
-    case type_array:
+    case dtype_array:
       {
         const auto& lhs = this->check<D_array>();
         const auto& rhs = other.check<D_array>();
@@ -216,7 +216,7 @@ Value::Compare Value::compare(const Value& other) const noexcept
         }
         return do_lexicographical_compare(lhs.begin(), rhs.begin(), nlhs);
       }
-    case type_object:
+    case dtype_object:
       {
         return Value::compare_unordered;
       }
@@ -228,34 +228,34 @@ Value::Compare Value::compare(const Value& other) const noexcept
 void Value::print(std::ostream& os, bool quote_strings) const
   {
     switch(this->type()) {
-    case type_null:
+    case dtype_null:
       {
         // null
         os << "null";
         return;
       }
-    case type_boolean:
+    case dtype_boolean:
       {
         const auto& alt = this->check<D_boolean>();
         // true
         os << std::boolalpha << std::nouppercase << alt;
         return;
       }
-    case type_integer:
+    case dtype_integer:
       {
         const auto& alt = this->check<D_integer>();
         // 42
         os << std::dec << alt;
         return;
       }
-    case type_real:
+    case dtype_real:
       {
         const auto& alt = this->check<D_real>();
         // 123.456
         os << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
         return;
       }
-    case type_string:
+    case dtype_string:
       {
         const auto& alt = this->check<D_string>();
         if(quote_strings) {
@@ -267,21 +267,21 @@ void Value::print(std::ostream& os, bool quote_strings) const
         os << alt;
         return;
       }
-    case type_opaque:
+    case dtype_opaque:
       {
         const auto& alt = this->check<D_opaque>();
         // <opaque> [[`my opaque`]]
         os << "<opaque> [[`" << alt.get() << "`]]";
         return;
       }
-    case type_function:
+    case dtype_function:
       {
         const auto& alt = this->check<D_function>();
         // <function> [[`my function`]]
         os << "<function> [[`" << alt.get() << "`]]";
         return;
       }
-    case type_array:
+    case dtype_array:
       {
         const auto& alt = this->check<D_array>();
         // [ 1; 2; 3; ]
@@ -294,7 +294,7 @@ void Value::print(std::ostream& os, bool quote_strings) const
         os << ' ' << ']';
         return;
       }
-    case type_object:
+    case dtype_object:
       {
         const auto& alt = this->check<D_object>();
         // { "one" = 1; "two" = 2; "three" = 3; }
@@ -326,55 +326,55 @@ void Value::print(std::ostream& os, bool quote_strings) const
 void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->type()) {
-    case type_null:
+    case dtype_null:
       {
         // null
         os << "null";
         return;
       }
-    case type_boolean:
+    case dtype_boolean:
       {
         const auto& alt = this->check<D_boolean>();
         // boolean true
         os << "boolean " << std::boolalpha << std::nouppercase << alt;
         return;
       }
-    case type_integer:
+    case dtype_integer:
       {
         const auto& alt = this->check<D_integer>();
         // integer 42
         os << "integer " << std::dec << alt;
         return;
       }
-    case type_real:
+    case dtype_real:
       {
         const auto& alt = this->check<D_real>();
         // real 123.456
         os << "real " << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
         return;
       }
-    case type_string:
+    case dtype_string:
       {
         const auto& alt = this->check<D_string>();
         // string(5) "hello"
         os << "string(" << std::dec << alt.size() << ") " << quote(alt);
         return;
       }
-    case type_opaque:
+    case dtype_opaque:
       {
         const auto& alt = this->check<D_opaque>();
         // opaque("typeid") [[`my opaque`]]
         os << "opaque(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
-    case type_function:
+    case dtype_function:
       {
         const auto& alt = this->check<D_function>();
         // function("typeid") [[`my function`]]
         os << "function(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
-    case type_array:
+    case dtype_array:
       {
         const auto& alt = this->check<D_array>();
         // array(3) =
@@ -393,7 +393,7 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
         os << do_indent_or_space(indent_increment, indent_next + 1) << ']';
         return;
       }
-    case type_object:
+    case dtype_object:
       {
         const auto& alt = this->check<D_object>();
         // object(3) =
@@ -420,30 +420,30 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
 bool Value::unique() const noexcept
   {
     switch(this->type()) {
-    case type_null:
-    case type_boolean:
-    case type_integer:
-    case type_real:
+    case dtype_null:
+    case dtype_boolean:
+    case dtype_integer:
+    case dtype_real:
       {
         return true;
       }
-    case type_string:
+    case dtype_string:
       {
         return this->check<D_string>().unique();
       }
-    case type_opaque:
+    case dtype_opaque:
       {
         return this->check<D_opaque>().unique();
       }
-    case type_function:
+    case dtype_function:
       {
         return this->check<D_function>().unique();
       }
-    case type_array:
+    case dtype_array:
       {
         return this->check<D_array>().unique();
       }
-    case type_object:
+    case dtype_object:
       {
         return this->check<D_object>().unique();
       }
@@ -455,33 +455,33 @@ bool Value::unique() const noexcept
 long Value::use_count() const noexcept
   {
     switch(this->type()) {
-    case type_null:
+    case dtype_null:
       {
         return 0;
       }
-    case type_boolean:
-    case type_integer:
-    case type_real:
+    case dtype_boolean:
+    case dtype_integer:
+    case dtype_real:
       {
         return 1;
       }
-    case type_string:
+    case dtype_string:
       {
         return this->check<D_string>().use_count();
       }
-    case type_opaque:
+    case dtype_opaque:
       {
         return this->check<D_opaque>().use_count();
       }
-    case type_function:
+    case dtype_function:
       {
         return this->check<D_function>().use_count();
       }
-    case type_array:
+    case dtype_array:
       {
         return this->check<D_array>().use_count();
       }
-    case type_object:
+    case dtype_object:
       {
         return this->check<D_object>().use_count();
       }
@@ -493,30 +493,30 @@ long Value::use_count() const noexcept
 void Value::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     switch(this->type()) {
-    case type_null:
-    case type_boolean:
-    case type_integer:
-    case type_real:
-    case type_string:
+    case dtype_null:
+    case dtype_boolean:
+    case dtype_integer:
+    case dtype_real:
+    case dtype_string:
       {
         return;
       }
-    case type_opaque:
+    case dtype_opaque:
       {
         this->check<D_opaque>()->enumerate_variables(callback);
         return;
       }
-    case type_function:
+    case dtype_function:
       {
         this->check<D_function>()->enumerate_variables(callback);
         return;
       }
-    case type_array:
+    case dtype_array:
       {
         rocket::for_each(this->check<D_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  });
         return;
       }
-    case type_object:
+    case dtype_object:
       {
         rocket::for_each(this->check<D_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
         return;
