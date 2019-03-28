@@ -20,8 +20,8 @@ void Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, 
     auto nvargs = this->get_argument_count();
     if(reader.start().finish()) {
       // Return the number of variadic arguments.
-      Reference_Root::S_constant ref_c = { D_integer(nvargs) };
-      self = rocket::move(ref_c);
+      Reference_Root::S_constant xref = { D_integer(nvargs) };
+      self = rocket::move(xref);
       return;
     }
     // `__varg(index)`

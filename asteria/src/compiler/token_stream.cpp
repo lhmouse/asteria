@@ -288,15 +288,15 @@ namespace Asteria {
             const auto& cur = range.first[0];
             if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
               // A keyword has been found.
-              Token::S_keyword token_c = { cur.second };
-              do_push_token(seq, reader, tlen, rocket::move(token_c));
+              Token::S_keyword xtoken = { cur.second };
+              do_push_token(seq, reader, tlen, rocket::move(xtoken));
               return true;
             }
             range.first++;
           }
         }
-        Token::S_identifier token_c = { Cow_String(bptr, tlen) };
-        do_push_token(seq, reader, tlen, rocket::move(token_c));
+        Token::S_identifier xtoken = { Cow_String(bptr, tlen) };
+        do_push_token(seq, reader, tlen, rocket::move(xtoken));
         return true;
       }
 
@@ -386,8 +386,8 @@ namespace Asteria {
           auto tlen = std::char_traits<char>::length(cur.first);
           if((tlen <= reader.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
             // A punctuator has been found.
-            Token::S_punctuator token_c = { cur.second };
-            do_push_token(seq, reader, tlen, rocket::move(token_c));
+            Token::S_punctuator xtoken = { cur.second };
+            do_push_token(seq, reader, tlen, rocket::move(xtoken));
             return true;
           }
           range.second--;
@@ -568,8 +568,8 @@ namespace Asteria {
           value.append(bptr + 1, tptr - 1);
           tlen = static_cast<std::size_t>(tptr - bptr);
         }
-        Token::S_string_literal token_c = { rocket::move(value) };
-        do_push_token(seq, reader, tlen, rocket::move(token_c));
+        Token::S_string_literal xtoken = { rocket::move(value) };
+        do_push_token(seq, reader, tlen, rocket::move(xtoken));
         return true;
       }
 
@@ -811,8 +811,8 @@ namespace Asteria {
             seq.pop_back();
           }
           // Push an integer literal.
-          Token::S_integer_literal token_c = { static_cast<std::int64_t>((value ^ smask) - smask) };
-          do_push_token(seq, reader, tlen, rocket::move(token_c));
+          Token::S_integer_literal xtoken = { static_cast<std::int64_t>((value ^ smask) - smask) };
+          do_push_token(seq, reader, tlen, rocket::move(xtoken));
           return true;
         }
         // Parse the literal as a floating-point number.
@@ -869,8 +869,8 @@ namespace Asteria {
           seq.pop_back();
         }
         // Push a floating-point literal.
-        Token::S_real_literal token_c = { std::copysign(value, fmask) };
-        do_push_token(seq, reader, tlen, rocket::move(token_c));
+        Token::S_real_literal xtoken = { std::copysign(value, fmask) };
+        do_push_token(seq, reader, tlen, rocket::move(xtoken));
         return true;
       }
 

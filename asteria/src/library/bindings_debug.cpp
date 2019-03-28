@@ -60,8 +60,8 @@ D_object create_bindings_debug()
                 return Reference_Root::S_null();
               }
               // Return `true`.
-              Reference_Root::S_temporary ref_c = { true };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { true };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -97,8 +97,8 @@ D_object create_bindings_debug()
                 return Reference_Root::S_null();
               }
               // Return `true`.
-              Reference_Root::S_temporary ref_c = { true };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { true };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();

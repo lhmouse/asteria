@@ -121,32 +121,32 @@ void Infix_Element::extract(Cow_Vector<Xprunit>& units)
       {
         auto& alt = this->m_stor.as<S_ternary>();
         // Construct a branch unit from both branches, then append it to `units`.
-        Xprunit::S_branch unit_c = { rocket::move(alt.branch_true), rocket::move(alt.branch_false), alt.assign };
-        units.emplace_back(rocket::move(unit_c));
+        Xprunit::S_branch xunit = { rocket::move(alt.branch_true), rocket::move(alt.branch_false), alt.assign };
+        units.emplace_back(rocket::move(xunit));
         return;
       }
     case index_logical_and:
       {
         auto& alt = this->m_stor.as<S_logical_and>();
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Xprunit::S_branch unit_c = { rocket::move(alt.branch_true), rocket::clear, alt.assign };
-        units.emplace_back(rocket::move(unit_c));
+        Xprunit::S_branch xunit = { rocket::move(alt.branch_true), rocket::clear, alt.assign };
+        units.emplace_back(rocket::move(xunit));
         return;
       }
     case index_logical_or:
       {
         auto& alt = this->m_stor.as<S_logical_or>();
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Xprunit::S_branch unit_c = { rocket::clear, rocket::move(alt.branch_false), alt.assign };
-        units.emplace_back(rocket::move(unit_c));
+        Xprunit::S_branch xunit = { rocket::clear, rocket::move(alt.branch_false), alt.assign };
+        units.emplace_back(rocket::move(xunit));
         return;
       }
     case index_coalescence:
       {
         auto& alt = this->m_stor.as<S_coalescence>();
         // Construct a branch unit from the NULL branch, then append it to `units`.
-        Xprunit::S_coalescence unit_c = { rocket::move(alt.branch_null), alt.assign };
-        units.emplace_back(rocket::move(unit_c));
+        Xprunit::S_coalescence xunit = { rocket::move(alt.branch_null), alt.assign };
+        units.emplace_back(rocket::move(xunit));
         return;
       }
     case index_general:
@@ -156,8 +156,8 @@ void Infix_Element::extract(Cow_Vector<Xprunit>& units)
         // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish Notation (RPN).
         std::move(alt.rhs.mut_begin(), alt.rhs.mut_end(), std::back_inserter(units));
         // Append the operator itself.
-        Xprunit::S_operator_rpn unit_c = { alt.xop, alt.assign };
-        units.emplace_back(rocket::move(unit_c));
+        Xprunit::S_operator_rpn xunit = { alt.xop, alt.assign };
+        units.emplace_back(rocket::move(xunit));
         return;
       }
     default:

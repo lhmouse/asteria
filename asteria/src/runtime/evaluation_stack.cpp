@@ -21,8 +21,8 @@ void Evaluation_Stack::set_temporary_result(bool assign, Value&& value)
       return;
     }
     // Replace the top reference to a temporary reference to the value.
-    Reference_Root::S_temporary ref_c = { rocket::move(value) };
-    this->m_refs.mut(0) = rocket::move(ref_c);
+    Reference_Root::S_temporary xref = { rocket::move(value) };
+    this->m_refs.mut(0) = rocket::move(xref);
   }
 
 void Evaluation_Stack::forward_result(bool assign)
@@ -32,8 +32,8 @@ void Evaluation_Stack::forward_result(bool assign)
     if(assign) {
       // Read a temporary value from the top reference and pop it.
       // Set the new top to a temporary reference to the value.
-      Reference_Root::S_temporary ref_c = { this->m_refs.get(0).read() };
-      this->m_refs.mut(1) = rocket::move(ref_c);
+      Reference_Root::S_temporary xref = { this->m_refs.get(0).read() };
+      this->m_refs.mut(1) = rocket::move(xref);
       this->m_refs.pop();
       return;
     }

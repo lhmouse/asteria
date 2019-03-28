@@ -33,8 +33,8 @@ void Global_Context::initialize(API_Version api_ver)
     }
     auto std_var = collector->create_variable();
     std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_obj), true);
-    Reference_Root::S_variable std_ref_c = { std_var };
-    this->open_named_reference(rocket::sref("std")) = rocket::move(std_ref_c);
+    Reference_Root::S_variable xstd_ref = { std_var };
+    this->open_named_reference(rocket::sref("std")) = rocket::move(xstd_ref);
     this->m_std_var = std_var;
   }
 

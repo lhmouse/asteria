@@ -19,8 +19,8 @@ int main(int argc, char** argv)
       if(argv[i]) {
         arg += argv[i];
       }
-      Reference_Root::S_constant ref_c = { rocket::move(arg) };
-      args.emplace_back(rocket::move(ref_c));
+      Reference_Root::S_constant xref = { rocket::move(arg) };
+      args.emplace_back(rocket::move(xref));
     }
     // prepare test code.
 #if 1

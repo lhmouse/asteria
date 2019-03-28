@@ -302,8 +302,8 @@ namespace Asteria {
         if(!qbody) {
           return rocket::nullopt;
         }
-        Statement::S_block stmt_c = { rocket::move(*qbody) };
-        return rocket::move(stmt_c);
+        Statement::S_block xstmt = { rocket::move(*qbody) };
+        return rocket::move(xstmt);
       }
 
     Optional<Cow_Vector<Xprunit>> do_accept_equal_initializer_opt(Token_Stream& tstrm)
@@ -327,8 +327,8 @@ namespace Asteria {
         if(!kpunct) {
           return rocket::nullopt;
         }
-        Statement::S_expression stmt_c = { rocket::clear };
-        return rocket::move(stmt_c);
+        Statement::S_expression xstmt = { rocket::clear };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
@@ -362,8 +362,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { rocket::move(sloc), false, rocket::move(vars) };
-        return rocket::move(stmt_c);
+        Statement::S_variable xstmt = { rocket::move(sloc), false, rocket::move(vars) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
@@ -397,8 +397,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_variable stmt_c = { rocket::move(sloc), true, rocket::move(vars) };
-        return rocket::move(stmt_c);
+        Statement::S_variable xstmt = { rocket::move(sloc), true, rocket::move(vars) };
+        return rocket::move(xstmt);
       }
 
     Optional<Cow_Vector<PreHashed_String>> do_accept_parameter_list_opt(Token_Stream& tstrm)
@@ -480,8 +480,8 @@ namespace Asteria {
         if(!qbody) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_expected);
         }
-        Statement::S_function stmt_c = { rocket::move(sloc), rocket::move(*qname), rocket::move(*kparams), rocket::move(*qbody) };
-        return rocket::move(stmt_c);
+        Statement::S_function xstmt = { rocket::move(sloc), rocket::move(*qname), rocket::move(*kparams), rocket::move(*qbody) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
@@ -496,8 +496,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_expression stmt_c = { rocket::move(*kexpr) };
-        return rocket::move(stmt_c);
+        Statement::S_expression xstmt = { rocket::move(*kexpr) };
+        return rocket::move(xstmt);
       }
 
     Optional<Cow_Vector<Statement>> do_accept_else_branch_opt(Token_Stream& tstrm)
@@ -551,8 +551,8 @@ namespace Asteria {
         if(!qbfalse) {
           qbfalse.emplace();
         }
-        Statement::S_if stmt_c = { *kneg, rocket::move(*qcond), rocket::move(*qbtrue), rocket::move(*qbfalse) };
-        return rocket::move(stmt_c);
+        Statement::S_if xstmt = { *kneg, rocket::move(*qcond), rocket::move(*qbtrue), rocket::move(*qbfalse) };
+        return rocket::move(xstmt);
       }
 
     Optional<std::pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_case_clause_opt(Token_Stream& tstrm)
@@ -663,8 +663,8 @@ namespace Asteria {
         if(!qclauses) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_expected);
         }
-        Statement::S_switch stmt_c = { rocket::move(*qctrl), rocket::move(*qclauses) };
-        return rocket::move(stmt_c);
+        Statement::S_switch xstmt = { rocket::move(*qctrl), rocket::move(*qclauses) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
@@ -699,8 +699,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
-        Statement::S_do_while stmt_c = { rocket::move(*qbody), *kneg, rocket::move(*qcond) };
-        return rocket::move(stmt_c);
+        Statement::S_do_while xstmt = { rocket::move(*qbody), *kneg, rocket::move(*qcond) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
@@ -731,8 +731,8 @@ namespace Asteria {
         if(!qbody) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        Statement::S_while stmt_c = { *kneg, rocket::move(*qcond), rocket::move(*qbody) };
-        return rocket::move(stmt_c);
+        Statement::S_while xstmt = { *kneg, rocket::move(*qcond), rocket::move(*qbody) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
@@ -771,8 +771,8 @@ namespace Asteria {
         if(!qbody) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        Statement::S_for_each stmt_c = { rocket::move(*qkname), rocket::move(*qmname), rocket::move(*qinit), rocket::move(*qbody) };
-        return rocket::move(stmt_c);
+        Statement::S_for_each xstmt = { rocket::move(*qkname), rocket::move(*qmname), rocket::move(*qinit), rocket::move(*qbody) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_for_initializer_opt(Token_Stream& tstrm)
@@ -824,8 +824,8 @@ namespace Asteria {
         }
         Cow_Vector<Statement> rvinit;
         rvinit.emplace_back(rocket::move(*qinit));
-        Statement::S_for stmt_c = { rocket::move(rvinit), rocket::move(*qcond), rocket::move(*kstep), rocket::move(*qbody) };
-        return rocket::move(stmt_c);
+        Statement::S_for xstmt = { rocket::move(rvinit), rocket::move(*qcond), rocket::move(*kstep), rocket::move(*qbody) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
@@ -895,8 +895,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_break stmt_c = { *qtarget };
-        return rocket::move(stmt_c);
+        Statement::S_break xstmt = { *qtarget };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement::Target> do_accept_continue_target_opt(Token_Stream& tstrm)
@@ -929,8 +929,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_continue stmt_c = { *qtarget };
-        return rocket::move(stmt_c);
+        Statement::S_continue xstmt = { *qtarget };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
@@ -951,8 +951,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_throw stmt_c = { rocket::move(sloc), rocket::move(*kexpr) };
-        return rocket::move(stmt_c);
+        Statement::S_throw xstmt = { rocket::move(sloc), rocket::move(*kexpr) };
+        return rocket::move(xstmt);
       }
 
     Optional<bool> do_accept_reference_specifier_opt(Token_Stream& tstrm)
@@ -986,8 +986,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_return stmt_c = { *qref, rocket::move(*kexpr) };
-        return rocket::move(stmt_c);
+        Statement::S_return xstmt = { *qref, rocket::move(*kexpr) };
+        return rocket::move(xstmt);
       }
 
     Optional<Cow_String> do_accept_assert_message_opt(Token_Stream& tstrm)
@@ -1031,8 +1031,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_assert stmt_c = { rocket::move(sloc), *kneg, rocket::move(*kexpr), rocket::move(*kmsg) };
-        return rocket::move(stmt_c);
+        Statement::S_assert xstmt = { rocket::move(sloc), *kneg, rocket::move(*kexpr), rocket::move(*kmsg) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
@@ -1067,8 +1067,8 @@ namespace Asteria {
         if(!qbcatch) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        Statement::S_try stmt_c = { rocket::move(*qbtry), rocket::move(*kexcept), rocket::move(*qbcatch) };
-        return rocket::move(stmt_c);
+        Statement::S_try xstmt = { rocket::move(*qbtry), rocket::move(*kexcept), rocket::move(*qbcatch) };
+        return rocket::move(xstmt);
       }
 
     Optional<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
@@ -1209,9 +1209,9 @@ namespace Asteria {
               return false;
             }
             // Return the prefix operator and discard this token.
-            Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
+            Xprunit::S_operator_rpn xunit = { qconf->xop, false };
             tstrm.shift();
-            return units.emplace_back(rocket::move(unit_c)), true;
+            return units.emplace_back(rocket::move(xunit)), true;
           }
         case Token::index_punctuator:
           {
@@ -1237,9 +1237,9 @@ namespace Asteria {
               return false;
             }
             // Return the prefix operator and discard this token.
-            Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
+            Xprunit::S_operator_rpn xunit = { qconf->xop, false };
             tstrm.shift();
-            return units.emplace_back(rocket::move(unit_c)), true;
+            return units.emplace_back(rocket::move(xunit)), true;
           }
         default:
           return false;
@@ -1257,15 +1257,15 @@ namespace Asteria {
         }
         // Replace special names. This is what macros in C do.
         if(*qname == "__file") {
-          Xprunit::S_literal unit_c = { D_string(sloc.file()) };
-          return units.emplace_back(rocket::move(unit_c)), true;
+          Xprunit::S_literal xunit = { D_string(sloc.file()) };
+          return units.emplace_back(rocket::move(xunit)), true;
         }
         if(*qname == "__line") {
-          Xprunit::S_literal unit_c = { D_integer(sloc.line()) };
-          return units.emplace_back(rocket::move(unit_c)), true;
+          Xprunit::S_literal xunit = { D_integer(sloc.line()) };
+          return units.emplace_back(rocket::move(xunit)), true;
         }
-        Xprunit::S_named_reference unit_c = { rocket::move(*qname) };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_named_reference xunit = { rocket::move(*qname) };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     bool do_accept_literal(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1275,8 +1275,8 @@ namespace Asteria {
         if(!qvalue) {
           return false;
         }
-        Xprunit::S_literal unit_c = { rocket::move(*qvalue) };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_literal xunit = { rocket::move(*qvalue) };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     bool do_accept_this(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1286,8 +1286,8 @@ namespace Asteria {
         if(!qkwrd) {
           return false;
         }
-        Xprunit::S_named_reference unit_c = { rocket::sref("__this") };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_named_reference xunit = { rocket::sref("__this") };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     Optional<Cow_Vector<Statement>> do_accept_closure_body_opt(Token_Stream& tstrm)
@@ -1300,8 +1300,8 @@ namespace Asteria {
         }
         auto qinit = do_accept_equal_initializer_opt(tstrm);
         if(qinit) {
-          Statement::S_return stmt_c = { false, rocket::move(*qinit) };
-          qblock.emplace().emplace_back(rocket::move(stmt_c));
+          Statement::S_return xstmt = { false, rocket::move(*qinit) };
+          qblock.emplace().emplace_back(rocket::move(xstmt));
           return qblock;
         }
         return qblock;
@@ -1325,8 +1325,8 @@ namespace Asteria {
         if(!qbody) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_or_equal_initializer_expected);
         }
-        Xprunit::S_closure_function unit_c = { rocket::move(sloc), rocket::move(*kparams), rocket::move(*qbody) };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_closure_function xunit = { rocket::move(sloc), rocket::move(*kparams), rocket::move(*qbody) };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     bool do_accept_unnamed_array(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1358,8 +1358,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
-        Xprunit::S_unnamed_array unit_c = { nelems };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_unnamed_array xunit = { nelems };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     bool do_accept_unnamed_object(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1404,8 +1404,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_expected);
         }
-        Xprunit::S_unnamed_object unit_c = { rocket::move(keys) };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_unnamed_object xunit = { rocket::move(keys) };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     bool do_accept_nested_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1491,9 +1491,9 @@ namespace Asteria {
               return false;
             }
             // Return the postfix operator and discard this token.
-            Xprunit::S_operator_rpn unit_c = { qconf->xop, false };
+            Xprunit::S_operator_rpn xunit = { qconf->xop, false };
             tstrm.shift();
-            return units.emplace_back(rocket::move(unit_c)), true;
+            return units.emplace_back(rocket::move(xunit)), true;
           }
         default:
           return false;
@@ -1532,8 +1532,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
-        Xprunit::S_function_call unit_c = { rocket::move(sloc), nargs };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_function_call xunit = { rocket::move(sloc), nargs };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1552,8 +1552,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
-        Xprunit::S_operator_rpn unit_c = { Xprunit::xop_postfix_at, false };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_operator_rpn xunit = { Xprunit::xop_postfix_at, false };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1568,8 +1568,8 @@ namespace Asteria {
         if(!qkey) {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        Xprunit::S_member_access unit_c = { rocket::move(*qkey) };
-        return units.emplace_back(rocket::move(unit_c)), true;
+        Xprunit::S_member_access xunit = { rocket::move(*qkey) };
+        return units.emplace_back(rocket::move(xunit)), true;
       }
 
     bool do_accept_infix_element(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1619,8 +1619,8 @@ namespace Asteria {
         if(!succ) {
           return rocket::nullopt;
         }
-        Infix_Element::S_head elem_c = { rocket::move(units) };
-        return rocket::move(elem_c);
+        Infix_Element::S_head xelem = { rocket::move(units) };
+        return rocket::move(xelem);
       }
 
     Optional<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
@@ -1639,8 +1639,8 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
         }
-        Infix_Element::S_ternary elem_c = { *kpunct == Token::punctuator_quest_eq, rocket::move(*qbtrue), rocket::clear };
-        return rocket::move(elem_c);
+        Infix_Element::S_ternary xelem = { *kpunct == Token::punctuator_quest_eq, rocket::move(*qbtrue), rocket::clear };
+        return rocket::move(xelem);
       }
 
     Optional<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
@@ -1655,8 +1655,8 @@ namespace Asteria {
           }
           kpunct.emplace(Token::punctuator_andl);
         }
-        Infix_Element::S_logical_and elem_c = { *kpunct == Token::punctuator_andl_eq, rocket::clear };
-        return rocket::move(elem_c);
+        Infix_Element::S_logical_and xelem = { *kpunct == Token::punctuator_andl_eq, rocket::clear };
+        return rocket::move(xelem);
       }
 
     Optional<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
@@ -1671,8 +1671,8 @@ namespace Asteria {
           }
           kpunct.emplace(Token::punctuator_orl);
         }
-        Infix_Element::S_logical_or elem_c = { *kpunct == Token::punctuator_orl_eq, rocket::clear };
-        return rocket::move(elem_c);
+        Infix_Element::S_logical_or xelem = { *kpunct == Token::punctuator_orl_eq, rocket::clear };
+        return rocket::move(xelem);
       }
 
     Optional<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
@@ -1683,8 +1683,8 @@ namespace Asteria {
         if(!kpunct) {
           return rocket::nullopt;
         }
-        Infix_Element::S_coalescence elem_c = { *kpunct == Token::punctuator_coales_eq, rocket::clear };
-        return rocket::move(elem_c);
+        Infix_Element::S_coalescence xelem = { *kpunct == Token::punctuator_coales_eq, rocket::clear };
+        return rocket::move(xelem);
       }
 
     Optional<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
@@ -1749,9 +1749,9 @@ namespace Asteria {
               return rocket::nullopt;
             }
             // Return the infix operator and discard this token.
-            Infix_Element::S_general elem_c = { qconf->xop, qconf->assign, rocket::clear };
+            Infix_Element::S_general xelem = { qconf->xop, qconf->assign, rocket::clear };
             tstrm.shift();
-            return rocket::move(elem_c);
+            return rocket::move(xelem);
           }
         default:
           return rocket::nullopt;

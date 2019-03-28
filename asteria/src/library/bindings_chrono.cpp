@@ -418,8 +418,8 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_utc_now() };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_utc_now() };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -444,8 +444,8 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_local_now() };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_local_now() };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -473,8 +473,8 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_hires_now() };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_hires_now() };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -502,8 +502,8 @@ D_object create_bindings_chrono()
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_steady_now() };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_steady_now() };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -530,8 +530,8 @@ D_object create_bindings_chrono()
             D_integer time_utc;
             if(reader.start().req(time_utc).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_local_from_utc(time_utc) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_local_from_utc(time_utc) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -559,8 +559,8 @@ D_object create_bindings_chrono()
             D_integer time_local;
             if(reader.start().req(time_local).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_utc_from_local(time_local) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_utc_from_local(time_local) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -589,8 +589,8 @@ D_object create_bindings_chrono()
             D_boolean with_ms = false;
             if(reader.start().req(time_point).opt(with_ms).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_format_datetime(time_point, with_ms) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_format_datetime(time_point, with_ms) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -618,8 +618,8 @@ D_object create_bindings_chrono()
             D_boolean with_ms = false;
             if(reader.start().opt(with_ms).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_min_datetime(with_ms) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_min_datetime(with_ms) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -647,8 +647,8 @@ D_object create_bindings_chrono()
             D_boolean with_ms = false;
             if(reader.start().opt(with_ms).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary ref_c = { std_chrono_max_datetime(with_ms) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { std_chrono_max_datetime(with_ms) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -683,8 +683,8 @@ D_object create_bindings_chrono()
               if(!qres) {
                 return Reference_Root::S_null();
               }
-              Reference_Root::S_temporary ref_c = { *qres };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { *qres };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();

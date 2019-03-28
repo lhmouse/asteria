@@ -465,8 +465,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decode arguments.
         const auto& value = p.at(0).as<Value>();
         // Push the constant.
-        Reference_Root::S_constant ref_c = { value };
-        stack.push_reference(rocket::move(ref_c));
+        Reference_Root::S_constant xref = { value };
+        stack.push_reference(rocket::move(xref));
         return Air_Node::status_next;
       }
 
@@ -539,8 +539,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_body));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);
         // Push the function object.
-        Reference_Root::S_temporary ref_c = { D_function(rocket::move(closure)) };
-        stack.push_reference(rocket::move(ref_c));
+        Reference_Root::S_temporary xref = { D_function(rocket::move(closure)) };
+        stack.push_reference(rocket::move(xref));
         return Air_Node::status_next;
       }
 
@@ -614,8 +614,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decode arguments.
         const auto& name = p.at(0).as<PreHashed_String>();
         // Append a modifier.
-        Reference_Modifier::S_object_key mod_c = { name };
-        stack.open_top_reference().zoom_in(rocket::move(mod_c));
+        Reference_Modifier::S_object_key xmod = { name };
+        stack.open_top_reference().zoom_in(rocket::move(xmod));
         return Air_Node::status_next;
       }
 
@@ -674,14 +674,14 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         if(rhs.type() == dtype_integer) {
           auto& reg = rhs.check<D_integer>();
-          Reference_Modifier::S_array_index mod_c = { rocket::move(reg) };
-          stack.open_top_reference().zoom_in(rocket::move(mod_c));
+          Reference_Modifier::S_array_index xmod = { rocket::move(reg) };
+          stack.open_top_reference().zoom_in(rocket::move(xmod));
           goto z;
         }
         if(rhs.type() == dtype_string) {
           auto& reg = rhs.check<D_string>();
-          Reference_Modifier::S_object_key mod_c = { rocket::move(reg) };
-          stack.open_top_reference().zoom_in(rocket::move(mod_c));
+          Reference_Modifier::S_object_key xmod = { rocket::move(reg) };
+          stack.open_top_reference().zoom_in(rocket::move(xmod));
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The value `", rhs, "` cannot be used as a subscript.");
@@ -1319,8 +1319,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           stack.pop_reference();
         }
         // Push the array as a temporary.
-        Reference_Root::S_temporary ref_c = { rocket::move(array) };
-        stack.push_reference(rocket::move(ref_c));
+        Reference_Root::S_temporary xref = { rocket::move(array) };
+        stack.push_reference(rocket::move(xref));
         return Air_Node::status_next;
       }
 
@@ -1337,8 +1337,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           stack.pop_reference();
         }
         // Push the object as a temporary.
-        Reference_Root::S_temporary ref_c = { rocket::move(object) };
-        stack.push_reference(rocket::move(ref_c));
+        Reference_Root::S_temporary xref = { rocket::move(object) };
+        stack.push_reference(rocket::move(xref));
         return Air_Node::status_next;
       }
 

@@ -455,8 +455,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto cmp = std_string_compare(text_one, text_two, length);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { cmp };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { cmp };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -486,8 +486,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto chk = std_string_starts_with(text, prefix);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(chk) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(chk) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -517,8 +517,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto chk = std_string_ends_with(text, suffix);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(chk) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(chk) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -553,8 +553,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_substr(text, from, length);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -582,8 +582,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_reverse(text);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -614,8 +614,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_trim(text, reject);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -646,8 +646,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_trim_left(text, reject);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -678,8 +678,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_trim_right(text, reject);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -708,8 +708,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_to_upper(text);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -738,8 +738,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_to_lower(text);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -776,8 +776,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_translate(text, inputs, outputs);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -812,8 +812,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_explode(text, delim, limit);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -844,8 +844,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto res = std_string_implode(segments, delim);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(res) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -879,8 +879,8 @@ D_object create_bindings_string()
               // Call the binding function.
               auto hstr = std_string_hex_encode(text, delim, uppercase);
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(hstr) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(hstr) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -914,8 +914,8 @@ D_object create_bindings_string()
                 return Reference_Root::S_null();
               }
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(*qtext) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(*qtext) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -950,8 +950,8 @@ D_object create_bindings_string()
                 return Reference_Root::S_null();
               }
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(*qtext) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(*qtext) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();
@@ -988,8 +988,8 @@ D_object create_bindings_string()
                 return Reference_Root::S_null();
               }
               // Forward the result.
-              Reference_Root::S_temporary ref_c = { rocket::move(*qres) };
-              return rocket::move(ref_c);
+              Reference_Root::S_temporary xref = { rocket::move(*qres) };
+              return rocket::move(xref);
             }
             // Fail.
             reader.throw_no_matching_function_call();

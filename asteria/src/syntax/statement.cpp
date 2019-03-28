@@ -36,8 +36,8 @@ namespace Asteria {
                                             const char* desc, const PreHashed_String& name, const Global_Context& global)
       {
         auto var = global.create_variable();
-        Reference_Root::S_variable ref_c = { var };
-        do_set_user_declared_reference(names_opt, ctx, desc, name, rocket::move(ref_c));
+        Reference_Root::S_variable xref = { var };
+        do_set_user_declared_reference(names_opt, ctx, desc, name, rocket::move(xref));
         return var;
       }
 
@@ -348,8 +348,8 @@ namespace Asteria {
               // Set up the key variable, which is immutable.
               key_var->reset(Source_Location(rocket::sref("<builtin>"), 0), D_integer(it - array.begin()), true);
               // Set up the mapped reference.
-              Reference_Modifier::S_array_index refm_c = { it - array.begin() };
-              range_ref.zoom_in(rocket::move(refm_c));
+              Reference_Modifier::S_array_index xrefm = { it - array.begin() };
+              range_ref.zoom_in(rocket::move(xrefm));
               do_set_user_declared_reference(nullptr, ctx_for, "mapped reference", mapped_name, range_ref);
               range_ref.zoom_out();
               // Execute the loop body.
@@ -372,8 +372,8 @@ namespace Asteria {
               // Set up the key variable, which is immutable.
               key_var->reset(Source_Location(rocket::sref("<builtin>"), 0), D_string(it->first), true);
               // Set up the mapped reference.
-              Reference_Modifier::S_object_key refm_c = { it->first };
-              range_ref.zoom_in(rocket::move(refm_c));
+              Reference_Modifier::S_object_key xrefm = { it->first };
+              range_ref.zoom_in(rocket::move(xrefm));
               do_set_user_declared_reference(nullptr, ctx_for, "mapped reference", mapped_name, range_ref);
               range_ref.zoom_out();
               // Execute the loop body.
@@ -448,8 +448,8 @@ namespace Asteria {
           // The exception object shall not outlast the `catch` body.
           Executive_Context ctx_catch(&ctx);
           auto traceable = trace_exception(rocket::move(stdex));
-          Reference_Root::S_temporary exref_c = { traceable.get_value() };
-          do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(exref_c));
+          Reference_Root::S_temporary xexref = { traceable.get_value() };
+          do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xexref));
           // Provide backtrace information.
           D_array backtrace;
           for(std::size_t i = 0; i < traceable.get_frame_count(); ++i) {
@@ -461,8 +461,8 @@ namespace Asteria {
             backtrace.emplace_back(rocket::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          Reference_Root::S_temporary btref_c = { rocket::move(backtrace) };
-          ctx_catch.open_named_reference(rocket::sref("__backtrace")) = rocket::move(btref_c);
+          Reference_Root::S_temporary xbtref = { rocket::move(backtrace) };
+          ctx_catch.open_named_reference(rocket::sref("__backtrace")) = rocket::move(xbtref);
           // Execute the `catch` body.
           auto status = do_execute_statement_list(stack, ctx_catch, code_catch, func, global);
           if(rocket::is_none_of(status, { Air_Node::status_next })) {
@@ -497,8 +497,8 @@ namespace Asteria {
         if(stack.get_top_reference().is_temporary()) {
           return Air_Node::status_next;
         }
-        Reference_Root::S_temporary ref_c = { stack.get_top_reference().read() };
-        stack.open_top_reference() = rocket::move(ref_c);
+        Reference_Root::S_temporary xref = { stack.get_top_reference().read() };
+        stack.open_top_reference() = rocket::move(xref);
         return Air_Node::status_next;
       }
 
