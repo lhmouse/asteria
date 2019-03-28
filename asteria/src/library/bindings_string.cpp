@@ -39,31 +39,39 @@ D_string std_string_reverse(const D_string& text)
     return D_string(text.rbegin(), text.rend());
   }
 
+    namespace {
+
+    std::pair<D_string::const_iterator, D_string::const_iterator> do_subrange(const D_string& text, D_integer from, D_integer length)
+      {
+        if(length <= 0) {
+          // No byte is to be copied.
+          return std::make_pair(text.begin(), text.begin());
+        }
+        auto slen = static_cast<std::ptrdiff_t>(text.size());
+        if(from >= 0) {
+          // This is the same as `std::string::substr()` except that no `std::out_of_range` is thrown.
+          if(from >= slen) {
+            // Return an empty string if `from` is out of range.
+            return std::make_pair(text.end(), text.end());
+          }
+          return std::make_pair(text.begin() + from, text.begin() + from + rocket::min(length, slen - from));
+        }
+        // Wrap `from` from the end of the string.
+        // Notice that when `from` is negative and `length` is positive, `from + length` cannot overflow.
+        auto to = from + length;
+        if(to <= -slen) {
+          // Return an empty string if `from` is out of range.
+          return std::make_pair(text.begin(), text.begin());
+        }
+        return std::make_pair(text.end() + rocket::max(from, -slen), text.end() + rocket::min(to, 0));
+      }
+
+    }
+
 D_string std_string_substr(const D_string& text, D_integer from, D_integer length)
   {
-    if(length <= 0) {
-      // No byte is to be copied.
-      return rocket::clear;
-    }
-    auto slen = static_cast<std::ptrdiff_t>(text.size());
-    if(from >= 0) {
-      // This is the same as `std::string::substr()` except that no `std::out_of_range` is thrown.
-      if(from >= slen) {
-        // Return an empty string if `from` is out of range.
-        return rocket::clear;
-      }
-      auto rlen = rocket::min(length, slen);
-      return text.substr(static_cast<std::size_t>(from), static_cast<std::size_t>(rlen));
-    }
-    // Wrap `from` from the end of the string.
-    // Notice that if `from` is negative and `length` is positive, `from + length` cannot overflow.
-    auto wto = from + length;
-    if(wto <= -slen) {
-      // Return an empty string if `from` is out of range.
-      return rocket::clear;
-    }
-    auto wfrom = rocket::max(from, -slen);
-    return text.substr(static_cast<std::size_t>(slen + wfrom), static_cast<std::size_t>(wto - wfrom));
+    auto range = do_subrange(text, from, length);
+    return D_string(range.first, range.second);
   }
 
 D_string std_string_trim(const D_string& text, const D_string& reject)
