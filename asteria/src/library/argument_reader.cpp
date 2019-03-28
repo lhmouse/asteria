@@ -300,7 +300,7 @@ Argument_Reader& Argument_Reader::req(D_object& xvalue)
 Argument_Reader& Argument_Reader::finish()
   {
     this->do_record_parameter_finish(false);
-    // Get the number of parameters.
+    // Get the number of named parameters.
     auto knparams = this->do_check_finish_opt(false);
     if(!knparams) {
       return *this;
@@ -318,16 +318,16 @@ Argument_Reader& Argument_Reader::finish()
 Argument_Reader& Argument_Reader::finish(Cow_Vector<Reference>& vargs)
   {
     this->do_record_parameter_finish(true);
-    // Get the number of parameters.
+    // Get the number of named parameters.
     auto knparams = this->do_check_finish_opt(true);
     if(!knparams) {
       return *this;
     }
     // Copy variadic arguments as is.
     vargs.clear();
-    for(std::size_t i = *knparams; i < this->m_args.get().size(); ++i) {
-      const auto& arg = this->m_args.get()[i];
-      vargs.emplace_back(arg);
+    if(*knparams < this->m_args.get().size()) {
+      std::for_each(this->m_args.get().begin() + static_cast<std::ptrdiff_t>(*knparams), this->m_args.get().end(),
+                    [&](const Reference& arg) { vargs.emplace_back(arg);  });
     }
     // Accept the end of arguments.
     return *this;
@@ -336,16 +336,16 @@ Argument_Reader& Argument_Reader::finish(Cow_Vector<Reference>& vargs)
 Argument_Reader& Argument_Reader::finish(Cow_Vector<Value>& vargs)
   {
     this->do_record_parameter_finish(true);
-    // Get the number of parameters.
+    // Get the number of named parameters.
     auto knparams = this->do_check_finish_opt(true);
     if(!knparams) {
       return *this;
     }
-    // Read values from variadic arguments.
+    // Copy variadic arguments as is.
     vargs.clear();
-    for(std::size_t i = *knparams; i < this->m_args.get().size(); ++i) {
-      const auto& arg = this->m_args.get()[i];
-      vargs.emplace_back(arg.read());
+    if(*knparams < this->m_args.get().size()) {
+      std::for_each(this->m_args.get().begin() + static_cast<std::ptrdiff_t>(*knparams), this->m_args.get().end(),
+                    [&](const Reference& arg) { vargs.emplace_back(arg.read());  });
     }
     // Accept the end of arguments.
     return *this;
