@@ -13,7 +13,7 @@ void Variadic_Arguer::describe(std::ostream& os) const
     os << "<builtin>.__varg(...) @ " << this->m_sloc;
   }
 
-void Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) const
+Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) const
   {
     Argument_Reader reader(rocket::sref("<builtin>.__varg"), args);
     // `__varg()`
@@ -21,8 +21,7 @@ void Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, 
     if(reader.start().finish()) {
       // Return the number of variadic arguments.
       Reference_Root::S_constant xref = { D_integer(nvargs) };
-      self = rocket::move(xref);
-      return;
+      return self = rocket::move(xref);
     }
     // `__varg(index)`
     D_integer index;
@@ -31,11 +30,9 @@ void Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, 
       auto wrapped = wrap_subscript(index, nvargs);
       if(wrapped.subscript >= nvargs) {
         ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", index, ", nvarg = ", nvargs);
-        self = Reference_Root::S_null();
-        return;
+        return self = Reference_Root::S_null();
       }
-      self = this->get_argument(wrapped.subscript);
-      return;
+      return self = this->get_argument(wrapped.subscript);
     }
     // Fail.
     reader.throw_no_matching_function_call();

@@ -19,7 +19,7 @@ void Instantiated_Function::describe(std::ostream& os) const
     os << this->m_zvarg->get_function_signature() << " @ " << this->m_zvarg->get_source_location();
   }
 
-void Instantiated_Function::invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const
+Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const
   {
     // Create a stack and a context for this function.
     Evaluation_Stack stack;
@@ -34,14 +34,12 @@ void Instantiated_Function::invoke(Reference& self, const Global_Context& global
     case Air_Node::status_next:
       {
         // Return `null` if the control flow reached the end of the function.
-        self = Reference_Root::S_null();
-        break;
+        return self = Reference_Root::S_null();
       }
     case Air_Node::status_return:
       {
         // Return the reference at the top of `stack`.
-        self = rocket::move(stack.open_top_reference());
-        break;
+        return self = rocket::move(stack.open_top_reference());
       }
     case Air_Node::status_break_unspec:
     case Air_Node::status_break_switch:
