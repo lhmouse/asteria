@@ -273,7 +273,7 @@ D_string std_string_hex_encode(const D_string& text, const D_string& delim, D_bo
     return hstr;
   }
 
-Optional<D_string> std_string_hex_decode(const D_string& hstr)
+Opt<D_string> std_string_hex_decode(const D_string& hstr)
   {
     D_string text;
     // Remember the value of a previous digit. `-1` means no such digit exists.
@@ -314,7 +314,7 @@ Optional<D_string> std_string_hex_decode(const D_string& hstr)
     return rocket::move(text);
   }
 
-Optional<D_string> std_string_utf8_encode(const D_array& code_points, D_boolean permissive)
+Opt<D_string> std_string_utf8_encode(const D_array& code_points, D_boolean permissive)
   {
     D_string text;
     for(std::size_t i = 0; i < code_points.size(); ++i) {
@@ -357,7 +357,7 @@ Optional<D_string> std_string_utf8_encode(const D_array& code_points, D_boolean 
     return rocket::move(text);
   }
 
-Optional<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
+Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
   {
     D_array code_points;
     for(std::size_t i = 0; i < text.size(); ++i) {

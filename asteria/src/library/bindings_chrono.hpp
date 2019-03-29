@@ -19,7 +19,7 @@ extern D_integer std_chrono_utc_from_local(D_integer time_local);
 extern D_string std_chrono_format_datetime(D_integer time_point, bool with_ms);
 extern D_string std_chrono_min_datetime(bool with_ms);
 extern D_string std_chrono_max_datetime(bool with_ms);
-extern Optional<D_integer> std_chrono_parse_datetime(const D_string& time_str);
+extern Opt<D_integer> std_chrono_parse_datetime(const D_string& time_str);
 
 // Create an object that is to be referenced as `std.chrono`.
 extern D_object create_bindings_chrono();

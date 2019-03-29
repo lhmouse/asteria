@@ -25,7 +25,7 @@ Executive_Context::~Executive_Context()
 void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>& zvarg, const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args)
   {
     // This is the subscript of the special pameter placeholder `...`.
-    Optional<std::size_t> qellpos;
+    Opt<std::size_t> qellpos;
     // Set parameters, which are local references.
     for(std::size_t i = 0; i < params.size(); ++i) {
       const auto& param = params.at(i);

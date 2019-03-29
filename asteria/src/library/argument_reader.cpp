@@ -124,7 +124,7 @@ const Reference* Argument_Reader::do_peek_argument_opt(bool required)
     return karg;
   }
 
-Optional<std::size_t> Argument_Reader::do_check_finish_opt(bool variadic)
+Opt<std::size_t> Argument_Reader::do_check_finish_opt(bool variadic)
   {
     if(!this->m_state.succeeded) {
       this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });

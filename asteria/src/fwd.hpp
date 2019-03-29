@@ -90,7 +90,7 @@ template<typename E> using Cow_Vector = rocket::cow_vector<E>;
 template<typename K, typename V, typename H> using Cow_HashMap = rocket::cow_hashmap<K, V, H, rocket::transparent_equal_to>;
 template<typename E, std::size_t k> using Static_Vector = rocket::static_vector<E, k>;
 template<typename... P> using Variant = rocket::variant<P...>;
-template<typename T> using Optional = rocket::optional<T>;
+template<typename T> using Opt = rocket::optional<T>;
 
 // Fundamental Types
 using D_null      = std::nullptr_t;

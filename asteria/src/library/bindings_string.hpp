@@ -25,10 +25,10 @@ extern D_array std_string_explode(const D_string& text, const D_string& delim, D
 extern D_string std_string_implode(const D_array& segments, const D_string& delim);
 
 extern D_string std_string_hex_encode(const D_string& text, const D_string& delim, D_boolean uppercase);
-extern Optional<D_string> std_string_hex_decode(const D_string& hstr);
+extern Opt<D_string> std_string_hex_decode(const D_string& hstr);
 
-extern Optional<D_string> std_string_utf8_encode(const D_array& code_points, D_boolean permissive);
-extern Optional<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive);
+extern Opt<D_string> std_string_utf8_encode(const D_array& code_points, D_boolean permissive);
+extern Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive);
 
 extern D_string std_string_pack_8(const D_array& ints);
 extern D_array std_string_unpack_8(const D_string& text);

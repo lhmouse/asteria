@@ -215,7 +215,7 @@ namespace Asteria {
         // Evaluate the control expression.
         auto ctrl_value = stack.get_top_reference().read();
         // Set the target clause.
-        Optional<Cow_Vector<Air_Node::Param>::const_iterator> qtarget;
+        Opt<Cow_Vector<Air_Node::Param>::const_iterator> qtarget;
         // Iterate over all `case` labels and evaluate them. Stop if the result value equals `ctrl_value`.
         // In this loop, `qtarget` points to the `default` clause.
         for(auto it = p.begin(); it != p.end(); it += 3) {

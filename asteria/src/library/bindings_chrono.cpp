@@ -265,7 +265,7 @@ D_string std_chrono_max_datetime(bool with_ms)
     return std_chrono_format_datetime(INT64_MAX, with_ms);
   }
 
-Optional<D_integer> std_chrono_parse_datetime(const D_string& time_str)
+Opt<D_integer> std_chrono_parse_datetime(const D_string& time_str)
   {
     // Characters are read forwards, unlike `datetime_format()`.
     auto rpos = time_str.begin();
