@@ -378,7 +378,8 @@ std::ostream& operator<<(std::ostream& os, const Quote& q)
               state |= std::ios_base::failbit;
               goto z;
             }
-            // Fallthrough.
+          }
+          // Fallthrough.
         case 0x20:  case 0x21:  /*  "  */   case 0x23:  case 0x24:  case 0x25:  case 0x26:  /*  '  */
         case 0x28:  case 0x29:  case 0x2a:  case 0x2b:  case 0x2c:  case 0x2d:  case 0x2e:  case 0x2f:
         case 0x30:  case 0x31:  case 0x32:  case 0x33:  case 0x34:  case 0x35:  case 0x36:  case 0x37:
@@ -391,6 +392,7 @@ std::ostream& operator<<(std::ostream& os, const Quote& q)
         case 0x68:  case 0x69:  case 0x6a:  case 0x6b:  case 0x6c:  case 0x6d:  case 0x6e:  case 0x6f:
         case 0x70:  case 0x71:  case 0x72:  case 0x73:  case 0x74:  case 0x75:  case 0x76:  case 0x77:
         case 0x78:  case 0x79:  case 0x7a:  case 0x7b:  case 0x7c:  case 0x7d:  case 0x7e:
+          {
             // Write the character as is.
             if(os.rdbuf()->sputc(static_cast<char>(uch)) == eof) {
               state |= std::ios_base::failbit;
@@ -427,43 +429,31 @@ z:
   }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Wrappable Index
+// Wrap Index
 ///////////////////////////////////////////////////////////////////////////////
 
-Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size)
+Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
   {
-    auto rsize = static_cast<std::int64_t>(size);
-    // Wrap `index` if it is negative.
-    // N.B. The result may still be negative.
-    auto rindex = index;
-    if(rindex < 0) {
-      rindex += rsize;
+    ROCKET_ASSERT(size <= PTRDIFF_MAX);
+    // The range of valid indices is (~size, size).
+    Wrapped_Index w;
+    auto ssize = static_cast<std::int64_t>(size);
+    if(index >= 0) {
+      // Append elements as needed.
+      auto nappend = rocket::max(index, ssize - 1) - (ssize - 1);
+      w.nprepend = 0;
+      w.nappend = static_cast<std::uint64_t>(nappend);
+      // `index` is truncated if it does not fit in `size_t`, but in this case it shouldn't be used.
+      w.rindex = static_cast<std::size_t>(index);
+    } else {
+      // Prepend elements as needed.
+      auto nprepend = rocket::max(index - 1, ~ssize) - (index - 1);
+      w.nprepend = static_cast<std::uint64_t>(nprepend);
+      w.nappend = 0;
+      // `index + ssize` cannot overflow when `index` is negative and `ssize` is not.
+      w.rindex = static_cast<std::size_t>(index + ssize) + static_cast<std::size_t>(nprepend);
     }
-    Wrapped_Subscript wrap = { static_cast<std::size_t>(rindex), 0, 0 };
-    // If `rindex` is still negative, we will have to insert elements in the front.
-    if(rindex < 0) {
-      // Calculate the number of elements to fill.
-      auto front_fill = 0 - static_cast<std::uint64_t>(rindex);
-      if(front_fill > PTRDIFF_MAX) {
-        rocket::sprintf_and_throw<std::length_error>("wrap_subscript: The subscript `%lld` is out of the acceptable range.",
-                                                     static_cast<long long>(index));
-      }
-      wrap.front_fill = static_cast<std::size_t>(front_fill);
-      return wrap;
-    }
-    // If `rindex` is greater than or equal to the size, we will have to insert elements in the back.
-    if(rindex >= rsize) {
-      // Calculate the number of elements to fill.
-      auto back_fill = static_cast<std::uint64_t>(rindex - rsize) + 1;
-      if(back_fill > PTRDIFF_MAX) {
-        rocket::sprintf_and_throw<std::length_error>("wrap_subscript: The subscript `%lld` is out of the acceptable range.",
-                                                     static_cast<long long>(index));
-      }
-      wrap.back_fill = static_cast<std::size_t>(back_fill);
-      return wrap;
-    }
-    // `rindex` fits in range.
-    return wrap;
+    return w;
   }
 
 }  // namespace Asteria

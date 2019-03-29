@@ -246,17 +246,17 @@ inline Quote quote(const rocket::cow_string& str) noexcept
 extern std::ostream& operator<<(std::ostream& os, const Quote& q);
 
 ///////////////////////////////////////////////////////////////////////////////
-// Wrappable Index
+// Wrap Index
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Wrapped_Subscript
+struct Wrapped_Index
   {
-    std::size_t subscript;
-    std::size_t front_fill;
-    std::size_t back_fill;
+    std::uint64_t nprepend;  // number of elements to prepend
+    std::uint64_t nappend;  // number of elements to append
+    std::size_t rindex;  // the wrapped index (valid if both `nprepend` and `nappend` are zeroes)
   };
 
-extern Wrapped_Subscript wrap_subscript(std::int64_t index, std::size_t size);
+extern Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept;
 
 }  // namespace Asteria
 

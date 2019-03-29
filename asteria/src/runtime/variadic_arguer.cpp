@@ -27,12 +27,12 @@ Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*glob
     D_integer index;
     if(reader.start().req(index).finish()) {
       // Return the argument at the index specified.
-      auto wrapped = wrap_subscript(index, nvargs);
-      if(wrapped.subscript >= nvargs) {
+      auto w = wrap_index(index, nvargs);
+      if(w.nprepend + w.nappend != 0) {
         ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", index, ", nvarg = ", nvargs);
         return self = Reference_Root::S_null();
       }
-      return self = this->get_argument(wrapped.subscript);
+      return self = this->get_argument(w.rindex);
     }
     // Fail.
     reader.throw_no_matching_function_call();

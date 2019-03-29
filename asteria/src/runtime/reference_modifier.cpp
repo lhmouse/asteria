@@ -22,12 +22,13 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         case dtype_array:
           {
             const auto& arr = parent.check<D_array>();
-            auto wrapped = wrap_subscript(alt.index, arr.size());
-            if(wrapped.subscript >= arr.size()) {
+            auto w = wrap_index(alt.index, arr.size());
+            auto nadd = w.nprepend | w.nappend;
+            if(nadd != 0) {
               ASTERIA_DEBUG_LOG("Array subscript is out of range: index = ", alt.index, ", size = ", arr.size());
               return nullptr;
             }
-            return arr.data() + wrapped.subscript;
+            return &(arr.at(w.rindex));
           }
         default:
           ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -73,20 +74,25 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
               return nullptr;
             }
             parent = D_array();
-            // Fallthrough.
+          }
+          // Fallthrough.
         case dtype_array:
+          {
             auto& arr = parent.check<D_array>();
-            auto wrapped = wrap_subscript(alt.index, arr.size());
-            if(wrapped.subscript >= arr.size()) {
+            auto w = wrap_index(alt.index, arr.size());
+            auto nadd = w.nprepend | w.nappend;
+            if(nadd != 0) {
               if(!create_new) {
                 ASTERIA_DEBUG_LOG("Array subscript is out of range: index = ", alt.index, ", size = ", arr.size());
                 return nullptr;
               }
-              arr.insert(arr.begin(), wrapped.front_fill);
-              wrapped.subscript += wrapped.front_fill;
-              arr.insert(arr.end(), wrapped.back_fill);
+              if(nadd > arr.max_size() - arr.size()) {
+                ASTERIA_THROW_RUNTIME_ERROR("Extending an `array` of length `", arr.size(), "` by `", nadd, "` would exceed the system limit.");
+              }
+              arr.insert(arr.begin(), static_cast<std::size_t>(w.nprepend));
+              arr.insert(arr.end(), static_cast<std::size_t>(w.nappend));
             }
-            return arr.mut_data() + wrapped.subscript;
+            return &(arr.mut(w.rindex));
           }
         default:
           ASTERIA_THROW_RUNTIME_ERROR("Index `", alt.index, "` cannot be applied to `", parent, "`.");
@@ -102,8 +108,10 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
               return nullptr;
             }
             parent = D_object();
-            // Fallthrough.
+          }
+          // Fallthrough.
         case dtype_object:
+          {
             auto& obj = parent.check<D_object>();
             auto rit = create_new ? obj.try_emplace(alt.key).first : obj.find_mut(alt.key);
             if(rit == obj.end()) {
@@ -135,13 +143,14 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         case dtype_array:
           {
             auto& arr = parent.check<D_array>();
-            auto wrapped = wrap_subscript(alt.index, arr.size());
-            if(wrapped.subscript >= arr.size()) {
+            auto w = wrap_index(alt.index, arr.size());
+            auto nadd = w.nprepend | w.nappend;
+            if(nadd != 0) {
               ASTERIA_DEBUG_LOG("Array subscript is out of range: index = ", alt.index, ", size = ", arr.size());
               return D_null();
             }
-            auto erased = rocket::move(arr.mut(wrapped.subscript));
-            arr.erase(wrapped.subscript, 1);
+            auto erased = rocket::move(arr.mut(w.rindex));
+            arr.erase(w.rindex);
             return rocket::move(erased);
           }
         default:
