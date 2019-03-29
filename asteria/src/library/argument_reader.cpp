@@ -297,31 +297,30 @@ Argument_Reader& Argument_Reader::req(D_object& xvalue)
     return this->do_read_typed_argument_required<dtype_object>(xvalue);
   }
 
-Argument_Reader& Argument_Reader::finish()
+bool Argument_Reader::finish()
   {
     this->do_record_parameter_finish(false);
     // Get the number of named parameters.
     auto knparams = this->do_check_finish_opt(false);
     if(!knparams) {
-      return *this;
+      return false;
     }
     // There shall be no more arguments than parameters.
     if(*knparams < this->m_args.get().size()) {
       this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", *knparams, "`, "
                                                      "but got `", this->m_args.get().size(), "`).");  });
-      return *this;
+      return false;
     }
-    // Accept the end of arguments.
-    return *this;
+    return true;
   }
 
-Argument_Reader& Argument_Reader::finish(Cow_Vector<Reference>& vargs)
+bool Argument_Reader::finish(Cow_Vector<Reference>& vargs)
   {
     this->do_record_parameter_finish(true);
     // Get the number of named parameters.
     auto knparams = this->do_check_finish_opt(true);
     if(!knparams) {
-      return *this;
+      return false;
     }
     // Copy variadic arguments as is.
     vargs.clear();
@@ -329,17 +328,16 @@ Argument_Reader& Argument_Reader::finish(Cow_Vector<Reference>& vargs)
       std::for_each(this->m_args.get().begin() + static_cast<std::ptrdiff_t>(*knparams), this->m_args.get().end(),
                     [&](const Reference& arg) { vargs.emplace_back(arg);  });
     }
-    // Accept the end of arguments.
-    return *this;
+    return true;
   }
 
-Argument_Reader& Argument_Reader::finish(Cow_Vector<Value>& vargs)
+bool Argument_Reader::finish(Cow_Vector<Value>& vargs)
   {
     this->do_record_parameter_finish(true);
     // Get the number of named parameters.
     auto knparams = this->do_check_finish_opt(true);
     if(!knparams) {
-      return *this;
+      return false;
     }
     // Copy variadic arguments as is.
     vargs.clear();
@@ -347,8 +345,7 @@ Argument_Reader& Argument_Reader::finish(Cow_Vector<Value>& vargs)
       std::for_each(this->m_args.get().begin() + static_cast<std::ptrdiff_t>(*knparams), this->m_args.get().end(),
                     [&](const Reference& arg) { vargs.emplace_back(arg.read());  });
     }
-    // Accept the end of arguments.
-    return *this;
+    return true;
   }
 
 void Argument_Reader::throw_no_matching_function_call() const

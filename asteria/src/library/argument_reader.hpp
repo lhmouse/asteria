@@ -100,11 +100,6 @@ class Argument_Reader
         return *this;
       }
 
-    // Reader objects are allowed in `if` and `while` conditions, just like `std::istream`s.
-    explicit operator bool () const noexcept
-      {
-        return this->m_state.succeeded;
-      }
     // Start recording an overload.
     Argument_Reader& start() noexcept;
     // Get an OPTIONAL argument.
@@ -134,9 +129,9 @@ class Argument_Reader
     // Terminate the argument list and finish this overload.
     // For the overload taking no arguments, if there are excess arguments, the operation fails.
     // For the other overloads, excess arguments are copied into `vargs`.
-    Argument_Reader& finish();
-    Argument_Reader& finish(Cow_Vector<Reference>& vargs);
-    Argument_Reader& finish(Cow_Vector<Value>& vargs);
+    bool finish();
+    bool finish(Cow_Vector<Reference>& vargs);
+    bool finish(Cow_Vector<Value>& vargs);
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]] void throw_no_matching_function_call() const;
