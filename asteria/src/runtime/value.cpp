@@ -69,7 +69,7 @@ const Value& Value::get_null() noexcept
 
 bool Value::test() const noexcept
   {
-    switch(this->type()) {
+    switch(this->dtype()) {
     case dtype_null:
       {
         return false;
@@ -104,7 +104,7 @@ bool Value::test() const noexcept
         return true;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
     }
   }
 
@@ -145,18 +145,18 @@ bool Value::test() const noexcept
 Value::Compare Value::compare(const Value& other) const noexcept
   {
     // Values of different types can only be compared if either of them is `null`.
-    if(this->type() != other.type()) {
+    if(this->dtype() != other.dtype()) {
       // `null` is considered to be equal to `null` and less than anything else.
-      if(this->type() == dtype_null) {
+      if(this->dtype() == dtype_null) {
         return Value::compare_less;
       }
-      if(other.type() == dtype_null) {
+      if(other.dtype() == dtype_null) {
         return Value::compare_greater;
       }
       return Value::compare_unordered;
     }
     // If both values have the same type, perform normal comparison.
-    switch(this->type()) {
+    switch(this->dtype()) {
     case dtype_null:
       {
         return Value::compare_equal;
@@ -221,13 +221,13 @@ Value::Compare Value::compare(const Value& other) const noexcept
         return Value::compare_unordered;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
     }
   }
 
 void Value::print(std::ostream& os, bool quote_strings) const
   {
-    switch(this->type()) {
+    switch(this->dtype()) {
     case dtype_null:
       {
         // null
@@ -310,7 +310,7 @@ void Value::print(std::ostream& os, bool quote_strings) const
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
     }
   }
 
@@ -325,7 +325,7 @@ void Value::print(std::ostream& os, bool quote_strings) const
 
 void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
   {
-    switch(this->type()) {
+    switch(this->dtype()) {
     case dtype_null:
       {
         // null
@@ -413,13 +413,13 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
     }
   }
 
 bool Value::unique() const noexcept
   {
-    switch(this->type()) {
+    switch(this->dtype()) {
     case dtype_null:
     case dtype_boolean:
     case dtype_integer:
@@ -448,13 +448,13 @@ bool Value::unique() const noexcept
         return this->check<D_object>().unique();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
     }
   }
 
 long Value::use_count() const noexcept
   {
-    switch(this->type()) {
+    switch(this->dtype()) {
     case dtype_null:
       {
         return 0;
@@ -486,13 +486,13 @@ long Value::use_count() const noexcept
         return this->check<D_object>().use_count();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
     }
   }
 
 void Value::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    switch(this->type()) {
+    switch(this->dtype()) {
     case dtype_null:
     case dtype_boolean:
     case dtype_integer:
@@ -522,7 +522,7 @@ void Value::enumerate_variables(const Abstract_Variable_Callback& callback) cons
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->type(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
     }
   }
 

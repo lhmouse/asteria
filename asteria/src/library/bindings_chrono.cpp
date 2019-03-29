@@ -166,21 +166,24 @@ D_integer std_chrono_utc_from_local(D_integer time_local)
     return time_utc;
   }
 
-D_string std_chrono_format_datetime(D_integer time_point, bool with_ms)
+D_string std_chrono_format_datetime(D_integer time_point, const Opt<D_boolean>& with_ms)
   {
     // Return strings that are allocated statically for special time point values.
     static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
                                                "1601-01-01 00:00:00.000" };
     static constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00",
                                                "9999-01-01 00:00:00.000" };
+    // No millisecond part is added by default.
+    bool pms = with_ms.value_or(false);
+    // Deal with special time points.
     if(time_point <= -11644473600000) {
-      return rocket::sref(s_min_str[with_ms]);
+      return rocket::sref(s_min_str[pms]);
     }
     if(time_point >= 253370764800000) {
-      return rocket::sref(s_max_str[with_ms]);
+      return rocket::sref(s_max_str[pms]);
     }
     // Notice that the length of the result string is fixed.
-    D_string time_str(rocket::sref(s_min_str[with_ms]));
+    D_string time_str(rocket::sref(s_min_str[pms]));
     // Characters are written backwards, unlike `datetime_parse()`.
     auto wpos = time_str.mut_rbegin();
     // Define functions to write each field.
@@ -214,7 +217,7 @@ D_string std_chrono_format_datetime(D_integer time_point, bool with_ms)
     ::SYSTEMTIME st;
     ::FileTimeToSystemTime(&ft, &st);
     // Write fields backwards.
-    if(with_ms) {
+    if(pms) {
       write_int(st.wMilliseconds, 3);
       write_sep('.');
     }
@@ -232,7 +235,7 @@ D_string std_chrono_format_datetime(D_integer time_point, bool with_ms)
 #else
     // Write fields backwards.
     // Be advised that POSIX APIs handle seconds only.
-    if(with_ms) {
+    if(pms) {
       write_int(static_cast<int>(time_point % 1000), 3);
       write_sep('.');
     }
@@ -255,12 +258,12 @@ D_string std_chrono_format_datetime(D_integer time_point, bool with_ms)
     return time_str;
   }
 
-D_string std_chrono_min_datetime(bool with_ms)
+D_string std_chrono_min_datetime(const Opt<D_boolean>& with_ms)
   {
     return std_chrono_format_datetime(INT64_MIN, with_ms);
   }
 
-D_string std_chrono_max_datetime(bool with_ms)
+D_string std_chrono_max_datetime(const Opt<D_boolean>& with_ms)
   {
     return std_chrono_format_datetime(INT64_MAX, with_ms);
   }
@@ -528,7 +531,7 @@ D_object create_bindings_chrono()
             Argument_Reader reader(rocket::sref("std.chrono.local_from_utc"), args);
             // Parse arguments.
             D_integer time_utc;
-            if(reader.start().req(time_utc).finish()) {
+            if(reader.start().g(time_utc).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_local_from_utc(time_utc) };
               return rocket::move(xref);
@@ -557,7 +560,7 @@ D_object create_bindings_chrono()
             Argument_Reader reader(rocket::sref("std.chrono.utc_from_local"), args);
             // Parse arguments.
             D_integer time_local;
-            if(reader.start().req(time_local).finish()) {
+            if(reader.start().g(time_local).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_utc_from_local(time_local) };
               return rocket::move(xref);
@@ -586,8 +589,8 @@ D_object create_bindings_chrono()
             Argument_Reader reader(rocket::sref("std.chrono.datetime_format"), args);
             // Parse arguments.
             D_integer time_point;
-            D_boolean with_ms = false;
-            if(reader.start().req(time_point).opt(with_ms).finish()) {
+            Opt<D_boolean> with_ms;
+            if(reader.start().g(time_point).g(with_ms).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_format_datetime(time_point, with_ms) };
               return rocket::move(xref);
@@ -615,8 +618,8 @@ D_object create_bindings_chrono()
           {
             Argument_Reader reader(rocket::sref("std.chrono.datetime_min"), args);
             // Parse arguments.
-            D_boolean with_ms = false;
-            if(reader.start().opt(with_ms).finish()) {
+            Opt<D_boolean> with_ms;
+            if(reader.start().g(with_ms).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_min_datetime(with_ms) };
               return rocket::move(xref);
@@ -644,8 +647,8 @@ D_object create_bindings_chrono()
           {
             Argument_Reader reader(rocket::sref("std.chrono.datetime_max"), args);
             // Parse arguments.
-            D_boolean with_ms = false;
-            if(reader.start().opt(with_ms).finish()) {
+            Opt<D_boolean> with_ms;
+            if(reader.start().g(with_ms).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_max_datetime(with_ms) };
               return rocket::move(xref);
@@ -677,13 +680,13 @@ D_object create_bindings_chrono()
             Argument_Reader reader(rocket::sref("std.chrono.datetime_parse"), args);
             // Parse arguments.
             D_string time_str;
-            if(reader.start().req(time_str).finish()) {
+            if(reader.start().g(time_str).finish()) {
               // Call the binding function.
               auto qres = std_chrono_parse_datetime(time_str);
               if(!qres) {
                 return Reference_Root::S_null();
               }
-              Reference_Root::S_temporary xref = { *qres };
+              Reference_Root::S_temporary xref = { rocket::move(*qres) };
               return rocket::move(xref);
             }
             // Fail.

@@ -103,83 +103,78 @@ void Argument_Reader::do_record_parameter_finish(bool variadic)
     this->m_overloads.append(this->m_state.prototype.begin(), this->m_state.prototype.end());
   }
 
-const Reference* Argument_Reader::do_peek_argument_opt(bool required)
+const Reference* Argument_Reader::do_peek_argument_opt() const
   {
     if(!this->m_state.succeeded) {
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
       return nullptr;
     }
     // Before calling this function, the parameter information must have been recorded in `m_state.prototype`.
     auto nparams = this->m_state.prototype.size();
     if(this->m_args.get().size() < nparams) {
-      if(!required) {
-        return nullptr;
-      }
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("No enough arguments were provided (expecting at least ", nparams, ").");  });
       return nullptr;
     }
     // Return a pointer to this argument.
-    auto karg = this->m_args.get().data() + (nparams - 1);
-    ROCKET_ASSERT(karg);
-    return karg;
+    return &(this->m_args.get().at(nparams - 1));
   }
 
-Opt<std::size_t> Argument_Reader::do_check_finish_opt(bool variadic)
+Opt<std::size_t> Argument_Reader::do_check_finish_opt(bool variadic) const
   {
     if(!this->m_state.succeeded) {
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("A previous operation had failed.");  });
       return rocket::nullopt;
     }
-    // Before calling this function, the parameter information must have been recorded in `m_state.prototype`.
-    auto nparams = this->m_state.prototype.size() - 1;
-    if(variadic) {
-      nparams -= 1;
-    }
+    // Before calling this function, a finish tag must have been recorded in `m_state.prototype`.
+    auto nparams = this->m_state.prototype.size() - 1 - variadic;
     return nparams;
   }
 
-template<Dtype dtypeT> Argument_Reader& Argument_Reader::do_read_typed_argument_optional(typename Value::Xvariant::type_at<dtypeT>::type& xvalue)
+template<Dtype dtypeT> Argument_Reader& Argument_Reader::do_read_typed_argument(Opt<typename Value::Xvariant::type_at<dtypeT>::type>& qxvalue)
   {
     this->do_record_parameter(dtypeT, false);
     // Get the next argument.
-    auto karg = this->do_peek_argument_opt(false);
+    auto karg = this->do_peek_argument_opt();
     if(!karg) {
+      qxvalue.reset();
       return *this;
     }
     // Read a value from the argument.
     const auto& value = karg->read();
-    auto qrvalue = value.opt<typename Value::Xvariant::type_at<dtypeT>::type>();
-    if(!qrvalue) {
+    if(value.dtype() == dtype_null) {
+      // Accept a `null` argument.
+      qxvalue.reset();
+      return *this;
+    }
+    auto qalt = value.template opt<typename Value::Xvariant::type_at<dtypeT>::type>();
+    if(!qalt) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.prototype.size(), " had type `", Value::get_type_name(value.type()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_type_name(value.dtype()), "`, "
                                                      "but `", Value::get_type_name(dtypeT), "` or `null` was expected.");  });
       return *this;
     }
     // Copy the value.
-    xvalue = *qrvalue;
+    qxvalue = *qalt;
     return *this;
   }
 
-template<Dtype dtypeT> Argument_Reader& Argument_Reader::do_read_typed_argument_required(typename Value::Xvariant::type_at<dtypeT>::type& xvalue)
+template<Dtype dtypeT> Argument_Reader& Argument_Reader::do_read_typed_argument(typename Value::Xvariant::type_at<dtypeT>::type& xvalue)
   {
-    // Record this parameter.
     this->do_record_parameter(dtypeT, true);
     // Get the next argument.
-    auto karg = this->do_peek_argument_opt(true);
+    auto karg = this->do_peek_argument_opt();
     if(!karg) {
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("No argument is available.");  });
       return *this;
     }
     // Read a value from the argument.
     const auto& value = karg->read();
-    auto qrvalue = value.opt<typename Value::Xvariant::type_at<dtypeT>::type>();
-    if(!qrvalue) {
+    auto qalt = value.template opt<typename Value::Xvariant::type_at<dtypeT>::type>();
+    if(!qalt) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", this->m_state.prototype.size(), " had type `", Value::get_type_name(value.type()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_type_name(value.dtype()), "`, "
                                                      "but `", Value::get_type_name(dtypeT), "` was expected.");  });
       return *this;
     }
     // Copy the value.
-    xvalue = *qrvalue;
+    xvalue = *qalt;
     return *this;
   }
 
@@ -191,12 +186,13 @@ Argument_Reader& Argument_Reader::start() noexcept
     return *this;
   }
 
-Argument_Reader& Argument_Reader::opt(Reference& ref)
+Argument_Reader& Argument_Reader::g(Reference& ref)
   {
     this->do_record_parameter_generic();
     // Get the next argument.
-    auto karg = this->do_peek_argument_opt(false);
+    auto karg = this->do_peek_argument_opt();
     if(!karg) {
+      ref = Reference_Root::S_null();
       return *this;
     }
     // Copy the reference as is.
@@ -204,12 +200,13 @@ Argument_Reader& Argument_Reader::opt(Reference& ref)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::opt(Value& value)
+Argument_Reader& Argument_Reader::g(Value& value)
   {
     this->do_record_parameter_generic();
     // Get the next argument.
-    auto karg = this->do_peek_argument_opt(false);
+    auto karg = this->do_peek_argument_opt();
     if(!karg) {
+      value = D_null();
       return *this;
     }
     // Copy the value as is.
@@ -217,84 +214,84 @@ Argument_Reader& Argument_Reader::opt(Value& value)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::opt(D_boolean& xvalue)
+Argument_Reader& Argument_Reader::g(Opt<D_boolean>& qxvalue)
   {
-    return this->do_read_typed_argument_optional<dtype_boolean>(xvalue);
+    return this->do_read_typed_argument<dtype_boolean>(qxvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_integer& xvalue)
+Argument_Reader& Argument_Reader::g(Opt<D_integer>& qxvalue)
   {
-    return this->do_read_typed_argument_optional<dtype_integer>(xvalue);
+    return this->do_read_typed_argument<dtype_integer>(qxvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_real& xvalue)
+Argument_Reader& Argument_Reader::g(Opt<D_real>& qxvalue)
   {
-    return this->do_read_typed_argument_optional<dtype_real>(xvalue);
+    return this->do_read_typed_argument<dtype_real>(qxvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_string& xvalue)
+Argument_Reader& Argument_Reader::g(Opt<D_string>& qxvalue)
   {
-    return this->do_read_typed_argument_optional<dtype_string>(xvalue);
+    return this->do_read_typed_argument<dtype_string>(qxvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_opaque& xvalue)
+Argument_Reader& Argument_Reader::g(Opt<D_opaque>& qxvalue)
   {
-    return this->do_read_typed_argument_optional<dtype_opaque>(xvalue);
+    return this->do_read_typed_argument<dtype_opaque>(qxvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_function& xvalue)
+Argument_Reader& Argument_Reader::g(Opt<D_function>& qxvalue)
   {
-    return this->do_read_typed_argument_optional<dtype_function>(xvalue);
+    return this->do_read_typed_argument<dtype_function>(qxvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_array& xvalue)
+Argument_Reader& Argument_Reader::g(Opt<D_array>& qxvalue)
   {
-    return this->do_read_typed_argument_optional<dtype_array>(xvalue);
+    return this->do_read_typed_argument<dtype_array>(qxvalue);
   }
 
-Argument_Reader& Argument_Reader::opt(D_object& xvalue)
+Argument_Reader& Argument_Reader::g(Opt<D_object>& qxvalue)
   {
-    return this->do_read_typed_argument_optional<dtype_object>(xvalue);
+    return this->do_read_typed_argument<dtype_object>(qxvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_boolean& xvalue)
+Argument_Reader& Argument_Reader::g(D_boolean& xvalue)
   {
-    return this->do_read_typed_argument_required<dtype_boolean>(xvalue);
+    return this->do_read_typed_argument<dtype_boolean>(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_integer& xvalue)
+Argument_Reader& Argument_Reader::g(D_integer& xvalue)
   {
-    return this->do_read_typed_argument_required<dtype_integer>(xvalue);
+    return this->do_read_typed_argument<dtype_integer>(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_real& xvalue)
+Argument_Reader& Argument_Reader::g(D_real& xvalue)
   {
-    return this->do_read_typed_argument_required<dtype_real>(xvalue);
+    return this->do_read_typed_argument<dtype_real>(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_string& xvalue)
+Argument_Reader& Argument_Reader::g(D_string& xvalue)
   {
-    return this->do_read_typed_argument_required<dtype_string>(xvalue);
+    return this->do_read_typed_argument<dtype_string>(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_opaque& xvalue)
+Argument_Reader& Argument_Reader::g(D_opaque& xvalue)
   {
-    return this->do_read_typed_argument_required<dtype_opaque>(xvalue);
+    return this->do_read_typed_argument<dtype_opaque>(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_function& xvalue)
+Argument_Reader& Argument_Reader::g(D_function& xvalue)
   {
-    return this->do_read_typed_argument_required<dtype_function>(xvalue);
+    return this->do_read_typed_argument<dtype_function>(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_array& xvalue)
+Argument_Reader& Argument_Reader::g(D_array& xvalue)
   {
-    return this->do_read_typed_argument_required<dtype_array>(xvalue);
+    return this->do_read_typed_argument<dtype_array>(xvalue);
   }
 
-Argument_Reader& Argument_Reader::req(D_object& xvalue)
+Argument_Reader& Argument_Reader::g(D_object& xvalue)
   {
-    return this->do_read_typed_argument_required<dtype_object>(xvalue);
+    return this->do_read_typed_argument<dtype_object>(xvalue);
   }
 
 bool Argument_Reader::finish()
@@ -356,8 +353,8 @@ void Argument_Reader::throw_no_matching_function_call() const
     rocket::insertable_ostream mos;
     mos << "There was no matching overload for function call `" << name << "(";
     if(!args.empty()) {
-      std::for_each(args.begin(), args.end() - 1, [&](const Reference& arg) { mos << Value::get_type_name(arg.read().type()) <<", ";  });
-      mos << Value::get_type_name(args.back().read().type());
+      std::for_each(args.begin(), args.end() - 1, [&](const Reference& arg) { mos << Value::get_type_name(arg.read().dtype()) <<", ";  });
+      mos << Value::get_type_name(args.back().read().dtype());
     }
     mos << ")`.";
     // If overload information is available, append the list of overloads.

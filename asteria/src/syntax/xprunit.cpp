@@ -586,7 +586,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Get the target reference.
         auto target_value = stack.get_top_reference().read();
         // Make sure it is really a function.
-        if(target_value.type() != dtype_function) {
+        if(target_value.dtype() != dtype_function) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", target_value, "` which is not a function.");
         }
         const auto& target = target_value.check<D_function>().get();
@@ -625,13 +625,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Increment the operand and return the old value.
         // `alt.assign` is ignored.
         auto& lhs = stack.get_top_reference().open();
-        if(lhs.type() == dtype_integer) {
+        if(lhs.dtype() == dtype_integer) {
           auto& reg = lhs.check<D_integer>();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_add(reg, D_integer(1));
           goto z;
         }
-        if(lhs.type() == dtype_real) {
+        if(lhs.dtype() == dtype_real) {
           auto& reg = lhs.check<D_real>();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_add(reg, D_real(1));
@@ -648,13 +648,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decrement the operand and return the old value.
         // `alt.assign` is ignored.
         auto& lhs = stack.get_top_reference().open();
-        if(lhs.type() == dtype_integer) {
+        if(lhs.dtype() == dtype_integer) {
           auto& reg = lhs.check<D_integer>();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_sub(reg, D_integer(1));
           goto z;
         }
-        if(lhs.type() == dtype_real) {
+        if(lhs.dtype() == dtype_real) {
           auto& reg = lhs.check<D_real>();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_sub(reg, D_real(1));
@@ -672,13 +672,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // `alt.assign` is ignored.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           auto& reg = rhs.check<D_integer>();
           Reference_Modifier::S_array_index xmod = { rocket::move(reg) };
           stack.open_top_reference().zoom_in(rocket::move(xmod));
           goto z;
         }
-        if(rhs.type() == dtype_string) {
+        if(rhs.dtype() == dtype_string) {
           auto& reg = rhs.check<D_string>();
           Reference_Modifier::S_object_key xmod = { rocket::move(reg) };
           stack.open_top_reference().zoom_in(rocket::move(xmod));
@@ -708,12 +708,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Negate the operand to create a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_neg(reg);
           goto z;
         }
-        if(rhs.type() == dtype_real) {
+        if(rhs.dtype() == dtype_real) {
           auto& reg = rhs.check<D_real>();
           reg = do_operator_neg(reg);
           goto z;
@@ -731,12 +731,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
-        if(rhs.type() == dtype_boolean) {
+        if(rhs.dtype() == dtype_boolean) {
           auto& reg = rhs.check<D_boolean>();
           reg = do_operator_not(reg);
           goto z;
         }
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_not(reg);
           goto z;
@@ -765,12 +765,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Increment the operand and return it.
         // `alt.assign` is ignored.
         auto& rhs = stack.get_top_reference().open();
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_add(reg, D_integer(1));
           goto z;
         }
-        if(rhs.type() == dtype_real) {
+        if(rhs.dtype() == dtype_real) {
           auto& reg = rhs.check<D_real>();
           reg = do_operator_add(reg, D_real(1));
           goto z;
@@ -786,12 +786,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decrement the operand and return it.
         // `alt.assign` is ignored.
         auto& rhs = stack.get_top_reference().open();
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_sub(reg, D_integer(1));
           return Air_Node::status_next;
         }
-        if(rhs.type() == dtype_real) {
+        if(rhs.dtype() == dtype_real) {
           auto& reg = rhs.check<D_real>();
           reg = do_operator_sub(reg, D_real(1));
           return Air_Node::status_next;
@@ -817,19 +817,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Return the number of elements in the operand.
         const auto& rhs = stack.get_top_reference().read();
-        if(rhs.type() == dtype_null) {
+        if(rhs.dtype() == dtype_null) {
           stack.set_temporary_result(assign, D_integer(0));
           goto z;
         }
-        if(rhs.type() == dtype_string) {
+        if(rhs.dtype() == dtype_string) {
           stack.set_temporary_result(assign, D_integer(rhs.check<D_string>().size()));
           goto z;
         }
-        if(rhs.type() == dtype_array) {
+        if(rhs.dtype() == dtype_array) {
           stack.set_temporary_result(assign, D_integer(rhs.check<D_array>().size()));
           goto z;
         }
-        if(rhs.type() == dtype_object) {
+        if(rhs.dtype() == dtype_object) {
           stack.set_temporary_result(assign, D_integer(rhs.check<D_object>().size()));
           goto z;
         }
@@ -846,7 +846,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
         const auto& rhs = stack.get_top_reference().read();
-        stack.set_temporary_result(assign, D_string(rocket::sref(Value::get_type_name(rhs.type()))));
+        stack.set_temporary_result(assign, D_string(rocket::sref(Value::get_type_name(rhs.dtype()))));
         return Air_Node::status_next;
       }
 
@@ -930,24 +930,24 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
-        if((lhs.type() == dtype_boolean) && (rhs.type() == dtype_boolean)) {
+        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
           auto& reg = rhs.check<D_boolean>();
           reg = do_operator_or(lhs.check<D_boolean>(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the sum of both operands.
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_add(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.type() == dtype_real) && (rhs.type() == dtype_real)) {
+        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
           auto& reg = rhs.check<D_real>();
           reg = do_operator_add(lhs.check<D_real>(), reg);
           goto z;
         }
         // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
-        if((lhs.type() == dtype_string) && (rhs.type() == dtype_string)) {
+        if((lhs.dtype() == dtype_string) && (rhs.dtype() == dtype_string)) {
           auto& reg = rhs.check<D_string>();
           reg = do_operator_add(lhs.check<D_string>(), reg);
           goto z;
@@ -968,18 +968,18 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
-        if((lhs.type() == dtype_boolean) && (rhs.type() == dtype_boolean)) {
+        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
           auto& reg = rhs.check<D_boolean>();
           reg = do_operator_xor(lhs.check<D_boolean>(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the difference of both operands.
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_sub(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.type() == dtype_real) && (rhs.type() == dtype_real)) {
+        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
           auto& reg = rhs.check<D_real>();
           reg = do_operator_sub(lhs.check<D_real>(), reg);
           goto z;
@@ -1000,29 +1000,29 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
-        if((lhs.type() == dtype_boolean) && (rhs.type() == dtype_boolean)) {
+        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
           auto& reg = rhs.check<D_boolean>();
           reg = do_operator_and(lhs.check<D_boolean>(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the product of both operands.
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_mul(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.type() == dtype_real) && (rhs.type() == dtype_real)) {
+        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
           auto& reg = rhs.check<D_real>();
           reg = do_operator_mul(lhs.check<D_real>(), reg);
           goto z;
         }
         // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
-        if((lhs.type() == dtype_string) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_string) && (rhs.dtype() == dtype_integer)) {
           // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
           rhs = do_operator_mul(lhs.check<D_string>(), rhs.check<D_integer>());
           goto z;
         }
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_string)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_string)) {
           auto& reg = rhs.check<D_string>();
           reg = do_operator_mul(lhs.check<D_integer>(), reg);
           goto z;
@@ -1043,12 +1043,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `integer` and `real` types, return the quotient of both operands.
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_div(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.type() == dtype_real) && (rhs.type() == dtype_real)) {
+        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
           auto& reg = rhs.check<D_real>();
           reg = do_operator_div(lhs.check<D_real>(), reg);
           goto z;
@@ -1069,12 +1069,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `integer` and `real` types, return the remainder of both operands.
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_mod(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.type() == dtype_real) && (rhs.type() == dtype_real)) {
+        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
           auto& reg = rhs.check<D_real>();
           reg = do_operator_mod(lhs.check<D_real>(), reg);
           goto z;
@@ -1095,17 +1095,17 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          if(lhs.type() == dtype_integer) {
+          if(lhs.dtype() == dtype_integer) {
             auto& reg = rhs.check<D_integer>();
             reg = do_operator_sll(lhs.check<D_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the right and discard characters from the left.
           // The number of bytes in the LHS operand will be preserved.
-          if(lhs.type() == dtype_string) {
+          if(lhs.dtype() == dtype_string) {
             // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
             rhs = do_operator_sll(lhs.check<D_string>(), rhs.check<D_integer>());
             goto z;
@@ -1127,17 +1127,17 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          if(lhs.type() == dtype_integer) {
+          if(lhs.dtype() == dtype_integer) {
             auto& reg = rhs.check<D_integer>();
             reg = do_operator_srl(lhs.check<D_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the left and discard characters from the right.
           // The number of bytes in the LHS operand will be preserved.
-          if(lhs.type() == dtype_string) {
+          if(lhs.dtype() == dtype_string) {
             // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
             rhs = do_operator_srl(lhs.check<D_string>(), rhs.check<D_integer>());
             goto z;
@@ -1159,17 +1159,17 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
           // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
-          if(lhs.type() == dtype_integer) {
+          if(lhs.dtype() == dtype_integer) {
             auto& reg = rhs.check<D_integer>();
             reg = do_operator_sla(lhs.check<D_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the right.
-          if(lhs.type() == dtype_string) {
+          if(lhs.dtype() == dtype_string) {
             // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
             rhs = do_operator_sla(lhs.check<D_string>(), rhs.check<D_integer>());
             goto z;
@@ -1191,16 +1191,16 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
-        if(rhs.type() == dtype_integer) {
+        if(rhs.dtype() == dtype_integer) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
-          if(lhs.type() == dtype_integer) {
+          if(lhs.dtype() == dtype_integer) {
             auto& reg = rhs.check<D_integer>();
             reg = do_operator_sra(lhs.check<D_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, discard characters from the right.
-          if(lhs.type() == dtype_string) {
+          if(lhs.dtype() == dtype_string) {
             // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
             rhs = do_operator_sra(lhs.check<D_string>(), rhs.check<D_integer>());
             goto z;
@@ -1222,13 +1222,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
-        if((lhs.type() == dtype_boolean) && (rhs.type() == dtype_boolean)) {
+        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
           auto& reg = rhs.check<D_boolean>();
           reg = do_operator_and(lhs.check<D_boolean>(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise AND'd result of both operands.
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_and(lhs.check<D_integer>(), reg);
           goto z;
@@ -1249,13 +1249,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
-        if((lhs.type() == dtype_boolean) && (rhs.type() == dtype_boolean)) {
+        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
           auto& reg = rhs.check<D_boolean>();
           reg = do_operator_or(lhs.check<D_boolean>(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise OR'd result of both operands.
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_or(lhs.check<D_integer>(), reg);
           goto z;
@@ -1276,13 +1276,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
-        if((lhs.type() == dtype_boolean) && (rhs.type() == dtype_boolean)) {
+        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
           auto& reg = rhs.check<D_boolean>();
           reg = do_operator_xor(lhs.check<D_boolean>(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise XOR'd result of both operands.
-        if((lhs.type() == dtype_integer) && (rhs.type() == dtype_integer)) {
+        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
           auto& reg = rhs.check<D_integer>();
           reg = do_operator_xor(lhs.check<D_integer>(), reg);
           goto z;
@@ -1348,7 +1348,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& code_null = p.at(0).as<Cow_Vector<Air_Node>>();
         const auto& assign = static_cast<bool>(p.at(1).as<std::int64_t>());
         // Pick a branch basing on the condition.
-        if(stack.get_top_reference().read().type() != dtype_null) {
+        if(stack.get_top_reference().read().dtype() != dtype_null) {
           // Leave the condition on the stack.
           return Air_Node::status_next;
         }

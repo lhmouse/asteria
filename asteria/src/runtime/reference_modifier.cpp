@@ -14,7 +14,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
     case index_array_index:
       {
         const auto& alt = this->m_stor.as<S_array_index>();
-        switch(rocket::weaken_enum(parent.type())) {
+        switch(rocket::weaken_enum(parent.dtype())) {
         case dtype_null:
           {
             return nullptr;
@@ -37,7 +37,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
     case index_object_key:
       {
         const auto& alt = this->m_stor.as<S_object_key>();
-        switch(rocket::weaken_enum(parent.type())) {
+        switch(rocket::weaken_enum(parent.dtype())) {
         case dtype_null:
           {
             return nullptr;
@@ -67,7 +67,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
     case index_array_index:
       {
         const auto& alt = this->m_stor.as<S_array_index>();
-        switch(rocket::weaken_enum(parent.type())) {
+        switch(rocket::weaken_enum(parent.dtype())) {
         case dtype_null:
           {
             if(!create_new) {
@@ -101,7 +101,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
     case index_object_key:
       {
         const auto& alt = this->m_stor.as<S_object_key>();
-        switch(rocket::weaken_enum(parent.type())) {
+        switch(rocket::weaken_enum(parent.dtype())) {
         case dtype_null:
           {
             if(!create_new) {
@@ -135,7 +135,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
     case index_array_index:
       {
         const auto& alt = this->m_stor.as<S_array_index>();
-        switch(rocket::weaken_enum(parent.type())) {
+        switch(rocket::weaken_enum(parent.dtype())) {
         case dtype_null:
           {
             return D_null();
@@ -160,7 +160,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
     case index_object_key:
       {
         const auto& alt = this->m_stor.as<S_object_key>();
-        switch(rocket::weaken_enum(parent.type())) {
+        switch(rocket::weaken_enum(parent.dtype())) {
         case dtype_null:
           {
             return D_null();

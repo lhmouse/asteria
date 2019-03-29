@@ -59,7 +59,7 @@ class Value
       }
 
   public:
-    Dtype type() const noexcept
+    Dtype dtype() const noexcept
       {
         return static_cast<Dtype>(this->m_stor.index());
       }

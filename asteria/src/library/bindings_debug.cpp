@@ -26,10 +26,12 @@ bool std_debug_print(const Cow_Vector<Value>& values)
     return succ;
   }
 
-bool std_debug_dump(const Value& value, D_integer indent_increment)
+bool std_debug_dump(const Value& value, const Opt<D_integer>& indent)
   {
     rocket::insertable_ostream mos;
-    value.dump(mos, static_cast<std::size_t>(rocket::clamp(indent_increment, 0, 10)));
+    auto rindent = indent ? rocket::clamp(*indent, 0, 10)  // Clamp it, just like Node.js.
+                          : 2;                             // Set the default value.
+    value.dump(mos, static_cast<std::size_t>(rindent));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
     return succ;
   }
@@ -56,7 +58,6 @@ D_object create_bindings_debug()
             if(reader.start().finish(values)) {
               // Call the binding function.
               if(!std_debug_print(values)) {
-                // Fail.
                 return Reference_Root::S_null();
               }
               // Return `true`.
@@ -75,11 +76,11 @@ D_object create_bindings_debug()
     ro.try_emplace(rocket::sref("dump"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.debug.dump(value, [indent_increment])`"
+        rocket::sref("`std.debug.dump(value, [indent])`"
                      "\n  * Prints the value to the standard error stream with detailed"
-                     "\n    information. `indent_increment` specifies the number of spaces"
-                     "\n    used as a single level of indent. Its value is clamped between"
-                     "\n    `0` and `10` inclusively. If it is set to `0`, no line break is"
+                     "\n    information. `indent` specifies the number of spaces to use as"
+                     "\n    a single level of indent. Its value is clamped between `0` and"
+                     "\n    `10` inclusively. If it is set to `0`, no line break is"
                      "\n    inserted and output lines are not indented. It has a default"
                      "\n    value of `2`."
                      "\n  * Returns `true` if the operation succeeds."),
@@ -89,11 +90,10 @@ D_object create_bindings_debug()
             Argument_Reader reader(rocket::sref("std.debug.dump"), args);
             // Parse arguments.
             Value value;
-            D_integer indent_increment = 2;
-            if(reader.start().opt(value).opt(indent_increment).finish()) {
+            Opt<D_integer> indent;
+            if(reader.start().g(value).g(indent).finish()) {
               // Call the binding function.
-              if(!std_debug_dump(value, indent_increment)) {
-                // Fail.
+              if(!std_debug_dump(value, indent)) {
                 return Reference_Root::S_null();
               }
               // Return `true`.

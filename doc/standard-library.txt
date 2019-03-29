@@ -7,12 +7,12 @@
 
 	* Returns `true` if the operation succeeds; otherwise `null`.
 
-`std.debug.dump(value, [indent_increment])`
+`std.debug.dump(value, [indent])`
 
 	* Prints the value to the standard error stream with detailed
-	  information. `indent_increment` specifies the number of spaces
-	  used as a single level of indent. Its value is clamped between
-	  `0` and `10` inclusively. If it is set to `0`, no line break is
+	  information. `indent` specifies the number of spaces to use as
+	  a single level of indent. Its value is clamped between `0` and
+	  `10` inclusively. If it is set to `0`, no line break is
 	  inserted and output lines are not indented. It has a default
 	  value of `2`.
 
@@ -113,7 +113,7 @@
 
 ### `std.string`
 
-`std.string.compare(text_one, text_two, [length])`
+`std.string.compare(text1, text2, [length])`
 
 	* Performs lexicographical comparison on two byte `string`s. If
 	  `length` is set to an `integer`, no more than this number of
@@ -121,9 +121,9 @@
 	  function in C, except that null characters do not terminate
 	  strings.
 
-	* Returns `1` if `text_one` compares greater than `text_two`,
-	  `-1` if `text_one` compares less than `text_two`, and `0` if
-	  `text_one` compares equal to `text_two`.
+	* Returns a positive `integer` if `text1` compares greater than
+	  `text2`, a negative `integer` if `text1` compares less than
+	  `text2`, or zero if `text1` compares equal to `text2`.
 
 `std.string.starts_with(text, prefix)`
 

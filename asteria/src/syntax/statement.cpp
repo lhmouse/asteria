@@ -338,7 +338,7 @@ namespace Asteria {
         auto range_ref = rocket::move(stack.open_top_reference());
         auto range_value = range_ref.read();
         // Iterate over the range.
-        switch(rocket::weaken_enum(range_value.type())) {
+        switch(rocket::weaken_enum(range_value.dtype())) {
         case dtype_array:
           {
             const auto& array = range_value.check<D_array>();
@@ -388,7 +388,7 @@ namespace Asteria {
             break;
           }
         default:
-          ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_type_name(range_value.type()), "`.");
+          ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_type_name(range_value.dtype()), "`.");
         }
         return Air_Node::status_next;
       }

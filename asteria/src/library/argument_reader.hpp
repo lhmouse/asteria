@@ -12,11 +12,10 @@ namespace Asteria {
 
 class Argument_Reader
   {
-  private:
+  public:
     // This opaque struct is used to encode function prototype parameters.
     struct Mparam;
 
-  public:
     struct State
       {
         Cow_Vector<Mparam> prototype;
@@ -55,11 +54,11 @@ class Argument_Reader
     inline void do_record_parameter_generic();
     inline void do_record_parameter_finish(bool variadic);
 
-    inline const Reference* do_peek_argument_opt(bool required);
-    inline Opt<std::size_t> do_check_finish_opt(bool variadic);
+    inline const Reference* do_peek_argument_opt() const;
+    inline Opt<std::size_t> do_check_finish_opt(bool variadic) const;
 
-    template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument_optional(typename Value::Xvariant::type_at<dtypeT>::type& xvalue);
-    template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument_required(typename Value::Xvariant::type_at<dtypeT>::type& xvalue);
+    template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument(Opt<typename Value::Xvariant::type_at<dtypeT>::type>& qxvalue);
+    template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument(typename Value::Xvariant::type_at<dtypeT>::type& xvalue);
 
   public:
     const Cow_String& get_name() const noexcept
@@ -103,31 +102,29 @@ class Argument_Reader
     // Start recording an overload.
     Argument_Reader& start() noexcept;
     // Get an OPTIONAL argument.
-    Argument_Reader& opt(Reference& ref);
-    Argument_Reader& opt(Value& value);
     // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
-    // If the argument is `null`, the operation succeeds without clobbering `xvalue`.
-    Argument_Reader& opt(D_boolean& xvalue);
-    Argument_Reader& opt(D_integer& xvalue);
-    Argument_Reader& opt(D_real& xvalue);
-    Argument_Reader& opt(D_string& xvalue);
-    Argument_Reader& opt(D_opaque& xvalue);
-    Argument_Reader& opt(D_function& xvalue);
-    Argument_Reader& opt(D_array& xvalue);
-    Argument_Reader& opt(D_object& xvalue);
+    Argument_Reader& g(Reference& ref);
+    Argument_Reader& g(Value& value);
+    Argument_Reader& g(Opt<D_boolean>& qxvalue);
+    Argument_Reader& g(Opt<D_integer>& qxvalue);
+    Argument_Reader& g(Opt<D_real>& qxvalue);
+    Argument_Reader& g(Opt<D_string>& qxvalue);
+    Argument_Reader& g(Opt<D_opaque>& qxvalue);
+    Argument_Reader& g(Opt<D_function>& qxvalue);
+    Argument_Reader& g(Opt<D_array>& qxvalue);
+    Argument_Reader& g(Opt<D_object>& qxvalue);
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise the operation fails.
-    // Particularly, if the argument is `null`, the operation fails.
-    Argument_Reader& req(D_boolean& xvalue);
-    Argument_Reader& req(D_integer& xvalue);
-    Argument_Reader& req(D_real& xvalue);
-    Argument_Reader& req(D_string& xvalue);
-    Argument_Reader& req(D_opaque& xvalue);
-    Argument_Reader& req(D_function& xvalue);
-    Argument_Reader& req(D_array& xvalue);
-    Argument_Reader& req(D_object& xvalue);
+    Argument_Reader& g(D_boolean& xvalue);
+    Argument_Reader& g(D_integer& xvalue);
+    Argument_Reader& g(D_real& xvalue);
+    Argument_Reader& g(D_string& xvalue);
+    Argument_Reader& g(D_opaque& xvalue);
+    Argument_Reader& g(D_function& xvalue);
+    Argument_Reader& g(D_array& xvalue);
+    Argument_Reader& g(D_object& xvalue);
     // Terminate the argument list and finish this overload.
-    // For the overload taking no arguments, if there are excess arguments, the operation fails.
+    // For the overload taking no argument, if there are excess arguments, the operation fails.
     // For the other overloads, excess arguments are copied into `vargs`.
     bool finish();
     bool finish(Cow_Vector<Reference>& vargs);

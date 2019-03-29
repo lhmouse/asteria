@@ -9,18 +9,15 @@
 
 namespace Asteria {
 
-D_integer std_string_compare(const D_string& text_one, const D_string& text_two, D_integer length)
+D_integer std_string_compare(const D_string& text1, const D_string& text2, const Opt<D_integer>& length)
   {
-    if(length <= 0) {
-      // No byte is to be compared.
-      return 0;
-    }
-    if(length >= PTRDIFF_MAX) {
+    if(!length || (*length > PTRDIFF_MAX)) {
       // Compare the entire strings.
-      return text_one.compare(text_two);
+      return text1.compare(text2);
     }
     // Compare two substrings.
-    return text_one.compare(0, static_cast<std::size_t>(length), text_two, 0, static_cast<std::size_t>(length));
+    auto rlen = static_cast<std::size_t>(*length);
+    return text1.compare(0, rlen, text2, 0, rlen);
   }
 
 D_boolean std_string_starts_with(const D_string& text, const D_string& prefix)
@@ -41,51 +38,81 @@ D_string std_string_reverse(const D_string& text)
 
     namespace {
 
-    std::pair<D_string::const_iterator, D_string::const_iterator> do_subrange(const D_string& text, D_integer from, D_integer length)
+    std::pair<D_string::const_iterator, D_string::const_iterator> do_subrange(const D_string& text, D_integer from, const Opt<D_integer>& length)
       {
-        if(length <= 0) {
+        if(length && (*length <= 0)) {
           // No byte is to be copied.
           return std::make_pair(text.begin(), text.begin());
         }
-        auto slen = static_cast<std::ptrdiff_t>(text.size());
+        auto ssize = static_cast<std::int64_t>(text.size());
         if(from >= 0) {
-          // This is the same as `std::string::substr()` except that no `std::out_of_range` is thrown.
-          if(from >= slen) {
-            // Return an empty string if `from` is out of range.
+          if(from >= ssize) {
+            // `from` is after the last byte.
             return std::make_pair(text.end(), text.end());
           }
-          return std::make_pair(text.begin() + from, text.begin() + from + rocket::min(length, slen - from));
+          if(!length) {
+            // Get the subrange from `from` to the end.
+            return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(from), text.end());
+          }
+          // Don't go after the end.
+          return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(from),
+                                text.begin() + static_cast<std::ptrdiff_t>(from + rocket::min(*length, ssize - from)));
         }
-        // Wrap `from` from the end of the string.
-        // Notice that when `from` is negative and `length` is positive, `from + length` cannot overflow.
-        auto to = from + length;
-        if(to <= -slen) {
-          // Return an empty string if `from` is out of range.
-          return std::make_pair(text.begin(), text.begin());
+        // Wrap `from` from the end.
+        // Notice that `from + ssize` will not overflow when `from` is negative and `ssize` is not.
+        auto rfrom = from + ssize;
+        if(rfrom >= 0) {
+          if(!length) {
+            // Get the subrange from `rfrom` to the end.
+            return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(rfrom), text.end());
+          }
+          // Don't go after the end.
+          return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(rfrom),
+                                text.begin() + static_cast<std::ptrdiff_t>(rfrom + rocket::min(*length, ssize - rfrom)));
         }
-        return std::make_pair(text.end() + rocket::max(from, -slen), text.end() + rocket::min(to, 0));
+        // `rfrom` is negative.
+        if(!length) {
+          // Return the entire string.
+          return std::make_pair(text.begin(), text.end());
+        }
+        // Get the subrange from the beginning to `rfrom + *length`.
+        // Notice that this will not result in overflow.
+        return std::make_pair(text.begin(),
+                              text.begin() + static_cast<std::ptrdiff_t>(rocket::max(rfrom + *length, 0)));
       }
 
     }
 
-D_string std_string_substr(const D_string& text, D_integer from, D_integer length)
+D_string std_string_substr(const D_string& text, D_integer from, const Opt<D_integer>& length)
   {
     auto range = do_subrange(text, from, length);
     return D_string(range.first, range.second);
   }
 
-D_string std_string_trim(const D_string& text, const D_string& reject)
+D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
   {
-    if(reject.empty()) {
-      // There is no byte to strip. Make use of reference counting.
-      return text;
+    const char* srej;
+    std::size_t nrej;
+    if(reject) {
+      if(reject->empty()) {
+        // There is no byte to strip. Make use of reference counting.
+        return text;
+      }
+      srej = reject->data();
+      nrej = reject->size();
+    } else {
+      // If `reject` is `null`, strip whitespaces.
+      srej = " \t";
+      nrej = 2;
     }
-    auto start = text.find_first_not_of(reject);
+    // Get the index of the first byte to keep.
+    auto start = text.find_first_not_of(srej, nrej);
     if(start == D_string::npos) {
       // There is no byte to keep. Return an empty string.
       return rocket::clear;
     }
-    auto end = text.find_last_not_of(reject);
+    // Get the index of the last byte to keep.
+    auto end = text.find_last_not_of(srej, nrej);
     if((start == 0) && (end == text.size() - 1)) {
       // There is no byte to strip. Make use of reference counting.
       return text;
@@ -94,13 +121,24 @@ D_string std_string_trim(const D_string& text, const D_string& reject)
     return text.substr(start, end + 1 - start);
   }
 
-D_string std_string_trim_left(const D_string& text, const D_string& reject)
+D_string std_string_trim_left(const D_string& text, const Opt<D_string>& reject)
   {
-    if(reject.empty()) {
-      // There is no byte to strip. Make use of reference counting.
-      return text;
+    const char* srej;
+    std::size_t nrej;
+    if(reject) {
+      if(reject->empty()) {
+        // There is no byte to strip. Make use of reference counting.
+        return text;
+      }
+      srej = reject->data();
+      nrej = reject->size();
+    } else {
+      // If `reject` is `null`, strip whitespaces.
+      srej = " \t";
+      nrej = 2;
     }
-    auto start = text.find_first_not_of(reject);
+    // Get the index of the first byte to keep.
+    auto start = text.find_first_not_of(srej, nrej);
     if(start == D_string::npos) {
       // There is no byte to keep. Return an empty string.
       return rocket::clear;
@@ -113,17 +151,24 @@ D_string std_string_trim_left(const D_string& text, const D_string& reject)
     return text.substr(start);
   }
 
-D_string std_string_trim_right(const D_string& text, const D_string& reject)
+D_string std_string_trim_right(const D_string& text, const Opt<D_string>& reject)
   {
-    if(reject.empty()) {
-      // There is no byte to strip. Make use of reference counting.
-      return text;
+    const char* srej;
+    std::size_t nrej;
+    if(reject) {
+      if(reject->empty()) {
+        // There is no byte to strip. Make use of reference counting.
+        return text;
+      }
+      srej = reject->data();
+      nrej = reject->size();
+    } else {
+      // If `reject` is `null`, strip whitespaces.
+      srej = " \t";
+      nrej = 2;
     }
-    auto end = text.find_last_not_of(reject);
-    if(end == D_string::npos) {
-      // There is no byte to keep. Return an empty string.
-      return rocket::clear;
-    }
+    // Get the index of the last byte to keep.
+    auto end = text.find_last_not_of(srej, nrej);
     if(end == text.size() - 1) {
       // There is no byte to strip. Make use of reference counting.
       return text;
@@ -172,7 +217,7 @@ D_string std_string_to_lower(const D_string& text)
     return res;
   }
 
-D_string std_string_translate(const D_string& text, const D_string& inputs, const D_string& outputs)
+D_string std_string_translate(const D_string& text, const D_string& inputs, const Opt<D_string>& outputs)
   {
     // Use reference counting as our advantage.
     D_string res = text;
@@ -188,28 +233,28 @@ D_string std_string_translate(const D_string& text, const D_string& inputs, cons
       if(ROCKET_UNEXPECT(!wptr)) {
         wptr = res.mut_data();
       }
-      if(ipos >= outputs.size()) {
+      if(!outputs || (ipos >= outputs->size())) {
         // Erase the byte if there is no replacement.
         // N.B. This must cause no reallocation.
         res.erase(i--, 1);
         continue;
       }
-      wptr[i] = outputs[ipos];
+      wptr[i] = outputs->data()[ipos];
     }
     return res;
   }
 
-D_array std_string_explode(const D_string& text, const D_string& delim, D_integer limit)
+D_array std_string_explode(const D_string& text, const Opt<D_string>& delim, const Opt<D_integer>& limit)
   {
-    if(limit <= 0) {
-      ASTERIA_THROW_RUNTIME_ERROR("The limit of number of segments must be greater than zero (got `", limit, "`).");
+    if(limit && (*limit <= 0)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The limit of number of segments must be greater than zero (got `", *limit, "`).");
     }
     D_array segments;
     if(text.empty()) {
       // Return an empty array.
       return segments;
     }
-    if(delim.empty()) {
+    if(!delim || delim->empty()) {
       // Split every byte.
       segments.reserve(text.size());
       rocket::for_each(text, [&](char ch) { segments.emplace_back(D_string(1, ch));  });
@@ -219,21 +264,21 @@ D_array std_string_explode(const D_string& text, const D_string& delim, D_intege
     std::size_t bpos = 0;
     std::size_t epos;
     for(;;) {
-      if(segments.size() >= static_cast<std::uint64_t>(limit - 1)) {
+      if(limit && (segments.size() >= static_cast<std::uint64_t>(*limit - 1))) {
         segments.emplace_back(text.substr(bpos));
         break;
       }
-      epos = text.find(delim, bpos);
+      epos = text.find(*delim, bpos);
       segments.emplace_back(text.substr(bpos, epos - bpos));
       if(epos == Cow_String::npos) {
         break;
       }
-      bpos = epos + delim.size();
+      bpos = epos + delim->size();
     }
     return segments;
   }
 
-D_string std_string_implode(const D_array& segments, const D_string& delim)
+D_string std_string_implode(const D_array& segments, const Opt<D_string>& delim)
   {
     D_string text;
     // Deal with nasty separators.
@@ -244,13 +289,15 @@ D_string std_string_implode(const D_array& segments, const D_string& delim)
         if(++rpos == segments.end()) {
           break;
         }
-        text += delim;
+        if(delim) {
+          text += *delim;
+        }
       }
     }
     return text;
   }
 
-D_string std_string_hex_encode(const D_string& text, const D_string& delim, D_boolean uppercase)
+D_string std_string_hex_encode(const D_string& text, const Opt<D_string>& delim, const Opt<D_boolean>& uppercase)
   {
     D_string hstr;
     auto rpos = text.begin();
@@ -258,17 +305,21 @@ D_string std_string_hex_encode(const D_string& text, const D_string& delim, D_bo
       // Return an empty string; no delimiter is added.
       return hstr;
     }
+    std::size_t ndcs = delim ? delim->size() : 0;
+    bool upc = uppercase.value_or(false);
     // Reserve storage for digits.
-    hstr.reserve(2 + (delim.size() + 2) * (text.size() - 1));
+    hstr.reserve(2 + (ndcs + 2) * (text.size() - 1));
     for(;;) {
       // Encode a byte.
       static constexpr char s_digits[] = "00112233445566778899aAbBcCdDeEfF";
-      hstr += s_digits[(*rpos & 0xF0) / 8 + uppercase];
-      hstr += s_digits[(*rpos & 0x0F) * 2 + uppercase];
+      hstr += s_digits[(*rpos & 0xF0) / 8 + upc];
+      hstr += s_digits[(*rpos & 0x0F) * 2 + upc];
       if(++rpos == text.end()) {
         break;
       }
-      hstr += delim;
+      if(delim) {
+        hstr += *delim;
+      }
     }
     return hstr;
   }
@@ -314,7 +365,7 @@ Opt<D_string> std_string_hex_decode(const D_string& hstr)
     return rocket::move(text);
   }
 
-Opt<D_string> std_string_utf8_encode(const D_array& code_points, D_boolean permissive)
+Opt<D_string> std_string_utf8_encode(const D_array& code_points, const Opt<D_boolean>& permissive)
   {
     D_string text;
     for(std::size_t i = 0; i < code_points.size(); ++i) {
@@ -322,7 +373,7 @@ Opt<D_string> std_string_utf8_encode(const D_array& code_points, D_boolean permi
       auto value = code_points[i].check<D_integer>();
       if(((0xD800 <= value) && (value < 0xE000)) || (0x110000 <= value)) {
         // Code point value is reserved or too large.
-        if(!permissive) {
+        if(permissive != true) {
           return rocket::nullopt;
         }
         // Replace it with the replacement character.
@@ -357,7 +408,7 @@ Opt<D_string> std_string_utf8_encode(const D_array& code_points, D_boolean permi
     return rocket::move(text);
   }
 
-Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
+Opt<D_array> std_string_utf8_decode(const D_string& text, const Opt<D_boolean>& permissive)
   {
     D_array code_points;
     for(std::size_t i = 0; i < text.size(); ++i) {
@@ -370,7 +421,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
       }
       if((cpnt < 0xC0) || (0xF8 <= cpnt)) {
         // This is not a leading character.
-        if(!permissive) {
+        if(permissive != true) {
           return rocket::nullopt;
         }
         // Re-interpret it as an isolated byte.
@@ -383,7 +434,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
       ROCKET_ASSERT(u8len <= 4);
       if(u8len > text.size() - i) {
         // No enough characters have been provided.
-        if(!permissive) {
+        if(permissive != true) {
           return rocket::nullopt;
         }
         // Re-interpret it as an isolated byte.
@@ -404,7 +455,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
       }
       if(k != u8len) {
         // An error has been encountered when parsing trailing characters.
-        if(!permissive) {
+        if(permissive != true) {
           return rocket::nullopt;
         }
         // Replace this character.
@@ -413,7 +464,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
       }
       if(((0xD800 <= cpnt) && (cpnt < 0xE000)) || (0x110000 <= cpnt)) {
         // Code point value is reserved or too large.
-        if(!permissive) {
+        if(permissive != true) {
           return rocket::nullopt;
         }
         // Replace this character.
@@ -424,7 +475,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
       auto mlen = static_cast<std::size_t>(1 + (cpnt >= 0x80) + (cpnt >= 0x800) + (cpnt >= 0x10000));
       if(mlen != u8len) {
         // Overlong sequences are not allowed.
-        if(!permissive) {
+        if(permissive != true) {
           return rocket::nullopt;
         }
         // Replace this character.
@@ -438,7 +489,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
 
     namespace {
 
-    template<typename IntegerT, bool bigendianT> D_string do_pack(const D_array& ints)
+    template<typename IntegerT, bool bigendT> D_string do_pack(const D_array& ints)
       {
         D_string text;
         // Define temporary storage.
@@ -447,7 +498,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
         // How many words will the result have?
         auto nwords = ints.size();
         if(nwords > text.max_size() / stor_le.size()) {
-          ASTERIA_THROW_RUNTIME_ERROR("The result string could not be allocated (attempting to allocate `", nwords, "` instances of size `", stor_le.size(), "`).");
+          ASTERIA_THROW_RUNTIME_ERROR("The result string could not be allocated (requesting `", nwords, "` instances of size `", stor_le.size(), "`).");
         }
         text.reserve(stor_le.size() * nwords);
         // Pack integers.
@@ -460,7 +511,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
             word >>= 8;
           }
           // Append this word.
-          if(bigendianT) {
+          if(bigendT) {
             text.append(stor_le.rbegin(), stor_le.rend());
           } else {
             text.append(stor_le.begin(), stor_le.end());
@@ -469,7 +520,7 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
         return text;
       }
 
-    template<typename IntegerT, bool bigendianT> D_array do_unpack(const D_string& text)
+    template<typename IntegerT, bool bigendT> D_array do_unpack(const D_string& text)
       {
         D_array ints;
         // Define temporary storage.
@@ -483,8 +534,8 @@ Opt<D_array> std_string_utf8_decode(const D_string& text, D_boolean permissive)
         ints.reserve(nwords);
         // Unpack integers.
         for(std::size_t i = 0; i < nwords; ++i) {
-          // Read some bytes in bit-endian order.
-          if(bigendianT) {
+          // Read some bytes in big-endian order.
+          if(bigendT) {
             std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.begin());
           } else {
             std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.rbegin());
@@ -586,20 +637,21 @@ D_object create_bindings_string()
                      "\n    `length` is set to an `integer`, no more than this number of"
                      "\n    bytes are compared. This function behaves like the `strncmp()`"
                      "\n    function in C, except that null characters do not terminate"
-                     "\n    strings."),
+                     "\n    strings."
+                     "\n  * Returns a positive `integer` if `text1` compares greater than"
+                     "\n    `text2`, a negative `integer` if `text1` compares less than"
+                     "\n    `text2`, or zero if `text1` compares equal to `text2`."),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.compare"), args);
             // Parse arguments.
-            D_string text_one;
-            D_string text_two;
-            D_integer length = INT64_MAX;
-            if(reader.start().req(text_one).req(text_two).opt(length).finish()) {
+            D_string text1;
+            D_string text2;
+            Opt<D_integer> length;
+            if(reader.start().g(text1).g(text2).g(length).finish()) {
               // Call the binding function.
-              auto cmp = std_string_compare(text_one, text_two, length);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { cmp };
+              Reference_Root::S_temporary xref = { std_string_compare(text1, text2, length) };
               return rocket::move(xref);
             }
             // Fail.
@@ -626,11 +678,9 @@ D_object create_bindings_string()
             // Parse arguments.
             D_string text;
             D_string prefix;
-            if(reader.start().req(text).req(prefix).finish()) {
+            if(reader.start().g(text).g(prefix).finish()) {
               // Call the binding function.
-              auto chk = std_string_starts_with(text, prefix);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(chk) };
+              Reference_Root::S_temporary xref = { std_string_starts_with(text, prefix) };
               return rocket::move(xref);
             }
             // Fail.
@@ -657,11 +707,9 @@ D_object create_bindings_string()
             // Parse arguments.
             D_string text;
             D_string suffix;
-            if(reader.start().req(text).req(suffix).finish()) {
+            if(reader.start().g(text).g(suffix).finish()) {
               // Call the binding function.
-              auto chk = std_string_ends_with(text, suffix);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(chk) };
+              Reference_Root::S_temporary xref = { std_string_ends_with(text, suffix) };
               return rocket::move(xref);
             }
             // Fail.
@@ -692,12 +740,10 @@ D_object create_bindings_string()
             // Parse arguments.
             D_string text;
             D_integer from;
-            D_integer length = INT64_MAX;
-            if(reader.start().req(text).req(from).opt(length).finish()) {
+            Opt<D_integer> length;
+            if(reader.start().g(text).g(from).g(length).finish()) {
               // Call the binding function.
-              auto res = std_string_substr(text, from, length);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_substr(text, from, length) };
               return rocket::move(xref);
             }
             // Fail.
@@ -722,11 +768,9 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.reverse"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto res = std_string_reverse(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_reverse(text) };
               return rocket::move(xref);
             }
             // Fail.
@@ -753,12 +797,10 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.trim"), args);
             // Parse arguments.
             D_string text;
-            D_string reject = rocket::sref(" \t");
-            if(reader.start().req(text).opt(reject).finish()) {
+            Opt<D_string> reject;
+            if(reader.start().g(text).g(reject).finish()) {
               // Call the binding function.
-              auto res = std_string_trim(text, reject);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_trim(text, reject) };
               return rocket::move(xref);
             }
             // Fail.
@@ -785,12 +827,10 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.trim_left"), args);
             // Parse arguments.
             D_string text;
-            D_string reject = rocket::sref(" \t");
-            if(reader.start().req(text).opt(reject).finish()) {
+            Opt<D_string> reject;
+            if(reader.start().g(text).g(reject).finish()) {
               // Call the binding function.
-              auto res = std_string_trim_left(text, reject);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_trim_left(text, reject) };
               return rocket::move(xref);
             }
             // Fail.
@@ -817,12 +857,10 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.trim_right"), args);
             // Parse arguments.
             D_string text;
-            D_string reject = rocket::sref(" \t");
-            if(reader.start().req(text).opt(reject).finish()) {
+            Opt<D_string> reject;
+            if(reader.start().g(text).g(reject).finish()) {
               // Call the binding function.
-              auto res = std_string_trim_right(text, reject);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_trim_right(text, reject) };
               return rocket::move(xref);
             }
             // Fail.
@@ -848,11 +886,9 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.to_upper"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto res = std_string_to_upper(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_to_upper(text) };
               return rocket::move(xref);
             }
             // Fail.
@@ -878,11 +914,9 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.to_lower"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto res = std_string_to_lower(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_to_lower(text) };
               return rocket::move(xref);
             }
             // Fail.
@@ -915,12 +949,10 @@ D_object create_bindings_string()
             // Parse arguments.
             D_string text;
             D_string inputs;
-            D_string outputs;
-            if(reader.start().req(text).req(inputs).opt(outputs).finish()) {
+            Opt<D_string> outputs;
+            if(reader.start().g(text).g(inputs).g(outputs).finish()) {
               // Call the binding function.
-              auto res = std_string_translate(text, inputs, outputs);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_translate(text, inputs, outputs) };
               return rocket::move(xref);
             }
             // Fail.
@@ -950,13 +982,11 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.explode"), args);
             // Parse arguments.
             D_string text;
-            D_string delim;
-            D_integer limit = INT64_MAX;
-            if(reader.start().req(text).opt(delim).opt(limit).finish()) {
+            Opt<D_string> delim;
+            Opt<D_integer> limit;
+            if(reader.start().g(text).g(delim).g(limit).finish()) {
               // Call the binding function.
-              auto res = std_string_explode(text, delim, limit);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_explode(text, delim, limit) };
               return rocket::move(xref);
             }
             // Fail.
@@ -983,12 +1013,10 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.implode"), args);
             // Parse arguments.
             D_array segments;
-            D_string delim;
-            if(reader.start().req(segments).opt(delim).finish()) {
+            Opt<D_string> delim;
+            if(reader.start().g(segments).g(delim).finish()) {
               // Call the binding function.
-              auto res = std_string_implode(segments, delim);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(res) };
+              Reference_Root::S_temporary xref = { std_string_implode(segments, delim) };
               return rocket::move(xref);
             }
             // Fail.
@@ -1017,13 +1045,11 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.hex_encode"), args);
             // Parse arguments.
             D_string text;
-            D_string delim;
-            D_boolean uppercase = false;
-            if(reader.start().req(text).opt(delim).opt(uppercase).finish()) {
+            Opt<D_string> delim;
+            Opt<D_boolean> uppercase;
+            if(reader.start().g(text).g(delim).g(uppercase).finish()) {
               // Call the binding function.
-              auto hstr = std_string_hex_encode(text, delim, uppercase);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(hstr) };
+              Reference_Root::S_temporary xref = { std_string_hex_encode(text, delim, uppercase) };
               return rocket::move(xref);
             }
             // Fail.
@@ -1051,13 +1077,12 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.hex_decode"), args);
             // Parse arguments.
             D_string hstr;
-            if(reader.start().req(hstr).finish()) {
+            if(reader.start().g(hstr).finish()) {
               // Call the binding function.
               auto qtext = std_string_hex_decode(hstr);
               if(!qtext) {
                 return Reference_Root::S_null();
               }
-              // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(*qtext) };
               return rocket::move(xref);
             }
@@ -1086,14 +1111,13 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.utf8_encode"), args);
             // Parse arguments.
             D_array code_points;
-            D_boolean permissive = false;
-            if(reader.start().req(code_points).opt(permissive).finish()) {
+            Opt<D_boolean> permissive;
+            if(reader.start().g(code_points).g(permissive).finish()) {
               // Call the binding function.
               auto qtext = std_string_utf8_encode(code_points, permissive);
               if(!qtext) {
                 return Reference_Root::S_null();
               }
-              // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(*qtext) };
               return rocket::move(xref);
             }
@@ -1124,14 +1148,13 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.utf8_decode"), args);
             // Parse arguments.
             D_string text;
-            D_boolean permissive = false;
-            if(reader.start().req(text).opt(permissive).finish()) {
+            Opt<D_boolean> permissive;
+            if(reader.start().g(text).g(permissive).finish()) {
               // Call the binding function.
               auto qres = std_string_utf8_decode(text, permissive);
               if(!qres) {
                 return Reference_Root::S_null();
               }
-              // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(*qres) };
               return rocket::move(xref);
             }
@@ -1158,7 +1181,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.pack_8"), args);
             // Parse arguments.
             D_array ints;
-            if(reader.start().req(ints).finish()) {
+            if(reader.start().g(ints).finish()) {
               // Call the binding function.
               auto text = std_string_pack_8(ints);
               // Forward the result.
@@ -1187,7 +1210,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.unpack_8"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
               auto ints = std_string_unpack_8(text);
               // Forward the result.
@@ -1217,7 +1240,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.pack_16be"), args);
             // Parse arguments.
             D_array ints;
-            if(reader.start().req(ints).finish()) {
+            if(reader.start().g(ints).finish()) {
               // Call the binding function.
               auto text = std_string_pack_16be(ints);
               // Forward the result.
@@ -1249,7 +1272,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.unpack_16be"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
               auto ints = std_string_unpack_16be(text);
               // Forward the result.
@@ -1280,7 +1303,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.pack_16le"), args);
             // Parse arguments.
             D_array ints;
-            if(reader.start().req(ints).finish()) {
+            if(reader.start().g(ints).finish()) {
               // Call the binding function.
               auto text = std_string_pack_16le(ints);
               // Forward the result.
@@ -1312,7 +1335,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.unpack_16le"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
               auto ints = std_string_unpack_16le(text);
               // Forward the result.
@@ -1342,7 +1365,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.pack_32be"), args);
             // Parse arguments.
             D_array ints;
-            if(reader.start().req(ints).finish()) {
+            if(reader.start().g(ints).finish()) {
               // Call the binding function.
               auto text = std_string_pack_32be(ints);
               // Forward the result.
@@ -1374,7 +1397,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.unpack_32be"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
               auto ints = std_string_unpack_32be(text);
               // Forward the result.
@@ -1405,7 +1428,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.pack_32le"), args);
             // Parse arguments.
             D_array ints;
-            if(reader.start().req(ints).finish()) {
+            if(reader.start().g(ints).finish()) {
               // Call the binding function.
               auto text = std_string_pack_32le(ints);
               // Forward the result.
@@ -1437,7 +1460,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.unpack_32le"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
               auto ints = std_string_unpack_32le(text);
               // Forward the result.
@@ -1467,7 +1490,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.pack_64be"), args);
             // Parse arguments.
             D_array ints;
-            if(reader.start().req(ints).finish()) {
+            if(reader.start().g(ints).finish()) {
               // Call the binding function.
               auto text = std_string_pack_64be(ints);
               // Forward the result.
@@ -1498,7 +1521,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.unpack_64be"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
               auto ints = std_string_unpack_64be(text);
               // Forward the result.
@@ -1528,7 +1551,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.pack_64le"), args);
             // Parse arguments.
             D_array ints;
-            if(reader.start().req(ints).finish()) {
+            if(reader.start().g(ints).finish()) {
               // Call the binding function.
               auto text = std_string_pack_64le(ints);
               // Forward the result.
@@ -1560,7 +1583,7 @@ D_object create_bindings_string()
             Argument_Reader reader(rocket::sref("std.string.unpack_64le"), args);
             // Parse arguments.
             D_string text;
-            if(reader.start().req(text).finish()) {
+            if(reader.start().g(text).finish()) {
               // Call the binding function.
               auto ints = std_string_unpack_64le(text);
               // Forward the result.

@@ -399,7 +399,7 @@ template<typename... alternativesT> class variant
     [[noreturn]] ROCKET_NOINLINE void do_throw_index_mismatch(size_t yindex, const type_info& ytype) const
       {
         noadl::sprintf_and_throw<invalid_argument>("variant: The index requested is `%ld` (`%s`), but the index currently active is `%ld` (`%s`).",
-                                                   static_cast<long>(yindex), ytype.name(), static_cast<long>(this->index()), this->type().name());
+                                                   static_cast<long>(yindex), ytype.name(), static_cast<long>(this->index()), this->dtype().name());
       }
 
   public:
@@ -409,7 +409,7 @@ template<typename... alternativesT> class variant
         ROCKET_ASSERT(this->m_index < type_size);
         return this->m_index;
       }
-    const type_info& type() const noexcept
+    const type_info& dtype() const noexcept
       {
         static const type_info* const s_table[] = { ::std::addressof(typeid(alternativesT))... };
         return variant::do_lookup(s_table, this->m_index);
