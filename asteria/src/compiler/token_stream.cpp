@@ -497,11 +497,15 @@ namespace Asteria {
             case 'U':
               {
                 xcnt += 2;  // 6: "\U123456"
-                // Fallthrough.
+              }
+              // Fallthrough.
             case 'u':
+              {
                 xcnt += 2;  // 4: "\u1234"
-                // Fallthrough.
+              }
+              // Fallthrough.
             case 'x':
+              {
                 xcnt += 2;  // 2: "\x12"
                 // Read hex digits.
                 if(qavail < xcnt + 2) {
