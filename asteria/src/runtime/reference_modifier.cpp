@@ -150,7 +150,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
               return D_null();
             }
             auto erased = rocket::move(arr.mut(w.rindex));
-            arr.erase(w.rindex);
+            arr.erase(w.rindex, 1);
             return rocket::move(erased);
           }
         default:
