@@ -618,7 +618,7 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("compare"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.compare(text_one, text_two, [length])`"
+        rocket::sref("`std.string.compare(text1, text2, [length])`"
                      "\n  * Performs lexicographical comparison on two byte `string`s. If"
                      "\n    `length` is set to an `integer`, no more than this number of"
                      "\n    bytes are compared. This function behaves like the `strncmp()`"
