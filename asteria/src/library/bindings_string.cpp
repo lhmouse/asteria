@@ -50,35 +50,21 @@ D_string std_string_reverse(const D_string& text)
             // `from` is after the last byte.
             return std::make_pair(text.end(), text.end());
           }
-          if(!length) {
-            // Get the subrange from `from` to the end.
-            return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(from), text.end());
-          }
-          // Don't go after the end.
+          // Get the subrange from `from` to the end.
           return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(from),
-                                text.begin() + static_cast<std::ptrdiff_t>(from + rocket::min(*length, ssize - from)));
+                                length ? (text.begin() + static_cast<std::ptrdiff_t>(from + rocket::min(*length, ssize - from))) : text.end());
         }
         // Wrap `from` from the end.
         // Notice that `from + ssize` will not overflow when `from` is negative and `ssize` is not.
         auto rfrom = from + ssize;
         if(rfrom >= 0) {
-          if(!length) {
-            // Get the subrange from `rfrom` to the end.
-            return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(rfrom), text.end());
-          }
-          // Don't go after the end.
+          // Get the subrange from `rfrom`.
           return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(rfrom),
-                                text.begin() + static_cast<std::ptrdiff_t>(rfrom + rocket::min(*length, ssize - rfrom)));
-        }
-        // `rfrom` is negative.
-        if(!length) {
-          // Return the entire string.
-          return std::make_pair(text.begin(), text.end());
+                                length ? (text.begin() + static_cast<std::ptrdiff_t>(rfrom + rocket::min(*length, ssize - rfrom))) : text.end());
         }
         // Get the subrange from the beginning to `rfrom + *length`.
-        // Notice that this will not result in overflow.
         return std::make_pair(text.begin(),
-                              text.begin() + static_cast<std::ptrdiff_t>(rocket::max(rfrom + *length, 0)));
+                              length ? (text.begin() + static_cast<std::ptrdiff_t>(rocket::max(rfrom + *length, 0))) : text.end());
       }
 
     }
