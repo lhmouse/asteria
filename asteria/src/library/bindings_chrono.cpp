@@ -104,7 +104,7 @@ D_integer std_chrono_steady_now()
 #endif
   }
 
-D_integer std_chrono_local_from_utc(D_integer time_utc)
+D_integer std_chrono_local_from_utc(const D_integer& time_utc)
   {
     // Handle special time values.
     if(time_utc <= -11644473600000) {
@@ -135,7 +135,7 @@ D_integer std_chrono_local_from_utc(D_integer time_utc)
     return time_local;
   }
 
-D_integer std_chrono_utc_from_local(D_integer time_local)
+D_integer std_chrono_utc_from_local(const D_integer& time_local)
   {
     // Handle special time values.
     if(time_local <= -11644473600000) {
@@ -166,7 +166,7 @@ D_integer std_chrono_utc_from_local(D_integer time_local)
     return time_utc;
   }
 
-D_string std_chrono_format_datetime(D_integer time_point, const Opt<D_boolean>& with_ms)
+D_string std_chrono_format_datetime(const D_integer& time_point, const Opt<D_boolean>& with_ms)
   {
     // Return strings that are allocated statically for special time point values.
     static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",

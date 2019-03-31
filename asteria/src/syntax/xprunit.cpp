@@ -153,27 +153,27 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
 
     namespace {
 
-    ROCKET_PURE_FUNCTION D_boolean do_operator_not(D_boolean rhs)
+    ROCKET_PURE_FUNCTION D_boolean do_operator_not(const D_boolean& rhs)
       {
         return !rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_boolean do_operator_and(D_boolean lhs, D_boolean rhs)
+    ROCKET_PURE_FUNCTION D_boolean do_operator_and(const D_boolean& lhs, const D_boolean& rhs)
       {
         return lhs & rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_boolean do_operator_or(D_boolean lhs, D_boolean rhs)
+    ROCKET_PURE_FUNCTION D_boolean do_operator_or(const D_boolean& lhs, const D_boolean& rhs)
       {
         return lhs | rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_boolean do_operator_xor(D_boolean lhs, D_boolean rhs)
+    ROCKET_PURE_FUNCTION D_boolean do_operator_xor(const D_boolean& lhs, const D_boolean& rhs)
       {
         return lhs ^ rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_neg(D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_neg(const D_integer& rhs)
       {
         if(rhs == INT64_MIN) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
@@ -181,7 +181,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return -rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_add(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_add(const D_integer& lhs, const D_integer& rhs)
       {
         if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -189,7 +189,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_sub(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_sub(const D_integer& lhs, const D_integer& rhs)
       {
         if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -197,7 +197,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_mul(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_mul(const D_integer& lhs, const D_integer& rhs)
       {
         if((lhs == 0) || (rhs == 0)) {
           return 0;
@@ -224,7 +224,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return slhs * arhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_div(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_div(const D_integer& lhs, const D_integer& rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -235,7 +235,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs / rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_mod(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_mod(const D_integer& lhs, const D_integer& rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -246,7 +246,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs % rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_sll(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_sll(const D_integer& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -257,7 +257,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) << rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_srl(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_srl(const D_integer& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -268,7 +268,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) >> rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_sla(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_sla(const D_integer& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -288,7 +288,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) << rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_sra(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_sra(const D_integer& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -299,102 +299,102 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs >> rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_not(D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_not(const D_integer& rhs)
       {
         return ~rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_and(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_and(const D_integer& lhs, const D_integer& rhs)
       {
         return lhs & rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_or(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_or(const D_integer& lhs, const D_integer& rhs)
       {
         return lhs | rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_xor(D_integer lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_integer do_operator_xor(const D_integer& lhs, const D_integer& rhs)
       {
         return lhs ^ rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_neg(D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_neg(const D_real& rhs)
       {
         return -rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_add(D_real lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_add(const D_real& lhs, const D_real& rhs)
       {
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_add(D_real lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_add(const D_real& lhs, const D_integer& rhs)
       {
         return lhs + static_cast<D_real>(rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_add(D_integer lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_add(const D_integer& lhs, const D_real& rhs)
       {
         return static_cast<D_real>(lhs) + rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_sub(D_real lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_real& lhs, const D_real& rhs)
       {
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_sub(D_real lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_real& lhs, const D_integer& rhs)
       {
         return lhs - static_cast<D_real>(rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_sub(D_integer lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_integer& lhs, const D_real& rhs)
       {
         return static_cast<D_real>(lhs) - rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mul(D_real lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_real& lhs, const D_real& rhs)
       {
         return lhs * rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mul(D_real lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_real& lhs, const D_integer& rhs)
       {
         return lhs * static_cast<D_real>(rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mul(D_integer lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_integer& lhs, const D_real& rhs)
       {
         return static_cast<D_real>(lhs) * rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_div(D_real lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_div(const D_real& lhs, const D_real& rhs)
       {
         return lhs / rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_div(D_real lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_div(const D_real& lhs, const D_integer& rhs)
       {
         return lhs / static_cast<D_real>(rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_div(D_integer lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_div(const D_integer& lhs, const D_real& rhs)
       {
         return static_cast<D_real>(lhs) / rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mod(D_real lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_mod(const D_real& lhs, const D_real& rhs)
       {
         return std::fmod(lhs, rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mod(D_real lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_mod(const D_real& lhs, const D_integer& rhs)
       {
         return std::fmod(lhs, rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mod(D_integer lhs, D_real rhs)
+    ROCKET_PURE_FUNCTION D_real do_operator_mod(const D_integer& lhs, const D_real& rhs)
       {
         return std::fmod(lhs, rhs);
       }
@@ -404,7 +404,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_mul(const D_string& lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_string do_operator_mul(const D_string& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
@@ -439,12 +439,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_mul(D_integer lhs, const D_string& rhs)
+    ROCKET_PURE_FUNCTION D_string do_operator_mul(const D_integer& lhs, const D_string& rhs)
       {
         return do_operator_mul(rhs, lhs);
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_sll(const D_string& lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_string do_operator_sll(const D_string& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -461,7 +461,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_srl(const D_string& lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_string do_operator_srl(const D_string& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -478,7 +478,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_sla(const D_string& lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_string do_operator_sla(const D_string& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -494,7 +494,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_sra(const D_string& lhs, D_integer rhs)
+    ROCKET_PURE_FUNCTION D_string do_operator_sra(const D_string& lhs, const D_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");

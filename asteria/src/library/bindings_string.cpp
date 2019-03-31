@@ -38,7 +38,7 @@ D_string std_string_reverse(const D_string& text)
 
     namespace {
 
-    std::pair<D_string::const_iterator, D_string::const_iterator> do_subrange(const D_string& text, D_integer from, const Opt<D_integer>& length)
+    std::pair<D_string::const_iterator, D_string::const_iterator> do_subrange(const D_string& text, const D_integer& from, const Opt<D_integer>& length)
       {
         if(length && (*length <= 0)) {
           // No byte is to be copied.
@@ -69,7 +69,7 @@ D_string std_string_reverse(const D_string& text)
 
     }
 
-D_string std_string_substr(const D_string& text, D_integer from, const Opt<D_integer>& length)
+D_string std_string_substr(const D_string& text, const D_integer& from, const Opt<D_integer>& length)
   {
     auto range = do_subrange(text, from, length);
     return D_string(range.first, range.second);
