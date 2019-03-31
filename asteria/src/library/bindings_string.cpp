@@ -255,10 +255,11 @@ D_array std_string_explode(const D_string& text, const Opt<D_string>& delim, con
         break;
       }
       epos = text.find(*delim, bpos);
-      segments.emplace_back(text.substr(bpos, epos - bpos));
       if(epos == Cow_String::npos) {
+        segments.emplace_back(text.substr(bpos));
         break;
       }
+      segments.emplace_back(text.substr(bpos, epos - bpos));
       bpos = epos + delim->size();
     }
     return segments;
