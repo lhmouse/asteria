@@ -619,15 +619,15 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("compare"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.compare(text1, text2, [length])`"
-                     "\n  * Performs lexicographical comparison on two byte `string`s. If"
-                     "\n    `length` is set to an `integer`, no more than this number of"
-                     "\n    bytes are compared. This function behaves like the `strncmp()`"
-                     "\n    function in C, except that null characters do not terminate"
-                     "\n    strings."
-                     "\n  * Returns a positive `integer` if `text1` compares greater than"
-                     "\n    `text2`, a negative `integer` if `text1` compares less than"
-                     "\n    `text2`, or zero if `text1` compares equal to `text2`."),
+        rocket::sref("`std.string.compare(text1, text2, [length])`\n"
+                     "  * Performs lexicographical comparison on two byte `string`s. If\n"
+                     "    `length` is set to an `integer`, no more than this number of\n"
+                     "    bytes are compared. This function behaves like the `strncmp()`\n"
+                     "    function in C, except that null characters do not terminate\n"
+                     "    strings.\n"
+                     "  * Returns a positive `integer` if `text1` compares greater than\n"
+                     "    `text2`, a negative `integer` if `text1` compares less than\n"
+                     "    `text2`, or zero if `text1` compares equal to `text2`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -653,11 +653,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("starts_with"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.starts_with(text, prefix)`"
-                     "\n  * Checks whether `prefix` is a prefix of `text`. The empty"
-                     "\n    `string` is considered to be a prefix of any string."
-                     "\n  * Returns `true` if `prefix` is a prefix of `text`; otherwise"
-                     "\n    `false`."),
+        rocket::sref("`std.string.starts_with(text, prefix)`\n"
+                     "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
+                     "    `string` is considered to be a prefix of any string.\n"
+                     "  * Returns `true` if `prefix` is a prefix of `text`; otherwise\n"
+                     "    `false`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -682,11 +682,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("ends_with"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.ends_with(text, suffix)`"
-                     "\n  * Checks whether `suffix` is a suffix of `text`. The empty"
-                     "\n    `string` is considered to be a suffix of any string."
-                     "\n  * Returns `true` if `suffix` is a suffix of `text`; otherwise"
-                     "\n    `false`."),
+        rocket::sref("`std.string.ends_with(text, suffix)`\n"
+                     "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
+                     "    `string` is considered to be a suffix of any string.\n"
+                     "  * Returns `true` if `suffix` is a suffix of `text`; otherwise\n"
+                     "    `false`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -711,15 +711,15 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("substr"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.substr(text, from, [length])`"
-                     "\n  * Copies a subrange of `text` to create a new byte string. Bytes"
-                     "\n    are copied from `from` if it is non-negative, and from"
-                     "\n    `lengthof(text) + from` otherwise. If `length` is set to an"
-                     "\n    `integer`, no more than this number of bytes will be copied. If"
-                     "\n    it is absent, all bytes from `from` to the end of `text` will"
-                     "\n    be copied. If `from` is outside `text`, an empty `string` is"
-                     "\n    returned."
-                     "\n  * Returns the specified substring of `text`."),
+        rocket::sref("`std.string.substr(text, from, [length])`\n"
+                     "  * Copies a subrange of `text` to create a new byte string. Bytes\n"
+                     "    are copied from `from` if it is non-negative, and from\n"
+                     "    `lengthof(text) + from` otherwise. If `length` is set to an\n"
+                     "    `integer`, no more than this number of bytes will be copied. If\n"
+                     "    it is absent, all bytes from `from` to the end of `text` will\n"
+                     "    be copied. If `from` is outside `text`, an empty `string` is\n"
+                     "    returned.\n"
+                     "  * Returns the specified substring of `text`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -745,10 +745,10 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("reverse"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.reverse(text)`"
-                     "\n  * Reverses a byte `string`. This function returns a new `string`"
-                     "\n    without modifying `text`."
-                     "\n  * Returns the reversed `string`."),
+        rocket::sref("`std.string.reverse(text)`\n"
+                     "  * Reverses a byte `string`. This function returns a new `string`\n"
+                     "    without modifying `text`.\n"
+                     "  * Returns the reversed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -772,12 +772,12 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("trim"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.trim(text, [reject])`"
-                     "\n  * Removes the longest prefix and suffix consisting solely bytes"
-                     "\n    from `reject`. If `reject` is empty, no byte is removed. If"
-                     "\n    `reject` is not specified, spaces and tabs are removed. This"
-                     "\n    function returns a new `string` without modifying `text`."
-                     "\n  * Returns the trimmed `string`."),
+        rocket::sref("`std.string.trim(text, [reject])`\n"
+                     "  * Removes the longest prefix and suffix consisting solely bytes\n"
+                     "    from `reject`. If `reject` is empty, no byte is removed. If\n"
+                     "    `reject` is not specified, spaces and tabs are removed. This\n"
+                     "    function returns a new `string` without modifying `text`.\n"
+                     "  * Returns the trimmed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -802,12 +802,12 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("trim_left"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.trim_left(text, [reject])`"
-                     "\n  * Removes the longest prefix consisting solely bytes from"
-                     "\n    `reject`. If `reject` is empty, no byte is removed. If `reject`"
-                     "\n    is not specified, spaces and tabs are removed. This function"
-                     "\n    returns a new `string` without modifying `text`."
-                     "\n  * Returns the trimmed `string`."),
+        rocket::sref("`std.string.trim_left(text, [reject])`\n"
+                     "  * Removes the longest prefix consisting solely bytes from\n"
+                     "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
+                     "    is not specified, spaces and tabs are removed. This function\n"
+                     "    returns a new `string` without modifying `text`.\n"
+                     "  * Returns the trimmed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -832,12 +832,12 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("trim_right"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.trim_right(text, [reject])`"
-                     "\n  * Removes the longest suffix consisting solely bytes from"
-                     "\n    `reject`. If `reject` is empty, no byte is removed. If `reject`"
-                     "\n    is not specified, spaces and tabs are removed. This function"
-                     "\n    returns a new `string` without modifying `text`."
-                     "\n  * Returns the trimmed `string`."),
+        rocket::sref("`std.string.trim_right(text, [reject])`\n"
+                     "  * Removes the longest suffix consisting solely bytes from\n"
+                     "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
+                     "    is not specified, spaces and tabs are removed. This function\n"
+                     "    returns a new `string` without modifying `text`.\n"
+                     "  * Returns the trimmed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -862,11 +862,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("to_upper"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.to_upper(text)`"
-                     "\n  * Converts all lowercase English letters in `text` to their"
-                     "\n    uppercase counterparts. This function returns a new `string`"
-                     "\n    without modifying `text`."
-                     "\n  * Returns a new `string` after the conversion."),
+        rocket::sref("`std.string.to_upper(text)`\n"
+                     "  * Converts all lowercase English letters in `text` to their\n"
+                     "    uppercase counterparts. This function returns a new `string`\n"
+                     "    without modifying `text`.\n"
+                     "  * Returns a new `string` after the conversion.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -890,11 +890,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("to_lower"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.to_lower(text)`"
-                     "\n  * Converts all lowercase English letters in `text` to their"
-                     "\n    uppercase counterparts. This function returns a new `string`"
-                     "\n    without modifying `text`."
-                     "\n  * Returns a new `string` after the conversion."),
+        rocket::sref("`std.string.to_lower(text)`\n"
+                     "  * Converts all lowercase English letters in `text` to their\n"
+                     "    uppercase counterparts. This function returns a new `string`\n"
+                     "    without modifying `text`.\n"
+                     "  * Returns a new `string` after the conversion.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -918,17 +918,17 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("translate"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("``std.string.translate(text, inputs, [outputs])`"
-                     "\n  * Performs bytewise translation on the given string. For every"
-                     "\n    byte in `text` that is also found in `inputs`, if there is a"
-                     "\n    corresponding replacement byte in `outputs` with the same"
-                     "\n    subscript, it is replaced with the latter; if no replacement"
-                     "\n    exists, because `outputs` is shorter than `inputs` or is null,"
-                     "\n    it is deleted. If `outputs` is longer than `inputs`, excess"
-                     "\n    bytes are ignored. Bytes that do not exist in `inputs` are left"
-                     "\n    intact. This function returns a new `string` without modifying"
-                     "\n    `text`."
-                     "\n  * Returns the translated `string`."),
+        rocket::sref("``std.string.translate(text, inputs, [outputs])`\n"
+                     "  * Performs bytewise translation on the given string. For every\n"
+                     "    byte in `text` that is also found in `inputs`, if there is a\n"
+                     "    corresponding replacement byte in `outputs` with the same\n"
+                     "    subscript, it is replaced with the latter; if no replacement\n"
+                     "    exists, because `outputs` is shorter than `inputs` or is null,\n"
+                     "    it is deleted. If `outputs` is longer than `inputs`, excess\n"
+                     "    bytes are ignored. Bytes that do not exist in `inputs` are left\n"
+                     "    intact. This function returns a new `string` without modifying\n"
+                     "    `text`.\n"
+                     "  * Returns the translated `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -954,15 +954,15 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("explode"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.explode(text, [delim], [limit])`"
-                     "\n  * Breaks `text` down into segments, separated by `delim`. If"
-                     "\n    `delim` is `null` or an empty `string`, every byte becomes a"
-                     "\n    segment. If `limit` is set to a positive `integer`, there will"
-                     "\n    be no more segments than this number; the last segment will"
-                     "\n    contain all the remaining bytes of the `text`."
-                     "\n  * Returns an `array` containing the broken-down segments. If"
-                     "\n    `text` is empty, an empty `array` is returned."
-                     "\n  * Throws an exception if `limit` is zero or negative."),
+        rocket::sref("`std.string.explode(text, [delim], [limit])`\n"
+                     "  * Breaks `text` down into segments, separated by `delim`. If\n"
+                     "    `delim` is `null` or an empty `string`, every byte becomes a\n"
+                     "    segment. If `limit` is set to a positive `integer`, there will\n"
+                     "    be no more segments than this number; the last segment will\n"
+                     "    contain all the remaining bytes of the `text`.\n"
+                     "  * Returns an `array` containing the broken-down segments. If\n"
+                     "    `text` is empty, an empty `array` is returned.\n"
+                     "  * Throws an exception if `limit` is zero or negative.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -988,12 +988,12 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("implode"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.implode(segments, [delim])`"
-                     "\n  * Concatenates elements of an array, `segments`, to create a new"
-                     "\n    `string`. All segments shall be `string`s. If `delim` is"
-                     "\n    specified, it is inserted between adjacent segments."
-                     "\n  * Returns a `string` containing all segments. If `segments` is"
-                     "\n    empty, an empty `string` is returned."),
+        rocket::sref("`std.string.implode(segments, [delim])`\n"
+                     "  * Concatenates elements of an array, `segments`, to create a new\n"
+                     "    `string`. All segments shall be `string`s. If `delim` is\n"
+                     "    specified, it is inserted between adjacent segments.\n"
+                     "  * Returns a `string` containing all segments. If `segments` is\n"
+                     "    empty, an empty `string` is returned.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1018,14 +1018,14 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("hex_encode"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.hex_encode(text, [delim], [uppercase])`"
-                     "\n  * Encodes all bytes in `text` as 2-digit hexadecimal numbers and"
-                     "\n    concatenates them. If `delim` is specified, it is inserted"
-                     "\n    between adjacent bytes. If `uppercase` is set to `true`,"
-                     "\n    hexadecimal digits above `9` are encoded as `ABCDEF`; otherwise"
-                     "\n    they are encoded as `abcdef`."
-                     "\n  * Returns the encoded `string`. If `text` is empty, an empty"
-                     "\n    `string` is returned."),
+        rocket::sref("`std.string.hex_encode(text, [delim], [uppercase])`\n"
+                     "  * Encodes all bytes in `text` as 2-digit hexadecimal numbers and\n"
+                     "    concatenates them. If `delim` is specified, it is inserted\n"
+                     "    between adjacent bytes. If `uppercase` is set to `true`,\n"
+                     "    hexadecimal digits above `9` are encoded as `ABCDEF`; otherwise\n"
+                     "    they are encoded as `abcdef`.\n"
+                     "  * Returns the encoded `string`. If `text` is empty, an empty\n"
+                     "    `string` is returned.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1051,13 +1051,13 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("hex_decode"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.hex_decode(hstr)`"
-                     "\n  * Decodes all hexadecimal digits from `hstr` and converts them to"
-                     "\n    bytes. Whitespaces are ignored. Characters that are neither"
-                     "\n    hexadecimal digits nor whitespaces will cause parse errors."
-                     "\n  * Returns a `string` containing decoded bytes. If `hstr` is empty"
-                     "\n    or consists only whitespaces, an empty `string` is returned. In"
-                     "\n    the case of parse errors, `null` is returned."),
+        rocket::sref("`std.string.hex_decode(hstr)`\n"
+                     "  * Decodes all hexadecimal digits from `hstr` and converts them to\n"
+                     "    bytes. Whitespaces are ignored. Characters that are neither\n"
+                     "    hexadecimal digits nor whitespaces will cause parse errors.\n"
+                     "  * Returns a `string` containing decoded bytes. If `hstr` is empty\n"
+                     "    or consists only whitespaces, an empty `string` is returned. In\n"
+                     "    the case of parse errors, `null` is returned.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1085,13 +1085,13 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("utf8_encode"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.utf8_encode(code_points, [permissive])`"
-                     "\n  * Encodes code points from `code_points` into an UTF-8 `string`."
-                     "\n    Code points shall be `integer`s. When an invalid code point is"
-                     "\n    encountered, if `permissive` is set to `true`, it is replaced"
-                     "\n    with the replacement character `\"\\uFFFD\"` and consequently"
-                     "\n    encoded as `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails."
-                     "\n  * Returns the encoded `string` on success; otherwise `null`."),
+        rocket::sref("`std.string.utf8_encode(code_points, [permissive])`\n"
+                     "  * Encodes code points from `code_points` into an UTF-8 `string`.\n"
+                     "    Code points shall be `integer`s. When an invalid code point is\n"
+                     "    encountered, if `permissive` is set to `true`, it is replaced\n"
+                     "    with the replacement character `\"\\uFFFD\"` and consequently\n"
+                     "    encoded as `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
+                     "  * Returns the encoded `string` on success; otherwise `null`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1120,15 +1120,15 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("utf8_decode"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.utf8_decode(text, [permissive])`"
-                     "\n  * Decodes `text`, which is expected to be a `string` containing"
-                     "\n    UTF-8 code units, into an `array` of code points, represented"
-                     "\n    as `integer`s. When an invalid code sequence is encountered, if"
-                     "\n    `permissive` is set to `true`, all code units of it are"
-                     "\n    re-interpreted as isolated bytes according to ISO/IEC 8859-1;"
-                     "\n    otherwise this function fails."
-                     "\n  * Returns an `array` containing decoded code points; otherwise"
-                     "\n    `null`."),
+        rocket::sref("`std.string.utf8_decode(text, [permissive])`\n"
+                     "  * Decodes `text`, which is expected to be a `string` containing\n"
+                     "    UTF-8 code units, into an `array` of code points, represented\n"
+                     "    as `integer`s. When an invalid code sequence is encountered, if\n"
+                     "    `permissive` is set to `true`, all code units of it are\n"
+                     "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
+                     "    otherwise this function fails.\n"
+                     "  * Returns an `array` containing decoded code points; otherwise\n"
+                     "    `null`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1157,11 +1157,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("pack_8"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.pack_8(ints)`"
-                     "\n  * Packs a series of 8-bit integers into a `string`. `ints` shall"
-                     "\n    be an `array` of `integer`s, all of which are truncated to 8"
-                     "\n    bits then copied into a `string`."
-                     "\n  * Returns the packed `string`."),
+        rocket::sref("`std.string.pack_8(ints)`\n"
+                     "  * Packs a series of 8-bit integers into a `string`. `ints` shall\n"
+                     "    be an `array` of `integer`s, all of which are truncated to 8\n"
+                     "    bits then copied into a `string`.\n"
+                     "  * Returns the packed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1186,11 +1186,11 @@ D_object create_bindings_string()
     //===================================================================
     ro.try_emplace(rocket::sref("unpack_8"),
       D_function(make_simple_binding(
-        rocket::sref("`std.string.unpack_8(text)`"
-                     "\n  * Unpacks 8-bit integers from a `string`. The contents of `text`"
-                     "\n    are re-interpreted as contiguous signed 8-bit integers, all of"
-                     "\n    which are sign-extended to 64 bits then copied into an `array`."
-                     "\n  * Returns an `array` containing unpacked integers."),
+        rocket::sref("`std.string.unpack_8(text)`\n"
+                     "  * Unpacks 8-bit integers from a `string`. The contents of `text`\n"
+                     "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
+                     "    which are sign-extended to 64 bits then copied into an `array`.\n"
+                     "  * Returns an `array` containing unpacked integers.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1216,11 +1216,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("pack_16be"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.pack_16be(ints)`"
-                     "\n  * Packs a series of 16-bit integers into a `string`. `ints` shall"
-                     "\n    be an `array` of `integer`s, all of which are truncated to 16"
-                     "\n    bits then copied into a `string` in the big-endian byte order."
-                     "\n  * Returns the packed `string`."),
+        rocket::sref("`std.string.pack_16be(ints)`\n"
+                     "  * Packs a series of 16-bit integers into a `string`. `ints` shall\n"
+                     "    be an `array` of `integer`s, all of which are truncated to 16\n"
+                     "    bits then copied into a `string` in the big-endian byte order.\n"
+                     "  * Returns the packed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1245,14 +1245,14 @@ D_object create_bindings_string()
     //===================================================================
     ro.try_emplace(rocket::sref("unpack_16be"),
       D_function(make_simple_binding(
-        rocket::sref("`std.string.unpack_16be(text)`"
-                     "\n  * Unpacks 16-bit integers from a `string`. The contents of `text`"
-                     "\n    are re-interpreted as contiguous signed 16-bit integers in the"
-                     "\n    big-endian byte order, all of which are sign-extended to 64"
-                     "\n    bits then copied into an `array`."
-                     "\n  * Returns an `array` containing unpacked integers."
-                     "\n  * Throws an exception if the length of `text` is not a multiple"
-                     "\n    of 2."),
+        rocket::sref("`std.string.unpack_16be(text)`\n"
+                     "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
+                     "    are re-interpreted as contiguous signed 16-bit integers in the\n"
+                     "    big-endian byte order, all of which are sign-extended to 64\n"
+                     "    bits then copied into an `array`.\n"
+                     "  * Returns an `array` containing unpacked integers.\n"
+                     "  * Throws an exception if the length of `text` is not a multiple\n"
+                     "    of 2.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1278,12 +1278,12 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("pack_16le"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.pack_16le(ints)`"
-                     "\n  * Packs a series of 16-bit integers into a `string`. `ints` shall"
-                     "\n    be an `array` of `integer`s, all of which are truncated to 16"
-                     "\n    bits then copied into a `string` in the little-endian byte"
-                     "\n    order."
-                     "\n  * Returns the packed `string`."),
+        rocket::sref("`std.string.pack_16le(ints)`\n"
+                     "  * Packs a series of 16-bit integers into a `string`. `ints` shall\n"
+                     "    be an `array` of `integer`s, all of which are truncated to 16\n"
+                     "    bits then copied into a `string` in the little-endian byte\n"
+                     "    order.\n"
+                     "  * Returns the packed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1308,14 +1308,14 @@ D_object create_bindings_string()
     //===================================================================
     ro.try_emplace(rocket::sref("unpack_16le"),
       D_function(make_simple_binding(
-        rocket::sref("`std.string.unpack_16le(text)`"
-                     "\n  * Unpacks 16-bit integers from a `string`. The contents of `text`"
-                     "\n    are re-interpreted as contiguous signed 16-bit integers in the"
-                     "\n    little-endian byte order, all of which are sign-extended to 64"
-                     "\n    bits then copied into an `array`."
-                     "\n  * Returns an `array` containing unpacked integers."
-                     "\n  * Throws an exception if the length of `text` is not a multiple"
-                     "\n    of 2."),
+        rocket::sref("`std.string.unpack_16le(text)`\n"
+                     "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
+                     "    are re-interpreted as contiguous signed 16-bit integers in the\n"
+                     "    little-endian byte order, all of which are sign-extended to 64\n"
+                     "    bits then copied into an `array`.\n"
+                     "  * Returns an `array` containing unpacked integers.\n"
+                     "  * Throws an exception if the length of `text` is not a multiple\n"
+                     "    of 2.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1341,11 +1341,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("pack_32be"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.pack_32be(ints)`"
-                     "\n  * Packs a series of 32-bit integers into a `string`. `ints` shall"
-                     "\n    be an `array` of `integer`s, all of which are truncated to 32"
-                     "\n    bits then copied into a `string` in the big-endian byte order."
-                     "\n  * Returns the packed `string`."),
+        rocket::sref("`std.string.pack_32be(ints)`\n"
+                     "  * Packs a series of 32-bit integers into a `string`. `ints` shall\n"
+                     "    be an `array` of `integer`s, all of which are truncated to 32\n"
+                     "    bits then copied into a `string` in the big-endian byte order.\n"
+                     "  * Returns the packed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1370,14 +1370,14 @@ D_object create_bindings_string()
     //===================================================================
     ro.try_emplace(rocket::sref("unpack_32be"),
       D_function(make_simple_binding(
-        rocket::sref("`std.string.unpack_32be(text)`"
-                     "\n  * Unpacks 32-bit integers from a `string`. The contents of `text`"
-                     "\n    are re-interpreted as contiguous signed 32-bit integers in the"
-                     "\n    big-endian byte order, all of which are sign-extended to 64"
-                     "\n    bits then copied into an `array`."
-                     "\n  * Returns an `array` containing unpacked integers."
-                     "\n  * Throws an exception if the length of `text` is not a multiple"
-                     "\n    of 4."),
+        rocket::sref("`std.string.unpack_32be(text)`\n"
+                     "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
+                     "    are re-interpreted as contiguous signed 32-bit integers in the\n"
+                     "    big-endian byte order, all of which are sign-extended to 64\n"
+                     "    bits then copied into an `array`.\n"
+                     "  * Returns an `array` containing unpacked integers.\n"
+                     "  * Throws an exception if the length of `text` is not a multiple\n"
+                     "    of 4.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1403,12 +1403,12 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("pack_32le"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.pack_32le(ints)`"
-                     "\n  * Packs a series of 32-bit integers into a `string`. `ints` shall"
-                     "\n    be an `array` of `integer`s, all of which are truncated to 32"
-                     "\n    bits then copied into a `string` in the little-endian byte"
-                     "\n    order."
-                     "\n  * Returns the packed `string`."),
+        rocket::sref("`std.string.pack_32le(ints)`\n"
+                     "  * Packs a series of 32-bit integers into a `string`. `ints` shall\n"
+                     "    be an `array` of `integer`s, all of which are truncated to 32\n"
+                     "    bits then copied into a `string` in the little-endian byte\n"
+                     "    order.\n"
+                     "  * Returns the packed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1433,14 +1433,14 @@ D_object create_bindings_string()
     //===================================================================
     ro.try_emplace(rocket::sref("unpack_32le"),
       D_function(make_simple_binding(
-        rocket::sref("`std.string.unpack_32le(text)`"
-                     "\n  * Unpacks 32-bit integers from a `string`. The contents of `text`"
-                     "\n    are re-interpreted as contiguous signed 32-bit integers in the"
-                     "\n    little-endian byte order, all of which are sign-extended to 64"
-                     "\n    bits then copied into an `array`."
-                     "\n  * Returns an `array` containing unpacked integers."
-                     "\n  * Throws an exception if the length of `text` is not a multiple"
-                     "\n    of 4."),
+        rocket::sref("`std.string.unpack_32le(text)`\n"
+                     "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
+                     "    are re-interpreted as contiguous signed 32-bit integers in the\n"
+                     "    little-endian byte order, all of which are sign-extended to 64\n"
+                     "    bits then copied into an `array`.\n"
+                     "  * Returns an `array` containing unpacked integers.\n"
+                     "  * Throws an exception if the length of `text` is not a multiple\n"
+                     "    of 4.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1466,11 +1466,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("pack_64be"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.pack_64be(ints)`"
-                     "\n  * Packs a series of 64-bit integers into a `string`. `ints` shall"
-                     "\n    be an `array` of `integer`s, all of which are copied into a"
-                     "\n    `string` in the big-endian byte order."
-                     "\n  * Returns the packed `string`."),
+        rocket::sref("`std.string.pack_64be(ints)`\n"
+                     "  * Packs a series of 64-bit integers into a `string`. `ints` shall\n"
+                     "    be an `array` of `integer`s, all of which are copied into a\n"
+                     "    `string` in the big-endian byte order.\n"
+                     "  * Returns the packed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1495,13 +1495,13 @@ D_object create_bindings_string()
     //===================================================================
     ro.try_emplace(rocket::sref("unpack_64be"),
       D_function(make_simple_binding(
-        rocket::sref("`std.string.unpack_64be(text)`"
-                     "\n  * Unpacks 64-bit integers from a `string`. The contents of `text`"
-                     "\n    are re-interpreted as contiguous signed 64-bit integers in the"
-                     "\n    big-endian byte order, all of which are copied into an `array`."
-                     "\n  * Returns an `array` containing unpacked integers."
-                     "\n  * Throws an exception if the length of `text` is not a multiple"
-                     "\n    of 8."),
+        rocket::sref("`std.string.unpack_64be(text)`\n"
+                     "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
+                     "    are re-interpreted as contiguous signed 64-bit integers in the\n"
+                     "    big-endian byte order, all of which are copied into an `array`.\n"
+                     "  * Returns an `array` containing unpacked integers.\n"
+                     "  * Throws an exception if the length of `text` is not a multiple\n"
+                     "    of 8.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1527,11 +1527,11 @@ D_object create_bindings_string()
     ro.try_emplace(rocket::sref("pack_64le"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.pack_64le(ints)`"
-                     "\n  * Packs a series of 64-bit integers into a `string`. `ints` shall"
-                     "\n    be an `array` of `integer`s, all of which are copied into a"
-                     "\n    `string` in the little-endian byte order."
-                     "\n  * Returns the packed `string`."),
+        rocket::sref("`std.string.pack_64le(ints)`\n"
+                     "  * Packs a series of 64-bit integers into a `string`. `ints` shall\n"
+                     "    be an `array` of `integer`s, all of which are copied into a\n"
+                     "    `string` in the little-endian byte order.\n"
+                     "  * Returns the packed `string`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1556,14 +1556,14 @@ D_object create_bindings_string()
     //===================================================================
     ro.try_emplace(rocket::sref("unpack_64le"),
       D_function(make_simple_binding(
-        rocket::sref("`std.string.unpack_64le(text)`"
-                     "\n  * Unpacks 64-bit integers from a `string`. The contents of `text`"
-                     "\n    are re-interpreted as contiguous signed 64-bit integers in the"
-                     "\n    little-endian byte order, all of which are copied into an"
-                     "\n    `array`."
-                     "\n  * Returns an `array` containing unpacked integers."
-                     "\n  * Throws an exception if the length of `text` is not a multiple"
-                     "\n    of 8."),
+        rocket::sref("`std.string.unpack_64le(text)`\n"
+                     "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
+                     "    are re-interpreted as contiguous signed 64-bit integers in the\n"
+                     "    little-endian byte order, all of which are copied into an\n"
+                     "    `array`.\n"
+                     "  * Returns an `array` containing unpacked integers.\n"
+                     "  * Throws an exception if the length of `text` is not a multiple\n"
+                     "    of 8.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
