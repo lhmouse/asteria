@@ -13,6 +13,9 @@ extern D_boolean std_string_starts_with(const D_string& text, const D_string& pr
 extern D_boolean std_string_ends_with(const D_string& text, const D_string& suffix);
 
 extern D_string std_string_substr(const D_string& text, const D_integer& from, const Opt<D_integer>& length = rocket::nullopt);
+extern D_string std_string_replace(const D_string& text, const D_integer& from, const D_string& replacement);
+extern D_string std_string_replace(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& replacement);
+
 extern D_string std_string_reverse(const D_string& text);
 extern D_string std_string_trim(const D_string& text, const Opt<D_string>& reject = rocket::nullopt);
 extern D_string std_string_trim_left(const D_string& text, const Opt<D_string>& reject = rocket::nullopt);

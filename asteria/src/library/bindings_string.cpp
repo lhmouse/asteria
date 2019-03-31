@@ -94,6 +94,24 @@ D_string std_string_substr(const D_string& text, const D_integer& from, const Op
     return res;
   }
 
+D_string std_string_replace(const D_string& text, const D_integer& from, const D_string& replacement)
+  {
+    D_string res;
+    res.assign(text);
+    auto range = do_subrange(res, from, rocket::nullopt);
+    res.replace(range.first, range.second, replacement);
+    return res;
+  }
+
+D_string std_string_replace(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& replacement)
+  {
+    D_string res;
+    res.assign(text);
+    auto range = do_subrange(res, from, length);
+    res.replace(range.first, range.second, replacement);
+    return res;
+  }
+
 D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
   {
     const char* srej;
@@ -750,6 +768,53 @@ D_object create_bindings_string()
             if(reader.start().g(text).g(from).g(length).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_substr(text, from, length) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.replace()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("replace"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.replace(text, from, replacement)`\n"
+                     "  * Replaces all bytes from `from` to the end of `text` with\n"
+                     "    `replacement` and returns the new byte string. If `from` is\n"
+                     "    negative, it specifies an offset from the end of `text`. This\n"
+                     "    function returns a new `string` without modifying `text`.\n"
+                     "  * Returns a `string` with the subrange replaced.\n"
+                     "`std.string.replace(text, from, [length], replacement)`\n"
+                     "  * Replaces all bytes from `from` to the end of `text` with\n"
+                     "    `replacement` and returns the new byte string. If `from` is\n"
+                     "    negative, it specifies an offset from the end of `text`. If\n"
+                     "    `length` is set to an `integer`, no more than this number of\n"
+                     "    bytes will be copied. If it is absent, this function is\n"
+                     "    equivalent to `replace(text, from, replacement)`. This function\n"
+                     "    returns a new `string` without modifying `text`.\n"
+                     "  * Returns a `string` with the subrange replaced.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.replace"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_integer from;
+            D_string replacement;
+            if(reader.start().g(text).g(from).save_state(state).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_replace(text, from, replacement) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_replace(text, from, length, replacement) };
               return rocket::move(xref);
             }
             // Fail.

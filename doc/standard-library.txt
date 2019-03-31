@@ -153,6 +153,27 @@
 
 	* Returns the specified substring of `text`.
 
+`std.string.replace(text, from, replacement)`
+
+	* Replaces all bytes from `from` to the end of `text` with
+	  `replacement` and returns the new byte string. If `from` is
+	  negative, it specifies an offset from the end of `text`. This
+	  function returns a new `string` without modifying `text`.
+
+	* Returns a `string` with the subrange replaced.
+
+`std.string.replace(text, from, [length], replacement)`
+
+	* Replaces all bytes from `from` to the end of `text` with
+	  `replacement` and returns the new byte string. If `from` is
+	  negative, it specifies an offset from the end of `text`. If
+	  `length` is set to an `integer`, no more than this number of
+	  bytes will be copied. If it is absent, this function is
+	  equivalent to `replace(text, from, replacement)`. This function
+	  returns a new `string` without modifying `text`.
+
+	* Returns a `string` with the subrange replaced.
+
 `std.string.reverse(text)`
 
 	* Reverses a byte `string`. This function returns a new `string`
