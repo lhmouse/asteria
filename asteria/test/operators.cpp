@@ -10,7 +10,7 @@ using namespace Asteria;
 
 int main()
   {
-    std::istringstream iss(R"__(
+    static constexpr char s_source[] = R"__(
       var b = false, i = 12, r = 8.5, s = "a";
       var a = [ 1, 2, 3 ];
       var o = { one: 1, two: 2, three: 3 };
@@ -221,7 +221,9 @@ int main()
       assert i ?? "abc" == 12;
       assert null ?? "abc" == "abc";
       assert null ?? null ?? 1 ?? null ?? 2 == 1;
-    )__");
+    )__";
+
+    std::istringstream iss(s_source);
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global, { });
