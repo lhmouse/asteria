@@ -254,7 +254,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs >= 64) {
           return 0;
         }
-        return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) << rhs);
+        return D_integer(static_cast<std::uint64_t>(lhs) << rhs);
       }
 
     ROCKET_PURE_FUNCTION D_integer do_operator_srl(const D_integer& lhs, const D_integer& rhs)
@@ -265,7 +265,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs >= 64) {
           return 0;
         }
-        return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) >> rhs);
+        return D_integer(static_cast<std::uint64_t>(lhs) >> rhs);
       }
 
     ROCKET_PURE_FUNCTION D_integer do_operator_sla(const D_integer& lhs, const D_integer& rhs)
@@ -285,7 +285,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(mask_out != mask_sbt) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
-        return static_cast<D_integer>(static_cast<std::uint64_t>(lhs) << rhs);
+        return D_integer(static_cast<std::uint64_t>(lhs) << rhs);
       }
 
     ROCKET_PURE_FUNCTION D_integer do_operator_sra(const D_integer& lhs, const D_integer& rhs)
@@ -331,12 +331,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
 
     ROCKET_PURE_FUNCTION D_real do_operator_add(const D_real& lhs, const D_integer& rhs)
       {
-        return lhs + static_cast<D_real>(rhs);
+        return lhs + D_real(rhs);
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_add(const D_integer& lhs, const D_real& rhs)
       {
-        return static_cast<D_real>(lhs) + rhs;
+        return D_real(lhs) + rhs;
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_real& lhs, const D_real& rhs)
@@ -346,12 +346,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
 
     ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_real& lhs, const D_integer& rhs)
       {
-        return lhs - static_cast<D_real>(rhs);
+        return lhs - D_real(rhs);
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_integer& lhs, const D_real& rhs)
       {
-        return static_cast<D_real>(lhs) - rhs;
+        return D_real(lhs) - rhs;
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_real& lhs, const D_real& rhs)
@@ -361,12 +361,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
 
     ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_real& lhs, const D_integer& rhs)
       {
-        return lhs * static_cast<D_real>(rhs);
+        return lhs * D_real(rhs);
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_integer& lhs, const D_real& rhs)
       {
-        return static_cast<D_real>(lhs) * rhs;
+        return D_real(lhs) * rhs;
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_div(const D_real& lhs, const D_real& rhs)
@@ -376,12 +376,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
 
     ROCKET_PURE_FUNCTION D_real do_operator_div(const D_real& lhs, const D_integer& rhs)
       {
-        return lhs / static_cast<D_real>(rhs);
+        return lhs / D_real(rhs);
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_div(const D_integer& lhs, const D_real& rhs)
       {
-        return static_cast<D_real>(lhs) / rhs;
+        return D_real(lhs) / rhs;
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_mod(const D_real& lhs, const D_real& rhs)
