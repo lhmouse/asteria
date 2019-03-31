@@ -6,6 +6,7 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
+#include <bitset>
 
 namespace Asteria {
 
@@ -110,6 +111,142 @@ D_string std_string_replace_substr(const D_string& text, const D_integer& from, 
     auto range = do_subrange(res, from, length);
     res.replace(range.first, range.second, replacement);
     return res;
+  }
+
+    namespace {
+
+    template<typename IteratorT> Opt<IteratorT> do_find_of(IteratorT begin, IteratorT end, const D_string& set, bool match)
+      {
+        // Make a lookup table.
+        std::bitset<256> table;
+        for(auto it = set.begin(); it != set.end(); ++it) {
+          table.set(*it & 0xFF);
+        }
+        // Search the range.
+        for(auto it = rocket::move(begin); it != end; ++it) {
+          if(table.test(*it & 0xFF) == match) {
+            return rocket::move(it);
+          }
+        }
+        return rocket::nullopt;
+      }
+
+    }
+
+Opt<D_integer> std_string_find_any_of(const D_string& text, const D_string& accept)
+  {
+    auto qit = do_find_of(text.begin(), text.end(), accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
+  {
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of(range.first, range.second, accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept)
+  {
+    auto range = do_subrange(text, from.value_or(0), length);
+    auto qit = do_find_of(range.first, range.second, accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& accept)
+  {
+    auto qit = do_find_of(text.rbegin(), text.rend(), accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
+  {
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept)
+  {
+    auto range = do_subrange(text, from.value_or(0), length);
+    auto qit = do_find_of(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_find_not_of(const D_string& text, const D_string& reject)
+  {
+    auto qit = do_find_of(text.begin(), text.end(), reject, false);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject)
+  {
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of(range.first, range.second, reject, false);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject)
+  {
+    auto range = do_subrange(text, from.value_or(0), length);
+    auto qit = do_find_of(range.first, range.second, reject, false);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_string& reject)
+  {
+    auto qit = do_find_of(text.rbegin(), text.rend(), reject, false);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject)
+  {
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
+  }
+
+Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject)
+  {
+    auto range = do_subrange(text, from.value_or(0), length);
+    auto qit = do_find_of(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return &**qit - text.data();
   }
 
 D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
@@ -815,6 +952,266 @@ D_object create_bindings_string()
             if(reader.load_state(state).g(length).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_replace_substr(text, from, length, replacement) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.find_any_of()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("find_any_of"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.find_any_of(text, accept)`\n"
+                     "  * Searches `text` for bytes that exist in `accept`.\n"
+                     "  * Returns the subscript of the first byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"
+                     "`std.string.find_any_of(text, [from], accept)`\n"
+                     "  * Searches `text` for bytes that exist in `accept`. The search\n"
+                     "    operation is performed on the same subrange that would be\n"
+                     "    returned by `substr(text, from)`.\n"
+                     "  * Returns the subscript of the first byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"
+                     "`std.string.find_any_of(text, [from], [length], accept)`\n"
+                     "  * Searches `text` for bytes that exist in `accept`. The search\n"
+                     "    operation is performed on the same subrange that would be\n"
+                     "    returned by `substr(text, from, length)`.\n"
+                     "  * Returns the subscript of the first byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.find_any_of"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_string accept;
+            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find_any_of(text, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> from;
+            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find_any_of(text, from, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find_any_of(text, from, length, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.rfind_any_of()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("rfind_any_of"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.rfind_any_of(text, accept)`\n"
+                     "  * Searches `text` for bytes that exist in `accept`.\n"
+                     "  * Returns the subscript of the last byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"
+                     "`std.string.rfind_any_of(text, [from], accept)`\n"
+                     "  * Searches `text` for bytes that exist in `accept`. The search\n"
+                     "    operation is performed on the same subrange that would be\n"
+                     "    returned by `substr(text, from)`.\n"
+                     "  * Returns the subscript of the last byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"
+                     "`std.string.rfind_any_of(text, [from], [length], accept)`\n"
+                     "  * Searches `text` for bytes that exist in `accept`. The search\n"
+                     "    operation is performed on the same subrange that would be\n"
+                     "    returned by `substr(text, from, length)`.\n"
+                     "  * Returns the subscript of the last byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.rfind_any_of"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_string accept;
+            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind_any_of(text, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> from;
+            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind_any_of(text, from, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind_any_of(text, from, length, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.find_not_of()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("find_not_of"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.find_not_of(text, reject)`\n"
+                     "  * Searches `text` for bytes that does not exist in `reject`.\n"
+                     "  * Returns the subscript of the first byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"
+                     "`std.string.find_not_of(text, [from], reject)`\n"
+                     "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from)`.\n"
+                     "  * Returns the subscript of the first byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"
+                     "`std.string.find_not_of(text, [from], [length], reject)`\n"
+                     "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from, length)`.\n"
+                     "  * Returns the subscript of the first byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.find_not_of"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_string accept;
+            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find_not_of(text, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> from;
+            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find_not_of(text, from, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find_not_of(text, from, length, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.rfind_not_of()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("rfind_not_of"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.rfind_not_of(text, reject)`\n"
+                     "  * Searches `text` for bytes that does not exist in `reject`.\n"
+                     "  * Returns the subscript of the last byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"
+                     "`std.string.rfind_not_of(text, [from], reject)`\n"
+                     "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from)`.\n"
+                     "  * Returns the subscript of the last byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"
+                     "`std.string.rfind_not_of(text, [from], [length], reject)`\n"
+                     "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from, length)`.\n"
+                     "  * Returns the subscript of the last byte found, which is always\n"
+                     "    non-negative; or `null` if no such byte exists.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.rfind_not_of"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_string accept;
+            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind_not_of(text, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> from;
+            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind_not_of(text, from, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind_not_of(text, from, length, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
             // Fail.
