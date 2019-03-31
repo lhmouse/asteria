@@ -221,9 +221,8 @@
 `std.string.rfind_any_of(text, [from], accept)`
 
 	* Searches `text` for bytes that exist in `accept`. The search
-	  operation is performed on the union of the subrange that would
-	  be returned by `substr(text, from, 1)` and all bytes preceding
-	  it.
+	  operation is performed on the same subrange that would be
+	  returned by `substr(text, from)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -272,9 +271,8 @@
 `std.string.rfind_not_of(text, [from], reject)`
 
 	* Searches `text` for bytes that does not exist in `reject`. The
-	  search operation is performed on the union of the subrange that
-	  would be returned by `substr(text, from, 1)` and all bytes
-	  preceding it.
+	  search operation is performed on the same subrange that would
+	  be returned by `substr(text, from)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.

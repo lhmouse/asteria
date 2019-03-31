@@ -144,8 +144,8 @@ Opt<D_integer> std_string_find_any_of(const D_string& text, const D_string& acce
 
 Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
   {
-    auto range = do_subrange(text, from.value_or(0), 1);
-    auto qit = do_find_of(range.first, text.end(), accept, true);
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of(range.first, range.second, accept, true);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -173,8 +173,8 @@ Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& acc
 
 Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
   {
-    auto range = do_subrange(text, from.value_or(0), 1);
-    auto qit = do_find_of(std::make_reverse_iterator(range.second), text.rend(), accept, true);
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -202,8 +202,8 @@ Opt<D_integer> std_string_find_not_of(const D_string& text, const D_string& reje
 
 Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject)
   {
-    auto range = do_subrange(text, from.value_or(0), 1);
-    auto qit = do_find_of(range.first, text.end(), reject, false);
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of(range.first, range.second, reject, false);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -231,8 +231,8 @@ Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_string& rej
 
 Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject)
   {
-    auto range = do_subrange(text, from.value_or(0), 1);
-    auto qit = do_find_of(std::make_reverse_iterator(range.second), text.rend(), reject, false);
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -1037,9 +1037,8 @@ D_object create_bindings_string()
                      "    non-negative; or `null` if no such byte exists.\n"
                      "`std.string.rfind_any_of(text, [from], accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
-                     "    operation is performed on the union of the subrange that would"
-                     "    be returned by `substr(text, from, 1)` and all bytes preceding"
-                     "    it."
+                     "    operation is performed on the same subrange that would be\n"
+                     "    returned by `substr(text, from)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
                      "`std.string.rfind_any_of(text, [from], [length], accept)`\n"
@@ -1168,9 +1167,8 @@ D_object create_bindings_string()
                      "    non-negative; or `null` if no such byte exists.\n"
                      "`std.string.rfind_not_of(text, [from], reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-                     "    search operation is performed on the union of the subrange that"
-                     "    would be returned by `substr(text, from, 1)` and all bytes"
-                     "    preceding it."
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
                      "`std.string.rfind_not_of(text, [from], [length], reject)`\n"
