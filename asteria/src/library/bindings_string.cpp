@@ -11,13 +11,16 @@ namespace Asteria {
 
 D_integer std_string_compare(const D_string& text1, const D_string& text2, const Opt<D_integer>& length)
   {
-    if(!length || (*length > PTRDIFF_MAX)) {
+    if(!length || (*length >= PTRDIFF_MAX)) {
       // Compare the entire strings.
       return text1.compare(text2);
     }
+    if(*length <= 0) {
+      // There is nothing to compare.
+      return 0;
+    }
     // Compare two substrings.
-    auto rlen = static_cast<std::size_t>(*length);
-    return text1.compare(0, rlen, text2, 0, rlen);
+    return text1.compare(0, static_cast<std::size_t>(*length), text2, 0, static_cast<std::size_t>(*length));
   }
 
 D_boolean std_string_starts_with(const D_string& text, const D_string& prefix)
@@ -38,41 +41,57 @@ D_string std_string_reverse(const D_string& text)
 
     namespace {
 
+    std::pair<D_string::const_iterator, D_string::const_iterator> do_subrange(const D_string& text, const D_string::const_iterator& tbegin, const Opt<D_integer>& length)
+      {
+        if(!length || (*length >= text.end() - tbegin)) {
+          // Get the subrange from `tbegin` to the end.
+          return std::make_pair(tbegin, text.end());
+        }
+        if(*length <= 0) {
+          // Return an empty range.
+          return std::make_pair(tbegin, tbegin);
+        }
+        // Don't go past the end.
+        return std::make_pair(tbegin, tbegin + static_cast<std::ptrdiff_t>(*length));
+      }
+
     std::pair<D_string::const_iterator, D_string::const_iterator> do_subrange(const D_string& text, const D_integer& from, const Opt<D_integer>& length)
       {
-        if(length && (*length <= 0)) {
-          // No byte is to be copied.
-          return std::make_pair(text.begin(), text.begin());
-        }
-        auto ssize = static_cast<std::int64_t>(text.size());
+        auto slen = static_cast<std::int64_t>(text.size());
         if(from >= 0) {
-          if(from >= ssize) {
-            // `from` is after the last byte.
+          // Behave like `std::string::substr()` except that no exception is thrown when `from` is greater than `text.size()`.
+          if(from >= slen) {
             return std::make_pair(text.end(), text.end());
           }
-          // Get the subrange from `from` to the end.
-          return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(from),
-                                length ? (text.begin() + static_cast<std::ptrdiff_t>(from + rocket::min(*length, ssize - from))) : text.end());
+          return do_subrange(text, text.begin() + static_cast<std::ptrdiff_t>(from), length);
         }
-        // Wrap `from` from the end.
-        // Notice that `from + ssize` will not overflow when `from` is negative and `ssize` is not.
-        auto rfrom = from + ssize;
+        // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
+        auto rfrom = from + slen;
         if(rfrom >= 0) {
-          // Get the subrange from `rfrom`.
-          return std::make_pair(text.begin() + static_cast<std::ptrdiff_t>(rfrom),
-                                length ? (text.begin() + static_cast<std::ptrdiff_t>(rfrom + rocket::min(*length, ssize - rfrom))) : text.end());
+          // Get a subrange from the wrapped index.
+          return do_subrange(text, text.begin() + static_cast<std::ptrdiff_t>(rfrom), length);
         }
-        // Get the subrange from the beginning to `rfrom + *length`.
-        return std::make_pair(text.begin(),
-                              length ? (text.begin() + static_cast<std::ptrdiff_t>(rocket::max(rfrom + *length, 0))) : text.end());
+        // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
+        if(!length) {
+          // Get the subrange from the beginning to the end.
+          return std::make_pair(text.begin(), text.end());
+        }
+        if(*length <= 0) {
+          // Return an empty range.
+          return std::make_pair(text.begin(), text.begin());
+        }
+        // Get a subrange excluding the part before the beginning. Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
+        return do_subrange(text, text.begin(), rfrom + *length);
       }
 
     }
 
 D_string std_string_substr(const D_string& text, const D_integer& from, const Opt<D_integer>& length)
   {
+    D_string res;
     auto range = do_subrange(text, from, length);
-    return D_string(range.first, range.second);
+    res.assign(range.first, range.second);
+    return res;
   }
 
 D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
