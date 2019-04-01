@@ -176,15 +176,57 @@
 
 `std.string.find(text, pattern)`
 
+	* Searches `text` for the first occurrence of `pattern`.
+
+	* Returns the subscript of the first byte of the first match of
+	  `pattern` in `text` if one is found, which is always
+	  non-negative; otherwise `null`.
+
 `std.string.find(text, [from], pattern)`
+
+	* Searches `text` for the first occurrence of `pattern`. The
+	  search operation is performed on the same subrange that would
+	  be returned by `substr(text, from ?? 0)`.
+
+	* Returns the subscript of the first byte of the first match of
+	  `pattern` in `text` if one is found, which is always
+	  non-negative; otherwise `null`.
 
 `std.string.find(text, [from], [length], pattern)`
 
+	* Searches `text` for the first occurrence of `pattern`. The
+	  search operation is performed on the same subrange that would
+	  be returned by `substr(text, from ?? 0, length)`.
+
+	* Returns the subscript of the first byte of the first match of
+	  `pattern` in `text` if one is found, which is always
+	  non-negative; otherwise `null`.
+
 `std.string.rfind(text, pattern)`
+
+	* Searches `text` for the last occurrence of `pattern`.
+
+	* Returns the subscript of the first byte of the last match of
+	  `pattern` in `text` if one is found, which is always
+	  non-negative; otherwise `null`.
 
 `std.string.rfind(text, [from], pattern)`
 
+	* Searches `text` for the last occurrence of `pattern`. The
+	  search operation is performed on the same subrange that would
+	  be returned by `substr(text, from ?? 0)`.
+
+	* Returns the subscript of the first byte of the last match of
+	  `pattern` in `text` if one is found, which is always
+	  non-negative; otherwise `null`.
+
 `std.string.rfind(text, [from], [length], pattern)`
+
+	* Searches `text` for the last occurrence of `pattern`.
+
+	* Returns the subscript of the first byte of the last match of
+	  `pattern` in `text` if one is found, which is always
+	  non-negative; otherwise `null`.
 
 `std.string.find_any_of(text, accept)`
 

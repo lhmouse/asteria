@@ -109,6 +109,78 @@ D_boolean std_string_ends_with(const D_string& text, const D_string& suffix)
 
     namespace {
 
+    template<typename IteratorT> Opt<IteratorT> do_find(IteratorT begin, IteratorT end, IteratorT pbegin, IteratorT pend)
+      {
+        // TODO implement BM for this
+        auto it = std::search(begin, end, pbegin, pend);
+        if(it == end) {
+          return rocket::nullopt;
+        }
+        return it;
+      }
+
+    }
+
+Opt<D_integer> std_string_find(const D_string& text, const D_string& pattern)
+  {
+    auto qit = do_find(text.begin(), text.end(), pattern.begin(), pattern.end());
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return *qit - text.begin();
+  }
+
+Opt<D_integer> std_string_find(const D_string& text, const Opt<D_integer>& from, const D_string& pattern)
+  {
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find(range.first, range.second, pattern.begin(), pattern.end());
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return *qit - text.begin();
+  }
+
+Opt<D_integer> std_string_find(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern)
+  {
+    auto range = do_subrange(text, from.value_or(0), length);
+    auto qit = do_find(range.first, range.second, pattern.begin(), pattern.end());
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return *qit - text.begin();
+  }
+
+Opt<D_integer> std_string_rfind(const D_string& text, const D_string& pattern)
+  {
+    auto qit = do_find(text.rbegin(), text.rend(), pattern.rbegin(), pattern.rend());
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return text.rend() - *qit - static_cast<std::ptrdiff_t>(pattern.size());
+  }
+
+Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const D_string& pattern)
+  {
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return text.rend() - *qit - static_cast<std::ptrdiff_t>(pattern.size());
+  }
+
+Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern)
+  {
+    auto range = do_subrange(text, from.value_or(0), length);
+    auto qit = do_find(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return text.rend() - *qit - static_cast<std::ptrdiff_t>(pattern.size());
+  }
+
+    namespace {
+
     template<typename IteratorT> Opt<IteratorT> do_find_of(IteratorT begin, IteratorT end, const D_string& set, bool match)
       {
         // Make a lookup table.
@@ -847,6 +919,140 @@ D_object create_bindings_string()
             if(reader.load_state(state).g(length).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_replace_substr(text, from, length, replacement) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.find()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("find"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.find(text, pattern)`\n"
+                     "  * Searches `text` for the first occurrence of `pattern`.\n"
+                     "  * Returns the subscript of the first byte of the first match of\n"
+                     "    `pattern` in `text` if one is found, which is always\n"
+                     "    non-negative; otherwise `null`.\n"
+                     "`std.string.find(text, [from], pattern)`\n"
+                     "  * Searches `text` for the first occurrence of `pattern`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from ?? 0)`.\n"
+                     "  * Returns the subscript of the first byte of the first match of\n"
+                     "    `pattern` in `text` if one is found, which is always\n"
+                     "    non-negative; otherwise `null`.\n"
+                     "`std.string.find(text, [from], [length], pattern)`\n"
+                     "  * Searches `text` for the first occurrence of `pattern`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from ?? 0, length)`.\n"
+                     "  * Returns the subscript of the first byte of the first match of\n"
+                     "    `pattern` in `text` if one is found, which is always\n"
+                     "    non-negative; otherwise `null`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.find"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_string accept;
+            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find(text, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> from;
+            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find(text, from, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_find(text, from, length, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.rfind()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("rfind"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.rfind(text, pattern)`\n"
+                     "  * Searches `text` for the last occurrence of `pattern`.\n"
+                     "  * Returns the subscript of the first byte of the last match of\n"
+                     "    `pattern` in `text` if one is found, which is always\n"
+                     "    non-negative; otherwise `null`.\n"
+                     "`std.string.rfind(text, [from], pattern)`\n"
+                     "  * Searches `text` for the last occurrence of `pattern`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from ?? 0)`.\n"
+                     "  * Returns the subscript of the first byte of the last match of\n"
+                     "    `pattern` in `text` if one is found, which is always\n"
+                     "    non-negative; otherwise `null`.\n"
+                     "`std.string.rfind(text, [from], [length], pattern)`\n"
+                     "  * Searches `text` for the last occurrence of `pattern`.\n"
+                     "  * Returns the subscript of the first byte of the last match of\n"
+                     "    `pattern` in `text` if one is found, which is always\n"
+                     "    non-negative; otherwise `null`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.rfind"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_string accept;
+            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind(text, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> from;
+            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind(text, from, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(accept).finish()) {
+              // Call the binding function.
+              auto qindex = std_string_rfind(text, from, length, accept);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
             // Fail.
