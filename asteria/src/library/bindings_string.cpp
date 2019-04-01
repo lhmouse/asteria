@@ -249,30 +249,35 @@ Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer
     return &**qit - text.data();
   }
 
+    namespace {
+
+    std::pair<const char*, std::size_t> do_what_to_trim(const Opt<D_string>& reject)
+      {
+        if(!reject) {
+          // Delete whitespaces by default.
+          return std::make_pair(" \t", 2);
+        }
+        // Delete characters in `*reject`.
+        return std::make_pair(reject->data(), reject->size());
+      }
+
+    }
+
 D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
   {
-    const char* srej;
-    std::size_t nrej;
-    if(reject) {
-      if(reject->empty()) {
-        // There is no byte to strip. Make use of reference counting.
-        return text;
-      }
-      srej = reject->data();
-      nrej = reject->size();
-    } else {
-      // If `reject` is `null`, strip whitespaces.
-      srej = " \t";
-      nrej = 2;
+    auto rchars = do_what_to_trim(reject);
+    if(rchars.second == 0) {
+      // There is no byte to strip. Make use of reference counting.
+      return text;
     }
     // Get the index of the first byte to keep.
-    auto start = text.find_first_not_of(srej, nrej);
+    auto start = text.find_first_not_of(rchars.first, rchars.second);
     if(start == D_string::npos) {
       // There is no byte to keep. Return an empty string.
       return rocket::clear;
     }
     // Get the index of the last byte to keep.
-    auto end = text.find_last_not_of(srej, nrej);
+    auto end = text.find_last_not_of(rchars.first, rchars.second);
     if((start == 0) && (end == text.size() - 1)) {
       // There is no byte to strip. Make use of reference counting.
       return text;
@@ -283,22 +288,13 @@ D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
 
 D_string std_string_ltrim(const D_string& text, const Opt<D_string>& reject)
   {
-    const char* srej;
-    std::size_t nrej;
-    if(reject) {
-      if(reject->empty()) {
-        // There is no byte to strip. Make use of reference counting.
-        return text;
-      }
-      srej = reject->data();
-      nrej = reject->size();
-    } else {
-      // If `reject` is `null`, strip whitespaces.
-      srej = " \t";
-      nrej = 2;
+    auto rchars = do_what_to_trim(reject);
+    if(rchars.second == 0) {
+      // There is no byte to strip. Make use of reference counting.
+      return text;
     }
     // Get the index of the first byte to keep.
-    auto start = text.find_first_not_of(srej, nrej);
+    auto start = text.find_first_not_of(rchars.first, rchars.second);
     if(start == D_string::npos) {
       // There is no byte to keep. Return an empty string.
       return rocket::clear;
@@ -313,22 +309,13 @@ D_string std_string_ltrim(const D_string& text, const Opt<D_string>& reject)
 
 D_string std_string_rtrim(const D_string& text, const Opt<D_string>& reject)
   {
-    const char* srej;
-    std::size_t nrej;
-    if(reject) {
-      if(reject->empty()) {
-        // There is no byte to strip. Make use of reference counting.
-        return text;
-      }
-      srej = reject->data();
-      nrej = reject->size();
-    } else {
-      // If `reject` is `null`, strip whitespaces.
-      srej = " \t";
-      nrej = 2;
+    auto rchars = do_what_to_trim(reject);
+    if(rchars.second == 0) {
+      // There is no byte to strip. Make use of reference counting.
+      return text;
     }
     // Get the index of the last byte to keep.
-    auto end = text.find_last_not_of(srej, nrej);
+    auto end = text.find_last_not_of(rchars.first, rchars.second);
     if(end == text.size() - 1) {
       // There is no byte to strip. Make use of reference counting.
       return text;
