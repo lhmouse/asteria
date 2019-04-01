@@ -14,7 +14,7 @@ namespace Asteria {
     class Line_Reader
       {
       private:
-        std::reference_wrapper<std::istream> m_strm;
+        std::streambuf* m_sbuf;
         Cow_String m_file;
 
         Cow_String m_str;
@@ -22,16 +22,10 @@ namespace Asteria {
         std::size_t m_offset;
 
       public:
-        Line_Reader(std::istream& xstrm, const Cow_String& xfile)
-          : m_strm(xstrm), m_file(xfile),
+        Line_Reader(std::streambuf* xsbuf, const Cow_String& xfile)
+          : m_sbuf(xsbuf), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
-            // Check whether the stream can be read from.
-            // For example, we shall fail here if an `std::ifstream` was constructed with a non-existent path.
-            auto& strm = this->m_strm.get();
-            if(strm.fail()) {
-              throw Parser_Error(0, 0, 0, Parser_Error::code_istream_open_failure);
-            }
           }
 
         Line_Reader(const Line_Reader&)
@@ -40,9 +34,9 @@ namespace Asteria {
           = delete;
 
       public:
-        std::istream& stream() const noexcept
+        std::streambuf* sbuf() const noexcept
           {
-            return this->m_strm;
+            return this->m_sbuf;
           }
         const Cow_String& file() const noexcept
           {
@@ -53,21 +47,28 @@ namespace Asteria {
           {
             return this->m_line;
           }
-        bool advance_line()
+        bool advance()
           {
-            // Call `getline()` via ADL.
-            auto& strm = this->m_strm.get();
-            getline(strm, this->m_str);
-            // Check `bad()` before `fail()` because the latter checks for both `badbit` and `failbit`.
-            if(strm.bad()) {
-              throw Parser_Error(this->m_line, this->m_offset, 0, Parser_Error::code_istream_badbit_set);
-            }
-            if(strm.fail()) {
-              return false;
-            }
-            // A line has been read successfully.
-            this->m_line++;
+            // Clear the current line buffer.
+            this->m_str.clear();
             this->m_offset = 0;
+            // Buffer a line.
+            for(;;) {
+              auto ich = this->m_sbuf->sbumpc();
+              if(ich == std::char_traits<char>::eof()) {
+                // Return `false` to indicate that there are no more data, when nothing has been read so far.
+                if(this->m_str.empty()) {
+                  return false;
+                }
+                break;
+              }
+              if(ich == '\n') {
+                break;
+              }
+              this->m_str.push_back(static_cast<char>(ich));
+            }
+            // Increment the line number.
+            this->m_line++;
             ASTERIA_DEBUG_LOG("Read line ", std::setw(4), this->m_line, ": ", this->m_str);
             return true;
           }
@@ -880,7 +881,7 @@ namespace Asteria {
 
     }  // namespace
 
-bool Token_Stream::load(std::istream& cstrm, const Cow_String& file, const Parser_Options& options)
+bool Token_Stream::load(std::streambuf* sbuf, const Cow_String& file, const Parser_Options& options)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -890,8 +891,8 @@ bool Token_Stream::load(std::istream& cstrm, const Cow_String& file, const Parse
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Line_Reader reader(cstrm, file);
-    while(reader.advance_line()) {
+    Line_Reader reader(sbuf, file);
+    while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::char_traits<char>::compare(reader.data_avail(), "#!", 2) == 0)) {
         continue;

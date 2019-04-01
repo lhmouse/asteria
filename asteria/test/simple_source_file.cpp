@@ -10,17 +10,17 @@ using namespace Asteria;
 
 int main()
   {
-    std::istringstream iss(R"__(
-      var one = 1;
-      const two = 2;
-      func fib(n) {
-        return n <= one ? n : fib(n - one) + fib(n - two);
-      }
-      var con = { };
-      con["value"] = fib(11);
-      con["const"] = one;
-      return con.value + con.const;
-    )__");
+    std::istringstream iss(
+      R"__(var one = 1;
+           const two = 2;
+           func fib(n) {
+             return n <= one ? n : fib(n - one) + fib(n - two);
+           }
+           var con = { };
+           con["value"] = fib(11);
+           con["const"] = one;
+           return con.value + con.const;
+      )__");
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     auto res = code.execute(global, { });

@@ -27,7 +27,7 @@ Parser_Error Simple_Source_File::do_reload_stream(bool throw_on_failure, std::is
     static constexpr Parser_Options options = { };
     // Tokenize the character stream.
     Token_Stream tstrm;
-    if(!tstrm.load(cstrm, filename, options)) {
+    if(!tstrm.load(cstrm.rdbuf(), filename, options)) {
       auto err = tstrm.get_parser_error();
       if(throw_on_failure) {
         Parser_Error::convert_to_runtime_error_and_throw(err);

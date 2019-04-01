@@ -11,15 +11,17 @@ using namespace Asteria;
 int main()
   {
     Token_Stream ts;
-    std::istringstream iss("#!meow \n"
-                           "hh+++ \n"
-                           " if <<<->>>>>\"\\u55b5b喵\"/\n"
-                           "* - 0x`01`7.8`4p+4  // comments\n"
-                           ".false/*more\n"
-                           "comments*/;/*yet more*/-42e13");
-    auto r = ts.load(iss, rocket::sref("dummy_file"), Parser_Options());
+    std::stringbuf buf(
+      R"__(#!some shebang
+           hh+++
+           if <<<->>>>>"\u55b5b喵"/
+           * - 0x`01`7.8`4p+4  // comments
+           .false/*more
+           comments*/;/*yet more*/-42e13
+      )__");
+    auto r = ts.load(&buf, rocket::sref("dummy_file"), Parser_Options());
     ASTERIA_TEST_CHECK(r);
-    ASTERIA_TEST_CHECK(iss.eof());
+    ASTERIA_TEST_CHECK(buf.sgetc() == std::char_traits<char>::eof());
 
     auto p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);

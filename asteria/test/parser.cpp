@@ -15,7 +15,7 @@ using namespace Asteria;
 
 int main()
   {
-    std::istringstream iss(R"__(
+    std::stringbuf buf(R"__(
       func third() {
         const f = func(p) = p + "ow";
         throw f("me");
@@ -33,7 +33,7 @@ int main()
       }
     )__");
     Token_Stream tis;
-    ASTERIA_TEST_CHECK(tis.load(iss, rocket::sref("dummy file"), Parser_Options()));
+    ASTERIA_TEST_CHECK(tis.load(&buf, rocket::sref("dummy file"), Parser_Options()));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis, Parser_Options()));
     auto code = pr.get_statements();
