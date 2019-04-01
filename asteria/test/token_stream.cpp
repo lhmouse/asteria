@@ -19,7 +19,7 @@ int main()
            .false/*more
            comments*/;/*yet more*/-42e13
       )__");
-    auto r = ts.load(&buf, rocket::sref("dummy_file"), Parser_Options());
+    auto r = ts.load(buf, rocket::sref("dummy_file"), Parser_Options());
     ASTERIA_TEST_CHECK(r);
     ASTERIA_TEST_CHECK(buf.sgetc() == std::char_traits<char>::eof());
 

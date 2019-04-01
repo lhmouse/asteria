@@ -12,44 +12,58 @@ namespace Asteria {
 class Simple_Source_File
   {
   private:
+    bool m_throw_on_failure;
     // We want type erasure.
-    Cow_Vector<Instantiated_Function> m_codev;
+    Cow_Vector<Instantiated_Function> m_inst;
 
   public:
     Simple_Source_File() noexcept
+      : m_throw_on_failure(false)
       {
       }
-    explicit Simple_Source_File(const Cow_String& filename)
+    Simple_Source_File(std::streambuf& cbuf, const Cow_String& filename)
+      : Simple_Source_File()
       {
-        this->do_reload_file(true, filename);
+        this->set_throw_on_failure(true);
+        this->reload(cbuf, filename);
       }
     Simple_Source_File(std::istream& cstrm, const Cow_String& filename)
+      : Simple_Source_File()
       {
-        this->do_reload_stream(true, cstrm, filename);
+        this->set_throw_on_failure(true);
+        this->reload(cstrm, filename);
+      }
+    Simple_Source_File(const Cow_String& cstr, const Cow_String& filename)
+      : Simple_Source_File()
+      {
+        this->set_throw_on_failure(true);
+        this->reload(cstr, filename);
+      }
+    explicit Simple_Source_File(const Cow_String& filename)
+      : Simple_Source_File()
+      {
+        this->set_throw_on_failure(true);
+        this->open(filename);
       }
 
   private:
-    // For these two functions, if `error_opt` is null, an exception is thrown.
-    Parser_Error do_reload_file(bool throw_on_failure, const Cow_String& filename);
-    Parser_Error do_reload_stream(bool throw_on_failure, std::istream& cstrm, const Cow_String& filename);
+    inline Parser_Error do_make_parser_error(Parser_Error::Code code);
+    inline Parser_Error do_throw_or_return(Parser_Error&& err);
 
   public:
-    bool empty() const noexcept
+    bool does_throw_on_failure() const noexcept
       {
-        return this->m_codev.empty();
+        return this->m_throw_on_failure;
       }
-    explicit operator bool () const noexcept
+    void set_throw_on_failure(bool throw_on_failure = true) noexcept
       {
-        return !this->m_codev.empty();
+        this->m_throw_on_failure = throw_on_failure;
       }
-    Parser_Error load_file(const Cow_String& filename)
-      {
-        return this->do_reload_file(false, filename);
-      }
-    Parser_Error load_stream(std::istream& cstrm, const Cow_String& filename)
-      {
-        return this->do_reload_stream(false, cstrm, filename);
-      }
+
+    Parser_Error reload(std::streambuf& cbuf, const Cow_String& filename);
+    Parser_Error reload(std::istream& cstrm, const Cow_String& filename);
+    Parser_Error reload(const Cow_String& cstr, const Cow_String& filename);
+    Parser_Error open(const Cow_String& filename);
     void clear() noexcept;
 
     Reference execute(const Global_Context& global, Cow_Vector<Reference>&& args) const;

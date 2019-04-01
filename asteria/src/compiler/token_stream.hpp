@@ -39,7 +39,7 @@ class Token_Stream
         return static_cast<State>(this->m_stor.index());
       }
 
-    bool load(std::streambuf* sbuf, const Cow_String& file, const Parser_Options& options);
+    bool load(std::streambuf& cbuf, const Cow_String& file, const Parser_Options& options);
     void clear() noexcept;
 
     Parser_Error get_parser_error() const noexcept;

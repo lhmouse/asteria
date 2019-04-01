@@ -14,7 +14,7 @@ namespace Asteria {
     class Line_Reader
       {
       private:
-        std::streambuf* m_sbuf;
+        std::reference_wrapper<std::streambuf> m_cbuf;
         Cow_String m_file;
 
         Cow_String m_str;
@@ -22,8 +22,8 @@ namespace Asteria {
         std::size_t m_offset;
 
       public:
-        Line_Reader(std::streambuf* xsbuf, const Cow_String& xfile)
-          : m_sbuf(xsbuf), m_file(xfile),
+        Line_Reader(std::streambuf& xcbuf, const Cow_String& xfile)
+          : m_cbuf(xcbuf), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
           }
@@ -34,9 +34,9 @@ namespace Asteria {
           = delete;
 
       public:
-        std::streambuf* sbuf() const noexcept
+        std::streambuf& cbuf() const noexcept
           {
-            return this->m_sbuf;
+            return this->m_cbuf;
           }
         const Cow_String& file() const noexcept
           {
@@ -54,7 +54,7 @@ namespace Asteria {
             this->m_offset = 0;
             // Buffer a line.
             for(;;) {
-              auto ich = this->m_sbuf->sbumpc();
+              auto ich = this->m_cbuf.get().sbumpc();
               if(ich == std::char_traits<char>::eof()) {
                 // Return `false` to indicate that there are no more data, when nothing has been read so far.
                 if(this->m_str.empty()) {
@@ -881,7 +881,7 @@ namespace Asteria {
 
     }  // namespace
 
-bool Token_Stream::load(std::streambuf* sbuf, const Cow_String& file, const Parser_Options& options)
+bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Parser_Options& options)
   try {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -891,7 +891,7 @@ bool Token_Stream::load(std::streambuf* sbuf, const Cow_String& file, const Pars
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Line_Reader reader(sbuf, file);
+    Line_Reader reader(cbuf, file);
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::char_traits<char>::compare(reader.data_avail(), "#!", 2) == 0)) {

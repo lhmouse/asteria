@@ -33,7 +33,7 @@ int main()
       }
     )__");
     Token_Stream tis;
-    ASTERIA_TEST_CHECK(tis.load(&buf, rocket::sref("dummy file"), Parser_Options()));
+    ASTERIA_TEST_CHECK(tis.load(buf, rocket::sref("dummy file"), Parser_Options()));
     Parser pr;
     ASTERIA_TEST_CHECK(pr.load(tis, Parser_Options()));
     auto code = pr.get_statements();
