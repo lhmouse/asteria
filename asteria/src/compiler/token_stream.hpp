@@ -26,14 +26,8 @@ class Token_Stream
 
   public:
     Token_Stream() noexcept
-      : m_stor()
       {
       }
-
-    Token_Stream(const Token_Stream&)
-      = delete;
-    Token_Stream& operator=(const Token_Stream&)
-      = delete;
 
   public:
     explicit operator bool () const noexcept
@@ -45,11 +39,11 @@ class Token_Stream
         return static_cast<State>(this->m_stor.index());
       }
 
-    Parser_Error get_parser_error() const noexcept;
-    bool empty() const noexcept;
-
     bool load(std::istream& cstrm, const Cow_String& file, const Parser_Options& options);
     void clear() noexcept;
+
+    Parser_Error get_parser_error() const noexcept;
+    bool empty() const noexcept;
     const Token* peek_opt() const;
     void shift();
   };

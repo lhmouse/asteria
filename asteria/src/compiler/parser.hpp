@@ -25,14 +25,8 @@ class Parser
 
   public:
     Parser() noexcept
-      : m_stor()
       {
       }
-
-    Parser(const Parser&)
-      = delete;
-    Parser& operator=(const Parser&)
-      = delete;
 
   public:
     explicit operator bool () const noexcept
@@ -44,11 +38,10 @@ class Parser
         return static_cast<State>(this->m_stor.index());
       }
 
-    Parser_Error get_parser_error() const noexcept;
-    bool empty() const noexcept;
-
     bool load(Token_Stream& tstrm, const Parser_Options& options);
     void clear() noexcept;
+
+    Parser_Error get_parser_error() const noexcept;
     const Cow_Vector<Statement>& get_statements() const;
   };
 

@@ -1835,46 +1835,6 @@ namespace Asteria {
 
     }  // namespace
 
-Parser_Error Parser::get_parser_error() const noexcept
-  {
-    switch(this->state()) {
-    case state_empty:
-      {
-        return Parser_Error(0, 0, 0, Parser_Error::code_no_data_loaded);
-      }
-    case state_error:
-      {
-        return this->m_stor.as<Parser_Error>();
-      }
-    case state_success:
-      {
-        return Parser_Error(0, 0, 0, Parser_Error::code_success);
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-    }
-  }
-
-bool Parser::empty() const noexcept
-  {
-    switch(this->state()) {
-    case state_empty:
-      {
-        return true;
-      }
-    case state_error:
-      {
-        return true;
-      }
-    case state_success:
-      {
-        return this->m_stor.as<Cow_Vector<Statement>>().empty();
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
-    }
-  }
-
 bool Parser::load(Token_Stream& tstrm, const Parser_Options& /*options*/)
   try {
     // This has to be done before anything else because of possibility of exceptions.
@@ -1912,6 +1872,26 @@ bool Parser::load(Token_Stream& tstrm, const Parser_Options& /*options*/)
 void Parser::clear() noexcept
   {
     this->m_stor = nullptr;
+  }
+
+Parser_Error Parser::get_parser_error() const noexcept
+  {
+    switch(this->state()) {
+    case state_empty:
+      {
+        return Parser_Error(0, 0, 0, Parser_Error::code_no_data_loaded);
+      }
+    case state_error:
+      {
+        return this->m_stor.as<Parser_Error>();
+      }
+    case state_success:
+      {
+        return Parser_Error(0, 0, 0, Parser_Error::code_success);
+      }
+    default:
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+    }
   }
 
 const Cow_Vector<Statement>& Parser::get_statements() const
