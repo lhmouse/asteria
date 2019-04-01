@@ -140,7 +140,7 @@
 	  `replacement` and returns the new byte string. If `from` is
 	  negative, it specifies an offset from the end of `text`. If
 	  `length` is set to an `integer`, no more than this number of
-	  bytes will be copied. If it is absent, this function is
+	  bytes will be copied. If it is `null`, this function is
 	  equivalent to `replace_substr(text, from, replacement)`. This
 	  function returns a new `string` without modifying `text`.
 

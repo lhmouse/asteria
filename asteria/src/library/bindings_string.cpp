@@ -825,7 +825,7 @@ D_object create_bindings_string()
                      "    `replacement` and returns the new byte string. If `from` is\n"
                      "    negative, it specifies an offset from the end of `text`. If\n"
                      "    `length` is set to an `integer`, no more than this number of\n"
-                     "    bytes will be copied. If it is absent, this function is\n"
+                     "    bytes will be copied. If it is `null`, this function is\n"
                      "    equivalent to `replace_substr(text, from, replacement)`. This\n"
                      "    function returns a new `string` without modifying `text`.\n"
                      "  * Returns a `string` with the subrange replaced.\n"),
