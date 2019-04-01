@@ -10,36 +10,6 @@
 
 namespace Asteria {
 
-D_integer std_string_compare(const D_string& text1, const D_string& text2, const Opt<D_integer>& length)
-  {
-    if(!length || (*length >= PTRDIFF_MAX)) {
-      // Compare the entire strings.
-      return text1.compare(text2);
-    }
-    if(*length <= 0) {
-      // There is nothing to compare.
-      return 0;
-    }
-    // Compare two substrings.
-    return text1.compare(0, static_cast<std::size_t>(*length), text2, 0, static_cast<std::size_t>(*length));
-  }
-
-D_boolean std_string_starts_with(const D_string& text, const D_string& prefix)
-  {
-    return text.starts_with(prefix);
-  }
-
-D_boolean std_string_ends_with(const D_string& text, const D_string& suffix)
-  {
-    return text.ends_with(suffix);
-  }
-
-D_string std_string_reverse(const D_string& text)
-  {
-    // This is an easy matter, isn't it?
-    return D_string(text.rbegin(), text.rend());
-  }
-
     namespace {
 
     std::pair<D_string::const_iterator, D_string::const_iterator> do_subrange(const D_string& text, const D_string::const_iterator& tbegin, const Opt<D_integer>& length)
@@ -111,6 +81,30 @@ D_string std_string_replace_substr(const D_string& text, const D_integer& from, 
     auto range = do_subrange(res, from, length);
     res.replace(range.first, range.second, replacement);
     return res;
+  }
+
+D_integer std_string_compare(const D_string& text1, const D_string& text2, const Opt<D_integer>& length)
+  {
+    if(!length || (*length >= PTRDIFF_MAX)) {
+      // Compare the entire strings.
+      return text1.compare(text2);
+    }
+    if(*length <= 0) {
+      // There is nothing to compare.
+      return 0;
+    }
+    // Compare two substrings.
+    return text1.compare(0, static_cast<std::size_t>(*length), text2, 0, static_cast<std::size_t>(*length));
+  }
+
+D_boolean std_string_starts_with(const D_string& text, const D_string& prefix)
+  {
+    return text.starts_with(prefix);
+  }
+
+D_boolean std_string_ends_with(const D_string& text, const D_string& suffix)
+  {
+    return text.ends_with(suffix);
   }
 
     namespace {
@@ -247,6 +241,12 @@ Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer
       return rocket::nullopt;
     }
     return &**qit - text.data();
+  }
+
+D_string std_string_reverse(const D_string& text)
+  {
+    // This is an easy matter, isn't it?
+    return D_string(text.rbegin(), text.rend());
   }
 
     namespace {
@@ -775,98 +775,6 @@ D_object create_bindings_string()
   {
     D_object ro;
     //===================================================================
-    // `std.string.compare()`
-    //===================================================================
-    ro.try_emplace(rocket::sref("compare"),
-      D_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.string.compare(text1, text2, [length])`\n"
-                     "  * Performs lexicographical comparison on two byte `string`s. If\n"
-                     "    `length` is set to an `integer`, no more than this number of\n"
-                     "    bytes are compared. This function behaves like the `strncmp()`\n"
-                     "    function in C, except that null characters do not terminate\n"
-                     "    strings.\n"
-                     "  * Returns a positive `integer` if `text1` compares greater than\n"
-                     "    `text2`, a negative `integer` if `text1` compares less than\n"
-                     "    `text2`, or zero if `text1` compares equal to `text2`.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.compare"), args);
-            // Parse arguments.
-            D_string text1;
-            D_string text2;
-            Opt<D_integer> length;
-            if(reader.start().g(text1).g(text2).g(length).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_compare(text1, text2, length) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        D_null()
-      )));
-    //===================================================================
-    // `std.string.starts_with()`
-    //===================================================================
-    ro.try_emplace(rocket::sref("starts_with"),
-      D_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.string.starts_with(text, prefix)`\n"
-                     "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
-                     "    `string` is considered to be a prefix of any string.\n"
-                     "  * Returns `true` if `prefix` is a prefix of `text`; otherwise\n"
-                     "    `false`.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
-            // Parse arguments.
-            D_string text;
-            D_string prefix;
-            if(reader.start().g(text).g(prefix).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_starts_with(text, prefix) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        D_null()
-      )));
-    //===================================================================
-    // `std.string.ends_with()`
-    //===================================================================
-    ro.try_emplace(rocket::sref("ends_with"),
-      D_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.string.ends_with(text, suffix)`\n"
-                     "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
-                     "    `string` is considered to be a suffix of any string.\n"
-                     "  * Returns `true` if `suffix` is a suffix of `text`; otherwise\n"
-                     "    `false`.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
-            // Parse arguments.
-            D_string text;
-            D_string suffix;
-            if(reader.start().g(text).g(suffix).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_ends_with(text, suffix) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        D_null()
-      )));
-    //===================================================================
     // `std.string.substr()`
     //===================================================================
     ro.try_emplace(rocket::sref("substr"),
@@ -1199,6 +1107,98 @@ D_object create_bindings_string()
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.compare()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("compare"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.compare(text1, text2, [length])`\n"
+                     "  * Performs lexicographical comparison on two byte `string`s. If\n"
+                     "    `length` is set to an `integer`, no more than this number of\n"
+                     "    bytes are compared. This function behaves like the `strncmp()`\n"
+                     "    function in C, except that null characters do not terminate\n"
+                     "    strings.\n"
+                     "  * Returns a positive `integer` if `text1` compares greater than\n"
+                     "    `text2`, a negative `integer` if `text1` compares less than\n"
+                     "    `text2`, or zero if `text1` compares equal to `text2`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.compare"), args);
+            // Parse arguments.
+            D_string text1;
+            D_string text2;
+            Opt<D_integer> length;
+            if(reader.start().g(text1).g(text2).g(length).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_compare(text1, text2, length) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.starts_with()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("starts_with"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.starts_with(text, prefix)`\n"
+                     "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
+                     "    `string` is considered to be a prefix of any string.\n"
+                     "  * Returns `true` if `prefix` is a prefix of `text`; otherwise\n"
+                     "    `false`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
+            // Parse arguments.
+            D_string text;
+            D_string prefix;
+            if(reader.start().g(text).g(prefix).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_starts_with(text, prefix) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.ends_with()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("ends_with"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.ends_with(text, suffix)`\n"
+                     "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
+                     "    `string` is considered to be a suffix of any string.\n"
+                     "  * Returns `true` if `suffix` is a suffix of `text`; otherwise\n"
+                     "    `false`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
+            // Parse arguments.
+            D_string text;
+            D_string suffix;
+            if(reader.start().g(text).g(suffix).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_ends_with(text, suffix) };
               return rocket::move(xref);
             }
             // Fail.

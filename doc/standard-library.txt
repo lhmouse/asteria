@@ -113,34 +113,6 @@
 
 ### `std.string`
 
-`std.string.compare(text1, text2, [length])`
-
-	* Performs lexicographical comparison on two byte `string`s. If
-	  `length` is set to an `integer`, no more than this number of
-	  bytes are compared. This function behaves like the `strncmp()`
-	  function in C, except that null characters do not terminate
-	  strings.
-
-	* Returns a positive `integer` if `text1` compares greater than
-	  `text2`, a negative `integer` if `text1` compares less than
-	  `text2`, or zero if `text1` compares equal to `text2`.
-
-`std.string.starts_with(text, prefix)`
-
-	* Checks whether `prefix` is a prefix of `text`. The empty
-	  `string` is considered to be a prefix of any string.
-
-	* Returns `true` if `prefix` is a prefix of `text`; otherwise
-	  `false`.
-
-`std.string.ends_with(text, suffix)`
-
-	* Checks whether `suffix` is a suffix of `text`. The empty
-	  `string` is considered to be a suffix of any string.
-
-	* Returns `true` if `suffix` is a suffix of `text`; otherwise
-	  `false`.
-
 `std.string.substr(text, from, [length])`
 
 	* Copies a subrange of `text` to create a new byte string. Bytes
@@ -173,6 +145,34 @@
 	  function returns a new `string` without modifying `text`.
 
 	* Returns a `string` with the subrange replaced.
+
+`std.string.compare(text1, text2, [length])`
+
+	* Performs lexicographical comparison on two byte `string`s. If
+	  `length` is set to an `integer`, no more than this number of
+	  bytes are compared. This function behaves like the `strncmp()`
+	  function in C, except that null characters do not terminate
+	  strings.
+
+	* Returns a positive `integer` if `text1` compares greater than
+	  `text2`, a negative `integer` if `text1` compares less than
+	  `text2`, or zero if `text1` compares equal to `text2`.
+
+`std.string.starts_with(text, prefix)`
+
+	* Checks whether `prefix` is a prefix of `text`. The empty
+	  `string` is considered to be a prefix of any string.
+
+	* Returns `true` if `prefix` is a prefix of `text`; otherwise
+	  `false`.
+
+`std.string.ends_with(text, suffix)`
+
+	* Checks whether `suffix` is a suffix of `text`. The empty
+	  `string` is considered to be a suffix of any string.
+
+	* Returns `true` if `suffix` is a suffix of `text`; otherwise
+	  `false`.
 
 `std.string.find(text, pattern)`
 
