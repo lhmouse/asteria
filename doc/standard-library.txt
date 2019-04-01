@@ -302,7 +302,7 @@
 
 	* Returns the trimmed `string`.
 
-`std.string.trim_left(text, [reject])`
+`std.string.ltrim(text, [reject])`
 
 	* Removes the longest prefix consisting solely bytes from
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`
@@ -311,7 +311,7 @@
 
 	* Returns the trimmed `string`.
 
-`std.string.trim_right(text, [reject])`
+`std.string.rtrim(text, [reject])`
 
 	* Removes the longest suffix consisting solely bytes from
 	  `reject`. If `reject` is empty, no byte is removed. If `reject`

@@ -281,7 +281,7 @@ D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
     return text.substr(start, end + 1 - start);
   }
 
-D_string std_string_trim_left(const D_string& text, const Opt<D_string>& reject)
+D_string std_string_ltrim(const D_string& text, const Opt<D_string>& reject)
   {
     const char* srej;
     std::size_t nrej;
@@ -311,7 +311,7 @@ D_string std_string_trim_left(const D_string& text, const Opt<D_string>& reject)
     return text.substr(start);
   }
 
-D_string std_string_trim_right(const D_string& text, const Opt<D_string>& reject)
+D_string std_string_rtrim(const D_string& text, const Opt<D_string>& reject)
   {
     const char* srej;
     std::size_t nrej;
@@ -1278,12 +1278,12 @@ D_object create_bindings_string()
         D_null()
       )));
     //===================================================================
-    // `std.string.trim_left()`
+    // `std.string.ltrim()`
     //===================================================================
-    ro.try_emplace(rocket::sref("trim_left"),
+    ro.try_emplace(rocket::sref("ltrim"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.trim_left(text, [reject])`\n"
+        rocket::sref("`std.string.ltrim(text, [reject])`\n"
                      "  * Removes the longest prefix consisting solely bytes from\n"
                      "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
                      "    is not specified, spaces and tabs are removed. This function\n"
@@ -1292,13 +1292,13 @@ D_object create_bindings_string()
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.trim_left"), args);
+            Argument_Reader reader(rocket::sref("std.string.ltrim"), args);
             // Parse arguments.
             D_string text;
             Opt<D_string> reject;
             if(reader.start().g(text).g(reject).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_trim_left(text, reject) };
+              Reference_Root::S_temporary xref = { std_string_ltrim(text, reject) };
               return rocket::move(xref);
             }
             // Fail.
@@ -1308,12 +1308,12 @@ D_object create_bindings_string()
         D_null()
       )));
     //===================================================================
-    // `std.string.trim_right()`
+    // `std.string.rtrim()`
     //===================================================================
-    ro.try_emplace(rocket::sref("trim_right"),
+    ro.try_emplace(rocket::sref("rtrim"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.string.trim_right(text, [reject])`\n"
+        rocket::sref("`std.string.rtrim(text, [reject])`\n"
                      "  * Removes the longest suffix consisting solely bytes from\n"
                      "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
                      "    is not specified, spaces and tabs are removed. This function\n"
@@ -1322,13 +1322,13 @@ D_object create_bindings_string()
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.trim_right"), args);
+            Argument_Reader reader(rocket::sref("std.string.rtrim"), args);
             // Parse arguments.
             D_string text;
             Opt<D_string> reject;
             if(reader.start().g(text).g(reject).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_trim_right(text, reject) };
+              Reference_Root::S_temporary xref = { std_string_rtrim(text, reject) };
               return rocket::move(xref);
             }
             // Fail.

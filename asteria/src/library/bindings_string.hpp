@@ -38,8 +38,8 @@ extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_
 
 extern D_string std_string_reverse(const D_string& text);
 extern D_string std_string_trim(const D_string& text, const Opt<D_string>& reject = rocket::nullopt);
-extern D_string std_string_trim_left(const D_string& text, const Opt<D_string>& reject = rocket::nullopt);
-extern D_string std_string_trim_right(const D_string& text, const Opt<D_string>& reject = rocket::nullopt);
+extern D_string std_string_ltrim(const D_string& text, const Opt<D_string>& reject = rocket::nullopt);
+extern D_string std_string_rtrim(const D_string& text, const Opt<D_string>& reject = rocket::nullopt);
 extern D_string std_string_to_upper(const D_string& text);
 extern D_string std_string_to_lower(const D_string& text);
 extern D_string std_string_translate(const D_string& text, const D_string& inputs, const Opt<D_string>& outputs = rocket::nullopt);
