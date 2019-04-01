@@ -162,7 +162,7 @@ Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& acc
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - 1 - *qit;
+    return text.rend() - *qit - 1;
   }
 
 Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
@@ -172,7 +172,7 @@ Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - 1 - *qit;
+    return text.rend() - *qit - 1;
   }
 
 Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept)
@@ -182,7 +182,7 @@ Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - 1 - *qit;
+    return text.rend() - *qit - 1;
   }
 
 Opt<D_integer> std_string_find_not_of(const D_string& text, const D_string& reject)
@@ -220,7 +220,7 @@ Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_string& rej
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - 1 - *qit;
+    return text.rend() - *qit - 1;
   }
 
 Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject)
@@ -230,7 +230,7 @@ Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - 1 - *qit;
+    return text.rend() - *qit - 1;
   }
 
 Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject)
@@ -240,7 +240,7 @@ Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - 1 - *qit;
+    return text.rend() - *qit - 1;
   }
 
 D_string std_string_reverse(const D_string& text)
