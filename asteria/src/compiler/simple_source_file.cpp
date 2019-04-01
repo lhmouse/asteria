@@ -63,20 +63,18 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
     if(!cerb) {
       return this->do_make_parser_error(Parser_Error::code_istream_open_failure);
     }
-    auto qbuf = cstrm.rdbuf();
-    if(!qbuf) {
-      cstrm.setstate(std::ios_base::badbit);
-      return this->do_make_parser_error(Parser_Error::Parser_Error::code_istream_badbit_set);
-    }
-    // Extract characters from `*qbuf` directly.
     Opt<Parser_Error> qerr;
-    auto state = std::ios_base::goodbit;
-    try {
-      qerr = this->reload(*qbuf, filename);
-      // N.B. `reload()` will have consumed all data, so `eofbit` is always set.
-      state |= std::ios_base::eofbit;
-    } catch(...) {
-      rocket::handle_ios_exception(cstrm, state);
+    auto state = std::ios_base::badbit;
+    auto qbuf = cstrm.rdbuf();
+    if(qbuf) {
+      // Extract characters from `*qbuf` directly.
+      try {
+        qerr = this->reload(*qbuf, filename);
+        // N.B. `reload()` will have consumed all data, so `eofbit` is always set.
+        state = std::ios_base::eofbit;
+      } catch(...) {
+        rocket::handle_ios_exception(cstrm, state);
+      }
     }
     if(state) {
       cstrm.setstate(state);
