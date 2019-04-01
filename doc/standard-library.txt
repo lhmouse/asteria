@@ -148,7 +148,7 @@
 
 `std.string.compare(text1, text2, [length])`
 
-	* Performs lexicographical comparison on two byte `string`s. If
+	* Performs lexicographical comparison on two byte strings. If
 	  `length` is set to an `integer`, no more than this number of
 	  bytes are compared. This function behaves like the `strncmp()`
 	  function in C, except that null characters do not terminate
@@ -197,7 +197,7 @@
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `substr(text, from)`.
+	  returned by `substr(text, from ?? 0)`.
 
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -206,7 +206,7 @@
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `substr(text, from, length)`.
+	  returned by `substr(text, from ?? 0, length)`.
 
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -222,7 +222,7 @@
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `substr(text, from)`.
+	  returned by `substr(text, from ?? 0)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -231,7 +231,7 @@
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `substr(text, from, length)`.
+	  returned by `substr(text, from ?? 0, length)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -247,7 +247,7 @@
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `substr(text, from)`.
+	  be returned by `substr(text, from ?? 0)`.
 
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -256,7 +256,7 @@
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `substr(text, from, length)`.
+	  be returned by `substr(text, from ?? 0, length)`.
 
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -272,7 +272,7 @@
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `substr(text, from)`.
+	  be returned by `substr(text, from ?? 0)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -281,7 +281,7 @@
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `substr(text, from, length)`.
+	  be returned by `substr(text, from ?? 0, length)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.

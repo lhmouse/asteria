@@ -868,13 +868,13 @@ D_object create_bindings_string()
                      "`std.string.find_any_of(text, [from], accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `substr(text, from)`.\n"
+                     "    returned by `substr(text, from ?? 0)`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
                      "`std.string.find_any_of(text, [from], [length], accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `substr(text, from, length)`.\n"
+                     "    returned by `substr(text, from ?? 0, length)`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"),
         // Definition
@@ -933,13 +933,13 @@ D_object create_bindings_string()
                      "`std.string.rfind_any_of(text, [from], accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `substr(text, from)`.\n"
+                     "    returned by `substr(text, from ?? 0)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
                      "`std.string.rfind_any_of(text, [from], [length], accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `substr(text, from, length)`.\n"
+                     "    returned by `substr(text, from ?? 0, length)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"),
         // Definition
@@ -998,13 +998,13 @@ D_object create_bindings_string()
                      "`std.string.find_not_of(text, [from], reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `substr(text, from)`.\n"
+                     "    be returned by `substr(text, from ?? 0)`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
                      "`std.string.find_not_of(text, [from], [length], reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `substr(text, from, length)`.\n"
+                     "    be returned by `substr(text, from ?? 0, length)`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"),
         // Definition
@@ -1063,13 +1063,13 @@ D_object create_bindings_string()
                      "`std.string.rfind_not_of(text, [from], reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `substr(text, from)`.\n"
+                     "    be returned by `substr(text, from ?? 0)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
                      "`std.string.rfind_not_of(text, [from], [length], reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `substr(text, from, length)`.\n"
+                     "    be returned by `substr(text, from ?? 0, length)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"),
         // Definition
@@ -1122,7 +1122,7 @@ D_object create_bindings_string()
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.compare(text1, text2, [length])`\n"
-                     "  * Performs lexicographical comparison on two byte `string`s. If\n"
+                     "  * Performs lexicographical comparison on two byte strings. If\n"
                      "    `length` is set to an `integer`, no more than this number of\n"
                      "    bytes are compared. This function behaves like the `strncmp()`\n"
                      "    function in C, except that null characters do not terminate\n"
