@@ -59,26 +59,28 @@ namespace Asteria {
 
 D_string std_string_substr(const D_string& text, const D_integer& from, const Opt<D_integer>& length)
   {
-    D_string res;
     auto range = do_subrange(text, from, length);
-    res.assign(range.first, range.second);
-    return res;
+    if((range.first == text.begin()) && (range.second == text.end())) {
+      // Use reference counting as our advantage.
+      return text;
+    }
+    return D_string(range.first, range.second);
   }
 
 D_string std_string_replace_substr(const D_string& text, const D_integer& from, const D_string& replacement)
   {
-    D_string res;
-    res.assign(text);
+    D_string res = text;
     auto range = do_subrange(res, from, rocket::nullopt);
+    // Replace the subrange.
     res.replace(range.first, range.second, replacement);
     return res;
   }
 
 D_string std_string_replace_substr(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& replacement)
   {
-    D_string res;
-    res.assign(text);
+    D_string res = text;
     auto range = do_subrange(res, from, length);
+    // Replace the subrange.
     res.replace(range.first, range.second, replacement);
     return res;
   }
