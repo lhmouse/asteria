@@ -529,9 +529,10 @@ D_string std_string_implode(const D_array& segments, const Opt<D_string>& delim)
         if(++rpos == segments.end()) {
           break;
         }
-        if(delim) {
-          text += *delim;
+        if(!delim) {
+          continue;
         }
+        text += *delim;
       }
     }
     return text;
@@ -557,9 +558,10 @@ D_string std_string_hex_encode(const D_string& text, const Opt<D_string>& delim,
       if(++rpos == text.end()) {
         break;
       }
-      if(delim) {
-        hstr += *delim;
+      if(!delim) {
+        continue;
       }
+      hstr += *delim;
     }
     return hstr;
   }
