@@ -523,7 +523,7 @@
 	* Returns an `array` containing decoded code points; otherwise
 	  `null`.
 
-`std.string.pack_8(ints)`
+`std.string.pack8(ints)`
 
 	* Packs a series of 8-bit integers into a `string`. `ints` shall
 	  be an `array` of `integer`s, all of which are truncated to 8
@@ -531,7 +531,7 @@
 
 	* Returns the packed `string`.
 
-`std.string.unpack_8(text)`
+`std.string.unpack8(text)`
 
 	* Unpacks 8-bit integers from a `string`. The contents of `text`
 	  are re-interpreted as contiguous signed 8-bit integers, all of
@@ -539,7 +539,7 @@
 
 	* Returns an `array` containing unpacked integers.
 
-`std.string.pack_16be(ints)`
+`std.string.pack16be(ints)`
 
 	* Packs a series of 16-bit integers into a `string`. `ints` shall
 	  be an `array` of `integer`s, all of which are truncated to 16
@@ -547,7 +547,7 @@
 
 	* Returns the packed `string`.
 
-`std.string.unpack_16be(text)`
+`std.string.unpack16be(text)`
 
 	* Unpacks 16-bit integers from a `string`. The contents of `text`
 	  are re-interpreted as contiguous signed 16-bit integers in the
@@ -559,7 +559,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 2.
 
-`std.string.pack_16le(ints)`
+`std.string.pack16le(ints)`
 
 	* Packs a series of 16-bit integers into a `string`. `ints` shall
 	  be an `array` of `integer`s, all of which are truncated to 16
@@ -568,7 +568,7 @@
 
 	* Returns the packed `string`.
 
-`std.string.unpack_16le(text)`
+`std.string.unpack16le(text)`
 
 	* Unpacks 16-bit integers from a `string`. The contents of `text`
 	  are re-interpreted as contiguous signed 16-bit integers in the
@@ -580,7 +580,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 2.
 
-`std.string.pack_32be(ints)`
+`std.string.pack32be(ints)`
 
 	* Packs a series of 32-bit integers into a `string`. `ints` shall
 	  be an `array` of `integer`s, all of which are truncated to 32
@@ -588,7 +588,7 @@
 
 	* Returns the packed `string`.
 
-`std.string.unpack_32be(text)`
+`std.string.unpack32be(text)`
 
 	* Unpacks 32-bit integers from a `string`. The contents of `text`
 	  are re-interpreted as contiguous signed 32-bit integers in the
@@ -600,7 +600,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 4.
 
-`std.string.pack_32le(ints)`
+`std.string.pack32le(ints)`
 
 	* Packs a series of 32-bit integers into a `string`. `ints` shall
 	  be an `array` of `integer`s, all of which are truncated to 32
@@ -609,7 +609,7 @@
 
 	* Returns the packed `string`.
 
-`std.string.unpack_32le(text)`
+`std.string.unpack32le(text)`
 
 	* Unpacks 32-bit integers from a `string`. The contents of `text`
 	  are re-interpreted as contiguous signed 32-bit integers in the
@@ -621,7 +621,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 4.
 
-`std.string.pack_64be(ints)`
+`std.string.pack64be(ints)`
 
 	* Packs a series of 64-bit integers into a `string`. `ints` shall
 	  be an `array` of `integer`s, all of which are copied into a
@@ -629,7 +629,7 @@
 
 	* Returns the packed `string`.
 
-`std.string.unpack_64be(text)`
+`std.string.unpack64be(text)`
 
 	* Unpacks 64-bit integers from a `string`. The contents of `text`
 	  are re-interpreted as contiguous signed 64-bit integers in the
@@ -640,7 +640,7 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 8.
 
-`std.string.pack_64le(ints)`
+`std.string.pack64le(ints)`
 
 	* Packs a series of 64-bit integers into a `string`. `ints` shall
 	  be an `array` of `integer`s, all of which are copied into a
@@ -648,7 +648,7 @@
 
 	* Returns the packed `string`.
 
-`std.string.unpack_64le(text)`
+`std.string.unpack64le(text)`
 
 	* Unpacks 64-bit integers from a `string`. The contents of `text`
 	  are re-interpreted as contiguous signed 64-bit integers in the

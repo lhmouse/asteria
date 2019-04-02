@@ -60,20 +60,20 @@ extern Opt<D_string> std_string_hex_decode(const D_string& hstr);
 extern Opt<D_string> std_string_utf8_encode(const D_array& code_points, const Opt<D_boolean>& permissive = rocket::nullopt);
 extern Opt<D_array> std_string_utf8_decode(const D_string& text, const Opt<D_boolean>& permissive = rocket::nullopt);
 
-extern D_string std_string_pack_8(const D_array& ints);
-extern D_array std_string_unpack_8(const D_string& text);
-extern D_string std_string_pack_16be(const D_array& ints);
-extern D_array std_string_unpack_16be(const D_string& text);
-extern D_string std_string_pack_16le(const D_array& ints);
-extern D_array std_string_unpack_16le(const D_string& text);
-extern D_string std_string_pack_32be(const D_array& ints);
-extern D_array std_string_unpack_32be(const D_string& text);
-extern D_string std_string_pack_32le(const D_array& ints);
-extern D_array std_string_unpack_32le(const D_string& text);
-extern D_string std_string_pack_64be(const D_array& ints);
-extern D_array std_string_unpack_64be(const D_string& text);
-extern D_string std_string_pack_64le(const D_array& ints);
-extern D_array std_string_unpack_64le(const D_string& text);
+extern D_string std_string_pack8(const D_array& ints);
+extern D_array std_string_unpack8(const D_string& text);
+extern D_string std_string_pack16be(const D_array& ints);
+extern D_array std_string_unpack16be(const D_string& text);
+extern D_string std_string_pack16le(const D_array& ints);
+extern D_array std_string_unpack16le(const D_string& text);
+extern D_string std_string_pack32be(const D_array& ints);
+extern D_array std_string_unpack32be(const D_string& text);
+extern D_string std_string_pack32le(const D_array& ints);
+extern D_array std_string_unpack32le(const D_string& text);
+extern D_string std_string_pack64be(const D_array& ints);
+extern D_array std_string_unpack64be(const D_string& text);
+extern D_string std_string_pack64le(const D_array& ints);
+extern D_array std_string_unpack64le(const D_string& text);
 
 // Create an object that is to be referenced as `std.string`.
 extern D_object create_bindings_string();
