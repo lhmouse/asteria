@@ -23,6 +23,13 @@ extern Opt<D_integer> std_string_rfind(const D_string& text, const D_string& pat
 extern Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const D_string& pattern);
 extern Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern);
 
+extern D_string std_string_find_and_replace(const D_string& text, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>& from, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_rfind_and_replace(const D_string& text, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>& from, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement);
+
 extern Opt<D_integer> std_string_find_any_of(const D_string& text, const D_string& accept);
 extern Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept);
 extern Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept);

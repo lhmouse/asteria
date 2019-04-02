@@ -201,6 +201,88 @@ Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from
     return text.rend() - *qit - static_cast<std::ptrdiff_t>(pattern.size());
   }
 
+D_string std_string_find_and_replace(const D_string& text, const D_string& pattern, const D_string& replacement)
+  {
+    D_string res = text;
+    auto qit = do_find_opt(res.begin(), res.end(), pattern.begin(), pattern.end());
+    if(!qit) {
+      // Make use of reference counting if no match has been found.
+      return res;
+    }
+    // Replace the subrange.
+    res.replace(*qit, *qit + static_cast<std::ptrdiff_t>(pattern.size()), replacement);
+    return res;
+  }
+
+D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>& from, const D_string& pattern, const D_string& replacement)
+  {
+    D_string res = text;
+    auto range = do_subrange(res, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
+    if(!qit) {
+      // Make use of reference counting if no match has been found.
+      return res;
+    }
+    // Replace the subrange.
+    res.replace(*qit, *qit + static_cast<std::ptrdiff_t>(pattern.size()), replacement);
+    return res;
+  }
+
+D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement)
+  {
+    D_string res = text;
+    auto range = do_subrange(res, from.value_or(0), length);
+    auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
+    if(!qit) {
+      // Make use of reference counting if no match has been found.
+      return res;
+    }
+    // Replace the subrange.
+    res.replace(*qit, *qit + static_cast<std::ptrdiff_t>(pattern.size()), replacement);
+    return res;
+  }
+
+D_string std_string_rfind_and_replace(const D_string& text, const D_string& pattern, const D_string& replacement)
+  {
+    D_string res = text;
+    auto qit = do_find_opt(res.rbegin(), res.rend(), pattern.rbegin(), pattern.rend());
+    if(!qit) {
+      // Make use of reference counting if no match has been found.
+      return res;
+    }
+    // Replace the subrange.
+    res.replace((*qit + static_cast<std::ptrdiff_t>(pattern.size())).base(), qit->base(), replacement);
+    return res;
+  }
+
+D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>& from, const D_string& pattern, const D_string& replacement)
+  {
+    D_string res = text;
+    auto range = do_subrange(res, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
+    if(!qit) {
+      // Make use of reference counting if no match has been found.
+      return res;
+    }
+    // Replace the subrange.
+    res.replace((*qit + static_cast<std::ptrdiff_t>(pattern.size())).base(), qit->base(), replacement);
+    return res;
+  }
+
+D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement)
+  {
+    D_string res = text;
+    auto range = do_subrange(res, from.value_or(0), length);
+    auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
+    if(!qit) {
+      // Make use of reference counting if no match has been found.
+      return res;
+    }
+    // Replace the subrange.
+    res.replace((*qit + static_cast<std::ptrdiff_t>(pattern.size())).base(), qit->base(), replacement);
+    return res;
+  }
+
     namespace {
 
     template<typename IteratorT> Opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const D_string& set, bool match)
@@ -1077,6 +1159,130 @@ D_object create_bindings_string()
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.find_and_replace()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("find_and_replace"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.find_and_replace(text, pattern, replacement)`\n"
+                     "  * Searches `text` for the first occurrence of `pattern`. If a\n"
+                     "    match is found, it is replaced with `replacement`. This\n"
+                     "    function returns a new `string` without modifying `text`.\n"
+                     "  * Returns the string with `pattern` replaced. If `text` does not\n"
+                     "    contain `pattern`, it is returned intact.\n"
+                     "`std.string.find_and_replace(text, [from], pattern, replacement)`\n"
+                     "  * Searches `text` for the first occurrence of `pattern`. If a\n"
+                     "    match is found, it is replaced with `replacement`. The search\n"
+                     "    operation is performed on the same subrange that would be\n"
+                     "    returned by `substr(text, from ?? 0)`. This function returns a\n"
+                     "    new `string` without modifying `text`.\n"
+                     "  * Returns the string with `pattern` replaced. If `text` does not\n"
+                     "    contain `pattern`, it is returned intact.\n"
+                     "`std.string.find_and_replace(text, [from], [length], pattern, replacement)`\n"
+                     "  * Searches `text` for the first occurrence of `pattern`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from ?? 0, length)`. If a match is\n"
+                     "    found, it is replaced with `replacement`. The search operation\n"
+                     "    is performed on the same subrange that would be returned by\n"
+                     "    `substr(text, from ?? 0)`. This function returns a new `string`\n"
+                     "    without modifying `text`.\n"
+                     "  * Returns the string with `pattern` replaced. If `text` does not\n"
+                     "    contain `pattern`, it is returned intact.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.find_and_replace"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_string pattern;
+            D_string replacement;
+            if(reader.start().g(text).save_state(state).g(pattern).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_find_and_replace(text, pattern, replacement) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> from;
+            if(reader.load_state(state).g(from).save_state(state).g(pattern).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, pattern, replacement) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(pattern).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, length, pattern, replacement) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.rfind_and_replace()`
+    //===================================================================
+    ro.try_emplace(rocket::sref("rfind_and_replace"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.rfind_and_replace(text, pattern, replacement)`\n"
+                     "  * Searches `text` for the last occurrence of `pattern`. If a\n"
+                     "    match is found, it is replaced with `replacement`. This\n"
+                     "    function returns a new `string` without modifying `text`.\n"
+                     "  * Returns the string with `pattern` replaced. If `text` does not\n"
+                     "    contain `pattern`, it is returned intact.\n"
+                     "`std.string.rfind_and_replace(text, [from], pattern, replacement)`\n"
+                     "  * Searches `text` for the last occurrence of `pattern`. If a\n"
+                     "    match is found, it is replaced with `replacement`. The search\n"
+                     "    operation is performed on the same subrange that would be\n"
+                     "    returned by `substr(text, from ?? 0)`. This function returns a\n"
+                     "    new `string` without modifying `text`.\n"
+                     "  * Returns the string with `pattern` replaced. If `text` does not\n"
+                     "    contain `pattern`, it is returned intact.\n"
+                     "`std.string.rfind_and_replace(text, [from], [length], pattern, replacement)`\n"
+                     "  * Searches `text` for the last occurrence of `pattern`. The\n"
+                     "    search operation is performed on the same subrange that would\n"
+                     "    be returned by `substr(text, from ?? 0, length)`. If a match is\n"
+                     "    found, it is replaced with `replacement`. The search operation\n"
+                     "    is performed on the same subrange that would be returned by\n"
+                     "    `substr(text, from ?? 0)`. This function returns a new `string`\n"
+                     "    without modifying `text`.\n"
+                     "  * Returns the string with `pattern` replaced. If `text` does not\n"
+                     "    contain `pattern`, it is returned intact.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.rfind_and_replace"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_string text;
+            D_string pattern;
+            D_string replacement;
+            if(reader.start().g(text).save_state(state).g(pattern).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_rfind_and_replace(text, pattern, replacement) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> from;
+            if(reader.load_state(state).g(from).save_state(state).g(pattern).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_rfind_and_replace(text, from, pattern, replacement) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(pattern).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_rfind_and_replace(text, from, length, pattern, replacement) };
               return rocket::move(xref);
             }
             // Fail.
