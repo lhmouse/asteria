@@ -979,10 +979,10 @@ D_object create_bindings_string()
             Argument_Reader::State state;
             // Parse arguments.
             D_string text;
-            D_string accept;
-            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+            D_string pattern;
+            if(reader.start().g(text).save_state(state).g(pattern).finish()) {
               // Call the binding function.
-              auto qindex = std_string_find(text, accept);
+              auto qindex = std_string_find(text, pattern);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -990,9 +990,9 @@ D_object create_bindings_string()
               return rocket::move(xref);
             }
             Opt<D_integer> from;
-            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+            if(reader.load_state(state).g(from).save_state(state).g(pattern).finish()) {
               // Call the binding function.
-              auto qindex = std_string_find(text, from, accept);
+              auto qindex = std_string_find(text, from, pattern);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -1000,9 +1000,9 @@ D_object create_bindings_string()
               return rocket::move(xref);
             }
             Opt<D_integer> length;
-            if(reader.load_state(state).g(length).g(accept).finish()) {
+            if(reader.load_state(state).g(length).g(pattern).finish()) {
               // Call the binding function.
-              auto qindex = std_string_find(text, from, length, accept);
+              auto qindex = std_string_find(text, from, length, pattern);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -1045,10 +1045,10 @@ D_object create_bindings_string()
             Argument_Reader::State state;
             // Parse arguments.
             D_string text;
-            D_string accept;
-            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+            D_string pattern;
+            if(reader.start().g(text).save_state(state).g(pattern).finish()) {
               // Call the binding function.
-              auto qindex = std_string_rfind(text, accept);
+              auto qindex = std_string_rfind(text, pattern);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -1056,9 +1056,9 @@ D_object create_bindings_string()
               return rocket::move(xref);
             }
             Opt<D_integer> from;
-            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+            if(reader.load_state(state).g(from).save_state(state).g(pattern).finish()) {
               // Call the binding function.
-              auto qindex = std_string_rfind(text, from, accept);
+              auto qindex = std_string_rfind(text, from, pattern);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -1066,9 +1066,9 @@ D_object create_bindings_string()
               return rocket::move(xref);
             }
             Opt<D_integer> length;
-            if(reader.load_state(state).g(length).g(accept).finish()) {
+            if(reader.load_state(state).g(length).g(pattern).finish()) {
               // Call the binding function.
-              auto qindex = std_string_rfind(text, from, length, accept);
+              auto qindex = std_string_rfind(text, from, length, pattern);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
