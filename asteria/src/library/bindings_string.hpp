@@ -26,12 +26,12 @@ extern Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer
 extern Opt<D_integer> std_string_find_any_of(const D_string& text, const D_string& accept);
 extern Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept);
 extern Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept);
-extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& accept);
-extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept);
-extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept);
 extern Opt<D_integer> std_string_find_not_of(const D_string& text, const D_string& reject);
 extern Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject);
 extern Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject);
+extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& accept);
+extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept);
+extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept);
 extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_string& reject);
 extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject);
 extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject);

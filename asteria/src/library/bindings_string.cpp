@@ -248,35 +248,6 @@ Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>
     return *qit - text.begin();
   }
 
-Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& accept)
-  {
-    auto qit = do_find_of_opt(text.rbegin(), text.rend(), accept, true);
-    if(!qit) {
-      return rocket::nullopt;
-    }
-    return text.rend() - *qit - 1;
-  }
-
-Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
-  {
-    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
-    auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
-    if(!qit) {
-      return rocket::nullopt;
-    }
-    return text.rend() - *qit - 1;
-  }
-
-Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept)
-  {
-    auto range = do_subrange(text, from.value_or(0), length);
-    auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
-    if(!qit) {
-      return rocket::nullopt;
-    }
-    return text.rend() - *qit - 1;
-  }
-
 Opt<D_integer> std_string_find_not_of(const D_string& text, const D_string& reject)
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), reject, false);
@@ -304,6 +275,35 @@ Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>
       return rocket::nullopt;
     }
     return *qit - text.begin();
+  }
+
+Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& accept)
+  {
+    auto qit = do_find_of_opt(text.rbegin(), text.rend(), accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return text.rend() - *qit - 1;
+  }
+
+Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
+  {
+    auto range = do_subrange(text, from.value_or(0), rocket::nullopt);
+    auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return text.rend() - *qit - 1;
+  }
+
+Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept)
+  {
+    auto range = do_subrange(text, from.value_or(0), length);
+    auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return text.rend() - *qit - 1;
   }
 
 Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_string& reject)
