@@ -14,32 +14,19 @@
 
 namespace Asteria {
 
-Parser_Error Simple_Source_File::do_make_parser_error(Parser_Error::Code code)
-  {
-    return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, code));
-  }
-
-Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
-  {
-    if((err != Parser_Error::code_success) && this->m_throw_on_failure) {
-      Parser_Error::convert_to_runtime_error_and_throw(err);
-    }
-    return rocket::move(err);
-  }
-
-Parser_Error Simple_Source_File::reload(std::streambuf& cbuf, const Cow_String& filename)
+Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const Cow_String& filename)
   {
     // Use default options.
     static constexpr Parser_Options s_default_options = { };
     // Tokenize the character stream.
     Token_Stream tstrm;
     if(!tstrm.load(cbuf, filename, s_default_options)) {
-      return this->do_throw_or_return(tstrm.get_parser_error());
+      return tstrm.get_parser_error();
     }
     // Parse tokens.
     Parser parser;
     if(!parser.load(tstrm, s_default_options)) {
-      return this->do_throw_or_return(parser.get_parser_error());
+      return parser.get_parser_error();
     }
     // Initialize parameters of the top scope.
     Source_Location sloc(filename, 1);
@@ -57,11 +44,24 @@ Parser_Error Simple_Source_File::reload(std::streambuf& cbuf, const Cow_String& 
     return Parser_Error(0, 0, 0, Parser_Error::code_success);
   }
 
+Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
+  {
+    if((err != Parser_Error::code_success) && this->m_throw_on_failure) {
+      Parser_Error::convert_to_runtime_error_and_throw(err);
+    }
+    return rocket::move(err);
+  }
+
+Parser_Error Simple_Source_File::reload(std::streambuf& cbuf, const Cow_String& filename)
+  {
+    return this->do_throw_or_return(this->do_reload_nothrow(cbuf, filename));
+  }
+
 Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& filename)
   {
     std::istream::sentry cerb(cstrm);
     if(!cerb) {
-      return this->do_make_parser_error(Parser_Error::code_istream_open_failure);
+      return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
     Opt<Parser_Error> qerr;
     auto state = std::ios_base::badbit;
@@ -69,7 +69,7 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
     if(qbuf) {
       // Extract characters from `*qbuf` directly.
       try {
-        qerr = this->reload(*qbuf, filename);
+        qerr = this->do_reload_nothrow(*qbuf, filename);
         // N.B. `reload()` will have consumed all data, so `eofbit` is always set.
         state = std::ios_base::eofbit;
       } catch(...) {
@@ -80,7 +80,7 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
       cstrm.setstate(state);
     }
     if(cstrm.bad()) {
-      return this->do_make_parser_error(Parser_Error::Parser_Error::code_istream_badbit_set);
+      return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
     // `qerr` shall always have a value here.
     // If the exceptional path above was taken, `cstrm.bad()` would have been set.
@@ -100,7 +100,7 @@ Parser_Error Simple_Source_File::open(const Cow_String& filename)
     // Open the file designated by `filename`.
     std::filebuf cbuf;
     if(!cbuf.open(filename.c_str(), std::ios_base::in)) {
-      return this->do_make_parser_error(Parser_Error::code_istream_open_failure);
+      return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
     return this->reload(cbuf, filename);
   }

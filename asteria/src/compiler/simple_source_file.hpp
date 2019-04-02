@@ -47,7 +47,7 @@ class Simple_Source_File
       }
 
   private:
-    inline Parser_Error do_make_parser_error(Parser_Error::Code code);
+    inline Parser_Error do_reload_nothrow(std::streambuf& cbuf, const Cow_String& filename);
     inline Parser_Error do_throw_or_return(Parser_Error&& err);
 
   public:
