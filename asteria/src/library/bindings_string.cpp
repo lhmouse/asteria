@@ -251,7 +251,7 @@ D_string std_string_rfind_and_replace(const D_string& text, const D_string& patt
       return res;
     }
     // Replace the subrange.
-    res.replace((*qit + static_cast<std::ptrdiff_t>(pattern.size())).base(), qit->base(), replacement);
+    res.replace(qit->base() - static_cast<std::ptrdiff_t>(pattern.size()), qit->base(), replacement);
     return res;
   }
 
@@ -265,7 +265,7 @@ D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>
       return res;
     }
     // Replace the subrange.
-    res.replace((*qit + static_cast<std::ptrdiff_t>(pattern.size())).base(), qit->base(), replacement);
+    res.replace(qit->base() - static_cast<std::ptrdiff_t>(pattern.size()), qit->base(), replacement);
     return res;
   }
 
@@ -279,7 +279,7 @@ D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>
       return res;
     }
     // Replace the subrange.
-    res.replace((*qit + static_cast<std::ptrdiff_t>(pattern.size())).base(), qit->base(), replacement);
+    res.replace(qit->base() - static_cast<std::ptrdiff_t>(pattern.size()), qit->base(), replacement);
     return res;
   }
 
