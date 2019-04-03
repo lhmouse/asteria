@@ -364,7 +364,7 @@ std::ostream& operator<<(std::ostream& os, const Quote& q)
         default:
           {
             static constexpr char s_digits[] = "0123456789ABCDEF";
-            const char xseq[4] = { '\\', 'x', s_digits[(uch >> 4) & 0x0F], s_digits[uch & 0x0F] };
+            char xseq[4] = { '\\', 'x', s_digits[(uch >> 4) & 0x0F], s_digits[uch & 0x0F] };
             if(os.rdbuf()->sputn(xseq, 4) < 4) {
               state |= std::ios_base::failbit;
               goto z;
