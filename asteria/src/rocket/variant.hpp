@@ -15,46 +15,6 @@ template<typename... alternativesT> class variant;
 
     namespace details_variant {
 
-    template<typename firstT, typename secondT> union union_pair
-      {
-        using first_type   = firstT;
-        using second_type  = secondT;
-
-        first_type first;
-        second_type second;
-
-        union_pair() noexcept
-          {
-          }
-        ~union_pair()
-          {
-          }
-      };
-
-    // Main template definition for no type parameters.
-    template<size_t minlenT, typename... typesT> struct aligned_union
-      {
-        struct type
-          {
-            char bytes[minlenT];
-          };
-      };
-    // Specialization for a size of zero and no type parameters. This has to exist to avoid arrays of zero elements.
-    template<> struct aligned_union<0>
-      {
-        struct type
-          {
-          };
-      };
-    // Specialization for at least one type parameter.
-    template<size_t minlenT, typename firstT, typename... restT> struct aligned_union<minlenT, firstT, restT...>
-      {
-        struct type
-          {
-            union_pair<firstT, typename aligned_union<minlenT, restT...>::type> pair;
-          };
-      };
-
     template<size_t indexT, typename targetT,
              typename... alternativesT> struct type_finder  // no value
       {
@@ -141,7 +101,7 @@ template<typename... alternativesT> class variant
   private:
     struct storage
       {
-        typename details_variant::aligned_union<1, alternativesT...>::type bytes;
+        typename aligned_union<1, alternativesT...>::type bytes;
 
         template<typename otherT> operator const otherT* () const noexcept
           {

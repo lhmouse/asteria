@@ -83,6 +83,7 @@ using ::std::is_trivially_destructible;
 using ::std::underlying_type;
 using ::std::is_array;
 using ::std::is_base_of;
+using ::std::aligned_union;
 
 using ::std::allocator;
 using ::std::allocator_traits;
