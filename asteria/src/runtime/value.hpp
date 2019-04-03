@@ -15,10 +15,10 @@ class Value
   public:
     enum Compare : std::uint8_t
       {
-        compare_unordered  = 0,  // 00
-        compare_equal      = 1,  // 01
-        compare_less       = 2,  // 10
-        compare_greater    = 3,  // 11
+        compare_unordered  = 0,  // 0000
+        compare_equal      = 1,  // 0001
+        compare_less       = 8,  // 1000
+        compare_greater    = 9,  // 1001
       };
 
     using Xvariant = Variant<
@@ -59,7 +59,7 @@ class Value
       }
 
   private:
-    inline Compare do_compare_partial(const Value& other) const;
+    inline Compare do_compare_partial(const Value& other) const noexcept;
     inline std::ostream& do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const;
 
   public:

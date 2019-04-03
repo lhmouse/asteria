@@ -60,18 +60,6 @@ const Value& Value::get_null() noexcept
     return *(static_cast<const Value*>(pv));
   }
 
-std::ostream& Value::do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
-  {
-    if(indent_increment == 0) {
-      // Output everything in a single line. Characters are separated by spaces.
-      return os << ' ';
-    }
-    // Terminate the current line and indent it accordingly.
-    os << std::endl;
-    os.width(static_cast<std::streamsize>(indent_next));
-    return os << "";
-  }
-
 bool Value::test() const noexcept
   {
     switch(this->dtype()) {
@@ -113,121 +101,101 @@ bool Value::test() const noexcept
     }
   }
 
-    namespace {
-
-    template<typename ElementT> Value::Compare do_three_way_compare(const ElementT& lhs, const ElementT& rhs)
-      {
-        if(lhs < rhs) {
-          return Value::compare_less;
-        }
-        if(rhs < lhs) {
-          return Value::compare_greater;
-        }
-        return Value::compare_equal;
+Value::Compare Value::do_compare_partial(const Value& other) const noexcept
+  {
+    if(this->dtype() == dtype_null) {
+      // `null` compares equal with `null` and less than anything else.
+      if(other.dtype() == dtype_null) {
+        return compare_equal;
       }
-
-    template<typename IteratorT> Value::Compare do_lexicographical_compare(IteratorT s1, IteratorT s2, std::size_t n)
-      {
-        auto p1 = rocket::move(s1);
-        auto e1 = p1 + static_cast<typename std::iterator_traits<IteratorT>::difference_type>(n);
-        auto p2 = rocket::move(s2);
-        for(;;) {
-          if(p1 == e1) {
-            break;
-          }
-          auto res = p1->compare(*p2);
-          if(res != Value::compare_equal) {
-            return res;
-          }
-          ++p1;
-          ++p2;
-        }
-        return Value::compare_equal;
+      return compare_less;
+    }
+    if((this->dtype() == dtype_boolean) && (other.dtype() == dtype_boolean)) {
+      // Compare `boolean` values as integers.
+      const auto& lhs = this->check<D_boolean>();
+      const auto& rhs = other.check<D_boolean>();
+      if(lhs == rhs) {
+        return compare_equal;
       }
-
-    }  // namespace
+      return (lhs < rhs) ? compare_less : compare_greater;
+    }
+    if((this->dtype() == dtype_integer) && (other.dtype() == dtype_integer)) {
+      // Compare `integer` values.
+      const auto& lhs = this->check<D_integer>();
+      const auto& rhs = other.check<D_integer>();
+      if(lhs == rhs) {
+        return compare_equal;
+      }
+      return (lhs < rhs) ? compare_less : compare_greater;
+    }
+    if((this->dtype() == dtype_integer) && (other.dtype() == dtype_real)) {
+      // Compare an `integer` value and a `real` value.
+      const auto& lhs = this->check<D_integer>();
+      const auto& rhs = other.check<D_real>();
+      // Cast the `integer` to type `real` and compare the result with the other.
+      auto rlhs = D_real(lhs);
+      if(std::isunordered(rlhs, rhs)) {
+        return compare_unordered;
+      }
+      if(rlhs == rhs) {
+        return compare_equal;
+      }
+      return (rlhs < rhs) ? compare_less : compare_greater;
+    }
+    if((this->dtype() == dtype_real) && (other.dtype() == dtype_real)) {
+      // Compare `real` values.
+      const auto& lhs = this->check<D_real>();
+      const auto& rhs = other.check<D_real>();
+      if(std::isunordered(lhs, rhs)) {
+        return compare_unordered;
+      }
+      if(lhs == rhs) {
+        return compare_equal;
+      }
+      return (lhs < rhs) ? compare_less : compare_greater;
+    }
+    if((this->dtype() == dtype_string) && (other.dtype() == dtype_string)) {
+      // Compare `string` values.
+      const auto& lhs = this->check<D_string>();
+      const auto& rhs = other.check<D_string>();
+      // Make use of the three-way comparison result of `D_string::compare()`.
+      auto res = lhs.compare(rhs);
+      if(res == 0) {
+        return compare_equal;
+      }
+      return (res < 0) ? compare_less : compare_greater;
+    }
+    if((this->dtype() == dtype_array) && (other.dtype() == dtype_array)) {
+      // Compare `array` values.
+      const auto& lhs = this->check<D_array>();
+      const auto& rhs = other.check<D_array>();
+      // Perform lexicographical comparison of array elements.
+      auto nlimit = rocket::min(lhs.size(), rhs.size());
+      for(std::size_t i = 0; i < nlimit; ++i) {
+        auto res = lhs[i].compare(rhs[i]);
+        if(res != compare_equal) {
+          return res;
+        }
+      }
+      if(lhs.size() == rhs.size()) {
+        return compare_equal;
+      }
+      return (lhs.size() < rhs.size()) ? compare_less : compare_greater;
+    }
+    // Anything not defined here is unordered.
+    return compare_unordered;
+  }
 
 Value::Compare Value::compare(const Value& other) const noexcept
   {
-    // Values of different types can only be compared if either of them is `null`.
-    if(this->dtype() != other.dtype()) {
-      // `null` is considered to be equal to `null` and less than anything else.
-      if(this->dtype() == dtype_null) {
-        return Value::compare_less;
-      }
-      if(other.dtype() == dtype_null) {
-        return Value::compare_greater;
-      }
-      return Value::compare_unordered;
+    if(this->dtype() <= other.dtype()) {
+      // Compare them in the natural order.
+      return this->do_compare_partial(other);
     }
-    // If both values have the same type, perform normal comparison.
-    switch(this->dtype()) {
-    case dtype_null:
-      {
-        return Value::compare_equal;
-      }
-    case dtype_boolean:
-      {
-        const auto& lhs = this->check<D_boolean>();
-        const auto& rhs = other.check<D_boolean>();
-        return do_three_way_compare(lhs, rhs);
-      }
-    case dtype_integer:
-      {
-        const auto& lhs = this->check<D_integer>();
-        const auto& rhs = other.check<D_integer>();
-        return do_three_way_compare(lhs, rhs);
-      }
-    case dtype_real:
-      {
-        const auto& lhs = this->check<D_real>();
-        const auto& rhs = other.check<D_real>();
-        if(std::isunordered(lhs, rhs)) {
-          return Value::compare_unordered;
-        }
-        return do_three_way_compare(lhs, rhs);
-      }
-    case dtype_string:
-      {
-        const auto& lhs = this->check<D_string>();
-        const auto& rhs = other.check<D_string>();
-        return do_three_way_compare(lhs.compare(rhs), 0);
-      }
-    case dtype_opaque:
-    case dtype_function:
-      {
-        return Value::compare_unordered;
-      }
-    case dtype_array:
-      {
-        const auto& lhs = this->check<D_array>();
-        const auto& rhs = other.check<D_array>();
-        // Compare elements lexicographically.
-        auto nlhs = lhs.size();
-        auto nrhs = rhs.size();
-        if(nlhs < nrhs) {
-          auto res = do_lexicographical_compare(lhs.begin(), rhs.begin(), nlhs);
-          if(res != compare_equal) {
-            return res;
-          }
-          return compare_less;
-        }
-        if(nlhs > nrhs) {
-          auto res = do_lexicographical_compare(lhs.begin(), rhs.begin(), nrhs);
-          if(res != compare_equal) {
-            return res;
-          }
-          return compare_greater;
-        }
-        return do_lexicographical_compare(lhs.begin(), rhs.begin(), nlhs);
-      }
-    case dtype_object:
-      {
-        return Value::compare_unordered;
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
-    }
+    // Swap the operands and compare them, then translate `compare_{less,greater}` to the other but preserve the other results.
+    int cmp = other.do_compare_partial(*this);
+    cmp ^= cmp >> 3;
+    return static_cast<Compare>(cmp);
   }
 
 void Value::print(std::ostream& os, bool quote_strings) const
@@ -317,6 +285,18 @@ void Value::print(std::ostream& os, bool quote_strings) const
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
     }
+  }
+
+std::ostream& Value::do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
+  {
+    if(indent_increment == 0) {
+      // Output everything in a single line. Characters are separated by spaces.
+      return os << ' ';
+    }
+    // Terminate the current line and indent it accordingly.
+    os << std::endl;
+    os.width(static_cast<std::streamsize>(indent_next));
+    return os << "";
   }
 
 void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
