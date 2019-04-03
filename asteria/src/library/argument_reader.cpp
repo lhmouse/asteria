@@ -117,14 +117,14 @@ const Reference* Argument_Reader::do_peek_argument_opt() const
     return &(this->m_args.get().at(nparams - 1));
   }
 
-Opt<std::size_t> Argument_Reader::do_check_finish_opt(bool variadic) const
+Opt<std::ptrdiff_t> Argument_Reader::do_check_finish_opt(bool variadic) const
   {
     if(!this->m_state.succeeded) {
       return rocket::nullopt;
     }
     // Before calling this function, a finish tag must have been recorded in `m_state.prototype`.
-    auto nparams = this->m_state.prototype.size() - 1 - variadic;
-    return nparams;
+    auto nparams = this->m_state.prototype.size() - 1;
+    return static_cast<std::ptrdiff_t>(nparams - variadic);
   }
 
 template<Dtype dtypeT> Argument_Reader& Argument_Reader::do_read_typed_argument(Opt<typename Value::Xvariant::type_at<dtypeT>::type>& qxvalue)
@@ -298,13 +298,13 @@ bool Argument_Reader::finish()
   {
     this->do_record_parameter_finish(false);
     // Get the number of named parameters.
-    auto knparams = this->do_check_finish_opt(false);
-    if(!knparams) {
+    auto qoff = this->do_check_finish_opt(false);
+    if(!qoff) {
       return false;
     }
     // There shall be no more arguments than parameters.
-    if(*knparams < this->m_args.get().size()) {
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", *knparams, "`, "
+    if(*qoff < this->m_args.get().ssize()) {
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", *qoff, "`, "
                                                      "but got `", this->m_args.get().size(), "`).");  });
       return false;
     }
@@ -315,14 +315,14 @@ bool Argument_Reader::finish(Cow_Vector<Reference>& vargs)
   {
     this->do_record_parameter_finish(true);
     // Get the number of named parameters.
-    auto knparams = this->do_check_finish_opt(true);
-    if(!knparams) {
+    auto qoff = this->do_check_finish_opt(true);
+    if(!qoff) {
       return false;
     }
     // Copy variadic arguments as is.
     vargs.clear();
-    if(*knparams < this->m_args.get().size()) {
-      std::for_each(this->m_args.get().begin() + static_cast<std::ptrdiff_t>(*knparams), this->m_args.get().end(),
+    if(*qoff < this->m_args.get().ssize()) {
+      std::for_each(this->m_args.get().begin() + *qoff, this->m_args.get().end(),
                     [&](const Reference& arg) { vargs.emplace_back(arg);  });
     }
     return true;
@@ -332,14 +332,14 @@ bool Argument_Reader::finish(Cow_Vector<Value>& vargs)
   {
     this->do_record_parameter_finish(true);
     // Get the number of named parameters.
-    auto knparams = this->do_check_finish_opt(true);
-    if(!knparams) {
+    auto qoff = this->do_check_finish_opt(true);
+    if(!qoff) {
       return false;
     }
     // Copy variadic arguments as is.
     vargs.clear();
-    if(*knparams < this->m_args.get().size()) {
-      std::for_each(this->m_args.get().begin() + static_cast<std::ptrdiff_t>(*knparams), this->m_args.get().end(),
+    if(*qoff < this->m_args.get().ssize()) {
+      std::for_each(this->m_args.get().begin() + *qoff, this->m_args.get().end(),
                     [&](const Reference& arg) { vargs.emplace_back(arg.read());  });
     }
     return true;

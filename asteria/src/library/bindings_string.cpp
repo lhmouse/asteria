@@ -178,7 +178,7 @@ Opt<D_integer> std_string_rfind(const D_string& text, const D_string& pattern)
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - *qit - static_cast<std::ptrdiff_t>(pattern.size());
+    return text.rend() - *qit - pattern.ssize();
   }
 
 Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const D_string& pattern)
@@ -188,7 +188,7 @@ Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - *qit - static_cast<std::ptrdiff_t>(pattern.size());
+    return text.rend() - *qit - pattern.ssize();
   }
 
 Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern)
@@ -198,7 +198,7 @@ Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from
     if(!qit) {
       return rocket::nullopt;
     }
-    return text.rend() - *qit - static_cast<std::ptrdiff_t>(pattern.size());
+    return text.rend() - *qit - pattern.ssize();
   }
 
 D_string std_string_find_and_replace(const D_string& text, const D_string& pattern, const D_string& replacement)
@@ -210,7 +210,7 @@ D_string std_string_find_and_replace(const D_string& text, const D_string& patte
       return res;
     }
     // Replace the subrange.
-    res.replace(*qit, *qit + static_cast<std::ptrdiff_t>(pattern.size()), replacement);
+    res.replace(*qit, *qit + pattern.ssize(), replacement);
     return res;
   }
 
@@ -224,7 +224,7 @@ D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>&
       return res;
     }
     // Replace the subrange.
-    res.replace(*qit, *qit + static_cast<std::ptrdiff_t>(pattern.size()), replacement);
+    res.replace(*qit, *qit + pattern.ssize(), replacement);
     return res;
   }
 
@@ -238,7 +238,7 @@ D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>&
       return res;
     }
     // Replace the subrange.
-    res.replace(*qit, *qit + static_cast<std::ptrdiff_t>(pattern.size()), replacement);
+    res.replace(*qit, *qit + pattern.ssize(), replacement);
     return res;
   }
 
@@ -251,7 +251,7 @@ D_string std_string_rfind_and_replace(const D_string& text, const D_string& patt
       return res;
     }
     // Replace the subrange.
-    res.replace(qit->base() - static_cast<std::ptrdiff_t>(pattern.size()), qit->base(), replacement);
+    res.replace(qit->base() - pattern.ssize(), qit->base(), replacement);
     return res;
   }
 
@@ -265,7 +265,7 @@ D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>
       return res;
     }
     // Replace the subrange.
-    res.replace(qit->base() - static_cast<std::ptrdiff_t>(pattern.size()), qit->base(), replacement);
+    res.replace(qit->base() - pattern.ssize(), qit->base(), replacement);
     return res;
   }
 
@@ -279,7 +279,7 @@ D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>
       return res;
     }
     // Replace the subrange.
-    res.replace(qit->base() - static_cast<std::ptrdiff_t>(pattern.size()), qit->base(), replacement);
+    res.replace(qit->base() - pattern.ssize(), qit->base(), replacement);
     return res;
   }
 

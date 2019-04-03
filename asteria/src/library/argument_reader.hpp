@@ -55,7 +55,7 @@ class Argument_Reader
     inline void do_record_parameter_finish(bool variadic);
 
     inline const Reference* do_peek_argument_opt() const;
-    inline Opt<std::size_t> do_check_finish_opt(bool variadic) const;
+    inline Opt<std::ptrdiff_t> do_check_finish_opt(bool variadic) const;
 
     template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument(Opt<typename Value::Xvariant::type_at<dtypeT>::type>& qxvalue);
     template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument(typename Value::Xvariant::type_at<dtypeT>::type& xvalue);
