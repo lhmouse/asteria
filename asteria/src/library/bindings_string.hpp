@@ -76,7 +76,7 @@ extern D_string std_string_pack64le(const D_array& ints);
 extern D_array std_string_unpack64le(const D_string& text);
 
 // Create an object that is to be referenced as `std.string`.
-extern D_object create_bindings_string();
+extern void create_bindings_string(D_object& result, API_Version version);
 
 }  // namespace Asteria
 

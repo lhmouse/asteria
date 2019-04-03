@@ -21,8 +21,8 @@ extern D_string std_chrono_min_datetime(const Opt<D_boolean>& with_ms = rocket::
 extern D_string std_chrono_max_datetime(const Opt<D_boolean>& with_ms = rocket::nullopt);
 extern Opt<D_integer> std_chrono_parse_datetime(const D_string& time_str);
 
-// Create an object that is to be referenced as `std.chrono`.
-extern D_object create_bindings_chrono();
+// Initialize an object that is to be referenced as `std.chrono`.
+extern void create_bindings_chrono(D_object& result, API_Version version);
 
 }  // namespace Asteria
 

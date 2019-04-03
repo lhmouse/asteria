@@ -949,13 +949,12 @@ D_array std_string_unpack64le(const D_string& text)
     return do_unpack<std::int64_t, false>(text);
   }
 
-D_object create_bindings_string()
+void create_bindings_string(D_object& result, API_Version /*version*/)
   {
-    D_object ro;
     //===================================================================
     // `std.string.substr()`
     //===================================================================
-    ro.try_emplace(rocket::sref("substr"),
+    result.insert_or_assign(rocket::sref("substr"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.substr(text, from, [length])`\n"
@@ -989,7 +988,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.replace_substr()`
     //===================================================================
-    ro.try_emplace(rocket::sref("replace_substr"),
+    result.insert_or_assign(rocket::sref("replace_substr"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.replace_substr(text, from, replacement)`\n"
@@ -1036,7 +1035,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.find()`
     //===================================================================
-    ro.try_emplace(rocket::sref("find"),
+    result.insert_or_assign(rocket::sref("find"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.find(text, pattern)`\n"
@@ -1104,7 +1103,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.rfind()`
     //===================================================================
-    ro.try_emplace(rocket::sref("rfind"),
+    result.insert_or_assign(rocket::sref("rfind"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.rfind(text, pattern)`\n"
@@ -1170,7 +1169,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.find_and_replace()`
     //===================================================================
-    ro.try_emplace(rocket::sref("find_and_replace"),
+    result.insert_or_assign(rocket::sref("find_and_replace"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.find_and_replace(text, pattern, replacement)`\n"
@@ -1232,7 +1231,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.rfind_and_replace()`
     //===================================================================
-    ro.try_emplace(rocket::sref("rfind_and_replace"),
+    result.insert_or_assign(rocket::sref("rfind_and_replace"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.rfind_and_replace(text, pattern, replacement)`\n"
@@ -1294,7 +1293,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.find_any_of()`
     //===================================================================
-    ro.try_emplace(rocket::sref("find_any_of"),
+    result.insert_or_assign(rocket::sref("find_any_of"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.find_any_of(text, accept)`\n"
@@ -1359,7 +1358,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.rfind_any_of()`
     //===================================================================
-    ro.try_emplace(rocket::sref("rfind_any_of"),
+    result.insert_or_assign(rocket::sref("rfind_any_of"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.rfind_any_of(text, accept)`\n"
@@ -1424,7 +1423,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.find_not_of()`
     //===================================================================
-    ro.try_emplace(rocket::sref("find_not_of"),
+    result.insert_or_assign(rocket::sref("find_not_of"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.find_not_of(text, reject)`\n"
@@ -1489,7 +1488,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.rfind_not_of()`
     //===================================================================
-    ro.try_emplace(rocket::sref("rfind_not_of"),
+    result.insert_or_assign(rocket::sref("rfind_not_of"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.rfind_not_of(text, reject)`\n"
@@ -1554,7 +1553,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.compare()`
     //===================================================================
-    ro.try_emplace(rocket::sref("compare"),
+    result.insert_or_assign(rocket::sref("compare"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.compare(text1, text2, [length])`\n"
@@ -1588,7 +1587,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.starts_with()`
     //===================================================================
-    ro.try_emplace(rocket::sref("starts_with"),
+    result.insert_or_assign(rocket::sref("starts_with"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.starts_with(text, prefix)`\n"
@@ -1617,7 +1616,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.ends_with()`
     //===================================================================
-    ro.try_emplace(rocket::sref("ends_with"),
+    result.insert_or_assign(rocket::sref("ends_with"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.ends_with(text, suffix)`\n"
@@ -1646,7 +1645,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.reverse()`
     //===================================================================
-    ro.try_emplace(rocket::sref("reverse"),
+    result.insert_or_assign(rocket::sref("reverse"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.reverse(text)`\n"
@@ -1673,7 +1672,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.trim()`
     //===================================================================
-    ro.try_emplace(rocket::sref("trim"),
+    result.insert_or_assign(rocket::sref("trim"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.trim(text, [reject])`\n"
@@ -1703,7 +1702,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.ltrim()`
     //===================================================================
-    ro.try_emplace(rocket::sref("ltrim"),
+    result.insert_or_assign(rocket::sref("ltrim"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.ltrim(text, [reject])`\n"
@@ -1733,7 +1732,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.rtrim()`
     //===================================================================
-    ro.try_emplace(rocket::sref("rtrim"),
+    result.insert_or_assign(rocket::sref("rtrim"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.rtrim(text, [reject])`\n"
@@ -1763,7 +1762,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.to_upper()`
     //===================================================================
-    ro.try_emplace(rocket::sref("to_upper"),
+    result.insert_or_assign(rocket::sref("to_upper"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.to_upper(text)`\n"
@@ -1791,7 +1790,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.to_lower()`
     //===================================================================
-    ro.try_emplace(rocket::sref("to_lower"),
+    result.insert_or_assign(rocket::sref("to_lower"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.to_lower(text)`\n"
@@ -1819,7 +1818,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.translate()`
     //===================================================================
-    ro.try_emplace(rocket::sref("translate"),
+    result.insert_or_assign(rocket::sref("translate"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("``std.string.translate(text, inputs, [outputs])`\n"
@@ -1855,7 +1854,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.explode()`
     //===================================================================
-    ro.try_emplace(rocket::sref("explode"),
+    result.insert_or_assign(rocket::sref("explode"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.explode(text, [delim], [limit])`\n"
@@ -1889,7 +1888,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.implode()`
     //===================================================================
-    ro.try_emplace(rocket::sref("implode"),
+    result.insert_or_assign(rocket::sref("implode"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.implode(segments, [delim])`\n"
@@ -1919,7 +1918,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.hex_encode()`
     //===================================================================
-    ro.try_emplace(rocket::sref("hex_encode"),
+    result.insert_or_assign(rocket::sref("hex_encode"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.hex_encode(text, [delim], [uppercase])`\n"
@@ -1952,7 +1951,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.hex_decode()`
     //===================================================================
-    ro.try_emplace(rocket::sref("hex_decode"),
+    result.insert_or_assign(rocket::sref("hex_decode"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.hex_decode(hstr)`\n"
@@ -1986,7 +1985,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.utf8_encode()`
     //===================================================================
-    ro.try_emplace(rocket::sref("utf8_encode"),
+    result.insert_or_assign(rocket::sref("utf8_encode"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.utf8_encode(code_points, [permissive])`\n"
@@ -2021,7 +2020,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.utf8_decode()`
     //===================================================================
-    ro.try_emplace(rocket::sref("utf8_decode"),
+    result.insert_or_assign(rocket::sref("utf8_decode"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.utf8_decode(text, [permissive])`\n"
@@ -2058,7 +2057,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.pack8()`
     //===================================================================
-    ro.try_emplace(rocket::sref("pack8"),
+    result.insert_or_assign(rocket::sref("pack8"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.pack8(ints)`\n"
@@ -2088,7 +2087,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.unpack8()`
     //===================================================================
-    ro.try_emplace(rocket::sref("unpack8"),
+    result.insert_or_assign(rocket::sref("unpack8"),
       D_function(make_simple_binding(
         rocket::sref("`std.string.unpack8(text)`\n"
                      "  * Unpacks 8-bit integers from a `string`. The contents of `text`\n"
@@ -2117,7 +2116,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.pack16be()`
     //===================================================================
-    ro.try_emplace(rocket::sref("pack16be"),
+    result.insert_or_assign(rocket::sref("pack16be"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.pack16be(ints)`\n"
@@ -2147,7 +2146,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.unpack16be()`
     //===================================================================
-    ro.try_emplace(rocket::sref("unpack16be"),
+    result.insert_or_assign(rocket::sref("unpack16be"),
       D_function(make_simple_binding(
         rocket::sref("`std.string.unpack16be(text)`\n"
                      "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
@@ -2179,7 +2178,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.pack16le()`
     //===================================================================
-    ro.try_emplace(rocket::sref("pack16le"),
+    result.insert_or_assign(rocket::sref("pack16le"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.pack16le(ints)`\n"
@@ -2210,7 +2209,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.unpack16le()`
     //===================================================================
-    ro.try_emplace(rocket::sref("unpack16le"),
+    result.insert_or_assign(rocket::sref("unpack16le"),
       D_function(make_simple_binding(
         rocket::sref("`std.string.unpack16le(text)`\n"
                      "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
@@ -2242,7 +2241,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.pack32be()`
     //===================================================================
-    ro.try_emplace(rocket::sref("pack32be"),
+    result.insert_or_assign(rocket::sref("pack32be"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.pack32be(ints)`\n"
@@ -2272,7 +2271,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.unpack32be()`
     //===================================================================
-    ro.try_emplace(rocket::sref("unpack32be"),
+    result.insert_or_assign(rocket::sref("unpack32be"),
       D_function(make_simple_binding(
         rocket::sref("`std.string.unpack32be(text)`\n"
                      "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
@@ -2304,7 +2303,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.pack32le()`
     //===================================================================
-    ro.try_emplace(rocket::sref("pack32le"),
+    result.insert_or_assign(rocket::sref("pack32le"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.pack32le(ints)`\n"
@@ -2335,7 +2334,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.unpack32le()`
     //===================================================================
-    ro.try_emplace(rocket::sref("unpack32le"),
+    result.insert_or_assign(rocket::sref("unpack32le"),
       D_function(make_simple_binding(
         rocket::sref("`std.string.unpack32le(text)`\n"
                      "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
@@ -2367,7 +2366,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.pack64be()`
     //===================================================================
-    ro.try_emplace(rocket::sref("pack64be"),
+    result.insert_or_assign(rocket::sref("pack64be"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.pack64be(ints)`\n"
@@ -2397,7 +2396,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.unpack64be()`
     //===================================================================
-    ro.try_emplace(rocket::sref("unpack64be"),
+    result.insert_or_assign(rocket::sref("unpack64be"),
       D_function(make_simple_binding(
         rocket::sref("`std.string.unpack64be(text)`\n"
                      "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
@@ -2428,7 +2427,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.pack64le()`
     //===================================================================
-    ro.try_emplace(rocket::sref("pack64le"),
+    result.insert_or_assign(rocket::sref("pack64le"),
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.pack64le(ints)`\n"
@@ -2458,7 +2457,7 @@ D_object create_bindings_string()
     //===================================================================
     // `std.string.unpack64le()`
     //===================================================================
-    ro.try_emplace(rocket::sref("unpack64le"),
+    result.insert_or_assign(rocket::sref("unpack64le"),
       D_function(make_simple_binding(
         rocket::sref("`std.string.unpack64le(text)`\n"
                      "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
@@ -2490,7 +2489,6 @@ D_object create_bindings_string()
     //===================================================================
     // End of `std.string`
     //===================================================================
-    return ro;
   }
 
 }  // namespace Asteria
