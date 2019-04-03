@@ -104,43 +104,50 @@ bool Value::test() const noexcept
 Value::Compare Value::do_compare_partial(const Value& other) const noexcept
   {
     if(this->dtype() == dtype_null) {
-      // `null` compares equal with `null` and less than anything else.
-      if(other.dtype() == dtype_null) {
-        return compare_equal;
+      // `null` compares equal with `null` and unordered with anything else.
+      if(other.dtype() != dtype_null) {
+        return compare_unordered;
       }
-      return compare_less;
+      return compare_equal;
     }
     if((this->dtype() == dtype_boolean) && (other.dtype() == dtype_boolean)) {
       // Compare `boolean` values as integers.
       const auto& lhs = this->check<D_boolean>();
       const auto& rhs = other.check<D_boolean>();
-      if(lhs == rhs) {
-        return compare_equal;
+      if(lhs < rhs) {
+        return compare_less;
       }
-      return (lhs < rhs) ? compare_less : compare_greater;
+      if(lhs > rhs) {
+        return compare_greater;
+      }
+      return compare_equal;
     }
     if((this->dtype() == dtype_integer) && (other.dtype() == dtype_integer)) {
       // Compare `integer` values.
       const auto& lhs = this->check<D_integer>();
       const auto& rhs = other.check<D_integer>();
-      if(lhs == rhs) {
-        return compare_equal;
+      if(lhs < rhs) {
+        return compare_less;
       }
-      return (lhs < rhs) ? compare_less : compare_greater;
+      if(lhs > rhs) {
+        return compare_greater;
+      }
+      return compare_equal;
     }
     if((this->dtype() == dtype_integer) && (other.dtype() == dtype_real)) {
       // Compare an `integer` value and a `real` value.
       const auto& lhs = this->check<D_integer>();
       const auto& rhs = other.check<D_real>();
-      // Cast the `integer` to type `real` and compare the result with the other.
-      auto rlhs = D_real(lhs);
-      if(std::isunordered(rlhs, rhs)) {
+      if(std::isunordered(lhs, rhs)) {
         return compare_unordered;
       }
-      if(rlhs == rhs) {
-        return compare_equal;
+      if(std::isless(lhs, rhs)) {
+        return compare_less;
       }
-      return (rlhs < rhs) ? compare_less : compare_greater;
+      if(std::isgreater(lhs, rhs)) {
+        return compare_greater;
+      }
+      return compare_equal;
     }
     if((this->dtype() == dtype_real) && (other.dtype() == dtype_real)) {
       // Compare `real` values.
@@ -149,38 +156,57 @@ Value::Compare Value::do_compare_partial(const Value& other) const noexcept
       if(std::isunordered(lhs, rhs)) {
         return compare_unordered;
       }
-      if(lhs == rhs) {
-        return compare_equal;
+      if(std::isless(lhs, rhs)) {
+        return compare_less;
       }
-      return (lhs < rhs) ? compare_less : compare_greater;
+      if(std::isgreater(lhs, rhs)) {
+        return compare_greater;
+      }
+      return compare_equal;
     }
     if((this->dtype() == dtype_string) && (other.dtype() == dtype_string)) {
       // Compare `string` values.
       const auto& lhs = this->check<D_string>();
       const auto& rhs = other.check<D_string>();
       // Make use of the three-way comparison result of `D_string::compare()`.
-      auto res = lhs.compare(rhs);
-      if(res == 0) {
-        return compare_equal;
+      auto cmp = lhs.compare(rhs);
+      if(cmp < 0) {
+        return compare_less;
       }
-      return (res < 0) ? compare_less : compare_greater;
+      if(cmp > 0) {
+        return compare_greater;
+      }
+      return compare_equal;
     }
     if((this->dtype() == dtype_array) && (other.dtype() == dtype_array)) {
       // Compare `array` values.
       const auto& lhs = this->check<D_array>();
       const auto& rhs = other.check<D_array>();
       // Perform lexicographical comparison of array elements.
-      auto nlimit = rocket::min(lhs.size(), rhs.size());
-      for(std::size_t i = 0; i < nlimit; ++i) {
-        auto res = lhs[i].compare(rhs[i]);
-        if(res != compare_equal) {
-          return res;
+      auto lpt = lhs.begin();
+      auto rpt = rhs.begin();
+      for(;;) {
+        if(lpt == lhs.end()) {
+          if(rpt == rhs.end()) {
+            // Both `lhs` and `rhs` have been exhausted.
+            break;
+          }
+          // `lhs` is shorter.
+          return compare_less;
         }
+        if(rpt == rhs.end()) {
+          // `rhs` is shorter.
+          return compare_greater;
+        }
+        auto ecmp = lpt->compare(*rpt);
+        if(ecmp != compare_equal) {
+          // A mismatch has been found.
+          return ecmp;
+        }
+        ++lpt;
+        ++rpt;
       }
-      if(lhs.size() == rhs.size()) {
-        return compare_equal;
-      }
-      return (lhs.size() < rhs.size()) ? compare_less : compare_greater;
+      return compare_equal;
     }
     // Anything not defined here is unordered.
     return compare_unordered;

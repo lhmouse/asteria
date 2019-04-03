@@ -50,9 +50,9 @@ int main()
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_equal);
 
     cmp = D_boolean(true);
-    ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_less);
+    ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);
     std::swap(value, cmp);
-    ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_greater);
+    ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);
 
     value = D_boolean(true);
     cmp = D_boolean(true);
