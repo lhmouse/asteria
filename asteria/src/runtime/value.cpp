@@ -54,7 +54,7 @@ const char* Value::get_type_name(Dtype etype) noexcept
 const Value& Value::get_null() noexcept
   {
     // Don't play with this at home.
-    static constexpr std::aligned_union<0, Value> s_null = { };
+    static constexpr std::aligned_union<0, Value>::type s_null = { };
     // This two-step conversion is necessary to eliminate warnings when strict aliasing is in effect.
     const void* pv = std::addressof(s_null);
     return *(static_cast<const Value*>(pv));
