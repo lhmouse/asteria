@@ -59,8 +59,8 @@ Parser_Error Simple_Source_File::reload(std::streambuf& cbuf, const Cow_String& 
 
 Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& filename)
   {
-    std::istream::sentry cerb(cstrm);
-    if(!cerb) {
+    std::istream::sentry sentry(cstrm, true);
+    if(!sentry) {
       return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
     Opt<Parser_Error> qerr;
@@ -80,7 +80,7 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
       cstrm.setstate(state);
     }
     if(cstrm.bad()) {
-      return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
+      return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_badbit_set));
     }
     // `qerr` shall always have a value here.
     // If the exceptional path above was taken, `cstrm.bad()` would have been set.
