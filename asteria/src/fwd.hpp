@@ -120,9 +120,9 @@ enum Dtype : std::uint8_t
 // API versioning of the standard library
 enum API_Version : std::uint32_t
   {
-    api_version_none    = 0x00000000,  // no standard library
-    api_version_1_0     = 0x00010000,  // `debug`, `chrono`, `string`
-    api_version_latest  = 0xFFFFFFFF,  // everything
+    api_version_none       = 0x00000000,  // no standard library
+    api_version_0001_0000  = 0x00010000,  // version 1.0
+    api_version_latest     = 0xFFFFFFFF,  // everything
   };
 
 }  // namespace Asteria
