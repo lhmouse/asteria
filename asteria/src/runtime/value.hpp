@@ -15,10 +15,10 @@ class Value
   public:
     enum Compare : std::uint8_t
       {
-        compare_unordered  = 0,
-        compare_less       = 1,
-        compare_equal      = 2,
-        compare_greater    = 3,
+        compare_unordered  = 0,  // 00
+        compare_equal      = 1,  // 01
+        compare_less       = 2,  // 10
+        compare_greater    = 3,  // 11
       };
 
     using Xvariant = Variant<
