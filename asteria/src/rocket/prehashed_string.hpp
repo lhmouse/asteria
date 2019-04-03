@@ -239,6 +239,10 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       {
         return this->m_sth.str().max_size();
       }
+    difference_type ssize() const noexcept
+      {
+        return static_cast<difference_type>(this->m_sth.str().size());
+      }
     void clear() noexcept(noexcept(::std::declval<string_type&>().clear()))
       {
         this->m_sth.clear();

@@ -911,6 +911,11 @@ template<typename valueT, typename allocatorT> class cow_vector
       {
         return this->m_sth.max_size();
       }
+    // N.B. This is a non-standard extension.
+    difference_type ssize() const noexcept
+      {
+        return static_cast<difference_type>(this->size());
+      }
     // N.B. The parameter pack is a non-standard extension.
     template<typename... paramsT> void resize(size_type n, const paramsT&... params)
       {

@@ -977,7 +977,11 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       {
         return this->m_sth.max_size();
       }
-
+    // N.B. This is a non-standard extension.
+    difference_type ssize() const noexcept
+      {
+        return static_cast<difference_type>(this->size());
+      }
     void resize(size_type n, value_type ch = value_type())
       {
         auto len_old = this->size();
