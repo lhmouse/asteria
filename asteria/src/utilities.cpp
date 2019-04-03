@@ -228,45 +228,6 @@ bool throw_runtime_error(const char* func, rocket::cow_string&& msg)
   }
 
 ///////////////////////////////////////////////////////////////////////////////
-// Indent
-///////////////////////////////////////////////////////////////////////////////
-
-std::ostream& operator<<(std::ostream& os, const Indent& n)
-  {
-    const std::ostream::sentry sentry(os);
-    if(!sentry) {
-      return os;
-    }
-    auto state = std::ios_base::goodbit;
-    try {
-      auto eof = std::char_traits<char>::eof();
-      // Insert the head character.
-      auto head = n.head();
-      if(os.rdbuf()->sputc(head) == eof) {
-        state |= std::ios_base::failbit;
-        goto z;
-      }
-      // Insert filling characters.
-      auto fill = os.fill();
-      auto rem = n.count();
-      while(rem > 0) {
-        if(os.rdbuf()->sputc(fill) == eof) {
-          state |= std::ios_base::failbit;
-          goto z;
-        }
-        --rem;
-      }
-    } catch(...) {
-      rocket::handle_ios_exception(os, state);
-    }
-  z:
-    if(state) {
-      os.setstate(state);
-    }
-    return os;
-  }
-
-///////////////////////////////////////////////////////////////////////////////
 // Quote
 ///////////////////////////////////////////////////////////////////////////////
 

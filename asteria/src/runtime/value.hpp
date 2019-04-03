@@ -58,6 +58,10 @@ class Value
         return *this;
       }
 
+  private:
+    inline Compare do_compare_partial(const Value& other) const;
+    inline std::ostream& do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const;
+
   public:
     Dtype dtype() const noexcept
       {

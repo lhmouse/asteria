@@ -170,40 +170,6 @@ class Runtime_Error : public virtual std::exception
                                                             ::std::terminate())
 
 ///////////////////////////////////////////////////////////////////////////////
-// Indent
-///////////////////////////////////////////////////////////////////////////////
-
-class Indent
-  {
-  private:
-    char m_head;
-    std::size_t m_count;
-
-  public:
-    constexpr Indent(char xhead, std::size_t xcount) noexcept
-      : m_head(xhead), m_count(xcount)
-      {
-      }
-
-  public:
-    char head() const noexcept
-      {
-        return this->m_head;
-      }
-    std::size_t count() const noexcept
-      {
-        return this->m_count;
-      }
-  };
-
-constexpr Indent indent(char head, std::size_t count) noexcept
-  {
-    return Indent(head, count);
-  }
-
-extern std::ostream& operator<<(std::ostream& os, const Indent& n);
-
-///////////////////////////////////////////////////////////////////////////////
 // Quote
 ///////////////////////////////////////////////////////////////////////////////
 

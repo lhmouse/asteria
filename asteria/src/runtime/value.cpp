@@ -51,20 +51,25 @@ const char* Value::get_type_name(Dtype etype) noexcept
     }
   }
 
-    namespace {
-
-    alignas(Value) struct
-      {
-        char bytes[sizeof(Value)];
-      }
-    const s_null = { 0 };  // Don't play with this at home.
-
-    }  // namespace
-
 const Value& Value::get_null() noexcept
   {
-    auto vptr = static_cast<const void*>(s_null.bytes);
-    return *static_cast<const Value*>(vptr);
+    // Don't play with this at home.
+    static constexpr std::aligned_union<0, Value> s_null = { };
+    // This two-step conversion is necessary to eliminate warnings when strict aliasing is in effect.
+    const void* pv = std::addressof(s_null);
+    return *(static_cast<const Value*>(pv));
+  }
+
+std::ostream& Value::do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
+  {
+    if(indent_increment == 0) {
+      // Output everything in a single line. Characters are separated by spaces.
+      return os << ' ';
+    }
+    // Terminate the current line and indent it accordingly.
+    os << std::endl;
+    os.width(static_cast<std::streamsize>(indent_next));
+    return os << "";
   }
 
 bool Value::test() const noexcept
@@ -314,15 +319,6 @@ void Value::print(std::ostream& os, bool quote_strings) const
     }
   }
 
-    namespace {
-
-    constexpr Indent do_indent_or_space(std::size_t indent_increment, std::size_t indent_next)
-      {
-        return (indent_increment != 0) ? indent('\n', indent_next) : indent(' ', 0);
-      }
-
-    }  // namespace
-
 void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->dtype()) {
@@ -384,13 +380,16 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
         //   2 = integer 3;
         //  ]
         os << "array(" << std::dec << alt.size() << ")";
-        os << do_indent_or_space(indent_increment, indent_next + 1) << '[';
+        this->do_auto_indent(os, indent_increment, indent_next + 1);
+        os << '[';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os << do_indent_or_space(indent_increment, indent_next + indent_increment) << std::dec << (it - alt.begin()) << " = ";
+          this->do_auto_indent(os, indent_increment, indent_next + indent_increment);
+          os << std::dec << (it - alt.begin()) << " = ";
           it->dump(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
-        os << do_indent_or_space(indent_increment, indent_next + 1) << ']';
+        this->do_auto_indent(os, indent_increment, indent_next + 1);
+        os << ']';
         return;
       }
     case dtype_object:
@@ -403,13 +402,16 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
         //   "three" = integer 3;
         //  }
         os << "object(" << std::dec << alt.size() << ")";
-        os << do_indent_or_space(indent_increment, indent_next + 1) << '{';
+        this->do_auto_indent(os, indent_increment, indent_next + 1);
+        os << '{';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          os << do_indent_or_space(indent_increment, indent_next + indent_increment) << quote(it->first) << " = ";
+          this->do_auto_indent(os, indent_increment, indent_next + indent_increment);
+          os << quote(it->first) << " = ";
           it->second.dump(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
-        os << do_indent_or_space(indent_increment, indent_next + 1) << '}';
+        this->do_auto_indent(os, indent_increment, indent_next + 1);
+        os << '}';
         return;
       }
     default:
