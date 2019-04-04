@@ -9,6 +9,30 @@
 
 namespace Asteria {
 
+bool Collector::track_variable(const Rcptr<Variable>& var)
+  {
+    if(!this->m_tracked.insert(var)) {
+      return false;
+    }
+    if(ROCKET_UNEXPECT(this->m_counter++ >= this->m_threshold)) {
+      // Perform automatic garbage collection on `*this`.
+      auto qnext = this;
+      do {
+        qnext = qnext->collect_single_opt();
+      } while(qnext);
+    }
+    return true;
+  }
+
+bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
+  {
+    if(!this->m_tracked.erase(var)) {
+      return false;
+    }
+    this->m_counter--;
+    return true;
+  }
+
     namespace {
 
     class Recursion_Sentry
@@ -62,7 +86,6 @@ namespace Asteria {
       {
         ptr->enumerate_variables(Variable_Callback<FunctionT>(rocket::forward<FunctionT>(func)));
       }
-
     template<typename FunctionT> void do_enumerate_variables(const Variable_HashSet& set, FunctionT&& func)
       {
         set.for_each(Variable_Callback<FunctionT>(rocket::forward<FunctionT>(func)));
@@ -70,7 +93,7 @@ namespace Asteria {
 
     }  // namespace
 
-Collector* Collector::do_collect_single_opt(std::size_t& total)
+Collector* Collector::collect_single_opt()
   {
     // Ignore recursive requests.
     Recursion_Sentry sentry(this->m_recur);
@@ -205,7 +228,6 @@ Collector* Collector::do_collect_single_opt(std::size_t& total)
             ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
             // Overwrite the value of this variable with a scalar value to break reference cycles.
             root->reset(Source_Location(rocket::sref("<defunct>"), 0), D_integer(0xFEEDFACECAFEBEEF), true);
-            total += 1;
             // Cache this variable if a pool is provided.
             if(output) {
               output->insert(root);
@@ -233,40 +255,6 @@ Collector* Collector::do_collect_single_opt(std::size_t& total)
     this->m_counter = 0;
     ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void*>(this));
     return collect_tied ? tied : nullptr;
-  }
-
-bool Collector::track_variable(const Rcptr<Variable>& var)
-  {
-    if(!this->m_tracked.insert(var)) {
-      return false;
-    }
-    if(ROCKET_UNEXPECT(this->m_counter++ >= this->m_threshold)) {
-      this->collect();
-    }
-    return true;
-  }
-
-bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
-  {
-    if(!this->m_tracked.erase(var)) {
-      return false;
-    }
-    this->m_counter--;
-    return true;
-  }
-
-std::size_t Collector::collect()
-  {
-    std::size_t total = 0;
-    auto cur = this;
-    for(;;) {
-      auto qnext = cur->do_collect_single_opt(total);
-      if(!qnext) {
-        break;
-      }
-      cur = qnext;
-    }
-    return total;
   }
 
 }  // namespace Asteria

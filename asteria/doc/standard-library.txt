@@ -12,6 +12,38 @@
 	  has been enabled. This member is always set, unless there is no
 	  standard library.
 
+### `std.gc`
+
+`std.gc.get_threshold(generation)`
+
+	* Gets the threshold of the collector for `generation`. Valid
+	  values for `generation` are `0`, `1` and `2`.
+
+	* Returns the threshold. If `generation` is not valid, `null` is
+	  returned.
+
+`std.gc.set_threshold(generation, threshold)`
+
+	* Sets the threshold of the collector for `generation` to
+	  `threshold`. Valid values for `generation` are `0`, `1` and
+	  `2`. Valid values for `threshould` range from `0` to an
+	  unspecified positive `integer`; overlarge values are capped
+	  silently without failure. A larger `threshold` makes garbage
+	  collection run less often but slower. Setting `threshold` to
+	  `0` ensures all unreachable variables be collected immediately.
+
+	* Returns the threshold before the call. If `generation` is not
+	  valid, `null` is returned.
+
+`std.gc.collect([generation_limit])`
+
+	* Performs garbage collection on all generations including and
+	  up to `generation_limit`. If it is absent, all generations are
+	  collected.
+
+	* Returns the number of variables that have been collected in
+	  total.
+
 ### `std.debug`
 
 `std.debug.print(...)`

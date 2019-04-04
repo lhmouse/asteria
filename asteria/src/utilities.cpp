@@ -4,7 +4,6 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #include <iostream>  // std::cerr
-
 #ifdef _WIN32
 #  include <windows.h>  // ::SYSTEMTIME, ::GetSystemTime()
 #else

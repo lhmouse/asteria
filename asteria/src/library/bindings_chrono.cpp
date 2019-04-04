@@ -6,7 +6,6 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
-
 #ifdef _WIN32
 #  include <windows.h>
 #else

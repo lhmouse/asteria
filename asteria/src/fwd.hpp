@@ -15,6 +15,7 @@
 #include <utility>  // std::pair<>, rocket::move(), rocket::forward()
 #include <cstddef>  // std::nullptr_t
 #include <cstdint>  // std::uint8_t, std::int64_t
+#include <climits>
 #include "rocket/preprocessor_utilities.h"
 #include "rocket/cow_string.hpp"
 #include "rocket/cow_vector.hpp"

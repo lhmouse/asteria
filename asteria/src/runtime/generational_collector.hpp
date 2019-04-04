@@ -15,16 +15,16 @@ class Generational_Collector : public virtual Rcbase
   {
   private:
     Variable_HashSet m_pool;
-    Collector m_gen_two;
-    Collector m_gen_one;
-    Collector m_gen_zero;
+    Collector m_coll_oldest;
+    Collector m_coll_middle;
+    Collector m_coll_newest;
 
   public:
-    Generational_Collector() noexcept
+    Generational_Collector()
       : m_pool(),
-        m_gen_two(&(this->m_pool), nullptr, 10),
-        m_gen_one(&(this->m_pool), &(this->m_gen_two), 50),
-        m_gen_zero(&(this->m_pool), &(this->m_gen_one), 500)
+        m_coll_oldest(&(this->m_pool), nullptr, 10),
+        m_coll_middle(&(this->m_pool), &(this->m_coll_oldest), 50),
+        m_coll_newest(&(this->m_pool), &(this->m_coll_middle), 500)
       {
       }
     ~Generational_Collector() override;
@@ -35,10 +35,9 @@ class Generational_Collector : public virtual Rcbase
       = delete;
 
   public:
-    Collector* get_collector_opt(unsigned gen_limit) noexcept;
-
+    Collector* get_collector_opt(unsigned generation) noexcept;
     Rcptr<Variable> create_variable();
-    bool collect_variables(unsigned gen_limit);
+    std::size_t collect_variables(unsigned generation_limit);
   };
 
 }  // namespace Asteria

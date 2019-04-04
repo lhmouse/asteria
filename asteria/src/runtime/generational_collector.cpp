@@ -13,62 +13,60 @@ Generational_Collector::~Generational_Collector()
   {
   }
 
-Collector* Generational_Collector::get_collector_opt(unsigned gen_limit) noexcept
+Collector* Generational_Collector::get_collector_opt(unsigned generation) noexcept
   {
-    auto qcoll = &(this->m_gen_zero);
-    // Find the collector with the given generation from the newest generation to the oldest.
-    unsigned gen = 0;
+    auto coll = &(this->m_coll_newest);
+    auto gcnt = generation;
     for(;;) {
-      if(gen == gen_limit) {
+      // Found?
+      if(gcnt == 0) {
         break;
       }
-      // Go to the next generation.
-      qcoll = qcoll->get_tied_collector_opt();
-      if(!qcoll) {
-        return nullptr;
+      --gcnt;
+      // Get the next generation.
+      coll = coll->get_tied_collector_opt();
+      if(!coll) {
+        break;
       }
-      ++gen;
     }
-    return qcoll;
+    return coll;
   }
 
 Rcptr<Variable> Generational_Collector::create_variable()
   {
-    // Get one from the pool.
-    auto var = this->m_pool.erase_random_opt();
-    if(ROCKET_EXPECT(var)) {
-      // Initialize it to `null`.
-      var->reset(Source_Location(rocket::sref("<pooled>"), 0), D_null(), true);
-    } else {
+    auto qvar = this->m_pool.erase_random_opt();
+    if(ROCKET_UNEXPECT(!qvar)) {
       // Create a new one if the pool has been exhausted.
-      var = rocket::make_refcnt<Variable>(Source_Location(rocket::sref("<fresh>"), 0));
+      qvar = rocket::make_refcnt<Variable>(Source_Location(rocket::sref("<fresh>"), 0));
     }
-    // The variable is alive now.
-    this->m_gen_zero.track_variable(var);
-    return var;
+    // Track it so it can be collected when out of use.
+    this->m_coll_newest.track_variable(qvar);
+    return qvar;
   }
 
-bool Generational_Collector::collect_variables(unsigned gen_limit)
+std::size_t Generational_Collector::collect_variables(unsigned generation_limit)
   {
-    auto qcoll = &(this->m_gen_zero);
-    // Force collection from the newest generation to the oldest.
-    unsigned gen = 0;
+    // Collect each generation.
+    auto coll = &(this->m_coll_newest);
+    auto gcnt = generation_limit;
     for(;;) {
-      // Collect this generation.
-      ASTERIA_DEBUG_LOG("Generation ", gen, " garbage collection begins.");
-      qcoll->collect();
-      ASTERIA_DEBUG_LOG("Generation ", gen, " garbage collection ends.");
-      // Go to the next generation.
-      if(gen == gen_limit) {
+      // Collect it.
+      coll->collect_single_opt();
+      // Found?
+      if(gcnt == 0) {
         break;
       }
-      qcoll = qcoll->get_tied_collector_opt();
-      if(!qcoll) {
-        return false;
+      --gcnt;
+      // Get the next generation.
+      coll = coll->get_tied_collector_opt();
+      if(!coll) {
+        break;
       }
-      ++gen;
     }
-    return true;
+    // Clear the variable pool.
+    auto nvars = this->m_pool.size();
+    this->m_pool.clear();
+    return nvars;
   }
 
 }  // namespace Asteria

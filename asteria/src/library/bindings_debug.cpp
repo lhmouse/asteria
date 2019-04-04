@@ -29,9 +29,7 @@ bool std_debug_print(const Cow_Vector<Value>& values)
 bool std_debug_dump(const Value& value, const Opt<D_integer>& indent)
   {
     rocket::insertable_ostream mos;
-    auto rindent = indent ? rocket::clamp(*indent, 0, 10)  // Clamp it, just like Node.js.
-                          : 2;                             // Set the default value.
-    value.dump(mos, static_cast<std::size_t>(rindent));
+    value.dump(mos, static_cast<std::size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
     return succ;
   }
@@ -59,7 +57,6 @@ void create_bindings_debug(D_object& result, API_Version /*version*/)
               if(!std_debug_print(values)) {
                 return Reference_Root::S_null();
               }
-              // Return `true`.
               Reference_Root::S_temporary xref = { true };
               return rocket::move(xref);
             }
@@ -95,7 +92,6 @@ void create_bindings_debug(D_object& result, API_Version /*version*/)
               if(!std_debug_dump(value, indent)) {
                 return Reference_Root::S_null();
               }
-              // Return `true`.
               Reference_Root::S_temporary xref = { true };
               return rocket::move(xref);
             }

@@ -14,15 +14,15 @@ class Collector
   private:
     Variable_HashSet* m_output_opt;
     Collector* m_tied_opt;
-    unsigned m_threshold;
+    std::size_t m_threshold;
 
-    unsigned m_counter;
+    std::size_t m_counter;
     long m_recur;
     Variable_HashSet m_tracked;
     Variable_HashSet m_staging;
 
   public:
-    Collector(Variable_HashSet* output_opt, Collector* tied_opt, unsigned threshold) noexcept
+    Collector(Variable_HashSet* output_opt, Collector* tied_opt, std::size_t threshold) noexcept
       : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold),
         m_counter(0), m_recur(0)
       {
@@ -32,9 +32,6 @@ class Collector
       = delete;
     Collector& operator=(const Collector&)
       = delete;
-
-  private:
-    Collector* do_collect_single_opt(std::size_t& total);
 
   public:
     Variable_HashSet* getput_pool_opt() const noexcept
@@ -55,11 +52,11 @@ class Collector
         this->m_tied_opt = tied_opt;
       }
 
-    unsigned get_threshold() const noexcept
+    std::size_t get_threshold() const noexcept
       {
         return this->m_threshold;
       }
-    void set_threshold(unsigned threshold) noexcept
+    void set_threshold(std::size_t threshold) noexcept
       {
         this->m_threshold = threshold;
       }
@@ -70,7 +67,7 @@ class Collector
       }
     bool track_variable(const Rcptr<Variable>& var);
     bool untrack_variable(const Rcptr<Variable>& var) noexcept;
-    std::size_t collect();
+    Collector* collect_single_opt();
   };
 
 }  // namespace Asteria

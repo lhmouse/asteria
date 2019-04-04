@@ -19,7 +19,6 @@ class Abstract_Opaque : public virtual Rcbase
 
   public:
     virtual void describe(std::ostream& os) const = 0;
-    virtual Abstract_Opaque* clone(Rcobj<Abstract_Opaque>& opaque) const = 0;
     virtual void enumerate_variables(const Abstract_Variable_Callback& callback) const = 0;
   };
 

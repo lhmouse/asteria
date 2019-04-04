@@ -14,7 +14,7 @@ class Global_Context : public Abstract_Context
   {
   private:
     // This is the global garbage collector.
-    Rcptr<Rcbase> m_collector;
+    Rcptr<Rcbase> m_gcoll;
     // This is the variable holding an object referenced as `std` in this context.
     Rcptr<Rcbase> m_std_var;
 
@@ -39,9 +39,10 @@ class Global_Context : public Abstract_Context
     // Clear all references, perform a full garbage collection, then reload the standard library.
     void initialize(API_Version version = api_version_latest);
 
-    // These are interfaces of the global garbage collector/
+    // These are interfaces of the global garbage collector.
+    Collector* get_collector_opt(unsigned generation) const;
     Rcptr<Variable> create_variable() const;
-    bool collect_variables(unsigned gen_limit = 0x7F) const;
+    std::size_t collect_variables(unsigned generation_limit = INT_MAX) const;
 
     // These are interfaces of the standard library.
     const Value& get_std_member(const PreHashed_String& name) const;
