@@ -24,31 +24,42 @@ void Global_Context::initialize(API_Version version)
     auto collector = rocket::make_refcnt<Generational_Collector>();
     this->tie_collector(collector);
     this->m_collector = collector;
-    // Define the list of standard library components.
-    struct Component
+    // Define the list of standard library modules.
+    struct Module
       {
         API_Version version;
         const char* name;
         void (*init)(D_object&, API_Version);
       }
-    static constexpr s_components[] =
+    static constexpr s_std_mods[] =
       {
         { api_version_0001_0000,  "debug",   create_bindings_debug   },
         { api_version_0001_0000,  "chrono",  create_bindings_chrono  },
         { api_version_0001_0000,  "string",  create_bindings_string  },
       };
-    // Create the `std` object.
+#ifdef ROCKET_DEBUG
+    ROCKET_ASSERT(std::is_sorted(std::begin(s_std_mods), std::end(s_std_mods), [&](const Module& lhs, const Module& rhs) { return lhs.version < rhs.version;  }));
+#endif
     D_object std_obj;
-    for(auto cur = std::begin(s_components); (cur != std::end(s_components)) && (cur->version <= version); ++cur) {
+    // Initialize library modules.
+    auto std_end = std::find_if(std::begin(s_std_mods), std::end(s_std_mods), [&](const Module& elem) { return elem.version > version;  });
+    for(auto cur = std::begin(s_std_mods); cur != std_end; ++cur) {
       // Create the subobject if it doesn't exist.
       auto pair = std_obj.try_emplace(rocket::sref(cur->name));
       if(pair.second) {
         pair.first->second = D_object();
       }
-      ASTERIA_DEBUG_LOG("Begin initialization of standard library component: name = ", cur->name);
+      ASTERIA_DEBUG_LOG("Begin initialization of standard library module: name = ", cur->name);
       (*(cur->init))(pair.first->second.check<D_object>(), version);
-      ASTERIA_DEBUG_LOG("Finished initialization of standard library component: name = ", cur->name);
+      ASTERIA_DEBUG_LOG("Finished initialization of standard library module: name = ", cur->name);
     }
+    if(std_end != std::begin(s_std_mods)) {
+      // Set version numbers if anything has been initialized after all.
+      auto version_enabled = static_cast<std::uint32_t>(std_end[-1].version);
+      std_obj.insert_or_assign(rocket::sref("version_major"), D_integer(version_enabled / 0x10000));
+      std_obj.insert_or_assign(rocket::sref("version_minor"), D_integer(version_enabled % 0x10000));
+    }
+    // Set the variable.
     auto std_var = collector->create_variable();
     std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_obj), true);
     Reference_Root::S_variable xref = { std_var };

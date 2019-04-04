@@ -1,3 +1,15 @@
+### `std.version_major`
+
+	* Denotes the major version number of the standard library that
+	  has been enabled. This member is always set, unless there is no
+	  standard library.
+
+### `std.version_minor`
+
+	* Denotes the minor version number of the standard library that
+	  has been enabled. This member is always set, unless there is no
+	  standard library.
+
 ### `std.debug`
 
 `std.debug.print(...)`
