@@ -40,13 +40,14 @@ void Global_Context::initialize(API_Version version)
     // Create the `std` object.
     D_object std_obj;
     for(auto cur = std::begin(s_components); (cur != std::end(s_components)) && (cur->version <= version); ++cur) {
-      ASTERIA_DEBUG_LOG("Initializing standard library component: name = ", cur->name);
+      // Create the subobject if it doesn't exist.
       auto pair = std_obj.try_emplace(rocket::sref(cur->name));
       if(pair.second) {
         pair.first->second = D_object();
       }
+      ASTERIA_DEBUG_LOG("Begin initialization of standard library component: name = ", cur->name);
       (*(cur->init))(pair.first->second.check<D_object>(), version);
-      ASTERIA_DEBUG_LOG("Initialized standard library component: name = ", cur->name);
+      ASTERIA_DEBUG_LOG("Finished initialization of standard library component: name = ", cur->name);
     }
     auto std_var = collector->create_variable();
     std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_obj), true);
