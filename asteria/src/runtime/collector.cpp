@@ -70,14 +70,14 @@ namespace Asteria {
 
     }  // namespace
 
-Collector* Collector::do_collect_once()
+Collector* Collector::do_collect_single_opt(std::size_t& total)
   {
     // Ignore recursive requests.
-    const Recursion_Sentry sentry(this->m_recur);
+    Recursion_Sentry sentry(this->m_recur);
     if(!sentry) {
       return nullptr;
     }
-    auto output = this->mput_opt;
+    auto output = this->m_output_opt;
     auto tied = this->m_tied_opt;
     bool collect_tied = false;
     // The algorithm here is basically described at
@@ -204,7 +204,8 @@ Collector* Collector::do_collect_once()
           if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
             // Overwrite the value of this variable with a scalar value to break reference cycles.
-            root->reset(Source_Location(rocket::sref("<collected>"), 0), D_integer(0xFEEDFACECAFEBEEF), true);
+            root->reset(Source_Location(rocket::sref("<defunct>"), 0), D_integer(0xFEEDFACECAFEBEEF), true);
+            total += 1;
             // Cache this variable if a pool is provided.
             if(output) {
               output->insert(root);
@@ -254,12 +255,18 @@ bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
     return true;
   }
 
-void Collector::collect()
+std::size_t Collector::collect()
   {
+    std::size_t total = 0;
     auto cur = this;
-    do {
-      cur = cur->do_collect_once();
-    } while(cur);
+    for(;;) {
+      auto qnext = cur->do_collect_single_opt(total);
+      if(!qnext) {
+        break;
+      }
+      cur = qnext;
+    }
+    return total;
   }
 
 }  // namespace Asteria

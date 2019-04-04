@@ -12,7 +12,7 @@ namespace Asteria {
 class Collector
   {
   private:
-    Variable_HashSet* mput_opt;
+    Variable_HashSet* m_output_opt;
     Collector* m_tied_opt;
     unsigned m_threshold;
 
@@ -23,7 +23,7 @@ class Collector
 
   public:
     Collector(Variable_HashSet* output_opt, Collector* tied_opt, unsigned threshold) noexcept
-      : mput_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold),
+      : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold),
         m_counter(0), m_recur(0)
       {
       }
@@ -34,16 +34,16 @@ class Collector
       = delete;
 
   private:
-    Collector* do_collect_once();
+    Collector* do_collect_single_opt(std::size_t& total);
 
   public:
     Variable_HashSet* getput_pool_opt() const noexcept
       {
-        return this->mput_opt;
+        return this->m_output_opt;
       }
     void setput_pool(Variable_HashSet* output_opt) noexcept
       {
-        this->mput_opt = output_opt;
+        this->m_output_opt = output_opt;
       }
 
     Collector* get_tied_collector_opt() const noexcept
@@ -70,7 +70,7 @@ class Collector
       }
     bool track_variable(const Rcptr<Variable>& var);
     bool untrack_variable(const Rcptr<Variable>& var) noexcept;
-    void collect();
+    std::size_t collect();
   };
 
 }  // namespace Asteria
