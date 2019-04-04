@@ -15,12 +15,16 @@ void create_bindings_version(D_object& result, API_Version version)
     // `std.version.major`
     //===================================================================
     result.insert_or_assign(rocket::sref("major"),
-      D_integer(version / 0x10000));
+      D_integer(
+        version / 0x10000
+      ));
     //===================================================================
     // `std.version.minor`
     //===================================================================
     result.insert_or_assign(rocket::sref("minor"),
-      D_integer(version % 0x10000));
+      D_integer(
+        version % 0x10000
+      ));
     //===================================================================
     // End of `std.version`
     //===================================================================
