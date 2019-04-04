@@ -1,10 +1,12 @@
-### `std.version_major`
+### `std.version`
+
+`std.version.major`
 
 	* Denotes the major version number of the standard library that
 	  has been enabled. This member is always set, unless there is no
 	  standard library.
 
-### `std.version_minor`
+`std.version.minor`
 
 	* Denotes the minor version number of the standard library that
 	  has been enabled. This member is always set, unless there is no
