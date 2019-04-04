@@ -33,9 +33,9 @@ void Global_Context::initialize(API_Version version)
       }
     static constexpr s_components[] =
       {
-        { api_version_1_0,  "debug",   create_bindings_debug   },
-        { api_version_1_0,  "chrono",  create_bindings_chrono  },
-        { api_version_1_0,  "string",  create_bindings_string  },
+        { api_version_0001_0000,  "debug",   create_bindings_debug   },
+        { api_version_0001_0000,  "chrono",  create_bindings_chrono  },
+        { api_version_0001_0000,  "string",  create_bindings_string  },
       };
     // Create the `std` object.
     D_object std_obj;
