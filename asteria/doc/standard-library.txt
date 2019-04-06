@@ -773,6 +773,38 @@
 	* Returns a copy of the minimum element, or `null` if `data` is
 	  empty.
 
+`std.array.find_if(data, predictor)`
+
+	* Finds the first elements, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.find_if_not(data, predictor)`
+
+	* Finds the first elements, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.rfind_if(data, predictor)`
+
+	* Finds the last elements, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.rfind_if_not(data, predictor)`
+
+	* Finds the last elements, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
 `std.array.is_sorted(data, [comparator])`
 
 	* Checks whether `data` is sorted. That is, there is no pair of

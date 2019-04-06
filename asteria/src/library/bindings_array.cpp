@@ -51,6 +51,64 @@ Value std_array_min_of(const D_array& data)
         args.emplace_back(rocket::move(xref));
       }
 
+    template<typename IteratorT> Opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end, const D_function& predictor, bool match)
+      {
+        // This can be reused.
+        Cow_Vector<Reference> args;
+        for(auto it = rocket::move(begin); it != end; ++it) {
+          // Set up arguments for the user-defined predictor.
+          args.clear();
+          do_push_argument(args, *it);
+          // Call it.
+          Reference self;
+          predictor.get().invoke(self, global, rocket::move(args));
+          if(self.read().test() == match) {
+            return rocket::move(it);
+          }
+        }
+        return rocket::nullopt;
+      }
+
+    }
+
+Opt<D_integer> std_array_find_if(const Global_Context& global, const D_array& data, const D_function& predictor)
+  {
+    auto qit = do_find_if_opt(global, data.begin(), data.end(), predictor, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return *qit - data.begin();
+  }
+
+Opt<D_integer> std_array_find_if_not(const Global_Context& global, const D_array& data, const D_function& predictor)
+  {
+    auto qit = do_find_if_opt(global, data.begin(), data.end(), predictor, false);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return *qit - data.begin();
+  }
+
+Opt<D_integer> std_array_rfind_if(const Global_Context& global, const D_array& data, const D_function& predictor)
+  {
+    auto qit = do_find_if_opt(global, data.rbegin(), data.rend(), predictor, true);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return data.rend() - *qit - 1;
+  }
+
+Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_array& data, const D_function& predictor)
+  {
+    auto qit = do_find_if_opt(global, data.rbegin(), data.rend(), predictor, false);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return data.rend() - *qit - 1;
+  }
+
+    namespace {
+
     Value::Compare do_compare(const Global_Context& global, const Opt<D_function>& comparator, Cow_Vector<Reference>&& args, const Value& lhs, const Value& rhs)
       {
         if(!comparator) {
@@ -155,6 +213,154 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             if(reader.start().g(data).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_min_of(data) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.find_if(data, predictor)`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("find_if"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.find_if(data, predictor)`\n"
+                     "  * Finds the first elements, namely `x`, in `data`, for which\n"
+                     "    `predictor(x)` yields logically true.\n"
+                     "  * Returns the subscript of such an element as an `integer`, if\n"
+                     "    one is found; otherwise `null`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.find_if"), args);
+            // Parse arguments.
+            D_array data;
+            Opt<D_function> predictor;
+            if(reader.start().g(data).g(predictor).finish()) {
+              // Hmm... can `D_function` be made default-constructible?
+              if(!predictor) {
+                ASTERIA_THROW_RUNTIME_ERROR("`null` cannot be used as a predictor.");
+              }
+              // Call the binding function.
+              auto qindex = std_array_find_if(global, data, *predictor);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.find_if_not(data, predictor)`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("find_if_not"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.find_if_not(data, predictor)`\n"
+                     "  * Finds the first elements, namely `x`, in `data`, for which\n"
+                     "    `predictor(x)` yields logically false.\n"
+                     "  * Returns the subscript of such an element as an `integer`, if\n"
+                     "    one is found; otherwise `null`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.find_if_not"), args);
+            // Parse arguments.
+            D_array data;
+            Opt<D_function> predictor;
+            if(reader.start().g(data).g(predictor).finish()) {
+              // Hmm... can `D_function` be made default-constructible?
+              if(!predictor) {
+                ASTERIA_THROW_RUNTIME_ERROR("`null` cannot be used as a predictor.");
+              }
+              // Call the binding function.
+              auto qindex = std_array_find_if_not(global, data, *predictor);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.rfind_if(data, predictor)`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("rfind_if"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.rfind_if(data, predictor)`\n"
+                     "  * Finds the last elements, namely `x`, in `data`, for which\n"
+                     "    `predictor(x)` yields logically true.\n"
+                     "  * Returns the subscript of such an element as an `integer`, if\n"
+                     "    one is found; otherwise `null`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.rfind_if"), args);
+            // Parse arguments.
+            D_array data;
+            Opt<D_function> predictor;
+            if(reader.start().g(data).g(predictor).finish()) {
+              // Hmm... can `D_function` be made default-constructible?
+              if(!predictor) {
+                ASTERIA_THROW_RUNTIME_ERROR("`null` cannot be used as a predictor.");
+              }
+              // Call the binding function.
+              auto qindex = std_array_rfind_if(global, data, *predictor);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.rfind_if_not(data, predictor)`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("rfind_if_not"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.rfind_if_not(data, predictor)`\n"
+                     "  * Finds the last elements, namely `x`, in `data`, for which\n"
+                     "    `predictor(x)` yields logically false.\n"
+                     "  * Returns the subscript of such an element as an `integer`, if\n"
+                     "    one is found; otherwise `null`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.rfind_if_not"), args);
+            // Parse arguments.
+            D_array data;
+            Opt<D_function> predictor;
+            if(reader.start().g(data).g(predictor).finish()) {
+              // Hmm... can `D_function` be made default-constructible?
+              if(!predictor) {
+                ASTERIA_THROW_RUNTIME_ERROR("`null` cannot be used as a predictor.");
+              }
+              // Call the binding function.
+              auto qindex = std_array_rfind_if_not(global, data, *predictor);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
             // Fail.
