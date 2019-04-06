@@ -773,6 +773,20 @@
 	* Returns a copy of the minimum element, or `null` if `data` is
 	  empty.
 
+`std.array.find(data, target)`
+
+	* Finds the first element that is equal to `target`.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.rfind(data, target)`
+
+	* Finds the last element that is equal to `target`.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
 `std.array.find_if(data, predictor)`
 
 	* Finds the first element, namely `x`, in `data`, for which

@@ -11,6 +11,9 @@ namespace Asteria {
 extern Value std_array_max_of(const D_array& data);
 extern Value std_array_min_of(const D_array& data);
 
+extern Opt<D_integer> std_array_find(const D_array& data, const Value& target);
+extern Opt<D_integer> std_array_rfind(const D_array& data, const Value& target);
+
 extern Opt<D_integer> std_array_find_if(const Global_Context& global, const D_array& data, const D_function& predictor);
 extern Opt<D_integer> std_array_find_if_not(const Global_Context& global, const D_array& data, const D_function& predictor);
 extern Opt<D_integer> std_array_rfind_if(const Global_Context& global, const D_array& data, const D_function& predictor);

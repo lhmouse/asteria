@@ -45,6 +45,38 @@ Value std_array_min_of(const D_array& data)
 
     namespace {
 
+    template<typename IteratorT> Opt<IteratorT> do_find_opt(IteratorT begin, IteratorT end, const Value& target)
+      {
+        for(auto it = rocket::move(begin); it != end; ++it) {
+          if(it->compare(target) == Value::compare_equal) {
+            return rocket::move(it);
+          }
+        }
+        return rocket::nullopt;
+      }
+
+    }
+
+Opt<D_integer> std_array_find(const D_array& data, const Value& target)
+  {
+    auto qit = do_find_opt(data.begin(), data.end(), target);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return *qit - data.begin();
+  }
+
+Opt<D_integer> std_array_rfind(const D_array& data, const Value& target)
+  {
+    auto qit = do_find_opt(data.rbegin(), data.rend(), target);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return data.rend() - *qit - 1;
+  }
+
+    namespace {
+
     inline void do_push_argument(Cow_Vector<Reference>& args, const Value& value)
       {
         Reference_Root::S_temporary xref = { value };
@@ -213,6 +245,70 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             if(reader.start().g(data).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_min_of(data) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.find(data, target)`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("find"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.find(data, target)`\n"
+                     "  * Finds the first element that is equal to `target`.\n"
+                     "  * Returns the subscript of such an element as an `integer`, if\n"
+                     "    one is found; otherwise `null`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.find"), args);
+            // Parse arguments.
+            D_array data;
+            Value target;
+            if(reader.start().g(data).g(target).finish()) {
+              // Call the binding function.
+              auto qindex = std_array_find(data, target);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.rfind(data, target)`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("rfind"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.rfind(data, target)`\n"
+                     "  * Finds the last element that is equal to `target`.\n"
+                     "  * Returns the subscript of such an element as an `integer`, if\n"
+                     "    one is found; otherwise `null`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.rfind"), args);
+            // Parse arguments.
+            D_array data;
+            Value target;
+            if(reader.start().g(data).g(target).finish()) {
+              // Call the binding function.
+              auto qindex = std_array_rfind(data, target);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
             // Fail.
