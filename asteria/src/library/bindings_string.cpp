@@ -12,7 +12,7 @@ namespace Asteria {
 
     namespace {
 
-    std::pair<D_string::const_iterator, D_string::const_iterator> do_slice(const D_string& text, const D_string::const_iterator& tbegin, const Opt<D_integer>& length)
+    std::pair<D_string::const_iterator, D_string::const_iterator> do_slice(const D_string& text, D_string::const_iterator tbegin, const Opt<D_integer>& length)
       {
         if(!length || (*length >= text.end() - tbegin)) {
           // Get the subrange from `tbegin` to the end.
