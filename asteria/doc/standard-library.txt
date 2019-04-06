@@ -830,3 +830,82 @@
 	  have been sorted.
 
 	* Returns `true` if `data` is sorted or empty; otherwise `false`.
+
+`std.array.binary_search(data, target, [comparator])`
+
+	* Finds the first element in `data` that is equal to `target`.
+	  The principle of user-defined `comparator`s is the same as the
+	  `is_sorted()` function. As a consequence, the function call
+	  `is_sorted(data, comparator)` shall yield `true` prior to this
+	  call, otherwise the effect is undefined.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+	* Throws an exception if `data` has not been sorted properly. Be
+	  advised that in this case there is no guarantee whether an
+	  exception will be thrown or not.
+
+`std.array.lower_bound(data, target, [comparator])`
+
+	* Finds the first element in `data` that is greater than or equal
+	  to `target` and precedes all elements that are less than
+	  `target` if any. The principle of user-defined `comparator`s is
+	  the same as the `is_sorted()` function. As a consequence, the
+	  function call `is_sorted(data, comparator)` shall yield `true`
+	  prior to this call, otherwise the effect is undefined.
+
+	* Returns the subscript of such an element as an `integer`. This
+	  function returns `lengthof(data)` if all elements are less than
+	  `target`.
+
+	* Throws an exception if `data` has not been sorted properly. Be
+	  advised that in this case there is no guarantee whether an
+	  exception will be thrown or not.
+
+`std.array.upper_bound(data, target, [comparator])`
+
+	* Finds the first element in `data` that is greater than `target`
+	  and precedes all elements that are less than or equal to
+	  `target` if any. The principle of user-defined `comparator`s is
+	  the same as the `is_sorted()` function. As a consequence, the
+	  function call `is_sorted(data, comparator)` shall yield `true`
+	  prior to this call, otherwise the effect is undefined.
+
+	* Returns the subscript of such an element as an `integer`. This
+	  function returns `lengthof(data)` if all elements are less than
+	  or equal to `target`.
+
+	* Throws an exception if `data` has not been sorted properly. Be
+	  advised that in this case there is no guarantee whether an
+	  exception will be thrown or not.
+
+`std.array.equal_range(data, target, [comparator])`
+
+	* Gets the range of elements equivalent to `target` in `data` as
+	  a single function call. This function is equivalent to calling
+	  `lower_bound(data, target, comparator)` and
+	  `upper_bound(data, target, comparator)` respectively then
+	  storing both results in an `array`.
+
+	* Returns an `array` of two `integer`s, the first of which
+	  specifies the lower bound and the other specifies the upper
+	  bound.
+
+	* Throws an exception if `data` has not been sorted properly. Be
+	  advised that in this case there is no guarantee whether an
+	  exception will be thrown or not.
+
+`std.array.sort(data, [comparator])`
+
+	* Sorts elements in `data` in ascending order. The principle of
+	  user-defined `comparator`s is the same as the `is_sorted()`
+	  function. The algorithm shall finish in `O(n log n)` time where
+	  `n` is the number of elements in `data`, and shall be stable.
+	  This function returns a new `array` without modifying `data`.
+
+	* Returns the sorted `array`.
+
+	* Throws an exception if any elements are unordered. Be advised
+	  that in this case there is no guarantee whether an exception
+	  will be thrown or not.

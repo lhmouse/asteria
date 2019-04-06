@@ -85,11 +85,9 @@ Opt<D_integer> std_array_rfind(const D_array& data, const Value& target)
 
     template<typename IteratorT> Opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end, const D_function& predictor, bool match)
       {
-        // This can be reused.
-        Cow_Vector<Reference> args;
         for(auto it = rocket::move(begin); it != end; ++it) {
           // Set up arguments for the user-defined predictor.
-          args.clear();
+          Cow_Vector<Reference> args;
           do_push_argument(args, *it);
           // Call it.
           Reference self;
@@ -141,22 +139,22 @@ Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_arra
 
     namespace {
 
-    Value::Compare do_compare(const Global_Context& global, const Opt<D_function>& comparator, Cow_Vector<Reference>&& args, const Value& lhs, const Value& rhs)
+    Value::Compare do_compare(const Global_Context& global, const Opt<D_function>& comparator, const Value& lhs, const Value& rhs)
       {
         if(!comparator) {
           // Perform the builtin 3-way comparison.
           return lhs.compare(rhs);
         }
         // Set up arguments for the user-defined comparator.
-        args.clear();
+        Cow_Vector<Reference> args;
         do_push_argument(args, lhs);
         do_push_argument(args, rhs);
         // Call it.
         Reference self;
         comparator->get().invoke(self, global, rocket::move(args));
-        // Translate the result.
         auto qint = self.read().opt<D_integer>();
         if(qint) {
+          // Translate the result.
           if(*qint < 0) {
             return Value::compare_less;
           }
@@ -178,21 +176,113 @@ D_boolean std_array_is_sorted(const Global_Context& global, const D_array& data,
       // If `data` contains no element, it is considered sorted.
       return true;
     }
-    // This can be reused.
-    Cow_Vector<Reference> args;
     for(;;) {
       auto next = cur + 1;
       if(next == data.end()) {
         break;
       }
       // Compare the two elements.
-      auto cmp = do_compare(global, comparator, rocket::move(args), *cur, *next);
+      auto cmp = do_compare(global, comparator, *cur, *next);
       if(rocket::is_any_of(cmp, { Value::compare_greater, Value::compare_unordered })) {
         return false;
       }
       cur = next;
     }
     return true;
+  }
+
+    namespace {
+
+    template<typename IteratorT> std::pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
+                                                                       const Opt<D_function>& comparator, const Value& target)
+      {
+        auto bpos = rocket::move(begin);
+        auto epos = rocket::move(end);
+        bool found = false;
+        for(;;) {
+          auto dist = epos - bpos;
+          if(dist <= 0) {
+            break;
+          }
+          auto mpos = bpos + dist / 2;
+          // Compare `target` with the element in the middle.
+          auto cmp = do_compare(global, comparator, target, *mpos);
+          if(cmp == Value::compare_unordered) {
+            ASTERIA_THROW_RUNTIME_ERROR("The elements `", target, "` and `", *mpos, "` are unordered.");
+          }
+          if(cmp == Value::compare_equal) {
+            bpos = mpos;
+            found = true;
+            break;
+          }
+          if(cmp == Value::compare_less) {
+            epos = mpos;
+            continue;
+          }
+          bpos = mpos + 1;
+        }
+        return std::make_pair(rocket::move(bpos), found);
+      }
+
+    template<typename IteratorT, typename PredT> IteratorT do_bound(const Global_Context& global, IteratorT begin, IteratorT end,
+                                                                    const Opt<D_function>& comparator, const Value& target, PredT&& pred)
+      {
+        auto bpos = rocket::move(begin);
+        auto epos = rocket::move(end);
+        for(;;) {
+          auto dist = epos - bpos;
+          if(dist <= 0) {
+            break;
+          }
+          auto mpos = bpos + dist / 2;
+          // Compare `target` with the element in the middle.
+          auto cmp = do_compare(global, comparator, target, *mpos);
+          if(cmp == Value::compare_unordered) {
+            ASTERIA_THROW_RUNTIME_ERROR("The elements `", target, "` and `", *mpos, "` are unordered.");
+          }
+          if(rocket::forward<PredT>(pred)(cmp)) {
+            epos = mpos;
+            continue;
+          }
+          bpos = mpos + 1;
+        }
+        return rocket::move(bpos);
+      }
+
+    }
+
+Opt<D_integer> std_array_binary_search(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator)
+  {
+    auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
+    if(!pair.second) {
+      return rocket::nullopt;
+    }
+    return pair.first - data.begin();
+  }
+
+D_integer std_array_lower_bound(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator)
+  {
+    auto lpos = do_bound(global, data.begin(), data.end(), comparator, target, [](Value::Compare cmp) { return cmp != Value::compare_greater;  });
+    return lpos - data.begin();
+  }
+
+D_integer std_array_upper_bound(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator)
+  {
+    auto upos = do_bound(global, data.begin(), data.end(), comparator, target, [](Value::Compare cmp) { return cmp == Value::compare_less;  });
+    return upos - data.begin();
+  }
+
+std::pair<D_integer, D_integer> std_array_equal_range(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator)
+  {
+    auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
+    auto lpos = do_bound(global, data.begin(), pair.first, comparator, target, [](Value::Compare cmp) { return cmp != Value::compare_greater;  });
+    auto upos = do_bound(global, pair.first, data.end(), comparator, target, [](Value::Compare cmp) { return cmp == Value::compare_less;  });
+    return std::make_pair(lpos - data.begin(), upos - data.begin());
+  }
+
+D_array std_array_sort(const Global_Context& global, const D_array& data, const Opt<D_function>& comparator)
+  {
+    return data;
   }
 
 void create_bindings_array(D_object& result, API_Version /*version*/)
@@ -494,6 +584,198 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             if(reader.start().g(data).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_is_sorted(global, data, comparator) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.binary_search()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("binary_search"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.binary_search(data, target, [comparator])`\n"
+                     "  * Finds the first element in `data` that is equal to `target`.\n"
+                     "    The principle of user-defined `comparator`s is the same as the\n"
+                     "    `is_sorted()` function. As a consequence, the function call\n"
+                     "    `is_sorted(data, comparator)` shall yield `true` prior to this\n"
+                     "    call, otherwise the effect is undefined.\n"
+                     "  * Returns the subscript of such an element as an `integer`, if\n"
+                     "    one is found; otherwise `null`.\n"
+                     "  * Throws an exception if `data` has not been sorted properly. Be\n"
+                     "    advised that in this case there is no guarantee whether an\n"
+                     "    exception will be thrown or not.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.binary_search"), args);
+            // Parse arguments.
+            D_array data;
+            Value target;
+            Opt<D_function> comparator;
+            if(reader.start().g(data).g(target).g(comparator).finish()) {
+              // Call the binding function.
+              auto qindex = std_array_binary_search(global, data, target, comparator);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.lower_bound()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("lower_bound"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.lower_bound(data, target, [comparator])`\n"
+                     "  * Finds the first element in `data` that is greater than or equal\n"
+                     "    to `target` and precedes all elements that are less than\n"
+                     "    `target` if any. The principle of user-defined `comparator`s is\n"
+                     "    the same as the `is_sorted()` function. As a consequence, the\n"
+                     "    function call `is_sorted(data, comparator)` shall yield `true`\n"
+                     "    prior to this call, otherwise the effect is undefined.\n"
+                     "  * Returns the subscript of such an element as an `integer`. This\n"
+                     "    function returns `lengthof(data)` if all elements are less than\n"
+                     "    `target`.\n"
+                     "  * Throws an exception if `data` has not been sorted properly. Be\n"
+                     "    advised that in this case there is no guarantee whether an\n"
+                     "    exception will be thrown or not.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
+            // Parse arguments.
+            D_array data;
+            Value target;
+            Opt<D_function> comparator;
+            if(reader.start().g(data).g(target).g(comparator).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_lower_bound(global, data, target, comparator) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.upper_bound()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("upper_bound"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.upper_bound(data, target, [comparator])`\n"
+                     "  * Finds the first element in `data` that is greater than `target`\n"
+                     "    and precedes all elements that are less than or equal to\n"
+                     "    `target` if any. The principle of user-defined `comparator`s is\n"
+                     "    the same as the `is_sorted()` function. As a consequence, the\n"
+                     "    function call `is_sorted(data, comparator)` shall yield `true`\n"
+                     "    prior to this call, otherwise the effect is undefined.\n"
+                     "  * Returns the subscript of such an element as an `integer`. This\n"
+                     "    function returns `lengthof(data)` if all elements are less than\n"
+                     "    or equal to `target`.\n"
+                     "  * Throws an exception if `data` has not been sorted properly. Be\n"
+                     "    advised that in this case there is no guarantee whether an\n"
+                     "    exception will be thrown or not.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.upper_bound"), args);
+            // Parse arguments.
+            D_array data;
+            Value target;
+            Opt<D_function> comparator;
+            if(reader.start().g(data).g(target).g(comparator).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_upper_bound(global, data, target, comparator) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.equal_range()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("equal_range"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.equal_range(data, target, [comparator])`\n"
+                     "  * Gets the range of elements equivalent to `target` in `data` as\n"
+                     "    a single function call. This function is equivalent to calling\n"
+                     "    `lower_bound(data, target, comparator)` and\n"
+                     "    `upper_bound(data, target, comparator)` respectively then\n"
+                     "    storing both results in an `array`.\n"
+                     "  * Returns an `array` of two `integer`s, the first of which\n"
+                     "    specifies the lower bound and the other specifies the upper\n"
+                     "    bound.\n"
+                     "  * Throws an exception if `data` has not been sorted properly. Be\n"
+                     "    advised that in this case there is no guarantee whether an\n"
+                     "    exception will be thrown or not.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
+            // Parse arguments.
+            D_array data;
+            Value target;
+            Opt<D_function> comparator;
+            if(reader.start().g(data).g(target).g(comparator).finish()) {
+              // Call the binding function.
+              auto pair = std_array_equal_range(global, data, target, comparator);
+              D_array res;
+              res.reserve(2);
+              res.emplace_back(rocket::move(pair.first));
+              res.emplace_back(rocket::move(pair.second));
+              Reference_Root::S_temporary xref = { rocket::move(res) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.sort()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sort"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.sort(data, [comparator])`\n"
+                     "  * Sorts elements in `data` in ascending order. The principle of\n"
+                     "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+                     "    function. The algorithm shall finish in `O(n log n)` time where\n"
+                     "    `n` is the number of elements in `data`, and shall be stable.\n"
+                     "    This function returns a new `array` without modifying `data`.\n"
+                     "  * Returns the sorted `array`.\n"
+                     "  * Throws an exception if any elements are unordered. Be advised\n"
+                     "    that in this case there is no guarantee whether an exception\n"
+                     "    will be thrown or not.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.sort"), args);
+            // Parse arguments.
+            D_array data;
+            Opt<D_function> comparator;
+            if(reader.start().g(data).g(comparator).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_sort(global, data, comparator) };
               return rocket::move(xref);
             }
             // Fail.
