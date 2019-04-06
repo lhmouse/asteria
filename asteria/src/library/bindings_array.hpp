@@ -8,6 +8,10 @@
 
 namespace Asteria {
 
+extern D_array std_array_slice(const D_array& data, const D_integer& from, const Opt<D_integer>& length = rocket::nullopt);
+extern D_array std_array_replace_slice(const D_array& data, const D_integer& from, const D_array& replacement);
+extern D_array std_array_replace_slice(const D_array& data, const D_integer& from, const Opt<D_integer>& length, const D_array& replacement);
+
 extern Value std_array_max_of(const D_array& data);
 extern Value std_array_min_of(const D_array& data);
 

@@ -753,6 +753,39 @@
 
 ### `std.array`
 
+`std.array.slice(data, from, [length])`
+
+	* Copies a subrange of `data` to create a new `array`. Elements
+	  are copied from `from` if it is non-negative, and from
+	  `lengthof(data) + from` otherwise. If `length` is set to an
+	  `integer`, no more than this number of elements will be copied.
+	  If it is absent, all elements from `from` to the end of `data`
+	  will be copied. If `from` is outside `data`, an empty `array`
+	  is returned.
+
+	* Returns the specified subarray of `data`.
+
+`std.array.replace_slice(data, from, replacement)`
+
+	* Replaces all elements from `from` to the end of `data` with
+	  `replacement` and returns the new `array`. If `from` is
+	  negative, it specifies an offset from the end of `data`. This
+	  function returns a new `array` without modifying `data`.
+
+	* Returns a `array` with the subrange replaced.
+
+`std.array.replace_slice(data, from, [length], replacement)`
+
+	* Replaces a subrange of `data` with `replacement` to create a
+	  new `array`. `from` specifies the start of the subrange to
+	  replace. If `from` is negative, it specifies an offset from the
+	  end of `data`. `length` specifies the maximum number of
+	  elements to replace. If it is set to `null`, this function is
+	  equivalent to `replace_slice(data, from, replacement)`. This
+	  function returns a new `array` without modifying `data`.
+
+	* Returns a `array` with the subrange replaced.
+
 `std.array.max_of(data)`
 
 	* Finds and returns the maximum element in `data`. Elements that

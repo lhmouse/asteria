@@ -9,6 +9,87 @@
 
 namespace Asteria {
 
+    namespace {
+
+    std::pair<D_array::const_iterator, D_array::const_iterator> do_slice(const D_array& text, D_array::const_iterator tbegin, const Opt<D_integer>& length)
+      {
+        if(!length || (*length >= text.end() - tbegin)) {
+          // Get the subrange from `tbegin` to the end.
+          return std::make_pair(tbegin, text.end());
+        }
+        if(*length <= 0) {
+          // Return an empty range.
+          return std::make_pair(tbegin, tbegin);
+        }
+        // Don't go past the end.
+        return std::make_pair(tbegin, tbegin + static_cast<std::ptrdiff_t>(*length));
+      }
+
+    std::pair<D_array::const_iterator, D_array::const_iterator> do_slice(const D_array& text, const D_integer& from, const Opt<D_integer>& length)
+      {
+        auto slen = static_cast<std::int64_t>(text.size());
+        if(from >= 0) {
+          // Behave like `std::string::substr()` except that no exception is thrown when `from` is greater than `text.size()`.
+          if(from >= slen) {
+            return std::make_pair(text.end(), text.end());
+          }
+          return do_slice(text, text.begin() + static_cast<std::ptrdiff_t>(from), length);
+        }
+        // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
+        auto rfrom = from + slen;
+        if(rfrom >= 0) {
+          // Get a subrange from the wrapped index.
+          return do_slice(text, text.begin() + static_cast<std::ptrdiff_t>(rfrom), length);
+        }
+        // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
+        if(!length) {
+          // Get the subrange from the beginning to the end.
+          return std::make_pair(text.begin(), text.end());
+        }
+        if(*length <= 0) {
+          // Return an empty range.
+          return std::make_pair(text.begin(), text.begin());
+        }
+        // Get a subrange excluding the part before the beginning. Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
+        return do_slice(text, text.begin(), rfrom + *length);
+      }
+
+    }
+
+D_array std_array_slice(const D_array& data, const D_integer& from, const Opt<D_integer>& length)
+  {
+    auto range = do_slice(data, from, length);
+    if((range.first == data.begin()) && (range.second == data.end())) {
+      // Use reference counting as our advantage.
+      return data;
+    }
+    return D_array(range.first, range.second);
+  }
+
+D_array std_array_replace_slice(const D_array& data, const D_integer& from, const D_array& replacement)
+  {
+    auto range = do_slice(data, from, rocket::nullopt);
+    // Append segments.
+    D_array res;
+    res.reserve(data.size() - static_cast<std::size_t>(range.second - range.first) + replacement.size());
+    res.append(data.begin(), range.first);
+    res.append(replacement.begin(), replacement.end());
+    res.append(range.second, data.end());
+    return res;
+  }
+
+D_array std_array_replace_slice(const D_array& data, const D_integer& from, const Opt<D_integer>& length, const D_array& replacement)
+  {
+    auto range = do_slice(data, from, length);
+    // Append segments.
+    D_array res;
+    res.reserve(data.size() - static_cast<std::size_t>(range.second - range.first) + replacement.size());
+    res.append(data.begin(), range.first);
+    res.append(replacement.begin(), replacement.end());
+    res.append(range.second, data.end());
+    return res;
+  }
+
 Value std_array_max_of(const D_array& data)
   {
     auto maxp = data.begin();
@@ -287,6 +368,87 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
 
 void create_bindings_array(D_object& result, API_Version /*version*/)
   {
+    //===================================================================
+    // `std.array.slice()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("slice"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.slice(data, from, [length])`\n"
+                     "  * Copies a subrange of `data` to create a new `array`. Elements\n"
+                     "    are copied from `from` if it is non-negative, and from\n"
+                     "    `lengthof(data) + from` otherwise. If `length` is set to an\n"
+                     "    `integer`, no more than this number of elements will be copied.\n"
+                     "    If it is absent, all elements from `from` to the end of `data`\n"
+                     "    will be copied. If `from` is outside `data`, an empty `array`\n"
+                     "    is returned.\n"
+                     "  * Returns the specified subarray of `data`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.slice"), args);
+            // Parse arguments.
+            D_array data;
+            D_integer from;
+            Opt<D_integer> length;
+            if(reader.start().g(data).g(from).g(length).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_slice(data, from, length) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.replace_slice()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("replace_slice"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.replace_slice(data, from, replacement)`\n"
+                     "  * Replaces all elements from `from` to the end of `data` with\n"
+                     "    `replacement` and returns the new `array`. If `from` is\n"
+                     "    negative, it specifies an offset from the end of `data`. This\n"
+                     "    function returns a new `array` without modifying `data`.\n"
+                     "  * Returns a `array` with the subrange replaced.\n"
+                     "`std.array.replace_slice(data, from, [length], replacement)`\n"
+                     "  * Replaces a subrange of `data` with `replacement` to create a\n"
+                     "    new `array`. `from` specifies the start of the subrange to\n"
+                     "    replace. If `from` is negative, it specifies an offset from the\n"
+                     "    end of `data`. `length` specifies the maximum number of\n"
+                     "    elements to replace. If it is set to `null`, this function is\n"
+                     "    equivalent to `replace_slice(data, from, replacement)`. This\n"
+                     "    function returns a new `array` without modifying `data`.\n"
+                     "  * Returns a `array` with the subrange replaced.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.replace"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            D_array data;
+            D_integer from;
+            D_array replacement;
+            if(reader.start().g(data).g(from).save_state(state).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, replacement) };
+              return rocket::move(xref);
+            }
+            Opt<D_integer> length;
+            if(reader.load_state(state).g(length).g(replacement).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, length, replacement) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
     //===================================================================
     // `std.array.max_of()`
     //===================================================================
