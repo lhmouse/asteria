@@ -775,7 +775,7 @@
 
 `std.array.find_if(data, predictor)`
 
-	* Finds the first elements, namely `x`, in `data`, for which
+	* Finds the first element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically true.
 
 	* Returns the subscript of such an element as an `integer`, if
@@ -783,7 +783,7 @@
 
 `std.array.find_if_not(data, predictor)`
 
-	* Finds the first elements, namely `x`, in `data`, for which
+	* Finds the first element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically false.
 
 	* Returns the subscript of such an element as an `integer`, if

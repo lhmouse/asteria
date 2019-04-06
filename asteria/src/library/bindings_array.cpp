@@ -228,7 +228,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.find_if(data, predictor)`\n"
-                     "  * Finds the first elements, namely `x`, in `data`, for which\n"
+                     "  * Finds the first element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically true.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
                      "    one is found; otherwise `null`.\n"),
@@ -265,7 +265,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.find_if_not(data, predictor)`\n"
-                     "  * Finds the first elements, namely `x`, in `data`, for which\n"
+                     "  * Finds the first element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically false.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
                      "    one is found; otherwise `null`.\n"),
