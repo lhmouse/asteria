@@ -8,9 +8,9 @@
 
 namespace Asteria {
 
-extern D_string std_string_substr(const D_string& text, const D_integer& from, const Opt<D_integer>& length = rocket::nullopt);
-extern D_string std_string_replace_substr(const D_string& text, const D_integer& from, const D_string& replacement);
-extern D_string std_string_replace_substr(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& replacement);
+extern D_string std_string_slice(const D_string& text, const D_integer& from, const Opt<D_integer>& length = rocket::nullopt);
+extern D_string std_string_replace_slice(const D_string& text, const D_integer& from, const D_string& replacement);
+extern D_string std_string_replace_slice(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& replacement);
 
 extern D_integer std_string_compare(const D_string& text1, const D_string& text2, const Opt<D_integer>& length = rocket::nullopt);
 extern D_boolean std_string_starts_with(const D_string& text, const D_string& prefix);
