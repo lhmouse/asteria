@@ -754,3 +754,21 @@
 
 	* Denotes the binary logarithm of the integer ten; that is,
 	  `3.3219280948873623478703194294893901758648313930246`.
+
+### `std.array`
+
+`std.array.max_of(data)`
+
+	* Finds and returns the maximum element in `data`. Elements that
+	  are unordered with the first element are ignored.
+
+	* Returns a copy of the maximum element, or `null` if `data` is
+	  empty.
+
+`std.array.min_of(data)`
+
+	* Finds and returns the minimum element in `data`. Elements that
+	  are unordered with the first element are ignored.
+
+	* Returns a copy of the minimum element, or `null` if `data` is
+	  empty.
