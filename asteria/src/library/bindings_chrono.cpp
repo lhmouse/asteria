@@ -186,7 +186,7 @@ D_string std_chrono_format_datetime(const D_integer& time_point, const Opt<D_boo
     // Characters are written backwards, unlike `datetime_parse()`.
     auto wpos = time_str.mut_rbegin();
     // Define functions to write each field.
-    // Be adviced that these functions modify `wpos`.
+    // Be advised that these functions modify `wpos`.
     const auto write_int = [&](int value, int width)
       {
         int r = value;
@@ -272,7 +272,7 @@ Opt<D_integer> std_chrono_parse_datetime(const D_string& time_str)
     // Characters are read forwards, unlike `datetime_format()`.
     auto rpos = time_str.begin();
     // Define functions to read each field.
-    // Be adviced that these functions modify `rpos`.
+    // Be advised that these functions modify `rpos`.
     const auto read_int = [&](auto& out, int width)
       {
         // The first digit is required.
