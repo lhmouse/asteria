@@ -17,31 +17,31 @@ extern D_boolean std_string_starts_with(const D_string& text, const D_string& pr
 extern D_boolean std_string_ends_with(const D_string& text, const D_string& suffix);
 
 extern Opt<D_integer> std_string_find(const D_string& text, const D_string& pattern);
-extern Opt<D_integer> std_string_find(const D_string& text, const Opt<D_integer>& from, const D_string& pattern);
-extern Opt<D_integer> std_string_find(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern);
+extern Opt<D_integer> std_string_find(const D_string& text, const D_integer& from, const D_string& pattern);
+extern Opt<D_integer> std_string_find(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& pattern);
 extern Opt<D_integer> std_string_rfind(const D_string& text, const D_string& pattern);
-extern Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const D_string& pattern);
-extern Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern);
+extern Opt<D_integer> std_string_rfind(const D_string& text, const D_integer& from, const D_string& pattern);
+extern Opt<D_integer> std_string_rfind(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& pattern);
 
 extern D_string std_string_find_and_replace(const D_string& text, const D_string& pattern, const D_string& replacement);
-extern D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>& from, const D_string& pattern, const D_string& replacement);
-extern D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_find_and_replace(const D_string& text, const D_integer& from, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_find_and_replace(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement);
 extern D_string std_string_rfind_and_replace(const D_string& text, const D_string& pattern, const D_string& replacement);
-extern D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>& from, const D_string& pattern, const D_string& replacement);
-extern D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_rfind_and_replace(const D_string& text, const D_integer& from, const D_string& pattern, const D_string& replacement);
+extern D_string std_string_rfind_and_replace(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement);
 
 extern Opt<D_integer> std_string_find_any_of(const D_string& text, const D_string& accept);
-extern Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept);
-extern Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept);
+extern Opt<D_integer> std_string_find_any_of(const D_string& text, const D_integer& from, const D_string& accept);
+extern Opt<D_integer> std_string_find_any_of(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& accept);
 extern Opt<D_integer> std_string_find_not_of(const D_string& text, const D_string& reject);
-extern Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject);
-extern Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject);
+extern Opt<D_integer> std_string_find_not_of(const D_string& text, const D_integer& from, const D_string& reject);
+extern Opt<D_integer> std_string_find_not_of(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& reject);
 extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& accept);
-extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept);
-extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept);
+extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_integer& from, const D_string& accept);
+extern Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& accept);
 extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_string& reject);
-extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject);
-extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject);
+extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_integer& from, const D_string& reject);
+extern Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& reject);
 
 extern D_string std_string_reverse(const D_string& text);
 extern D_string std_string_trim(const D_string& text, const Opt<D_string>& reject = rocket::nullopt);

@@ -182,13 +182,13 @@
 
 `std.string.replace_slice(text, from, [length], replacement)`
 
-	* Replaces all bytes from `from` to the end of `text` with
-	  `replacement` and returns the new byte string. If `from` is
-	  negative, it specifies an offset from the end of `text`. If
-	  `length` is set to an `integer`, no more than this number of
-	  bytes will be copied. If it is `null`, this function is
-	  equivalent to `replace_slice(text, from, replacement)`. This
-	  function returns a new `string` without modifying `text`.
+	* Replaces a subrange of `text` with `replacement` to create a
+	  new byte string. `from` specifies the start of the subrange to
+	  replace. If `from` is negative, it specifies an offset from the
+	  end of `text`. `length` specifies the maximum number of bytes
+	  to replace. If it is set to `null`, this function is equivalent
+	  to `replace_slice(text, from, replacement)`. This function
+	  returns a new `string` without modifying `text`.
 
 	* Returns a `string` with the subrange replaced.
 
@@ -228,21 +228,21 @@
 	  `pattern` in `text` if one is found, which is always
 	  non-negative; otherwise `null`.
 
-`std.string.find(text, [from], pattern)`
+`std.string.find(text, from, pattern)`
 
 	* Searches `text` for the first occurrence of `pattern`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from ?? 0)`.
+	  be returned by `slice(text, from)`.
 
 	* Returns the subscript of the first byte of the first match of
 	  `pattern` in `text` if one is found, which is always
 	  non-negative; otherwise `null`.
 
-`std.string.find(text, [from], [length], pattern)`
+`std.string.find(text, from, [length], pattern)`
 
 	* Searches `text` for the first occurrence of `pattern`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from ?? 0, length)`.
+	  be returned by `slice(text, from, length)`.
 
 	* Returns the subscript of the first byte of the first match of
 	  `pattern` in `text` if one is found, which is always
@@ -256,17 +256,17 @@
 	  `pattern` in `text` if one is found, which is always
 	  non-negative; otherwise `null`.
 
-`std.string.rfind(text, [from], pattern)`
+`std.string.rfind(text, from, pattern)`
 
 	* Searches `text` for the last occurrence of `pattern`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from ?? 0)`.
+	  be returned by `slice(text, from)`.
 
 	* Returns the subscript of the first byte of the last match of
 	  `pattern` in `text` if one is found, which is always
 	  non-negative; otherwise `null`.
 
-`std.string.rfind(text, [from], [length], pattern)`
+`std.string.rfind(text, from, [length], pattern)`
 
 	* Searches `text` for the last occurrence of `pattern`.
 
@@ -283,24 +283,24 @@
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
 
-`std.string.find_and_replace(text, [from], pattern, replacement)`
+`std.string.find_and_replace(text, from, pattern, replacement)`
 
 	* Searches `text` for the first occurrence of `pattern`. If a
 	  match is found, it is replaced with `replacement`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from ?? 0)`. This function returns a
-	  new `string` without modifying `text`.
+	  returned by `slice(text, from)`. This function returns a new
+	  `string` without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
 
-`std.string.find_and_replace(text, [from], [length], pattern, replacement)`
+`std.string.find_and_replace(text, from, [length], pattern, replacement)`
 
 	* Searches `text` for the first occurrence of `pattern`. If a
 	  match is found, it is replaced with `replacement`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from ?? 0, length)`. This function
-	  returns a new `string` without modifying `text`.
+	  returned by `slice(text, from, length)`. This function returns
+	  a new `string` without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
@@ -314,24 +314,24 @@
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
 
-`std.string.rfind_and_replace(text, [from], pattern, replacement)`
+`std.string.rfind_and_replace(text, from, pattern, replacement)`
 
 	* Searches `text` for the last occurrence of `pattern`. If a
 	  match is found, it is replaced with `replacement`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from ?? 0)`. This function returns a
-	  new `string` without modifying `text`.
+	  returned by `slice(text, from)`. This function returns a new
+	  `string` without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
 
-`std.string.rfind_and_replace(text, [from], [length], pattern, replacement)`
+`std.string.rfind_and_replace(text, from, [length], pattern, replacement)`
 
 	* Searches `text` for the last occurrence of `pattern`. If a
 	  match is found, it is replaced with `replacement`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from ?? 0, length)`. This function
-	  returns a new `string` without modifying `text`.
+	  returned by `slice(text, from, length)`. This function returns
+	  a new `string` without modifying `text`.
 
 	* Returns the string with `pattern` replaced. If `text` does not
 	  contain `pattern`, it is returned intact.
@@ -343,20 +343,20 @@
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.find_any_of(text, [from], accept)`
+`std.string.find_any_of(text, from, accept)`
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from ?? 0)`.
+	  returned by `slice(text, from)`.
 
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.find_any_of(text, [from], [length], accept)`
+`std.string.find_any_of(text, from, [length], accept)`
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from ?? 0, length)`.
+	  returned by `slice(text, from, length)`.
 
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -368,20 +368,20 @@
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.rfind_any_of(text, [from], accept)`
+`std.string.rfind_any_of(text, from, accept)`
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from ?? 0)`.
+	  returned by `slice(text, from)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.rfind_any_of(text, [from], [length], accept)`
+`std.string.rfind_any_of(text, from, [length], accept)`
 
 	* Searches `text` for bytes that exist in `accept`. The search
 	  operation is performed on the same subrange that would be
-	  returned by `slice(text, from ?? 0, length)`.
+	  returned by `slice(text, from, length)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -393,20 +393,20 @@
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.find_not_of(text, [from], reject)`
+`std.string.find_not_of(text, from, reject)`
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from ?? 0)`.
+	  be returned by `slice(text, from)`.
 
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.find_not_of(text, [from], [length], reject)`
+`std.string.find_not_of(text, from, [length], reject)`
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from ?? 0, length)`.
+	  be returned by `slice(text, from, length)`.
 
 	* Returns the subscript of the first byte found, which is always
 	  non-negative; or `null` if no such byte exists.
@@ -418,20 +418,20 @@
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.rfind_not_of(text, [from], reject)`
+`std.string.rfind_not_of(text, from, reject)`
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from ?? 0)`.
+	  be returned by `slice(text, from)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.
 
-`std.string.rfind_not_of(text, [from], [length], reject)`
+`std.string.rfind_not_of(text, from, [length], reject)`
 
 	* Searches `text` for bytes that does not exist in `reject`. The
 	  search operation is performed on the same subrange that would
-	  be returned by `slice(text, from ?? 0, length)`.
+	  be returned by `slice(text, from, length)`.
 
 	* Returns the subscript of the last byte found, which is always
 	  non-negative; or `null` if no such byte exists.

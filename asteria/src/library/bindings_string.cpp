@@ -152,9 +152,9 @@ Opt<D_integer> std_string_find(const D_string& text, const D_string& pattern)
     return *qit - text.begin();
   }
 
-Opt<D_integer> std_string_find(const D_string& text, const Opt<D_integer>& from, const D_string& pattern)
+Opt<D_integer> std_string_find(const D_string& text, const D_integer& from, const D_string& pattern)
   {
-    auto range = do_slice(text, from.value_or(0), rocket::nullopt);
+    auto range = do_slice(text, from, rocket::nullopt);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
       return rocket::nullopt;
@@ -162,9 +162,9 @@ Opt<D_integer> std_string_find(const D_string& text, const Opt<D_integer>& from,
     return *qit - text.begin();
   }
 
-Opt<D_integer> std_string_find(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern)
+Opt<D_integer> std_string_find(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& pattern)
   {
-    auto range = do_slice(text, from.value_or(0), length);
+    auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
       return rocket::nullopt;
@@ -181,9 +181,9 @@ Opt<D_integer> std_string_rfind(const D_string& text, const D_string& pattern)
     return text.rend() - *qit - pattern.ssize();
   }
 
-Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const D_string& pattern)
+Opt<D_integer> std_string_rfind(const D_string& text, const D_integer& from, const D_string& pattern)
   {
-    auto range = do_slice(text, from.value_or(0), rocket::nullopt);
+    auto range = do_slice(text, from, rocket::nullopt);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
     if(!qit) {
       return rocket::nullopt;
@@ -191,9 +191,9 @@ Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from
     return text.rend() - *qit - pattern.ssize();
   }
 
-Opt<D_integer> std_string_rfind(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern)
+Opt<D_integer> std_string_rfind(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& pattern)
   {
-    auto range = do_slice(text, from.value_or(0), length);
+    auto range = do_slice(text, from, length);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
     if(!qit) {
       return rocket::nullopt;
@@ -214,10 +214,10 @@ D_string std_string_find_and_replace(const D_string& text, const D_string& patte
     return res;
   }
 
-D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>& from, const D_string& pattern, const D_string& replacement)
+D_string std_string_find_and_replace(const D_string& text, const D_integer& from, const D_string& pattern, const D_string& replacement)
   {
     D_string res = text;
-    auto range = do_slice(res, from.value_or(0), rocket::nullopt);
+    auto range = do_slice(res, from, rocket::nullopt);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
       // Make use of reference counting if no match has been found.
@@ -228,10 +228,10 @@ D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>&
     return res;
   }
 
-D_string std_string_find_and_replace(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement)
+D_string std_string_find_and_replace(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement)
   {
     D_string res = text;
-    auto range = do_slice(res, from.value_or(0), length);
+    auto range = do_slice(res, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
       // Make use of reference counting if no match has been found.
@@ -255,10 +255,10 @@ D_string std_string_rfind_and_replace(const D_string& text, const D_string& patt
     return res;
   }
 
-D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>& from, const D_string& pattern, const D_string& replacement)
+D_string std_string_rfind_and_replace(const D_string& text, const D_integer& from, const D_string& pattern, const D_string& replacement)
   {
     D_string res = text;
-    auto range = do_slice(res, from.value_or(0), rocket::nullopt);
+    auto range = do_slice(res, from, rocket::nullopt);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
     if(!qit) {
       // Make use of reference counting if no match has been found.
@@ -269,10 +269,10 @@ D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>
     return res;
   }
 
-D_string std_string_rfind_and_replace(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement)
+D_string std_string_rfind_and_replace(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& pattern, const D_string& replacement)
   {
     D_string res = text;
-    auto range = do_slice(res, from.value_or(0), length);
+    auto range = do_slice(res, from, length);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
     if(!qit) {
       // Make use of reference counting if no match has been found.
@@ -312,9 +312,9 @@ Opt<D_integer> std_string_find_any_of(const D_string& text, const D_string& acce
     return *qit - text.begin();
   }
 
-Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
+Opt<D_integer> std_string_find_any_of(const D_string& text, const D_integer& from, const D_string& accept)
   {
-    auto range = do_slice(text, from.value_or(0), rocket::nullopt);
+    auto range = do_slice(text, from, rocket::nullopt);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
     if(!qit) {
       return rocket::nullopt;
@@ -322,9 +322,9 @@ Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>
     return *qit - text.begin();
   }
 
-Opt<D_integer> std_string_find_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept)
+Opt<D_integer> std_string_find_any_of(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& accept)
   {
-    auto range = do_slice(text, from.value_or(0), length);
+    auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
     if(!qit) {
       return rocket::nullopt;
@@ -341,9 +341,9 @@ Opt<D_integer> std_string_find_not_of(const D_string& text, const D_string& reje
     return *qit - text.begin();
   }
 
-Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject)
+Opt<D_integer> std_string_find_not_of(const D_string& text, const D_integer& from, const D_string& reject)
   {
-    auto range = do_slice(text, from.value_or(0), rocket::nullopt);
+    auto range = do_slice(text, from, rocket::nullopt);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit) {
       return rocket::nullopt;
@@ -351,9 +351,9 @@ Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>
     return *qit - text.begin();
   }
 
-Opt<D_integer> std_string_find_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject)
+Opt<D_integer> std_string_find_not_of(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& reject)
   {
-    auto range = do_slice(text, from.value_or(0), length);
+    auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit) {
       return rocket::nullopt;
@@ -370,9 +370,9 @@ Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_string& acc
     return text.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const D_string& accept)
+Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_integer& from, const D_string& accept)
   {
-    auto range = do_slice(text, from.value_or(0), rocket::nullopt);
+    auto range = do_slice(text, from, rocket::nullopt);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
     if(!qit) {
       return rocket::nullopt;
@@ -380,9 +380,9 @@ Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer
     return text.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_string_rfind_any_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& accept)
+Opt<D_integer> std_string_rfind_any_of(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& accept)
   {
-    auto range = do_slice(text, from.value_or(0), length);
+    auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
     if(!qit) {
       return rocket::nullopt;
@@ -399,9 +399,9 @@ Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_string& rej
     return text.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const D_string& reject)
+Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_integer& from, const D_string& reject)
   {
-    auto range = do_slice(text, from.value_or(0), rocket::nullopt);
+    auto range = do_slice(text, from, rocket::nullopt);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
     if(!qit) {
       return rocket::nullopt;
@@ -409,9 +409,9 @@ Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer
     return text.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_string_rfind_not_of(const D_string& text, const Opt<D_integer>& from, const Opt<D_integer>& length, const D_string& reject)
+Opt<D_integer> std_string_rfind_not_of(const D_string& text, const D_integer& from, const Opt<D_integer>& length, const D_string& reject)
   {
-    auto range = do_slice(text, from.value_or(0), length);
+    auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
     if(!qit) {
       return rocket::nullopt;
@@ -998,13 +998,13 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "    function returns a new `string` without modifying `text`.\n"
                      "  * Returns a `string` with the subrange replaced.\n"
                      "`std.string.replace_slice(text, from, [length], replacement)`\n"
-                     "  * Replaces all bytes from `from` to the end of `text` with\n"
-                     "    `replacement` and returns the new byte string. If `from` is\n"
-                     "    negative, it specifies an offset from the end of `text`. If\n"
-                     "    `length` is set to an `integer`, no more than this number of\n"
-                     "    bytes will be copied. If it is `null`, this function is\n"
-                     "    equivalent to `replace_slice(text, from, replacement)`. This\n"
-                     "    function returns a new `string` without modifying `text`.\n"
+                     "  * Replaces a subrange of `text` with `replacement` to create a\n"
+                     "    new byte string. `from` specifies the start of the subrange to\n"
+                     "    replace. If `from` is negative, it specifies an offset from the\n"
+                     "    end of `text`. `length` specifies the maximum number of bytes\n"
+                     "    to replace. If it is set to `null`, this function is equivalent\n"
+                     "    to `replace_slice(text, from, replacement)`. This function\n"
+                     "    returns a new `string` without modifying `text`.\n"
                      "  * Returns a `string` with the subrange replaced.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1043,17 +1043,17 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "  * Returns the subscript of the first byte of the first match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
                      "    non-negative; otherwise `null`.\n"
-                     "`std.string.find(text, [from], pattern)`\n"
+                     "`std.string.find(text, from, pattern)`\n"
                      "  * Searches `text` for the first occurrence of `pattern`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(text, from ?? 0)`.\n"
+                     "    be returned by `slice(text, from)`.\n"
                      "  * Returns the subscript of the first byte of the first match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
                      "    non-negative; otherwise `null`.\n"
-                     "`std.string.find(text, [from], [length], pattern)`\n"
+                     "`std.string.find(text, from, [length], pattern)`\n"
                      "  * Searches `text` for the first occurrence of `pattern`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(text, from ?? 0, length)`.\n"
+                     "    be returned by `slice(text, from, length)`.\n"
                      "  * Returns the subscript of the first byte of the first match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
                      "    non-negative; otherwise `null`.\n"),
@@ -1074,7 +1074,7 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> from;
+            D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(pattern).finish()) {
               // Call the binding function.
               auto qindex = std_string_find(text, from, pattern);
@@ -1111,14 +1111,14 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "  * Returns the subscript of the first byte of the last match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
                      "    non-negative; otherwise `null`.\n"
-                     "`std.string.rfind(text, [from], pattern)`\n"
+                     "`std.string.rfind(text, from, pattern)`\n"
                      "  * Searches `text` for the last occurrence of `pattern`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(text, from ?? 0)`.\n"
+                     "    be returned by `slice(text, from)`.\n"
                      "  * Returns the subscript of the first byte of the last match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
                      "    non-negative; otherwise `null`.\n"
-                     "`std.string.rfind(text, [from], [length], pattern)`\n"
+                     "`std.string.rfind(text, from, [length], pattern)`\n"
                      "  * Searches `text` for the last occurrence of `pattern`.\n"
                      "  * Returns the subscript of the first byte of the last match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
@@ -1140,7 +1140,7 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> from;
+            D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(pattern).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind(text, from, pattern);
@@ -1178,20 +1178,20 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "    function returns a new `string` without modifying `text`.\n"
                      "  * Returns the string with `pattern` replaced. If `text` does not\n"
                      "    contain `pattern`, it is returned intact.\n"
-                     "`std.string.find_and_replace(text, [from], pattern, replacement)`\n"
+                     "`std.string.find_and_replace(text, from, pattern, replacement)`\n"
                      "  * Searches `text` for the first occurrence of `pattern`. If a\n"
                      "    match is found, it is replaced with `replacement`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(text, from ?? 0)`. This function returns a\n"
-                     "    new `string` without modifying `text`.\n"
+                     "    returned by `slice(text, from)`. This function returns a new\n"
+                     "    `string` without modifying `text`.\n"
                      "  * Returns the string with `pattern` replaced. If `text` does not\n"
                      "    contain `pattern`, it is returned intact.\n"
-                     "`std.string.find_and_replace(text, [from], [length], pattern, replacement)`\n"
+                     "`std.string.find_and_replace(text, from, [length], pattern, replacement)`\n"
                      "  * Searches `text` for the first occurrence of `pattern`. If a\n"
                      "    match is found, it is replaced with `replacement`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(text, from ?? 0, length)`. This function\n"
-                     "    returns a new `string` without modifying `text`.\n"
+                     "    returned by `slice(text, from, length)`. This function returns\n"
+                     "    a new `string` without modifying `text`.\n"
                      "  * Returns the string with `pattern` replaced. If `text` does not\n"
                      "    contain `pattern`, it is returned intact.\n"),
         // Definition
@@ -1208,7 +1208,7 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { std_string_find_and_replace(text, pattern, replacement) };
               return rocket::move(xref);
             }
-            Opt<D_integer> from;
+            D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(pattern).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, pattern, replacement) };
@@ -1238,20 +1238,20 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "    function returns a new `string` without modifying `text`.\n"
                      "  * Returns the string with `pattern` replaced. If `text` does not\n"
                      "    contain `pattern`, it is returned intact.\n"
-                     "`std.string.rfind_and_replace(text, [from], pattern, replacement)`\n"
+                     "`std.string.rfind_and_replace(text, from, pattern, replacement)`\n"
                      "  * Searches `text` for the last occurrence of `pattern`. If a\n"
                      "    match is found, it is replaced with `replacement`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(text, from ?? 0)`. This function returns a\n"
-                     "    new `string` without modifying `text`.\n"
+                     "    returned by `slice(text, from)`. This function returns a new\n"
+                     "    `string` without modifying `text`.\n"
                      "  * Returns the string with `pattern` replaced. If `text` does not\n"
                      "    contain `pattern`, it is returned intact.\n"
-                     "`std.string.rfind_and_replace(text, [from], [length], pattern, replacement)`\n"
+                     "`std.string.rfind_and_replace(text, from, [length], pattern, replacement)`\n"
                      "  * Searches `text` for the last occurrence of `pattern`. If a\n"
                      "    match is found, it is replaced with `replacement`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(text, from ?? 0, length)`. This function\n"
-                     "    returns a new `string` without modifying `text`.\n"
+                     "    returned by `slice(text, from, length)`. This function returns\n"
+                     "    a new `string` without modifying `text`.\n"
                      "  * Returns the string with `pattern` replaced. If `text` does not\n"
                      "    contain `pattern`, it is returned intact.\n"),
         // Definition
@@ -1268,7 +1268,7 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { std_string_rfind_and_replace(text, pattern, replacement) };
               return rocket::move(xref);
             }
-            Opt<D_integer> from;
+            D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(pattern).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_rfind_and_replace(text, from, pattern, replacement) };
@@ -1296,16 +1296,16 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "  * Searches `text` for bytes that exist in `accept`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
-                     "`std.string.find_any_of(text, [from], accept)`\n"
+                     "`std.string.find_any_of(text, from, accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(text, from ?? 0)`.\n"
+                     "    returned by `slice(text, from)`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
-                     "`std.string.find_any_of(text, [from], [length], accept)`\n"
+                     "`std.string.find_any_of(text, from, [length], accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(text, from ?? 0, length)`.\n"
+                     "    returned by `slice(text, from, length)`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"),
         // Definition
@@ -1325,7 +1325,7 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> from;
+            D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_find_any_of(text, from, accept);
@@ -1361,16 +1361,16 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "  * Searches `text` for bytes that exist in `accept`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
-                     "`std.string.rfind_any_of(text, [from], accept)`\n"
+                     "`std.string.rfind_any_of(text, from, accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(text, from ?? 0)`.\n"
+                     "    returned by `slice(text, from)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
-                     "`std.string.rfind_any_of(text, [from], [length], accept)`\n"
+                     "`std.string.rfind_any_of(text, from, [length], accept)`\n"
                      "  * Searches `text` for bytes that exist in `accept`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(text, from ?? 0, length)`.\n"
+                     "    returned by `slice(text, from, length)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"),
         // Definition
@@ -1390,7 +1390,7 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> from;
+            D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind_any_of(text, from, accept);
@@ -1426,16 +1426,16 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "  * Searches `text` for bytes that does not exist in `reject`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
-                     "`std.string.find_not_of(text, [from], reject)`\n"
+                     "`std.string.find_not_of(text, from, reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(text, from ?? 0)`.\n"
+                     "    be returned by `slice(text, from)`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
-                     "`std.string.find_not_of(text, [from], [length], reject)`\n"
+                     "`std.string.find_not_of(text, from, [length], reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(text, from ?? 0, length)`.\n"
+                     "    be returned by `slice(text, from, length)`.\n"
                      "  * Returns the subscript of the first byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"),
         // Definition
@@ -1455,7 +1455,7 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> from;
+            D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_find_not_of(text, from, accept);
@@ -1491,16 +1491,16 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
                      "  * Searches `text` for bytes that does not exist in `reject`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
-                     "`std.string.rfind_not_of(text, [from], reject)`\n"
+                     "`std.string.rfind_not_of(text, from, reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(text, from ?? 0)`.\n"
+                     "    be returned by `slice(text, from)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"
-                     "`std.string.rfind_not_of(text, [from], [length], reject)`\n"
+                     "`std.string.rfind_not_of(text, from, [length], reject)`\n"
                      "  * Searches `text` for bytes that does not exist in `reject`. The\n"
                      "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(text, from ?? 0, length)`.\n"
+                     "    be returned by `slice(text, from, length)`.\n"
                      "  * Returns the subscript of the last byte found, which is always\n"
                      "    non-negative; or `null` if no such byte exists.\n"),
         // Definition
@@ -1520,7 +1520,7 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> from;
+            D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind_not_of(text, from, accept);
