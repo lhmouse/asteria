@@ -501,24 +501,26 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
     for(std::size_t bsize = 1; bsize < res.size(); bsize *= 2) {
       // Merge adjacent blocks of `bsize` elements.
       std::size_t toff = 0;
-      auto transfer_at = [&](std::size_t roff)
-        {
-          temp.mut(toff++) = rocket::move(res.mut(roff));
-        };
-      // Define range information for blocks.
-      struct Block
-        {
-          std::size_t off;
-          std::size_t end;
-        }
-      r1, r2;
-      // Implement non-recursive Merge Sort.
       for(;;) {
+        // Define a function to merge one element.
+        auto transfer_at = [&](std::size_t roff)
+          {
+            temp.mut(toff++) = rocket::move(res.mut(roff));
+          };
+        // Define range information for blocks.
+        struct Block
+          {
+            std::size_t off;
+            std::size_t end;
+          }
+        r1, r2;
         // Get the range of the first block to merge.
         r1.off = toff;
         r1.end = toff + bsize;
         // Stop if there are no more blocks.
         if(res.size() <= r1.end) {
+          // Copy all remaining elements.
+          rocket::ranged_for(r1.off, res.size(), transfer_at);
           break;
         }
         // Get the range of the second block to merge.
@@ -542,8 +544,6 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
         auto& rk = std::get<1>(refs);
         rocket::ranged_do_while(rk.off, rk.end, transfer_at);
       }
-      // Copy all remaining elements.
-      rocket::ranged_for(r1.off, res.size(), transfer_at);
       // Accept all merged blocks.
       res.swap(temp);
     }
