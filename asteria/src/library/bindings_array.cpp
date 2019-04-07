@@ -498,57 +498,47 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
     // Define the temporary storage for Merge Sort.
     D_array temp;
     temp.resize(res.size());
-    // A pair of adjacent blocks of this number of elements are merged to create a larger block.
-    std::size_t bsize = 1;
-    for(;;) {
-      // Merge adjacent blocks.
+    for(std::size_t bsize = 1; bsize < res.size(); bsize *= 2) {
+      // Define range information for blocks.
+      struct Block
+        {
+          std::size_t off;
+          std::size_t end;
+        }
+      r1, r2;
+      // Merge adjacent blocks of `bsize` elements.
       std::size_t toff = 0;
+      auto transfer_at = [&](std::size_t index) { temp.mut(toff++) = rocket::move(res.mut(index));  };
       for(;;) {
         // Get the range of the first block to merge.
-        std::size_t r1off = toff;
-        std::size_t r1end = r1off + bsize;
-        if(res.size() <= r1end) {
+        r1.off = toff;
+        r1.end = r1.off + bsize;
+        if(res.size() <= r1.end) {
           // Copy all remaining elements.
-          rocket::ranged_for(r1off, res.size(), [&](std::size_t i) { temp.mut(toff++) = rocket::move(res.mut(i));  });
+          rocket::ranged_for(r1.off, res.size(), transfer_at);
           break;
         }
         // Get the range of the second block to merge.
-        std::size_t r2off = r1end;
-        std::size_t r2end = rocket::min(r2off + bsize, res.size());
+        r2.off = r1.end;
+        r2.end = rocket::min(r2.off + bsize, res.size());
         // Merge these two blocks.
-        for(;;) {
-          auto& elem1 = res.mut(r1off);
-          auto& elem2 = res.mut(r2off);
-          // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
-          auto cmp = do_compare(global, comparator, elem1, elem2);
-          if(cmp == Value::compare_unordered) {
-            ASTERIA_THROW_RUNTIME_ERROR("The elements `", elem1, "` and `", elem2, "` are unordered.");
-          }
-          if(cmp != Value::compare_greater) {
-            // Move the first element.
-            temp.mut(toff++) = rocket::move(elem1);
-            if(++r1off == r1end) {
-              // The first block has been exhausted.
-              rocket::ranged_do_while(r2off, r2end, [&](std::size_t i) { temp.mut(toff++) = rocket::move(res.mut(i));  });
-              break;
-            }
-          } else {
-            // Move the second element.
-            temp.mut(toff++) = rocket::move(elem2);
-            if(++r2off == r2end) {
-              // The second block has been exhausted.
-              rocket::ranged_do_while(r1off, r1end, [&](std::size_t i) { temp.mut(toff++) = rocket::move(res.mut(i));  });
-              break;
-            }
-          }
+  z:
+        auto cmp = do_compare(global, comparator, res[r1.off], res[r2.off]);
+        if(cmp == Value::compare_unordered) {
+          ASTERIA_THROW_RUNTIME_ERROR("The elements `", res[r1.off], "` and `", res[r2.off], "` are unordered.");
         }
+        // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
+        auto& rf = (cmp != Value::compare_greater) ? r1 : r2;
+        // Move the element from `rf`.
+        transfer_at(rf.off++);
+        if(rf.off != rf.end) {
+          goto z;
+        }
+        // A block has been exhausted. Move all elements from the other.
+        auto& rk = (&rf == &r2) ? r1 : r2;
+        rocket::ranged_do_while(rk.off, rk.end, transfer_at);
       }
-      // Accept merged blocks.
       res.swap(temp);
-      if(res.size() - bsize <= bsize) {
-        break;
-      }
-      bsize *= 2;
     }
     return res;
   }
