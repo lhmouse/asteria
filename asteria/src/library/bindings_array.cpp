@@ -516,31 +516,35 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
       for(;;) {
         // Get the range of the first block to merge.
         r1.off = toff;
-        r1.end = r1.off + bsize;
+        r1.end = toff + bsize;
+        // Stop if there are no more blocks.
         if(res.size() <= r1.end) {
-          // Copy all remaining elements.
-          rocket::ranged_for(r1.off, res.size(), transfer_at);
           break;
         }
         // Get the range of the second block to merge.
         r2.off = r1.end;
-        r2.end = rocket::min(r2.off + bsize, res.size());
+        r2.end = rocket::min(r1.end + bsize, res.size());
+        // Merge elements one by one, until either block has been exhausted.
   z:
         auto cmp = do_compare(global, comparator, res[r1.off], res[r2.off]);
         if(cmp == Value::compare_unordered) {
           ASTERIA_THROW_RUNTIME_ERROR("The elements `", res[r1.off], "` and `", res[r2.off], "` are unordered.");
         }
         // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
-        auto& rf = (cmp != Value::compare_greater) ? r1 : r2;
+        auto refs = (cmp != Value::compare_greater) ? std::tie(r1, r2) : std::tie(r2, r1);
+        auto& rf = std::get<0>(refs);
         // Move the element from `rf`.
         transfer_at(rf.off++);
         if(rf.off != rf.end) {
           goto z;
         }
-        // When either block has been exhausted, move all elements from the other.
-        auto& rk = (&rf == &r2) ? r1 : r2;
+        // Move all elements from the other block.
+        auto& rk = std::get<1>(refs);
         rocket::ranged_do_while(rk.off, rk.end, transfer_at);
       }
+      // Copy all remaining elements.
+      rocket::ranged_for(r1.off, res.size(), transfer_at);
+      // Accept all merged blocks.
       res.swap(temp);
     }
     return res;
