@@ -804,22 +804,84 @@
 
 `std.array.find(data, target)`
 
-	* Finds the first element that is equal to `target`.
+	* Searches `data` for the first occurrence of `target`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	* Returns the subscript of the first match of `target` in `data`
+	  if one is found, which is always non-negative; otherwise
+	  `null`.
+
+`std.array.find(data, from, target)`
+
+	* Searches `data` for the first occurrence of `target`. The
+	  search operation is performed on the same subrange that would
+	  be returned by `slice(data, from)`.
+
+	* Returns the subscript of the first match of `target` in `data`
+	  if one is found, which is always non-negative; otherwise
+	  `null`.
+
+`std.array.find(data, from, [length], target)`
+
+	* Searches `data` for the first occurrence of `target`. The
+	  search operation is performed on the same subrange that would
+	  be returned by `slice(data, from, length)`.
+
+	* Returns the subscript of the first match of `target` in `data`
+	  if one is found, which is always non-negative; otherwise
+	  `null`.
 
 `std.array.rfind(data, target)`
 
-	* Finds the last element that is equal to `target`.
+	* Searches `data` for the last occurrence of `target`.
 
-	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	* Returns the subscript of the last match of `target` in `data`
+	  if one is found, which is always non-negative; otherwise
+	  `null`.
+
+`std.array.rfind(data, from, target)`
+
+	* Searches `data` for the last occurrence of `target`. The search
+	  operation is performed on the same subrange that would be
+	  returned by `slice(data, from)`.
+
+	* Returns the subscript of the last match of `target` in `data`
+	  if one is found, which is always non-negative; otherwise
+	  `null`.
+
+`std.array.rfind(data, from, [length], target)`
+
+	* Searches `data` for the last occurrence of `target`. The search
+	  operation is performed on the same subrange that would be
+	  returned by `slice(data, from, length)`.
+
+	* Returns the subscript of the last match of `target` in `data`
+	  if one is found, which is always non-negative; otherwise
+	  `null`.
 
 `std.array.find_if(data, predictor)`
 
 	* Finds the first element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically true.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.find_if(data, from, predictor)`
+
+	* Finds the first element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from)`.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.find_if(data, from, [length], predictor)`
+
+	* Finds the first element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an `integer`, if
 	  one is found; otherwise `null`.
@@ -832,18 +894,78 @@
 	* Returns the subscript of such an element as an `integer`, if
 	  one is found; otherwise `null`.
 
+`std.array.find_if_not(data, from, predictor)`
+
+	* Finds the first element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from)`.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.find_if_not(data, from, [length], predictor)`
+
+	* Finds the first element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from, length)`.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
 `std.array.rfind_if(data, predictor)`
 
-	* Finds the last elements, namely `x`, in `data`, for which
+	* Finds the last element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically true.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.rfind_if(data, from, predictor)`
+
+	* Finds the last element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from)`.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.rfind_if(data, from, [length], predictor)`
+
+	* Finds the last element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an `integer`, if
 	  one is found; otherwise `null`.
 
 `std.array.rfind_if_not(data, predictor)`
 
-	* Finds the last elements, namely `x`, in `data`, for which
+	* Finds the last element, namely `x`, in `data`, for which
 	  `predictor(x)` yields logically false.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.rfind_if_not(data, from, predictor)`
+
+	* Finds the last element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from)`.
+
+	* Returns the subscript of such an element as an `integer`, if
+	  one is found; otherwise `null`.
+
+`std.array.rfind_if_not(data, from, [length], predictor)`
+
+	* Finds the last element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false. The search operation is
+	  performed on the same subrange that would be returned by
+	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an `integer`, if
 	  one is found; otherwise `null`.
