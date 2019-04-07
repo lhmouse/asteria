@@ -5,6 +5,7 @@
 #include "bindings_array.hpp"
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
+#include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -793,14 +794,10 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader::State state;
             // Parse arguments.
             D_array data;
-            Opt<D_function> predictor;
+            D_function predictor = global.uninitialized_placeholder();
             if(reader.start().g(data).save_state(state).g(predictor).finish()) {
-              // Hmm... can `D_function` be made default-constructible?
-              if(!predictor) {
-                ASTERIA_THROW_RUNTIME_ERROR("`null` cannot be used as a predictor.");
-              }
               // Call the binding function.
-              auto qindex = std_array_find_if(global, data, *predictor);
+              auto qindex = std_array_find_if(global, data, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -810,7 +807,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
               // Call the binding function.
-              auto qindex = std_array_find_if(global, data, from, *predictor);
+              auto qindex = std_array_find_if(global, data, from, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -820,7 +817,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Opt<D_integer> length;
             if(reader.load_state(state).g(length).g(predictor).finish()) {
               // Call the binding function.
-              auto qindex = std_array_find_if(global, data, from, length, *predictor);
+              auto qindex = std_array_find_if(global, data, from, length, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -865,14 +862,10 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader::State state;
             // Parse arguments.
             D_array data;
-            Opt<D_function> predictor;
+            D_function predictor = global.uninitialized_placeholder();
             if(reader.start().g(data).save_state(state).g(predictor).finish()) {
-              // Hmm... can `D_function` be made default-constructible?
-              if(!predictor) {
-                ASTERIA_THROW_RUNTIME_ERROR("`null` cannot be used as a predictor.");
-              }
               // Call the binding function.
-              auto qindex = std_array_find_if_not(global, data, *predictor);
+              auto qindex = std_array_find_if_not(global, data, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -882,7 +875,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
               // Call the binding function.
-              auto qindex = std_array_find_if_not(global, data, from, *predictor);
+              auto qindex = std_array_find_if_not(global, data, from, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -892,7 +885,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Opt<D_integer> length;
             if(reader.load_state(state).g(length).g(predictor).finish()) {
               // Call the binding function.
-              auto qindex = std_array_find_if_not(global, data, from, length, *predictor);
+              auto qindex = std_array_find_if_not(global, data, from, length, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -937,14 +930,10 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader::State state;
             // Parse arguments.
             D_array data;
-            Opt<D_function> predictor;
+            D_function predictor = global.uninitialized_placeholder();
             if(reader.start().g(data).save_state(state).g(predictor).finish()) {
-              // Hmm... can `D_function` be made default-constructible?
-              if(!predictor) {
-                ASTERIA_THROW_RUNTIME_ERROR("`null` cannot be used as a predictor.");
-              }
               // Call the binding function.
-              auto qindex = std_array_rfind_if(global, data, *predictor);
+              auto qindex = std_array_rfind_if(global, data, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -954,7 +943,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
               // Call the binding function.
-              auto qindex = std_array_rfind_if(global, data, from, *predictor);
+              auto qindex = std_array_rfind_if(global, data, from, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -964,7 +953,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Opt<D_integer> length;
             if(reader.load_state(state).g(length).g(predictor).finish()) {
               // Call the binding function.
-              auto qindex = std_array_rfind_if(global, data, from, length, *predictor);
+              auto qindex = std_array_rfind_if(global, data, from, length, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -1009,14 +998,10 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader::State state;
             // Parse arguments.
             D_array data;
-            Opt<D_function> predictor;
+            D_function predictor = global.uninitialized_placeholder();
             if(reader.start().g(data).save_state(state).g(predictor).finish()) {
-              // Hmm... can `D_function` be made default-constructible?
-              if(!predictor) {
-                ASTERIA_THROW_RUNTIME_ERROR("`null` cannot be used as a predictor.");
-              }
               // Call the binding function.
-              auto qindex = std_array_rfind_if_not(global, data, *predictor);
+              auto qindex = std_array_rfind_if_not(global, data, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -1026,7 +1011,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             D_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
               // Call the binding function.
-              auto qindex = std_array_rfind_if_not(global, data, from, *predictor);
+              auto qindex = std_array_rfind_if_not(global, data, from, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
@@ -1036,7 +1021,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Opt<D_integer> length;
             if(reader.load_state(state).g(length).g(predictor).finish()) {
               // Call the binding function.
-              auto qindex = std_array_rfind_if_not(global, data, from, length, *predictor);
+              auto qindex = std_array_rfind_if_not(global, data, from, length, predictor);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
