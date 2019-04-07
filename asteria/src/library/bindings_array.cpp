@@ -501,7 +501,10 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
     for(std::size_t bsize = 1; bsize < res.size(); bsize *= 2) {
       // Merge adjacent blocks of `bsize` elements.
       std::size_t toff = 0;
-      auto transfer_at = [&](std::size_t roff) { temp.mut(toff++) = rocket::move(res.mut(roff));  };
+      auto transfer_at = [&](std::size_t roff)
+        {
+          temp.mut(toff++) = rocket::move(res.mut(roff));
+        };
       // Define range information for blocks.
       struct Block
         {
