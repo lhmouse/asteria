@@ -592,18 +592,18 @@ D_array std_array_shuffle(const D_array& data, const Opt<D_integer>& seed)
 #endif
     }
     // Create a linear congruential generator with `rseed`.
-    std::minstd_rand prng(static_cast<std::uint_fast32_t>(rseed));
-    static_assert(std::minstd_rand::min() == 1, "??");
-    static_assert(std::minstd_rand::max() == 2147483646, "??");
+    // The template arguments are the same as glibc's `rand48_r()` function.
+    //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
+    std::linear_congruential_engine<std::uint64_t, 0x5DEECE66D, 0xB, 0x1000000000000> prng(static_cast<std::uint64_t>(rseed));
     // Shuffle elements.
-    for(auto it = res.mut_begin(); it != res.end(); ++it) {
+    for(auto bpos = res.mut_begin(); bpos != res.end(); ++bpos) {
       // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
       // ratio <= [0.0, 1.0)
-      auto ratio = static_cast<double>(static_cast<std::int_fast32_t>(prng() - 1)) / 2147483646;
+      auto ratio = static_cast<double>(static_cast<std::int64_t>(prng())) / 0x1p48;
       // offset <= [0, res.size())
       auto offset = static_cast<std::ptrdiff_t>(ratio * static_cast<double>(res.ssize()));
-      // Swap `*it` with the element at `offset`.
-      swap(*it, res.mut_begin()[offset]);
+      // Swap `*bpos` with the element at `offset`.
+      std::iter_swap(bpos, res.mut_begin() + offset);
     }
     return res;
   }
