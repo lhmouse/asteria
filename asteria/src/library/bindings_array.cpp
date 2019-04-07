@@ -499,6 +499,9 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
     D_array temp;
     temp.resize(res.size());
     for(std::size_t bsize = 1; bsize < res.size(); bsize *= 2) {
+      // Merge adjacent blocks of `bsize` elements.
+      std::size_t toff = 0;
+      auto transfer_at = [&](std::size_t roff) { temp.mut(toff++) = rocket::move(res.mut(roff));  };
       // Define range information for blocks.
       struct Block
         {
@@ -506,9 +509,7 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
           std::size_t end;
         }
       r1, r2;
-      // Merge adjacent blocks of `bsize` elements.
-      std::size_t toff = 0;
-      auto transfer_at = [&](std::size_t index) { temp.mut(toff++) = rocket::move(res.mut(index));  };
+      // Implement non-recursive Merge Sort.
       for(;;) {
         // Get the range of the first block to merge.
         r1.off = toff;
@@ -521,7 +522,6 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
         // Get the range of the second block to merge.
         r2.off = r1.end;
         r2.end = rocket::min(r2.off + bsize, res.size());
-        // Merge these two blocks.
   z:
         auto cmp = do_compare(global, comparator, res[r1.off], res[r2.off]);
         if(cmp == Value::compare_unordered) {
@@ -534,7 +534,7 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
         if(rf.off != rf.end) {
           goto z;
         }
-        // A block has been exhausted. Move all elements from the other.
+        // When either block has been exhausted, move all elements from the other.
         auto& rk = (&rf == &r2) ? r1 : r2;
         rocket::ranged_do_while(rk.off, rk.end, transfer_at);
       }
