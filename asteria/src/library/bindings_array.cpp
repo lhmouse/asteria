@@ -490,7 +490,67 @@ std::pair<D_integer, D_integer> std_array_equal_range(const Global_Context& glob
 
 D_array std_array_sort(const Global_Context& global, const D_array& data, const Opt<D_function>& comparator)
   {
-    return data;
+    D_array res = data;
+    if(res.size() <= 1) {
+      // Use reference counting as our advantage.
+      return res;
+    }
+    // Define the temporary storage for Merge Sort.
+    D_array temp;
+    temp.resize(res.size());
+    // A pair of adjacent blocks of this number of elements are merged to create a larger block.
+    std::size_t bsize = 1;
+    for(;;) {
+      // Merge adjacent blocks.
+      std::size_t toff = 0;
+      for(;;) {
+        // Get the range of the first block to merge.
+        std::size_t r1off = toff;
+        std::size_t r1end = r1off + bsize;
+        if(res.size() <= r1end) {
+          // Copy all remaining elements.
+          rocket::ranged_for(r1off, res.size(), [&](std::size_t i) { temp.mut(toff++) = rocket::move(res.mut(i));  });
+          break;
+        }
+        // Get the range of the second block to merge.
+        std::size_t r2off = r1end;
+        std::size_t r2end = rocket::min(r2off + bsize, res.size());
+        // Merge these two blocks.
+        for(;;) {
+          auto& elem1 = res.mut(r1off);
+          auto& elem2 = res.mut(r2off);
+          // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
+          auto cmp = do_compare(global, comparator, elem1, elem2);
+          if(cmp == Value::compare_unordered) {
+            ASTERIA_THROW_RUNTIME_ERROR("The elements `", elem1, "` and `", elem2, "` are unordered.");
+          }
+          if(cmp != Value::compare_greater) {
+            // Move the first element.
+            temp.mut(toff++) = rocket::move(elem1);
+            if(++r1off == r1end) {
+              // The first block has been exhausted.
+              rocket::ranged_do_while(r2off, r2end, [&](std::size_t i) { temp.mut(toff++) = rocket::move(res.mut(i));  });
+              break;
+            }
+          } else {
+            // Move the second element.
+            temp.mut(toff++) = rocket::move(elem2);
+            if(++r2off == r2end) {
+              // The second block has been exhausted.
+              rocket::ranged_do_while(r1off, r1end, [&](std::size_t i) { temp.mut(toff++) = rocket::move(res.mut(i));  });
+              break;
+            }
+          }
+        }
+      }
+      // Accept merged blocks.
+      res.swap(temp);
+      if(res.size() - bsize <= bsize) {
+        break;
+      }
+      bsize *= 2;
+    }
+    return res;
   }
 
 D_array std_array_generate(const Global_Context& global, const D_function& generator, const D_integer& length)
