@@ -7,6 +7,12 @@
 #include "simple_binding_wrapper.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
+#include <random>
+#ifdef _WIN32
+#  include <windows.h>
+#else
+#  include <time.h>
+#endif
 
 namespace Asteria {
 
@@ -485,6 +491,64 @@ std::pair<D_integer, D_integer> std_array_equal_range(const Global_Context& glob
 D_array std_array_sort(const Global_Context& global, const D_array& data, const Opt<D_function>& comparator)
   {
     return data;
+  }
+
+D_array std_array_generate(const Global_Context& global, const D_function& generator, const D_integer& length)
+  {
+    D_array res;
+    res.reserve(static_cast<std::size_t>(length));
+    for(std::int64_t i = 0; i < length; ++i) {
+      // Set up arguments for the user-defined generator.
+      Cow_Vector<Reference> args;
+      do_push_argument(args, D_integer(i));
+      do_push_argument(args, res.empty() ? Value::get_null() : res.back());
+      // Call it.
+      Reference self;
+      generator.get().invoke(self, global, rocket::move(args));
+      res.emplace_back(self.read());
+    }
+    return res;
+  }
+
+D_array std_array_shuffle(const D_array& data, const Opt<D_integer>& seed)
+  {
+    D_array res = data;
+    if(res.size() <= 1) {
+      // Use reference counting as our advantage.
+      return res;
+    }
+    // Initialize the random generator.
+    std::int64_t rseed;
+    if(seed) {
+      // Use the user-provided seed.
+      rseed = *seed;
+    } else {
+      // Get a seed from the system.
+#ifdef _WIN32
+      ::LARGE_INTEGER li;
+      ::QueryPerformanceCounter(&li);
+      rseed = li.QuadPart;
+#else
+      ::timespec ts;
+      ::clock_gettime(CLOCK_MONOTONIC, &ts);
+      rseed = ts.tv_nsec;
+#endif
+    }
+    // Create a linear congruential generator with `rseed`.
+    std::minstd_rand prng(static_cast<std::uint_fast32_t>(rseed));
+    static_assert(std::minstd_rand::min() == 1, "??");
+    static_assert(std::minstd_rand::max() == 2147483646, "??");
+    // Shuffle elements.
+    for(auto it = res.mut_begin(); it != res.end(); ++it) {
+      // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
+      // ratio <= [0.0, 1.0)
+      auto ratio = static_cast<double>(static_cast<std::int_fast32_t>(prng() - 1)) / 2147483646;
+      // offset <= [0, res.size())
+      auto offset = static_cast<std::ptrdiff_t>(ratio * static_cast<double>(res.ssize()));
+      // Swap `*it` with the element at `offset`.
+      swap(*it, res.mut_begin()[offset]);
+    }
+    return res;
   }
 
 void create_bindings_array(D_object& result, API_Version /*version*/)
@@ -1255,6 +1319,70 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             if(reader.start().g(data).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_sort(global, data, comparator) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.generate()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("generate"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.generate(generator, length)`\n"
+                     "  * Calls `generator` repeatedly up to `length` times and returns\n"
+                     "    an `array` consisting of all values returned. `generator` shall\n"
+                     "    be a binary function. The first argument will be the number of\n"
+                     "    elements having been generated; the second argument is the\n"
+                     "    previous element generated, or `null` in the case of the first\n"
+                     "    element.\n"
+                     "  * Returns an `array` containing all values generated.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.generate"), args);
+            // Parse arguments.
+            D_function generator = global.uninitialized_placeholder();
+            D_integer length;
+            if(reader.start().g(generator).g(length).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_generate(global, generator, length) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.array.shuffle()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("shuffle"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.shuffle(data, [seed])`\n"
+                     "  * Shuffles elements in `data` randomly. If `seed` is set to an\n"
+                     "    `integer`, the internal pseudo random number generator will be\n"
+                     "    initialized with it and will produce the same series of numbers\n"
+                     "    for a specific `seed` value. If it is absent, a random seed is\n"
+                     "    obtained each time this function is called. This function\n"
+                     "    returns a new `array` without modifying `data`.\n"
+                     "  * Returns the shuffled `array`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.shuffle"), args);
+            // Parse arguments.
+            D_array data;
+            Opt<D_integer> seed;
+            if(reader.start().g(data).g(seed).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_shuffle(data, seed) };
               return rocket::move(xref);
             }
             // Fail.

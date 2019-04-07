@@ -1064,3 +1064,25 @@
 	* Throws an exception if any elements are unordered. Be advised
 	  that in this case there is no guarantee whether an exception
 	  will be thrown or not.
+
+`std.array.generate(generator, length)`
+
+	* Calls `generator` repeatedly up to `length` times and returns
+	  an `array` consisting of all values returned. `generator` shall
+	  be a binary function. The first argument will be the number of
+	  elements having been generated; the second argument is the
+	  previous element generated, or `null` in the case of the first
+	  element.
+
+	* Returns an `array` containing all values generated.
+
+`std.array.shuffle(data, [seed])`
+
+	* Shuffles elements in `data` randomly. If `seed` is set to an
+	  `integer`, the internal pseudo random number generator will be
+	  initialized with it and will produce the same series of numbers
+	  for a specific `seed` value. If it is absent, a random seed is
+	  obtained each time this function is called. This function
+	  returns a new `array` without modifying `data`.
+
+	* Returns the shuffled `array`.

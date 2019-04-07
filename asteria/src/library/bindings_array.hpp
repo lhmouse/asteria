@@ -42,6 +42,9 @@ extern D_integer std_array_upper_bound(const Global_Context& global, const D_arr
 extern std::pair<D_integer, D_integer> std_array_equal_range(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator = rocket::nullopt);
 extern D_array std_array_sort(const Global_Context& global, const D_array& data, const Opt<D_function>& comparator = rocket::nullopt);
 
+extern D_array std_array_generate(const Global_Context& global, const D_function& generator, const D_integer& length);
+extern D_array std_array_shuffle(const D_array& data, const Opt<D_integer>& seed);
+
 // Create an object that is to be referenced as `std.array`.
 extern void create_bindings_array(D_object& result, API_Version version);
 
