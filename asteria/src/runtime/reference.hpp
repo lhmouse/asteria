@@ -53,6 +53,30 @@ class Reference
         return this->m_root.index() == Reference_Root::index_temporary;
       }
 
+    template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
+      {
+        // Append a modifier.
+        this->m_mods.emplace_back(rocket::forward<XmodT>(xmod));
+        return *this;
+      }
+    Reference& zoom_out()
+      {
+        if(ROCKET_EXPECT(this->m_mods.empty())) {
+          // If there is no modifier, set `this` to `null`.
+          this->m_root = Reference_Root::S_null();
+          return *this;
+        }
+        // Drop the last modifier.
+        this->m_mods.pop_back();
+        return *this;
+      }
+
+    void swap(Reference& other) noexcept
+      {
+        this->m_root.swap(other.m_root);
+        this->m_mods.swap(other.m_mods);
+      }
+
     const Value& read() const
       {
         if(ROCKET_EXPECT(this->m_mods.empty())) {
@@ -75,29 +99,16 @@ class Reference
         return this->do_unset_with_modifiers();
       }
 
-    template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
-      {
-        // Append a modifier.
-        this->m_mods.emplace_back(rocket::forward<XmodT>(xmod));
-        return *this;
-      }
-    Reference& zoom_out()
-      {
-        if(ROCKET_EXPECT(this->m_mods.empty())) {
-          // If there is no modifier, set `this` to `null`.
-          this->m_root = Reference_Root::S_null();
-          return *this;
-        }
-        // Drop the last modifier.
-        this->m_mods.pop_back();
-        return *this;
-      }
-
     void enumerate_variables(const Abstract_Variable_Callback& callback) const
       {
         this->m_root.enumerate_variables(callback);
       }
   };
+
+inline void swap(Reference& lhs, Reference& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace Asteria
 

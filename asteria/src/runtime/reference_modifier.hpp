@@ -49,10 +49,20 @@ class Reference_Modifier
       }
 
   public:
+    void swap(Reference_Modifier& other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     const Value* apply_const_opt(const Value& parent) const;
     Value* apply_mutable_opt(Value& parent, bool create_new) const;
     Value apply_and_erase(Value& parent) const;
   };
+
+inline void swap(Reference_Modifier& lhs, Reference_Modifier& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace Asteria
 

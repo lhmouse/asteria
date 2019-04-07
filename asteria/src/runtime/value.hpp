@@ -85,6 +85,11 @@ class Value
         return this->m_stor.as<AltT>();
       }
 
+    void swap(Value& other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     bool test() const noexcept;
     Compare compare(const Value& other) const noexcept;
     void print(std::ostream& os, bool quote_strings = false) const;
@@ -94,6 +99,11 @@ class Value
     long use_count() const noexcept;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
+
+inline void swap(Value& lhs, Value& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 inline std::ostream& operator<<(std::ostream& os, const Value& value)
   {

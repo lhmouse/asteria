@@ -79,10 +79,20 @@ class Reference_Root
         return this->m_stor.as<AltT>();
       }
 
+    void swap(Reference_Root& other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     const Value& dereference_const() const;
     Value& dereference_mutable() const;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
+
+inline void swap(Reference_Root& lhs, Reference_Root& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace Asteria
 
