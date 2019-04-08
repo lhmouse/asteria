@@ -177,8 +177,7 @@ namespace Asteria {
                 { Token::keyword_nan,       []() -> Value { return D_real(NAN);  }       },
                 { Token::keyword_infinity,  []() -> Value { return D_real(INFINITY);  }  },
               };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
-                                      [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
             if(qconf == std::end(s_table)) {
               return rocket::nullopt;
             }
@@ -1203,8 +1202,7 @@ namespace Asteria {
                 { Token::keyword_typeof,    Xprunit::xop_prefix_typeof   },
                 { Token::keyword_not,       Xprunit::xop_prefix_notl     },
               };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
-                                      [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
             if(qconf == std::end(s_table)) {
               return false;
             }
@@ -1231,8 +1229,7 @@ namespace Asteria {
                 { Token::punctuator_inc,   Xprunit::xop_prefix_inc  },
                 { Token::punctuator_dec,   Xprunit::xop_prefix_dec  },
               };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
-                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
             if(qconf == std::end(s_table)) {
               return false;
             }
@@ -1485,8 +1482,7 @@ namespace Asteria {
                 { Token::punctuator_inc,   Xprunit::xop_postfix_inc  },
                 { Token::punctuator_dec,   Xprunit::xop_postfix_dec  },
               };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
-                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
             if(qconf == std::end(s_table)) {
               return false;
             }
@@ -1743,8 +1739,7 @@ namespace Asteria {
                 { Token::punctuator_cmp_gte,    Xprunit::xop_infix_cmp_gte,   false },
                 { Token::punctuator_spaceship,  Xprunit::xop_infix_cmp_3way,  false },
               };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table),
-                                      [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
+            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
             if(qconf == std::end(s_table)) {
               return rocket::nullopt;
             }
