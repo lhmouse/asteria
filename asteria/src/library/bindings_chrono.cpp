@@ -117,7 +117,7 @@ D_integer std_chrono_local_from_utc(const D_integer& time_utc)
 #ifdef _WIN32
     ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
     ::GetDynamicTimeZoneInformation(&dtz);
-    time_local = time_utc + dtz.Bias* -60000;
+    time_local = time_utc + dtz.Bias * -60000;
 #else
     ::time_t tp = 0;
     ::tm tr;
@@ -148,7 +148,7 @@ D_integer std_chrono_utc_from_local(const D_integer& time_local)
 #ifdef _WIN32
     ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
     ::GetDynamicTimeZoneInformation(&dtz);
-    time_utc = time_local - dtz.Bias* -60000;
+    time_utc = time_local - dtz.Bias * -60000;
 #else
     ::time_t tp = 0;
     ::tm tr;
@@ -165,7 +165,7 @@ D_integer std_chrono_utc_from_local(const D_integer& time_local)
     return time_utc;
   }
 
-D_string std_chrono_format_datetime(const D_integer& time_point, const Opt<D_boolean>& with_ms)
+D_string std_chrono_datetime_format(const D_integer& time_point, const Opt<D_boolean>& with_ms)
   {
     // Return strings that are allocated statically for special time point values.
     static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
@@ -187,20 +187,20 @@ D_string std_chrono_format_datetime(const D_integer& time_point, const Opt<D_boo
     auto wpos = time_str.mut_rbegin();
     // Define functions to write each field.
     // Be advised that these functions modify `wpos`.
-    const auto write_int = [&](int value, int width)
+    auto write_int = [&](int value, int width)
       {
         int r = value;
         for(int i = 0; i < width; ++i) {
           int d = r % 10;
           r /= 10;
-         * wpos = static_cast<char>('0' + d);
+          *wpos = static_cast<char>('0' + d);
           ++wpos;
         }
         return true;
       };
-    const auto write_sep = [&](char sep)
+    auto write_sep = [&](char sep)
       {
-       * wpos = sep;
+        *wpos = sep;
         ++wpos;
         return true;
       };
@@ -233,12 +233,14 @@ D_string std_chrono_format_datetime(const D_integer& time_point, const Opt<D_boo
     write_int(st.wYear, 4);
 #else
     // Write fields backwards.
-    // Be advised that POSIX APIs handle seconds only.
+    // Get the second and millisecond parts.
+    // Note that the number of seconds shall be rounded towards negative infinity.
+    ::time_t ms = (time_point % 1000) + ((time_point >> 63) & 1000);
+    ::time_t tp = (time_point - ms) / 1000;
     if(pms) {
-      write_int(static_cast<int>(time_point % 1000), 3);
+      write_int(static_cast<int>(ms), 3);
       write_sep('.');
     }
-    ::time_t tp = time_point / 1000;
     ::tm tr;
     ::gmtime_r(&tp, &tr);
     write_int(tr.tm_sec, 2);
@@ -257,23 +259,23 @@ D_string std_chrono_format_datetime(const D_integer& time_point, const Opt<D_boo
     return time_str;
   }
 
-D_string std_chrono_min_datetime(const Opt<D_boolean>& with_ms)
+D_string std_chrono_datetime_min(const Opt<D_boolean>& with_ms)
   {
-    return std_chrono_format_datetime(INT64_MIN, with_ms);
+    return std_chrono_datetime_format(INT64_MIN, with_ms);
   }
 
-D_string std_chrono_max_datetime(const Opt<D_boolean>& with_ms)
+D_string std_chrono_datetime_max(const Opt<D_boolean>& with_ms)
   {
-    return std_chrono_format_datetime(INT64_MAX, with_ms);
+    return std_chrono_datetime_format(INT64_MAX, with_ms);
   }
 
-Opt<D_integer> std_chrono_parse_datetime(const D_string& time_str)
+Opt<D_integer> std_chrono_datetime_parse(const D_string& time_str)
   {
     // Characters are read forwards, unlike `datetime_format()`.
     auto rpos = time_str.begin();
     // Define functions to read each field.
     // Be advised that these functions modify `rpos`.
-    const auto read_int = [&](auto& out, int width)
+    auto read_int = [&](auto& out, int width)
       {
         // The first digit is required.
         if(rpos == time_str.end()) {
@@ -300,7 +302,7 @@ Opt<D_integer> std_chrono_parse_datetime(const D_string& time_str)
         out = static_cast<typename std::decay<decltype(out)>::type>(r);
         return true;
       };
-    const auto read_sep = [&](auto&&... seps)
+    auto read_sep = [&](auto&&... seps)
       {
         if(rpos == time_str.end()) {
           return false;
@@ -384,7 +386,7 @@ Opt<D_integer> std_chrono_parse_datetime(const D_string& time_str)
         ++rpos;
         r = (r + d) / 10;
       }
-      time_point += static_cast<std::int64_t>(r * 1000);
+      time_point += std::llround(r * 1000);
     }
     // Reject invalid characters in the end of `time_str`.
     if(rpos != time_str.end()) {
@@ -395,7 +397,7 @@ Opt<D_integer> std_chrono_parse_datetime(const D_string& time_str)
       return INT64_MIN;
     }
     if(time_point >= 253370764800000) {
-      return INT64_MIN;
+      return INT64_MAX;
     }
     return time_point;
   }
@@ -590,7 +592,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             Opt<D_boolean> with_ms;
             if(reader.start().g(time_point).g(with_ms).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_format_datetime(time_point, with_ms) };
+              Reference_Root::S_temporary xref = { std_chrono_datetime_format(time_point, with_ms) };
               return rocket::move(xref);
             }
             // Fail.
@@ -619,7 +621,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             Opt<D_boolean> with_ms;
             if(reader.start().g(with_ms).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_min_datetime(with_ms) };
+              Reference_Root::S_temporary xref = { std_chrono_datetime_min(with_ms) };
               return rocket::move(xref);
             }
             // Fail.
@@ -648,7 +650,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             Opt<D_boolean> with_ms;
             if(reader.start().g(with_ms).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_max_datetime(with_ms) };
+              Reference_Root::S_temporary xref = { std_chrono_datetime_max(with_ms) };
               return rocket::move(xref);
             }
             // Fail.
@@ -680,7 +682,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             D_string time_str;
             if(reader.start().g(time_str).finish()) {
               // Call the binding function.
-              auto qres = std_chrono_parse_datetime(time_str);
+              auto qres = std_chrono_datetime_parse(time_str);
               if(!qres) {
                 return Reference_Root::S_null();
               }

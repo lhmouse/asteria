@@ -213,6 +213,9 @@ check_PROGRAMS =  \
   asteria/test/garbage_collection.test  \
   asteria/test/std_library.test  \
   asteria/test/varg.test  \
-  asteria/test/operators.test
+  asteria/test/operators.test  \
+  asteria/test/bindings_chrono.test  \
+  asteria/test/bindings_string.test  \
+  asteria/test/bindings_array.test
 
 TESTS = ${check_PROGRAMS}
