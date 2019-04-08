@@ -595,10 +595,11 @@
 `std.string.utf8_encode(code_points, [permissive])`
 
 	* Encodes code points from `code_points` into an UTF-8 `string`.
-	  Code points shall be `integer`s. When an invalid code point is
-	  encountered, if `permissive` is set to `true`, it is replaced
-	  with the replacement character `"\uFFFD"` and consequently
-	  encoded as `"\xEF\xBF\xBD"`; otherwise this function fails.
+	  `code_points` can be either an `integer` or an `array` of
+	  `integer`s. When an invalid code point is encountered, if
+	  `permissive` is set to `true`, it is replaced with the
+	  replacement character `"\uFFFD"` and consequently encoded as
+	  `"\xEF\xBF\xBD"`; otherwise this function fails.
 
 	* Returns the encoded `string` on success; otherwise `null`.
 

@@ -199,6 +199,9 @@ int main()
         assert std.string.translate("hello", "el") == "ho";
         assert std.string.translate("hello", "el", "a") == "hao";
 
+        assert std.string.utf8_encode(30002) == "甲";
+        assert std.string.utf8_encode(0xFFFFFF) == null;
+        assert std.string.utf8_encode(0xFFFFFF, true) == "\uFFFD";
         assert std.string.utf8_encode([ 97, 98, 99, 100, 1040, 1042, 1043, 1044, 30002, 20057, 19993, 19969 ]) == "abcdАВГД甲乙丙丁";
         assert std.string.utf8_encode([ 0xFFFFFF ]) == null;
         assert std.string.utf8_encode([ 0xFFFFFF ], true) == "\uFFFD";

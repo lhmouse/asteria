@@ -57,6 +57,7 @@ extern D_string std_string_implode(const D_array& segments, const Opt<D_string>&
 extern D_string std_string_hex_encode(const D_string& text, const Opt<D_string>& delim = rocket::nullopt, const Opt<D_boolean>& uppercase = rocket::nullopt);
 extern Opt<D_string> std_string_hex_decode(const D_string& hstr);
 
+extern Opt<D_string> std_string_utf8_encode(const D_integer& code_point, const Opt<D_boolean>& permissive = rocket::nullopt);
 extern Opt<D_string> std_string_utf8_encode(const D_array& code_points, const Opt<D_boolean>& permissive = rocket::nullopt);
 extern Opt<D_array> std_string_utf8_decode(const D_string& text, const Opt<D_boolean>& permissive = rocket::nullopt);
 

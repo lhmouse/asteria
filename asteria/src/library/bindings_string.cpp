@@ -690,45 +690,65 @@ Opt<D_string> std_string_hex_decode(const D_string& hstr)
     return rocket::move(text);
   }
 
+    namespace {
+
+    bool do_utf8_encode_one(D_string& text, const D_integer& code_point, const Opt<D_boolean>& permissive)
+      {
+        auto value = code_point;
+        if(((0xD800 <= value) && (value < 0xE000)) || (0x110000 <= value)) {
+          // Code point value is reserved or too large.
+          if(permissive != true) {
+            return false;
+          }
+          // Replace it with the replacement character.
+          value = 0xFFFD;
+        }
+        char32_t cpnt = value & 0x1FFFFF;
+        // Encode it.
+        auto encode_one = [&](unsigned shift, unsigned mask)
+          {
+            text.push_back(static_cast<char>((~mask << 1) | ((cpnt >> shift) & mask)));
+          };
+        if(cpnt < 0x80) {
+          encode_one( 0, 0xFF);
+          return true;
+        }
+        if(cpnt < 0x800) {
+          encode_one( 6, 0x1F);
+          encode_one( 0, 0x3F);
+          return true;
+        }
+        if(cpnt < 0x10000) {
+          encode_one(12, 0x0F);
+          encode_one( 6, 0x3F);
+          encode_one( 0, 0x3F);
+          return true;
+        }
+        encode_one(18, 0x07);
+        encode_one(12, 0x3F);
+        encode_one( 6, 0x3F);
+        encode_one( 0, 0x3F);
+        return true;
+      }
+
+    }
+
+Opt<D_string> std_string_utf8_encode(const D_integer& code_point, const Opt<D_boolean>& permissive)
+  {
+    D_string text;
+    if(!do_utf8_encode_one(text, code_point, permissive)) {
+      return rocket::nullopt;
+    }
+    return rocket::move(text);
+  }
+
 Opt<D_string> std_string_utf8_encode(const D_array& code_points, const Opt<D_boolean>& permissive)
   {
     D_string text;
-    for(std::size_t i = 0; i < code_points.size(); ++i) {
-      // Encode each code point.
-      auto value = code_points[i].check<D_integer>();
-      if(((0xD800 <= value) && (value < 0xE000)) || (0x110000 <= value)) {
-        // Code point value is reserved or too large.
-        if(permissive != true) {
-          return rocket::nullopt;
-        }
-        // Replace it with the replacement character.
-        value = 0xFFFD;
+    for(const auto& elem : code_points) {
+      if(!do_utf8_encode_one(text, elem.check<D_integer>(), permissive)) {
+        return rocket::nullopt;
       }
-      char32_t cpnt = value & 0x1FFFFF;
-      // Encode it.
-      auto encode_one = [&](unsigned shift, unsigned mask)
-        {
-          text.push_back(static_cast<char>((~mask << 1) | ((cpnt >> shift) & mask)));
-        };
-      if(cpnt < 0x80) {
-        encode_one( 0, 0xFF);
-        continue;
-      }
-      if(cpnt < 0x800) {
-        encode_one( 6, 0x1F);
-        encode_one( 0, 0x3F);
-        continue;
-      }
-      if(cpnt < 0x10000) {
-        encode_one(12, 0x0F);
-        encode_one( 6, 0x3F);
-        encode_one( 0, 0x3F);
-        continue;
-      }
-      encode_one(18, 0x07);
-      encode_one(12, 0x3F);
-      encode_one( 6, 0x3F);
-      encode_one( 0, 0x3F);
     }
     return rocket::move(text);
   }
@@ -1985,18 +2005,29 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
         // Description
         rocket::sref("`std.string.utf8_encode(code_points, [permissive])`\n"
                      "  * Encodes code points from `code_points` into an UTF-8 `string`.\n"
-                     "    Code points shall be `integer`s. When an invalid code point is\n"
-                     "    encountered, if `permissive` is set to `true`, it is replaced\n"
-                     "    with the replacement character `\"\\uFFFD\"` and consequently\n"
-                     "    encoded as `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
+                     "  `code_points` can be either an `integer` or an `array` of\n"
+                     "  `integer`s. When an invalid code point is encountered, if\n"
+                     "  `permissive` is set to `true`, it is replaced with the\n"
+                     "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
+                     "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
                      "  * Returns the encoded `string` on success; otherwise `null`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.string.utf8_encode"), args);
             // Parse arguments.
-            D_array code_points;
+            D_integer code_point;
             Opt<D_boolean> permissive;
+            if(reader.start().g(code_point).g(permissive).finish()) {
+              // Call the binding function.
+              auto qtext = std_string_utf8_encode(code_point, permissive);
+              if(!qtext) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qtext) };
+              return rocket::move(xref);
+            }
+            D_array code_points;
             if(reader.start().g(code_points).g(permissive).finish()) {
               // Call the binding function.
               auto qtext = std_string_utf8_encode(code_points, permissive);
