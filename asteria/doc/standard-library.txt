@@ -615,11 +615,11 @@
 	* Returns an `array` containing decoded code points; otherwise
 	  `null`.
 
-`std.string.pack8(ints)`
+`std.string.pack8(values)`
 
-	* Packs a series of 8-bit integers into a `string`. `ints` shall
-	  be an `array` of `integer`s, all of which are truncated to 8
-	  bits then copied into a `string`.
+	* Packs a series of 8-bit integers into a `string`. `values` can
+	  be either an `integer` or an `array` of `integer`s, all of
+	  which are truncated to 8 bits then copied into a `string`.
 
 	* Returns the packed `string`.
 
@@ -631,11 +631,12 @@
 
 	* Returns an `array` containing unpacked integers.
 
-`std.string.pack16be(ints)`
+`std.string.pack16be(values)`
 
-	* Packs a series of 16-bit integers into a `string`. `ints` shall
-	  be an `array` of `integer`s, all of which are truncated to 16
-	  bits then copied into a `string` in the big-endian byte order.
+	* Packs a series of 16-bit integers into a `string`. `values` can
+	  be either an `integer` or an `array` of `integers`, all of
+	  which are truncated to 16 bits then copied into a `string` in
+	  the big-endian byte order.
 
 	* Returns the packed `string`.
 
@@ -651,12 +652,12 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 2.
 
-`std.string.pack16le(ints)`
+`std.string.pack16le(values)`
 
-	* Packs a series of 16-bit integers into a `string`. `ints` shall
-	  be an `array` of `integer`s, all of which are truncated to 16
-	  bits then copied into a `string` in the little-endian byte
-	  order.
+	* Packs a series of 16-bit integers into a `string`. `values` can
+	  be either an `integer` or an `array` of `integers`, all of
+	  which are truncated to 16 bits then copied into a `string` in
+	  the little-endian byte order.
 
 	* Returns the packed `string`.
 
@@ -672,11 +673,12 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 2.
 
-`std.string.pack32be(ints)`
+`std.string.pack32be(values)`
 
-	* Packs a series of 32-bit integers into a `string`. `ints` shall
-	  be an `array` of `integer`s, all of which are truncated to 32
-	  bits then copied into a `string` in the big-endian byte order.
+	* Packs a series of 32-bit integers into a `string`. `values` can
+	  be either an `integer` or an `array` of `integers`, all of
+	  which are truncated to 32 bits then copied into a `string` in
+	  the big-endian byte order.
 
 	* Returns the packed `string`.
 
@@ -692,12 +694,12 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 4.
 
-`std.string.pack32le(ints)`
+`std.string.pack32le(values)`
 
-	* Packs a series of 32-bit integers into a `string`. `ints` shall
-	  be an `array` of `integer`s, all of which are truncated to 32
-	  bits then copied into a `string` in the little-endian byte
-	  order.
+	* Packs a series of 32-bit integers into a `string`. `values` can
+	  be either an `integer` or an `array` of `integers`, all of
+	  which are truncated to 32 bits then copied into a `string` in
+	  the little-endian byte order.
 
 	* Returns the packed `string`.
 
@@ -713,11 +715,11 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 4.
 
-`std.string.pack64be(ints)`
+`std.string.pack64be(values)`
 
-	* Packs a series of 64-bit integers into a `string`. `ints` shall
-	  be an `array` of `integer`s, all of which are copied into a
-	  `string` in the big-endian byte order.
+	* Packs a series of 64-bit integers into a `string`. `values` can
+	  be either an `integer` or an `array` of `integers`, all of
+	  which are copied into a `string` in the big-endian byte order.
 
 	* Returns the packed `string`.
 
@@ -732,11 +734,12 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 8.
 
-`std.string.pack64le(ints)`
+`std.string.pack64le(values)`
 
-	* Packs a series of 64-bit integers into a `string`. `ints` shall
-	  be an `array` of `integer`s, all of which are copied into a
-	  `string` in the little-endian byte order.
+	* Packs a series of 64-bit integers into a `string`. `values` can
+	  be either an `integer` or an `array` of `integers`, all of
+	  which are copied into a `string` in the little-endian byte
+	  order.
 
 	* Returns the packed `string`.
 

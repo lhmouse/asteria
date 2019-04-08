@@ -212,24 +212,31 @@ int main()
         assert std.string.utf8_decode("\xFF\xFE\x62") == null;
         assert std.string.utf8_decode("\xFF\xFE\x62", true) == [ 255, 254, 98 ];
 
+        assert std.string.pack8(0x1234) == "\x34";
         assert std.string.pack8([ 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF ]) == "\x01\x23\x45\x67\x89\xAB\xCD\xEF";
         assert std.string.unpack8("\x01\x23\x45\x67\x89\xAB\xCD\xEF") == [ 0x01, 0x23, 0x45, 0x67, -0x1p8 | 0x89, -0x1p8 | 0xAB, -0x1p8 | 0xCD, -0x1p8 | 0xEF ];
 
+        assert std.string.pack16be(0x1234) == "\x12\x34";
         assert std.string.pack16be([ 0x0123, 0x4567, 0x89AB, 0xCDEF ]) == "\x01\x23\x45\x67\x89\xAB\xCD\xEF";
         assert std.string.unpack16be("\x01\x23\x45\x67\x89\xAB\xCD\xEF") == [ 0x0123, 0x4567, -0x1p16 | 0x89AB, -0x1p16 | 0xCDEF ];
 
+        assert std.string.pack16le(0x1234) == "\x34\x12";
         assert std.string.pack16le([ 0x0123, 0x4567, 0x89AB, 0xCDEF ]) == "\x23\x01\x67\x45\xAB\x89\xEF\xCD";
         assert std.string.unpack16le("\x23\x01\x67\x45\xAB\x89\xEF\xCD") == [ 0x0123, 0x4567, -0x1p16 | 0x89AB, -0x1p16 | 0xCDEF ];
 
+        assert std.string.pack32be(0x12345678) == "\x12\x34\x56\x78";
         assert std.string.pack32be([ 0x01234567, 0x89ABCDEF ]) == "\x01\x23\x45\x67\x89\xAB\xCD\xEF";
         assert std.string.unpack32be("\x01\x23\x45\x67\x89\xAB\xCD\xEF") == [ 0x01234567, -0x1p32 | 0x89ABCDEF ];
 
+        assert std.string.pack32le(0x12345678) == "\x78\x56\x34\x12";
         assert std.string.pack32le([ 0x01234567, 0x89ABCDEF ]) == "\x67\x45\x23\x01\xEF\xCD\xAB\x89";
         assert std.string.unpack32le("\x67\x45\x23\x01\xEF\xCD\xAB\x89") == [ 0x01234567, -0x1p32 | 0x89ABCDEF ];
 
+        assert std.string.pack64be(0x123456789ABCDEF0) == "\x12\x34\x56\x78\x9A\xBC\xDE\xF0";
         assert std.string.pack64be([ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ]) == "\x01\x23\x45\x67\x89\xAB\xCD\xEF\x7E\xDC\xBA\x98\x76\x54\x32\x10";
         assert std.string.unpack64be("\x01\x23\x45\x67\x89\xAB\xCD\xEF\x7E\xDC\xBA\x98\x76\x54\x32\x10") == [ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ];
 
+        assert std.string.pack64le(0x123456789ABCDEF0) == "\xF0\xDE\xBC\x9A\x78\x56\x34\x12";
         assert std.string.pack64le([ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ]) == "\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E";
         assert std.string.unpack64le("\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E") == [ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ];
       )__";
