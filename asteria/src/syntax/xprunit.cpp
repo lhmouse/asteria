@@ -630,7 +630,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         Cow_Vector<Reference> args;
         args.resize(nargs);
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
-         * it = rocket::move(stack.open_top_reference());
+          *it = rocket::move(stack.open_top_reference());
           stack.pop_reference();
         }
         // Get the target reference.
@@ -1414,7 +1414,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         D_array array;
         array.resize(nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
-         * it = stack.get_top_reference().read();
+          *it = stack.get_top_reference().read();
           stack.pop_reference();
         }
         // Push the array as a temporary.

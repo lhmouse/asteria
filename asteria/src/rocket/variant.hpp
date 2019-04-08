@@ -51,11 +51,11 @@ template<typename... alternativesT> class variant;
       }
     template<typename alternativeT> void wrapped_copy_assign(void* tptr, const void* rptr)
       {
-       * static_cast<alternativeT*>(tptr) = *static_cast<const alternativeT*>(rptr);
+        *static_cast<alternativeT*>(tptr) = *static_cast<const alternativeT*>(rptr);
       }
     template<typename alternativeT> void wrapped_move_assign(void* tptr, void* rptr)
       {
-       * static_cast<alternativeT*>(tptr) = noadl::move(*static_cast<alternativeT*>(rptr));
+        *static_cast<alternativeT*>(tptr) = noadl::move(*static_cast<alternativeT*>(rptr));
       }
     template<typename alternativeT> void wrapped_destroy(void* tptr) noexcept
       {
@@ -253,7 +253,7 @@ template<typename... alternativesT> class variant
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Copy-assign the alternative in place.
-         * static_cast<typename type_at<index_new>::type*>(this->m_stor) = param;
+          *static_cast<typename type_at<index_new>::type*>(this->m_stor) = param;
           return *this;
         }
         if(is_nothrow_copy_constructible<paramT>::value) {
@@ -286,7 +286,7 @@ template<typename... alternativesT> class variant
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Move-assign the alternative in place.
-         * static_cast<typename type_at<index_new>::type*>(this->m_stor) = noadl::move(param);
+          *static_cast<typename type_at<index_new>::type*>(this->m_stor) = noadl::move(param);
           return *this;
         }
         // Destroy the old alternative.
