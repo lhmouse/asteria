@@ -622,6 +622,10 @@ template<typename charT> constexpr details_cow_string::shallow<charT, char_trait
   {
     return details_cow_string::shallow<charT, char_traits<charT>>(str);
   }
+template<typename charT, typename traitsT, typename allocatorT> inline details_cow_string::shallow<charT, traitsT> sref(const basic_cow_string<charT, traitsT, allocatorT>& str) noexcept
+  {
+    return details_cow_string::shallow<charT, traitsT>(str);
+  }
 
 template<typename charT, typename traitsT, typename allocatorT> class basic_cow_string
   {
