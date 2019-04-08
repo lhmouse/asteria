@@ -1807,11 +1807,10 @@ namespace Asteria {
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
           // Assignment operations have the lowest precedence and group from right to left.
-          auto preced_top = stack.back().tell_precedence();
-          if(preced_top < Infix_Element::precedence_assignment) {
-            auto preced_next = qnext->tell_precedence();
+          if(stack.back().tell_precedence() < Infix_Element::precedence_assignment) {
             // Collapse elements that have no lower precedence and group from left to right.
-            while((stack.size() > 1) && (preced_top <= preced_next)) {
+            auto preced_next = qnext->tell_precedence();
+            while((stack.size() >= 2) && (stack.back().tell_precedence() <= preced_next)) {
               qelem = rocket::move(stack.mut_back());
               stack.pop_back();
               qelem->extract(stack.mut_back().open_junction());
@@ -1819,7 +1818,7 @@ namespace Asteria {
           }
           stack.emplace_back(rocket::move(*qnext));
         }
-        while(stack.size() > 1) {
+        while(stack.size() >= 2) {
           qelem = rocket::move(stack.mut_back());
           stack.pop_back();
           qelem->extract(stack.mut_back().open_junction());
