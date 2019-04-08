@@ -48,8 +48,8 @@
 
 `std.debug.print(...)`
 
-	* Prints all arguments to the standard error stream, separated by
-	  spaces. A line break is appended to terminate the line.
+	* Prints all arguments to the standard error stream. A line break
+	  is appended to terminate the line.
 
 	* Returns `true` if the operation succeeds; otherwise `null`.
 

@@ -12,16 +12,7 @@ namespace Asteria {
 bool std_debug_print(const Cow_Vector<Value>& values)
   {
     rocket::insertable_ostream mos;
-    auto rpos = values.begin();
-    if(rpos != values.end()) {
-      for(;;) {
-        rpos->print(mos);
-        if(++rpos == values.end()) {
-          break;
-        }
-        mos << ' ';
-      }
-    }
+    rocket::for_each(values, [&](const Value& value) { mos << value;  });
     bool succ = write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
     return succ;
   }
@@ -43,8 +34,8 @@ void create_bindings_debug(D_object& result, API_Version /*version*/)
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.debug.print(...)`\n"
-                     "  * Prints all arguments to the standard error stream, separated by\n"
-                     "    spaces. A line break is appended to terminate the line.\n"
+                     "  * Prints all arguments to the standard error stream. A line break\n"
+                     "    is appended to terminate the line.\n"
                      "  * Returns `true` if the operation succeeds.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
