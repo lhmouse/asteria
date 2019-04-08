@@ -10,7 +10,7 @@ namespace Asteria {
 
 void Air_Node::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    const auto enumerate_variables_recursively = [&](const Param& param)
+    auto enumerate_variables_recursively = [&](const Param& param)
       {
         switch(static_cast<Index>(param.index())) {
         case index_int64:
