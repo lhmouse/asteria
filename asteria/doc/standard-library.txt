@@ -519,6 +519,28 @@
 
 	* Returns the trimmed string.
 
+`std.string.lpad(text, length, [padding])`
+
+	* Prepends `text` with `padding` repeatedly, until its length
+	  would exceed `length`. The default value of `padding` is a
+	  `string` consisting of a space. This function returns a new
+	  `string` without modifying `text`.
+
+	* Returns the padded string.
+
+	* Throws an exception if `padding` is empty.
+
+`std.string.rpad(text, length, [padding])`
+
+	* Appends `text` with `padding` repeatedly, until its length
+	  would exceed `length`. The default value of `padding` is a
+	  `string` consisting of a space. This function returns a new
+	  `string` without modifying `text`.
+
+	* Returns the padded string.
+
+	* Throws an exception if `padding` is empty.
+
 `std.string.to_upper(text)`
 
 	* Converts all lowercase English letters in `text` to their

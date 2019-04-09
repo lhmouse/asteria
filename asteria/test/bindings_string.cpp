@@ -153,14 +153,25 @@ int main()
         assert std.string.trim("hello") == "hello";
         assert std.string.trim("   hello \t") == "hello";
         assert std.string.trim("\t hello   ") == "hello";
+        assert std.string.trim("hello", "hlo") == "e";
 
         assert std.string.ltrim("hello") == "hello";
         assert std.string.ltrim("   hello \t") == "hello \t";
         assert std.string.ltrim("\t hello   ") == "hello   ";
+        assert std.string.ltrim("hello", "hlo") == "ello";
 
         assert std.string.rtrim("hello") == "hello";
         assert std.string.rtrim("   hello \t") == "   hello";
         assert std.string.rtrim("\t hello   ") == "\t hello";
+        assert std.string.rtrim("hello", "hlo") == "he";
+
+        assert std.string.lpad("hello", -9, "#") == "hello";
+        assert std.string.lpad("hello", 10, "#") == "#####hello";
+        assert std.string.lpad("hello", 10, "#!") == "#!#!hello";
+
+        assert std.string.rpad("hello", -9, "#") == "hello";
+        assert std.string.rpad("hello", 10, "#") == "hello#####";
+        assert std.string.rpad("hello", 10, "#!") == "hello#!#!";
 
         assert std.string.to_upper("") == "";
         assert std.string.to_upper("hElLo") == "HELLO";

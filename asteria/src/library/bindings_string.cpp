@@ -502,6 +502,53 @@ D_string std_string_rtrim(const D_string& text, const Opt<D_string>& reject)
     return text.substr(0, end + 1);
   }
 
+    namespace {
+
+    inline D_string::shallow_type do_get_padding(const Opt<D_string>& padding)
+      {
+        if(!padding) {
+          return rocket::sref(" ");
+        }
+        if(padding->empty()) {
+          ASTERIA_THROW_RUNTIME_ERROR("Padding empty strings could result in infinite loops.");
+        }
+        return rocket::sref(*padding);
+      }
+
+    }
+
+D_string std_string_lpad(const D_string& text, const D_integer& length, const Opt<D_string>& padding)
+  {
+    D_string res = text;
+    auto rpadding = do_get_padding(padding);
+    if(length <= 0) {
+      // There is nothing to do.
+      return res;
+    }
+    // Fill `rpadding` at the front.
+    res.reserve(static_cast<std::size_t>(length));
+    while(res.size() + rpadding.length() <= static_cast<std::uint64_t>(length)) {
+      res.insert(res.end() - text.ssize(), rpadding);
+    }
+    return res;
+  }
+
+D_string std_string_rpad(const D_string& text, const D_integer& length, const Opt<D_string>& padding)
+  {
+    D_string res = text;
+    auto rpadding = do_get_padding(padding);
+    if(length <= 0) {
+      // There is nothing to do.
+      return res;
+    }
+    // Fill `rpadding` at the back.
+    res.reserve(static_cast<std::size_t>(length));
+    while(res.size() + rpadding.length() <= static_cast<std::uint64_t>(length)) {
+      res.append(rpadding);
+    }
+    return res;
+  }
+
 D_string std_string_to_upper(const D_string& text)
   {
     // Use reference counting as our advantage.
@@ -1853,6 +1900,70 @@ void create_bindings_string(D_object& result, API_Version /*version*/)
             if(reader.start().g(text).g(reject).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_rtrim(text, reject) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.lpad()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("lpad"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.lpad(text, length, [padding])`\n"
+                     "  * Prepends `text` with `padding` repeatedly, until its length\n"
+                     "    would exceed `length`. The default value of `padding` is a\n"
+                     "    `string` consisting of a space. This function returns a new\n"
+                     "    `string` without modifying `text`.\n"
+                     "  * Returns the padded string.\n"
+                     "  * Throws an exception if `padding` is empty.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.lpad"), args);
+            // Parse arguments.
+            D_string text;
+            D_integer length;
+            Opt<D_string> padding;
+            if(reader.start().g(text).g(length).g(padding).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_lpad(text, length, padding) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.string.rpad()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("rpad"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.rpad(text, length, [padding])`\n"
+                     "  * Appends `text` with `padding` repeatedly, until its length\n"
+                     "    would exceed `length`. The default value of `padding` is a\n"
+                     "    `string` consisting of a space. This function returns a new\n"
+                     "    `string` without modifying `text`.\n"
+                     "  * Returns the padded string.\n"
+                     "  * Throws an exception if `padding` is empty.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.rpad"), args);
+            // Parse arguments.
+            D_string text;
+            D_integer length;
+            Opt<D_string> padding;
+            if(reader.start().g(text).g(length).g(padding).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_rpad(text, length, padding) };
               return rocket::move(xref);
             }
             // Fail.
