@@ -8,11 +8,6 @@
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
 #include <random>
-#ifdef _WIN32
-#  include <windows.h>
-#else
-#  include <time.h>
-#endif
 
 namespace Asteria {
 
@@ -574,27 +569,12 @@ D_array std_array_shuffle(const D_array& data, const Opt<D_integer>& seed)
       // Use reference counting as our advantage.
       return res;
     }
-    // Initialize the random generator.
-    std::int64_t rseed;
-    if(seed) {
-      // Use the user-provided seed.
-      rseed = *seed;
-    } else {
-      // Get a seed from the system.
-#ifdef _WIN32
-      ::LARGE_INTEGER li;
-      ::QueryPerformanceCounter(&li);
-      rseed = li.QuadPart;
-#else
-      ::timespec ts;
-      ::clock_gettime(CLOCK_MONOTONIC, &ts);
-      rseed = ts.tv_nsec;
-#endif
-    }
-    // Create a linear congruential generator with `rseed`.
+    // Create a linear congruential generator.
     // The template arguments are the same as glibc's `rand48_r()` function.
     //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
-    std::linear_congruential_engine<std::uint64_t, 0x5DEECE66D, 0xB, 0x1000000000000> prng(static_cast<std::uint64_t>(rseed));
+    std::linear_congruential_engine<std::uint64_t,
+                                    0x5DEECE66D, 0xB,
+                                    0x1000000000000> prng(seed ? static_cast<std::uint64_t>(*seed) : generate_random_seed());
     // Shuffle elements.
     for(auto bpos = res.mut_begin(); bpos != res.end(); ++bpos) {
       // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.

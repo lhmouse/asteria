@@ -224,6 +224,13 @@ struct Wrapped_Index
 
 extern Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept;
 
+///////////////////////////////////////////////////////////////////////////////
+// Random Seed
+///////////////////////////////////////////////////////////////////////////////
+
+// Note that the return value may be either positive or negative.
+extern std::uint64_t generate_random_seed() noexcept;
+
 }  // namespace Asteria
 
 #endif

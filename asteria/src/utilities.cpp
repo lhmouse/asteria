@@ -416,4 +416,32 @@ Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
     return w;
   }
 
+///////////////////////////////////////////////////////////////////////////////
+// Random Seed
+///////////////////////////////////////////////////////////////////////////////
+
+std::uint64_t generate_random_seed() noexcept
+  {
+    // Get the system time of very high resolution.
+    std::int64_t tp;
+#ifdef _WIN32
+    ::LARGE_INTEGER li;
+    ::QueryPerformanceCounter(&li);
+    tp = li.QuadPart;
+#else
+    ::timespec ts;
+    ::clock_gettime(CLOCK_MONOTONIC, &ts);
+    tp = ts.tv_sec * 1000000000 + ts.tv_nsec;
+#endif
+    // Hash it using FNV-1a to erase sensitive information.
+    //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
+    // The timestamp is read in little-endian byte order.
+    std::uint64_t seed = 0xCBF29CE484222325;
+    for(int i = 0; i < 8; ++i) {
+      auto byte = static_cast<unsigned char>(tp >> i * 8);
+      seed = (seed ^ byte) * 0x100000001B3;
+    }
+    return seed;
+  }
+
 }  // namespace Asteria
