@@ -427,16 +427,19 @@ D_string std_string_reverse(const D_string& text)
 
     namespace {
 
-    inline D_string::shallow_type do_reject(const Opt<D_string>& reject)
+    inline D_string::shallow_type do_get_reject(const Opt<D_string>& reject)
       {
-        return reject ? rocket::sref(*reject) : rocket::sref(" \t");
+        if(!reject) {
+          return rocket::sref(" \t");
+        }
+        return rocket::sref(*reject);
       }
 
     }
 
 D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
   {
-    auto rchars = do_reject(reject);
+    auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
       // There is no byte to strip. Make use of reference counting.
       return text;
@@ -459,7 +462,7 @@ D_string std_string_trim(const D_string& text, const Opt<D_string>& reject)
 
 D_string std_string_ltrim(const D_string& text, const Opt<D_string>& reject)
   {
-    auto rchars = do_reject(reject);
+    auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
       // There is no byte to strip. Make use of reference counting.
       return text;
@@ -480,7 +483,7 @@ D_string std_string_ltrim(const D_string& text, const Opt<D_string>& reject)
 
 D_string std_string_rtrim(const D_string& text, const Opt<D_string>& reject)
   {
-    auto rchars = do_reject(reject);
+    auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
       // There is no byte to strip. Make use of reference counting.
       return text;
