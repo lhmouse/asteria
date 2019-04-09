@@ -1426,8 +1426,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
                      "  * Shuffles elements in `data` randomly. If `seed` is set to an\n"
                      "    `integer`, the internal pseudo random number generator will be\n"
                      "    initialized with it and will produce the same series of numbers\n"
-                     "    for a specific `seed` value. If it is absent, a random seed is\n"
-                     "    obtained each time this function is called. This function\n"
+                     "    for a specific `seed` value. If it is absent, an unspecified\n"
+                     "    seed is generated when this function is called. This function\n"
                      "    returns a new `array` without modifying `data`.\n"
                      "  * Returns the shuffled `array`.\n"),
         // Definition

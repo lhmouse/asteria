@@ -1107,8 +1107,8 @@
 	* Shuffles elements in `data` randomly. If `seed` is set to an
 	  `integer`, the internal pseudo random number generator will be
 	  initialized with it and will produce the same series of numbers
-	  for a specific `seed` value. If it is absent, a random seed is
-	  obtained each time this function is called. This function
+	  for a specific `seed` value. If it is absent, an unspecified
+	  seed is generated when this function is called. This function
 	  returns a new `array` without modifying `data`.
 
 	* Returns the shuffled `array`.
