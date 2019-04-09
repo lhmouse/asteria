@@ -1112,3 +1112,84 @@
 	  returns a new `array` without modifying `data`.
 
 	* Returns the shuffled `array`.
+
+### `std.numeric`
+
+`std.numeric.abs(value)`
+
+	* Gets the absolute value of `value`, which may be an `integer`
+	  or `real`. Negative `integer`s are negated, which might cause
+	  an exception to be thrown due to overflow. Sign bits of `real`s
+	  are removed, which works on infinities and NaNs and does not
+	  result in exceptions.
+
+	* Return the absolute value.
+
+	* Throws an exception if `value` is the `integer` `-0x1p63`.
+
+`std.numeric.signbit(value)`
+
+	* Populates the sign bit of the number `value`, which may be an
+	  `integer` or `real`, to all bits of an `integer`. Be advised
+	  that `-0.0` is distinct from `0.0` despite the equality.
+
+	* Returns `-1` if `value` is negative and `0` otherwise.
+
+`std.numeric.clamp(value, lower, upper)`
+
+	* Limits `value` between `lower` and `upper`. `lower` and `upper`
+	  shall be of the same type. The type of value returned by this
+	  function depends on its arguments.
+
+	* Returns `lower` if `value < lower`, `upper` if `value > upper`,
+	  and `value` otherwise.
+
+	* Throws an exception if `value` is unordered with `lower` or
+	  `upper`.
+
+`std.numeric.random()`
+
+	* Generates a random `real`.
+
+	* Returns a non-negative `real` that is less than `1.0`.
+
+`std.numeric.random(upper)`
+
+	* Generates a random `integer` or `real` that is less than
+	  `upper`. The type of value returned by this function depends
+	  on its argument.
+
+	* Returns a non-negative `integer` or `real` that is less than
+	  `upper`.
+
+	* Throws an exception if `upper` is negative or zero.
+
+`std.numeric.random(lower, upper)`
+
+	* Generates a random `integer` or `real` that is not less than
+	  `lower` but is less than `upper`. `lower` and `upper` shall be
+	  of the same type. The type of value returned by this function
+	  depends on its arguments.
+
+	* Returns an `integer` or `real` that is not less than `lower`
+	  but is less than `upper`.
+
+	* Throws an exception if `lower` is not less than `upper`.
+
+`std.numeric.saturation_add(x, y)`
+
+`std.numeric.saturation_add(x, y, lower, upper)`
+
+`std.numeric.saturation_sub(x, y)`
+
+`std.numeric.saturation_sub(x, y, lower, upper)`
+
+`std.numeric.saturation_mul(x, y)`
+
+`std.numeric.saturation_mul(x, y, lower, upper)`
+
+`std.numeric.parse_integer(str)`
+
+`std.numeric.parse_real(str)`
+
+`std.numeric.format(value)`
