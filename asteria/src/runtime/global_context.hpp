@@ -6,7 +6,6 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
-#include "uninitialized_placeholder.hpp"
 
 namespace Asteria {
 
@@ -14,7 +13,7 @@ class Global_Context : public Abstract_Context
   {
   private:
     // This is used to initialize an object of type `D_opaque` or `D_function` which does not have a default constructor.
-    Rcobj<Uninitialized_Placeholder> m_placeholder;
+    Rcptr<Rcbase> m_placeholder;
     // This is the global garbage collector.
     Rcptr<Rcbase> m_gcoll;
     // This is the variable holding an object referenced as `std` in this context.
@@ -37,13 +36,14 @@ class Global_Context : public Abstract_Context
       {
         return nullptr;
       }
-    const Rcobj<Uninitialized_Placeholder>& uninitialized_placeholder() const noexcept
-      {
-        return this->m_placeholder;
-      }
 
     // Clear all references, perform a full garbage collection, then reload the standard library.
     void initialize(API_Version version = api_version_latest);
+
+    // These are interfaces of the placeholder.
+    Rcobj<Uninitialized_Placeholder> get_placeholder() const noexcept;
+    Rcobj<Abstract_Opaque> get_placeholder_opaque() const noexcept;
+    Rcobj<Abstract_Function> get_placeholder_function() const noexcept;
 
     // These are interfaces of the global garbage collector.
     Collector* get_collector_opt(unsigned generation) const;

@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "global_context.hpp"
+#include "uninitialized_placeholder.hpp"
 #include "generational_collector.hpp"
 #include "variable.hpp"
 #include "../library/bindings_version.hpp"
@@ -24,6 +25,9 @@ void Global_Context::initialize(API_Version version)
   {
     // Purge the context.
     this->clear_named_references();
+    // Initializer the placeholder for opaque and function objects.
+    auto placeholder = rocket::make_refcnt<Uninitialized_Placeholder>();
+    this->m_placeholder = placeholder;
     // Initialize the global garbage collector.
     auto gcoll = rocket::make_refcnt<Generational_Collector>();
     this->tie_collector(gcoll);
@@ -72,6 +76,27 @@ void Global_Context::initialize(API_Version version)
     Reference_Root::S_variable xref = { std_var };
     this->open_named_reference(rocket::sref("std")) = rocket::move(xref);
     this->m_std_var = std_var;
+  }
+
+Rcobj<Uninitialized_Placeholder> Global_Context::get_placeholder() const noexcept
+  {
+    auto placeholder = rocket::dynamic_pointer_cast<Uninitialized_Placeholder>(this->m_placeholder);
+    ROCKET_ASSERT(placeholder);
+    return rocket::move(placeholder);
+  }
+
+Rcobj<Abstract_Opaque> Global_Context::get_placeholder_opaque() const noexcept
+  {
+    auto placeholder = rocket::dynamic_pointer_cast<Abstract_Opaque>(this->m_placeholder);
+    ROCKET_ASSERT(placeholder);
+    return rocket::move(placeholder);
+  }
+
+Rcobj<Abstract_Function> Global_Context::get_placeholder_function() const noexcept
+  {
+    auto placeholder = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_placeholder);
+    ROCKET_ASSERT(placeholder);
+    return rocket::move(placeholder);
   }
 
 Collector* Global_Context::get_collector_opt(unsigned generation) const
