@@ -37,14 +37,13 @@ class Global_Context : public Abstract_Context
       {
         return nullptr;
       }
-
-    // Clear all references, perform a full garbage collection, then reload the standard library.
-    void initialize(API_Version version = api_version_latest);
-
     const Rcobj<Uninitialized_Placeholder>& uninitialized_placeholder() const noexcept
       {
         return this->m_placeholder;
       }
+
+    // Clear all references, perform a full garbage collection, then reload the standard library.
+    void initialize(API_Version version = api_version_latest);
 
     // These are interfaces of the global garbage collector.
     Collector* get_collector_opt(unsigned generation) const;

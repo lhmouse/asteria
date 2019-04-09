@@ -5,13 +5,13 @@
 #include "global_context.hpp"
 #include "generational_collector.hpp"
 #include "variable.hpp"
+#include "../library/bindings_version.hpp"
 #include "../library/bindings_gc.hpp"
 #include "../library/bindings_constants.hpp"
 #include "../library/bindings_debug.hpp"
 #include "../library/bindings_chrono.hpp"
 #include "../library/bindings_string.hpp"
 #include "../library/bindings_array.hpp"
-#include "../library/bindings_version.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
