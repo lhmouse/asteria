@@ -53,6 +53,94 @@ int main()
         assert std.numeric.clamp(3.75, 2.5, 3.5) == 3.50;
         assert typeof std.numeric.clamp(1.75, 2.5, 3.5) == "real";
 
+        assert std.numeric.round(42) == 42;
+        assert typeof std.numeric.round(42) == "integer";
+        assert std.numeric.round(42.4) == 42;
+        assert typeof std.numeric.round(42.4) == "real";
+        assert std.numeric.round(42.5) == 43;
+        assert typeof std.numeric.round(42.5) == "real";
+        assert std.numeric.round(-42.4) == -42;
+        assert typeof std.numeric.round(-42.4) == "real";
+        assert std.numeric.round(-42.5) == -43;
+        assert typeof std.numeric.round(-42.5) == "real";
+
+        assert std.numeric.floor(42) == 42;
+        assert typeof std.numeric.floor(42) == "integer";
+        assert std.numeric.floor(42.4) == 42;
+        assert typeof std.numeric.floor(42.4) == "real";
+        assert std.numeric.floor(42.5) == 42;
+        assert typeof std.numeric.floor(42.5) == "real";
+        assert std.numeric.floor(-42.4) == -43;
+        assert typeof std.numeric.floor(-42.4) == "real";
+        assert std.numeric.floor(-42.5) == -43;
+        assert typeof std.numeric.floor(-42.5) == "real";
+
+        assert std.numeric.ceil(42) == 42;
+        assert typeof std.numeric.ceil(42) == "integer";
+        assert std.numeric.ceil(42.4) == 43;
+        assert typeof std.numeric.ceil(42.4) == "real";
+        assert std.numeric.ceil(42.5) == 43;
+        assert typeof std.numeric.ceil(42.5) == "real";
+        assert std.numeric.ceil(-42.4) == -42;
+        assert typeof std.numeric.ceil(-42.4) == "real";
+        assert std.numeric.ceil(-42.5) == -42;
+        assert typeof std.numeric.ceil(-42.5) == "real";
+
+        assert std.numeric.trunc(42) == 42;
+        assert typeof std.numeric.trunc(42) == "integer";
+        assert std.numeric.trunc(42.4) == 42;
+        assert typeof std.numeric.trunc(42.4) == "real";
+        assert std.numeric.trunc(42.5) == 42;
+        assert typeof std.numeric.trunc(42.5) == "real";
+        assert std.numeric.trunc(-42.4) == -42;
+        assert typeof std.numeric.trunc(-42.4) == "real";
+        assert std.numeric.trunc(-42.5) == -42;
+        assert typeof std.numeric.trunc(-42.5) == "real";
+
+        assert std.numeric.iround(42) == 42;
+        assert typeof std.numeric.iround(42) == "integer";
+        assert std.numeric.iround(42.4) == 42;
+        assert typeof std.numeric.iround(42.4) == "integer";
+        assert std.numeric.iround(42.5) == 43;
+        assert typeof std.numeric.iround(42.5) == "integer";
+        assert std.numeric.iround(-42.4) == -42;
+        assert typeof std.numeric.iround(-42.4) == "integer";
+        assert std.numeric.iround(-42.5) == -43;
+        assert typeof std.numeric.iround(-42.5) == "integer";
+
+        assert std.numeric.ifloor(42) == 42;
+        assert typeof std.numeric.ifloor(42) == "integer";
+        assert std.numeric.ifloor(42.4) == 42;
+        assert typeof std.numeric.ifloor(42.4) == "integer";
+        assert std.numeric.ifloor(42.5) == 42;
+        assert typeof std.numeric.ifloor(42.5) == "integer";
+        assert std.numeric.ifloor(-42.4) == -43;
+        assert typeof std.numeric.ifloor(-42.4) == "integer";
+        assert std.numeric.ifloor(-42.5) == -43;
+        assert typeof std.numeric.ifloor(-42.5) == "integer";
+
+        assert std.numeric.iceil(42) == 42;
+        assert typeof std.numeric.iceil(42) == "integer";
+        assert std.numeric.iceil(42.4) == 43;
+        assert typeof std.numeric.iceil(42.4) == "integer";
+        assert std.numeric.iceil(42.5) == 43;
+        assert typeof std.numeric.iceil(42.5) == "integer";
+        assert std.numeric.iceil(-42.4) == -42;
+        assert typeof std.numeric.iceil(-42.4) == "integer";
+        assert std.numeric.iceil(-42.5) == -42;
+        assert typeof std.numeric.iceil(-42.5) == "integer";
+
+        assert std.numeric.itrunc(42) == 42;
+        assert typeof std.numeric.itrunc(42) == "integer";
+        assert std.numeric.itrunc(42.4) == 42;
+        assert typeof std.numeric.itrunc(42.4) == "integer";
+        assert std.numeric.itrunc(42.5) == 42;
+        assert typeof std.numeric.itrunc(42.5) == "integer";
+        assert std.numeric.itrunc(-42.4) == -42;
+        assert typeof std.numeric.itrunc(-42.4) == "integer";
+        assert std.numeric.itrunc(-42.5) == -42;
+        assert typeof std.numeric.itrunc(-42.5) == "integer";
+
         var i = 1000;
         do {
           assert std.numeric.random() >= 0.0;

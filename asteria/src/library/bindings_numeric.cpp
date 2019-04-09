@@ -71,6 +71,98 @@ D_real std_numeric_clamp(const D_real& value, const D_real& lower, const D_real&
     return rocket::clamp(do_rcast(value), do_rcast(lower), do_rcast(upper));
   }
 
+D_integer std_numeric_round(const D_integer& value)
+  {
+    return value;
+  }
+
+D_real std_numeric_round(const D_real& value)
+  {
+    return std::round(value);
+  }
+
+D_integer std_numeric_floor(const D_integer& value)
+  {
+    return value;
+  }
+
+D_real std_numeric_floor(const D_real& value)
+  {
+    return std::floor(value);
+  }
+
+D_integer std_numeric_ceil(const D_integer& value)
+  {
+    return value;
+  }
+
+D_real std_numeric_ceil(const D_real& value)
+  {
+    return std::ceil(value);
+  }
+
+D_integer std_numeric_trunc(const D_integer& value)
+  {
+    return value;
+  }
+
+D_real std_numeric_trunc(const D_real& value)
+  {
+    return std::trunc(value);
+  }
+
+    namespace {
+
+    D_integer do_icast(const D_real& value)
+      {
+        if((value < INT64_MIN) || (value > (INT64_MAX & -0x400))) {
+          ASTERIA_THROW_RUNTIME_ERROR("The `real` number `", value, "` cannot be represented as an `integer`.");
+        }
+        return D_integer(value);
+      }
+
+    }
+
+D_integer std_numeric_iround(const D_integer& value)
+  {
+    return value;
+  }
+
+D_integer std_numeric_iround(const D_real& value)
+  {
+    return do_icast(std::round(value));
+  }
+
+D_integer std_numeric_ifloor(const D_integer& value)
+  {
+    return value;
+  }
+
+D_integer std_numeric_ifloor(const D_real& value)
+  {
+    return do_icast(std::floor(value));
+  }
+
+D_integer std_numeric_iceil(const D_integer& value)
+  {
+    return value;
+  }
+
+D_integer std_numeric_iceil(const D_real& value)
+  {
+    return do_icast(std::ceil(value));
+  }
+
+D_integer std_numeric_itrunc(const D_integer& value)
+  {
+    return value;
+  }
+
+D_integer std_numeric_itrunc(const D_real& value)
+  {
+    return do_icast(std::trunc(value));
+  }
+
 D_real std_numeric_random()
   {
     return 0.5;
@@ -213,6 +305,289 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             if(reader.load_state(state).g(rlower).g(rupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_clamp(rvalue, rlower, rupper) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.round()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("round"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.round(value)`\n"
+                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+                     "    nearest integer; halfway values are rounded away from zero. If\n"
+                     "    `value` is an `integer`, it is returned intact.\n"
+                     "  * Returns the rounded value.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.round"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_round(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_round(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.floor()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("floor"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.floor(value)`\n"
+                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+                     "    nearest integer towards negative infinity. If `value` is an\n"
+                     "    `integer`, it is returned intact.\n"
+                     "  * Returns the rounded value.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.floor"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_floor(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_floor(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.ceil()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("ceil"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.ceil(value)`\n"
+                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+                     "    nearest integer towards positive infinity. If `value` is an\n"
+                     "    `integer`, it is returned intact.\n"
+                     "  * Returns the rounded value.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.ceil"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_ceil(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_ceil(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.trunc()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("trunc"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.trunc(value)`\n"
+                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+                     "    nearest integer towards zero. If `value` is an `integer`, it is\n"
+                     "    returned intact.\n"
+                     "  * Returns the rounded value.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.trunc"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_trunc(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_trunc(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.iround()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("iround"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.iround(value)`\n"
+                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+                     "    nearest integer; halfway values are rounded away from zero. If\n"
+                     "    `value` is an `integer`, it is returned intact. The result is\n"
+                     "    converted to an `integer`.\n"
+                     "  * Returns the rounded value as an `integer`\n"
+                     "  * Throws an exception if the result cannot be represented as an\n"
+                     "    `integer`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.iround"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_iround(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_iround(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.ifloor()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("ifloor"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.ifloor(value)`\n"
+                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+                     "    nearest integer towards negative infinity. If `value` is an\n"
+                     "    `integer`, it is returned intact. The result is converted to\n"
+                     "    an `integer`.\n"
+                     "  * Returns the rounded value as an `integer`\n"
+                     "  * Throws an exception if the result cannot be represented as an\n"
+                     "    `integer`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.ifloor"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_ifloor(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_ifloor(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.iceil()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("iceil"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.iceil(value)`\n"
+                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+                     "    nearest integer towards positive infinity. If `value` is an\n"
+                     "    `integer`, it is returned intact. The result is converted to\n"
+                     "    an `integer`.\n"
+                     "  * Returns the rounded value as an `integer`\n"
+                     "  * Throws an exception if the result cannot be represented as an\n"
+                     "    `integer`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.iceil"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_iceil(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_iceil(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.itrunc()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("itrunc"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.itrunc(value)`\n"
+                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+                     "    nearest integer towards zero. If `value` is an `integer`, it is\n"
+                     "    returned intact. The result is converted to an `integer`.\n"
+                     "  * Returns the rounded value as an `integer`\n"
+                     "  * Throws an exception if the result cannot be represented as an\n"
+                     "    `integer`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.itrunc"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_itrunc(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_itrunc(rvalue) };
               return rocket::move(xref);
             }
             // Fail.
