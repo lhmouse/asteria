@@ -10,7 +10,7 @@
 #include <ostream>  // std::basic_ostream<>
 #include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
 #include <cstring>  // std::memset()
-#include "compatibility.h"
+#include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"

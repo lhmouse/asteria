@@ -7,7 +7,7 @@
 #include <iterator>  // std::iterator_traits<>, std::forward_iterator_tag
 #include <tuple>  // std::forward_as_tuple()
 #include <cstring>  // std::memset()
-#include "compatibility.h"
+#include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"

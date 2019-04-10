@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_TEST_INIT_HPP_
-#define ASTERIA_TEST_INIT_HPP_
+#ifndef ASTERIA_TEST_UTILITIES_HPP_
+#define ASTERIA_TEST_UTILITIES_HPP_
 
 #include "../asteria/src/fwd.hpp"
 #include "../asteria/src/runtime/traceable_exception.hpp"

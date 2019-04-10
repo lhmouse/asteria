@@ -31,7 +31,7 @@
 #include <cfloat>
 #include <cmath>
 
-#include "rocket/compatibility.h"
+#include "rocket/compiler.h"
 #include "rocket/preprocessor_utilities.h"
 #include "rocket/assert.hpp"
 #include "rocket/throw.hpp"

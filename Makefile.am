@@ -21,12 +21,10 @@ BUILT_SOURCES =  \
   .pch.hpp  \
   .pch.hpp.gch
 
-CLEANFILES =  \
+MOSTLYCLEANFILES =  \
   .pch.hpp  \
-  .pch.hpp.gch
-
-noinst_HEADERS =  \
-  asteria/test/_test_init.hpp
+  .pch.hpp.gch  \
+  .pch.hpp.gch.*
 
 noinst_LTLIBRARIES =  \
   lib/librocket.la
@@ -36,10 +34,7 @@ lib_LTLIBRARIES =  \
 
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS =  \
-  asteria/src/rocket/compatibility.h  \
-  asteria/src/rocket/_compatibility_gcc.h  \
-  asteria/src/rocket/_compatibility_clang.h  \
-  asteria/src/rocket/_compatibility_msvc.h  \
+  asteria/src/rocket/compiler.h  \
   asteria/src/rocket/preprocessor_utilities.h  \
   asteria/src/rocket/assert.hpp  \
   asteria/src/rocket/throw.hpp  \
@@ -64,6 +59,12 @@ pkginclude_rocket_HEADERS =  \
   asteria/src/rocket/static_vector.hpp  \
   asteria/src/rocket/optional.hpp  \
   asteria/src/rocket/prehashed_string.hpp
+
+pkginclude_rocket_platformdir = ${pkgincludedir}/rocket/platform
+pkginclude_rocket_platform_HEADERS =  \
+  asteria/src/rocket/platform/compiler_clang.h  \
+  asteria/src/rocket/platform/compiler_gcc.h  \
+  asteria/src/rocket/platform/compiler_msvc.h
 
 lib_librocket_la_SOURCES =  \
   asteria/src/rocket/assert.cpp  \
@@ -130,13 +131,14 @@ pkginclude_librarydir = ${pkgincludedir}/library
 pkginclude_library_HEADERS =  \
   asteria/src/library/argument_reader.hpp  \
   asteria/src/library/simple_binding_wrapper.hpp  \
+  asteria/src/library/bindings_version.hpp  \
   asteria/src/library/bindings_gc.hpp  \
   asteria/src/library/bindings_constants.hpp  \
   asteria/src/library/bindings_debug.hpp  \
   asteria/src/library/bindings_chrono.hpp  \
   asteria/src/library/bindings_string.hpp  \
   asteria/src/library/bindings_array.hpp  \
-  asteria/src/library/bindings_version.hpp
+  asteria/src/library/bindings_numeric.hpp
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
@@ -198,6 +200,9 @@ bin_PROGRAMS =  \
 
 bin_asteria_SOURCES =  \
   asteria/src/main.cpp
+
+check_HEADERS =  \
+  asteria/test/test_utilities.hpp
 
 check_PROGRAMS =  \
   asteria/test/utilities.test  \

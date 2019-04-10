@@ -16,7 +16,7 @@
 #include <stdexcept>  // standard exceptions...
 #include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
-#include "compatibility.h"
+#include "compiler.h"
 
 namespace rocket {
 

@@ -1,7 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
-#include "_test_init.hpp"
+#include "test_utilities.hpp"
 #include "../asteria/src/compiler/parser.hpp"
 #include "../asteria/src/compiler/token_stream.hpp"
 #include "../asteria/src/runtime/global_context.hpp"

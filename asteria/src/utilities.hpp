@@ -4,7 +4,7 @@
 #ifndef ASTERIA_UTILITIES_HPP_
 #define ASTERIA_UTILITIES_HPP_
 
-#include "rocket/compatibility.h"
+#include "rocket/compiler.h"
 #include "rocket/utilities.hpp"
 #include "rocket/insertable_ostream.hpp"
 #include "rocket/unique_ptr.hpp"

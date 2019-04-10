@@ -6,7 +6,7 @@
 
 #include <atomic>  // std::atomic<>
 #include <exception>  // std::terminate()
-#include "compatibility.h"
+#include "compiler.h"
 #include "assert.hpp"
 
 namespace rocket {

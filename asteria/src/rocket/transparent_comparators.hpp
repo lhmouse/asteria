@@ -4,7 +4,7 @@
 #ifndef ROCKET_TRANSPARENT_COMPARATORS_HPP_
 #define ROCKET_TRANSPARENT_COMPARATORS_HPP_
 
-#include "compatibility.h"
+#include "compiler.h"
 #include "utilities.hpp"
 
 namespace rocket {

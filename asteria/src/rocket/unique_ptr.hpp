@@ -4,7 +4,7 @@
 #ifndef ROCKET_UNIQUE_PTR_HPP_
 #define ROCKET_UNIQUE_PTR_HPP_
 
-#include "compatibility.h"
+#include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"

@@ -5,7 +5,7 @@
 #define ROCKET_PREHASHED_STRING_HPP_
 
 #include <iosfwd>  // std::basic_ostream<>
-#include "compatibility.h"
+#include "compiler.h"
 #include "cow_string.hpp"
 
 namespace rocket {

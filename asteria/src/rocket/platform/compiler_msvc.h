@@ -1,10 +1,10 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_DETAILS_COMPATIBILITY_IMPLEMENTATION_
-#  error Please #include <rocket/compatibility.h> instead.
+#ifndef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
+#  error Please #include <rocket/compiler.h> instead.
 #endif
-#undef ROCKET_DETAILS_COMPATIBILITY_IMPLEMENTATION_
+#undef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
 
 // Check for compiler support.
 #define ROCKET_ATTRIBUTE_PRINTF(...)        // not implemented
