@@ -163,29 +163,60 @@ D_integer std_numeric_itrunc(const D_real& value)
     return do_icast(std::trunc(value));
   }
 
-D_real std_numeric_random()
+    namespace {
+
+    double do_random_ratio(const Global_Context& global) noexcept
+      {
+        // sqword <= [0,INT64_MAX]
+        std::int64_t sqword = global.get_random_uint32();
+        sqword <<= 31;
+        sqword ^= global.get_random_uint32();
+        // return <= [0,1)
+        return static_cast<double>(sqword) / 0x1p63;
+      }
+
+    }
+
+D_integer std_numeric_random(const Global_Context& global, const D_integer& upper)
   {
-    return 0.5;
+    if(upper <= 0) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `upper` limit must be greater than zero (got `", upper, "`).");
+    }
+    auto res = do_random_ratio(global);
+    res *= static_cast<double>(upper);
+    return static_cast<std::int64_t>(res);
   }
 
-D_integer std_numeric_random(const D_integer& upper)
+D_real std_numeric_random(const Global_Context& global, const Opt<D_real>& upper)
   {
-    return upper / 2;
+    if(upper && (*upper <= 0)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `upper` limit must be greater than zero (got `", *upper, "`).");
+    }
+    auto res = do_random_ratio(global);
+    if(upper) {
+      res *= *upper;
+    }
+    return res;
   }
 
-D_real std_numeric_random(const D_real& upper)
+D_integer std_numeric_random(const Global_Context& global, const D_integer& lower, const D_integer& upper)
   {
-    return upper / 2;
+    if(lower >= upper) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
+    auto res = do_random_ratio(global);
+    res *= static_cast<double>(upper - lower);
+    return lower + static_cast<std::int64_t>(res);
   }
 
-D_integer std_numeric_random(const D_integer& lower, const D_integer& upper)
+D_real std_numeric_random(const Global_Context& global, const D_real& lower, const D_real& upper)
   {
-    return (lower + upper) / 2;
-  }
-
-D_real std_numeric_random(const D_real& lower, const D_real& upper)
-  {
-    return (lower + upper) / 2;
+    if(lower >= upper) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
+    auto res = do_random_ratio(global);
+    res *= upper - lower;
+    return lower + res;
   }
 
 void create_bindings_numeric(D_object& result, API_Version /*version*/)
@@ -602,13 +633,11 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("random"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.random()`\n"
-                     "  * Generates a random `real`.\n"
-                     "  * Returns a non-negative `real` that is less than `1.0`.\n"
-                     "`std.numeric.random(upper)`\n"
+        rocket::sref("`std.numeric.random(upper)`\n"
                      "  * Generates a random `integer` or `real` that is less than\n"
                      "    `upper`. The type of value returned by this function depends\n"
-                     "    on its argument.\n"
+                     "    on its argument. If `upper` is absent, it has a default value\n"
+                     "    of `1.0` which is a `real`.\n"
                      "  * Returns a non-negative `integer` or `real` that is less than\n"
                      "    `upper`.\n"
                      "  * Throws an exception if `upper` is negative or zero.\n"
@@ -621,38 +650,32 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
                      "    but is less than `upper`.\n"
                      "  * Throws an exception if `lower` is not less than `upper`.\n"),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.random"), args);
-            Argument_Reader::State state;
             // Parse arguments.
-            if(reader.start().finish()) {
+            D_integer iupper;
+            if(reader.start().g(iupper).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random() };
+              Reference_Root::S_temporary xref = { std_numeric_random(global, iupper) };
+              return rocket::move(xref);
+            }
+            Opt<D_real> rupper;
+            if(reader.start().g(rupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_random(global, rupper) };
               return rocket::move(xref);
             }
             D_integer ilower;
-            if(reader.start().g(ilower).save_state(state).finish()) {
+            if(reader.start().g(ilower).g(iupper).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(ilower) };
-              return rocket::move(xref);
-            }
-            D_integer iupper;
-            if(reader.load_state(state).g(iupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(ilower, iupper) };
+              Reference_Root::S_temporary xref = { std_numeric_random(global, ilower, iupper) };
               return rocket::move(xref);
             }
             D_real rlower;
-            if(reader.start().g(rlower).save_state(state).finish()) {
+            if(reader.start().g(rlower).g(rupper.emplace()).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(rlower) };
-              return rocket::move(xref);
-            }
-            D_real rupper;
-            if(reader.load_state(state).g(rupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(rlower, rupper) };
+              Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, *rupper) };
               return rocket::move(xref);
             }
             // Fail.

@@ -48,7 +48,7 @@ class Global_Context : public Abstract_Context
     Rcobj<Abstract_Function> get_placeholder_function() const noexcept;
 
     // These are interfaces of the PRNG.
-    std::uint32_t get_random_number() noexcept;
+    std::uint32_t get_random_uint32() const noexcept;
 
     // These are interfaces of the global garbage collector.
     Collector* get_collector_opt(unsigned generation) const;

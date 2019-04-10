@@ -37,11 +37,10 @@ extern D_integer std_numeric_iceil(const D_real& value);
 extern D_integer std_numeric_itrunc(const D_integer& value);
 extern D_integer std_numeric_itrunc(const D_real& value);
 
-extern D_real std_numeric_random();
-extern D_integer std_numeric_random(const D_integer& upper);
-extern D_real std_numeric_random(const D_real& upper);
-extern D_integer std_numeric_random(const D_integer& lower, const D_integer& upper);
-extern D_real std_numeric_random(const D_real& lower, const D_real& upper);
+extern D_integer std_numeric_random(const Global_Context& global, const D_integer& upper);
+extern D_real std_numeric_random(const Global_Context& global, const Opt<D_real>& upper);
+extern D_integer std_numeric_random(const Global_Context& global, const D_integer& lower, const D_integer& upper);
+extern D_real std_numeric_random(const Global_Context& global, const D_real& lower, const D_real& upper);
 
 // Create an object that is to be referenced as `std.gc`.
 extern void create_bindings_numeric(D_object& result, API_Version version);

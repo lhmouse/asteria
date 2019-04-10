@@ -1226,17 +1226,12 @@
 	* Throws an exception if the result cannot be represented as an
 	  `integer`.
 
-`std.numeric.random()`
-
-	* Generates a random `real`.
-
-	* Returns a non-negative `real` that is less than `1.0`.
-
-`std.numeric.random(upper)`
+`std.numeric.random([upper])`
 
 	* Generates a random `integer` or `real` that is less than
 	  `upper`. The type of value returned by this function depends
-	  on its argument.
+	  on its argument. If `upper` is absent, it has a default value
+	  of `1.0` which is a `real`.
 
 	* Returns a non-negative `integer` or `real` that is less than
 	  `upper`.

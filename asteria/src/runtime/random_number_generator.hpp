@@ -15,12 +15,12 @@ namespace Asteria {
 class Random_Number_Generator : public Rcbase
   {
   private:
-    // generator states
+    // generator state
     std::uint32_t m_aa;
     std::uint32_t m_bb;
     std::uint32_t m_cc;
     std::uint32_t m_mm[256];
-    // generated numbers
+    // generated result
     std::uint32_t m_ngot;
     std::uint32_t m_pool[256];
 

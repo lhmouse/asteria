@@ -70,7 +70,7 @@ void Random_Number_Generator::reset() noexcept
     this->m_bb = 0;
     this->m_cc = 0;
     do_random_fill(this->m_mm, sizeof(this->m_mm));
-    // Scramble the states.
+    // Scramble the state.
     std::uint32_t regs[8];
     for(unsigned i = 0; i != 8; i += 1) {
       regs[i] = 0x9E3779B9;
@@ -105,7 +105,9 @@ void Random_Number_Generator::reset() noexcept
     for(unsigned i = 0; i != 256; i += 8) {
       scramble_round(i);
     }
-    // Postpone generation of the first round to when a number is requested.
+    // Discard the result of the very first round.
+    this->do_update();
+    // Postpone generation of the next round to when a number is requested.
     this->m_ngot = 256;
   }
 

@@ -112,7 +112,7 @@ Rcobj<Abstract_Function> Global_Context::get_placeholder_function() const noexce
     return rocket::move(placeholder);
   }
 
-std::uint32_t Global_Context::get_random_number() noexcept
+std::uint32_t Global_Context::get_random_uint32() const noexcept
   {
     auto prng = rocket::dynamic_pointer_cast<Random_Number_Generator>(this->m_prng);
     ROCKET_ASSERT(prng);
