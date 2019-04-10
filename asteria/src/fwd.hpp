@@ -46,7 +46,7 @@ class Rcbase;
 class Value;
 class Abstract_Opaque;
 class Abstract_Function;
-class Uninitialized_Placeholder;
+class Placeholder;
 class Reference_Root;
 class Reference_Modifier;
 class Reference;

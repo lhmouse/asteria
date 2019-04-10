@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_UNINITIALIZED_PLACEHOLDER_HPP_
-#define ASTERIA_RUNTIME_UNINITIALIZED_PLACEHOLDER_HPP_
+#ifndef ASTERIA_RUNTIME_PLACEHOLDER_HPP_
+#define ASTERIA_RUNTIME_PLACEHOLDER_HPP_
 
 #include "../fwd.hpp"
 #include "abstract_opaque.hpp"
@@ -10,13 +10,13 @@
 
 namespace Asteria {
 
-class Uninitialized_Placeholder : public Abstract_Opaque, public Abstract_Function
+class Placeholder : public Abstract_Opaque, public Abstract_Function
   {
   public:
-    Uninitialized_Placeholder() noexcept
+    Placeholder() noexcept
       {
       }
-    ~Uninitialized_Placeholder() override;
+    ~Placeholder() override;
 
   public:
     void describe(std::ostream& os) const override;

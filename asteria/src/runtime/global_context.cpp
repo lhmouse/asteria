@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "global_context.hpp"
-#include "uninitialized_placeholder.hpp"
+#include "placeholder.hpp"
 #include "generational_collector.hpp"
 #include "variable.hpp"
 #include "../library/bindings_version.hpp"
@@ -27,7 +27,7 @@ void Global_Context::initialize(API_Version version)
     // Purge the context.
     this->clear_named_references();
     // Initializer the placeholder for opaque and function objects.
-    auto placeholder = rocket::make_refcnt<Uninitialized_Placeholder>();
+    auto placeholder = rocket::make_refcnt<Placeholder>();
     this->m_placeholder = placeholder;
     // Initialize the global garbage collector.
     auto gcoll = rocket::make_refcnt<Generational_Collector>();
@@ -80,9 +80,9 @@ void Global_Context::initialize(API_Version version)
     this->m_std_var = std_var;
   }
 
-Rcobj<Uninitialized_Placeholder> Global_Context::get_placeholder() const noexcept
+Rcobj<Placeholder> Global_Context::get_placeholder() const noexcept
   {
-    auto placeholder = rocket::dynamic_pointer_cast<Uninitialized_Placeholder>(this->m_placeholder);
+    auto placeholder = rocket::dynamic_pointer_cast<Placeholder>(this->m_placeholder);
     ROCKET_ASSERT(placeholder);
     return rocket::move(placeholder);
   }
