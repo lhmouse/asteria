@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../asteria/src/runtime/traceable_exception.hpp"
+#include "../src/runtime/traceable_exception.hpp"
 
 using namespace Asteria;
 

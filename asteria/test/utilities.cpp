@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../asteria/src/utilities.hpp"
+#include "../src/utilities.hpp"
 
 using namespace Asteria;
 

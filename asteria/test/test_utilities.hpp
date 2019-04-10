@@ -4,9 +4,9 @@
 #ifndef ASTERIA_TEST_UTILITIES_HPP_
 #define ASTERIA_TEST_UTILITIES_HPP_
 
-#include "../asteria/src/fwd.hpp"
-#include "../asteria/src/runtime/traceable_exception.hpp"
-#include "../asteria/src/utilities.hpp"
+#include "../src/fwd.hpp"
+#include "../src/runtime/traceable_exception.hpp"
+#include "../src/utilities.hpp"
 #include <iostream>  // std::cerr, operator<< ()
 
 #define ASTERIA_TEST_CHECK(expr_)  \

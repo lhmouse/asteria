@@ -2,9 +2,9 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../asteria/src/compiler/simple_source_file.hpp"
-#include "../asteria/src/runtime/global_context.hpp"
-#include "../asteria/src/rocket/insertable_istream.hpp"
+#include "../src/compiler/simple_source_file.hpp"
+#include "../src/runtime/global_context.hpp"
+#include "../src/rocket/insertable_istream.hpp"
 
 using namespace Asteria;
 

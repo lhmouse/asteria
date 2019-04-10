@@ -2,8 +2,8 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../asteria/src/compiler/token_stream.hpp"
-#include "../asteria/src/compiler/token.hpp"
+#include "../src/compiler/token_stream.hpp"
+#include "../src/compiler/token.hpp"
 #include <sstream>
 
 using namespace Asteria;

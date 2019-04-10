@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../asteria/src/runtime/reference.hpp"
+#include "../src/runtime/reference.hpp"
 
 using namespace Asteria;
 

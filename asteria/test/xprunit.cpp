@@ -2,12 +2,12 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../asteria/src/syntax/xprunit.hpp"
-#include "../asteria/src/runtime/global_context.hpp"
-#include "../asteria/src/runtime/executive_context.hpp"
-#include "../asteria/src/runtime/air_node.hpp"
-#include "../asteria/src/runtime/evaluation_stack.hpp"
-#include "../asteria/src/runtime/analytic_context.hpp"
+#include "../src/syntax/xprunit.hpp"
+#include "../src/runtime/global_context.hpp"
+#include "../src/runtime/executive_context.hpp"
+#include "../src/runtime/air_node.hpp"
+#include "../src/runtime/evaluation_stack.hpp"
+#include "../src/runtime/analytic_context.hpp"
 
 using namespace Asteria;
 
