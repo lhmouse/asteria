@@ -9,6 +9,8 @@
 
 namespace Asteria {
 
+// This implements the variable tracking algorithm similar to what is used by Python.
+//   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
 class Collector
   {
   private:
