@@ -431,7 +431,7 @@ std::uint64_t generate_random_seed() noexcept
 #else
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    tp = ts.tv_sec * 1000000000 + ts.tv_nsec;
+    tp = static_cast<std::int64_t>(ts.tv_sec) * 1000000000 + ts.tv_nsec;
 #endif
     // Hash it using FNV-1a to erase sensitive information.
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
