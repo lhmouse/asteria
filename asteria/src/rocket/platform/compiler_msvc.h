@@ -6,7 +6,6 @@
 #endif
 #undef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
 
-// Check for compiler support.
 #define ROCKET_ATTRIBUTE_PRINTF(...)        // not implemented
 #define ROCKET_FUNCSIG                      __FUNCSIG__
 #define ROCKET_UNREACHABLE()                __assume(0)

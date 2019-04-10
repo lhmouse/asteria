@@ -4,14 +4,7 @@
 #ifndef ROCKET_COMPILER_H_
 #define ROCKET_COMPILER_H_
 
-#ifdef __cplusplus
-#  include <cstdbool>  // standard library configuration macros
-#else
-#  include <stdbool.h>  // bool, true, false
-#endif
-
 #define ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_ 1
-
 #if defined(__clang__)
 #  include "platform/compiler_clang.h"
 #elif defined(__GNUC__)
@@ -20,8 +13,22 @@
 #  include "platform/compiler_msvc.h"
 #endif
 
-#ifdef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
-#  error "`ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_` must have been `#undef`'d here."
+// Ensure all requested macros are defined.
+#if !(1  \
+        && defined(ROCKET_ATTRIBUTE_PRINTF)  \
+        && defined(ROCKET_FUNCSIG)  \
+        && defined(ROCKET_UNREACHABLE)  \
+        && defined(ROCKET_SELECTANY)  \
+        && defined(ROCKET_EXPECT)  \
+        && defined(ROCKET_UNEXPECT)  \
+        && defined(ROCKET_SECTION)  \
+        && defined(ROCKET_NOINLINE)  \
+        && defined(ROCKET_PURE_FUNCTION)  \
+        && defined(ROCKET_ARTIFICIAL_FUNCTION)  \
+        && defined(ROCKET_CONSTANT_P)  \
+        && defined(ROCKET_FLATTEN_FUNCTION)  \
+      )
+#  error Some macros are missing.
 #endif
 
 #endif

@@ -6,7 +6,6 @@
 #endif
 #undef ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_
 
-// Check for compiler support.
 #define ROCKET_ATTRIBUTE_PRINTF(...)        __attribute__((__format__(__gnu_printf__, __VA_ARGS__)))
 #define ROCKET_FUNCSIG                      __PRETTY_FUNCTION__
 #define ROCKET_UNREACHABLE()                __builtin_unreachable()
