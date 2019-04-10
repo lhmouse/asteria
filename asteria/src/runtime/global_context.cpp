@@ -5,6 +5,7 @@
 #include "../precompiled.hpp"
 #include "global_context.hpp"
 #include "placeholder.hpp"
+#include "random_number_generator.hpp"
 #include "generational_collector.hpp"
 #include "variable.hpp"
 #include "../library/bindings_version.hpp"
@@ -109,6 +110,13 @@ Rcobj<Abstract_Function> Global_Context::get_placeholder_function() const noexce
     auto placeholder = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_placeholder);
     ROCKET_ASSERT(placeholder);
     return rocket::move(placeholder);
+  }
+
+std::uint32_t Global_Context::get_random_number() noexcept
+  {
+    auto prng = rocket::dynamic_pointer_cast<Random_Number_Generator>(this->m_prng);
+    ROCKET_ASSERT(prng);
+    return prng->bump();
   }
 
 Collector* Global_Context::get_collector_opt(unsigned generation) const
