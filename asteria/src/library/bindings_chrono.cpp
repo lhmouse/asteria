@@ -333,6 +333,12 @@ Opt<D_integer> std_chrono_datetime_parse(const D_string& time_str)
     if(!succ) {
       return rocket::nullopt;
     }
+    if(st.wYear < 1600) {
+      return INT64_MIN;
+    }
+    if(st.wYear > 9998) {
+      return INT64_MAX;
+    }
     // Assemble the parts, assuming the millisecond field is zero..
     st.wMilliseconds = 0;
     ::FILETIME ft;
@@ -361,6 +367,12 @@ Opt<D_integer> std_chrono_datetime_parse(const D_string& time_str)
            read_int(tr.tm_sec, 2);
     if(!succ) {
       return rocket::nullopt;
+    }
+    if(tr.tm_year < 1600) {
+      return INT64_MIN;
+    }
+    if(tr.tm_year > 9998) {
+      return INT64_MAX;
     }
     // Assemble the parts without milliseconds.
     tr.tm_year -= 1900;
@@ -391,13 +403,6 @@ Opt<D_integer> std_chrono_datetime_parse(const D_string& time_str)
     // Reject invalid characters in the end of `time_str`.
     if(rpos != time_str.end()) {
       return rocket::nullopt;
-    }
-    // Handle special time values.
-    if(time_point <= -11644473600000) {
-      return INT64_MIN;
-    }
-    if(time_point >= 253370764800000) {
-      return INT64_MAX;
     }
     return time_point;
   }
