@@ -26,14 +26,18 @@ void Global_Context::initialize(API_Version version)
   {
     // Purge the context.
     this->clear_named_references();
-    // Initializer the placeholder for opaque and function objects.
+    ///////////////////////////////////////////////////////////////////////////
+    // Initializer global objects.
+    ///////////////////////////////////////////////////////////////////////////
     auto placeholder = rocket::make_refcnt<Placeholder>();
     this->m_placeholder = placeholder;
-    // Initialize the global garbage collector.
+    // Tie the collector to `*this` so a full garbage collection is performed when this context is destroyed.
     auto gcoll = rocket::make_refcnt<Generational_Collector>();
     this->tie_collector(gcoll);
     this->m_gcoll = gcoll;
-    // Define the list of standard library modules.
+    ///////////////////////////////////////////////////////////////////////////
+    // Initialize standard library modules.
+    ///////////////////////////////////////////////////////////////////////////
     struct Module
       {
         API_Version version;
@@ -72,7 +76,9 @@ void Global_Context::initialize(API_Version version)
     // Set up version information.
     auto pair = std_obj.insert_or_assign(rocket::sref("version"), D_object());
     create_bindings_version(pair.first->second.check<D_object>(), std_end[-1].version);
-    // Set the variable.
+    ///////////////////////////////////////////////////////////////////////////
+    // Set the `std` variable.
+    ///////////////////////////////////////////////////////////////////////////
     auto std_var = gcoll->create_variable();
     std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_obj), true);
     Reference_Root::S_variable xref = { std_var };
