@@ -1,3 +1,4 @@
+
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
@@ -31,6 +32,9 @@ void Global_Context::initialize(API_Version version)
     ///////////////////////////////////////////////////////////////////////////
     auto placeholder = rocket::make_refcnt<Placeholder>();
     this->m_placeholder = placeholder;
+    // Use default seed.
+    auto prng = rocket::make_refcnt<Random_Number_Generator>();
+    this->m_prng = prng;
     // Tie the collector to `*this` so a full garbage collection is performed when this context is destroyed.
     auto gcoll = rocket::make_refcnt<Generational_Collector>();
     this->tie_collector(gcoll);
