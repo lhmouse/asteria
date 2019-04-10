@@ -48,7 +48,6 @@ void Random_Number_Generator::do_update() noexcept
 
     bool do_random_fill(void* data, std::size_t size) noexcept
       {
-return std::memset(data, 0, size);
 #ifdef _WIN32
         return ::RtlGenRandom(data, static_cast<std::uint32_t>(size));
 #else
@@ -90,7 +89,6 @@ void Random_Number_Generator::reset() noexcept
     for(unsigned i = 0; i != 4; i += 1) {
       mix_regs();
     }
-    for(unsigned i = 0; i != 256; i += 8) { ROCKET_ASSERT(this->m_mm[i] == 0); }
     auto scramble_round = [&](unsigned r)
       {
         for(unsigned k = 0; k != 8; k += 1) {
