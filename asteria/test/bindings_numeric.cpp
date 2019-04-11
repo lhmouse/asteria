@@ -23,16 +23,16 @@ int main()
         assert std.numeric.abs(-nan) <=> 0 == "<unordered>";
         assert typeof std.numeric.abs(42.5) == "real";
 
-        assert std.numeric.signbit(+42) ==  0;
-        assert std.numeric.signbit(-42) == -1;
-        assert typeof std.numeric.signbit(42) == "integer";
-        assert std.numeric.signbit(+42.5) ==  0;
-        assert std.numeric.signbit(-42.5) == -1;
-        assert std.numeric.signbit(+infinity) ==  0;
-        assert std.numeric.signbit(-infinity) == -1;
-        assert std.numeric.signbit(+nan) ==  0;
-        assert std.numeric.signbit(-nan) == -1;
-        assert typeof std.numeric.signbit(42.5) == "integer";
+        assert std.numeric.sign(+42) ==  0;
+        assert std.numeric.sign(-42) == -1;
+        assert typeof std.numeric.sign(42) == "integer";
+        assert std.numeric.sign(+42.5) ==  0;
+        assert std.numeric.sign(-42.5) == -1;
+        assert std.numeric.sign(+infinity) ==  0;
+        assert std.numeric.sign(-infinity) == -1;
+        assert std.numeric.sign(+nan) ==  0;
+        assert std.numeric.sign(-nan) == -1;
+        assert typeof std.numeric.sign(42.5) == "integer";
 
         assert std.numeric.clamp(1, 2, 3) == 2;
         assert std.numeric.clamp(2, 2, 3) == 2;
