@@ -653,11 +653,18 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.random"), args);
+            Argument_Reader::State state;
             // Parse arguments.
             D_integer iupper;
-            if(reader.start().g(iupper).finish()) {
+            if(reader.start().g(iupper).save_state(state).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, iupper) };
+              return rocket::move(xref);
+            }
+            D_integer ilower = iupper;
+            if(reader.load_state(state).g(iupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_random(global, ilower, iupper) };
               return rocket::move(xref);
             }
             Opt<D_real> rupper;
@@ -666,14 +673,8 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { std_numeric_random(global, rupper) };
               return rocket::move(xref);
             }
-            D_integer ilower;
-            if(reader.start().g(ilower).g(iupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(global, ilower, iupper) };
-              return rocket::move(xref);
-            }
-            D_real rlower;
-            if(reader.start().g(rlower).g(rupper.emplace()).finish()) {
+            D_real rlower = rupper.emplace();
+            if(reader.start().g(rlower).g(*rupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, *rupper) };
               return rocket::move(xref);
