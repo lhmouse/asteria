@@ -24,10 +24,10 @@ install:
   - mkdir -p m4
   - autoreconf -ifv
   - ./configure --disable-silent-rules ${_options}
-  - make -j$(nproc) check
+  - make -j$(nproc)
 
 script:
-  - exit 0
+  - make -j$(nproc) check
 
 notifications:
   irc:
