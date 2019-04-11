@@ -1127,7 +1127,7 @@
 
 	* Throws an exception if `value` is the `integer` `-0x1p63`.
 
-`std.numeric.signbit(value)`
+`std.numeric.sign(value)`
 
 	* Propagates the sign bit of the number `value`, which may be an
 	  `integer` or `real`, to all bits of an `integer`. Be advised

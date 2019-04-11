@@ -24,12 +24,12 @@ D_real std_numeric_abs(const D_real& value)
     return std::fabs(value);
   }
 
-D_integer std_numeric_signbit(const D_integer& value)
+D_integer std_numeric_sign(const D_integer& value)
   {
     return value >> 63;
   }
 
-D_integer std_numeric_signbit(const D_real& value)
+D_integer std_numeric_sign(const D_real& value)
   {
     return static_cast<std::int64_t>(std::signbit(value) == 0) - 1;
   }
@@ -254,12 +254,12 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
         D_null()
       )));
     //===================================================================
-    // `std.numeric.signbit()`
+    // `std.numeric.sign()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("signbit"),
+    result.insert_or_assign(rocket::sref("sign"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.signbit(value)`\n"
+        rocket::sref("`std.numeric.sign(value)`\n"
                      "  * Propagates the sign bit of the number `value`, which may be an\n"
                      "    `integer` or `real`, to all bits of an `integer`. Be advised\n"
                      "    that `-0.0` is distinct from `0.0` despite the equality.\n"
@@ -267,18 +267,18 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.numeric.signbit"), args);
+            Argument_Reader reader(rocket::sref("std.numeric.sign"), args);
             // Parse arguments.
             D_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_signbit(ivalue) };
+              Reference_Root::S_temporary xref = { std_numeric_sign(ivalue) };
               return rocket::move(xref);
             }
             D_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_signbit(rvalue) };
+              Reference_Root::S_temporary xref = { std_numeric_sign(rvalue) };
               return rocket::move(xref);
             }
             // Fail.
