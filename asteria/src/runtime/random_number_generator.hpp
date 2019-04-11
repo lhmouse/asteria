@@ -15,14 +15,14 @@ namespace Asteria {
 class Random_Number_Generator : public Rcbase
   {
   private:
+    // generated result
+    std::uint32_t m_ngot;
+    std::uint32_t m_pool[256];
     // generator state
     std::uint32_t m_aa;
     std::uint32_t m_bb;
     std::uint32_t m_cc;
     std::uint32_t m_mm[256];
-    // generated result
-    std::uint32_t m_ngot;
-    std::uint32_t m_pool[256];
 
   public:
     Random_Number_Generator() noexcept

@@ -18,27 +18,43 @@ Random_Number_Generator::~Random_Number_Generator()
   {
   }
 
+    namespace {
+
+    constexpr std::uint32_t do_sll(std::uint32_t reg, int bits) noexcept
+      {
+        return reg << bits;
+      }
+    constexpr std::uint32_t do_srl(std::uint32_t reg, int bits) noexcept
+      {
+        return reg >> bits;
+      }
+
+    }
+
 void Random_Number_Generator::do_update() noexcept
   {
     // Increment `cc` and combine it with `bb` for every round.
     this->m_cc += 1;
     this->m_bb += this->m_cc;
     // Unroll the loop by 4.
-    for(unsigned i = 0; i != 256; i += 4) {
-      auto step = [&](unsigned r, auto&& aa_spec)
+    for(std::size_t i = 0; i < 64; ++i) {
+      auto step = [&](std::size_t r, auto shift, int b)
         {
           auto x = this->m_mm[r];
-          this->m_aa ^= aa_spec();
-          this->m_aa += this->m_mm[(r + 128) % 256];
-          auto y = this->m_mm[(x >> 2) % 256] + this->m_aa + this->m_bb;
+          auto y = this->m_aa;
+          y ^= shift(y, b);
+          y += this->m_mm[(r+128)%256];
+          this->m_aa = y;
+          y += this->m_mm[(x>>2)%256] + this->m_bb;
           this->m_mm[r] = y;
-          this->m_bb = this->m_mm[(y >> 10) % 256] + x;
-          this->m_pool[r] = this->m_bb;
+          x += this->m_mm[(y>>10)%256];
+          this->m_bb = x;
+          this->m_pool[r] = x;
         };
-      step(i + 0, [&] { return this->m_aa << 13;  });
-      step(i + 1, [&] { return this->m_aa >>  6;  });
-      step(i + 2, [&] { return this->m_aa <<  2;  });
-      step(i + 3, [&] { return this->m_aa >> 16;  });
+      step(i * 4 + 0, do_sll, 13);
+      step(i * 4 + 1, do_srl,  6);
+      step(i * 4 + 2, do_sll,  2);
+      step(i * 4 + 3, do_srl, 16);
     }
     // Mark this round ready for consumption.
     this->m_ngot = 0;
@@ -46,7 +62,7 @@ void Random_Number_Generator::do_update() noexcept
 
     namespace {
 
-    bool do_random_fill(void* data, std::size_t size) noexcept
+    bool do_read_random_device(void* data, std::size_t size) noexcept
       {
 #ifdef _WIN32
         return ::RtlGenRandom(data, static_cast<std::uint32_t>(size));
@@ -61,6 +77,54 @@ void Random_Number_Generator::do_update() noexcept
 #endif
       }
 
+    class Scrambler
+      {
+      private:
+        std::uint32_t m_regs[8];
+
+      public:
+        Scrambler() noexcept
+          {
+            for(std::size_t i = 0; i < 8; ++i) {
+              this->m_regs[i] = 0x9E3779B9;
+            }
+            for(std::size_t i = 0; i < 4; ++i) {
+              this->mix();
+            }
+          }
+
+      public:
+        void combine(const std::uint32_t* src) noexcept
+          {
+            for(std::size_t i = 0; i < 8; ++i) {
+              this->m_regs[i] += src[i];
+            }
+          }
+        void mix() noexcept
+          {
+            auto step = [&](std::size_t r, auto shift, int b)
+              {
+                this->m_regs[r] ^= shift(this->m_regs[(r+1)%8], b);
+                this->m_regs[(r+3)%8] += this->m_regs[r];
+                this->m_regs[(r+1)%8] += this->m_regs[(r+2)%8];
+              };
+            step(0, do_sll, 11);
+            step(1, do_srl,  2);
+            step(2, do_sll,  8);
+            step(3, do_srl, 16);
+            step(4, do_sll, 10);
+            step(5, do_srl,  4);
+            step(6, do_sll,  8);
+            step(7, do_srl,  9);
+          }
+        void output(std::uint32_t* out) const noexcept
+          {
+            for(std::size_t i = 0; i < 8; ++i) {
+              out[i] = this->m_regs[i];
+            }
+          }
+      };
+
     }
 
 void Random_Number_Generator::reset() noexcept
@@ -69,41 +133,14 @@ void Random_Number_Generator::reset() noexcept
     this->m_aa = 0;
     this->m_bb = 0;
     this->m_cc = 0;
-    do_random_fill(this->m_mm, sizeof(this->m_mm));
-    // Scramble the state.
-    std::uint32_t regs[8];
-    for(unsigned i = 0; i != 8; i += 1) {
-      regs[i] = 0x9E3779B9;
-    }
-    auto mix_regs = [&]()
-      {
-        regs[0] ^= regs[1] << 11, regs[3] += regs[0], regs[1] += regs[2];
-        regs[1] ^= regs[2] >>  2, regs[4] += regs[1], regs[2] += regs[3];
-        regs[2] ^= regs[3] <<  8, regs[5] += regs[2], regs[3] += regs[4];
-        regs[3] ^= regs[4] >> 16, regs[6] += regs[3], regs[4] += regs[5];
-        regs[4] ^= regs[5] << 10, regs[7] += regs[4], regs[5] += regs[6];
-        regs[5] ^= regs[6] >>  4, regs[0] += regs[5], regs[6] += regs[7];
-        regs[6] ^= regs[7] <<  8, regs[1] += regs[6], regs[7] += regs[0];
-        regs[7] ^= regs[0] >>  9, regs[2] += regs[7], regs[0] += regs[1];
-      };
-    for(unsigned i = 0; i != 4; i += 1) {
-      mix_regs();
-    }
-    auto scramble_round = [&](unsigned r)
-      {
-        for(unsigned k = 0; k != 8; k += 1) {
-          regs[k] += this->m_mm[r + k];
-        }
-        mix_regs();
-        for(unsigned k = 0; k != 8; k += 1) {
-          this->m_mm[r + k] = regs[k];
-        }
-      };
-    for(unsigned i = 0; i != 256; i += 8) {
-      scramble_round(i);
-    }
-    for(unsigned i = 0; i != 256; i += 8) {
-      scramble_round(i);
+    do_read_random_device(this->m_mm, sizeof(this->m_mm));
+    // Scramble words.
+    Scrambler regs;
+    for(std::size_t i = 0; i < 64; ++i) {
+      auto view = this->m_mm + i % 32 * 8;
+      regs.combine(view);
+      regs.mix();
+      regs.output(view);
     }
     // Discard the result of the very first round.
     this->do_update();
@@ -113,14 +150,14 @@ void Random_Number_Generator::reset() noexcept
 
 std::uint32_t Random_Number_Generator::bump() noexcept
   {
-    unsigned index = this->m_ngot;
+    auto index = this->m_ngot;
     if(index >= 256) {
       // Populate the pool with new numbers.
       this->do_update();
       index = 0;
     }
     // Advance the index and return the number at the previous position.
-    this->m_ngot = static_cast<std::uint16_t>(index + 1);
+    this->m_ngot = index + 1;
     return this->m_pool[index];
   }
 
