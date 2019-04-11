@@ -30,10 +30,8 @@ void Evaluation_Stack::forward_result(bool assign)
     // Do not play with this at home.
     ROCKET_ASSERT(this->m_refs.size() >= 2);
     if(assign) {
-      // Read a temporary value from the top reference and pop it.
-      // Set the new top to a temporary reference to the value.
-      Reference_Root::S_temporary xref = { this->m_refs.get(0).read() };
-      this->m_refs.mut(1) = rocket::move(xref);
+      // Read a value from the top reference and write it to the second reference. Drop the top reference thereafter.
+      this->m_refs.get(1).open() = this->m_refs.get(0).read();
       this->m_refs.pop();
       return;
     }

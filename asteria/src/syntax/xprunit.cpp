@@ -603,20 +603,18 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(2).as<std::int64_t>());
         // Pick a branch basing on the condition.
         if(stack.get_top_reference().read().test()) {
-          // Execute the true branch. If the branch is empty, leave the condition on the stack.
-          if(code_true.empty()) {
-            return Air_Node::status_next;
+          // Evaluate the true branch. If the branch is empty, leave the condition on the stack.
+          if(!code_true.empty()) {
+            rocket::for_each(code_true, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+            stack.forward_result(assign);
           }
-          rocket::for_each(code_true, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+          return Air_Node::status_next;
+        }
+        // Evaluate the false branch. If the branch is empty, leave the condition on the stack.
+        if(!code_false.empty()) {
+          rocket::for_each(code_false, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
           stack.forward_result(assign);
-          return Air_Node::status_next;
         }
-        // Execute the false branch. If the branch is empty, leave the condition on the stack.
-        if(code_false.empty()) {
-          return Air_Node::status_next;
-        }
-        rocket::for_each(code_false, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
-        stack.forward_result(assign);
         return Air_Node::status_next;
       }
 
@@ -1452,13 +1450,11 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // Leave the condition on the stack.
           return Air_Node::status_next;
         }
-        if(code_null.empty()) {
-          // Leave the condition on the stack.
-          return Air_Node::status_next;
+        // Evaluate the null branch. If the branch is empty, leave the condition on the stack.
+        if(!code_null.empty()) {
+          rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+          stack.forward_result(assign);
         }
-        // Evaluate the branch.
-        rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
-        stack.forward_result(assign);
         return Air_Node::status_next;
       }
 
