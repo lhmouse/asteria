@@ -29,22 +29,22 @@ struct Argument_Reader::Mparam
             os << '[' << Value::get_type_name(this->dtype) << ']';
             return;
           }
-        case Mparam::tag_required:
+        case tag_required:
           {
             os << Value::get_type_name(this->dtype);
             return;
           }
-        case Mparam::tag_generic:
+        case tag_generic:
           {
             os << "<generic>";
             return;
           }
-        case Mparam::tag_variadic:
+        case tag_variadic:
           {
             os << "...";
             return;
           }
-        case Mparam::tag_finish:
+        case tag_finish:
           {
             ROCKET_ASSERT(false);
           }
@@ -67,7 +67,7 @@ void Argument_Reader::do_record_parameter(Dtype dtype, bool required)
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; no argument could be extracted any further.");
     }
-    Mparam pinfo;
+    Mparam pinfo = { };
     if(required) {
       pinfo.tag = Mparam::tag_required;
     } else {
@@ -82,7 +82,7 @@ void Argument_Reader::do_record_parameter_generic()
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; no argument could be extracted any further.");
     }
-    Mparam pinfo;
+    Mparam pinfo = { };
     pinfo.tag = Mparam::tag_generic;
     this->m_state.prototype.emplace_back(pinfo);
   }
@@ -92,7 +92,7 @@ void Argument_Reader::do_record_parameter_finish(bool variadic)
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; it cannot be finished a second time.");
     }
-    Mparam pinfo;
+    Mparam pinfo = { };
     if(variadic) {
       pinfo.tag = Mparam::tag_variadic;
       this->m_state.prototype.emplace_back(pinfo);
