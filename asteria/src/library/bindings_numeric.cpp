@@ -35,22 +35,6 @@ D_integer std_numeric_signbit(const D_real& value)
     return -static_cast<std::int64_t>(b);
   }
 
-    namespace {
-
-    inline D_real do_rcast(const D_integer& value)
-      {
-        return D_real(value);
-      }
-    inline D_real do_rcast(const D_real& value)
-      {
-        if(std::fpclassify(value) == FP_NAN) {
-          ASTERIA_THROW_RUNTIME_ERROR("The value `", value, "` is unordered with everything.");
-        }
-        return value;
-      }
-
-    }
-
 D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, const D_integer& upper)
   {
     return rocket::clamp(value, lower, upper);
@@ -58,17 +42,23 @@ D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, cons
 
 D_real std_numeric_clamp(const D_integer& value, const D_real& lower, const D_real& upper)
   {
-    return rocket::clamp(do_rcast(value), do_rcast(lower), do_rcast(upper));
+    if(std::isnan(lower) || std::isnan(upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("NaNs cannot be used as boundaries.");
+    }
+    return rocket::clamp(D_real(value), lower, upper);
   }
 
 D_real std_numeric_clamp(const D_real& value, const D_integer& lower, const D_integer& upper)
   {
-    return rocket::clamp(do_rcast(value), do_rcast(lower), do_rcast(upper));
+    return rocket::clamp(value, D_real(lower), D_real(upper));
   }
 
 D_real std_numeric_clamp(const D_real& value, const D_real& lower, const D_real& upper)
   {
-    return rocket::clamp(do_rcast(value), do_rcast(lower), do_rcast(upper));
+    if(std::isnan(lower) || std::isnan(upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("NaNs cannot be used as boundaries.");
+    }
+    return rocket::clamp(value, lower, upper);
   }
 
 D_integer std_numeric_round(const D_integer& value)
