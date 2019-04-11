@@ -34,6 +34,39 @@ int main()
         assert std.numeric.sign(-nan) == -1;
         assert typeof std.numeric.sign(42.5) == "integer";
 
+        assert std.numeric.is_finite(+5) == true;
+        assert std.numeric.is_finite(-5) == true;
+        assert std.numeric.is_finite(+3.5) == true;
+        assert std.numeric.is_finite(-3.5) == true;
+        assert std.numeric.is_finite(+3.5) == true;
+        assert std.numeric.is_finite(-3.5) == true;
+        assert std.numeric.is_finite(+infinity) == false;
+        assert std.numeric.is_finite(-infinity) == false;
+        assert std.numeric.is_finite(+nan) == false;
+        assert std.numeric.is_finite(-nan) == false;
+
+        assert std.numeric.is_infinity(+5) == false;
+        assert std.numeric.is_infinity(-5) == false;
+        assert std.numeric.is_infinity(+3.5) == false;
+        assert std.numeric.is_infinity(-3.5) == false;
+        assert std.numeric.is_infinity(+3.5) == false;
+        assert std.numeric.is_infinity(-3.5) == false;
+        assert std.numeric.is_infinity(+infinity) == true;
+        assert std.numeric.is_infinity(-infinity) == true;
+        assert std.numeric.is_infinity(+nan) == false;
+        assert std.numeric.is_infinity(-nan) == false;
+
+        assert std.numeric.is_nan(+5) == false;
+        assert std.numeric.is_nan(-5) == false;
+        assert std.numeric.is_nan(+3.5) == false;
+        assert std.numeric.is_nan(-3.5) == false;
+        assert std.numeric.is_nan(+3.5) == false;
+        assert std.numeric.is_nan(-3.5) == false;
+        assert std.numeric.is_nan(+infinity) == false;
+        assert std.numeric.is_nan(-infinity) == false;
+        assert std.numeric.is_nan(+nan) == true;
+        assert std.numeric.is_nan(-nan) == true;
+
         assert std.numeric.clamp(1, 2, 3) == 2;
         assert std.numeric.clamp(2, 2, 3) == 2;
         assert std.numeric.clamp(3, 2, 3) == 3;
@@ -52,6 +85,10 @@ int main()
         assert std.numeric.clamp(2.75, 2.5, 3.5) == 2.75;
         assert std.numeric.clamp(3.75, 2.5, 3.5) == 3.50;
         assert typeof std.numeric.clamp(1.75, 2.5, 3.5) == "real";
+        assert std.numeric.is_nan(std.numeric.clamp(+nan, 2.5, 3.5));
+        assert std.numeric.is_nan(std.numeric.clamp(-nan, 2.5, 3.5));
+        assert std.numeric.clamp(+infinity, 2.5, 3.5) == 3.5;
+        assert std.numeric.clamp(-infinity, 2.5, 3.5) == 2.5;
 
         assert std.numeric.round(42) == 42;
         assert typeof std.numeric.round(42) == "integer";

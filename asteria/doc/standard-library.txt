@@ -1135,6 +1135,35 @@
 
 	* Returns `-1` if `value` is negative and `0` otherwise.
 
+`std.numeric.is_finite(value)`
+
+	* Checks whether `value` is a finite number. `value` may be an
+	  `integer` or `real`. Be adviced that this functions returns
+	  `true` for `integer`s for consistency; `integer`s do not
+	  support infinities or NaNs.
+
+	* Returns `true` if `value` is an `integer`, or is a `real` that
+	  is neither an infinity or a NaN; otherwise `false`.
+
+`std.numeric.is_infinity(value)`
+
+	* Checks whether `value` is an infinity. `value` may be an
+	  `integer` or `real`. Be adviced that this functions returns
+	  `false` for `integer`s for consistency; `integer`s do not
+	  support infinities.
+
+	* Returns `true` if `value` is a `real` that denotes an infinity;
+	  otherwise `false`.
+
+`std.numeric.is_nan(value)`
+
+	* Checks whether `value` is a NaN. `value` may be an `integer` or
+	  `real`. Be adviced that this functions returns `false` for
+	  `integer`s for consistency; `integer`s do not support NaNs.
+
+	* Returns `true` if `value` is a `real` denoting a NaN; otherwise
+	  `false`.
+
 `std.numeric.clamp(value, lower, upper)`
 
 	* Limits `value` between `lower` and `upper`. `lower` and `upper`

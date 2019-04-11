@@ -14,6 +14,13 @@ extern D_real std_numeric_abs(const D_real& value);
 extern D_integer std_numeric_sign(const D_integer& value);
 extern D_integer std_numeric_sign(const D_real& value);
 
+extern D_boolean std_numeric_is_finite(const D_integer& value);
+extern D_boolean std_numeric_is_finite(const D_real& value);
+extern D_boolean std_numeric_is_infinity(const D_integer& value);
+extern D_boolean std_numeric_is_infinity(const D_real& value);
+extern D_boolean std_numeric_is_nan(const D_integer& value);
+extern D_boolean std_numeric_is_nan(const D_real& value);
+
 extern D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, const D_integer& upper);
 extern D_real std_numeric_clamp(const D_integer& value, const D_real& lower, const D_real& upper);
 extern D_real std_numeric_clamp(const D_real& value, const D_integer& lower, const D_integer& upper);

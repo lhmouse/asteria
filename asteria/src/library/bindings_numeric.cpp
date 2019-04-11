@@ -34,6 +34,36 @@ D_integer std_numeric_sign(const D_real& value)
     return static_cast<std::int64_t>(std::signbit(value) == 0) - 1;
   }
 
+D_boolean std_numeric_is_finite(const D_integer& /*value*/)
+  {
+    return true;
+  }
+
+D_boolean std_numeric_is_finite(const D_real& value)
+  {
+    return std::isfinite(value);
+  }
+
+D_boolean std_numeric_is_infinity(const D_integer& /*value*/)
+  {
+    return false;
+  }
+
+D_boolean std_numeric_is_infinity(const D_real& value)
+  {
+    return std::isinf(value);
+  }
+
+D_boolean std_numeric_is_nan(const D_integer& /*value*/)
+  {
+    return false;
+  }
+
+D_boolean std_numeric_is_nan(const D_real& value)
+  {
+    return std::isnan(value);
+  }
+
 D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, const D_integer& upper)
   {
     if(!(lower <= upper)) {
@@ -279,6 +309,113 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_sign(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.is_finite()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("is_finite"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.is_finite(value)`\n"
+                     "  * Checks whether `value` is a finite number. `value` may be an\n"
+                     "    `integer` or `real`. Be adviced that this functions returns\n"
+                     "    `true` for `integer`s for consistency; `integer`s do not\n"
+                     "    support infinities or NaNs.\n"
+                     "  * Returns `true` if `value` is an `integer`, or is a `real` that\n"
+                     "    is neither an infinity or a NaN; otherwise `false`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.is_finite"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_is_finite(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_is_finite(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.is_infinity()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("is_infinity"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.is_infinity(value)`\n"
+                     "  * Checks whether `value` is an infinity. `value` may be an\n"
+                     "    `integer` or `real`. Be adviced that this functions returns\n"
+                     "    `false` for `integer`s for consistency; `integer`s do not\n"
+                     "    support infinities.\n"
+                     "  * Returns `true` if `value` is a `real` that denotes an infinity;\n"
+                     "    otherwise `false`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.is_infinity"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_is_infinity(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_is_infinity(rvalue) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        D_null()
+      )));
+    //===================================================================
+    // `std.numeric.is_nan()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("is_nan"),
+      D_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.is_nan(value)`\n"
+                     "  * Checks whether `value` is a NaN. `value` may be an `integer` or\n"
+                     "    `real`. Be adviced that this functions returns `false` for\n"
+                     "    `integer`s for consistency; `integer`s do not support NaNs.\n"
+                     "  * Returns `true` if `value` is a `real` denoting a NaN; otherwise\n"
+                     "    `false`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.is_nan"), args);
+            // Parse arguments.
+            D_integer ivalue;
+            if(reader.start().g(ivalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_is_nan(ivalue) };
+              return rocket::move(xref);
+            }
+            D_real rvalue;
+            if(reader.start().g(rvalue).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_is_nan(rvalue) };
               return rocket::move(xref);
             }
             // Fail.
