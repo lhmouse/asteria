@@ -436,8 +436,8 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
                      "  * Returns `lower` if `value < lower`, `upper` if `value > upper`,\n"
                      "    and `value` otherwise. The type of value returned by this\n"
                      "    function depends on its arguments.\n"
-                     "  * Throws an exception if `value` is unordered with `lower` or\n"
-                     "    `upper`, or `lower` is less than `upper`.\n"),
+                     "  * Throws an exception if `lower` is not less than or equal to\n"
+                     "    `upper`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {

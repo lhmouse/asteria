@@ -1173,8 +1173,8 @@
 	  and `value` otherwise. The type of value returned by this
 	  function depends on its arguments.
 
-	* Throws an exception if `value` is unordered with `lower` or
-	  `upper`, or `lower` is less than `upper`.
+	* Throws an exception if `lower` is not less than or equal to
+	  `upper`.
 
 `std.numeric.round(value)`
 
