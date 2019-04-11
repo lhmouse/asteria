@@ -1186,7 +1186,7 @@
 	  `value` is an `integer`, it is returned intact. The result is
 	  converted to an `integer`.
 
-	* Returns the rounded value as an `integer`
+	* Returns the rounded value as an `integer`.
 
 	* Throws an exception if the result cannot be represented as an
 	  `integer`.
@@ -1198,7 +1198,7 @@
 	  `integer`, it is returned intact. The result is converted to
 	  an `integer`.
 
-	* Returns the rounded value as an `integer`
+	* Returns the rounded value as an `integer`.
 
 	* Throws an exception if the result cannot be represented as an
 	  `integer`.
@@ -1210,7 +1210,7 @@
 	  `integer`, it is returned intact. The result is converted to
 	  an `integer`.
 
-	* Returns the rounded value as an `integer`
+	* Returns the rounded value as an `integer`.
 
 	* Throws an exception if the result cannot be represented as an
 	  `integer`.
@@ -1221,7 +1221,7 @@
 	  nearest integer towards zero. If `value` is an `integer`, it is
 	  returned intact. The result is converted to an `integer`.
 
-	* Returns the rounded value as an `integer`
+	* Returns the rounded value as an `integer`.
 
 	* Throws an exception if the result cannot be represented as an
 	  `integer`.

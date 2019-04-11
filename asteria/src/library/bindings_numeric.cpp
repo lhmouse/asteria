@@ -481,7 +481,7 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
                      "    nearest integer; halfway values are rounded away from zero. If\n"
                      "    `value` is an `integer`, it is returned intact. The result is\n"
                      "    converted to an `integer`.\n"
-                     "  * Returns the rounded value as an `integer`\n"
+                     "  * Returns the rounded value as an `integer`.\n"
                      "  * Throws an exception if the result cannot be represented as an\n"
                      "    `integer`.\n"),
         // Definition
@@ -518,7 +518,7 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
                      "    nearest integer towards negative infinity. If `value` is an\n"
                      "    `integer`, it is returned intact. The result is converted to\n"
                      "    an `integer`.\n"
-                     "  * Returns the rounded value as an `integer`\n"
+                     "  * Returns the rounded value as an `integer`.\n"
                      "  * Throws an exception if the result cannot be represented as an\n"
                      "    `integer`.\n"),
         // Definition
@@ -555,7 +555,7 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
                      "    nearest integer towards positive infinity. If `value` is an\n"
                      "    `integer`, it is returned intact. The result is converted to\n"
                      "    an `integer`.\n"
-                     "  * Returns the rounded value as an `integer`\n"
+                     "  * Returns the rounded value as an `integer`.\n"
                      "  * Throws an exception if the result cannot be represented as an\n"
                      "    `integer`.\n"),
         // Definition
@@ -591,7 +591,7 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
                      "    nearest integer towards zero. If `value` is an `integer`, it is\n"
                      "    returned intact. The result is converted to an `integer`.\n"
-                     "  * Returns the rounded value as an `integer`\n"
+                     "  * Returns the rounded value as an `integer`.\n"
                      "  * Throws an exception if the result cannot be represented as an\n"
                      "    `integer`.\n"),
         // Definition
