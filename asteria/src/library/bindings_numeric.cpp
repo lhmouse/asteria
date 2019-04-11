@@ -738,50 +738,51 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("random"),
       D_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.random(upper)`\n"
+        rocket::sref("`std.numeric.random([upper])`\n"
                      "  * Generates a random `integer` or `real` that is less than\n"
-                     "    `upper`. The type of value returned by this function depends\n"
-                     "    on its argument. If `upper` is absent, it has a default value\n"
-                     "    of `1.0` which is a `real`.\n"
+                     "    `upper`. If `upper` is absent, it has a default value of `1.0`\n"
+                     "    which is a `real`.\n"
                      "  * Returns a non-negative `integer` or `real` that is less than\n"
-                     "    `upper`.\n"
+                     "    `upper`. The return value is of type `integer` if `upper` is of\n"
+                     "    type `integer`; otherwise it is of type `real`.\n"
                      "  * Throws an exception if `upper` is negative or zero.\n"
                      "`std.numeric.random(lower, upper)`\n"
                      "  * Generates a random `integer` or `real` that is not less than\n"
                      "    `lower` but is less than `upper`. `lower` and `upper` shall be\n"
                      "    of the same type.\n"
                      "  * Returns an `integer` or `real` that is not less than `lower`\n"
-                     "    but is less than `upper`. The type of value returned by this function\n"
-                     "    depends on its arguments.\n"
+                     "    but is less than `upper`. The return value is of type `integer`\n"
+                     "    if both arguments are of type `integer`; otherwise it is of\n"
+                     "    type `real`.\n"
                      "  * Throws an exception if `lower` is not less than `upper`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.random"), args);
-            Argument_Reader::State state;
             // Parse arguments.
             D_integer iupper;
-            if(reader.start().g(iupper).save_state(state).finish()) {
+            if(reader.start().g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, iupper) };
               return rocket::move(xref);
             }
-            D_integer ilower = iupper;
-            if(reader.load_state(state).g(iupper).finish()) {
+            Opt<D_real> kupper;
+            if(reader.start().g(kupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_random(global, kupper) };
+              return rocket::move(xref);
+            }
+            D_integer ilower;
+            if(reader.start().g(ilower).g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, ilower, iupper) };
               return rocket::move(xref);
             }
-            Opt<D_real> rupper;
-            if(reader.start().g(rupper).finish()) {
+            D_real rupper;
+            D_real rlower;
+            if(reader.start().g(rlower).g(rupper).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(global, rupper) };
-              return rocket::move(xref);
-            }
-            D_real rlower = rupper.emplace();
-            if(reader.start().g(rlower).g(*rupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, *rupper) };
+              Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, rupper) };
               return rocket::move(xref);
             }
             // Fail.

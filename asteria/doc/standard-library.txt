@@ -1258,12 +1258,12 @@
 `std.numeric.random([upper])`
 
 	* Generates a random `integer` or `real` that is less than
-	  `upper`. The type of value returned by this function depends
-	  on its argument. If `upper` is absent, it has a default value
-	  of `1.0` which is a `real`.
+	  `upper`. If `upper` is absent, it has a default value of `1.0`
+	  which is a `real`.
 
 	* Returns a non-negative `integer` or `real` that is less than
-	  `upper`.
+	  `upper`. The return value is of type `integer` if `upper` is of
+	  type `integer`; otherwise it is of type `real`.
 
 	* Throws an exception if `upper` is negative or zero.
 
@@ -1274,8 +1274,9 @@
 	  of the same type.
 
 	* Returns an `integer` or `real` that is not less than `lower`
-	  but is less than `upper`. The type of value returned by this
-	  function depends on its arguments.
+	  but is less than `upper`. The return value is of type `integer`
+	  if both arguments are of type `integer`; otherwise it is of
+	  type `real`.
 
 	* Throws an exception if `lower` is not less than `upper`.
 
