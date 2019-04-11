@@ -329,29 +329,9 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_add(const D_real& lhs, const D_integer& rhs)
-      {
-        return lhs + D_real(rhs);
-      }
-
-    ROCKET_PURE_FUNCTION D_real do_operator_add(const D_integer& lhs, const D_real& rhs)
-      {
-        return D_real(lhs) + rhs;
-      }
-
     ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_real& lhs, const D_real& rhs)
       {
         return lhs - rhs;
-      }
-
-    ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_real& lhs, const D_integer& rhs)
-      {
-        return lhs - D_real(rhs);
-      }
-
-    ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_integer& lhs, const D_real& rhs)
-      {
-        return D_real(lhs) - rhs;
       }
 
     ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_real& lhs, const D_real& rhs)
@@ -359,42 +339,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs * rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_real& lhs, const D_integer& rhs)
-      {
-        return lhs * D_real(rhs);
-      }
-
-    ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_integer& lhs, const D_real& rhs)
-      {
-        return D_real(lhs) * rhs;
-      }
-
     ROCKET_PURE_FUNCTION D_real do_operator_div(const D_real& lhs, const D_real& rhs)
       {
         return lhs / rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_div(const D_real& lhs, const D_integer& rhs)
-      {
-        return lhs / D_real(rhs);
-      }
-
-    ROCKET_PURE_FUNCTION D_real do_operator_div(const D_integer& lhs, const D_real& rhs)
-      {
-        return D_real(lhs) / rhs;
-      }
-
     ROCKET_PURE_FUNCTION D_real do_operator_mod(const D_real& lhs, const D_real& rhs)
-      {
-        return std::fmod(lhs, rhs);
-      }
-
-    ROCKET_PURE_FUNCTION D_real do_operator_mod(const D_real& lhs, const D_integer& rhs)
-      {
-        return std::fmod(lhs, rhs);
-      }
-
-    ROCKET_PURE_FUNCTION D_real do_operator_mod(const D_integer& lhs, const D_real& rhs)
       {
         return std::fmod(lhs, rhs);
       }
@@ -989,19 +939,9 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_add(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_add(lhs.check<D_real>(), reg);
-          goto z;
-        }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_integer)) {
-          // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-          rhs = do_operator_add(lhs.check<D_real>(), rhs.check<D_integer>());
-          goto z;
-        }
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_add(lhs.check<D_integer>(), reg);
+        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          rhs = do_operator_add(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
         // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
@@ -1037,19 +977,9 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_sub(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_sub(lhs.check<D_real>(), reg);
-          goto z;
-        }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_integer)) {
-          // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-          rhs = do_operator_sub(lhs.check<D_real>(), rhs.check<D_integer>());
-          goto z;
-        }
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_sub(lhs.check<D_integer>(), reg);
+        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          rhs = do_operator_sub(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sub), " operation is not defined for `", lhs, "` and `", rhs, "`.");
@@ -1079,19 +1009,9 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_mul(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_mul(lhs.check<D_real>(), reg);
-          goto z;
-        }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_integer)) {
-          // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-          rhs = do_operator_mul(lhs.check<D_real>(), rhs.check<D_integer>());
-          goto z;
-        }
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_mul(lhs.check<D_integer>(), reg);
+        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          rhs = do_operator_mul(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
         // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
@@ -1126,19 +1046,9 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_div(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_div(lhs.check<D_real>(), reg);
-          goto z;
-        }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_integer)) {
-          // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-          rhs = do_operator_div(lhs.check<D_real>(), rhs.check<D_integer>());
-          goto z;
-        }
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_div(lhs.check<D_integer>(), reg);
+        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          rhs = do_operator_div(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_div), " operation is not defined for `", lhs, "` and `", rhs, "`.");
@@ -1162,19 +1072,9 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_mod(lhs.check<D_integer>(), reg);
           goto z;
         }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_mod(lhs.check<D_real>(), reg);
-          goto z;
-        }
-        if((lhs.dtype() == dtype_real) && (rhs.dtype() == dtype_integer)) {
-          // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-          rhs = do_operator_mod(lhs.check<D_real>(), rhs.check<D_integer>());
-          goto z;
-        }
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_real)) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_mod(lhs.check<D_integer>(), reg);
+        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          rhs = do_operator_mod(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_mod), " operation is not defined for `", lhs, "` and `", rhs, "`.");

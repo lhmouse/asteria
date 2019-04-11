@@ -60,6 +60,22 @@ const Value& Value::get_null() noexcept
     return *(static_cast<const Value*>(pv));
   }
 
+D_real Value::convert_to_real() const
+  {
+    switch(rocket::weaken_enum(this->dtype())) {
+    case dtype_integer:
+      {
+        return D_real(this->check<D_integer>());
+      }
+    case dtype_real:
+      {
+        return this->check<D_real>();
+      }
+    default:
+      ASTERIA_TERMINATE("`", Value::get_type_name(this->dtype()), "` is not an arithmetic type.");
+    }
+  }
+
 bool Value::test() const noexcept
   {
     switch(this->dtype()) {
@@ -101,127 +117,111 @@ bool Value::test() const noexcept
     }
   }
 
-Value::Compare Value::do_compare_partial(const Value& other) const noexcept
+template<typename XvalueT, ROCKET_ENABLE_IF(std::is_integral<XvalueT>::value)> Value::Compare Value::do_compare_3way(XvalueT lhs, XvalueT rhs) noexcept
   {
-    if(this->dtype() == dtype_null) {
-      // `null` compares equal with `null` and unordered with anything else.
-      if(other.dtype() != dtype_null) {
-        return compare_unordered;
-      }
-      return compare_equal;
+    if(lhs < rhs) {
+      return compare_less;
     }
-    if((this->dtype() == dtype_boolean) && (other.dtype() == dtype_boolean)) {
-      // Compare `boolean` values as integers.
-      const auto& lhs = this->check<D_boolean>();
-      const auto& rhs = other.check<D_boolean>();
-      if(lhs < rhs) {
-        return compare_less;
-      }
-      if(lhs > rhs) {
-        return compare_greater;
-      }
-      return compare_equal;
+    if(lhs > rhs) {
+      return compare_greater;
     }
-    if((this->dtype() == dtype_integer) && (other.dtype() == dtype_integer)) {
-      // Compare `integer` values.
-      const auto& lhs = this->check<D_integer>();
-      const auto& rhs = other.check<D_integer>();
-      if(lhs < rhs) {
-        return compare_less;
-      }
-      if(lhs > rhs) {
-        return compare_greater;
-      }
-      return compare_equal;
+    return compare_equal;
+  }
+
+Value::Compare Value::do_compare_3way(D_real lhs, D_real rhs) noexcept
+  {
+    if(std::isunordered(lhs, rhs)) {
+      return compare_unordered;
     }
-    if((this->dtype() == dtype_integer) && (other.dtype() == dtype_real)) {
-      // Compare an `integer` value and a `real` value.
-      const auto& lhs = this->check<D_integer>();
-      const auto& rhs = other.check<D_real>();
-      if(std::isunordered(lhs, rhs)) {
-        return compare_unordered;
-      }
-      if(std::isless(lhs, rhs)) {
-        return compare_less;
-      }
-      if(std::isgreater(lhs, rhs)) {
-        return compare_greater;
-      }
-      return compare_equal;
+    if(std::isless(lhs, rhs)) {
+      return compare_less;
     }
-    if((this->dtype() == dtype_real) && (other.dtype() == dtype_real)) {
-      // Compare `real` values.
-      const auto& lhs = this->check<D_real>();
-      const auto& rhs = other.check<D_real>();
-      if(std::isunordered(lhs, rhs)) {
-        return compare_unordered;
-      }
-      if(std::isless(lhs, rhs)) {
-        return compare_less;
-      }
-      if(std::isgreater(lhs, rhs)) {
-        return compare_greater;
-      }
-      return compare_equal;
+    if(std::isgreater(lhs, rhs)) {
+      return compare_greater;
     }
-    if((this->dtype() == dtype_string) && (other.dtype() == dtype_string)) {
-      // Compare `string` values.
-      const auto& lhs = this->check<D_string>();
-      const auto& rhs = other.check<D_string>();
-      // Make use of the three-way comparison result of `D_string::compare()`.
-      auto cmp = lhs.compare(rhs);
-      if(cmp < 0) {
-        return compare_less;
-      }
-      if(cmp > 0) {
-        return compare_greater;
-      }
-      return compare_equal;
-    }
-    if((this->dtype() == dtype_array) && (other.dtype() == dtype_array)) {
-      // Compare `array` values.
-      const auto& lhs = this->check<D_array>();
-      const auto& rhs = other.check<D_array>();
-      // Perform lexicographical comparison of array elements.
-      auto lpt = lhs.begin();
-      auto rpt = rhs.begin();
-      for(;;) {
-        if(lpt == lhs.end()) {
-          if(rpt == rhs.end()) {
-            // Both `lhs` and `rhs` have been exhausted.
-            break;
-          }
-          // `lhs` is shorter.
-          return compare_less;
-        }
-        if(rpt == rhs.end()) {
-          // `rhs` is shorter.
-          return compare_greater;
-        }
-        auto ecmp = lpt->compare(*rpt);
-        if(ecmp != compare_equal) {
-          // A mismatch has been found.
-          return ecmp;
-        }
-        ++lpt;
-        ++rpt;
-      }
-      return compare_equal;
-    }
-    // Anything not defined here is unordered.
-    return compare_unordered;
+    return compare_equal;
   }
 
 Value::Compare Value::compare(const Value& other) const noexcept
   {
-    if(this->dtype() <= other.dtype()) {
-      // Compare them in the natural order.
-      return this->do_compare_partial(other);
+    if(this->dtype() != other.dtype()) {
+      // If the operands have different types, they are only comparable if both are of arithmetic types.
+      if(this->is_convertible_to_real() && other.is_convertible_to_real()) {
+        const auto& lhs = this->convert_to_real();
+        const auto& rhs = other.convert_to_real();
+        // Compare `real` values.
+        return Value::do_compare_3way(lhs, rhs);
+      }
+      // Otherwise, they are unordered.
+      return compare_unordered;
     }
-    // Swap the operands and compare them, then translate `compare_{less,greater}` to the other but preserve the other results.
-    int cmp = other.do_compare_partial(*this);
-    cmp ^= cmp >> 3;
-    return static_cast<Compare>(cmp);
+    switch(this->dtype()) {
+    case dtype_null:
+      {
+        // `null` values are equivalent.
+        return compare_equal;
+      }
+    case dtype_boolean:
+      {
+        const auto& lhs = this->check<D_boolean>();
+        const auto& rhs = other.check<D_boolean>();
+        // Compare `boolean` values as integers.
+        return Value::do_compare_3way(lhs, rhs);
+      }
+    case dtype_integer:
+      {
+        const auto& lhs = this->check<D_integer>();
+        const auto& rhs = other.check<D_integer>();
+        // Compare `integer`s.
+        return Value::do_compare_3way(lhs, rhs);
+      }
+    case dtype_real:
+      {
+        const auto& lhs = this->check<D_real>();
+        const auto& rhs = other.check<D_real>();
+        // Compare `real`s.
+        return Value::do_compare_3way(lhs, rhs);
+      }
+    case dtype_string:
+      {
+        const auto& lhs = this->check<D_string>();
+        const auto& rhs = other.check<D_string>();
+        // Compare `string`s.
+        return Value::do_compare_3way(lhs.compare(rhs), 0);
+      }
+    case dtype_opaque:
+      {
+        // `opaque` values are unordered with everything.
+        return compare_unordered;
+      }
+    case dtype_function:
+      {
+        // `function`s are unordered with everything.
+        return compare_unordered;
+      }
+    case dtype_array:
+      {
+        const auto& lhs = this->check<D_array>();
+        const auto& rhs = other.check<D_array>();
+        // Perform lexicographical comparison of array elements.
+        auto rlen = rocket::min(lhs.size(), rhs.size());
+        for(std::size_t i = 0; i < rlen; ++i) {
+          auto cmp = lhs[i].compare(rhs[i]);
+          if(cmp != compare_equal) {
+            // A mismatch has been found.
+            return cmp;
+          }
+        }
+        return Value::do_compare_3way(lhs.size(), rhs.size());
+      }
+    case dtype_object:
+      {
+        // `object`s are unordered with everything.
+        return compare_unordered;
+      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
+    }
   }
 
 void Value::print(std::ostream& os, bool quote_strings) const
@@ -313,7 +313,7 @@ void Value::print(std::ostream& os, bool quote_strings) const
     }
   }
 
-std::ostream& Value::do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
+std::ostream& Value::do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next)
   {
     if(indent_increment == 0) {
       // Output everything in a single line. Characters are separated by spaces.
@@ -386,15 +386,15 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
         //   2 = integer 3;
         //  ]
         os << "array(" << std::dec << alt.size() << ")";
-        this->do_auto_indent(os, indent_increment, indent_next + 1);
+        Value::do_auto_indent(os, indent_increment, indent_next + 1);
         os << '[';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          this->do_auto_indent(os, indent_increment, indent_next + indent_increment);
+          Value::do_auto_indent(os, indent_increment, indent_next + indent_increment);
           os << std::dec << (it - alt.begin()) << " = ";
           it->dump(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
-        this->do_auto_indent(os, indent_increment, indent_next + 1);
+        Value::do_auto_indent(os, indent_increment, indent_next + 1);
         os << ']';
         return;
       }
@@ -408,15 +408,15 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
         //   "three" = integer 3;
         //  }
         os << "object(" << std::dec << alt.size() << ")";
-        this->do_auto_indent(os, indent_increment, indent_next + 1);
+        Value::do_auto_indent(os, indent_increment, indent_next + 1);
         os << '{';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
-          this->do_auto_indent(os, indent_increment, indent_next + indent_increment);
+          Value::do_auto_indent(os, indent_increment, indent_next + indent_increment);
           os << quote(it->first) << " = ";
           it->second.dump(os, indent_increment, indent_next + indent_increment);
           os << ';';
         }
-        this->do_auto_indent(os, indent_increment, indent_next + 1);
+        Value::do_auto_indent(os, indent_increment, indent_next + 1);
         os << '}';
         return;
       }

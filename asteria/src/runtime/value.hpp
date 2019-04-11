@@ -35,6 +35,12 @@ class Value
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
+  private:
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_integral<XvalueT>::value)> static inline Compare do_compare_3way(XvalueT lhs, XvalueT rhs) noexcept;
+    static inline Compare do_compare_3way(D_real lhs, D_real rhs) noexcept;
+
+    static inline std::ostream& do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next);
+
   public:
     // The objects returned by these functions are allocated statically and exist throughout the program.
     ROCKET_PURE_FUNCTION static const char* get_type_name(Dtype etype) noexcept;
@@ -57,10 +63,6 @@ class Value
         this->m_stor = rocket::forward<AltT>(alt);
         return *this;
       }
-
-  private:
-    inline Compare do_compare_partial(const Value& other) const noexcept;
-    inline std::ostream& do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const;
 
   public:
     Dtype dtype() const noexcept
@@ -89,6 +91,12 @@ class Value
       {
         this->m_stor.swap(other.m_stor);
       }
+
+    bool is_convertible_to_real() const noexcept
+      {
+        return rocket::is_any_of(this->dtype(), { dtype_integer, dtype_real });
+      }
+    D_real convert_to_real() const;
 
     bool test() const noexcept;
     Compare compare(const Value& other) const noexcept;
