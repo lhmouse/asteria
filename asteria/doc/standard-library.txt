@@ -1129,7 +1129,7 @@
 
 `std.numeric.signbit(value)`
 
-	* Populates the sign bit of the number `value`, which may be an
+	* Propagates the sign bit of the number `value`, which may be an
 	  `integer` or `real`, to all bits of an `integer`. Be advised
 	  that `-0.0` is distinct from `0.0` despite the equality.
 

@@ -261,7 +261,7 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.signbit(value)`\n"
-                     "  * Populates the sign bit of the number `value`, which may be an\n"
+                     "  * Propagates the sign bit of the number `value`, which may be an\n"
                      "    `integer` or `real`, to all bits of an `integer`. Be advised\n"
                      "    that `-0.0` is distinct from `0.0` despite the equality.\n"
                      "  * Returns `-1` if `value` is negative and `0` otherwise.\n"),
