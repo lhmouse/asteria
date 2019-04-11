@@ -1145,7 +1145,7 @@
 	  function depends on its arguments.
 
 	* Throws an exception if `value` is unordered with `lower` or
-	  `upper`.
+	  `upper`, or `lower` is less than `upper`.
 
 `std.numeric.round(value)`
 

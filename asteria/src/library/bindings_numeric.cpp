@@ -37,26 +37,32 @@ D_integer std_numeric_signbit(const D_real& value)
 
 D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, const D_integer& upper)
   {
+    if(!(lower <= upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
     return rocket::clamp(value, lower, upper);
   }
 
 D_real std_numeric_clamp(const D_integer& value, const D_real& lower, const D_real& upper)
   {
-    if(std::isnan(lower) || std::isnan(upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("NaNs cannot be used as boundaries.");
+    if(!(lower <= upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
     }
     return rocket::clamp(D_real(value), lower, upper);
   }
 
 D_real std_numeric_clamp(const D_real& value, const D_integer& lower, const D_integer& upper)
   {
+    if(!(lower <= upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
     return rocket::clamp(value, D_real(lower), D_real(upper));
   }
 
 D_real std_numeric_clamp(const D_real& value, const D_real& lower, const D_real& upper)
   {
-    if(std::isnan(lower) || std::isnan(upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("NaNs cannot be used as boundaries.");
+    if(!(lower <= upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
     }
     return rocket::clamp(value, lower, upper);
   }
@@ -169,7 +175,7 @@ D_integer std_numeric_itrunc(const D_real& value)
 
 D_integer std_numeric_random(const Global_Context& global, const D_integer& upper)
   {
-    if(upper <= 0) {
+    if(!(upper > 0)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `upper` limit must be greater than zero (got `", upper, "`).");
     }
     auto res = do_random_ratio(global);
@@ -179,7 +185,7 @@ D_integer std_numeric_random(const Global_Context& global, const D_integer& uppe
 
 D_real std_numeric_random(const Global_Context& global, const Opt<D_real>& upper)
   {
-    if(upper && (*upper <= 0)) {
+    if(upper && !(*upper > 0)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `upper` limit must be greater than zero (got `", *upper, "`).");
     }
     auto res = do_random_ratio(global);
@@ -191,7 +197,7 @@ D_real std_numeric_random(const Global_Context& global, const Opt<D_real>& upper
 
 D_integer std_numeric_random(const Global_Context& global, const D_integer& lower, const D_integer& upper)
   {
-    if(lower >= upper) {
+    if(!(lower < upper)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
     }
     auto res = do_random_ratio(global);
@@ -201,7 +207,7 @@ D_integer std_numeric_random(const Global_Context& global, const D_integer& lowe
 
 D_real std_numeric_random(const Global_Context& global, const D_real& lower, const D_real& upper)
   {
-    if(lower >= upper) {
+    if(!(lower < upper)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
     }
     auto res = do_random_ratio(global);
@@ -295,7 +301,7 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
                      "    and `value` otherwise. The type of value returned by this\n"
                      "    function depends on its arguments.\n"
                      "  * Throws an exception if `value` is unordered with `lower` or\n"
-                     "    `upper`.\n"),
+                     "    `upper`, or `lower` is less than `upper`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
