@@ -57,9 +57,6 @@ class Argument_Reader
     inline const Reference* do_peek_argument_opt() const;
     inline Opt<std::ptrdiff_t> do_check_finish_opt(bool variadic) const;
 
-    template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument(Opt<typename Value::Xvariant::type_at<dtypeT>::type>& qxvalue);
-    template<Dtype dtypeT> inline Argument_Reader& do_read_typed_argument(typename Value::Xvariant::type_at<dtypeT>::type& xvalue);
-
   public:
     const Cow_String& get_name() const noexcept
       {
@@ -107,7 +104,7 @@ class Argument_Reader
     Argument_Reader& g(Value& value);
     Argument_Reader& g(Opt<D_boolean>& qxvalue);
     Argument_Reader& g(Opt<D_integer>& qxvalue);
-    Argument_Reader& g(Opt<D_real>& qxvalue);
+    Argument_Reader& g(Opt<D_real>& qxvalue);  // This function converts `integer`s to `real`s implicitly.
     Argument_Reader& g(Opt<D_string>& qxvalue);
     Argument_Reader& g(Opt<D_opaque>& qxvalue);
     Argument_Reader& g(Opt<D_function>& qxvalue);
@@ -117,7 +114,7 @@ class Argument_Reader
     // The argument must exist and must be of the desired type; otherwise the operation fails.
     Argument_Reader& g(D_boolean& xvalue);
     Argument_Reader& g(D_integer& xvalue);
-    Argument_Reader& g(D_real& xvalue);
+    Argument_Reader& g(D_real& xvalue);  // This function converts `integer`s to `real`s implicitly.
     Argument_Reader& g(D_string& xvalue);
     Argument_Reader& g(D_opaque& xvalue);
     Argument_Reader& g(D_function& xvalue);
