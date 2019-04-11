@@ -1166,12 +1166,12 @@
 
 `std.numeric.clamp(value, lower, upper)`
 
-	* Limits `value` between `lower` and `upper`. `lower` and `upper`
-	  shall be of the same type.
+	* Limits `value` between `lower` and `upper`.
 
 	* Returns `lower` if `value < lower`, `upper` if `value > upper`,
-	  and `value` otherwise. The type of value returned by this
-	  function depends on its arguments.
+	  and `value` otherwise (including when `value` is a NaN). The
+	  returned value is of type `integer` if all arguments are of
+	  type `integer`; otherwise it is of type `real`.
 
 	* Throws an exception if `lower` is not less than or equal to
 	  `upper`.

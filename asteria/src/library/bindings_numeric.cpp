@@ -66,31 +66,15 @@ D_boolean std_numeric_is_nan(const D_real& value)
 
 D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, const D_integer& upper)
   {
-    if(!(lower <= upper)) {
+    if(lower > upper) {
       ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
     }
     return rocket::clamp(value, lower, upper);
   }
 
-D_real std_numeric_clamp(const D_integer& value, const D_real& lower, const D_real& upper)
-  {
-    if(!(lower <= upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(D_real(value), lower, upper);
-  }
-
-D_real std_numeric_clamp(const D_real& value, const D_integer& lower, const D_integer& upper)
-  {
-    if(!(lower <= upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(value, D_real(lower), D_real(upper));
-  }
-
 D_real std_numeric_clamp(const D_real& value, const D_real& lower, const D_real& upper)
   {
-    if(!(lower <= upper)) {
+    if(!std::isless(lower, upper)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
     }
     return rocket::clamp(value, lower, upper);
@@ -431,41 +415,30 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
       D_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.clamp(value, lower, upper)`\n"
-                     "  * Limits `value` between `lower` and `upper`. `lower` and `upper`\n"
-                     "    shall be of the same type.\n"
+                     "  * Limits `value` between `lower` and `upper`.\n"
                      "  * Returns `lower` if `value < lower`, `upper` if `value > upper`,\n"
-                     "    and `value` otherwise. The type of value returned by this\n"
-                     "    function depends on its arguments.\n"
+                     "    and `value` otherwise (including when `value` is a NaN). The\n"
+                     "    returned value is of type `integer` if all arguments are of\n"
+                     "    type `integer`; otherwise it is of type `real`.\n"
                      "  * Throws an exception if `lower` is not less than or equal to\n"
                      "    `upper`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.clamp"), args);
-            Argument_Reader::State state;
             // Parse arguments.
             D_integer ivalue;
             D_integer ilower;
             D_integer iupper;
-            if(reader.start().g(ivalue).save_state(state).g(ilower).g(iupper).finish()) {
+            if(reader.start().g(ivalue).g(ilower).g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_clamp(ivalue, ilower, iupper) };
               return rocket::move(xref);
             }
+            D_real rvalue;
             D_real rlower;
             D_real rupper;
-            if(reader.load_state(state).g(rlower).g(rupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_clamp(ivalue, rlower, rupper) };
-              return rocket::move(xref);
-            }
-            D_real rvalue;
-            if(reader.start().g(rvalue).save_state(state).g(ilower).g(iupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_clamp(rvalue, ilower, iupper) };
-              return rocket::move(xref);
-            }
-            if(reader.load_state(state).g(rlower).g(rupper).finish()) {
+            if(reader.start().g(rvalue).g(rlower).g(rupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_clamp(rvalue, rlower, rupper) };
               return rocket::move(xref);
