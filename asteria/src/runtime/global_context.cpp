@@ -85,7 +85,7 @@ void Global_Context::initialize(API_Version version)
     // Set the `std` variable.
     ///////////////////////////////////////////////////////////////////////////
     auto std_var = gcoll->create_variable();
-    std_var->reset(Source_Location(rocket::sref("<builtin>"), 0), rocket::move(std_obj), true);
+    std_var->reset(Source_Location(rocket::sref("<built-in>"), 0), rocket::move(std_obj), true);
     Reference_Root::S_variable xref = { std_var };
     this->open_named_reference(rocket::sref("std")) = rocket::move(xref);
     this->m_std_var = std_var;

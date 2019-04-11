@@ -345,7 +345,7 @@ Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_arra
     Value::Compare do_compare(const Global_Context& global, const Opt<D_function>& comparator, const Value& lhs, const Value& rhs)
       {
         if(!comparator) {
-          // Perform the builtin 3-way comparison.
+          // Perform the built-in 3-way comparison.
           return lhs.compare(rhs);
         }
         // Set up arguments for the user-defined comparator.
@@ -1150,9 +1150,9 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
                      "    the second one, a positive `integer` if the first argument is\n"
                      "    greater than the second one, or `0` if the arguments are equal;\n"
                      "    other values indicate that the arguments are unordered. If no\n"
-                     "    `comparator` is provided, the builtin 3-way comparison operator\n"
-                     "    is used. An `array` that contains no elements is considered to\n"
-                     "    have been sorted.\n"
+                     "    `comparator` is provided, the built-in 3-way comparison\n"
+                     "    operator is used. An `array` that contains no elements is\n"
+                     "    considered to have been sorted.\n"
                      "  * Returns `true` if `data` is sorted or empty; otherwise `false`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference

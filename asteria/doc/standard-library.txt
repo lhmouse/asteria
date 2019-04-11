@@ -1006,9 +1006,9 @@
 	  the second one, a positive `integer` if the first argument is
 	  greater than the second one, or `0` if the arguments are equal;
 	  other values indicate that the arguments are unordered. If no
-	  `comparator` is provided, the builtin 3-way comparison operator
-	  is used. An `array` that contains no elements is considered to
-	  have been sorted.
+	  `comparator` is provided, the built-in 3-way comparison
+	  operator is used. An `array` that contains no elements is
+	  considered to have been sorted.
 
 	* Returns `true` if `data` is sorted or empty; otherwise `false`.
 

@@ -346,7 +346,7 @@ namespace Asteria {
               // Create a fresh context for the loop body.
               Executive_Context ctx_body(&ctx_for);
               // Set up the key variable, which is immutable.
-              key_var->reset(Source_Location(rocket::sref("<builtin>"), 0), D_integer(it - array.begin()), true);
+              key_var->reset(Source_Location(rocket::sref("<built-in>"), 0), D_integer(it - array.begin()), true);
               // Set up the mapped reference.
               Reference_Modifier::S_array_index xrefm = { it - array.begin() };
               range_ref.zoom_in(rocket::move(xrefm));
@@ -370,7 +370,7 @@ namespace Asteria {
               // Create a fresh context for the loop body.
               Executive_Context ctx_body(&ctx_for);
               // Set up the key variable, which is immutable.
-              key_var->reset(Source_Location(rocket::sref("<builtin>"), 0), D_string(it->first), true);
+              key_var->reset(Source_Location(rocket::sref("<built-in>"), 0), D_string(it->first), true);
               // Set up the mapped reference.
               Reference_Modifier::S_object_key xrefm = { it->first };
               range_ref.zoom_in(rocket::move(xrefm));
