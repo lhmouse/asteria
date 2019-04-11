@@ -1138,11 +1138,11 @@
 `std.numeric.clamp(value, lower, upper)`
 
 	* Limits `value` between `lower` and `upper`. `lower` and `upper`
-	  shall be of the same type. The type of value returned by this
-	  function depends on its arguments.
+	  shall be of the same type.
 
 	* Returns `lower` if `value < lower`, `upper` if `value > upper`,
-	  and `value` otherwise.
+	  and `value` otherwise. The type of value returned by this
+	  function depends on its arguments.
 
 	* Throws an exception if `value` is unordered with `lower` or
 	  `upper`.
@@ -1242,11 +1242,11 @@
 
 	* Generates a random `integer` or `real` that is not less than
 	  `lower` but is less than `upper`. `lower` and `upper` shall be
-	  of the same type. The type of value returned by this function
-	  depends on its arguments.
+	  of the same type.
 
 	* Returns an `integer` or `real` that is not less than `lower`
-	  but is less than `upper`.
+	  but is less than `upper`. The type of value returned by this
+	  function depends on its arguments.
 
 	* Throws an exception if `lower` is not less than `upper`.
 

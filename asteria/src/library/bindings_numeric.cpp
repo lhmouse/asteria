@@ -290,10 +290,10 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
         // Description
         rocket::sref("`std.numeric.clamp(value, lower, upper)`\n"
                      "  * Limits `value` between `lower` and `upper`. `lower` and `upper`\n"
-                     "    shall be of the same type. The type of value returned by this\n"
-                     "    function depends on its arguments.\n"
+                     "    shall be of the same type.\n"
                      "  * Returns `lower` if `value < lower`, `upper` if `value > upper`,\n"
-                     "    and `value` otherwise.\n"
+                     "    and `value` otherwise. The type of value returned by this\n"
+                     "    function depends on its arguments.\n"
                      "  * Throws an exception if `value` is unordered with `lower` or\n"
                      "    `upper`.\n"),
         // Definition
@@ -634,10 +634,10 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
                      "`std.numeric.random(lower, upper)`\n"
                      "  * Generates a random `integer` or `real` that is not less than\n"
                      "    `lower` but is less than `upper`. `lower` and `upper` shall be\n"
-                     "    of the same type. The type of value returned by this function\n"
-                     "    depends on its arguments.\n"
+                     "    of the same type.\n"
                      "  * Returns an `integer` or `real` that is not less than `lower`\n"
-                     "    but is less than `upper`.\n"
+                     "    but is less than `upper`. The type of value returned by this function\n"
+                     "    depends on its arguments.\n"
                      "  * Throws an exception if `lower` is not less than `upper`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
