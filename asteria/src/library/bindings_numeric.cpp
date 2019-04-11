@@ -31,8 +31,7 @@ D_integer std_numeric_signbit(const D_integer& value)
 
 D_integer std_numeric_signbit(const D_real& value)
   {
-    bool b = std::signbit(value);
-    return -static_cast<std::int64_t>(b);
+    return static_cast<std::int64_t>(std::signbit(value) == 0) - 1;
   }
 
 D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, const D_integer& upper)
