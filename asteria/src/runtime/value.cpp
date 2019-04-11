@@ -117,7 +117,7 @@ bool Value::test() const noexcept
     }
   }
 
-template<typename XvalueT, ROCKET_ENABLE_IF(std::is_integral<XvalueT>::value)> Value::Compare Value::do_compare_3way(XvalueT lhs, XvalueT rhs) noexcept
+template<typename XvalueT> ROCKET_RETURN_ENABLE_IF(Value::Compare, std::is_integral<XvalueT>::value) Value::do_compare_3way(XvalueT lhs, XvalueT rhs) noexcept
   {
     if(lhs < rhs) {
       return compare_less;

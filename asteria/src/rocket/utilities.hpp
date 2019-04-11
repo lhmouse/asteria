@@ -121,7 +121,7 @@ using ::std::range_error;
 using ::std::overflow_error;
 using ::std::underflow_error;
 
-#define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<bool(__VA_ARGS__)>::type* = nullptr
+#define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
 template<typename... unusedT> struct make_void
@@ -130,7 +130,10 @@ template<typename... unusedT> struct make_void
   };
 
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type* = nullptr
-#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof(__VA_ARGS__) || true>::type* = nullptr
+#define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof((__VA_ARGS__)) || true>::type* = nullptr
+
+#define ROCKET_RETURN_ENABLE_IF(R_, ...)     typename ::std::enable_if<+bool(__VA_ARGS__), R_>::type
+#define ROCKET_RETURN_DISABLE_IF(R_, ...)    typename ::std::enable_if<!bool(__VA_ARGS__), R_>::type
 
 // The argument must be a non-const lvalue.
 template<typename argT, ROCKET_ENABLE_IF(is_same<typename remove_cv<argT>::type, argT>::value)> constexpr typename remove_reference<argT>::type&& move(argT& arg) noexcept

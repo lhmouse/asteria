@@ -36,7 +36,7 @@ class Value
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   private:
-    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_integral<XvalueT>::value)> static inline Compare do_compare_3way(XvalueT lhs, XvalueT rhs) noexcept;
+    template<typename XvalueT> static inline ROCKET_RETURN_ENABLE_IF(Compare, std::is_integral<XvalueT>::value) do_compare_3way(XvalueT lhs, XvalueT rhs) noexcept;
     static inline Compare do_compare_3way(D_real lhs, D_real rhs) noexcept;
 
     static inline std::ostream& do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next);
