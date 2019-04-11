@@ -55,6 +55,8 @@ int main()
         assert std.numeric.is_infinity(-infinity) == true;
         assert std.numeric.is_infinity(+nan) == false;
         assert std.numeric.is_infinity(-nan) == false;
+        assert std.numeric.is_infinity(+1.0 / 0);
+        assert std.numeric.is_infinity(-1.0 / 0);
 
         assert std.numeric.is_nan(+5) == false;
         assert std.numeric.is_nan(-5) == false;
@@ -66,6 +68,8 @@ int main()
         assert std.numeric.is_nan(-infinity) == false;
         assert std.numeric.is_nan(+nan) == true;
         assert std.numeric.is_nan(-nan) == true;
+        assert std.numeric.is_nan(+0.0 / 0);
+        assert std.numeric.is_nan(+0.0 / 0);
 
         assert std.numeric.clamp(1, 2, 3) == 2;
         assert std.numeric.clamp(2, 2, 3) == 2;
