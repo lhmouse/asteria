@@ -46,11 +46,11 @@ class Reference
   public:
     bool is_constant() const noexcept
       {
-        return rocket::is_any_of(this->m_root.index(), { Reference_Root::index_null, Reference_Root::index_constant });
+        return this->m_root.is_constant();
       }
     bool is_temporary() const noexcept
       {
-        return this->m_root.index() == Reference_Root::index_temporary;
+        return this->m_root.is_temporary();
       }
 
     template<typename XmodT> Reference& zoom_in(XmodT&& xmod)

@@ -66,17 +66,13 @@ class Reference_Root
       }
 
   public:
-    Index index() const noexcept
+    bool is_constant() const noexcept
       {
-        return static_cast<Index>(this->m_stor.index());
+        return (this->m_stor.index() == index_null) || (this->m_stor.index() == index_constant);
       }
-    template<typename AltT> const AltT* opt() const noexcept
+    bool is_temporary() const noexcept
       {
-        return this->m_stor.get<AltT>();
-      }
-    template<typename AltT> const AltT& check() const
-      {
-        return this->m_stor.as<AltT>();
+        return (this->m_stor.index() == index_null) || (this->m_stor.index() == index_temporary);
       }
 
     void swap(Reference_Root& other) noexcept
