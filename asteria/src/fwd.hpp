@@ -107,7 +107,7 @@ using G_array     = Cow_Vector<Value>;
 using G_object    = Cow_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
 
 // Indices of Fundamental Types
-enum Dtype : std::uint8_t
+enum Gtype : std::uint8_t
   {
     gtype_null      = 0,
     gtype_boolean   = 1,

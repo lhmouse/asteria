@@ -24,5 +24,5 @@ int main()
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     auto res = code.execute(global, { });
-    ASTERIA_TEST_CHECK(res.read().check<G_integer>() == 90);
+    ASTERIA_TEST_CHECK(res.read().as_integer() == 90);
   }

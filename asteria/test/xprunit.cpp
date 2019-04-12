@@ -68,23 +68,23 @@ int main()
     rocket::for_each(expr_code, [&](const Air_Node& node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
     ASTERIA_TEST_CHECK(stack.get_reference_count() == 1);
     auto value = dval->get_value();
-    ASTERIA_TEST_CHECK(value.check<G_real>() == 2.5);
+    ASTERIA_TEST_CHECK(value.as_real() == 2.5);
     value = ival->get_value();
-    ASTERIA_TEST_CHECK(value.check<G_integer>() == 3);
+    ASTERIA_TEST_CHECK(value.as_integer() == 3);
     value = aval->get_value();
-    ASTERIA_TEST_CHECK(value.check<G_array>().at(1).check<G_real>() == 1.75);
+    ASTERIA_TEST_CHECK(value.as_array().at(1).as_real() == 1.75);
     value = stack.get_top_reference().read();
-    ASTERIA_TEST_CHECK(value.check<G_real>() == 1.75);
+    ASTERIA_TEST_CHECK(value.as_real() == 1.75);
 
     cond->open_value() = G_integer(42);
     rocket::for_each(expr_code, [&](const Air_Node& node) { node.execute(stack, ctx, rocket::sref("dummy_function"), global);  });
     ASTERIA_TEST_CHECK(stack.get_reference_count() == 2);
     value = dval->get_value();
-    ASTERIA_TEST_CHECK(value.check<G_real>() == 2.5);
+    ASTERIA_TEST_CHECK(value.as_real() == 2.5);
     value = ival->get_value();
-    ASTERIA_TEST_CHECK(value.check<G_integer>() == 3);
+    ASTERIA_TEST_CHECK(value.as_integer() == 3);
     value = aval->get_value();
-    ASTERIA_TEST_CHECK(value.check<G_array>().at(1).check<G_string>() == "hello,hello,hello,");
+    ASTERIA_TEST_CHECK(value.as_array().at(1).as_string() == "hello,hello,hello,");
     value = stack.get_top_reference().read();
-    ASTERIA_TEST_CHECK(value.check<G_string>() == "hello,hello,hello,");
+    ASTERIA_TEST_CHECK(value.as_string() == "hello,hello,hello,");
  }

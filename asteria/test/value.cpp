@@ -10,38 +10,38 @@ using namespace Asteria;
 int main()
   {
     Value value(true);
-    ASTERIA_TEST_CHECK(value.dtype() == gtype_boolean);
-    ASTERIA_TEST_CHECK(value.check<G_boolean>() == true);
-    ASTERIA_TEST_CHECK_CATCH(value.check<G_string>());
-    ASTERIA_TEST_CHECK(value.opt<G_real>() == nullptr);
+    ASTERIA_TEST_CHECK(value.is_boolean());
+    ASTERIA_TEST_CHECK(value.as_boolean() == true);
+    ASTERIA_TEST_CHECK_CATCH(value.as_string());
+    ASTERIA_TEST_CHECK(!value.is_real());
 
     value = G_integer(42);
-    ASTERIA_TEST_CHECK(value.dtype() == gtype_integer);
-    ASTERIA_TEST_CHECK(value.check<G_integer>() == 42);
+    ASTERIA_TEST_CHECK(value.is_integer());
+    ASTERIA_TEST_CHECK(value.as_integer() == 42);
 
     value = G_real(1.5);
-    ASTERIA_TEST_CHECK(value.dtype() == gtype_real);
-    ASTERIA_TEST_CHECK(value.check<G_real>() == 1.5);
+    ASTERIA_TEST_CHECK(value.is_real());
+    ASTERIA_TEST_CHECK(value.as_real() == 1.5);
 
     value = G_string(rocket::sref("hello"));
-    ASTERIA_TEST_CHECK(value.dtype() == gtype_string);
-    ASTERIA_TEST_CHECK(value.check<G_string>() == "hello");
+    ASTERIA_TEST_CHECK(value.is_string());
+    ASTERIA_TEST_CHECK(value.as_string() == "hello");
 
     G_array array;
     array.emplace_back(G_boolean(true));
     array.emplace_back(G_string("world"));
     value = std::move(array);
-    ASTERIA_TEST_CHECK(value.dtype() == gtype_array);
-    ASTERIA_TEST_CHECK(value.check<G_array>().at(0).check<G_boolean>() == true);
-    ASTERIA_TEST_CHECK(value.check<G_array>().at(1).check<G_string>() == "world");
+    ASTERIA_TEST_CHECK(value.is_array());
+    ASTERIA_TEST_CHECK(value.as_array().at(0).as_boolean() == true);
+    ASTERIA_TEST_CHECK(value.as_array().at(1).as_string() == "world");
 
     G_object object;
     object.try_emplace(PreHashed_String(rocket::sref("one")), G_boolean(true));
     object.try_emplace(PreHashed_String(rocket::sref("two")), G_string("world"));
     value = std::move(object);
-    ASTERIA_TEST_CHECK(value.dtype() == gtype_object);
-    ASTERIA_TEST_CHECK(value.check<G_object>().at(PreHashed_String(rocket::sref("one"))).check<G_boolean>() == true);
-    ASTERIA_TEST_CHECK(value.check<G_object>().at(PreHashed_String(rocket::sref("two"))).check<G_string>() == "world");
+    ASTERIA_TEST_CHECK(value.is_object());
+    ASTERIA_TEST_CHECK(value.as_object().at(PreHashed_String(rocket::sref("one"))).as_boolean() == true);
+    ASTERIA_TEST_CHECK(value.as_object().at(PreHashed_String(rocket::sref("two"))).as_string() == "world");
 
     value = nullptr;
     Value cmp(nullptr);
@@ -111,16 +111,16 @@ int main()
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_equal);
 
-    value.check<G_array>().mut(1) = G_string(rocket::sref("hello"));
+    value.as_array().mut(1) = G_string(rocket::sref("hello"));
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_less);
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_greater);
 
-    value.check<G_array>().mut(1) = G_boolean(true);
+    value.as_array().mut(1) = G_boolean(true);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);
-    value.check<G_array>().erase(std::prev(value.check<G_array>().end()));
+    value.as_array().erase(std::prev(value.as_array().end()));
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_less);
 
     object.clear();

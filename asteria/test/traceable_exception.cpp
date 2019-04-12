@@ -14,7 +14,7 @@ int main()
       except.append_frame(Source_Location(rocket::sref("file3"), 3), rocket::sref("func3"));
       throw except;
     } catch(Traceable_Exception& e) {
-      ASTERIA_TEST_CHECK(e.get_value().check<G_integer>() == 42);
+      ASTERIA_TEST_CHECK(e.get_value().as_integer() == 42);
       ASTERIA_TEST_CHECK(e.get_frame_count() == 3);
       ASTERIA_TEST_CHECK(e.get_frame(0).source_file() ==        "file1");
       ASTERIA_TEST_CHECK(e.get_frame(0).source_line() ==             1 );

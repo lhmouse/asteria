@@ -1023,11 +1023,11 @@ const Token* Token_Stream::peek_opt() const
       }
     case state_success:
       {
-        auto& alt = this->m_stor.as<Cow_Vector<Token>>();
-        if(alt.empty()) {
+        auto& altr = this->m_stor.as<Cow_Vector<Token>>();
+        if(altr.empty()) {
           return nullptr;
         }
-        return &(alt.back());
+        return &(altr.back());
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
@@ -1047,11 +1047,11 @@ void Token_Stream::shift()
       }
     case state_success:
       {
-        auto& alt = this->m_stor.as<Cow_Vector<Token>>();
-        if(alt.empty()) {
+        auto& altr = this->m_stor.as<Cow_Vector<Token>>();
+        if(altr.empty()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
         }
-        alt.pop_back();
+        altr.pop_back();
         return;
       }
     default:

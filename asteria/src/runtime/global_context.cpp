@@ -75,12 +75,12 @@ void Global_Context::initialize(API_Version version)
         pair.first->second = G_object();
       }
       ASTERIA_DEBUG_LOG("Begin initialization of standard library module: name = ", cur->name);
-      (*(cur->init))(pair.first->second.check<G_object>(), std_end[-1].version);
+      (*(cur->init))(pair.first->second.as_object(), std_end[-1].version);
       ASTERIA_DEBUG_LOG("Finished initialization of standard library module: name = ", cur->name);
     }
     // Set up version information.
     auto pair = std_obj.insert_or_assign(rocket::sref("version"), G_object());
-    create_bindings_version(pair.first->second.check<G_object>(), std_end[-1].version);
+    create_bindings_version(pair.first->second.as_object(), std_end[-1].version);
     ///////////////////////////////////////////////////////////////////////////
     // Set the `std` variable.
     ///////////////////////////////////////////////////////////////////////////
@@ -144,21 +144,21 @@ const Value& Global_Context::get_std_member(const PreHashed_String& name) const
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    return std_var->get_value().check<G_object>().get_or(name, Value::get_null());
+    return std_var->get_value().as_object().get_or(name, Value::get_null());
   }
 
 Value& Global_Context::open_std_member(const PreHashed_String& name)
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    return std_var->open_value().check<G_object>()[name];
+    return std_var->open_value().as_object()[name];
   }
 
 bool Global_Context::remove_std_member(const PreHashed_String& name)
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    return std_var->open_value().check<G_object>().erase(name);
+    return std_var->open_value().as_object().erase(name);
   }
 
 }  // namespace Asteria

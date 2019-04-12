@@ -355,19 +355,7 @@ Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_arra
         // Call it.
         Reference self;
         comparator->get().invoke(self, global, rocket::move(args));
-        auto qint = self.read().opt<G_integer>();
-        if(qint) {
-          // Translate the result.
-          if(*qint < 0) {
-            return Value::compare_less;
-          }
-          if(*qint > 0) {
-            return Value::compare_greater;
-          }
-          return Value::compare_equal;
-        }
-        // If the result isn't an `integer`, consider `lhs` and `rhs` unordered.
-        return Value::compare_unordered;
+        return self.read().compare(G_integer(0));
       }
 
     }
@@ -1147,13 +1135,13 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
                      "    adjacent elements in `data` such that the first one is greater\n"
                      "    than or unordered with the second one. Elements are compared\n"
                      "    using `comparator`, which shall be a binary `function` that\n"
-                     "    returns a negative `integer` if the first argument is less than\n"
-                     "    the second one, a positive `integer` if the first argument is\n"
-                     "    greater than the second one, or `0` if the arguments are equal;\n"
-                     "    other values indicate that the arguments are unordered. If no\n"
-                     "    `comparator` is provided, the built-in 3-way comparison\n"
-                     "    operator is used. An `array` that contains no elements is\n"
-                     "    considered to have been sorted.\n"
+                     "    returns a negative `integer` or `real` if the first argument is\n"
+                     "    less than the second one, a positive `integer` or `real` if the\n"
+                     "    first argument is greater than the second one, or `0` if the\n"
+                     "    arguments are equal; other values indicate that the arguments\n"
+                     "    are unordered. If no `comparator` is provided, the built-in\n"
+                     "    3-way comparison operator is used. An `array` that contains no\n"
+                     "    elements is considered to have been sorted.\n"
                      "  * Returns `true` if `data` is sorted or empty; otherwise `false`.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference

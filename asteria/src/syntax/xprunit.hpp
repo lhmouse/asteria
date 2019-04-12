@@ -138,14 +138,14 @@ class Xprunit
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Xprunit(AltT&& alt)
-      : m_stor(rocket::forward<AltT>(alt))
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Xprunit(AltT&& altr)
+      : m_stor(rocket::forward<AltT>(altr))
       {
       }
     // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Xprunit& operator=(AltT&& alt)
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Xprunit& operator=(AltT&& altr)
       {
-        this->m_stor = rocket::forward<AltT>(alt);
+        this->m_stor = rocket::forward<AltT>(altr);
         return *this;
       }
 

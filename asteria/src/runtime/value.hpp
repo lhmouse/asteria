@@ -35,15 +35,9 @@ class Value
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
-  private:
-    template<typename XvalueT> static inline ROCKET_RETURN_ENABLE_IF(Compare, std::is_integral<XvalueT>::value) do_compare_3way(XvalueT lhs, XvalueT rhs) noexcept;
-    static inline Compare do_compare_3way(G_real lhs, G_real rhs) noexcept;
-
-    static inline std::ostream& do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next);
-
   public:
     // The objects returned by these functions are allocated statically and exist throughout the program.
-    ROCKET_PURE_FUNCTION static const char* get_type_name(Dtype etype) noexcept;
+    ROCKET_PURE_FUNCTION static const char* get_gtype_name(Gtype gtype) noexcept;
     ROCKET_PURE_FUNCTION static const Value& get_null() noexcept;
 
   private:
@@ -54,37 +48,129 @@ class Value
       : m_stor()  // Initialize to `null`.
       {
       }
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<typename std::decay<AltT>::type>::value)> Value(AltT&& alt) noexcept
-      : m_stor(rocket::forward<AltT>(alt))
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<typename std::decay<AltT>::type>::value)> Value(AltT&& altr) noexcept
+      : m_stor(rocket::forward<AltT>(altr))
       {
       }
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<typename std::decay<AltT>::type>::value)> Value& operator=(AltT&& alt) noexcept
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<typename std::decay<AltT>::type>::value)> Value& operator=(AltT&& altr) noexcept
       {
-        this->m_stor = rocket::forward<AltT>(alt);
+        this->m_stor = rocket::forward<AltT>(altr);
         return *this;
       }
 
   public:
-    Dtype dtype() const noexcept
+    Gtype gtype() const noexcept
       {
-        return static_cast<Dtype>(this->m_stor.index());
-      }
-    template<typename AltT> const AltT* opt() const noexcept
-      {
-        return this->m_stor.get<AltT>();
-      }
-    template<typename AltT> const AltT& check() const
-      {
-        return this->m_stor.as<AltT>();
+        return static_cast<Gtype>(this->m_stor.index());
       }
 
-    template<typename AltT> AltT* opt() noexcept
+    bool is_null() const noexcept
       {
-        return this->m_stor.get<AltT>();
+        return this->m_stor.index() == gtype_null;
       }
-    template<typename AltT> AltT& check()
+
+    bool is_boolean() const noexcept
       {
-        return this->m_stor.as<AltT>();
+        return this->m_stor.index() == gtype_boolean;
+      }
+    const G_boolean& as_boolean() const
+      {
+        return this->m_stor.as<gtype_boolean>();
+      }
+    G_boolean& as_boolean()
+      {
+        return this->m_stor.as<gtype_boolean>();
+      }
+
+    bool is_integer() const noexcept
+      {
+        return this->m_stor.index() == gtype_integer;
+      }
+    const G_integer& as_integer() const
+      {
+        return this->m_stor.as<gtype_integer>();
+      }
+    G_integer& as_integer()
+      {
+        return this->m_stor.as<gtype_integer>();
+      }
+
+    bool is_real() const noexcept
+      {
+        return this->m_stor.index() == gtype_real;
+      }
+    const G_real& as_real() const
+      {
+        return this->m_stor.as<gtype_real>();
+      }
+    G_real& as_real()
+      {
+        return this->m_stor.as<gtype_real>();
+      }
+
+    bool is_string() const noexcept
+      {
+        return this->m_stor.index() == gtype_string;
+      }
+    const G_string& as_string() const
+      {
+        return this->m_stor.as<gtype_string>();
+      }
+    G_string& as_string()
+      {
+        return this->m_stor.as<gtype_string>();
+      }
+
+    bool is_function() const noexcept
+      {
+        return this->m_stor.index() == gtype_function;
+      }
+    const G_function& as_function() const
+      {
+        return this->m_stor.as<gtype_function>();
+      }
+    G_function& as_function()
+      {
+        return this->m_stor.as<gtype_function>();
+      }
+
+    bool is_opaque() const noexcept
+      {
+        return this->m_stor.index() == gtype_opaque;
+      }
+    const G_opaque& as_opaque() const
+      {
+        return this->m_stor.as<gtype_opaque>();
+      }
+    G_opaque& as_opaque()
+      {
+        return this->m_stor.as<gtype_opaque>();
+      }
+
+    bool is_array() const noexcept
+      {
+        return this->m_stor.index() == gtype_array;
+      }
+    const G_array& as_array() const
+      {
+        return this->m_stor.as<gtype_array>();
+      }
+    G_array& as_array()
+      {
+        return this->m_stor.as<gtype_array>();
+      }
+
+    bool is_object() const noexcept
+      {
+        return this->m_stor.index() == gtype_object;
+      }
+    const G_object& as_object() const
+      {
+        return this->m_stor.as<gtype_object>();
+      }
+    G_object& as_object()
+      {
+        return this->m_stor.as<gtype_object>();
       }
 
     void swap(Value& other) noexcept
@@ -94,9 +180,18 @@ class Value
 
     bool is_convertible_to_real() const noexcept
       {
-        return rocket::is_any_of(this->dtype(), { gtype_integer, gtype_real });
+        if(this->m_stor.index() == gtype_integer) {
+          return true;
+        }
+        return this->m_stor.index() == gtype_real;
       }
-    G_real convert_to_real() const;
+    G_real convert_to_real() const
+      {
+        if(this->m_stor.index() == gtype_integer) {
+          return G_real(this->m_stor.as<gtype_integer>());
+        }
+        return this->m_stor.as<gtype_real>();
+      }
 
     bool test() const noexcept;
     Compare compare(const Value& other) const noexcept;

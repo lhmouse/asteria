@@ -50,7 +50,7 @@ class Argument_Reader
   private:
     template<typename HandlerT> inline void do_fail(HandlerT&& handler);
 
-    inline void do_record_parameter(Dtype dtype, bool required);
+    inline void do_record_parameter(Gtype gtype, bool required);
     inline void do_record_parameter_generic();
     inline void do_record_parameter_finish(bool variadic);
 

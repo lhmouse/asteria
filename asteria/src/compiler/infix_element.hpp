@@ -86,8 +86,8 @@ class Infix_Element
 
   public:
     // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Infix_Element(AltT&& alt) noexcept
-      : m_stor(rocket::forward<AltT>(alt))
+    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Infix_Element(AltT&& altr) noexcept
+      : m_stor(rocket::forward<AltT>(altr))
       {
       }
 

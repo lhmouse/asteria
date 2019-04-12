@@ -12,45 +12,45 @@ Infix_Element::Precedence Infix_Element::tell_precedence() const noexcept
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_head:
       {
-        // const auto& alt = this->m_stor.as<index_head>();
+        // const auto& altr = this->m_stor.as<index_head>();
         return precedence_lowest;
       }
     case index_ternary:
       {
-        // const auto& alt = this->m_stor.as<index_ternary>();
+        // const auto& altr = this->m_stor.as<index_ternary>();
         return precedence_assignment;
       }
     case index_logical_and:
       {
-        const auto& alt = this->m_stor.as<index_logical_and>();
-        if(alt.assign) {
+        const auto& altr = this->m_stor.as<index_logical_and>();
+        if(altr.assign) {
           return precedence_assignment;
         }
         return precedence_logical_and;
       }
     case index_logical_or:
       {
-        const auto& alt = this->m_stor.as<index_logical_or>();
-        if(alt.assign) {
+        const auto& altr = this->m_stor.as<index_logical_or>();
+        if(altr.assign) {
           return precedence_assignment;
         }
         return precedence_logical_or;
       }
     case index_coalescence:
       {
-        const auto& alt = this->m_stor.as<index_coalescence>();
-        if(alt.assign) {
+        const auto& altr = this->m_stor.as<index_coalescence>();
+        if(altr.assign) {
           return precedence_assignment;
         }
         return precedence_coalescence;
       }
     case index_general:
       {
-        const auto& alt = this->m_stor.as<index_general>();
-        if(alt.assign) {
+        const auto& altr = this->m_stor.as<index_general>();
+        if(altr.assign) {
           return precedence_assignment;
         }
-        switch(rocket::weaken_enum(alt.xop)) {
+        switch(rocket::weaken_enum(altr.xop)) {
         case Xprunit::xop_infix_mul:
         case Xprunit::xop_infix_div:
         case Xprunit::xop_infix_mod:
@@ -99,7 +99,7 @@ Infix_Element::Precedence Infix_Element::tell_precedence() const noexcept
             return precedence_assignment;
           }
         default:
-          ASTERIA_TERMINATE("An invalid infix operator `", alt.xop, "` has been encountered.");
+          ASTERIA_TERMINATE("An invalid infix operator `", altr.xop, "` has been encountered.");
         }
       }
     default:
@@ -112,51 +112,51 @@ void Infix_Element::extract(Cow_Vector<Xprunit>& units)
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_head:
       {
-        auto& alt = this->m_stor.as<index_head>();
+        auto& altr = this->m_stor.as<index_head>();
         // Move-append all units into `units`.
-        std::move(alt.units.mut_begin(), alt.units.mut_end(), std::back_inserter(units));
+        std::move(altr.units.mut_begin(), altr.units.mut_end(), std::back_inserter(units));
         return;
       }
     case index_ternary:
       {
-        auto& alt = this->m_stor.as<index_ternary>();
+        auto& altr = this->m_stor.as<index_ternary>();
         // Construct a branch unit from both branches, then append it to `units`.
-        Xprunit::S_branch xunit = { rocket::move(alt.branch_true), rocket::move(alt.branch_false), alt.assign };
+        Xprunit::S_branch xunit = { rocket::move(altr.branch_true), rocket::move(altr.branch_false), altr.assign };
         units.emplace_back(rocket::move(xunit));
         return;
       }
     case index_logical_and:
       {
-        auto& alt = this->m_stor.as<index_logical_and>();
+        auto& altr = this->m_stor.as<index_logical_and>();
         // Construct a branch unit from the TRUE branch and an empty FALSE branch, then append it to `units`.
-        Xprunit::S_branch xunit = { rocket::move(alt.branch_true), rocket::clear, alt.assign };
+        Xprunit::S_branch xunit = { rocket::move(altr.branch_true), rocket::clear, altr.assign };
         units.emplace_back(rocket::move(xunit));
         return;
       }
     case index_logical_or:
       {
-        auto& alt = this->m_stor.as<index_logical_or>();
+        auto& altr = this->m_stor.as<index_logical_or>();
         // Construct a branch unit from an empty TRUE branch and the FALSE branch, then append it to `units`.
-        Xprunit::S_branch xunit = { rocket::clear, rocket::move(alt.branch_false), alt.assign };
+        Xprunit::S_branch xunit = { rocket::clear, rocket::move(altr.branch_false), altr.assign };
         units.emplace_back(rocket::move(xunit));
         return;
       }
     case index_coalescence:
       {
-        auto& alt = this->m_stor.as<index_coalescence>();
+        auto& altr = this->m_stor.as<index_coalescence>();
         // Construct a branch unit from the NULL branch, then append it to `units`.
-        Xprunit::S_coalescence xunit = { rocket::move(alt.branch_null), alt.assign };
+        Xprunit::S_coalescence xunit = { rocket::move(altr.branch_null), altr.assign };
         units.emplace_back(rocket::move(xunit));
         return;
       }
     case index_general:
       {
-        auto& alt = this->m_stor.as<index_general>();
+        auto& altr = this->m_stor.as<index_general>();
         // N.B. `units` is the LHS operand.
         // Append the RHS operand to the LHS operand, followed by the operator, forming the Reverse Polish Notation (RPN).
-        std::move(alt.rhs.mut_begin(), alt.rhs.mut_end(), std::back_inserter(units));
+        std::move(altr.rhs.mut_begin(), altr.rhs.mut_end(), std::back_inserter(units));
         // Append the operator itself.
-        Xprunit::S_operator_rpn xunit = { alt.xop, alt.assign };
+        Xprunit::S_operator_rpn xunit = { altr.xop, altr.assign };
         units.emplace_back(rocket::move(xunit));
         return;
       }
@@ -170,33 +170,33 @@ Cow_Vector<Xprunit>& Infix_Element::open_junction() noexcept
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_head:
       {
-        auto& alt = this->m_stor.as<index_head>();
-        return alt.units;
+        auto& altr = this->m_stor.as<index_head>();
+        return altr.units;
       }
     case index_ternary:
       {
-        auto& alt = this->m_stor.as<index_ternary>();
-        return alt.branch_false;
+        auto& altr = this->m_stor.as<index_ternary>();
+        return altr.branch_false;
       }
     case index_logical_and:
       {
-        auto& alt = this->m_stor.as<index_logical_and>();
-        return alt.branch_true;
+        auto& altr = this->m_stor.as<index_logical_and>();
+        return altr.branch_true;
       }
     case index_logical_or:
       {
-        auto& alt = this->m_stor.as<index_logical_or>();
-        return alt.branch_false;
+        auto& altr = this->m_stor.as<index_logical_or>();
+        return altr.branch_false;
       }
     case index_coalescence:
       {
-        auto& alt = this->m_stor.as<index_coalescence>();
-        return alt.branch_null;
+        auto& altr = this->m_stor.as<index_coalescence>();
+        return altr.branch_null;
       }
     case index_general:
       {
-        auto& alt = this->m_stor.as<index_general>();
-        return alt.rhs;
+        auto& altr = this->m_stor.as<index_general>();
+        return altr.rhs;
       }
     default:
       ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->m_stor.index(), "` has been encountered.");

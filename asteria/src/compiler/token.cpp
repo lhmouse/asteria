@@ -376,44 +376,44 @@ void Token::print(std::ostream& os) const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_keyword:
       {
-        const auto& alt = this->m_stor.as<index_keyword>();
+        const auto& altr = this->m_stor.as<index_keyword>();
         // keyword `if`
-        os << "keyword `" << Token::get_keyword(alt.keyword) << "`";
+        os << "keyword `" << Token::get_keyword(altr.keyword) << "`";
         return;
       }
     case index_punctuator:
       {
-        const auto& alt = this->m_stor.as<index_punctuator>();
+        const auto& altr = this->m_stor.as<index_punctuator>();
         // punctuator `;`
-        os << "punctuator `" << Token::get_punctuator(alt.punct) << "`";
+        os << "punctuator `" << Token::get_punctuator(altr.punct) << "`";
         return;
       }
     case index_identifier:
       {
-        const auto& alt = this->m_stor.as<index_identifier>();
+        const auto& altr = this->m_stor.as<index_identifier>();
         // identifier `meow`
-        os << "identifier `" << alt.name << "`";
+        os << "identifier `" << altr.name << "`";
         return;
       }
     case index_integer_literal:
       {
-        const auto& alt = this->m_stor.as<index_integer_literal>();
+        const auto& altr = this->m_stor.as<index_integer_literal>();
         // integer-literal `42`
-        os << "integer-literal `" << std::dec << alt.value << "`";
+        os << "integer-literal `" << std::dec << altr.value << "`";
         return;
       }
     case index_real_literal:
       {
-        const auto& alt = this->m_stor.as<index_real_literal>();
+        const auto& altr = this->m_stor.as<index_real_literal>();
         // real-number-literal `123.456`
-        os << "real-number-literal `" << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt.value << "`";
+        os << "real-number-literal `" << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << altr.value << "`";
         return;
       }
     case index_string_literal:
       {
-        const auto& alt = this->m_stor.as<index_string_literal>();
+        const auto& altr = this->m_stor.as<index_string_literal>();
         // string-literal "hello world"
-        os << "string-literal `" << quote(alt.value) << "`";
+        os << "string-literal `" << quote(altr.value) << "`";
         return;
       }
     default:

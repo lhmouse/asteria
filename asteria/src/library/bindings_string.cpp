@@ -658,7 +658,7 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
     auto rpos = segments.begin();
     if(rpos != segments.end()) {
       for(;;) {
-        text += rpos->check<G_string>();
+        text += rpos->as_string();
         if(++rpos == segments.end()) {
           break;
         }
@@ -798,7 +798,7 @@ Opt<G_string> std_string_utf8_encode(const G_array& code_points, const Opt<G_boo
     G_string text;
     text.reserve(code_points.size() * 3);
     for(const auto& elem : code_points) {
-      if(!do_utf8_encode_one(text, elem.check<G_integer>(), permissive)) {
+      if(!do_utf8_encode_one(text, elem.as_integer(), permissive)) {
         return rocket::nullopt;
       }
     }
@@ -954,7 +954,7 @@ G_string std_string_pack8(const G_array& values)
     G_string text;
     text.reserve(values.size());
     for(const auto& elem : values) {
-      do_pack_one<std::int8_t, false>(text, elem.check<G_integer>());
+      do_pack_one<std::int8_t, false>(text, elem.as_integer());
     }
     return text;
   }
@@ -977,7 +977,7 @@ G_string std_string_pack16be(const G_array& values)
     G_string text;
     text.reserve(values.size() * 2);
     for(const auto& elem : values) {
-      do_pack_one<std::int16_t, true>(text, elem.check<G_integer>());
+      do_pack_one<std::int16_t, true>(text, elem.as_integer());
     }
     return text;
   }
@@ -1000,7 +1000,7 @@ G_string std_string_pack16le(const G_array& values)
     G_string text;
     text.reserve(values.size() * 2);
     for(const auto& elem : values) {
-      do_pack_one<std::int16_t, false>(text, elem.check<G_integer>());
+      do_pack_one<std::int16_t, false>(text, elem.as_integer());
     }
     return text;
   }
@@ -1023,7 +1023,7 @@ G_string std_string_pack32be(const G_array& values)
     G_string text;
     text.reserve(values.size() * 4);
     for(const auto& elem : values) {
-      do_pack_one<std::int32_t, true>(text, elem.check<G_integer>());
+      do_pack_one<std::int32_t, true>(text, elem.as_integer());
     }
     return text;
   }
@@ -1046,7 +1046,7 @@ G_string std_string_pack32le(const G_array& values)
     G_string text;
     text.reserve(values.size() * 4);
     for(const auto& elem : values) {
-      do_pack_one<std::int32_t, false>(text, elem.check<G_integer>());
+      do_pack_one<std::int32_t, false>(text, elem.as_integer());
     }
     return text;
   }
@@ -1069,7 +1069,7 @@ G_string std_string_pack64be(const G_array& values)
     G_string text;
     text.reserve(values.size() * 8);
     for(const auto& elem : values) {
-      do_pack_one<std::int64_t, true>(text, elem.check<G_integer>());
+      do_pack_one<std::int64_t, true>(text, elem.as_integer());
     }
     return text;
   }
@@ -1092,7 +1092,7 @@ G_string std_string_pack64le(const G_array& values)
     G_string text;
     text.reserve(values.size() * 8);
     for(const auto& elem : values) {
-      do_pack_one<std::int64_t, false>(text, elem.check<G_integer>());
+      do_pack_one<std::int64_t, false>(text, elem.as_integer());
     }
     return text;
   }
