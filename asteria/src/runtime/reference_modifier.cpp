@@ -13,7 +13,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
-        const auto& alt = this->m_stor.as<S_array_index>();
+        const auto& alt = this->m_stor.as<index_array_index>();
         switch(rocket::weaken_enum(parent.dtype())) {
         case gtype_null:
           {
@@ -36,7 +36,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
       }
     case index_object_key:
       {
-        const auto& alt = this->m_stor.as<S_object_key>();
+        const auto& alt = this->m_stor.as<index_object_key>();
         switch(rocket::weaken_enum(parent.dtype())) {
         case gtype_null:
           {
@@ -66,7 +66,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
-        const auto& alt = this->m_stor.as<S_array_index>();
+        const auto& alt = this->m_stor.as<index_array_index>();
         switch(rocket::weaken_enum(parent.dtype())) {
         case gtype_null:
           {
@@ -100,7 +100,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
       }
     case index_object_key:
       {
-        const auto& alt = this->m_stor.as<S_object_key>();
+        const auto& alt = this->m_stor.as<index_object_key>();
         switch(rocket::weaken_enum(parent.dtype())) {
         case gtype_null:
           {
@@ -134,7 +134,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_array_index:
       {
-        const auto& alt = this->m_stor.as<S_array_index>();
+        const auto& alt = this->m_stor.as<index_array_index>();
         switch(rocket::weaken_enum(parent.dtype())) {
         case gtype_null:
           {
@@ -159,7 +159,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
       }
     case index_object_key:
       {
-        const auto& alt = this->m_stor.as<S_object_key>();
+        const auto& alt = this->m_stor.as<index_object_key>();
         switch(rocket::weaken_enum(parent.dtype())) {
         case gtype_null:
           {

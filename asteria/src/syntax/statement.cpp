@@ -531,7 +531,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_expression:
       {
-        const auto& alt = this->m_stor.as<S_expression>();
+        const auto& alt = this->m_stor.as<index_expression>();
         if(alt.expr.empty()) {
           // Generate nothing for empty expressions.
           return;
@@ -545,7 +545,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_block:
       {
-        const auto& alt = this->m_stor.as<S_block>();
+        const auto& alt = this->m_stor.as<index_block>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(do_generate_code_block(ctx, alt.body));  // 0
@@ -554,7 +554,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_variable:
       {
-        const auto& alt = this->m_stor.as<S_variable>();
+        const auto& alt = this->m_stor.as<index_variable>();
         // There may be multiple variables.
         for(const auto& pair : alt.vars) {
           // Create a dummy reference for further name lookups.
@@ -584,7 +584,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_function:
       {
-        const auto& alt = this->m_stor.as<S_function>();
+        const auto& alt = this->m_stor.as<index_function>();
         // Create a dummy reference for further name lookups.
         do_set_user_declared_reference(names_opt, ctx, "function placeholder", alt.name, Reference_Root::S_null());
         // Encode arguments.
@@ -598,7 +598,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_if:
       {
-        const auto& alt = this->m_stor.as<S_if>();
+        const auto& alt = this->m_stor.as<index_if>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
@@ -614,7 +614,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_switch:
       {
-        const auto& alt = this->m_stor.as<S_switch>();
+        const auto& alt = this->m_stor.as<index_switch>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
@@ -638,7 +638,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_do_while:
       {
-        const auto& alt = this->m_stor.as<S_do_while>();
+        const auto& alt = this->m_stor.as<index_do_while>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(do_generate_code_block(ctx, alt.body));  // 0
@@ -649,7 +649,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_while:
       {
-        const auto& alt = this->m_stor.as<S_while>();
+        const auto& alt = this->m_stor.as<index_while>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(static_cast<std::int64_t>(alt.negative));  // 0
@@ -660,7 +660,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_for_each:
       {
-        const auto& alt = this->m_stor.as<S_for_each>();
+        const auto& alt = this->m_stor.as<index_for_each>();
         // Create a fresh context for the `for` loop.
         Analytic_Context ctx_for(&ctx);
         do_set_user_declared_reference(nullptr, ctx_for, "key placeholder", alt.key_name, Reference_Root::S_null());
@@ -676,7 +676,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_for:
       {
-        const auto& alt = this->m_stor.as<S_for>();
+        const auto& alt = this->m_stor.as<index_for>();
         // Create a fresh context for the `for` loop.
         Analytic_Context ctx_for(&ctx);
         // Encode arguments.
@@ -690,7 +690,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_try:
       {
-        const auto& alt = this->m_stor.as<S_try>();
+        const auto& alt = this->m_stor.as<index_try>();
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(&ctx);
         do_set_user_declared_reference(nullptr, ctx_catch, "exception placeholder", alt.except_name, Reference_Root::S_null());
@@ -705,7 +705,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_break:
       {
-        const auto& alt = this->m_stor.as<S_break>();
+        const auto& alt = this->m_stor.as<index_break>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         switch(alt.target) {
@@ -737,7 +737,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_continue:
       {
-        const auto& alt = this->m_stor.as<S_continue>();
+        const auto& alt = this->m_stor.as<index_continue>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         switch(alt.target) {
@@ -768,7 +768,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_throw:
       {
-        const auto& alt = this->m_stor.as<S_throw>();
+        const auto& alt = this->m_stor.as<index_throw>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
@@ -782,7 +782,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_return:
       {
-        const auto& alt = this->m_stor.as<S_return>();
+        const auto& alt = this->m_stor.as<index_return>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
@@ -801,7 +801,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
       }
     case index_assert:
       {
-        const auto& alt = this->m_stor.as<S_assert>();
+        const auto& alt = this->m_stor.as<index_assert>();
         // Generate preparation code.
         Cow_Vector<Air_Node::Param> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));

@@ -1365,7 +1365,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
       {
-        const auto& alt = this->m_stor.as<S_literal>();
+        const auto& alt = this->m_stor.as<index_literal>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.value);  // 0
@@ -1374,7 +1374,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_named_reference:
       {
-        const auto& alt = this->m_stor.as<S_named_reference>();
+        const auto& alt = this->m_stor.as<index_named_reference>();
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
         const Abstract_Context* qctx = &ctx;
@@ -1411,7 +1411,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_closure_function:
       {
-        const auto& alt = this->m_stor.as<S_closure_function>();
+        const auto& alt = this->m_stor.as<index_closure_function>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.sloc);  // 0
@@ -1422,7 +1422,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_branch:
       {
-        const auto& alt = this->m_stor.as<S_branch>();
+        const auto& alt = this->m_stor.as<index_branch>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         Cow_Vector<Air_Node> code_branch;
@@ -1437,7 +1437,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_function_call:
       {
-        const auto& alt = this->m_stor.as<S_function_call>();
+        const auto& alt = this->m_stor.as<index_function_call>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.sloc);  // 0
@@ -1447,7 +1447,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_member_access:
       {
-        const auto& alt = this->m_stor.as<S_member_access>();
+        const auto& alt = this->m_stor.as<index_member_access>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.name);  // 0
@@ -1456,7 +1456,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_operator_rpn:
       {
-        const auto& alt = this->m_stor.as<S_operator_rpn>();
+        const auto& alt = this->m_stor.as<index_operator_rpn>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(static_cast<std::int64_t>(alt.assign));  // 0
@@ -1637,7 +1637,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_unnamed_array:
       {
-        const auto& alt = this->m_stor.as<S_unnamed_array>();
+        const auto& alt = this->m_stor.as<index_unnamed_array>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(static_cast<std::int64_t>(alt.nelems));  // 0
@@ -1646,7 +1646,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_unnamed_object:
       {
-        const auto& alt = this->m_stor.as<S_unnamed_object>();
+        const auto& alt = this->m_stor.as<index_unnamed_object>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         p.emplace_back(alt.keys);  // 0
@@ -1655,7 +1655,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
       }
     case index_coalescence:
       {
-        const auto& alt = this->m_stor.as<S_coalescence>();
+        const auto& alt = this->m_stor.as<index_coalescence>();
         // Encode arguments.
         Cow_Vector<Air_Node::Param> p;
         Cow_Vector<Air_Node> code_branch;

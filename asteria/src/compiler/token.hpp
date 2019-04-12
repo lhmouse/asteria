@@ -197,7 +197,7 @@ class Token
       }
     Keyword as_keyword() const
       {
-        return this->m_stor.as<S_keyword>().keyword;
+        return this->m_stor.as<index_keyword>().keyword;
       }
 
     bool is_punctuator() const noexcept
@@ -206,7 +206,7 @@ class Token
       }
     Punctuator as_punctuator() const
       {
-        return this->m_stor.as<S_punctuator>().punct;
+        return this->m_stor.as<index_punctuator>().punct;
       }
 
     bool is_identifier() const noexcept
@@ -215,7 +215,7 @@ class Token
       }
     const Cow_String& as_identifier() const
       {
-        return this->m_stor.as<S_identifier>().name;
+        return this->m_stor.as<index_identifier>().name;
       }
 
     bool is_integer_literal() const noexcept
@@ -224,7 +224,7 @@ class Token
       }
     std::int64_t as_integer_literal() const
       {
-        return this->m_stor.as<S_integer_literal>().value;
+        return this->m_stor.as<index_integer_literal>().value;
       }
 
     bool is_real_literal() const noexcept
@@ -233,7 +233,7 @@ class Token
       }
     double as_real_literal() const
       {
-        return this->m_stor.as<S_real_literal>().value;
+        return this->m_stor.as<index_real_literal>().value;
       }
 
     bool is_string_literal() const noexcept
@@ -242,7 +242,7 @@ class Token
       }
     const Cow_String& as_string_literal() const
       {
-        return this->m_stor.as<S_string_literal>().value;
+        return this->m_stor.as<index_string_literal>().value;
       }
 
     void print(std::ostream& os) const;

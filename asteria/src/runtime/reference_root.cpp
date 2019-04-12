@@ -17,17 +17,17 @@ const Value& Reference_Root::dereference_const() const
       }
     case index_constant:
       {
-        const auto& alt = this->m_stor.as<S_constant>();
+        const auto& alt = this->m_stor.as<index_constant>();
         return alt.source;
       }
     case index_temporary:
       {
-        const auto& alt = this->m_stor.as<S_temporary>();
+        const auto& alt = this->m_stor.as<index_temporary>();
         return alt.value;
       }
     case index_variable:
       {
-        const auto& alt = this->m_stor.as<S_variable>();
+        const auto& alt = this->m_stor.as<index_variable>();
         if(!alt.var_opt) {
           return Value::get_null();
         }
@@ -47,17 +47,17 @@ Value& Reference_Root::dereference_mutable() const
       }
     case index_constant:
       {
-        const auto& alt = this->m_stor.as<S_constant>();
+        const auto& alt = this->m_stor.as<index_constant>();
         ASTERIA_THROW_RUNTIME_ERROR("The constant `", alt.source, "` cannot be modified.");
       }
     case index_temporary:
       {
-        const auto& alt = this->m_stor.as<S_temporary>();
+        const auto& alt = this->m_stor.as<index_temporary>();
         ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", alt.value, "` cannot be modified.");
       }
     case index_variable:
       {
-        const auto& alt = this->m_stor.as<S_variable>();
+        const auto& alt = this->m_stor.as<index_variable>();
         if(!alt.var_opt) {
           ASTERIA_THROW_RUNTIME_ERROR("The reference cannot be written after being moved. This is likely a bug. Please report.");
         }
@@ -80,19 +80,19 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callb
       }
     case index_constant:
       {
-        const auto& alt = this->m_stor.as<S_constant>();
+        const auto& alt = this->m_stor.as<index_constant>();
         alt.source.enumerate_variables(callback);
         return;
       }
     case index_temporary:
       {
-        const auto& alt = this->m_stor.as<S_temporary>();
+        const auto& alt = this->m_stor.as<index_temporary>();
         alt.value.enumerate_variables(callback);
         return;
       }
     case index_variable:
       {
-        const auto& alt = this->m_stor.as<S_variable>();
+        const auto& alt = this->m_stor.as<index_variable>();
         if(!alt.var_opt) {
           return;
         }
