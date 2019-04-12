@@ -77,11 +77,11 @@ class Value
       {
         return this->m_stor.index() == gtype_boolean;
       }
-    const G_boolean& as_boolean() const
+    G_boolean as_boolean() const
       {
         return this->m_stor.as<gtype_boolean>();
       }
-    G_boolean& as_boolean()
+    G_boolean& mut_boolean()
       {
         return this->m_stor.as<gtype_boolean>();
       }
@@ -90,11 +90,11 @@ class Value
       {
         return this->m_stor.index() == gtype_integer;
       }
-    const G_integer& as_integer() const
+    G_integer as_integer() const
       {
         return this->m_stor.as<gtype_integer>();
       }
-    G_integer& as_integer()
+    G_integer& mut_integer()
       {
         return this->m_stor.as<gtype_integer>();
       }
@@ -103,11 +103,11 @@ class Value
       {
         return this->m_stor.index() == gtype_real;
       }
-    const G_real& as_real() const
+    G_real as_real() const
       {
         return this->m_stor.as<gtype_real>();
       }
-    G_real& as_real()
+    G_real& mut_real()
       {
         return this->m_stor.as<gtype_real>();
       }
@@ -120,7 +120,7 @@ class Value
       {
         return this->m_stor.as<gtype_string>();
       }
-    G_string& as_string()
+    G_string& mut_string()
       {
         return this->m_stor.as<gtype_string>();
       }
@@ -133,7 +133,7 @@ class Value
       {
         return this->m_stor.as<gtype_function>();
       }
-    G_function& as_function()
+    G_function& mut_function()
       {
         return this->m_stor.as<gtype_function>();
       }
@@ -146,7 +146,7 @@ class Value
       {
         return this->m_stor.as<gtype_opaque>();
       }
-    G_opaque& as_opaque()
+    G_opaque& mut_opaque()
       {
         return this->m_stor.as<gtype_opaque>();
       }
@@ -159,7 +159,7 @@ class Value
       {
         return this->m_stor.as<gtype_array>();
       }
-    G_array& as_array()
+    G_array& mut_array()
       {
         return this->m_stor.as<gtype_array>();
       }
@@ -172,7 +172,7 @@ class Value
       {
         return this->m_stor.as<gtype_object>();
       }
-    G_object& as_object()
+    G_object& mut_object()
       {
         return this->m_stor.as<gtype_object>();
       }
@@ -193,6 +193,13 @@ class Value
       {
         if(this->m_stor.index() == gtype_integer) {
           return G_real(this->m_stor.as<gtype_integer>());
+        }
+        return this->m_stor.as<gtype_real>();
+      }
+    G_real& mutate_into_real()
+      {
+        if(this->m_stor.index() == gtype_integer) {
+          return this->m_stor.emplace<gtype_real>(G_real(this->m_stor.as<gtype_integer>()));
         }
         return this->m_stor.as<gtype_real>();
       }

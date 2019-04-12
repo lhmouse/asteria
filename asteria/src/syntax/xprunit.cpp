@@ -623,13 +623,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // `altr.assign` is ignored.
         auto& lhs = stack.get_top_reference().open();
         if(lhs.is_integer()) {
-          auto& reg = lhs.as_integer();
+          auto& reg = lhs.mut_integer();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_integer(1));
           goto z;
         }
         if(lhs.is_real()) {
-          auto& reg = lhs.as_real();
+          auto& reg = lhs.mut_real();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_real(1));
           goto z;
@@ -646,13 +646,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // `altr.assign` is ignored.
         auto& lhs = stack.get_top_reference().open();
         if(lhs.is_integer()) {
-          auto& reg = lhs.as_integer();
+          auto& reg = lhs.mut_integer();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_integer(1));
           goto z;
         }
         if(lhs.is_real()) {
-          auto& reg = lhs.as_real();
+          auto& reg = lhs.mut_real();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_real(1));
           goto z;
@@ -670,13 +670,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         if(rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           Reference_Modifier::S_array_index xmod = { rocket::move(reg) };
           stack.open_top_reference().zoom_in(rocket::move(xmod));
           goto z;
         }
         if(rhs.is_string()) {
-          auto& reg = rhs.as_string();
+          auto& reg = rhs.mut_string();
           Reference_Modifier::S_object_key xmod = { rocket::move(reg) };
           stack.open_top_reference().zoom_in(rocket::move(xmod));
           goto z;
@@ -706,12 +706,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Negate the operand to create a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
         if(rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_neg(reg);
           goto z;
         }
         if(rhs.is_real()) {
-          auto& reg = rhs.as_real();
+          auto& reg = rhs.mut_real();
           reg = do_operator_neg(reg);
           goto z;
         }
@@ -729,12 +729,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
         if(rhs.is_boolean()) {
-          auto& reg = rhs.as_boolean();
+          auto& reg = rhs.mut_boolean();
           reg = do_operator_not(reg);
           goto z;
         }
         if(rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_not(reg);
           goto z;
         }
@@ -763,12 +763,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // `altr.assign` is ignored.
         auto& rhs = stack.get_top_reference().open();
         if(rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_add(reg, G_integer(1));
           goto z;
         }
         if(rhs.is_real()) {
-          auto& reg = rhs.as_real();
+          auto& reg = rhs.mut_real();
           reg = do_operator_add(reg, G_real(1));
           goto z;
         }
@@ -784,12 +784,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // `altr.assign` is ignored.
         auto& rhs = stack.get_top_reference().open();
         if(rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_sub(reg, G_integer(1));
           return Air_Node::status_next;
         }
         if(rhs.is_real()) {
-          auto& reg = rhs.as_real();
+          auto& reg = rhs.mut_real();
           reg = do_operator_sub(reg, G_real(1));
           return Air_Node::status_next;
         }
@@ -928,13 +928,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
-          auto& reg = rhs.as_boolean();
+          auto& reg = rhs.mut_boolean();
           reg = do_operator_or(lhs.as_boolean(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the sum of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_add(lhs.as_integer(), reg);
           goto z;
         }
@@ -945,7 +945,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         }
         // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
         if(lhs.is_string() && rhs.is_string()) {
-          auto& reg = rhs.as_string();
+          auto& reg = rhs.mut_string();
           reg = do_operator_add(lhs.as_string(), reg);
           goto z;
         }
@@ -966,13 +966,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
-          auto& reg = rhs.as_boolean();
+          auto& reg = rhs.mut_boolean();
           reg = do_operator_xor(lhs.as_boolean(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the difference of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_sub(lhs.as_integer(), reg);
           goto z;
         }
@@ -998,13 +998,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
-          auto& reg = rhs.as_boolean();
+          auto& reg = rhs.mut_boolean();
           reg = do_operator_and(lhs.as_boolean(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the product of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_mul(lhs.as_integer(), reg);
           goto z;
         }
@@ -1020,7 +1020,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           goto z;
         }
         if(lhs.is_integer() && rhs.is_string()) {
-          auto& reg = rhs.as_string();
+          auto& reg = rhs.mut_string();
           reg = do_operator_mul(lhs.as_integer(), reg);
           goto z;
         }
@@ -1041,7 +1041,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& lhs = stack.get_top_reference().read();
         // For the `integer` and `real` types, return the quotient of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_div(lhs.as_integer(), reg);
           goto z;
         }
@@ -1067,7 +1067,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& lhs = stack.get_top_reference().read();
         // For the `integer` and `real` types, return the remainder of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_mod(lhs.as_integer(), reg);
           goto z;
         }
@@ -1096,7 +1096,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
           if(lhs.is_integer()) {
-            auto& reg = rhs.as_integer();
+            auto& reg = rhs.mut_integer();
             reg = do_operator_sll(lhs.as_integer(), reg);
             goto z;
           }
@@ -1128,7 +1128,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
           if(lhs.is_integer()) {
-            auto& reg = rhs.as_integer();
+            auto& reg = rhs.mut_integer();
             reg = do_operator_srl(lhs.as_integer(), reg);
             goto z;
           }
@@ -1161,7 +1161,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
           // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
           if(lhs.is_integer()) {
-            auto& reg = rhs.as_integer();
+            auto& reg = rhs.mut_integer();
             reg = do_operator_sla(lhs.as_integer(), reg);
             goto z;
           }
@@ -1192,7 +1192,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
           if(lhs.is_integer()) {
-            auto& reg = rhs.as_integer();
+            auto& reg = rhs.mut_integer();
             reg = do_operator_sra(lhs.as_integer(), reg);
             goto z;
           }
@@ -1220,13 +1220,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
-          auto& reg = rhs.as_boolean();
+          auto& reg = rhs.mut_boolean();
           reg = do_operator_and(lhs.as_boolean(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise AND'd result of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_and(lhs.as_integer(), reg);
           goto z;
         }
@@ -1247,13 +1247,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
-          auto& reg = rhs.as_boolean();
+          auto& reg = rhs.mut_boolean();
           reg = do_operator_or(lhs.as_boolean(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise OR'd result of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_or(lhs.as_integer(), reg);
           goto z;
         }
@@ -1274,13 +1274,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
-          auto& reg = rhs.as_boolean();
+          auto& reg = rhs.mut_boolean();
           reg = do_operator_xor(lhs.as_boolean(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise XOR'd result of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
-          auto& reg = rhs.as_integer();
+          auto& reg = rhs.mut_integer();
           reg = do_operator_xor(lhs.as_integer(), reg);
           goto z;
         }

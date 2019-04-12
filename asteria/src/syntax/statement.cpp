@@ -444,12 +444,12 @@ namespace Asteria {
           // The exception object shall not outlast the `catch` body.
           Executive_Context ctx_catch(&ctx);
           auto traceable = trace_exception(rocket::move(stdex));
-          Reference_Root::S_temporary xexref = { traceable.get_value() };
-          do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xexref));
+          Reference_Root::S_temporary xeref = { rocket::move(traceable.mut_value()) };
+          do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xeref));
           // Provide backtrace information.
           G_array backtrace;
-          for(std::size_t i = 0; i < traceable.get_frame_count(); ++i) {
-            const auto& frame = traceable.get_frame(i);
+          for(std::size_t i = 0; i < traceable.frame_count(); ++i) {
+            const auto& frame = traceable.frame(i);
             G_object elem;
             elem.try_emplace(rocket::sref("file"), G_string(frame.source_file()));
             elem.try_emplace(rocket::sref("line"), G_integer(frame.source_line()));

@@ -14,16 +14,16 @@ int main()
       except.append_frame(Source_Location(rocket::sref("file3"), 3), rocket::sref("func3"));
       throw except;
     } catch(Traceable_Exception& e) {
-      ASTERIA_TEST_CHECK(e.get_value().as_integer() == 42);
-      ASTERIA_TEST_CHECK(e.get_frame_count() == 3);
-      ASTERIA_TEST_CHECK(e.get_frame(0).source_file() ==        "file1");
-      ASTERIA_TEST_CHECK(e.get_frame(0).source_line() ==             1 );
-      ASTERIA_TEST_CHECK(e.get_frame(0).function_signature() == "func1");
-      ASTERIA_TEST_CHECK(e.get_frame(1).source_file() ==        "file2");
-      ASTERIA_TEST_CHECK(e.get_frame(1).source_line() ==             2 );
-      ASTERIA_TEST_CHECK(e.get_frame(1).function_signature() == "func2");
-      ASTERIA_TEST_CHECK(e.get_frame(2).source_file() ==        "file3");
-      ASTERIA_TEST_CHECK(e.get_frame(2).source_line() ==             3 );
-      ASTERIA_TEST_CHECK(e.get_frame(2).function_signature() == "func3");
+      ASTERIA_TEST_CHECK(e.value().as_integer() == 42);
+      ASTERIA_TEST_CHECK(e.frame_count() == 3);
+      ASTERIA_TEST_CHECK(e.frame(0).source_file() ==        "file1");
+      ASTERIA_TEST_CHECK(e.frame(0).source_line() ==             1 );
+      ASTERIA_TEST_CHECK(e.frame(0).function_signature() == "func1");
+      ASTERIA_TEST_CHECK(e.frame(1).source_file() ==        "file2");
+      ASTERIA_TEST_CHECK(e.frame(1).source_line() ==             2 );
+      ASTERIA_TEST_CHECK(e.frame(1).function_signature() == "func2");
+      ASTERIA_TEST_CHECK(e.frame(2).source_file() ==        "file3");
+      ASTERIA_TEST_CHECK(e.frame(2).source_line() ==             3 );
+      ASTERIA_TEST_CHECK(e.frame(2).function_signature() == "func3");
     }
   }

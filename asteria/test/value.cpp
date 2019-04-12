@@ -111,16 +111,16 @@ int main()
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_equal);
 
-    value.as_array().mut(1) = G_string(rocket::sref("hello"));
+    value.mut_array().mut(1) = G_string(rocket::sref("hello"));
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_less);
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_greater);
 
-    value.as_array().mut(1) = G_boolean(true);
+    value.mut_array().mut(1) = G_boolean(true);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);
     std::swap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);
-    value.as_array().erase(std::prev(value.as_array().end()));
+    value.mut_array().erase(std::prev(value.as_array().end()));
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_less);
 
     object.clear();

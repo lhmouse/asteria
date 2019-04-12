@@ -31,7 +31,7 @@ class Traceable_Exception : public virtual std::exception
         return "Asteria::Traceable_Exception";
       }
 
-    const Value& get_value() const noexcept
+    const Value& value() const noexcept
       {
         return this->m_value;
       }
@@ -40,11 +40,11 @@ class Traceable_Exception : public virtual std::exception
         return this->m_value;
       }
 
-    std::size_t get_frame_count() const noexcept
+    std::size_t frame_count() const noexcept
       {
         return this->m_frames.size();
       }
-    const Backtrace_Frame& get_frame(std::size_t index) const
+    const Backtrace_Frame& frame(std::size_t index) const
       {
         return this->m_frames.at(index);
       }
