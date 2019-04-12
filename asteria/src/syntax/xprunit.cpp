@@ -843,7 +843,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
         const auto& rhs = stack.get_top_reference().read();
-        stack.set_temporary_result(assign, G_string(rocket::sref(Value::get_gtype_name(rhs.gtype()))));
+        stack.set_temporary_result(assign, G_string(rocket::sref(rhs.gtype_name())));
         return Air_Node::status_next;
       }
 

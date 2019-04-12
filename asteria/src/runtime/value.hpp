@@ -63,6 +63,10 @@ class Value
       {
         return static_cast<Gtype>(this->m_stor.index());
       }
+    const char* gtype_name() const noexcept
+      {
+        return Value::get_gtype_name(static_cast<Gtype>(this->m_stor.index()));
+      }
 
     bool is_null() const noexcept
       {

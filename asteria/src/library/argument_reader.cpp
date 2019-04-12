@@ -181,7 +181,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_boolean>& qxvalue)
     }
     if(!value.is_boolean()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `boolean` or `null` was expected.");  });
       return *this;
     }
@@ -208,7 +208,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_integer>& qxvalue)
     }
     if(!value.is_integer()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `integer` or `null` was expected.");  });
       return *this;
     }
@@ -235,7 +235,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_real>& qxvalue)
     }
     if(!value.is_convertible_to_real()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `integer`, `real` or `null` was expected.");  });
       return *this;
     }
@@ -262,7 +262,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_string>& qxvalue)
     }
     if(!value.is_string()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `string` or `null` was expected.");  });
       return *this;
     }
@@ -289,7 +289,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_opaque>& qxvalue)
     }
     if(!value.is_opaque()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `opaque` or `null` was expected.");  });
       return *this;
     }
@@ -316,7 +316,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_function>& qxvalue)
     }
     if(!value.is_function()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `function` or `null` was expected.");  });
       return *this;
     }
@@ -343,7 +343,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_array>& qxvalue)
     }
     if(!value.is_array()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `array` or `null` was expected.");  });
       return *this;
     }
@@ -370,7 +370,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_object>& qxvalue)
     }
     if(!value.is_object()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `object` or `null` was expected.");  });
       return *this;
     }
@@ -392,7 +392,7 @@ Argument_Reader& Argument_Reader::g(G_boolean& xvalue)
     const auto& value = karg->read();
     if(!value.is_boolean()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `boolean` was expected.");  });
       return *this;
     }
@@ -414,7 +414,7 @@ Argument_Reader& Argument_Reader::g(G_integer& xvalue)
     const auto& value = karg->read();
     if(!value.is_integer()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `integer` was expected.");  });
       return *this;
     }
@@ -436,7 +436,7 @@ Argument_Reader& Argument_Reader::g(G_real& xvalue)
     const auto& value = karg->read();
     if(!value.is_convertible_to_real()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `integer` or `real` was expected.");  });
       return *this;
     }
@@ -458,7 +458,7 @@ Argument_Reader& Argument_Reader::g(G_string& xvalue)
     const auto& value = karg->read();
     if(!value.is_string()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `string` was expected.");  });
       return *this;
     }
@@ -480,7 +480,7 @@ Argument_Reader& Argument_Reader::g(G_opaque& xvalue)
     const auto& value = karg->read();
     if(!value.is_opaque()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `opaque` was expected.");  });
       return *this;
     }
@@ -502,7 +502,7 @@ Argument_Reader& Argument_Reader::g(G_function& xvalue)
     const auto& value = karg->read();
     if(!value.is_function()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `function` was expected.");  });
       return *this;
     }
@@ -524,7 +524,7 @@ Argument_Reader& Argument_Reader::g(G_array& xvalue)
     const auto& value = karg->read();
     if(!value.is_array()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `array` was expected.");  });
       return *this;
     }
@@ -546,7 +546,7 @@ Argument_Reader& Argument_Reader::g(G_object& xvalue)
     const auto& value = karg->read();
     if(!value.is_object()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", Value::get_gtype_name(value.gtype()), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.gtype_name(), "`, "
                                                      "but `object` was expected.");  });
       return *this;
     }
@@ -614,8 +614,8 @@ void Argument_Reader::throw_no_matching_function_call() const
     rocket::insertable_ostream mos;
     mos << "There was no matching overload for function call `" << name << "(";
     if(!args.empty()) {
-      std::for_each(args.begin(), args.end() - 1, [&](const Reference& arg) { mos << Value::get_gtype_name(arg.read().gtype()) <<", ";  });
-      mos << Value::get_gtype_name(args.back().read().gtype());
+      std::for_each(args.begin(), args.end() - 1, [&](const Reference& arg) { mos << arg.read().gtype_name() <<", ";  });
+      mos << args.back().read().gtype_name();
     }
     mos << ")`.";
     // If overload information is available, append the list of overloads.

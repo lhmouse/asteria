@@ -384,7 +384,7 @@ namespace Asteria {
           }
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", Value::get_gtype_name(range_value.gtype()), "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", range_value.gtype_name(), "`.");
       z:
         return Air_Node::status_next;
       }
