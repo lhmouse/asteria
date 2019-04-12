@@ -574,7 +574,8 @@ G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed)
     //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
     std::linear_congruential_engine<std::uint64_t,
                                     0x5DEECE66D, 0xB,
-                                    0x1000000000000> prng(seed ? static_cast<std::uint64_t>(*seed) : generate_random_seed());
+                                    0x1000000000000> prng(seed ? static_cast<std::uint64_t>(*seed)
+                                                               : generate_random_seed());
     // Shuffle elements.
     for(auto bpos = res.mut_begin(); bpos != res.end(); ++bpos) {
       // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
