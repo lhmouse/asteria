@@ -120,7 +120,7 @@ namespace Asteria {
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx, "variable", name, global);
         // Initialize the variable.
-        var->reset(sloc, D_null(), immutable);
+        var->reset(sloc, G_null(), immutable);
         return Air_Node::status_next;
       }
 
@@ -180,7 +180,7 @@ namespace Asteria {
         nos <<")";
         Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_func));
         // Initialized the function variable.
-        var->reset(sloc, D_function(rocket::move(closure)), true);
+        var->reset(sloc, G_function(rocket::move(closure)), true);
         return Air_Node::status_next;
       }
 
@@ -339,14 +339,14 @@ namespace Asteria {
         auto range_value = range_ref.read();
         // Iterate over the range.
         switch(rocket::weaken_enum(range_value.dtype())) {
-        case dtype_array:
+        case gtype_array:
           {
-            const auto& array = range_value.check<D_array>();
+            const auto& array = range_value.check<G_array>();
             for(auto it = array.begin(); it != array.end(); ++it) {
               // Create a fresh context for the loop body.
               Executive_Context ctx_body(&ctx_for);
               // Set up the key variable, which is immutable.
-              key_var->reset(Source_Location(rocket::sref("<built-in>"), 0), D_integer(it - array.begin()), true);
+              key_var->reset(Source_Location(rocket::sref("<built-in>"), 0), G_integer(it - array.begin()), true);
               // Set up the mapped reference.
               Reference_Modifier::S_array_index xrefm = { it - array.begin() };
               range_ref.zoom_in(rocket::move(xrefm));
@@ -363,14 +363,14 @@ namespace Asteria {
             }
             break;
           }
-        case dtype_object:
+        case gtype_object:
           {
-            const auto& object = range_value.check<D_object>();
+            const auto& object = range_value.check<G_object>();
             for(auto it = object.begin(); it != object.end(); ++it) {
               // Create a fresh context for the loop body.
               Executive_Context ctx_body(&ctx_for);
               // Set up the key variable, which is immutable.
-              key_var->reset(Source_Location(rocket::sref("<built-in>"), 0), D_string(it->first), true);
+              key_var->reset(Source_Location(rocket::sref("<built-in>"), 0), G_string(it->first), true);
               // Set up the mapped reference.
               Reference_Modifier::S_object_key xrefm = { it->first };
               range_ref.zoom_in(rocket::move(xrefm));
@@ -451,13 +451,13 @@ namespace Asteria {
           Reference_Root::S_temporary xexref = { traceable.get_value() };
           do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xexref));
           // Provide backtrace information.
-          D_array backtrace;
+          G_array backtrace;
           for(std::size_t i = 0; i < traceable.get_frame_count(); ++i) {
             const auto& frame = traceable.get_frame(i);
-            D_object elem;
-            elem.try_emplace(rocket::sref("file"), D_string(frame.source_file()));
-            elem.try_emplace(rocket::sref("line"), D_integer(frame.source_line()));
-            elem.try_emplace(rocket::sref("func"), D_string(frame.function_signature()));
+            G_object elem;
+            elem.try_emplace(rocket::sref("file"), G_string(frame.source_file()));
+            elem.try_emplace(rocket::sref("line"), G_integer(frame.source_line()));
+            elem.try_emplace(rocket::sref("func"), G_string(frame.function_signature()));
             backtrace.emplace_back(rocket::move(elem));
           }
           ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));

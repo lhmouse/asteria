@@ -9,10 +9,10 @@
 namespace Asteria {
 
 extern bool std_debug_print(const Cow_Vector<Value>& values);
-extern bool std_debug_dump(const Value& value, const Opt<D_integer>& indent = rocket::nullopt);
+extern bool std_debug_dump(const Value& value, const Opt<G_integer>& indent = rocket::nullopt);
 
 // Create an object that is to be referenced as `std.debug`.
-extern void create_bindings_debug(D_object& result, API_Version version);
+extern void create_bindings_debug(G_object& result, API_Version version);
 
 }  // namespace Asteria
 

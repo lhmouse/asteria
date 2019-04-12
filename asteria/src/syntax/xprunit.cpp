@@ -153,27 +153,27 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
 
     namespace {
 
-    ROCKET_PURE_FUNCTION D_boolean do_operator_not(const D_boolean& rhs)
+    ROCKET_PURE_FUNCTION G_boolean do_operator_not(const G_boolean& rhs)
       {
         return !rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_boolean do_operator_and(const D_boolean& lhs, const D_boolean& rhs)
+    ROCKET_PURE_FUNCTION G_boolean do_operator_and(const G_boolean& lhs, const G_boolean& rhs)
       {
         return lhs & rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_boolean do_operator_or(const D_boolean& lhs, const D_boolean& rhs)
+    ROCKET_PURE_FUNCTION G_boolean do_operator_or(const G_boolean& lhs, const G_boolean& rhs)
       {
         return lhs | rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_boolean do_operator_xor(const D_boolean& lhs, const D_boolean& rhs)
+    ROCKET_PURE_FUNCTION G_boolean do_operator_xor(const G_boolean& lhs, const G_boolean& rhs)
       {
         return lhs ^ rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_neg(const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_neg(const G_integer& rhs)
       {
         if(rhs == INT64_MIN) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
@@ -181,7 +181,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return -rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_add(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_integer& rhs)
       {
         if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -189,7 +189,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_sub(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_sub(const G_integer& lhs, const G_integer& rhs)
       {
         if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
@@ -197,7 +197,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_mul(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_mul(const G_integer& lhs, const G_integer& rhs)
       {
         if((lhs == 0) || (rhs == 0)) {
           return 0;
@@ -224,7 +224,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return slhs * arhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_div(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_div(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -235,7 +235,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs / rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_mod(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_mod(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs == 0) {
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
@@ -246,7 +246,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs % rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_sll(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_sll(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -254,10 +254,10 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs >= 64) {
           return 0;
         }
-        return D_integer(static_cast<std::uint64_t>(lhs) << rhs);
+        return G_integer(static_cast<std::uint64_t>(lhs) << rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_srl(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_srl(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -265,10 +265,10 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(rhs >= 64) {
           return 0;
         }
-        return D_integer(static_cast<std::uint64_t>(lhs) >> rhs);
+        return G_integer(static_cast<std::uint64_t>(lhs) >> rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_sla(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_sla(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -285,10 +285,10 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(mask_out != mask_sbt) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
-        return D_integer(static_cast<std::uint64_t>(lhs) << rhs);
+        return G_integer(static_cast<std::uint64_t>(lhs) << rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_sra(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_sra(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
@@ -299,67 +299,67 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return lhs >> rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_not(const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_not(const G_integer& rhs)
       {
         return ~rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_and(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_and(const G_integer& lhs, const G_integer& rhs)
       {
         return lhs & rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_or(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_or(const G_integer& lhs, const G_integer& rhs)
       {
         return lhs | rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_integer do_operator_xor(const D_integer& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_xor(const G_integer& lhs, const G_integer& rhs)
       {
         return lhs ^ rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_neg(const D_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_operator_neg(const G_real& rhs)
       {
         return -rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_add(const D_real& lhs, const D_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_operator_add(const G_real& lhs, const G_real& rhs)
       {
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_sub(const D_real& lhs, const D_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_operator_sub(const G_real& lhs, const G_real& rhs)
       {
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mul(const D_real& lhs, const D_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_operator_mul(const G_real& lhs, const G_real& rhs)
       {
         return lhs * rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_div(const D_real& lhs, const D_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_operator_div(const G_real& lhs, const G_real& rhs)
       {
         return lhs / rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_real do_operator_mod(const D_real& lhs, const D_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_operator_mod(const G_real& lhs, const G_real& rhs)
       {
         return std::fmod(lhs, rhs);
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_add(const D_string& lhs, const D_string& rhs)
+    ROCKET_PURE_FUNCTION G_string do_operator_add(const G_string& lhs, const G_string& rhs)
       {
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_mul(const D_string& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        G_string res;
         auto nchars = lhs.size();
         if((nchars == 0) || (rhs == 0)) {
           return res;
@@ -389,17 +389,17 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_mul(const D_integer& lhs, const D_string& rhs)
+    ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_integer& lhs, const G_string& rhs)
       {
         return do_operator_mul(rhs, lhs);
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_sll(const D_string& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_string do_operator_sll(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        G_string res;
         // Reserve space for the result string.
         auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
         if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
@@ -411,12 +411,12 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_srl(const D_string& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_string do_operator_srl(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        G_string res;
         // Reserve space for the result string.
         auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
         if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
@@ -428,28 +428,28 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_sla(const D_string& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_string do_operator_sla(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        G_string res;
         if(static_cast<std::uint64_t>(rhs) >= res.max_size() - lhs.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
         }
         auto count = static_cast<std::size_t>(rhs);
         // Append spaces in the right and return the result.
-        res.assign(D_string::shallow_type(lhs));
+        res.assign(G_string::shallow_type(lhs));
         res.append(count, ' ');
         return res;
       }
 
-    ROCKET_PURE_FUNCTION D_string do_operator_sra(const D_string& lhs, const D_integer& rhs)
+    ROCKET_PURE_FUNCTION G_string do_operator_sra(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
-        D_string res;
+        G_string res;
         if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
@@ -539,7 +539,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_body));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);
         // Push the function object.
-        Reference_Root::S_temporary xref = { D_function(rocket::move(closure)) };
+        Reference_Root::S_temporary xref = { G_function(rocket::move(closure)) };
         stack.push_reference(rocket::move(xref));
         return Air_Node::status_next;
       }
@@ -584,10 +584,10 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Get the target reference.
         auto target_value = stack.get_top_reference().read();
         // Make sure it is really a function.
-        if(target_value.dtype() != dtype_function) {
+        if(target_value.dtype() != gtype_function) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", target_value, "` which is not a function.");
         }
-        const auto& target = target_value.check<D_function>().get();
+        const auto& target = target_value.check<G_function>().get();
         // Make the `this` reference. On the function's return it is reused to store the result of the function.
         auto& self_result = stack.open_top_reference().zoom_out();
         // Call the function now.
@@ -623,16 +623,16 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Increment the operand and return the old value.
         // `alt.assign` is ignored.
         auto& lhs = stack.get_top_reference().open();
-        if(lhs.dtype() == dtype_integer) {
-          auto& reg = lhs.check<D_integer>();
+        if(lhs.dtype() == gtype_integer) {
+          auto& reg = lhs.check<G_integer>();
           stack.set_temporary_result(false, rocket::move(lhs));
-          reg = do_operator_add(reg, D_integer(1));
+          reg = do_operator_add(reg, G_integer(1));
           goto z;
         }
-        if(lhs.dtype() == dtype_real) {
-          auto& reg = lhs.check<D_real>();
+        if(lhs.dtype() == gtype_real) {
+          auto& reg = lhs.check<G_real>();
           stack.set_temporary_result(false, rocket::move(lhs));
-          reg = do_operator_add(reg, D_real(1));
+          reg = do_operator_add(reg, G_real(1));
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_postfix_inc), " operation is not defined for `", lhs, "`.");
@@ -646,16 +646,16 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decrement the operand and return the old value.
         // `alt.assign` is ignored.
         auto& lhs = stack.get_top_reference().open();
-        if(lhs.dtype() == dtype_integer) {
-          auto& reg = lhs.check<D_integer>();
+        if(lhs.dtype() == gtype_integer) {
+          auto& reg = lhs.check<G_integer>();
           stack.set_temporary_result(false, rocket::move(lhs));
-          reg = do_operator_sub(reg, D_integer(1));
+          reg = do_operator_sub(reg, G_integer(1));
           goto z;
         }
-        if(lhs.dtype() == dtype_real) {
-          auto& reg = lhs.check<D_real>();
+        if(lhs.dtype() == gtype_real) {
+          auto& reg = lhs.check<G_real>();
           stack.set_temporary_result(false, rocket::move(lhs));
-          reg = do_operator_sub(reg, D_real(1));
+          reg = do_operator_sub(reg, G_real(1));
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_postfix_dec), " operation is not defined for `", lhs, "`.");
@@ -670,14 +670,14 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // `alt.assign` is ignored.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
-        if(rhs.dtype() == dtype_integer) {
-          auto& reg = rhs.check<D_integer>();
+        if(rhs.dtype() == gtype_integer) {
+          auto& reg = rhs.check<G_integer>();
           Reference_Modifier::S_array_index xmod = { rocket::move(reg) };
           stack.open_top_reference().zoom_in(rocket::move(xmod));
           goto z;
         }
-        if(rhs.dtype() == dtype_string) {
-          auto& reg = rhs.check<D_string>();
+        if(rhs.dtype() == gtype_string) {
+          auto& reg = rhs.check<G_string>();
           Reference_Modifier::S_object_key xmod = { rocket::move(reg) };
           stack.open_top_reference().zoom_in(rocket::move(xmod));
           goto z;
@@ -706,13 +706,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Negate the operand to create a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
-        if(rhs.dtype() == dtype_integer) {
-          auto& reg = rhs.check<D_integer>();
+        if(rhs.dtype() == gtype_integer) {
+          auto& reg = rhs.check<G_integer>();
           reg = do_operator_neg(reg);
           goto z;
         }
-        if(rhs.dtype() == dtype_real) {
-          auto& reg = rhs.check<D_real>();
+        if(rhs.dtype() == gtype_real) {
+          auto& reg = rhs.check<G_real>();
           reg = do_operator_neg(reg);
           goto z;
         }
@@ -729,13 +729,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
-        if(rhs.dtype() == dtype_boolean) {
-          auto& reg = rhs.check<D_boolean>();
+        if(rhs.dtype() == gtype_boolean) {
+          auto& reg = rhs.check<G_boolean>();
           reg = do_operator_not(reg);
           goto z;
         }
-        if(rhs.dtype() == dtype_integer) {
-          auto& reg = rhs.check<D_integer>();
+        if(rhs.dtype() == gtype_integer) {
+          auto& reg = rhs.check<G_integer>();
           reg = do_operator_not(reg);
           goto z;
         }
@@ -753,7 +753,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         const auto& rhs = stack.get_top_reference().read();
-        stack.set_temporary_result(assign, D_boolean(do_operator_not(rhs.test())));
+        stack.set_temporary_result(assign, G_boolean(do_operator_not(rhs.test())));
         return Air_Node::status_next;
       }
 
@@ -763,14 +763,14 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Increment the operand and return it.
         // `alt.assign` is ignored.
         auto& rhs = stack.get_top_reference().open();
-        if(rhs.dtype() == dtype_integer) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_add(reg, D_integer(1));
+        if(rhs.dtype() == gtype_integer) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_add(reg, G_integer(1));
           goto z;
         }
-        if(rhs.dtype() == dtype_real) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_add(reg, D_real(1));
+        if(rhs.dtype() == gtype_real) {
+          auto& reg = rhs.check<G_real>();
+          reg = do_operator_add(reg, G_real(1));
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_inc), " operation is not defined for `", rhs, "`.");
@@ -784,14 +784,14 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decrement the operand and return it.
         // `alt.assign` is ignored.
         auto& rhs = stack.get_top_reference().open();
-        if(rhs.dtype() == dtype_integer) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_sub(reg, D_integer(1));
+        if(rhs.dtype() == gtype_integer) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_sub(reg, G_integer(1));
           return Air_Node::status_next;
         }
-        if(rhs.dtype() == dtype_real) {
-          auto& reg = rhs.check<D_real>();
-          reg = do_operator_sub(reg, D_real(1));
+        if(rhs.dtype() == gtype_real) {
+          auto& reg = rhs.check<G_real>();
+          reg = do_operator_sub(reg, G_real(1));
           return Air_Node::status_next;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_dec), " operation is not defined for `", rhs, "`.");
@@ -815,20 +815,20 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Return the number of elements in the operand.
         const auto& rhs = stack.get_top_reference().read();
-        if(rhs.dtype() == dtype_null) {
-          stack.set_temporary_result(assign, D_integer(0));
+        if(rhs.dtype() == gtype_null) {
+          stack.set_temporary_result(assign, G_integer(0));
           goto z;
         }
-        if(rhs.dtype() == dtype_string) {
-          stack.set_temporary_result(assign, D_integer(rhs.check<D_string>().size()));
+        if(rhs.dtype() == gtype_string) {
+          stack.set_temporary_result(assign, G_integer(rhs.check<G_string>().size()));
           goto z;
         }
-        if(rhs.dtype() == dtype_array) {
-          stack.set_temporary_result(assign, D_integer(rhs.check<D_array>().size()));
+        if(rhs.dtype() == gtype_array) {
+          stack.set_temporary_result(assign, G_integer(rhs.check<G_array>().size()));
           goto z;
         }
-        if(rhs.dtype() == dtype_object) {
-          stack.set_temporary_result(assign, D_integer(rhs.check<D_object>().size()));
+        if(rhs.dtype() == gtype_object) {
+          stack.set_temporary_result(assign, G_integer(rhs.check<G_object>().size()));
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_lengthof), " operation is not defined for `", rhs, "`.");
@@ -844,7 +844,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
         const auto& rhs = stack.get_top_reference().read();
-        stack.set_temporary_result(assign, D_string(rocket::sref(Value::get_type_name(rhs.dtype()))));
+        stack.set_temporary_result(assign, G_string(rocket::sref(Value::get_type_name(rhs.dtype()))));
         return Air_Node::status_next;
       }
 
@@ -861,7 +861,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
-        rhs = D_boolean((comp == Value::compare_equal) != negative);
+        rhs = G_boolean((comp == Value::compare_equal) != negative);
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -883,7 +883,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         if(comp == Value::compare_unordered) {
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", rhs, "` are unordered.");
         }
-        rhs = D_boolean((comp == expect) != negative);
+        rhs = G_boolean((comp == expect) != negative);
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -901,18 +901,18 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
         if(comp == Value::compare_unordered) {
-          rhs = D_string(rocket::sref("<unordered>"));
+          rhs = G_string(rocket::sref("<unordered>"));
           goto z;
         }
         if(comp == Value::compare_less) {
-          rhs = D_integer(-1);
+          rhs = G_integer(-1);
           goto z;
         }
         if(comp == Value::compare_greater) {
-          rhs = D_integer(+1);
+          rhs = G_integer(+1);
           goto z;
         }
-        rhs = D_integer(0);
+        rhs = G_integer(0);
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -928,26 +928,26 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
-        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
-          auto& reg = rhs.check<D_boolean>();
-          reg = do_operator_or(lhs.check<D_boolean>(), reg);
+        if((lhs.dtype() == gtype_boolean) && (rhs.dtype() == gtype_boolean)) {
+          auto& reg = rhs.check<G_boolean>();
+          reg = do_operator_or(lhs.check<G_boolean>(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the sum of both operands.
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_add(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_integer)) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_add(lhs.check<G_integer>(), reg);
           goto z;
         }
         if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_add(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
         // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
-        if((lhs.dtype() == dtype_string) && (rhs.dtype() == dtype_string)) {
-          auto& reg = rhs.check<D_string>();
-          reg = do_operator_add(lhs.check<D_string>(), reg);
+        if((lhs.dtype() == gtype_string) && (rhs.dtype() == gtype_string)) {
+          auto& reg = rhs.check<G_string>();
+          reg = do_operator_add(lhs.check<G_string>(), reg);
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_add), " operation is not defined for `", lhs, "` and `", rhs, "`.");
@@ -966,19 +966,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
-        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
-          auto& reg = rhs.check<D_boolean>();
-          reg = do_operator_xor(lhs.check<D_boolean>(), reg);
+        if((lhs.dtype() == gtype_boolean) && (rhs.dtype() == gtype_boolean)) {
+          auto& reg = rhs.check<G_boolean>();
+          reg = do_operator_xor(lhs.check<G_boolean>(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the difference of both operands.
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_sub(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_integer)) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_sub(lhs.check<G_integer>(), reg);
           goto z;
         }
         if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_sub(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
@@ -998,31 +998,31 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
-        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
-          auto& reg = rhs.check<D_boolean>();
-          reg = do_operator_and(lhs.check<D_boolean>(), reg);
+        if((lhs.dtype() == gtype_boolean) && (rhs.dtype() == gtype_boolean)) {
+          auto& reg = rhs.check<G_boolean>();
+          reg = do_operator_and(lhs.check<G_boolean>(), reg);
           goto z;
         }
         // For the `integer` and `real` types, return the product of both operands.
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_mul(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_integer)) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_mul(lhs.check<G_integer>(), reg);
           goto z;
         }
         if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_mul(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
         // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
-        if((lhs.dtype() == dtype_string) && (rhs.dtype() == dtype_integer)) {
-          // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-          rhs = do_operator_mul(lhs.check<D_string>(), rhs.check<D_integer>());
+        if((lhs.dtype() == gtype_string) && (rhs.dtype() == gtype_integer)) {
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_mul(lhs.check<G_string>(), rhs.check<G_integer>());
           goto z;
         }
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_string)) {
-          auto& reg = rhs.check<D_string>();
-          reg = do_operator_mul(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_string)) {
+          auto& reg = rhs.check<G_string>();
+          reg = do_operator_mul(lhs.check<G_integer>(), reg);
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_mul), " operation is not defined for `", lhs, "` and `", rhs, "`.");
@@ -1041,13 +1041,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `integer` and `real` types, return the quotient of both operands.
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_div(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_integer)) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_div(lhs.check<G_integer>(), reg);
           goto z;
         }
         if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_div(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
@@ -1067,13 +1067,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `integer` and `real` types, return the remainder of both operands.
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_mod(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_integer)) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_mod(lhs.check<G_integer>(), reg);
           goto z;
         }
         if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
-          // Note that `rhs` might not have type `D_real`, thus this branch can't be optimized.
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_mod(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
@@ -1093,19 +1093,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
-        if(rhs.dtype() == dtype_integer) {
+        if(rhs.dtype() == gtype_integer) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          if(lhs.dtype() == dtype_integer) {
-            auto& reg = rhs.check<D_integer>();
-            reg = do_operator_sll(lhs.check<D_integer>(), reg);
+          if(lhs.dtype() == gtype_integer) {
+            auto& reg = rhs.check<G_integer>();
+            reg = do_operator_sll(lhs.check<G_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the right and discard characters from the left.
           // The number of bytes in the LHS operand will be preserved.
-          if(lhs.dtype() == dtype_string) {
-            // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-            rhs = do_operator_sll(lhs.check<D_string>(), rhs.check<D_integer>());
+          if(lhs.dtype() == gtype_string) {
+            // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+            rhs = do_operator_sll(lhs.check<G_string>(), rhs.check<G_integer>());
             goto z;
           }
         }
@@ -1125,19 +1125,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
-        if(rhs.dtype() == dtype_integer) {
+        if(rhs.dtype() == gtype_integer) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          if(lhs.dtype() == dtype_integer) {
-            auto& reg = rhs.check<D_integer>();
-            reg = do_operator_srl(lhs.check<D_integer>(), reg);
+          if(lhs.dtype() == gtype_integer) {
+            auto& reg = rhs.check<G_integer>();
+            reg = do_operator_srl(lhs.check<G_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the left and discard characters from the right.
           // The number of bytes in the LHS operand will be preserved.
-          if(lhs.dtype() == dtype_string) {
-            // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-            rhs = do_operator_srl(lhs.check<D_string>(), rhs.check<D_integer>());
+          if(lhs.dtype() == gtype_string) {
+            // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+            rhs = do_operator_srl(lhs.check<G_string>(), rhs.check<G_integer>());
             goto z;
           }
         }
@@ -1157,19 +1157,19 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
-        if(rhs.dtype() == dtype_integer) {
+        if(rhs.dtype() == gtype_integer) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
           // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
-          if(lhs.dtype() == dtype_integer) {
-            auto& reg = rhs.check<D_integer>();
-            reg = do_operator_sla(lhs.check<D_integer>(), reg);
+          if(lhs.dtype() == gtype_integer) {
+            auto& reg = rhs.check<G_integer>();
+            reg = do_operator_sla(lhs.check<G_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, fill space characters in the right.
-          if(lhs.dtype() == dtype_string) {
-            // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-            rhs = do_operator_sla(lhs.check<D_string>(), rhs.check<D_integer>());
+          if(lhs.dtype() == gtype_string) {
+            // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+            rhs = do_operator_sla(lhs.check<G_string>(), rhs.check<G_integer>());
             goto z;
           }
         }
@@ -1189,18 +1189,18 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // The RHS operand shall be of type `integer`.
-        if(rhs.dtype() == dtype_integer) {
+        if(rhs.dtype() == gtype_integer) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
-          if(lhs.dtype() == dtype_integer) {
-            auto& reg = rhs.check<D_integer>();
-            reg = do_operator_sra(lhs.check<D_integer>(), reg);
+          if(lhs.dtype() == gtype_integer) {
+            auto& reg = rhs.check<G_integer>();
+            reg = do_operator_sra(lhs.check<G_integer>(), reg);
             goto z;
           }
           // If the LHS operand has type `string`, discard characters from the right.
-          if(lhs.dtype() == dtype_string) {
-            // Note that `rhs` does not have type `D_string`, thus this branch can't be optimized.
-            rhs = do_operator_sra(lhs.check<D_string>(), rhs.check<D_integer>());
+          if(lhs.dtype() == gtype_string) {
+            // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+            rhs = do_operator_sra(lhs.check<G_string>(), rhs.check<G_integer>());
             goto z;
           }
         }
@@ -1220,15 +1220,15 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical AND'd result of both operands.
-        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
-          auto& reg = rhs.check<D_boolean>();
-          reg = do_operator_and(lhs.check<D_boolean>(), reg);
+        if((lhs.dtype() == gtype_boolean) && (rhs.dtype() == gtype_boolean)) {
+          auto& reg = rhs.check<G_boolean>();
+          reg = do_operator_and(lhs.check<G_boolean>(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise AND'd result of both operands.
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_and(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_integer)) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_and(lhs.check<G_integer>(), reg);
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_andb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
@@ -1247,15 +1247,15 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical OR'd result of both operands.
-        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
-          auto& reg = rhs.check<D_boolean>();
-          reg = do_operator_or(lhs.check<D_boolean>(), reg);
+        if((lhs.dtype() == gtype_boolean) && (rhs.dtype() == gtype_boolean)) {
+          auto& reg = rhs.check<G_boolean>();
+          reg = do_operator_or(lhs.check<G_boolean>(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise OR'd result of both operands.
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_or(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_integer)) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_or(lhs.check<G_integer>(), reg);
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_orb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
@@ -1274,15 +1274,15 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
         // For the `boolean` type, return the logical XOR'd result of both operands.
-        if((lhs.dtype() == dtype_boolean) && (rhs.dtype() == dtype_boolean)) {
-          auto& reg = rhs.check<D_boolean>();
-          reg = do_operator_xor(lhs.check<D_boolean>(), reg);
+        if((lhs.dtype() == gtype_boolean) && (rhs.dtype() == gtype_boolean)) {
+          auto& reg = rhs.check<G_boolean>();
+          reg = do_operator_xor(lhs.check<G_boolean>(), reg);
           goto z;
         }
         // For the `integer` type, return bitwise XOR'd result of both operands.
-        if((lhs.dtype() == dtype_integer) && (rhs.dtype() == dtype_integer)) {
-          auto& reg = rhs.check<D_integer>();
-          reg = do_operator_xor(lhs.check<D_integer>(), reg);
+        if((lhs.dtype() == gtype_integer) && (rhs.dtype() == gtype_integer)) {
+          auto& reg = rhs.check<G_integer>();
+          reg = do_operator_xor(lhs.check<G_integer>(), reg);
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_orb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
@@ -1309,7 +1309,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decode arguments.
         const auto& nelems = static_cast<std::size_t>(p.at(0).as<std::int64_t>());
         // Pop references to create an array.
-        D_array array;
+        G_array array;
         array.resize(nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
           *it = stack.get_top_reference().read();
@@ -1327,7 +1327,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Decode arguments.
         const auto& keys = p.at(0).as<Cow_Vector<PreHashed_String>>();
         // Pop references to create an object.
-        D_object object;
+        G_object object;
         object.reserve(keys.size());
         for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
           object.try_emplace(*it, stack.get_top_reference().read());
@@ -1346,7 +1346,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& code_null = p.at(0).as<Cow_Vector<Air_Node>>();
         const auto& assign = static_cast<bool>(p.at(1).as<std::int64_t>());
         // Pick a branch basing on the condition.
-        if(stack.get_top_reference().read().dtype() != dtype_null) {
+        if(stack.get_top_reference().read().dtype() != gtype_null) {
           // Leave the condition on the stack.
           return Air_Node::status_next;
         }

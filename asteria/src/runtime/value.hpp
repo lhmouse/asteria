@@ -23,21 +23,21 @@ class Value
 
     using Xvariant = Variant<
       ROCKET_CDR(
-        , D_null      // 0,
-        , D_boolean   // 1,
-        , D_integer   // 2,
-        , D_real      // 3,
-        , D_string    // 4,
-        , D_opaque    // 5,
-        , D_function  // 6,
-        , D_array     // 7,
-        , D_object    // 8,
+        , G_null      // 0,
+        , G_boolean   // 1,
+        , G_integer   // 2,
+        , G_real      // 3,
+        , G_string    // 4,
+        , G_opaque    // 5,
+        , G_function  // 6,
+        , G_array     // 7,
+        , G_object    // 8,
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   private:
     template<typename XvalueT> static inline ROCKET_RETURN_ENABLE_IF(Compare, std::is_integral<XvalueT>::value) do_compare_3way(XvalueT lhs, XvalueT rhs) noexcept;
-    static inline Compare do_compare_3way(D_real lhs, D_real rhs) noexcept;
+    static inline Compare do_compare_3way(G_real lhs, G_real rhs) noexcept;
 
     static inline std::ostream& do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next);
 
@@ -94,9 +94,9 @@ class Value
 
     bool is_convertible_to_real() const noexcept
       {
-        return rocket::is_any_of(this->dtype(), { dtype_integer, dtype_real });
+        return rocket::is_any_of(this->dtype(), { gtype_integer, gtype_real });
       }
-    D_real convert_to_real() const;
+    G_real convert_to_real() const;
 
     bool test() const noexcept;
     Compare compare(const Value& other) const noexcept;

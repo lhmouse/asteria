@@ -15,13 +15,13 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
       {
         const auto& alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.dtype())) {
-        case dtype_null:
+        case gtype_null:
           {
             return nullptr;
           }
-        case dtype_array:
+        case gtype_array:
           {
-            const auto& arr = parent.check<D_array>();
+            const auto& arr = parent.check<G_array>();
             auto w = wrap_index(alt.index, arr.size());
             auto nadd = w.nprepend | w.nappend;
             if(nadd != 0) {
@@ -38,13 +38,13 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
       {
         const auto& alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.dtype())) {
-        case dtype_null:
+        case gtype_null:
           {
             return nullptr;
           }
-        case dtype_object:
+        case gtype_object:
           {
-            const auto& obj = parent.check<D_object>();
+            const auto& obj = parent.check<G_object>();
             auto rit = obj.find(alt.key);
             if(rit == obj.end()) {
               ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
@@ -68,17 +68,17 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
       {
         const auto& alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.dtype())) {
-        case dtype_null:
+        case gtype_null:
           {
             if(!create_new) {
               return nullptr;
             }
-            parent = D_array();
+            parent = G_array();
           }
           // Fallthrough.
-        case dtype_array:
+        case gtype_array:
           {
-            auto& arr = parent.check<D_array>();
+            auto& arr = parent.check<G_array>();
             auto w = wrap_index(alt.index, arr.size());
             auto nadd = w.nprepend | w.nappend;
             if(nadd != 0) {
@@ -102,17 +102,17 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
       {
         const auto& alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.dtype())) {
-        case dtype_null:
+        case gtype_null:
           {
             if(!create_new) {
               return nullptr;
             }
-            parent = D_object();
+            parent = G_object();
           }
           // Fallthrough.
-        case dtype_object:
+        case gtype_object:
           {
-            auto& obj = parent.check<D_object>();
+            auto& obj = parent.check<G_object>();
             auto rit = create_new ? obj.try_emplace(alt.key).first : obj.find_mut(alt.key);
             if(rit == obj.end()) {
               ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
@@ -136,18 +136,18 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
       {
         const auto& alt = this->m_stor.as<S_array_index>();
         switch(rocket::weaken_enum(parent.dtype())) {
-        case dtype_null:
+        case gtype_null:
           {
-            return D_null();
+            return G_null();
           }
-        case dtype_array:
+        case gtype_array:
           {
-            auto& arr = parent.check<D_array>();
+            auto& arr = parent.check<G_array>();
             auto w = wrap_index(alt.index, arr.size());
             auto nadd = w.nprepend | w.nappend;
             if(nadd != 0) {
               ASTERIA_DEBUG_LOG("Array subscript is out of range: index = ", alt.index, ", size = ", arr.size());
-              return D_null();
+              return G_null();
             }
             auto erased = rocket::move(arr.mut(w.rindex));
             arr.erase(w.rindex, 1);
@@ -161,17 +161,17 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
       {
         const auto& alt = this->m_stor.as<S_object_key>();
         switch(rocket::weaken_enum(parent.dtype())) {
-        case dtype_null:
+        case gtype_null:
           {
-            return D_null();
+            return G_null();
           }
-        case dtype_object:
+        case gtype_object:
           {
-            auto& obj = parent.check<D_object>();
+            auto& obj = parent.check<G_object>();
             auto rit = obj.find_mut(alt.key);
             if(rit == obj.end()) {
               ASTERIA_DEBUG_LOG("Object key was not found: key = ", alt.key, ", parent = ", parent);
-              return D_null();
+              return G_null();
             }
             auto erased = rocket::move(rit->second);
             obj.erase(rit);

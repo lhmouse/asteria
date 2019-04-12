@@ -13,7 +13,7 @@ namespace Asteria {
 
     namespace {
 
-    std::pair<D_array::const_iterator, D_array::const_iterator> do_slice(const D_array& text, D_array::const_iterator tbegin, const Opt<D_integer>& length)
+    std::pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, G_array::const_iterator tbegin, const Opt<G_integer>& length)
       {
         if(!length || (*length >= text.end() - tbegin)) {
           // Get the subrange from `tbegin` to the end.
@@ -27,7 +27,7 @@ namespace Asteria {
         return std::make_pair(tbegin, tbegin + static_cast<std::ptrdiff_t>(*length));
       }
 
-    std::pair<D_array::const_iterator, D_array::const_iterator> do_slice(const D_array& text, const D_integer& from, const Opt<D_integer>& length)
+    std::pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, const G_integer& from, const Opt<G_integer>& length)
       {
         auto slen = static_cast<std::int64_t>(text.size());
         if(from >= 0) {
@@ -58,21 +58,21 @@ namespace Asteria {
 
     }
 
-D_array std_array_slice(const D_array& data, const D_integer& from, const Opt<D_integer>& length)
+G_array std_array_slice(const G_array& data, const G_integer& from, const Opt<G_integer>& length)
   {
     auto range = do_slice(data, from, length);
     if((range.first == data.begin()) && (range.second == data.end())) {
       // Use reference counting as our advantage.
       return data;
     }
-    return D_array(range.first, range.second);
+    return G_array(range.first, range.second);
   }
 
-D_array std_array_replace_slice(const D_array& data, const D_integer& from, const D_array& replacement)
+G_array std_array_replace_slice(const G_array& data, const G_integer& from, const G_array& replacement)
   {
     auto range = do_slice(data, from, rocket::nullopt);
     // Append segments.
-    D_array res;
+    G_array res;
     res.reserve(data.size() - static_cast<std::size_t>(range.second - range.first) + replacement.size());
     res.append(data.begin(), range.first);
     res.append(replacement.begin(), replacement.end());
@@ -80,11 +80,11 @@ D_array std_array_replace_slice(const D_array& data, const D_integer& from, cons
     return res;
   }
 
-D_array std_array_replace_slice(const D_array& data, const D_integer& from, const Opt<D_integer>& length, const D_array& replacement)
+G_array std_array_replace_slice(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_array& replacement)
   {
     auto range = do_slice(data, from, length);
     // Append segments.
-    D_array res;
+    G_array res;
     res.reserve(data.size() - static_cast<std::size_t>(range.second - range.first) + replacement.size());
     res.append(data.begin(), range.first);
     res.append(replacement.begin(), replacement.end());
@@ -92,12 +92,12 @@ D_array std_array_replace_slice(const D_array& data, const D_integer& from, cons
     return res;
   }
 
-Value std_array_max_of(const D_array& data)
+Value std_array_max_of(const G_array& data)
   {
     auto maxp = data.begin();
     if(maxp == data.end()) {
       // Return `null` if `data` is empty.
-      return D_null();
+      return G_null();
     }
     for(auto cur = maxp + 1; cur != data.end(); ++cur) {
       // Compare `*maxp` with the other elements, ignoring unordered elements.
@@ -109,12 +109,12 @@ Value std_array_max_of(const D_array& data)
     return *maxp;
   }
 
-Value std_array_min_of(const D_array& data)
+Value std_array_min_of(const G_array& data)
   {
     auto minp = data.begin();
     if(minp == data.end()) {
       // Return `null` if `data` is empty.
-      return D_null();
+      return G_null();
     }
     for(auto cur = minp + 1; cur != data.end(); ++cur) {
       // Compare `*minp` with the other elements, ignoring unordered elements.
@@ -140,7 +140,7 @@ Value std_array_min_of(const D_array& data)
 
     }
 
-Opt<D_integer> std_array_find(const D_array& data, const Value& target)
+Opt<G_integer> std_array_find(const G_array& data, const Value& target)
   {
     auto qit = do_find_opt(data.begin(), data.end(), target);
     if(!qit) {
@@ -149,7 +149,7 @@ Opt<D_integer> std_array_find(const D_array& data, const Value& target)
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_find(const D_array& data, const D_integer& from, const Value& target)
+Opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const Value& target)
   {
     auto range = do_slice(data, from, rocket::nullopt);
     auto qit = do_find_opt(range.first, range.second, target);
@@ -159,7 +159,7 @@ Opt<D_integer> std_array_find(const D_array& data, const D_integer& from, const 
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_find(const D_array& data, const D_integer& from, const Opt<D_integer>& length, const Value& target)
+Opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(range.first, range.second, target);
@@ -169,7 +169,7 @@ Opt<D_integer> std_array_find(const D_array& data, const D_integer& from, const 
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_rfind(const D_array& data, const Value& target)
+Opt<G_integer> std_array_rfind(const G_array& data, const Value& target)
   {
     auto qit = do_find_opt(data.rbegin(), data.rend(), target);
     if(!qit) {
@@ -178,7 +178,7 @@ Opt<D_integer> std_array_rfind(const D_array& data, const Value& target)
     return data.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_array_rfind(const D_array& data, const D_integer& from, const Value& target)
+Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Value& target)
   {
     auto range = do_slice(data, from, rocket::nullopt);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
@@ -188,7 +188,7 @@ Opt<D_integer> std_array_rfind(const D_array& data, const D_integer& from, const
     return data.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_array_rfind(const D_array& data, const D_integer& from, const Opt<D_integer>& length, const Value& target)
+Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
@@ -206,7 +206,7 @@ Opt<D_integer> std_array_rfind(const D_array& data, const D_integer& from, const
         args.emplace_back(rocket::move(xref));
       }
 
-    template<typename IteratorT> Opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end, const D_function& predictor, bool match)
+    template<typename IteratorT> Opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end, const G_function& predictor, bool match)
       {
         for(auto it = rocket::move(begin); it != end; ++it) {
           // Set up arguments for the user-defined predictor.
@@ -224,7 +224,7 @@ Opt<D_integer> std_array_rfind(const D_array& data, const D_integer& from, const
 
     }
 
-Opt<D_integer> std_array_find_if(const Global_Context& global, const D_array& data, const D_function& predictor)
+Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
     auto qit = do_find_if_opt(global, data.begin(), data.end(), predictor, true);
     if(!qit) {
@@ -233,7 +233,7 @@ Opt<D_integer> std_array_find_if(const Global_Context& global, const D_array& da
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_find_if(const Global_Context& global, const D_array& data, const D_integer& from, const D_function& predictor)
+Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     auto range = do_slice(data, from, rocket::nullopt);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -243,7 +243,7 @@ Opt<D_integer> std_array_find_if(const Global_Context& global, const D_array& da
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_find_if(const Global_Context& global, const D_array& data, const D_integer& from, const Opt<D_integer>& length, const D_function& predictor)
+Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -253,7 +253,7 @@ Opt<D_integer> std_array_find_if(const Global_Context& global, const D_array& da
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_find_if_not(const Global_Context& global, const D_array& data, const D_function& predictor)
+Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
     auto qit = do_find_if_opt(global, data.begin(), data.end(), predictor, false);
     if(!qit) {
@@ -262,7 +262,7 @@ Opt<D_integer> std_array_find_if_not(const Global_Context& global, const D_array
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_find_if_not(const Global_Context& global, const D_array& data, const D_integer& from, const D_function& predictor)
+Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     auto range = do_slice(data, from, rocket::nullopt);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -272,7 +272,7 @@ Opt<D_integer> std_array_find_if_not(const Global_Context& global, const D_array
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_find_if_not(const Global_Context& global, const D_array& data, const D_integer& from, const Opt<D_integer>& length, const D_function& predictor)
+Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -282,7 +282,7 @@ Opt<D_integer> std_array_find_if_not(const Global_Context& global, const D_array
     return *qit - data.begin();
   }
 
-Opt<D_integer> std_array_rfind_if(const Global_Context& global, const D_array& data, const D_function& predictor)
+Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
     auto qit = do_find_if_opt(global, data.rbegin(), data.rend(), predictor, true);
     if(!qit) {
@@ -291,7 +291,7 @@ Opt<D_integer> std_array_rfind_if(const Global_Context& global, const D_array& d
     return data.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_array_rfind_if(const Global_Context& global, const D_array& data, const D_integer& from, const D_function& predictor)
+Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     auto range = do_slice(data, from, rocket::nullopt);
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, true);
@@ -301,7 +301,7 @@ Opt<D_integer> std_array_rfind_if(const Global_Context& global, const D_array& d
     return data.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_array_rfind_if(const Global_Context& global, const D_array& data, const D_integer& from, const Opt<D_integer>& length, const D_function& predictor)
+Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, true);
@@ -311,7 +311,7 @@ Opt<D_integer> std_array_rfind_if(const Global_Context& global, const D_array& d
     return data.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_array& data, const D_function& predictor)
+Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
     auto qit = do_find_if_opt(global, data.rbegin(), data.rend(), predictor, false);
     if(!qit) {
@@ -320,7 +320,7 @@ Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_arra
     return data.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_array& data, const D_integer& from, const D_function& predictor)
+Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     auto range = do_slice(data, from, rocket::nullopt);
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, false);
@@ -330,7 +330,7 @@ Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_arra
     return data.rend() - *qit - 1;
   }
 
-Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_array& data, const D_integer& from, const Opt<D_integer>& length, const D_function& predictor)
+Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, false);
@@ -342,7 +342,7 @@ Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_arra
 
     namespace {
 
-    Value::Compare do_compare(const Global_Context& global, const Opt<D_function>& comparator, const Value& lhs, const Value& rhs)
+    Value::Compare do_compare(const Global_Context& global, const Opt<G_function>& comparator, const Value& lhs, const Value& rhs)
       {
         if(!comparator) {
           // Perform the built-in 3-way comparison.
@@ -355,7 +355,7 @@ Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_arra
         // Call it.
         Reference self;
         comparator->get().invoke(self, global, rocket::move(args));
-        auto qint = self.read().opt<D_integer>();
+        auto qint = self.read().opt<G_integer>();
         if(qint) {
           // Translate the result.
           if(*qint < 0) {
@@ -372,7 +372,7 @@ Opt<D_integer> std_array_rfind_if_not(const Global_Context& global, const D_arra
 
     }
 
-D_boolean std_array_is_sorted(const Global_Context& global, const D_array& data, const Opt<D_function>& comparator)
+G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {
     auto cur = data.begin();
     if(cur == data.end()) {
@@ -397,7 +397,7 @@ D_boolean std_array_is_sorted(const Global_Context& global, const D_array& data,
     namespace {
 
     template<typename IteratorT> std::pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
-                                                                       const Opt<D_function>& comparator, const Value& target)
+                                                                       const Opt<G_function>& comparator, const Value& target)
       {
         auto bpos = rocket::move(begin);
         auto epos = rocket::move(end);
@@ -428,7 +428,7 @@ D_boolean std_array_is_sorted(const Global_Context& global, const D_array& data,
       }
 
     template<typename IteratorT, typename PredT> IteratorT do_bound(const Global_Context& global, IteratorT begin, IteratorT end,
-                                                                    const Opt<D_function>& comparator, const Value& target, PredT&& pred)
+                                                                    const Opt<G_function>& comparator, const Value& target, PredT&& pred)
       {
         auto bpos = rocket::move(begin);
         auto epos = rocket::move(end);
@@ -454,7 +454,7 @@ D_boolean std_array_is_sorted(const Global_Context& global, const D_array& data,
 
     }
 
-Opt<D_integer> std_array_binary_search(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator)
+Opt<G_integer> std_array_binary_search(const Global_Context& global, const G_array& data, const Value& target, const Opt<G_function>& comparator)
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
     if(!pair.second) {
@@ -463,19 +463,19 @@ Opt<D_integer> std_array_binary_search(const Global_Context& global, const D_arr
     return pair.first - data.begin();
   }
 
-D_integer std_array_lower_bound(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator)
+G_integer std_array_lower_bound(const Global_Context& global, const G_array& data, const Value& target, const Opt<G_function>& comparator)
   {
     auto lpos = do_bound(global, data.begin(), data.end(), comparator, target, [](Value::Compare cmp) { return cmp != Value::compare_greater;  });
     return lpos - data.begin();
   }
 
-D_integer std_array_upper_bound(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator)
+G_integer std_array_upper_bound(const Global_Context& global, const G_array& data, const Value& target, const Opt<G_function>& comparator)
   {
     auto upos = do_bound(global, data.begin(), data.end(), comparator, target, [](Value::Compare cmp) { return cmp == Value::compare_less;  });
     return upos - data.begin();
   }
 
-std::pair<D_integer, D_integer> std_array_equal_range(const Global_Context& global, const D_array& data, const Value& target, const Opt<D_function>& comparator)
+std::pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, const G_array& data, const Value& target, const Opt<G_function>& comparator)
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
     auto lpos = do_bound(global, data.begin(), pair.first, comparator, target, [](Value::Compare cmp) { return cmp != Value::compare_greater;  });
@@ -483,15 +483,15 @@ std::pair<D_integer, D_integer> std_array_equal_range(const Global_Context& glob
     return std::make_pair(lpos - data.begin(), upos - data.begin());
   }
 
-D_array std_array_sort(const Global_Context& global, const D_array& data, const Opt<D_function>& comparator)
+G_array std_array_sort(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {
-    D_array res = data;
+    G_array res = data;
     if(res.size() <= 1) {
       // Use reference counting as our advantage.
       return res;
     }
     // Define the temporary storage for Merge Sort.
-    D_array temp;
+    G_array temp;
     temp.resize(res.size());
     for(std::size_t bsize = 1; bsize < res.size(); bsize *= 2) {
       // Merge adjacent blocks of `bsize` elements.
@@ -545,14 +545,14 @@ D_array std_array_sort(const Global_Context& global, const D_array& data, const 
     return res;
   }
 
-D_array std_array_generate(const Global_Context& global, const D_function& generator, const D_integer& length)
+G_array std_array_generate(const Global_Context& global, const G_function& generator, const G_integer& length)
   {
-    D_array res;
+    G_array res;
     res.reserve(static_cast<std::size_t>(length));
     for(std::int64_t i = 0; i < length; ++i) {
       // Set up arguments for the user-defined generator.
       Cow_Vector<Reference> args;
-      do_push_argument(args, D_integer(i));
+      do_push_argument(args, G_integer(i));
       do_push_argument(args, res.empty() ? Value::get_null() : res.back());
       // Call it.
       Reference self;
@@ -562,9 +562,9 @@ D_array std_array_generate(const Global_Context& global, const D_function& gener
     return res;
   }
 
-D_array std_array_shuffle(const D_array& data, const Opt<D_integer>& seed)
+G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed)
   {
-    D_array res = data;
+    G_array res = data;
     if(res.size() <= 1) {
       // Use reference counting as our advantage.
       return res;
@@ -588,13 +588,13 @@ D_array std_array_shuffle(const D_array& data, const Opt<D_integer>& seed)
     return res;
   }
 
-void create_bindings_array(D_object& result, API_Version /*version*/)
+void create_bindings_array(G_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.array.slice()`
     //===================================================================
     result.insert_or_assign(rocket::sref("slice"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.slice(data, from, [length])`\n"
                      "  * Copies a subrange of `data` to create a new `array`. Elements\n"
@@ -610,9 +610,9 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.slice"), args);
             // Parse arguments.
-            D_array data;
-            D_integer from;
-            Opt<D_integer> length;
+            G_array data;
+            G_integer from;
+            Opt<G_integer> length;
             if(reader.start().g(data).g(from).g(length).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_slice(data, from, length) };
@@ -622,13 +622,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.replace_slice()`
     //===================================================================
     result.insert_or_assign(rocket::sref("replace_slice"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.replace_slice(data, from, replacement)`\n"
                      "  * Replaces all elements from `from` to the end of `data` with\n"
@@ -651,15 +651,15 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.array.replace"), args);
             Argument_Reader::State state;
             // Parse arguments.
-            D_array data;
-            D_integer from;
-            D_array replacement;
+            G_array data;
+            G_integer from;
+            G_array replacement;
             if(reader.start().g(data).g(from).save_state(state).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, replacement) };
               return rocket::move(xref);
             }
-            Opt<D_integer> length;
+            Opt<G_integer> length;
             if(reader.load_state(state).g(length).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, length, replacement) };
@@ -669,13 +669,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.max_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("max_of"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.max_of(data)`\n"
                      "  * Finds and returns the maximum element in `data`. Elements that\n"
@@ -687,7 +687,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.max_of"), args);
             // Parse arguments.
-            D_array data;
+            G_array data;
             if(reader.start().g(data).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_max_of(data) };
@@ -697,13 +697,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.min_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("min_of"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.min_of(data)`\n"
                      "  * Finds and returns the minimum element in `data`. Elements that\n"
@@ -715,7 +715,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.min_of"), args);
             // Parse arguments.
-            D_array data;
+            G_array data;
             if(reader.start().g(data).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_min_of(data) };
@@ -725,13 +725,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.find()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.find(data, target)`\n"
                      "  * Searches `data` for the first occurrence of `target`.\n"
@@ -758,7 +758,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.array.find"), args);
             Argument_Reader::State state;
             // Parse arguments.
-            D_array data;
+            G_array data;
             Value target;
             if(reader.start().g(data).save_state(state).g(target).finish()) {
               // Call the binding function.
@@ -769,7 +769,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            D_integer from;
+            G_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_find(data, from, target);
@@ -779,7 +779,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> length;
+            Opt<G_integer> length;
             if(reader.load_state(state).g(length).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_find(data, from, length, target);
@@ -793,13 +793,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.rfind()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.rfind(data, target)`\n"
                      "  * Searches `data` for the last occurrence of `target`.\n"
@@ -826,7 +826,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.array.rfind"), args);
             Argument_Reader::State state;
             // Parse arguments.
-            D_array data;
+            G_array data;
             Value target;
             if(reader.start().g(data).save_state(state).g(target).finish()) {
               // Call the binding function.
@@ -837,7 +837,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            D_integer from;
+            G_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind(data, from, target);
@@ -847,7 +847,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> length;
+            Opt<G_integer> length;
             if(reader.load_state(state).g(length).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind(data, from, length, target);
@@ -861,13 +861,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.find_if()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_if"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.find_if(data, predictor)`\n"
                      "  * Finds the first element, namely `x`, in `data`, for which\n"
@@ -894,8 +894,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.array.find_if"), args);
             Argument_Reader::State state;
             // Parse arguments.
-            D_array data;
-            D_function predictor = global.get_placeholder_function();
+            G_array data;
+            G_function predictor = global.get_placeholder_function();
             if(reader.start().g(data).save_state(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if(global, data, predictor);
@@ -905,7 +905,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            D_integer from;
+            G_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if(global, data, from, predictor);
@@ -915,7 +915,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> length;
+            Opt<G_integer> length;
             if(reader.load_state(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if(global, data, from, length, predictor);
@@ -929,13 +929,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.find_if_not()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_if_not"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.find_if_not(data, predictor)`\n"
                      "  * Finds the first element, namely `x`, in `data`, for which\n"
@@ -962,8 +962,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.array.find_if_not"), args);
             Argument_Reader::State state;
             // Parse arguments.
-            D_array data;
-            D_function predictor = global.get_placeholder_function();
+            G_array data;
+            G_function predictor = global.get_placeholder_function();
             if(reader.start().g(data).save_state(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if_not(global, data, predictor);
@@ -973,7 +973,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            D_integer from;
+            G_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if_not(global, data, from, predictor);
@@ -983,7 +983,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> length;
+            Opt<G_integer> length;
             if(reader.load_state(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if_not(global, data, from, length, predictor);
@@ -997,13 +997,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.rfind_if()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind_if"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.rfind_if(data, predictor)`\n"
                      "  * Finds the last element, namely `x`, in `data`, for which\n"
@@ -1030,8 +1030,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.array.rfind_if"), args);
             Argument_Reader::State state;
             // Parse arguments.
-            D_array data;
-            D_function predictor = global.get_placeholder_function();
+            G_array data;
+            G_function predictor = global.get_placeholder_function();
             if(reader.start().g(data).save_state(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if(global, data, predictor);
@@ -1041,7 +1041,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            D_integer from;
+            G_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if(global, data, from, predictor);
@@ -1051,7 +1051,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> length;
+            Opt<G_integer> length;
             if(reader.load_state(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if(global, data, from, length, predictor);
@@ -1065,13 +1065,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.rfind_if_not()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind_if_not"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.rfind_if_not(data, predictor)`\n"
                      "  * Finds the last element, namely `x`, in `data`, for which\n"
@@ -1098,8 +1098,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.array.rfind_if_not"), args);
             Argument_Reader::State state;
             // Parse arguments.
-            D_array data;
-            D_function predictor = global.get_placeholder_function();
+            G_array data;
+            G_function predictor = global.get_placeholder_function();
             if(reader.start().g(data).save_state(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if_not(global, data, predictor);
@@ -1109,7 +1109,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            D_integer from;
+            G_integer from;
             if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if_not(global, data, from, predictor);
@@ -1119,7 +1119,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
               return rocket::move(xref);
             }
-            Opt<D_integer> length;
+            Opt<G_integer> length;
             if(reader.load_state(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if_not(global, data, from, length, predictor);
@@ -1133,13 +1133,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.is_sorted()`
     //===================================================================
     result.insert_or_assign(rocket::sref("is_sorted"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.is_sorted(data, [comparator])`\n"
                      "  * Checks whether `data` is sorted. That is, there is no pair of\n"
@@ -1159,8 +1159,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.is_sorted"), args);
             // Parse arguments.
-            D_array data;
-            Opt<D_function> comparator;
+            G_array data;
+            Opt<G_function> comparator;
             if(reader.start().g(data).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_is_sorted(global, data, comparator) };
@@ -1170,13 +1170,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.binary_search()`
     //===================================================================
     result.insert_or_assign(rocket::sref("binary_search"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.binary_search(data, target, [comparator])`\n"
                      "  * Finds the first element in `data` that is equal to `target`.\n"
@@ -1194,9 +1194,9 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.binary_search"), args);
             // Parse arguments.
-            D_array data;
+            G_array data;
             Value target;
-            Opt<D_function> comparator;
+            Opt<G_function> comparator;
             if(reader.start().g(data).g(target).g(comparator).finish()) {
               // Call the binding function.
               auto qindex = std_array_binary_search(global, data, target, comparator);
@@ -1210,13 +1210,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.lower_bound()`
     //===================================================================
     result.insert_or_assign(rocket::sref("lower_bound"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.lower_bound(data, target, [comparator])`\n"
                      "  * Finds the first element in `data` that is greater than or equal\n"
@@ -1236,9 +1236,9 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
             // Parse arguments.
-            D_array data;
+            G_array data;
             Value target;
-            Opt<D_function> comparator;
+            Opt<G_function> comparator;
             if(reader.start().g(data).g(target).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_lower_bound(global, data, target, comparator) };
@@ -1248,13 +1248,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.upper_bound()`
     //===================================================================
     result.insert_or_assign(rocket::sref("upper_bound"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.upper_bound(data, target, [comparator])`\n"
                      "  * Finds the first element in `data` that is greater than `target`\n"
@@ -1274,9 +1274,9 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.upper_bound"), args);
             // Parse arguments.
-            D_array data;
+            G_array data;
             Value target;
-            Opt<D_function> comparator;
+            Opt<G_function> comparator;
             if(reader.start().g(data).g(target).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_upper_bound(global, data, target, comparator) };
@@ -1286,13 +1286,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.equal_range()`
     //===================================================================
     result.insert_or_assign(rocket::sref("equal_range"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.equal_range(data, target, [comparator])`\n"
                      "  * Gets the range of elements equivalent to `target` in `data` as\n"
@@ -1311,13 +1311,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
             // Parse arguments.
-            D_array data;
+            G_array data;
             Value target;
-            Opt<D_function> comparator;
+            Opt<G_function> comparator;
             if(reader.start().g(data).g(target).g(comparator).finish()) {
               // Call the binding function.
               auto pair = std_array_equal_range(global, data, target, comparator);
-              D_array res;
+              G_array res;
               res.reserve(2);
               res.emplace_back(rocket::move(pair.first));
               res.emplace_back(rocket::move(pair.second));
@@ -1328,13 +1328,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.sort()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sort"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.sort(data, [comparator])`\n"
                      "  * Sorts elements in `data` in ascending order. The principle of\n"
@@ -1351,8 +1351,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.sort"), args);
             // Parse arguments.
-            D_array data;
-            Opt<D_function> comparator;
+            G_array data;
+            Opt<G_function> comparator;
             if(reader.start().g(data).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_sort(global, data, comparator) };
@@ -1362,13 +1362,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.generate()`
     //===================================================================
     result.insert_or_assign(rocket::sref("generate"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.generate(generator, length)`\n"
                      "  * Calls `generator` repeatedly up to `length` times and returns\n"
@@ -1383,8 +1383,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.generate"), args);
             // Parse arguments.
-            D_function generator = global.get_placeholder_function();
-            D_integer length;
+            G_function generator = global.get_placeholder_function();
+            G_integer length;
             if(reader.start().g(generator).g(length).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_generate(global, generator, length) };
@@ -1394,13 +1394,13 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.array.shuffle()`
     //===================================================================
     result.insert_or_assign(rocket::sref("shuffle"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.array.shuffle(data, [seed])`\n"
                      "  * Shuffles elements in `data` randomly. If `seed` is set to an\n"
@@ -1415,8 +1415,8 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.shuffle"), args);
             // Parse arguments.
-            D_array data;
-            Opt<D_integer> seed;
+            G_array data;
+            Opt<G_integer> seed;
             if(reader.start().g(data).g(seed).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_shuffle(data, seed) };
@@ -1426,7 +1426,7 @@ void create_bindings_array(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // End of `std.array`

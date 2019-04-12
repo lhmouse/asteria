@@ -17,7 +17,7 @@ bool std_debug_print(const Cow_Vector<Value>& values)
     return succ;
   }
 
-bool std_debug_dump(const Value& value, const Opt<D_integer>& indent)
+bool std_debug_dump(const Value& value, const Opt<G_integer>& indent)
   {
     rocket::insertable_ostream mos;
     value.dump(mos, static_cast<std::size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
@@ -25,13 +25,13 @@ bool std_debug_dump(const Value& value, const Opt<D_integer>& indent)
     return succ;
   }
 
-void create_bindings_debug(D_object& result, API_Version /*version*/)
+void create_bindings_debug(G_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.debug.print()`
     //===================================================================
     result.insert_or_assign(rocket::sref("print"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.debug.print(...)`\n"
                      "  * Prints all arguments to the standard error stream. A line break\n"
@@ -55,13 +55,13 @@ void create_bindings_debug(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.debug.dump()`
     //===================================================================
     result.insert_or_assign(rocket::sref("dump"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.debug.dump(value, [indent])`\n"
                      "  * Prints the value to the standard error stream with detailed\n"
@@ -77,7 +77,7 @@ void create_bindings_debug(D_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.debug.dump"), args);
             // Parse arguments.
             Value value;
-            Opt<D_integer> indent;
+            Opt<G_integer> indent;
             if(reader.start().g(value).g(indent).finish()) {
               // Call the binding function.
               if(!std_debug_dump(value, indent)) {
@@ -90,7 +90,7 @@ void create_bindings_debug(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // End of `std.debug`

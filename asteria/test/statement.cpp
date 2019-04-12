@@ -20,16 +20,16 @@ int main()
     Cow_Vector<Statement> text;
     // var res = 0;
     Cow_Vector<Xprunit> expr;
-    expr.emplace_back(Xprunit::S_literal { D_integer(0) });
+    expr.emplace_back(Xprunit::S_literal { G_integer(0) });
     text.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 1), false,
                                               { { rocket::sref("res"), std::move(expr) } } });
     // const data = [ 1, 2, 3, 2 * 5 ];
     expr.clear();
-    expr.emplace_back(Xprunit::S_literal { D_integer(1) });
-    expr.emplace_back(Xprunit::S_literal { D_integer(2) });
-    expr.emplace_back(Xprunit::S_literal { D_integer(3) });
-    expr.emplace_back(Xprunit::S_literal { D_integer(2) });
-    expr.emplace_back(Xprunit::S_literal { D_integer(5) });
+    expr.emplace_back(Xprunit::S_literal { G_integer(1) });
+    expr.emplace_back(Xprunit::S_literal { G_integer(2) });
+    expr.emplace_back(Xprunit::S_literal { G_integer(3) });
+    expr.emplace_back(Xprunit::S_literal { G_integer(2) });
+    expr.emplace_back(Xprunit::S_literal { G_integer(5) });
     expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_mul, false });
     expr.emplace_back(Xprunit::S_unnamed_array { 4 });
     text.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 2), true,
@@ -66,19 +66,19 @@ int main()
     expr.emplace_back(Xprunit::S_named_reference { rocket::sref("data") });
     expr.emplace_back(Xprunit::S_named_reference { rocket::sref("j") });
     expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_postfix_at, false });
-    expr.emplace_back(Xprunit::S_literal { D_integer(2) });
+    expr.emplace_back(Xprunit::S_literal { G_integer(2) });
     expr.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_cmp_eq, false });
     Cow_Vector<Statement> branch_true;
     branch_true.emplace_back(Statement::S_break { Statement::target_unspec });
     body.emplace_back(Statement::S_if { false, std::move(expr), std::move(branch_true), { } });
     expr.clear();
-    expr.emplace_back(Xprunit::S_literal { D_integer(0) });
+    expr.emplace_back(Xprunit::S_literal { G_integer(0) });
     Cow_Vector<Statement> init;
     init.emplace_back(Statement::S_variable { Source_Location(rocket::sref("nonexistent"), 3), false,
                                               { { rocket::sref("j"), std::move(expr) } } });
     Cow_Vector<Xprunit> cond;
     cond.emplace_back(Xprunit::S_named_reference { rocket::sref("j") });
-    cond.emplace_back(Xprunit::S_literal { D_integer(3) });
+    cond.emplace_back(Xprunit::S_literal { G_integer(3) });
     cond.emplace_back(Xprunit::S_operator_rpn { Xprunit::xop_infix_cmp_lte, false });
     Cow_Vector<Xprunit> step;
     step.emplace_back(Xprunit::S_named_reference { rocket::sref("j") });
@@ -95,14 +95,14 @@ int main()
     ASTERIA_TEST_CHECK(status == Air_Node::status_next);
     auto qref = ctx.get_named_reference_opt(rocket::sref("res"));
     ASTERIA_TEST_CHECK(qref != nullptr);
-    ASTERIA_TEST_CHECK(qref->read().check<D_integer>() == 41);
+    ASTERIA_TEST_CHECK(qref->read().check<G_integer>() == 41);
     qref = ctx.get_named_reference_opt(rocket::sref("data"));
     ASTERIA_TEST_CHECK(qref != nullptr);
-    ASTERIA_TEST_CHECK(qref->read().check<D_array>().size() == 4);
-    ASTERIA_TEST_CHECK(qref->read().check<D_array>().at(0).check<D_integer>() ==  1);
-    ASTERIA_TEST_CHECK(qref->read().check<D_array>().at(1).check<D_integer>() ==  2);
-    ASTERIA_TEST_CHECK(qref->read().check<D_array>().at(2).check<D_integer>() ==  3);
-    ASTERIA_TEST_CHECK(qref->read().check<D_array>().at(3).check<D_integer>() == 10);
+    ASTERIA_TEST_CHECK(qref->read().check<G_array>().size() == 4);
+    ASTERIA_TEST_CHECK(qref->read().check<G_array>().at(0).check<G_integer>() ==  1);
+    ASTERIA_TEST_CHECK(qref->read().check<G_array>().at(1).check<G_integer>() ==  2);
+    ASTERIA_TEST_CHECK(qref->read().check<G_array>().at(2).check<G_integer>() ==  3);
+    ASTERIA_TEST_CHECK(qref->read().check<G_array>().at(3).check<G_integer>() == 10);
     qref = ctx.get_named_reference_opt(rocket::sref("k"));
     ASTERIA_TEST_CHECK(qref == nullptr);
     qref = ctx.get_named_reference_opt(rocket::sref("v"));

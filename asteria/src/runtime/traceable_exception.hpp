@@ -62,7 +62,7 @@ template<typename ExceptionT> Traceable_Exception trace_exception(ExceptionT&& e
     auto traceable = dynamic_cast<typename std::conditional<copy_or_move, const Traceable_Exception*, Traceable_Exception*>::type>(std::addressof(except));
     if(!traceable) {
       // Say the exception was thrown from native code.
-      return Traceable_Exception(D_string(except.what()), Source_Location(rocket::sref("<native code>"), 0), rocket::sref("<native code>"));
+      return Traceable_Exception(G_string(except.what()), Source_Location(rocket::sref("<native code>"), 0), rocket::sref("<native code>"));
     }
     // Copy or move it.
     return static_cast<typename std::conditional<copy_or_move, const Traceable_Exception&, Traceable_Exception&&>::type>(*traceable);

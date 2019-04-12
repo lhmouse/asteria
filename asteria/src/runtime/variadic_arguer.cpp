@@ -17,12 +17,12 @@ Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*glob
   {
     Argument_Reader reader(rocket::sref("<built-in>.__varg"), args);
     // Extract arguments.
-    Opt<D_integer> qindex;
+    Opt<G_integer> qindex;
     if(reader.start().g(qindex).finish()) {
       auto nvargs = this->m_vargs.size();
       if(!qindex) {
         // Return the number of variadic arguments if `index` is `null` or absent.
-        Reference_Root::S_constant xref = { D_integer(nvargs) };
+        Reference_Root::S_constant xref = { G_integer(nvargs) };
         return self = rocket::move(xref);
       }
       // Return the argument at `index`.

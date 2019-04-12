@@ -96,28 +96,28 @@ template<typename... P> using Variant = rocket::variant<P...>;
 template<typename T> using Opt = rocket::optional<T>;
 
 // Fundamental Types
-using D_null      = std::nullptr_t;
-using D_boolean   = bool;
-using D_integer   = std::int64_t;
-using D_real      = double;
-using D_string    = Cow_String;
-using D_opaque    = Rcobj<Abstract_Opaque>;
-using D_function  = Rcobj<Abstract_Function>;
-using D_array     = Cow_Vector<Value>;
-using D_object    = Cow_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
+using G_null      = std::nullptr_t;
+using G_boolean   = bool;
+using G_integer   = std::int64_t;
+using G_real      = double;
+using G_string    = Cow_String;
+using G_opaque    = Rcobj<Abstract_Opaque>;
+using G_function  = Rcobj<Abstract_Function>;
+using G_array     = Cow_Vector<Value>;
+using G_object    = Cow_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
 
 // Indices of Fundamental Types
 enum Dtype : std::uint8_t
   {
-    dtype_null      = 0,
-    dtype_boolean   = 1,
-    dtype_integer   = 2,
-    dtype_real      = 3,
-    dtype_string    = 4,
-    dtype_opaque    = 5,
-    dtype_function  = 6,
-    dtype_array     = 7,
-    dtype_object    = 8,
+    gtype_null      = 0,
+    gtype_boolean   = 1,
+    gtype_integer   = 2,
+    gtype_real      = 3,
+    gtype_string    = 4,
+    gtype_opaque    = 5,
+    gtype_function  = 6,
+    gtype_array     = 7,
+    gtype_object    = 8,
   };
 
 // API versioning of the standard library

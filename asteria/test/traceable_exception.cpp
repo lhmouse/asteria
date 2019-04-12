@@ -9,12 +9,12 @@ using namespace Asteria;
 int main()
   {
     try {
-      Traceable_Exception except(D_integer(42), Source_Location(rocket::sref("file1"), 1), rocket::sref("func1"));
+      Traceable_Exception except(G_integer(42), Source_Location(rocket::sref("file1"), 1), rocket::sref("func1"));
       except.append_frame(Source_Location(rocket::sref("file2"), 2), rocket::sref("func2"));
       except.append_frame(Source_Location(rocket::sref("file3"), 3), rocket::sref("func3"));
       throw except;
     } catch(Traceable_Exception& e) {
-      ASTERIA_TEST_CHECK(e.get_value().check<D_integer>() == 42);
+      ASTERIA_TEST_CHECK(e.get_value().check<G_integer>() == 42);
       ASTERIA_TEST_CHECK(e.get_frame_count() == 3);
       ASTERIA_TEST_CHECK(e.get_frame(0).source_file() ==        "file1");
       ASTERIA_TEST_CHECK(e.get_frame(0).source_line() ==             1 );

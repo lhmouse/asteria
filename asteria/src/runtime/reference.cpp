@@ -53,7 +53,7 @@ Value Reference::do_unset_with_modifiers() const
     for(std::size_t i = 0; i != epos; ++i) {
       auto qnext = this->m_mods.at(i).apply_mutable_opt(cur, false);
       if(!qnext) {
-        return D_null();
+        return G_null();
       }
       cur = std::ref(*qnext);
     }

@@ -227,7 +227,7 @@ Collector* Collector::collect_single_opt()
           if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
             // Overwrite the value of this variable with a scalar value to break reference cycles.
-            root->reset(Source_Location(rocket::sref("<defunct>"), 0), D_integer(0xFEEDFACECAFEBEEF), true);
+            root->reset(Source_Location(rocket::sref("<defunct>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
             // Cache this variable if a pool is provided.
             if(output) {
               output->insert(root);

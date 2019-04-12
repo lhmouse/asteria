@@ -171,11 +171,11 @@ namespace Asteria {
               }
             static const s_table[] =
               {
-                { Token::keyword_null,      []() -> Value { return D_null();  }          },
-                { Token::keyword_false,     []() -> Value { return D_boolean(false);  }  },
-                { Token::keyword_true,      []() -> Value { return D_boolean(true);  }   },
-                { Token::keyword_nan,       []() -> Value { return D_real(NAN);  }       },
-                { Token::keyword_infinity,  []() -> Value { return D_real(INFINITY);  }  },
+                { Token::keyword_null,      []() -> Value { return G_null();  }          },
+                { Token::keyword_false,     []() -> Value { return G_boolean(false);  }  },
+                { Token::keyword_true,      []() -> Value { return G_boolean(true);  }   },
+                { Token::keyword_nan,       []() -> Value { return G_real(NAN);  }       },
+                { Token::keyword_infinity,  []() -> Value { return G_real(INFINITY);  }  },
               };
             auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
             if(qconf == std::end(s_table)) {
@@ -190,7 +190,7 @@ namespace Asteria {
           {
             const auto& alt = qtok->check<Token::S_integer_literal>();
             // Copy the value and discard this token.
-            auto value = D_integer(alt.value);
+            auto value = G_integer(alt.value);
             tstrm.shift();
             return rocket::move(value);
           }
@@ -198,7 +198,7 @@ namespace Asteria {
           {
             const auto& alt = qtok->check<Token::S_real_literal>();
             // Copy the value and discard this token.
-            auto value = D_real(alt.value);
+            auto value = G_real(alt.value);
             tstrm.shift();
             return rocket::move(value);
           }
@@ -206,7 +206,7 @@ namespace Asteria {
           {
             const auto& alt = qtok->check<Token::S_string_literal>();
             // Copy the value and discard this token.
-            auto value = D_string(alt.value);
+            auto value = G_string(alt.value);
             tstrm.shift();
             return rocket::move(value);
           }
@@ -1254,11 +1254,11 @@ namespace Asteria {
         }
         // Replace special names. This is what macros in C do.
         if(*qname == "__file") {
-          Xprunit::S_literal xunit = { D_string(sloc.file()) };
+          Xprunit::S_literal xunit = { G_string(sloc.file()) };
           return units.emplace_back(rocket::move(xunit)), true;
         }
         if(*qname == "__line") {
-          Xprunit::S_literal xunit = { D_integer(sloc.line()) };
+          Xprunit::S_literal xunit = { G_integer(sloc.line()) };
           return units.emplace_back(rocket::move(xunit)), true;
         }
         Xprunit::S_named_reference xunit = { rocket::move(*qname) };

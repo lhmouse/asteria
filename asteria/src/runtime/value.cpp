@@ -10,39 +10,39 @@ namespace Asteria {
 const char* Value::get_type_name(Dtype etype) noexcept
   {
     switch(etype) {
-    case dtype_null:
+    case gtype_null:
       {
         return "null";
       }
-    case dtype_boolean:
+    case gtype_boolean:
       {
         return "boolean";
       }
-    case dtype_integer:
+    case gtype_integer:
       {
         return "integer";
       }
-    case dtype_real:
+    case gtype_real:
       {
         return "real";
       }
-    case dtype_string:
+    case gtype_string:
       {
         return "string";
       }
-    case dtype_opaque:
+    case gtype_opaque:
       {
         return "opaque";
       }
-    case dtype_function:
+    case gtype_function:
       {
         return "function";
       }
-    case dtype_array:
+    case gtype_array:
       {
         return "array";
       }
-    case dtype_object:
+    case gtype_object:
       {
         return "object";
       }
@@ -60,16 +60,16 @@ const Value& Value::get_null() noexcept
     return *(static_cast<const Value*>(pv));
   }
 
-D_real Value::convert_to_real() const
+G_real Value::convert_to_real() const
   {
     switch(rocket::weaken_enum(this->dtype())) {
-    case dtype_integer:
+    case gtype_integer:
       {
-        return D_real(this->check<D_integer>());
+        return G_real(this->check<G_integer>());
       }
-    case dtype_real:
+    case gtype_real:
       {
-        return this->check<D_real>();
+        return this->check<G_real>();
       }
     default:
       ASTERIA_TERMINATE("`", Value::get_type_name(this->dtype()), "` is not an arithmetic type.");
@@ -79,36 +79,36 @@ D_real Value::convert_to_real() const
 bool Value::test() const noexcept
   {
     switch(this->dtype()) {
-    case dtype_null:
+    case gtype_null:
       {
         return false;
       }
-    case dtype_boolean:
+    case gtype_boolean:
       {
-        return this->check<D_boolean>();
+        return this->check<G_boolean>();
       }
-    case dtype_integer:
+    case gtype_integer:
       {
-        return this->check<D_integer>() != 0;
+        return this->check<G_integer>() != 0;
       }
-    case dtype_real:
+    case gtype_real:
       {
-        return std::fpclassify(this->check<D_real>()) != FP_ZERO;
+        return std::fpclassify(this->check<G_real>()) != FP_ZERO;
       }
-    case dtype_string:
+    case gtype_string:
       {
-        return this->check<D_string>().size() != 0;
+        return this->check<G_string>().size() != 0;
       }
-    case dtype_opaque:
-    case dtype_function:
+    case gtype_opaque:
+    case gtype_function:
       {
         return true;
       }
-    case dtype_array:
+    case gtype_array:
       {
-        return this->check<D_array>().size() != 0;
+        return this->check<G_array>().size() != 0;
       }
-    case dtype_object:
+    case gtype_object:
       {
         return true;
       }
@@ -128,7 +128,7 @@ template<typename XvalueT> ROCKET_RETURN_ENABLE_IF(Value::Compare, std::is_integ
     return compare_equal;
   }
 
-Value::Compare Value::do_compare_3way(D_real lhs, D_real rhs) noexcept
+Value::Compare Value::do_compare_3way(G_real lhs, G_real rhs) noexcept
   {
     if(std::isunordered(lhs, rhs)) {
       return compare_unordered;
@@ -156,53 +156,53 @@ Value::Compare Value::compare(const Value& other) const noexcept
       return compare_unordered;
     }
     switch(this->dtype()) {
-    case dtype_null:
+    case gtype_null:
       {
         // `null` values are equivalent.
         return compare_equal;
       }
-    case dtype_boolean:
+    case gtype_boolean:
       {
-        const auto& lhs = this->check<D_boolean>();
-        const auto& rhs = other.check<D_boolean>();
+        const auto& lhs = this->check<G_boolean>();
+        const auto& rhs = other.check<G_boolean>();
         // Compare `boolean` values as integers.
         return Value::do_compare_3way(lhs, rhs);
       }
-    case dtype_integer:
+    case gtype_integer:
       {
-        const auto& lhs = this->check<D_integer>();
-        const auto& rhs = other.check<D_integer>();
+        const auto& lhs = this->check<G_integer>();
+        const auto& rhs = other.check<G_integer>();
         // Compare `integer`s.
         return Value::do_compare_3way(lhs, rhs);
       }
-    case dtype_real:
+    case gtype_real:
       {
-        const auto& lhs = this->check<D_real>();
-        const auto& rhs = other.check<D_real>();
+        const auto& lhs = this->check<G_real>();
+        const auto& rhs = other.check<G_real>();
         // Compare `real`s.
         return Value::do_compare_3way(lhs, rhs);
       }
-    case dtype_string:
+    case gtype_string:
       {
-        const auto& lhs = this->check<D_string>();
-        const auto& rhs = other.check<D_string>();
+        const auto& lhs = this->check<G_string>();
+        const auto& rhs = other.check<G_string>();
         // Compare `string`s.
         return Value::do_compare_3way(lhs.compare(rhs), 0);
       }
-    case dtype_opaque:
+    case gtype_opaque:
       {
         // `opaque` values are unordered with everything.
         return compare_unordered;
       }
-    case dtype_function:
+    case gtype_function:
       {
         // `function`s are unordered with everything.
         return compare_unordered;
       }
-    case dtype_array:
+    case gtype_array:
       {
-        const auto& lhs = this->check<D_array>();
-        const auto& rhs = other.check<D_array>();
+        const auto& lhs = this->check<G_array>();
+        const auto& rhs = other.check<G_array>();
         // Perform lexicographical comparison of array elements.
         auto rlen = rocket::min(lhs.size(), rhs.size());
         for(std::size_t i = 0; i < rlen; ++i) {
@@ -214,7 +214,7 @@ Value::Compare Value::compare(const Value& other) const noexcept
         }
         return Value::do_compare_3way(lhs.size(), rhs.size());
       }
-    case dtype_object:
+    case gtype_object:
       {
         // `object`s are unordered with everything.
         return compare_unordered;
@@ -227,36 +227,36 @@ Value::Compare Value::compare(const Value& other) const noexcept
 void Value::print(std::ostream& os, bool quote_strings) const
   {
     switch(this->dtype()) {
-    case dtype_null:
+    case gtype_null:
       {
         // null
         os << "null";
         return;
       }
-    case dtype_boolean:
+    case gtype_boolean:
       {
-        const auto& alt = this->check<D_boolean>();
+        const auto& alt = this->check<G_boolean>();
         // true
         os << std::boolalpha << std::nouppercase << alt;
         return;
       }
-    case dtype_integer:
+    case gtype_integer:
       {
-        const auto& alt = this->check<D_integer>();
+        const auto& alt = this->check<G_integer>();
         // 42
         os << std::dec << alt;
         return;
       }
-    case dtype_real:
+    case gtype_real:
       {
-        const auto& alt = this->check<D_real>();
+        const auto& alt = this->check<G_real>();
         // 123.456
         os << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
         return;
       }
-    case dtype_string:
+    case gtype_string:
       {
-        const auto& alt = this->check<D_string>();
+        const auto& alt = this->check<G_string>();
         if(quote_strings) {
           // "hello"
           os << quote(alt);
@@ -266,23 +266,23 @@ void Value::print(std::ostream& os, bool quote_strings) const
         os << alt;
         return;
       }
-    case dtype_opaque:
+    case gtype_opaque:
       {
-        const auto& alt = this->check<D_opaque>();
+        const auto& alt = this->check<G_opaque>();
         // <opaque> [[`my opaque`]]
         os << "<opaque> [[`" << alt.get() << "`]]";
         return;
       }
-    case dtype_function:
+    case gtype_function:
       {
-        const auto& alt = this->check<D_function>();
+        const auto& alt = this->check<G_function>();
         // <function> [[`my function`]]
         os << "<function> [[`" << alt.get() << "`]]";
         return;
       }
-    case dtype_array:
+    case gtype_array:
       {
-        const auto& alt = this->check<D_array>();
+        const auto& alt = this->check<G_array>();
         // [ 1; 2; 3; ]
         os << '[';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
@@ -293,9 +293,9 @@ void Value::print(std::ostream& os, bool quote_strings) const
         os << ' ' << ']';
         return;
       }
-    case dtype_object:
+    case gtype_object:
       {
-        const auto& alt = this->check<D_object>();
+        const auto& alt = this->check<G_object>();
         // { "one" = 1; "two" = 2; "three" = 3; }
         os << '{';
         for(auto it = alt.begin(); it != alt.end(); ++it) {
@@ -328,57 +328,57 @@ std::ostream& Value::do_auto_indent(std::ostream& os, std::size_t indent_increme
 void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
   {
     switch(this->dtype()) {
-    case dtype_null:
+    case gtype_null:
       {
         // null
         os << "null";
         return;
       }
-    case dtype_boolean:
+    case gtype_boolean:
       {
-        const auto& alt = this->check<D_boolean>();
+        const auto& alt = this->check<G_boolean>();
         // boolean true
         os << "boolean " << std::boolalpha << std::nouppercase << alt;
         return;
       }
-    case dtype_integer:
+    case gtype_integer:
       {
-        const auto& alt = this->check<D_integer>();
+        const auto& alt = this->check<G_integer>();
         // integer 42
         os << "integer " << std::dec << alt;
         return;
       }
-    case dtype_real:
+    case gtype_real:
       {
-        const auto& alt = this->check<D_real>();
+        const auto& alt = this->check<G_real>();
         // real 123.456
         os << "real " << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt;
         return;
       }
-    case dtype_string:
+    case gtype_string:
       {
-        const auto& alt = this->check<D_string>();
+        const auto& alt = this->check<G_string>();
         // string(5) "hello"
         os << "string(" << std::dec << alt.size() << ") " << quote(alt);
         return;
       }
-    case dtype_opaque:
+    case gtype_opaque:
       {
-        const auto& alt = this->check<D_opaque>();
+        const auto& alt = this->check<G_opaque>();
         // opaque("typeid") [[`my opaque`]]
         os << "opaque(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
-    case dtype_function:
+    case gtype_function:
       {
-        const auto& alt = this->check<D_function>();
+        const auto& alt = this->check<G_function>();
         // function("typeid") [[`my function`]]
         os << "function(" << quote(typeid(alt.get()).name()) << ") [[`" << alt.get() << "`]]";
         return;
       }
-    case dtype_array:
+    case gtype_array:
       {
-        const auto& alt = this->check<D_array>();
+        const auto& alt = this->check<G_array>();
         // array(3) =
         //  [
         //   0 = integer 1;
@@ -398,9 +398,9 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
         os << ']';
         return;
       }
-    case dtype_object:
+    case gtype_object:
       {
-        const auto& alt = this->check<D_object>();
+        const auto& alt = this->check<G_object>();
         // object(3) =
         //  {
         //   "one" = integer 1;
@@ -428,32 +428,32 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
 bool Value::unique() const noexcept
   {
     switch(this->dtype()) {
-    case dtype_null:
-    case dtype_boolean:
-    case dtype_integer:
-    case dtype_real:
+    case gtype_null:
+    case gtype_boolean:
+    case gtype_integer:
+    case gtype_real:
       {
         return true;
       }
-    case dtype_string:
+    case gtype_string:
       {
-        return this->check<D_string>().unique();
+        return this->check<G_string>().unique();
       }
-    case dtype_opaque:
+    case gtype_opaque:
       {
-        return this->check<D_opaque>().unique();
+        return this->check<G_opaque>().unique();
       }
-    case dtype_function:
+    case gtype_function:
       {
-        return this->check<D_function>().unique();
+        return this->check<G_function>().unique();
       }
-    case dtype_array:
+    case gtype_array:
       {
-        return this->check<D_array>().unique();
+        return this->check<G_array>().unique();
       }
-    case dtype_object:
+    case gtype_object:
       {
-        return this->check<D_object>().unique();
+        return this->check<G_object>().unique();
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
@@ -463,35 +463,35 @@ bool Value::unique() const noexcept
 long Value::use_count() const noexcept
   {
     switch(this->dtype()) {
-    case dtype_null:
+    case gtype_null:
       {
         return 0;
       }
-    case dtype_boolean:
-    case dtype_integer:
-    case dtype_real:
+    case gtype_boolean:
+    case gtype_integer:
+    case gtype_real:
       {
         return 1;
       }
-    case dtype_string:
+    case gtype_string:
       {
-        return this->check<D_string>().use_count();
+        return this->check<G_string>().use_count();
       }
-    case dtype_opaque:
+    case gtype_opaque:
       {
-        return this->check<D_opaque>().use_count();
+        return this->check<G_opaque>().use_count();
       }
-    case dtype_function:
+    case gtype_function:
       {
-        return this->check<D_function>().use_count();
+        return this->check<G_function>().use_count();
       }
-    case dtype_array:
+    case gtype_array:
       {
-        return this->check<D_array>().use_count();
+        return this->check<G_array>().use_count();
       }
-    case dtype_object:
+    case gtype_object:
       {
-        return this->check<D_object>().use_count();
+        return this->check<G_object>().use_count();
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->dtype(), "` has been encountered.");
@@ -501,32 +501,32 @@ long Value::use_count() const noexcept
 void Value::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     switch(this->dtype()) {
-    case dtype_null:
-    case dtype_boolean:
-    case dtype_integer:
-    case dtype_real:
-    case dtype_string:
+    case gtype_null:
+    case gtype_boolean:
+    case gtype_integer:
+    case gtype_real:
+    case gtype_string:
       {
         return;
       }
-    case dtype_opaque:
+    case gtype_opaque:
       {
-        this->check<D_opaque>()->enumerate_variables(callback);
+        this->check<G_opaque>()->enumerate_variables(callback);
         return;
       }
-    case dtype_function:
+    case gtype_function:
       {
-        this->check<D_function>()->enumerate_variables(callback);
+        this->check<G_function>()->enumerate_variables(callback);
         return;
       }
-    case dtype_array:
+    case gtype_array:
       {
-        rocket::for_each(this->check<D_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  });
+        rocket::for_each(this->check<G_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  });
         return;
       }
-    case dtype_object:
+    case gtype_object:
       {
-        rocket::for_each(this->check<D_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
+        rocket::for_each(this->check<G_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
         return;
       }
     default:

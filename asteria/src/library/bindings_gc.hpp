@@ -8,12 +8,12 @@
 
 namespace Asteria {
 
-extern Opt<D_integer> std_gc_get_threshold(const Global_Context& global, const D_integer& generation);
-extern Opt<D_integer> std_gc_set_threshold(const Global_Context& global, const D_integer& generation, const D_integer& threshold);
-extern D_integer std_gc_collect(const Global_Context& global, const Opt<D_integer>& generation_limit);
+extern Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation);
+extern Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold);
+extern G_integer std_gc_collect(const Global_Context& global, const Opt<G_integer>& generation_limit);
 
 // Create an object that is to be referenced as `std.gc`.
-extern void create_bindings_gc(D_object& result, API_Version version);
+extern void create_bindings_gc(G_object& result, API_Version version);
 
 }  // namespace Asteria
 

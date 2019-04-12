@@ -12,7 +12,7 @@ namespace Asteria {
 class Global_Context : public Abstract_Context
   {
   private:
-    // This is used to initialize an object of type `D_opaque` or `D_function` which does not have a default constructor.
+    // This is used to initialize an object of type `G_opaque` or `G_function` which does not have a default constructor.
     Rcptr<Rcbase> m_placeholder;
     // This is the global high-quality Pseudo Random Number Generator (PRNG).
     Rcptr<Rcbase> m_prng;

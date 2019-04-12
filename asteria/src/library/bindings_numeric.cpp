@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-D_integer std_numeric_abs(const D_integer& value)
+G_integer std_numeric_abs(const G_integer& value)
   {
     if(value == INT64_MIN) {
       ASTERIA_THROW_RUNTIME_ERROR("The absolute value of `", value, "` cannot be represented as an `integer`.");
@@ -19,52 +19,52 @@ D_integer std_numeric_abs(const D_integer& value)
     return std::abs(value);
   }
 
-D_real std_numeric_abs(const D_real& value)
+G_real std_numeric_abs(const G_real& value)
   {
     return std::fabs(value);
   }
 
-D_integer std_numeric_sign(const D_integer& value)
+G_integer std_numeric_sign(const G_integer& value)
   {
     return value >> 63;
   }
 
-D_integer std_numeric_sign(const D_real& value)
+G_integer std_numeric_sign(const G_real& value)
   {
     return static_cast<std::int64_t>(std::signbit(value) == 0) - 1;
   }
 
-D_boolean std_numeric_is_finite(const D_integer& /*value*/)
+G_boolean std_numeric_is_finite(const G_integer& /*value*/)
   {
     return true;
   }
 
-D_boolean std_numeric_is_finite(const D_real& value)
+G_boolean std_numeric_is_finite(const G_real& value)
   {
     return std::isfinite(value);
   }
 
-D_boolean std_numeric_is_infinity(const D_integer& /*value*/)
+G_boolean std_numeric_is_infinity(const G_integer& /*value*/)
   {
     return false;
   }
 
-D_boolean std_numeric_is_infinity(const D_real& value)
+G_boolean std_numeric_is_infinity(const G_real& value)
   {
     return std::isinf(value);
   }
 
-D_boolean std_numeric_is_nan(const D_integer& /*value*/)
+G_boolean std_numeric_is_nan(const G_integer& /*value*/)
   {
     return false;
   }
 
-D_boolean std_numeric_is_nan(const D_real& value)
+G_boolean std_numeric_is_nan(const G_real& value)
   {
     return std::isnan(value);
   }
 
-D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, const D_integer& upper)
+G_integer std_numeric_clamp(const G_integer& value, const G_integer& lower, const G_integer& upper)
   {
     if(lower > upper) {
       ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
@@ -72,7 +72,7 @@ D_integer std_numeric_clamp(const D_integer& value, const D_integer& lower, cons
     return rocket::clamp(value, lower, upper);
   }
 
-D_real std_numeric_clamp(const D_real& value, const D_real& lower, const D_real& upper)
+G_real std_numeric_clamp(const G_real& value, const G_real& lower, const G_real& upper)
   {
     if(!std::isless(lower, upper)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
@@ -80,94 +80,94 @@ D_real std_numeric_clamp(const D_real& value, const D_real& lower, const D_real&
     return rocket::clamp(value, lower, upper);
   }
 
-D_integer std_numeric_round(const D_integer& value)
+G_integer std_numeric_round(const G_integer& value)
   {
     return value;
   }
 
-D_real std_numeric_round(const D_real& value)
+G_real std_numeric_round(const G_real& value)
   {
     return std::round(value);
   }
 
-D_integer std_numeric_floor(const D_integer& value)
+G_integer std_numeric_floor(const G_integer& value)
   {
     return value;
   }
 
-D_real std_numeric_floor(const D_real& value)
+G_real std_numeric_floor(const G_real& value)
   {
     return std::floor(value);
   }
 
-D_integer std_numeric_ceil(const D_integer& value)
+G_integer std_numeric_ceil(const G_integer& value)
   {
     return value;
   }
 
-D_real std_numeric_ceil(const D_real& value)
+G_real std_numeric_ceil(const G_real& value)
   {
     return std::ceil(value);
   }
 
-D_integer std_numeric_trunc(const D_integer& value)
+G_integer std_numeric_trunc(const G_integer& value)
   {
     return value;
   }
 
-D_real std_numeric_trunc(const D_real& value)
+G_real std_numeric_trunc(const G_real& value)
   {
     return std::trunc(value);
   }
 
     namespace {
 
-    D_integer do_icast(const D_real& value)
+    G_integer do_icast(const G_real& value)
       {
         if((value < INT64_MIN) || (value > (INT64_MAX & -0x400))) {
           ASTERIA_THROW_RUNTIME_ERROR("The `real` number `", value, "` cannot be represented as an `integer`.");
         }
-        return D_integer(value);
+        return G_integer(value);
       }
 
     }
 
-D_integer std_numeric_iround(const D_integer& value)
+G_integer std_numeric_iround(const G_integer& value)
   {
     return value;
   }
 
-D_integer std_numeric_iround(const D_real& value)
+G_integer std_numeric_iround(const G_real& value)
   {
     return do_icast(std::round(value));
   }
 
-D_integer std_numeric_ifloor(const D_integer& value)
+G_integer std_numeric_ifloor(const G_integer& value)
   {
     return value;
   }
 
-D_integer std_numeric_ifloor(const D_real& value)
+G_integer std_numeric_ifloor(const G_real& value)
   {
     return do_icast(std::floor(value));
   }
 
-D_integer std_numeric_iceil(const D_integer& value)
+G_integer std_numeric_iceil(const G_integer& value)
   {
     return value;
   }
 
-D_integer std_numeric_iceil(const D_real& value)
+G_integer std_numeric_iceil(const G_real& value)
   {
     return do_icast(std::ceil(value));
   }
 
-D_integer std_numeric_itrunc(const D_integer& value)
+G_integer std_numeric_itrunc(const G_integer& value)
   {
     return value;
   }
 
-D_integer std_numeric_itrunc(const D_real& value)
+G_integer std_numeric_itrunc(const G_real& value)
   {
     return do_icast(std::trunc(value));
   }
@@ -186,7 +186,7 @@ D_integer std_numeric_itrunc(const D_real& value)
 
     }
 
-D_integer std_numeric_random(const Global_Context& global, const D_integer& upper)
+G_integer std_numeric_random(const Global_Context& global, const G_integer& upper)
   {
     if(!(upper > 0)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `upper` limit must be greater than zero (got `", upper, "`).");
@@ -196,7 +196,7 @@ D_integer std_numeric_random(const Global_Context& global, const D_integer& uppe
     return static_cast<std::int64_t>(res);
   }
 
-D_real std_numeric_random(const Global_Context& global, const Opt<D_real>& upper)
+G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& upper)
   {
     if(upper && !(*upper > 0)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `upper` limit must be greater than zero (got `", *upper, "`).");
@@ -208,7 +208,7 @@ D_real std_numeric_random(const Global_Context& global, const Opt<D_real>& upper
     return res;
   }
 
-D_integer std_numeric_random(const Global_Context& global, const D_integer& lower, const D_integer& upper)
+G_integer std_numeric_random(const Global_Context& global, const G_integer& lower, const G_integer& upper)
   {
     if(!(lower < upper)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
@@ -218,7 +218,7 @@ D_integer std_numeric_random(const Global_Context& global, const D_integer& lowe
     return lower + static_cast<std::int64_t>(res);
   }
 
-D_real std_numeric_random(const Global_Context& global, const D_real& lower, const D_real& upper)
+G_real std_numeric_random(const Global_Context& global, const G_real& lower, const G_real& upper)
   {
     if(!(lower < upper)) {
       ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
@@ -228,13 +228,13 @@ D_real std_numeric_random(const Global_Context& global, const D_real& lower, con
     return lower + res;
   }
 
-void create_bindings_numeric(D_object& result, API_Version /*version*/)
+void create_bindings_numeric(G_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.numeric.abs()`
     //===================================================================
     result.insert_or_assign(rocket::sref("abs"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.abs(value)`\n"
                      "  * Gets the absolute value of `value`, which may be an `integer`\n"
@@ -249,13 +249,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.abs"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_abs(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_abs(rvalue) };
@@ -265,13 +265,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.sign()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sign"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.sign(value)`\n"
                      "  * Propagates the sign bit of the number `value`, which may be an\n"
@@ -283,13 +283,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.sign"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_sign(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_sign(rvalue) };
@@ -299,13 +299,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.is_finite()`
     //===================================================================
     result.insert_or_assign(rocket::sref("is_finite"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.is_finite(value)`\n"
                      "  * Checks whether `value` is a finite number. `value` may be an\n"
@@ -319,13 +319,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.is_finite"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_is_finite(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_is_finite(rvalue) };
@@ -335,13 +335,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.is_infinity()`
     //===================================================================
     result.insert_or_assign(rocket::sref("is_infinity"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.is_infinity(value)`\n"
                      "  * Checks whether `value` is an infinity. `value` may be an\n"
@@ -355,13 +355,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.is_infinity"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_is_infinity(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_is_infinity(rvalue) };
@@ -371,13 +371,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.is_nan()`
     //===================================================================
     result.insert_or_assign(rocket::sref("is_nan"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.is_nan(value)`\n"
                      "  * Checks whether `value` is a NaN. `value` may be an `integer` or\n"
@@ -390,13 +390,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.is_nan"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_is_nan(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_is_nan(rvalue) };
@@ -406,13 +406,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.clamp()`
     //===================================================================
     result.insert_or_assign(rocket::sref("clamp"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.clamp(value, lower, upper)`\n"
                      "  * Limits `value` between `lower` and `upper`.\n"
@@ -427,17 +427,17 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.clamp"), args);
             // Parse arguments.
-            D_integer ivalue;
-            D_integer ilower;
-            D_integer iupper;
+            G_integer ivalue;
+            G_integer ilower;
+            G_integer iupper;
             if(reader.start().g(ivalue).g(ilower).g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_clamp(ivalue, ilower, iupper) };
               return rocket::move(xref);
             }
-            D_real rvalue;
-            D_real rlower;
-            D_real rupper;
+            G_real rvalue;
+            G_real rlower;
+            G_real rupper;
             if(reader.start().g(rvalue).g(rlower).g(rupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_clamp(rvalue, rlower, rupper) };
@@ -447,13 +447,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.round()`
     //===================================================================
     result.insert_or_assign(rocket::sref("round"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.round(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
@@ -465,13 +465,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.round"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_round(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_round(rvalue) };
@@ -481,13 +481,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.floor()`
     //===================================================================
     result.insert_or_assign(rocket::sref("floor"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.floor(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
@@ -499,13 +499,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.floor"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_floor(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_floor(rvalue) };
@@ -515,13 +515,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.ceil()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ceil"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.ceil(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
@@ -533,13 +533,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.ceil"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_ceil(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_ceil(rvalue) };
@@ -549,13 +549,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.trunc()`
     //===================================================================
     result.insert_or_assign(rocket::sref("trunc"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.trunc(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
@@ -567,13 +567,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.trunc"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_trunc(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_trunc(rvalue) };
@@ -583,13 +583,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.iround()`
     //===================================================================
     result.insert_or_assign(rocket::sref("iround"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.iround(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
@@ -604,13 +604,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.iround"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_iround(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_iround(rvalue) };
@@ -620,13 +620,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.ifloor()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ifloor"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.ifloor(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
@@ -641,13 +641,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.ifloor"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_ifloor(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_ifloor(rvalue) };
@@ -657,13 +657,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.iceil()`
     //===================================================================
     result.insert_or_assign(rocket::sref("iceil"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.iceil(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
@@ -678,13 +678,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.iceil"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_iceil(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_iceil(rvalue) };
@@ -694,13 +694,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.itrunc()`
     //===================================================================
     result.insert_or_assign(rocket::sref("itrunc"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.itrunc(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
@@ -714,13 +714,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.itrunc"), args);
             // Parse arguments.
-            D_integer ivalue;
+            G_integer ivalue;
             if(reader.start().g(ivalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_itrunc(ivalue) };
               return rocket::move(xref);
             }
-            D_real rvalue;
+            G_real rvalue;
             if(reader.start().g(rvalue).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_itrunc(rvalue) };
@@ -730,13 +730,13 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.numeric.random()`
     //===================================================================
     result.insert_or_assign(rocket::sref("random"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.numeric.random([upper])`\n"
                      "  * Generates a random `integer` or `real` that is less than\n"
@@ -760,26 +760,26 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.random"), args);
             // Parse arguments.
-            D_integer iupper;
+            G_integer iupper;
             if(reader.start().g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, iupper) };
               return rocket::move(xref);
             }
-            Opt<D_real> kupper;
+            Opt<G_real> kupper;
             if(reader.start().g(kupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, kupper) };
               return rocket::move(xref);
             }
-            D_integer ilower;
+            G_integer ilower;
             if(reader.start().g(ilower).g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, ilower, iupper) };
               return rocket::move(xref);
             }
-            D_real rupper;
-            D_real rlower;
+            G_real rupper;
+            G_real rlower;
             if(reader.start().g(rlower).g(rupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, rupper) };
@@ -789,7 +789,7 @@ void create_bindings_numeric(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // End of `std.numeric`

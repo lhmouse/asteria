@@ -14,7 +14,7 @@
 
 namespace Asteria {
 
-D_integer std_chrono_utc_now()
+G_integer std_chrono_utc_now()
   {
 #ifdef _WIN32
     // Get UTC time from the system.
@@ -35,7 +35,7 @@ D_integer std_chrono_utc_now()
 #endif
   }
 
-D_integer std_chrono_local_now()
+G_integer std_chrono_local_now()
   {
 #ifdef _WIN32
     // Get local time from the system.
@@ -60,12 +60,12 @@ D_integer std_chrono_local_now()
 #endif
   }
 
-D_real std_chrono_hires_now()
+G_real std_chrono_hires_now()
   {
 #ifdef _WIN32
     // Read the performance counter.
     // The performance counter frequency has to be obtained only once.
-    static std::atomic<D_real> s_freq_recip;
+    static std::atomic<G_real> s_freq_recip;
     ::LARGE_INTEGER ti;
     auto freq_recip = s_freq_recip.load(std::memory_order_relaxed);
     if(ROCKET_UNEXPECT(!(freq_recip > 0))) {
@@ -87,7 +87,7 @@ D_real std_chrono_hires_now()
 #endif
   }
 
-D_integer std_chrono_steady_now()
+G_integer std_chrono_steady_now()
   {
 #ifdef _WIN32
     // Get the system tick count.
@@ -103,7 +103,7 @@ D_integer std_chrono_steady_now()
 #endif
   }
 
-D_integer std_chrono_local_from_utc(const D_integer& time_utc)
+G_integer std_chrono_local_from_utc(const G_integer& time_utc)
   {
     // Handle special time values.
     if(time_utc <= -11644473600000) {
@@ -113,7 +113,7 @@ D_integer std_chrono_local_from_utc(const D_integer& time_utc)
       return INT64_MAX;
     }
     // Calculate the local time.
-    D_integer time_local;
+    G_integer time_local;
 #ifdef _WIN32
     ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
     ::GetDynamicTimeZoneInformation(&dtz);
@@ -134,7 +134,7 @@ D_integer std_chrono_local_from_utc(const D_integer& time_utc)
     return time_local;
   }
 
-D_integer std_chrono_utc_from_local(const D_integer& time_local)
+G_integer std_chrono_utc_from_local(const G_integer& time_local)
   {
     // Handle special time values.
     if(time_local <= -11644473600000) {
@@ -144,7 +144,7 @@ D_integer std_chrono_utc_from_local(const D_integer& time_local)
       return INT64_MAX;
     }
     // Calculate the UTC time.
-    D_integer time_utc;
+    G_integer time_utc;
 #ifdef _WIN32
     ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
     ::GetDynamicTimeZoneInformation(&dtz);
@@ -165,7 +165,7 @@ D_integer std_chrono_utc_from_local(const D_integer& time_local)
     return time_utc;
   }
 
-D_string std_chrono_datetime_format(const D_integer& time_point, const Opt<D_boolean>& with_ms)
+G_string std_chrono_datetime_format(const G_integer& time_point, const Opt<G_boolean>& with_ms)
   {
     // Return strings that are allocated statically for special time point values.
     static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
@@ -182,7 +182,7 @@ D_string std_chrono_datetime_format(const D_integer& time_point, const Opt<D_boo
       return rocket::sref(s_max_str[pms]);
     }
     // Notice that the length of the result string is fixed.
-    D_string time_str(rocket::sref(s_min_str[pms]));
+    G_string time_str(rocket::sref(s_min_str[pms]));
     // Characters are written backwards, unlike `datetime_parse()`.
     auto wpos = time_str.mut_rbegin();
     // Define functions to write each field.
@@ -259,17 +259,17 @@ D_string std_chrono_datetime_format(const D_integer& time_point, const Opt<D_boo
     return time_str;
   }
 
-D_string std_chrono_datetime_min(const Opt<D_boolean>& with_ms)
+G_string std_chrono_datetime_min(const Opt<G_boolean>& with_ms)
   {
     return std_chrono_datetime_format(INT64_MIN, with_ms);
   }
 
-D_string std_chrono_datetime_max(const Opt<D_boolean>& with_ms)
+G_string std_chrono_datetime_max(const Opt<G_boolean>& with_ms)
   {
     return std_chrono_datetime_format(INT64_MAX, with_ms);
   }
 
-Opt<D_integer> std_chrono_datetime_parse(const D_string& time_str)
+Opt<G_integer> std_chrono_datetime_parse(const G_string& time_str)
   {
     // Characters are read forwards, unlike `datetime_format()`.
     auto rpos = time_str.begin();
@@ -314,7 +314,7 @@ Opt<D_integer> std_chrono_datetime_parse(const D_string& time_str)
         return true;
       };
     // The millisecond part is optional so we have to declare some intermediate results here.
-    D_integer time_point;
+    G_integer time_point;
     bool succ;
 #ifdef _WIN32
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
@@ -407,13 +407,13 @@ Opt<D_integer> std_chrono_datetime_parse(const D_string& time_str)
     return time_point;
   }
 
-void create_bindings_chrono(D_object& result, API_Version /*version*/)
+void create_bindings_chrono(G_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.chrono.utc_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_now"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.utc_now()`\n"
                      "  * Retrieves the wall clock time in UTC.\n"
@@ -433,13 +433,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.local_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("local_now"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.local_now()`\n"
                      "  * Retrieves the wall clock time in the local time zone.\n"
@@ -459,13 +459,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.hires_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("hires_now"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.hires_now()`\n"
                      "  * Retrieves a time point from a high resolution clock. The clock\n"
@@ -488,13 +488,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.steady_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("steady_now"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.steady_now()`\n"
                      "  * Retrieves a time point from a steady clock. The clock goes\n"
@@ -517,13 +517,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.local_from_utc()`
     //===================================================================
     result.insert_or_assign(rocket::sref("local_from_utc"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.local_from_utc(time_utc)`\n"
                      "  * Converts a UTC time point to a local one. `time_utc` shall be\n"
@@ -535,7 +535,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.chrono.local_from_utc"), args);
             // Parse arguments.
-            D_integer time_utc;
+            G_integer time_utc;
             if(reader.start().g(time_utc).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_local_from_utc(time_utc) };
@@ -545,13 +545,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.utc_from_local()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_from_local"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.utc_from_local(time_local)`\n"
                      "  * Converts a local time point to a UTC one. `time_local` shall\n"
@@ -564,7 +564,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.chrono.utc_from_local"), args);
             // Parse arguments.
-            D_integer time_local;
+            G_integer time_local;
             if(reader.start().g(time_local).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_utc_from_local(time_local) };
@@ -574,13 +574,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.datetime_format()`
     //===================================================================
     result.insert_or_assign(rocket::sref("datetime_format"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.datetime_format(time_point, [with_ms])`\n"
                      "  * Converts `time_point`, which represents the number of\n"
@@ -593,8 +593,8 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.chrono.datetime_format"), args);
             // Parse arguments.
-            D_integer time_point;
-            Opt<D_boolean> with_ms;
+            G_integer time_point;
+            Opt<G_boolean> with_ms;
             if(reader.start().g(time_point).g(with_ms).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_datetime_format(time_point, with_ms) };
@@ -604,13 +604,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.datetime_min()`
     //===================================================================
     result.insert_or_assign(rocket::sref("datetime_min"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.datetime_min([with_ms])`\n"
                      "  * Gets the special string that denotes the negative infinity time\n"
@@ -623,7 +623,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.chrono.datetime_min"), args);
             // Parse arguments.
-            Opt<D_boolean> with_ms;
+            Opt<G_boolean> with_ms;
             if(reader.start().g(with_ms).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_datetime_min(with_ms) };
@@ -633,13 +633,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.datetime_max()`
     //===================================================================
     result.insert_or_assign(rocket::sref("datetime_max"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.datetime_max([with_ms])`\n"
                      "  * Gets the special string that denotes the positive infinity time\n"
@@ -652,7 +652,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.chrono.datetime_max"), args);
             // Parse arguments.
-            Opt<D_boolean> with_ms;
+            Opt<G_boolean> with_ms;
             if(reader.start().g(with_ms).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_chrono_datetime_max(with_ms) };
@@ -662,13 +662,13 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.chrono.datetime_parse()`
     //===================================================================
     result.insert_or_assign(rocket::sref("datetime_parse"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.chrono.datetime_parse(time_str)`\n"
                      "  * Parses `time_str`, which is an ASCII string representing a time\n"
@@ -684,7 +684,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.chrono.datetime_parse"), args);
             // Parse arguments.
-            D_string time_str;
+            G_string time_str;
             if(reader.start().g(time_str).finish()) {
               // Call the binding function.
               auto qres = std_chrono_datetime_parse(time_str);
@@ -698,7 +698,7 @@ void create_bindings_chrono(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // End of `std.chrono`

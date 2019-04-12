@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-Opt<D_integer> std_gc_get_threshold(const Global_Context& global, const D_integer& generation)
+Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
   {
     if((generation < 0) || (generation > 2)) {
       return rocket::nullopt;
@@ -22,10 +22,10 @@ Opt<D_integer> std_gc_get_threshold(const Global_Context& global, const D_intege
     }
     // Get the current threshold.
     auto thres = qcoll->get_threshold();
-    return D_integer(thres);
+    return G_integer(thres);
   }
 
-Opt<D_integer> std_gc_set_threshold(const Global_Context& global, const D_integer& generation, const D_integer& threshold)
+Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold)
   {
     if((generation < 0) || (generation > 2)) {
       return rocket::nullopt;
@@ -38,23 +38,23 @@ Opt<D_integer> std_gc_set_threshold(const Global_Context& global, const D_intege
     auto thres = qcoll->get_threshold();
     // Set a new threshold.
     qcoll->set_threshold(static_cast<std::size_t>(rocket::clamp(threshold, 0, PTRDIFF_MAX)));
-    return D_integer(thres);
+    return G_integer(thres);
   }
 
-D_integer std_gc_collect(const Global_Context& global, const Opt<D_integer>& generation_limit)
+G_integer std_gc_collect(const Global_Context& global, const Opt<G_integer>& generation_limit)
   {
     // Perform full garbage collection.
     auto nvars = global.collect_variables(static_cast<unsigned>(rocket::clamp(generation_limit.value_or(INT_MAX), 0, INT_MAX)));
-    return D_integer(nvars);
+    return G_integer(nvars);
   }
 
-void create_bindings_gc(D_object& result, API_Version /*version*/)
+void create_bindings_gc(G_object& result, API_Version /*version*/)
   {
     //===================================================================
     // `std.gc.get_threshold()`
     //===================================================================
     result.insert_or_assign(rocket::sref("get_threshold"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.gc.get_threshold(generation)`\n"
                      "  * Gets the threshold of the collector for `generation`. Valid\n"
@@ -66,7 +66,7 @@ void create_bindings_gc(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.gc.get_threshold"), args);
             // Parse arguments.
-            D_integer generation;
+            G_integer generation;
             if(reader.start().g(generation).finish()) {
               // Call the binding function.
               auto qthres = std_gc_get_threshold(global, generation);
@@ -80,13 +80,13 @@ void create_bindings_gc(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.gc.set_threshold()`
     //===================================================================
     result.insert_or_assign(rocket::sref("set_threshold"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.gc.set_threshold(generation, threshold)`\n"
                      "  * Sets the threshold of the collector for `generation` to\n"
@@ -103,8 +103,8 @@ void create_bindings_gc(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.gc.set_threshold"), args);
             // Parse arguments.
-            D_integer generation;
-            D_integer threshold;
+            G_integer generation;
+            G_integer threshold;
             if(reader.start().g(generation).g(threshold).finish()) {
               // Call the binding function.
               auto qoldthres = std_gc_set_threshold(global, generation, threshold);
@@ -118,13 +118,13 @@ void create_bindings_gc(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // `std.gc.collect()`
     //===================================================================
     result.insert_or_assign(rocket::sref("collect"),
-      D_function(make_simple_binding(
+      G_function(make_simple_binding(
         // Description
         rocket::sref("`std.gc.collect([generation_limit])`\n"
                      "  * Performs garbage collection on all generations including and\n"
@@ -137,7 +137,7 @@ void create_bindings_gc(D_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.gc.collect"), args);
             // Parse arguments.
-            Opt<D_integer> generation_limit;
+            Opt<G_integer> generation_limit;
             if(reader.start().g(generation_limit).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_gc_collect(global, generation_limit) };
@@ -147,7 +147,7 @@ void create_bindings_gc(D_object& result, API_Version /*version*/)
             reader.throw_no_matching_function_call();
           },
         // Opaque parameter
-        D_null()
+        G_null()
       )));
     //===================================================================
     // End of `std.gc`

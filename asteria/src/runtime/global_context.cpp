@@ -47,7 +47,7 @@ void Global_Context::initialize(API_Version version)
       {
         API_Version version;
         const char* name;
-        void (*init)(D_object&, API_Version);
+        void (*init)(G_object&, API_Version);
       }
     static constexpr s_std_mods[] =
       {
@@ -63,7 +63,7 @@ void Global_Context::initialize(API_Version version)
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(std::is_sorted(std::begin(s_std_mods), std::end(s_std_mods), [&](const Module& lhs, const Module& rhs) { return lhs.version < rhs.version;  }));
 #endif
-    D_object std_obj;
+    G_object std_obj;
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which will be referenced as `std_end[-1].version`.
     auto std_end = std::find_if(std::begin(s_std_mods) + 1, std::end(s_std_mods), [&](const Module& elem) { return elem.version > version;  });
@@ -72,15 +72,15 @@ void Global_Context::initialize(API_Version version)
       // Create the subobject if it doesn't exist.
       auto pair = std_obj.try_emplace(rocket::sref(cur->name));
       if(pair.second) {
-        pair.first->second = D_object();
+        pair.first->second = G_object();
       }
       ASTERIA_DEBUG_LOG("Begin initialization of standard library module: name = ", cur->name);
-      (*(cur->init))(pair.first->second.check<D_object>(), std_end[-1].version);
+      (*(cur->init))(pair.first->second.check<G_object>(), std_end[-1].version);
       ASTERIA_DEBUG_LOG("Finished initialization of standard library module: name = ", cur->name);
     }
     // Set up version information.
-    auto pair = std_obj.insert_or_assign(rocket::sref("version"), D_object());
-    create_bindings_version(pair.first->second.check<D_object>(), std_end[-1].version);
+    auto pair = std_obj.insert_or_assign(rocket::sref("version"), G_object());
+    create_bindings_version(pair.first->second.check<G_object>(), std_end[-1].version);
     ///////////////////////////////////////////////////////////////////////////
     // Set the `std` variable.
     ///////////////////////////////////////////////////////////////////////////
@@ -144,21 +144,21 @@ const Value& Global_Context::get_std_member(const PreHashed_String& name) const
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    return std_var->get_value().check<D_object>().get_or(name, Value::get_null());
+    return std_var->get_value().check<G_object>().get_or(name, Value::get_null());
   }
 
 Value& Global_Context::open_std_member(const PreHashed_String& name)
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    return std_var->open_value().check<D_object>()[name];
+    return std_var->open_value().check<G_object>()[name];
   }
 
 bool Global_Context::remove_std_member(const PreHashed_String& name)
   {
     auto std_var = rocket::dynamic_pointer_cast<Variable>(this->m_std_var);
     ROCKET_ASSERT(std_var);
-    return std_var->open_value().check<D_object>().erase(name);
+    return std_var->open_value().check<G_object>().erase(name);
   }
 
 }  // namespace Asteria

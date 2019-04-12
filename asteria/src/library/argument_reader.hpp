@@ -102,24 +102,24 @@ class Argument_Reader
     // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
     Argument_Reader& g(Reference& ref);
     Argument_Reader& g(Value& value);
-    Argument_Reader& g(Opt<D_boolean>& qxvalue);
-    Argument_Reader& g(Opt<D_integer>& qxvalue);
-    Argument_Reader& g(Opt<D_real>& qxvalue);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(Opt<D_string>& qxvalue);
-    Argument_Reader& g(Opt<D_opaque>& qxvalue);
-    Argument_Reader& g(Opt<D_function>& qxvalue);
-    Argument_Reader& g(Opt<D_array>& qxvalue);
-    Argument_Reader& g(Opt<D_object>& qxvalue);
+    Argument_Reader& g(Opt<G_boolean>& qxvalue);
+    Argument_Reader& g(Opt<G_integer>& qxvalue);
+    Argument_Reader& g(Opt<G_real>& qxvalue);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& g(Opt<G_string>& qxvalue);
+    Argument_Reader& g(Opt<G_opaque>& qxvalue);
+    Argument_Reader& g(Opt<G_function>& qxvalue);
+    Argument_Reader& g(Opt<G_array>& qxvalue);
+    Argument_Reader& g(Opt<G_object>& qxvalue);
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise the operation fails.
-    Argument_Reader& g(D_boolean& xvalue);
-    Argument_Reader& g(D_integer& xvalue);
-    Argument_Reader& g(D_real& xvalue);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(D_string& xvalue);
-    Argument_Reader& g(D_opaque& xvalue);
-    Argument_Reader& g(D_function& xvalue);
-    Argument_Reader& g(D_array& xvalue);
-    Argument_Reader& g(D_object& xvalue);
+    Argument_Reader& g(G_boolean& xvalue);
+    Argument_Reader& g(G_integer& xvalue);
+    Argument_Reader& g(G_real& xvalue);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& g(G_string& xvalue);
+    Argument_Reader& g(G_opaque& xvalue);
+    Argument_Reader& g(G_function& xvalue);
+    Argument_Reader& g(G_array& xvalue);
+    Argument_Reader& g(G_object& xvalue);
     // Terminate the argument list and finish this overload.
     // For the overload taking no argument, if there are excess arguments, the operation fails.
     // For the other overloads, excess arguments are copied into `vargs`.
