@@ -12,8 +12,7 @@ int main()
   {
     Token_Stream ts;
     std::stringbuf buf(
-      R"__(
-        #!some shebang
+      R"__(#!some shebang
         hh+++
         if <<<->>>>>"\u55b5b喵"/
         * - 0x`01`7.8`4p+4  // comments
