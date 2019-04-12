@@ -191,17 +191,58 @@ class Token
         return this->m_length;
       }
 
-    Index index() const noexcept
+    bool is_keyword() const noexcept
       {
-        return static_cast<Index>(this->m_stor.index());
+        return this->m_stor.index() == index_keyword;
       }
-    template<typename AltT> const AltT* opt() const noexcept
+    Keyword as_keyword() const
       {
-        return this->m_stor.get<AltT>();
+        return this->m_stor.as<S_keyword>().keyword;
       }
-    template<typename AltT> const AltT& check() const
+
+    bool is_punctuator() const noexcept
       {
-        return this->m_stor.as<AltT>();
+        return this->m_stor.index() == index_punctuator;
+      }
+    Punctuator as_punctuator() const
+      {
+        return this->m_stor.as<S_punctuator>().punct;
+      }
+
+    bool is_identifier() const noexcept
+      {
+        return this->m_stor.index() == index_identifier;
+      }
+    const Cow_String& as_identifier() const
+      {
+        return this->m_stor.as<S_identifier>().name;
+      }
+
+    bool is_integer_literal() const noexcept
+      {
+        return this->m_stor.index() == index_integer_literal;
+      }
+    std::int64_t as_integer_literal() const
+      {
+        return this->m_stor.as<S_integer_literal>().value;
+      }
+
+    bool is_real_literal() const noexcept
+      {
+        return this->m_stor.index() == index_real_literal;
+      }
+    double as_real_literal() const
+      {
+        return this->m_stor.as<S_real_literal>().value;
+      }
+
+    bool is_string_literal() const noexcept
+      {
+        return this->m_stor.index() == index_string_literal;
+      }
+    const Cow_String& as_string_literal() const
+      {
+        return this->m_stor.as<S_string_literal>().value;
       }
 
     void print(std::ostream& os) const;

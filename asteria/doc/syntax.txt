@@ -20,7 +20,7 @@ numeric-literal ::=
 exponent-suffix-opt ::=
 	decimal-exponent-suffix | binary-exponent-suffix | ""
 binary-literal ::=
-	PCRE(0[bB][01`]+(\.[01`]+)
+	PCRE(0[bB][01`]+(\.[01`]+))
 decimal-literal ::=
 	PCRE([0-9`]+(\.[0-9`]+))
 hexadecimal-literal ::=

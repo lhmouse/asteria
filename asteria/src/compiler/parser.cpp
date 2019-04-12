@@ -38,16 +38,15 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        // See whether it is one of acceptable keywords.
-        auto qalt = qtok->opt<Token::S_keyword>();
-        if(!qalt) {
+        // See whether it is one of the acceptable keywords.
+        if(!qtok->is_keyword()) {
           return rocket::nullopt;
         }
-        if(rocket::is_none_of(qalt->keyword, accept)) {
+        auto keyword = qtok->as_keyword();
+        if(rocket::is_none_of(keyword, accept)) {
           return rocket::nullopt;
         }
         // Return the keyword and discard this token.
-        auto keyword = qalt->keyword;
         tstrm.shift();
         return keyword;
       }
@@ -58,16 +57,15 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        // See whether it is one of acceptable punctuator.
-        auto qalt = qtok->opt<Token::S_punctuator>();
-        if(!qalt) {
+        // See whether it is one of the acceptable punctuators.
+        if(!qtok->is_punctuator()) {
           return rocket::nullopt;
         }
-        if(rocket::is_none_of(qalt->punct, accept)) {
+        auto punct = qtok->as_punctuator();
+        if(rocket::is_none_of(punct, accept)) {
           return rocket::nullopt;
         }
         // Return the punctuator and discard this token.
-        auto punct = qalt->punct;
         tstrm.shift();
         return punct;
       }
@@ -79,12 +77,11 @@ namespace Asteria {
           return rocket::nullopt;
         }
         // See whether it is an identifier.
-        auto qalt = qtok->opt<Token::S_identifier>();
-        if(!qalt) {
+        if(!qtok->is_identifier()) {
           return rocket::nullopt;
         }
+        auto name = qtok->as_identifier();
         // Return the identifier and discard this token.
-        auto name = qalt->name;
         tstrm.shift();
         return name;
       }
@@ -95,13 +92,12 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        // See whether it is an string literal.
-        auto qalt = qtok->opt<Token::S_string_literal>();
-        if(!qalt) {
+        // See whether it is a string literal.
+        if(!qtok->is_string_literal()) {
           return rocket::nullopt;
         }
+        auto value = qtok->as_string_literal();
         // Return the string literal and discard this token.
-        auto value = qalt->value;
         tstrm.shift();
         return value;
       }
@@ -112,34 +108,26 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_keyword:
-          {
-            const auto& alt = qtok->check<Token::S_keyword>();
-            // Treat the keyword as a plain identifier and discard this token.
-            auto name = rocket::sref(Token::get_keyword(alt.keyword));
-            tstrm.shift();
-            return rocket::move(name);
-          }
-        case Token::index_identifier:
-          {
-            const auto& alt = qtok->check<Token::S_identifier>();
-            // Return the identifier and discard this token.
-            auto name = alt.name;
-            tstrm.shift();
-            return rocket::move(name);
-          }
-        case Token::index_string_literal:
-          {
-            const auto& alt = qtok->check<Token::S_string_literal>();
-            // Return the string literal and discard this token.
-            auto name = alt.value;
-            tstrm.shift();
-            return rocket::move(name);
-          }
-        default:
-          return rocket::nullopt;
+        // See whether it is a keyword, identifier, or string literal.
+        if(qtok->is_keyword()) {
+          auto keyword = qtok->as_keyword();
+          // Treat the keyword as a plain identifier and discard this token.
+          tstrm.shift();
+          return rocket::sref(Token::get_keyword(keyword));
         }
+        if(qtok->is_identifier()) {
+          auto name = qtok->as_identifier();
+          // Return the identifier and discard this token.
+          tstrm.shift();
+          return name;
+        }
+        if(qtok->is_string_literal()) {
+          auto value = qtok->as_string_literal();
+          // Return the string literal and discard this token.
+          tstrm.shift();
+          return value;
+        }
+        return rocket::nullopt;
       }
 
     Opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
@@ -159,60 +147,50 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_keyword:
-          {
-            const auto& alt = qtok->check<Token::S_keyword>();
-            // Hmm... use a lookup table?
-            struct Keyword_Table
-              {
-                Token::Keyword keyword;
-                Value (*generator)();
-              }
-            static const s_table[] =
-              {
-                { Token::keyword_null,      []() -> Value { return G_null();  }          },
-                { Token::keyword_false,     []() -> Value { return G_boolean(false);  }  },
-                { Token::keyword_true,      []() -> Value { return G_boolean(true);  }   },
-                { Token::keyword_nan,       []() -> Value { return G_real(NAN);  }       },
-                { Token::keyword_infinity,  []() -> Value { return G_real(INFINITY);  }  },
-              };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
-            if(qconf == std::end(s_table)) {
-              return rocket::nullopt;
+        if(qtok->is_keyword()) {
+          // Hmm... use a lookup table?
+          struct Keyword_Table
+            {
+              Token::Keyword keyword;
+              Value (*generator)();
             }
-            // Discard this token and create a new value using the generator.
-            auto generator = qconf->generator;
-            tstrm.shift();
-            return (*generator)();
+          static const s_table[] =
+            {
+              { Token::keyword_null,      []() -> Value { return G_null();  }          },
+              { Token::keyword_false,     []() -> Value { return G_boolean(false);  }  },
+              { Token::keyword_true,      []() -> Value { return G_boolean(true);  }   },
+              { Token::keyword_nan,       []() -> Value { return G_real(NAN);  }       },
+              { Token::keyword_infinity,  []() -> Value { return G_real(INFINITY);  }  },
+            };
+          auto keyword = qtok->as_keyword();
+          auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return keyword == r.keyword;  });
+          if(qconf == std::end(s_table)) {
+            return rocket::nullopt;
           }
-        case Token::index_integer_literal:
-          {
-            const auto& alt = qtok->check<Token::S_integer_literal>();
-            // Copy the value and discard this token.
-            auto value = G_integer(alt.value);
-            tstrm.shift();
-            return rocket::move(value);
-          }
-        case Token::index_real_literal:
-          {
-            const auto& alt = qtok->check<Token::S_real_literal>();
-            // Copy the value and discard this token.
-            auto value = G_real(alt.value);
-            tstrm.shift();
-            return rocket::move(value);
-          }
-        case Token::index_string_literal:
-          {
-            const auto& alt = qtok->check<Token::S_string_literal>();
-            // Copy the value and discard this token.
-            auto value = G_string(alt.value);
-            tstrm.shift();
-            return rocket::move(value);
-          }
-        default:
-          return rocket::nullopt;
+          auto generator = qconf->generator;
+          // Discard this token and create a new value using the generator.
+          tstrm.shift();
+          return (*generator)();
         }
+        if(qtok->is_integer_literal()) {
+          auto value = G_integer(qtok->as_integer_literal());
+          // Copy the value and discard this token.
+          tstrm.shift();
+          return value;
+        }
+        if(qtok->is_real_literal()) {
+          auto value = G_real(qtok->as_real_literal());
+          // Copy the value and discard this token.
+          tstrm.shift();
+          return value;
+        }
+        if(qtok->is_string_literal()) {
+          auto value = G_string(qtok->as_string_literal());
+          // Copy the value and discard this token.
+          tstrm.shift();
+          return value;
+        }
+        return rocket::nullopt;
       }
 
     Opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
@@ -223,30 +201,17 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_keyword:
-          {
-            const auto& alt = qtok->check<Token::S_keyword>();
-            if(alt.keyword != Token::keyword_not) {
-              return rocket::nullopt;
-            }
-            // Discard this token.
-            tstrm.shift();
-            return true;
-          }
-        case Token::index_punctuator:
-          {
-            const auto& alt = qtok->check<Token::S_punctuator>();
-            if(alt.punct != Token::punctuator_notl) {
-              return rocket::nullopt;
-            }
-            // Discard this token.
-            tstrm.shift();
-            return true;
-          }
-        default:
-          return rocket::nullopt;
+        if(qtok->is_keyword() && (qtok->as_keyword() == Token::keyword_not)) {
+          // Discard this token.
+          tstrm.shift();
+          return true;
         }
+        if(qtok->is_punctuator() && (qtok->as_punctuator() == Token::punctuator_notl)) {
+          // Discard this token.
+          tstrm.shift();
+          return true;
+        }
+        return rocket::nullopt;
       }
 
     // Accept a statement; a blockt is converted to a single statement.
@@ -1185,62 +1150,59 @@ namespace Asteria {
         if(!qtok) {
           return false;
         }
-        switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_keyword:
-          {
-            const auto& alt = qtok->check<Token::S_keyword>();
-            // Hmm... use a lookup table?
-            struct Keyword_Table
-              {
-                Token::Keyword keyword;
-                Xprunit::Xop xop;
-              }
-            static constexpr s_table[] =
-              {
-                { Token::keyword_unset,     Xprunit::xop_prefix_unset    },
-                { Token::keyword_lengthof,  Xprunit::xop_prefix_lengthof },
-                { Token::keyword_typeof,    Xprunit::xop_prefix_typeof   },
-                { Token::keyword_not,       Xprunit::xop_prefix_notl     },
-              };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return alt.keyword == r.keyword;  });
-            if(qconf == std::end(s_table)) {
-              return false;
+        if(qtok->is_keyword()) {
+          // Hmm... use a lookup table?
+          struct Keyword_Table
+            {
+              Token::Keyword keyword;
+              Xprunit::Xop xop;
             }
-            // Return the prefix operator and discard this token.
-            Xprunit::S_operator_rpn xunit = { qconf->xop, false };
-            tstrm.shift();
-            return units.emplace_back(rocket::move(xunit)), true;
+          static constexpr s_table[] =
+            {
+              { Token::keyword_unset,     Xprunit::xop_prefix_unset    },
+              { Token::keyword_lengthof,  Xprunit::xop_prefix_lengthof },
+              { Token::keyword_typeof,    Xprunit::xop_prefix_typeof   },
+              { Token::keyword_not,       Xprunit::xop_prefix_notl     },
+            };
+          auto keyword = qtok->as_keyword();
+          auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return keyword == r.keyword;  });
+          if(qconf == std::end(s_table)) {
+            return false;
           }
-        case Token::index_punctuator:
-          {
-            const auto& alt = qtok->check<Token::S_punctuator>();
-            // Hmm... use a lookup table?
-            struct Punctuator_Table
-              {
-                Token::Punctuator punct;
-                Xprunit::Xop xop;
-              }
-            static constexpr s_table[] =
-              {
-                { Token::punctuator_add,   Xprunit::xop_prefix_pos  },
-                { Token::punctuator_sub,   Xprunit::xop_prefix_neg  },
-                { Token::punctuator_notb,  Xprunit::xop_prefix_notb },
-                { Token::punctuator_notl,  Xprunit::xop_prefix_notl },
-                { Token::punctuator_inc,   Xprunit::xop_prefix_inc  },
-                { Token::punctuator_dec,   Xprunit::xop_prefix_dec  },
-              };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
-            if(qconf == std::end(s_table)) {
-              return false;
-            }
-            // Return the prefix operator and discard this token.
-            Xprunit::S_operator_rpn xunit = { qconf->xop, false };
-            tstrm.shift();
-            return units.emplace_back(rocket::move(xunit)), true;
-          }
-        default:
-          return false;
+          // Return the prefix operator and discard this token.
+          tstrm.shift();
+          Xprunit::S_operator_rpn xunit = { qconf->xop, false };
+          units.emplace_back(rocket::move(xunit));
+          return true;
         }
+        if(qtok->is_punctuator()) {
+          // Hmm... use a lookup table?
+          struct Punctuator_Table
+            {
+              Token::Punctuator punct;
+              Xprunit::Xop xop;
+            }
+          static constexpr s_table[] =
+            {
+              { Token::punctuator_add,   Xprunit::xop_prefix_pos  },
+              { Token::punctuator_sub,   Xprunit::xop_prefix_neg  },
+              { Token::punctuator_notb,  Xprunit::xop_prefix_notb },
+              { Token::punctuator_notl,  Xprunit::xop_prefix_notl },
+              { Token::punctuator_inc,   Xprunit::xop_prefix_inc  },
+              { Token::punctuator_dec,   Xprunit::xop_prefix_dec  },
+            };
+          auto punct = qtok->as_punctuator();
+          auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return punct == r.punct;  });
+          if(qconf == std::end(s_table)) {
+            return false;
+          }
+          // Return the prefix operator and discard this token.
+          tstrm.shift();
+          Xprunit::S_operator_rpn xunit = { qconf->xop, false };
+          units.emplace_back(rocket::move(xunit));
+          return true;
+        }
+        return false;
       }
 
     bool do_accept_named_reference(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1467,33 +1429,30 @@ namespace Asteria {
         if(!qtok) {
           return false;
         }
-        switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_punctuator:
-          {
-            const auto& alt = qtok->check<Token::S_punctuator>();
-            // Hmm... use a lookup table?
-            struct Punctuator_Table
-              {
-                Token::Punctuator punct;
-                Xprunit::Xop xop;
-              }
-            static constexpr s_table[] =
-              {
-                { Token::punctuator_inc,   Xprunit::xop_postfix_inc  },
-                { Token::punctuator_dec,   Xprunit::xop_postfix_dec  },
-              };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
-            if(qconf == std::end(s_table)) {
-              return false;
+        if(qtok->is_punctuator()) {
+          // Hmm... use a lookup table?
+          struct Punctuator_Table
+            {
+              Token::Punctuator punct;
+              Xprunit::Xop xop;
             }
-            // Return the postfix operator and discard this token.
-            Xprunit::S_operator_rpn xunit = { qconf->xop, false };
-            tstrm.shift();
-            return units.emplace_back(rocket::move(xunit)), true;
+          static constexpr s_table[] =
+            {
+              { Token::punctuator_inc,   Xprunit::xop_postfix_inc  },
+              { Token::punctuator_dec,   Xprunit::xop_postfix_dec  },
+            };
+          auto punct = qtok->as_punctuator();
+          auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return punct == r.punct;  });
+          if(qconf == std::end(s_table)) {
+            return false;
           }
-        default:
-          return false;
+          // Return the postfix operator and discard this token.
+          tstrm.shift();
+          Xprunit::S_operator_rpn xunit = { qconf->xop, false };
+          units.emplace_back(rocket::move(xunit));
+          return true;
         }
+        return false;
       }
 
     bool do_accept_postfix_function_call(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1693,64 +1652,60 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        switch(rocket::weaken_enum(qtok->index())) {
-        case Token::index_punctuator:
-          {
-            const auto& alt = qtok->check<Token::S_punctuator>();
-            // Hmm... use a lookup table?
-            struct Punctuator_Table
-              {
-                Token::Punctuator punct;
-                Xprunit::Xop xop;
-                bool assign;
-              }
-            static constexpr s_table[] =
-              {
-                { Token::punctuator_add,        Xprunit::xop_infix_add,       false },
-                { Token::punctuator_sub,        Xprunit::xop_infix_sub,       false },
-                { Token::punctuator_mul,        Xprunit::xop_infix_mul,       false },
-                { Token::punctuator_div,        Xprunit::xop_infix_div,       false },
-                { Token::punctuator_mod,        Xprunit::xop_infix_mod,       false },
-                { Token::punctuator_andb,       Xprunit::xop_infix_andb,      false },
-                { Token::punctuator_orb,        Xprunit::xop_infix_orb,       false },
-                { Token::punctuator_xorb,       Xprunit::xop_infix_xorb,      false },
-                { Token::punctuator_sla,        Xprunit::xop_infix_sla,       false },
-                { Token::punctuator_sra,        Xprunit::xop_infix_sra,       false },
-                { Token::punctuator_sll,        Xprunit::xop_infix_sll,       false },
-                { Token::punctuator_srl,        Xprunit::xop_infix_srl,       false },
-                { Token::punctuator_add_eq,     Xprunit::xop_infix_add,       true  },
-                { Token::punctuator_sub_eq,     Xprunit::xop_infix_sub,       true  },
-                { Token::punctuator_mul_eq,     Xprunit::xop_infix_mul,       true  },
-                { Token::punctuator_div_eq,     Xprunit::xop_infix_div,       true  },
-                { Token::punctuator_mod_eq,     Xprunit::xop_infix_mod,       true  },
-                { Token::punctuator_andb_eq,    Xprunit::xop_infix_andb,      true  },
-                { Token::punctuator_orb_eq,     Xprunit::xop_infix_orb,       true  },
-                { Token::punctuator_xorb_eq,    Xprunit::xop_infix_xorb,      true  },
-                { Token::punctuator_sla_eq,     Xprunit::xop_infix_sla,       true  },
-                { Token::punctuator_sra_eq,     Xprunit::xop_infix_sra,       true  },
-                { Token::punctuator_sll_eq,     Xprunit::xop_infix_sll,       true  },
-                { Token::punctuator_srl_eq,     Xprunit::xop_infix_srl,       true  },
-                { Token::punctuator_assign,     Xprunit::xop_infix_assign,    true  },
-                { Token::punctuator_cmp_eq,     Xprunit::xop_infix_cmp_eq,    false },
-                { Token::punctuator_cmp_ne,     Xprunit::xop_infix_cmp_ne,    false },
-                { Token::punctuator_cmp_lt,     Xprunit::xop_infix_cmp_lt,    false },
-                { Token::punctuator_cmp_gt,     Xprunit::xop_infix_cmp_gt,    false },
-                { Token::punctuator_cmp_lte,    Xprunit::xop_infix_cmp_lte,   false },
-                { Token::punctuator_cmp_gte,    Xprunit::xop_infix_cmp_gte,   false },
-                { Token::punctuator_spaceship,  Xprunit::xop_infix_cmp_3way,  false },
-              };
-            auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return alt.punct == r.punct;  });
-            if(qconf == std::end(s_table)) {
-              return rocket::nullopt;
+        if(qtok->is_punctuator()) {
+          // Hmm... use a lookup table?
+          struct Punctuator_Table
+            {
+              Token::Punctuator punct;
+              Xprunit::Xop xop;
+              bool assign;
             }
-            // Return the infix operator and discard this token.
-            Infix_Element::S_general xelem = { qconf->xop, qconf->assign, rocket::clear };
-            tstrm.shift();
-            return rocket::move(xelem);
+          static constexpr s_table[] =
+            {
+              { Token::punctuator_add,        Xprunit::xop_infix_add,       false },
+              { Token::punctuator_sub,        Xprunit::xop_infix_sub,       false },
+              { Token::punctuator_mul,        Xprunit::xop_infix_mul,       false },
+              { Token::punctuator_div,        Xprunit::xop_infix_div,       false },
+              { Token::punctuator_mod,        Xprunit::xop_infix_mod,       false },
+              { Token::punctuator_andb,       Xprunit::xop_infix_andb,      false },
+              { Token::punctuator_orb,        Xprunit::xop_infix_orb,       false },
+              { Token::punctuator_xorb,       Xprunit::xop_infix_xorb,      false },
+              { Token::punctuator_sla,        Xprunit::xop_infix_sla,       false },
+              { Token::punctuator_sra,        Xprunit::xop_infix_sra,       false },
+              { Token::punctuator_sll,        Xprunit::xop_infix_sll,       false },
+              { Token::punctuator_srl,        Xprunit::xop_infix_srl,       false },
+              { Token::punctuator_add_eq,     Xprunit::xop_infix_add,       true  },
+              { Token::punctuator_sub_eq,     Xprunit::xop_infix_sub,       true  },
+              { Token::punctuator_mul_eq,     Xprunit::xop_infix_mul,       true  },
+              { Token::punctuator_div_eq,     Xprunit::xop_infix_div,       true  },
+              { Token::punctuator_mod_eq,     Xprunit::xop_infix_mod,       true  },
+              { Token::punctuator_andb_eq,    Xprunit::xop_infix_andb,      true  },
+              { Token::punctuator_orb_eq,     Xprunit::xop_infix_orb,       true  },
+              { Token::punctuator_xorb_eq,    Xprunit::xop_infix_xorb,      true  },
+              { Token::punctuator_sla_eq,     Xprunit::xop_infix_sla,       true  },
+              { Token::punctuator_sra_eq,     Xprunit::xop_infix_sra,       true  },
+              { Token::punctuator_sll_eq,     Xprunit::xop_infix_sll,       true  },
+              { Token::punctuator_srl_eq,     Xprunit::xop_infix_srl,       true  },
+              { Token::punctuator_assign,     Xprunit::xop_infix_assign,    true  },
+              { Token::punctuator_cmp_eq,     Xprunit::xop_infix_cmp_eq,    false },
+              { Token::punctuator_cmp_ne,     Xprunit::xop_infix_cmp_ne,    false },
+              { Token::punctuator_cmp_lt,     Xprunit::xop_infix_cmp_lt,    false },
+              { Token::punctuator_cmp_gt,     Xprunit::xop_infix_cmp_gt,    false },
+              { Token::punctuator_cmp_lte,    Xprunit::xop_infix_cmp_lte,   false },
+              { Token::punctuator_cmp_gte,    Xprunit::xop_infix_cmp_gte,   false },
+              { Token::punctuator_spaceship,  Xprunit::xop_infix_cmp_3way,  false },
+            };
+          auto punct = qtok->as_punctuator();
+          auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Punctuator_Table& r) { return punct == r.punct;  });
+          if(qconf == std::end(s_table)) {
+            return rocket::nullopt;
           }
-        default:
-          return rocket::nullopt;
+          // Return the infix operator and discard this token.
+          tstrm.shift();
+          Infix_Element::S_general xelem = { qconf->xop, qconf->assign, rocket::clear };
+          return rocket::move(xelem);
         }
+        return rocket::nullopt;
       }
 
     Opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)

@@ -25,87 +25,87 @@ int main()
 
     auto p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_identifier>().name == "hh");
+    ASTERIA_TEST_CHECK(p->as_identifier() == "hh");
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_inc);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_inc);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_add);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_add);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_keyword>().keyword == Token::keyword_if);
+    ASTERIA_TEST_CHECK(p->as_keyword() == Token::keyword_if);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_sll);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_sll);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_sub);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_sub);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_srl);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_srl);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_sra);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_sra);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_string_literal>().value == "喵\x62\xe5\x96\xb5");
+    ASTERIA_TEST_CHECK(p->as_string_literal() == "喵\x62\xe5\x96\xb5");
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_div);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_div);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_mul);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_mul);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_sub);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_sub);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_real_literal>().value == 376.25);
+    ASTERIA_TEST_CHECK(p->as_real_literal() == 376.25);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_dot);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_dot);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_keyword>().keyword == Token::keyword_false);
+    ASTERIA_TEST_CHECK(p->as_keyword() == Token::keyword_false);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_punctuator>().punct == Token::punctuator_semicol);
+    ASTERIA_TEST_CHECK(p->as_punctuator() == Token::punctuator_semicol);
     ts.shift();
 
     p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);
-    ASTERIA_TEST_CHECK(p->check<Token::S_integer_literal>().value == -420000000000000);
+    ASTERIA_TEST_CHECK(p->as_integer_literal() == -420000000000000);
     ts.shift();
 
     p = ts.peek_opt();

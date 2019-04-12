@@ -373,51 +373,51 @@ const char* Token::get_punctuator(Punctuator punct) noexcept
 
 void Token::print(std::ostream& os) const
   {
-    switch(this->index()) {
+    switch(static_cast<Index>(this->m_stor.index())) {
     case index_keyword:
       {
-        const auto& alt = this->check<S_keyword>();
+        const auto& alt = this->m_stor.as<S_keyword>();
         // keyword `if`
         os << "keyword `" << Token::get_keyword(alt.keyword) << "`";
         return;
       }
     case index_punctuator:
       {
-        const auto& alt = this->check<S_punctuator>();
+        const auto& alt = this->m_stor.as<S_punctuator>();
         // punctuator `;`
         os << "punctuator `" << Token::get_punctuator(alt.punct) << "`";
         return;
       }
     case index_identifier:
       {
-        const auto& alt = this->check<S_identifier>();
+        const auto& alt = this->m_stor.as<S_identifier>();
         // identifier `meow`
         os << "identifier `" << alt.name << "`";
         return;
       }
     case index_integer_literal:
       {
-        const auto& alt = this->check<S_integer_literal>();
+        const auto& alt = this->m_stor.as<S_integer_literal>();
         // integer-literal `42`
         os << "integer-literal `" << std::dec << alt.value << "`";
         return;
       }
     case index_real_literal:
       {
-        const auto& alt = this->check<S_real_literal>();
+        const auto& alt = this->m_stor.as<S_real_literal>();
         // real-number-literal `123.456`
         os << "real-number-literal `" << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << alt.value << "`";
         return;
       }
     case index_string_literal:
       {
-        const auto& alt = this->check<S_string_literal>();
+        const auto& alt = this->m_stor.as<S_string_literal>();
         // string-literal "hello world"
         os << "string-literal `" << quote(alt.value) << "`";
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown token type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown token type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
   }
 

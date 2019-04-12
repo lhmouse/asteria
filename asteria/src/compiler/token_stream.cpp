@@ -593,54 +593,34 @@ namespace Asteria {
           // Not contiguous.
           return nullptr;
         }
-        if(qstok->index() != Token::index_punctuator) {
+        if(!qstok->is_punctuator()) {
           // Only an immediate `+` or `-` can be merged.
           return nullptr;
         }
-        if(rocket::is_none_of(qstok->check<Token::S_punctuator>().punct, { Token::punctuator_add, Token::punctuator_sub })) {
+        if(rocket::is_none_of(qstok->as_punctuator(), { Token::punctuator_add, Token::punctuator_sub })) {
           // Only an immediate `+` or `-` can be merged.
           return nullptr;
         }
-        if(seq.size() >= 2) {
-          // Check whether the previous token may be an infix operator.
-          const auto& pt = seq.rbegin()[1];
-          switch(pt.index()) {
-          case Token::index_keyword:
-            {
-              const auto& alt = pt.check<Token::S_keyword>();
-              // Mergeable unless the keyword denotes a value or reference.
-              bool mergeable = rocket::is_none_of(alt.keyword, { Token::keyword_null, Token::keyword_true, Token::keyword_false,
+        if(seq.size() < 2) {
+          // Mergeable.
+          return qstok;
+        }
+        // Check whether the previous token may be an infix operator.
+        const auto& pt = seq.rbegin()[1];
+        if(pt.is_keyword()) {
+          // Mergeable unless the keyword denotes a value or reference.
+          bool mergeable = rocket::is_none_of(pt.as_keyword(), { Token::keyword_null, Token::keyword_true, Token::keyword_false,
                                                                  Token::keyword_nan, Token::keyword_infinity, Token::keyword_this });
-              if(!mergeable) {
-                return nullptr;
-              }
-              break;
-            }
-          case Token::index_punctuator:
-            {
-              const auto& alt = pt.check<Token::S_punctuator>();
-              // Mergeable unless the punctuator terminates an expression.
-              bool mergeable = rocket::is_none_of(alt.punct, { Token::punctuator_inc, Token::punctuator_dec, Token::punctuator_parenth_cl,
-                                                               Token::punctuator_bracket_cl, Token::punctuator_brace_cl });
-              if(!mergeable) {
-                return nullptr;
-              }
-              break;
-            }
-          case Token::index_identifier:
-          case Token::index_integer_literal:
-          case Token::index_real_literal:
-          case Token::index_string_literal:
-            {
-              // Not mergeable, always.
-              return nullptr;
-            }
-          default:
-            ASTERIA_TERMINATE("An unknown token type enumeration `", pt.index(), "` has been encountered.");
-          }
+          return mergeable ? qstok : nullptr;
         }
-        // Mergeable.
-        return qstok;
+        if(pt.is_punctuator()) {
+          // Mergeable unless the punctuator terminates an expression.
+          bool mergeable = rocket::is_none_of(pt.as_punctuator(), { Token::punctuator_inc, Token::punctuator_dec,
+                                                                    Token::punctuator_parenth_cl, Token::punctuator_bracket_cl, Token::punctuator_brace_cl });
+          return mergeable ? qstok : nullptr;
+        }
+        // Not mergeable.
+        return nullptr;
       }
 
     bool do_accept_numeric_literal(Cow_Vector<Token>& seq, Line_Reader& reader, bool integer_as_real)
@@ -650,7 +630,7 @@ namespace Asteria {
         // exponent-suffix-opt ::=
         //   decimal-exponent-suffix | binary-exponent-suffix | ""
         // binary-literal ::=
-        //   PCRE(0[bB][01`]+(\.[01`]+)
+        //   PCRE(0[bB][01`]+(\.[01`]+))
         // decimal-literal ::=
         //   PCRE([0-9`]+(\.[0-9`]+))
         // hexadecimal-literal ::=
@@ -803,9 +783,12 @@ namespace Asteria {
           }
           // Check for a previous sign symbol.
           auto qstok = do_check_mergeability(seq, reader);
-          std::uint64_t smask = (qstok && qstok->check<Token::S_punctuator>().punct == Token::punctuator_sub) ? UINT64_MAX : 0;
+          std::uint64_t imask = 0;
+          if(qstok && (qstok->as_punctuator() == Token::punctuator_sub)) {
+            imask = UINT64_MAX;
+          }
           // The special value `0x1p63` is only allowed if a contiguous minus symbol precedes it.
-          if((value == (UINT64_C(1) << 63)) && (smask == 0)) {
+          if((value == static_cast<std::uint64_t>(INT64_MIN)) && (imask == 0)) {
             throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
           }
           if(qstok) {
@@ -816,7 +799,7 @@ namespace Asteria {
             seq.pop_back();
           }
           // Push an integer literal.
-          Token::S_integer_literal xtoken = { static_cast<std::int64_t>((value ^ smask) - smask) };
+          Token::S_integer_literal xtoken = { static_cast<std::int64_t>((value ^ imask) - imask) };
           do_push_token(seq, reader, tlen, rocket::move(xtoken));
           return true;
         }
@@ -865,7 +848,10 @@ namespace Asteria {
         }
         // Check for a previous sign symbol.
         auto qstok = do_check_mergeability(seq, reader);
-        double fmask = (qstok && qstok->check<Token::S_punctuator>().punct == Token::punctuator_sub) ? -1 : 0;
+        double fmask = 0;
+        if(qstok && (qstok->as_punctuator() == Token::punctuator_sub)) {
+          fmask = -1;
+        }
         if(qstok) {
           // Overwrite the previous token.
           tlen += reader.offset() - qstok->offset();
