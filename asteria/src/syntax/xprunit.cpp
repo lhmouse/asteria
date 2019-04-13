@@ -188,7 +188,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
     ROCKET_PURE_FUNCTION G_integer do_operator_neg(const G_integer& rhs)
       {
         if(rhs == INT64_MIN) {
-          ASTERIA_THROW_RUNTIME_ERROR("Integral negation of `", rhs, "` would result in overflow.");
+          ASTERIA_THROW_RUNTIME_ERROR("The opposite of `", rhs, "` cannot be represented as an `integer`.");
         }
         return -rhs;
       }
