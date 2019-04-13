@@ -693,7 +693,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_add(reg, G_real(1));
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_postfix_inc), " operation is not defined for `", lhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Postfix increment is not defined for `", lhs, "`.");
       z:
         return Air_Node::status_next;
       }
@@ -716,7 +716,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_sub(reg, G_real(1));
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_postfix_dec), " operation is not defined for `", lhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Postfix decrement is not defined for `", lhs, "`.");
       z:
         return Air_Node::status_next;
       }
@@ -774,7 +774,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_neg(reg);
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_neg), " operation is not defined for `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -797,7 +797,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_not(reg);
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_notb), " operation is not defined for `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -831,7 +831,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_add(reg, G_real(1));
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_inc), " operation is not defined for `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
       z:
         return Air_Node::status_next;
       }
@@ -852,7 +852,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_sub(reg, G_real(1));
           return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_dec), " operation is not defined for `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix decrement is not defined for `", rhs, "`.");
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_unset(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
@@ -889,7 +889,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           stack.set_temporary_result(assign, G_integer(rhs.as_object().size()));
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_lengthof), " operation is not defined for `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
       z:
         return Air_Node::status_next;
       }
@@ -923,7 +923,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_sqrt(reg);
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_sqrt), " operation is not defined for `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -946,7 +946,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           rhs = do_operator_isnan(rhs.as_real());
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_isnan), " operation is not defined for `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -969,7 +969,30 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           rhs = do_operator_isinf(rhs.as_real());
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_isinf), " operation is not defined for `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_abs(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Get the absolute value of the operand as a temporary value, then return it.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
+          rhs = do_operator_abs(rhs.as_integer());
+          goto z;
+        }
+        if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_abs(reg);
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1100,7 +1123,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_add(lhs.as_string(), reg);
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_add), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1132,7 +1155,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           rhs = do_operator_sub(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sub), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1175,7 +1198,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_mul(lhs.as_integer(), reg);
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_mul), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1201,7 +1224,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           rhs = do_operator_div(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_div), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1227,7 +1250,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           rhs = do_operator_mod(lhs.convert_to_real(), rhs.convert_to_real());
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_mod), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1259,7 +1282,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
             goto z;
           }
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sll), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1291,7 +1314,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
             goto z;
           }
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_srl), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1323,7 +1346,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
             goto z;
           }
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sla), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1354,7 +1377,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
             goto z;
           }
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_sra), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1381,7 +1404,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_and(lhs.as_integer(), reg);
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_andb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1408,7 +1431,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_or(lhs.as_integer(), reg);
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_orb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1435,7 +1458,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           reg = do_operator_xor(lhs.as_integer(), reg);
           goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_infix_orb), " operation is not defined for `", lhs, "` and `", rhs, "`.");
+        ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
