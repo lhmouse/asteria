@@ -777,8 +777,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         rocket::sref("`std.numeric.iround(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
                      "    nearest integer; halfway values are rounded away from zero. If\n"
-                     "    `value` is an `integer`, it is returned intact. The result is\n"
-                     "    converted to an `integer`.\n"
+                     "    `value` is an `integer`, it is returned intact. If `value` is a\n"
+                     "    `real`, it is converted to an `integer`.\n"
                      "  * Returns the rounded value as an `integer`.\n"
                      "  * Throws an exception if the result cannot be represented as an\n"
                      "    `integer`.\n"),
@@ -814,8 +814,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         rocket::sref("`std.numeric.ifloor(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
                      "    nearest integer towards negative infinity. If `value` is an\n"
-                     "    `integer`, it is returned intact. The result is converted to\n"
-                     "    an `integer`.\n"
+                     "    `integer`, it is returned intact. If `value` is a `real`, it is\n"
+                     "    converted to an `integer`.\n"
                      "  * Returns the rounded value as an `integer`.\n"
                      "  * Throws an exception if the result cannot be represented as an\n"
                      "    `integer`.\n"),
@@ -851,8 +851,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         rocket::sref("`std.numeric.iceil(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
                      "    nearest integer towards positive infinity. If `value` is an\n"
-                     "    `integer`, it is returned intact. The result is converted to\n"
-                     "    an `integer`.\n"
+                     "    `integer`, it is returned intact. If `value` is a `real`, it is\n"
+                     "    converted to an `integer`.\n"
                      "  * Returns the rounded value as an `integer`.\n"
                      "  * Throws an exception if the result cannot be represented as an\n"
                      "    `integer`.\n"),
@@ -888,7 +888,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         rocket::sref("`std.numeric.itrunc(value)`\n"
                      "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
                      "    nearest integer towards zero. If `value` is an `integer`, it is\n"
-                     "    returned intact. The result is converted to an `integer`.\n"
+                     "    returned intact. If `value` is a `real`, it is converted to an\n"
+                     "    `integer`.\n"
                      "  * Returns the rounded value as an `integer`.\n"
                      "  * Throws an exception if the result cannot be represented as an\n"
                      "    `integer`.\n"),

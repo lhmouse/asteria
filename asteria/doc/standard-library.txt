@@ -1212,8 +1212,8 @@
 
 	* Rounds `value`, which may be an `integer` or `real`, to the
 	  nearest integer; halfway values are rounded away from zero. If
-	  `value` is an `integer`, it is returned intact. The result is
-	  converted to an `integer`.
+	  `value` is an `integer`, it is returned intact. If `value` is a
+	  `real`, it is converted to an `integer`.
 
 	* Returns the rounded value as an `integer`.
 
@@ -1224,8 +1224,8 @@
 
 	* Rounds `value`, which may be an `integer` or `real`, to the
 	  nearest integer towards negative infinity. If `value` is an
-	  `integer`, it is returned intact. The result is converted to
-	  an `integer`.
+	  `integer`, it is returned intact. If `value` is a `real`, it is
+	  converted to an `integer`.
 
 	* Returns the rounded value as an `integer`.
 
@@ -1236,8 +1236,8 @@
 
 	* Rounds `value`, which may be an `integer` or `real`, to the
 	  nearest integer towards positive infinity. If `value` is an
-	  `integer`, it is returned intact. The result is converted to
-	  an `integer`.
+	  `integer`, it is returned intact. If `value` is a `real`, it is
+	  converted to an `integer`.
 
 	* Returns the rounded value as an `integer`.
 
@@ -1248,7 +1248,8 @@
 
 	* Rounds `value`, which may be an `integer` or `real`, to the
 	  nearest integer towards zero. If `value` is an `integer`, it is
-	  returned intact. The result is converted to an `integer`.
+	  returned intact. If `value` is a `real`, it is converted to an
+	  `integer`.
 
 	* Returns the rounded value as an `integer`.
 
