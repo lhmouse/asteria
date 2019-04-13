@@ -93,6 +93,10 @@ int main()
         assert std.numeric.is_nan(std.numeric.clamp(-nan, 2.5, 3.5));
         assert std.numeric.clamp(+infinity, 2.5, 3.5) == 3.5;
         assert std.numeric.clamp(-infinity, 2.5, 3.5) == 2.5;
+        assert std.numeric.clamp(1, 2, 2) == 2;
+        assert std.numeric.clamp(3, 2, 2) == 2;
+        assert std.numeric.clamp(1, 2.5, 2.5) == 2.5;
+        assert std.numeric.clamp(3, 2.5, 2.5) == 2.5;
 
         assert std.numeric.round(42) == 42;
         assert typeof std.numeric.round(42) == "integer";
