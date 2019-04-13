@@ -461,11 +461,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_real rvalue;
-            G_real rlower;
-            G_real rupper;
-            if(reader.start().g(rvalue).g(rlower).g(rupper).finish()) {
+            G_real flower;
+            G_real fupper;
+            if(reader.start().g(rvalue).g(flower).g(fupper).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_clamp(rvalue, rlower, rupper) };
+              Reference_Root::S_temporary xref = { std_numeric_clamp(rvalue, flower, fupper) };
               return rocket::move(xref);
             }
             // Fail.
@@ -803,11 +803,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
               Reference_Root::S_temporary xref = { std_numeric_random(global, ilower, iupper) };
               return rocket::move(xref);
             }
-            G_real rupper;
-            G_real rlower;
-            if(reader.start().g(rlower).g(rupper).finish()) {
+            G_real fupper;
+            G_real flower;
+            if(reader.start().g(flower).g(fupper).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, rupper) };
+              Reference_Root::S_temporary xref = { std_numeric_random(global, flower, fupper) };
               return rocket::move(xref);
             }
             // Fail.
