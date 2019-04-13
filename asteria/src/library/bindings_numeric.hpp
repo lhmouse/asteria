@@ -54,7 +54,7 @@ extern G_integer std_numeric_addm(const G_integer& x, const G_integer& y);
 extern G_integer std_numeric_subm(const G_integer& x, const G_integer& y);
 extern G_integer std_numeric_mulm(const G_integer& x, const G_integer& y);
 
-// Create an object that is to be referenced as `std.gc`.
+// Create an object that is to be referenced as `std.numeric`.
 extern void create_bindings_numeric(G_object& result, API_Version version);
 
 }  // namespace Asteria
