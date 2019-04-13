@@ -745,7 +745,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Negate the operand to create a temporary value, then return it.
+        // Get the opposite of the operand as a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
         if(rhs.is_integer()) {
           auto& reg = rhs.mut_integer();
