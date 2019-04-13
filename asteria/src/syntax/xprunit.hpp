@@ -21,15 +21,15 @@ class Xprunit
         xop_postfix_dec      = 11,  // --
         xop_postfix_at       = 12,  // []
         // Prefix operators
-        xop_prefix_pos       = 30,  // +
-        xop_prefix_neg       = 31,  // -
-        xop_prefix_notb      = 32,  // ~
-        xop_prefix_notl      = 33,  // !
-        xop_prefix_inc       = 34,  // ++
-        xop_prefix_dec       = 35,  // --
-        xop_prefix_unset     = 36,  // unset
-        xop_prefix_lengthof  = 37,  // lengthof
-        xop_prefix_typeof    = 38,  // typeof
+        xop_prefix_pos       = 20,  // +
+        xop_prefix_neg       = 21,  // -
+        xop_prefix_notb      = 22,  // ~
+        xop_prefix_notl      = 23,  // !
+        xop_prefix_inc       = 24,  // ++
+        xop_prefix_dec       = 25,  // --
+        xop_prefix_unset     = 26,  // unset
+        xop_prefix_lengthof  = 27,  // lengthof
+        xop_prefix_typeof    = 28,  // typeof
         // Infix relational operators
         xop_infix_cmp_eq     = 50,  // ==
         xop_infix_cmp_ne     = 51,  // !=

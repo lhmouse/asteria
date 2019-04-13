@@ -752,7 +752,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         const auto& rhs = stack.get_top_reference().read();
-        stack.set_temporary_result(assign, G_boolean(do_operator_not(rhs.test())));
+        stack.set_temporary_result(assign, do_operator_not(rhs.test()));
         return Air_Node::status_next;
       }
 
