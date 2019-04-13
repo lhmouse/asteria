@@ -253,6 +253,160 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
     return G_integer(static_cast<std::uint64_t>(x) * static_cast<std::uint64_t>(y));
   }
 
+    namespace {
+
+    ROCKET_PURE_FUNCTION G_integer do_saturing_add(const G_integer& lhs, const G_integer& rhs)
+      {
+        if(rhs >= 0) {
+          if(lhs > INT64_MAX - rhs) {
+            return INT64_MAX;
+          }
+        } else {
+          if(lhs < INT64_MIN - rhs) {
+            return INT64_MIN;
+          }
+        }
+        return lhs + rhs;
+      }
+    ROCKET_PURE_FUNCTION G_integer do_saturing_sub(const G_integer& lhs, const G_integer& rhs)
+      {
+        if(rhs >= 0) {
+          if(lhs < INT64_MIN + rhs) {
+            return INT64_MIN;
+          }
+        } else {
+          if(lhs > INT64_MAX + rhs) {
+            return INT64_MAX;
+          }
+        }
+        return lhs - rhs;
+      }
+    ROCKET_PURE_FUNCTION G_integer do_saturing_mul(const G_integer& lhs, const G_integer& rhs)
+      {
+        if((lhs == 0) || (rhs == 0)) {
+          return 0;
+        }
+        if((lhs == 1) || (rhs == 1)) {
+          return lhs ^ rhs ^ 1;
+        }
+        if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
+          return (lhs >> 63) ^ (rhs >> 63) ^ INT64_MAX;
+        }
+        if((lhs == -1) || (rhs == -1)) {
+          return -(lhs ^ rhs ^ -1);
+        }
+        // signed lhs and absolute rhs
+        auto slhs = lhs;
+        auto arhs = rhs;
+        if(rhs < 0) {
+          slhs = -lhs;
+          arhs = -rhs;
+        }
+        if(slhs >= 0) {
+          if(slhs > INT64_MAX / arhs) {
+            return INT64_MAX;
+          }
+        } else {
+          if(slhs < INT64_MIN / arhs) {
+            return INT64_MIN;
+          }
+        }
+        return slhs * arhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_saturing_add(const G_real& lhs, const G_real& rhs)
+      {
+        return lhs + rhs;
+      }
+    ROCKET_PURE_FUNCTION G_real do_saturing_sub(const G_real& lhs, const G_real& rhs)
+      {
+        return lhs - rhs;
+      }
+    ROCKET_PURE_FUNCTION G_real do_saturing_mul(const G_real& lhs, const G_real& rhs)
+      {
+        return lhs * rhs;
+      }
+
+    }
+
+G_integer std_numeric_adds(const G_integer& x, const G_integer& y)
+  {
+    return do_saturing_add(x, y);
+  }
+
+G_real std_numeric_adds(const G_real& x, const G_real& y)
+  {
+    return do_saturing_add(x, y);
+  }
+
+G_integer std_numeric_adds(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
+  {
+    if(!(lower < upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
+    return rocket::clamp(do_saturing_add(x, y), lower, upper);
+  }
+
+G_real std_numeric_adds(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
+  {
+    if(!std::isless(lower, upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
+    return rocket::clamp(do_saturing_add(x, y), lower, upper);
+  }
+
+G_integer std_numeric_subs(const G_integer& x, const G_integer& y)
+  {
+    return do_saturing_sub(x, y);
+  }
+
+G_real std_numeric_subs(const G_real& x, const G_real& y)
+  {
+    return do_saturing_sub(x, y);
+  }
+
+G_integer std_numeric_subs(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
+  {
+    if(!(lower < upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
+    return rocket::clamp(do_saturing_sub(x, y), lower, upper);
+  }
+
+G_real std_numeric_subs(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
+  {
+    if(!std::isless(lower, upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
+    return rocket::clamp(do_saturing_sub(x, y), lower, upper);
+  }
+
+G_integer std_numeric_muls(const G_integer& x, const G_integer& y)
+  {
+    return do_saturing_mul(x, y);
+  }
+
+G_real std_numeric_muls(const G_real& x, const G_real& y)
+  {
+    return do_saturing_mul(x, y);
+  }
+
+G_integer std_numeric_muls(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
+  {
+    if(!(lower < upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
+    return rocket::clamp(do_saturing_mul(x, y), lower, upper);
+  }
+
+G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
+  {
+    if(!std::isless(lower, upper)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+    }
+    return rocket::clamp(do_saturing_mul(x, y), lower, upper);
+  }
+
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -957,6 +1111,192 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             if(reader.start().g(x).g(y).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_mulm(x, y) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.adds()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("adds"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.adds(x, y)`\n"
+                     "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
+                     "    `integer` or `real` values. The result is limited within the\n"
+                     "    range of representable values of its type, hence will not cause\n"
+                     "    overflow exceptions to be thrown. When either argument is of\n"
+                     "    type `real` which supports infinities, this function is\n"
+                     "    equivalent to the built-in addition operator.\n"
+                     "  * Returns the saturated sum of `x` and `y`.\n"
+                     "`std.numeric.adds(x, y, lower, upper)`\n"
+                     "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
+                     "    `integer` or `real` values. The result is limited between\n"
+                     "    `lower` and `upper`, hence will not cause overflow exceptions\n"
+                     "    to be thrown.\n"
+                     "  * Returns the saturated sum of `x` and `y`. The result is of type\n"
+                     "    `integer` if all arguments are of type `integer`; otherwise it\n"
+                     "    is of type `real`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.adds"), args);
+            Argument_Reader::State istate, fstate;
+            // Parse arguments.
+            G_integer ix;
+            G_integer iy;
+            if(reader.start().g(ix).g(iy).save_state(istate).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_adds(ix, iy) };
+              return rocket::move(xref);
+            }
+            G_real fx;
+            G_real fy;
+            if(reader.start().g(fx).g(fy).save_state(fstate).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_adds(fx, fy) };
+              return rocket::move(xref);
+            }
+            G_integer ilower;
+            G_integer iupper;
+            if(reader.load_state(istate).g(ilower).g(iupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_adds(ix, iy, ilower, iupper) };
+              return rocket::move(xref);
+            }
+            G_real flower;
+            G_real fupper;
+            if(reader.load_state(fstate).g(flower).g(fupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_adds(fx, fy, flower, fupper) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.subs()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("subs"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.subs(x, y)`\n"
+                     "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
+                     "    may be `integer` or `real` values. The result is limited within\n"
+                     "    the range of representable values of its type, hence will not\n"
+                     "    cause overflow exceptions to be thrown. When either argument is\n"
+                     "    of type `real` which supports infinities, this function is\n"
+                     "    equivalent to the built-in subtraction operator.\n"
+                     "  * Returns the saturated difference of `x` and `y`.\n"
+                     "`std.numeric.subs(x, y, lower, upper)`\n"
+                     "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
+                     "    may be `integer` or `real` values. The result is limited\n"
+                     "    between `lower` and `upper`, hence will not cause overflow\n"
+                     "    exceptions to be thrown.\n"
+                     "  * Returns the saturated difference of `x` and `y`. The result is\n"
+                     "    of type `integer` if all arguments are of type `integer`;\n"
+                     "    otherwise it is of type `real`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.subs"), args);
+            Argument_Reader::State istate, fstate;
+            // Parse arguments.
+            G_integer ix;
+            G_integer iy;
+            if(reader.start().g(ix).g(iy).save_state(istate).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_subs(ix, iy) };
+              return rocket::move(xref);
+            }
+            G_real fx;
+            G_real fy;
+            if(reader.start().g(fx).g(fy).save_state(fstate).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_subs(fx, fy) };
+              return rocket::move(xref);
+            }
+            G_integer ilower;
+            G_integer iupper;
+            if(reader.load_state(istate).g(ilower).g(iupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_subs(ix, iy, ilower, iupper) };
+              return rocket::move(xref);
+            }
+            G_real flower;
+            G_real fupper;
+            if(reader.load_state(fstate).g(flower).g(fupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_subs(fx, fy, flower, fupper) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.muls()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("muls"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.muls(x, y)`\n"
+                     "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
+                     "    may be `integer` or `real` values. The result is limited within\n"
+                     "    the range of representable values of its type, hence will not\n"
+                     "    cause overflow exceptions to be thrown. When either argument is\n"
+                     "    of type `real` which supports infinities, this function is\n"
+                     "    equivalent to the built-in multiplication operator.\n"
+                     "  * Returns the saturated product of `x` and `y`.\n"
+                     "`std.numeric.muls(x, y, lower, upper)`\n"
+                     "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
+                     "    may be `integer` or `real` values. The result is limited\n"
+                     "    between `lower` and `upper`, hence will not cause overflow\n"
+                     "    exceptions to be thrown.\n"
+                     "  * Returns the saturated product of `x` and `y`. The result is of\n"
+                     "    type `integer` if all arguments are of type `integer`;\n"
+                     "    otherwise it is of type `real`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.muls"), args);
+            Argument_Reader::State istate, fstate;
+            // Parse arguments.
+            G_integer ix;
+            G_integer iy;
+            if(reader.start().g(ix).g(iy).save_state(istate).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_muls(ix, iy) };
+              return rocket::move(xref);
+            }
+            G_real fx;
+            G_real fy;
+            if(reader.start().g(fx).g(fy).save_state(fstate).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy) };
+              return rocket::move(xref);
+            }
+            G_integer ilower;
+            G_integer iupper;
+            if(reader.load_state(istate).g(ilower).g(iupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_muls(ix, iy, ilower, iupper) };
+              return rocket::move(xref);
+            }
+            G_real flower;
+            G_real fupper;
+            if(reader.load_state(fstate).g(flower).g(fupper).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy, flower, fupper) };
               return rocket::move(xref);
             }
             // Fail.

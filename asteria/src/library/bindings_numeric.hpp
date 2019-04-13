@@ -54,6 +54,19 @@ extern G_integer std_numeric_addm(const G_integer& x, const G_integer& y);
 extern G_integer std_numeric_subm(const G_integer& x, const G_integer& y);
 extern G_integer std_numeric_mulm(const G_integer& x, const G_integer& y);
 
+extern G_integer std_numeric_adds(const G_integer& x, const G_integer& y);
+extern G_real std_numeric_adds(const G_real& x, const G_real& y);
+extern G_integer std_numeric_adds(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper);
+extern G_real std_numeric_adds(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper);
+extern G_integer std_numeric_subs(const G_integer& x, const G_integer& y);
+extern G_real std_numeric_subs(const G_real& x, const G_real& y);
+extern G_integer std_numeric_subs(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper);
+extern G_real std_numeric_subs(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper);
+extern G_integer std_numeric_muls(const G_integer& x, const G_integer& y);
+extern G_real std_numeric_muls(const G_real& x, const G_real& y);
+extern G_integer std_numeric_muls(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper);
+extern G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper);
+
 // Create an object that is to be referenced as `std.numeric`.
 extern void create_bindings_numeric(G_object& result, API_Version version);
 

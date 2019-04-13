@@ -1324,6 +1324,72 @@
 
 	* Returns the reduced product of `x` and `y`.
 
+`std.numeric.adds(x, y)`
+
+	* Adds `y` to `x` using saturating arithmetic. `x` and `y` may be
+	  `integer` or `real` values. The result is limited within the
+	  range of representable values of its type, hence will not cause
+	  overflow exceptions to be thrown. When either argument is of
+	  type `real` which supports infinities, this function is
+	  equivalent to the built-in addition operator.
+
+	* Returns the saturated sum of `x` and `y`.
+
+`std.numeric.adds(x, y, lower, upper)`
+
+	* Adds `y` to `x` using saturating arithmetic. `x` and `y` may be
+	  `integer` or `real` values. The result is limited between
+	  `lower` and `upper`, hence will not cause overflow exceptions
+	  to be thrown.
+
+	* Returns the saturated sum of `x` and `y`. The result is of type
+	  `integer` if all arguments are of type `integer`; otherwise it
+	  is of type `real`.
+
+`std.numeric.subs(x, y)`
+
+	* Subtracts `y` from `x` using saturating arithmetic. `x` and `y`
+	  may be `integer` or `real` values. The result is limited within
+	  the range of representable values of its type, hence will not
+	  cause overflow exceptions to be thrown. When either argument is
+	  of type `real` which supports infinities, this function is
+	  equivalent to the built-in subtraction operator.
+
+	* Returns the saturated difference of `x` and `y`.
+
+`std.numeric.subs(x, y, lower, upper)`
+
+	* Subtracts `y` from `x` using saturating arithmetic. `x` and `y`
+	  may be `integer` or `real` values. The result is limited
+	  between `lower` and `upper`, hence will not cause overflow
+	  exceptions to be thrown.
+
+	* Returns the saturated difference of `x` and `y`. The result is
+	  of type `integer` if all arguments are of type `integer`;
+	  otherwise it is of type `real`.
+
+`std.numeric.muls(x, y)`
+
+	* Multiplies `x` by `y` using saturating arithmetic. `x` and `y`
+	  may be `integer` or `real` values. The result is limited within
+	  the range of representable values of its type, hence will not
+	  cause overflow exceptions to be thrown. When either argument is
+	  of type `real` which supports infinities, this function is
+	  equivalent to the built-in multiplication operator.
+
+	* Returns the saturated product of `x` and `y`.
+
+`std.numeric.muls(x, y, lower, upper)`
+
+	* Multiplies `x` by `y` using saturating arithmetic. `x` and `y`
+	  may be `integer` or `real` values. The result is limited
+	  between `lower` and `upper`, hence will not cause overflow
+	  exceptions to be thrown.
+
+	* Returns the saturated product of `x` and `y`. The result is of
+	  type `integer` if all arguments are of type `integer`;
+	  otherwise it is of type `real`.
+
 `std.numeric.parse_integer(str)`
 
 `std.numeric.parse_real(str)`
