@@ -894,7 +894,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        //  Get the square root of the operand as a temporary value, then return it.
+        // Get the square root of the operand as a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
@@ -917,7 +917,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        //  Get the square root of the operand as a temporary value, then return it.
+        // Check whether the operand is a NaN, store the result in a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
@@ -940,7 +940,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        //  Get the square root of the operand as a temporary value, then return it.
+        // Check whether the operand is an infinity, store the result in a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
