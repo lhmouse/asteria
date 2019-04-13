@@ -228,6 +228,33 @@ G_real std_numeric_random(const Global_Context& global, const G_real& lower, con
     return lower + res;
   }
 
+G_integer std_numeric_negm(const G_integer& x)
+  {
+    auto ux = static_cast<std::uint64_t>(x);
+    return G_integer(-ux);
+  }
+
+G_integer std_numeric_addm(const G_integer& x, const G_integer& y)
+  {
+    auto ux = static_cast<std::uint64_t>(x);
+    auto uy = static_cast<std::uint64_t>(y);
+    return G_integer(ux + uy);
+  }
+
+G_integer std_numeric_subm(const G_integer& x, const G_integer& y)
+  {
+    auto ux = static_cast<std::uint64_t>(x);
+    auto uy = static_cast<std::uint64_t>(y);
+    return G_integer(ux - uy);
+  }
+
+G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
+  {
+    auto ux = static_cast<std::uint64_t>(x);
+    auto uy = static_cast<std::uint64_t>(y);
+    return G_integer(ux * uy);
+  }
+
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -783,6 +810,127 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             if(reader.start().g(rlower).g(rupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, rupper) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.negm()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("negm"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.negm(x)`\n"
+                     "  * Subtracts `x` from zero using modular arithmetic. `x` must be\n"
+                     "    of the `integer` type. The result is reduced to be congruent to\n"
+                     "    the opposite of `x` modulo `0x1p64` in infinite precision. This\n"
+                     "    function will not cause overflow exceptions to be thrown.\n"
+                     "  * Returns the reduced opposite of `x`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.negm"), args);
+            // Parse arguments.
+            G_integer x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_negm(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.addm()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("addm"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.addm(x, y)`\n"
+                     "  * Adds `y` to `x` using modular arithmetic. `x` and `y` must be\n"
+                     "    of the `integer` type. The result is reduced to be congruent to\n"
+                     "    the sum of `x` and `y` modulo `0x1p64` in infinite precision.\n"
+                     "    This function will not cause overflow exceptions to be thrown.\n"
+                     "  * Returns the reduced sum of `x` and `y`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.addm"), args);
+            // Parse arguments.
+            G_integer x;
+            G_integer y;
+            if(reader.start().g(x).g(y).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_addm(x, y) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.subm()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("subm"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.subm(x, y)`\n"
+                     "  * Subtracts `y` from `x` using modular arithmetic. `x` and `y`\n"
+                     "    must be of the `integer` type. The result is reduced to be\n"
+                     "    congruent to the difference of `x` and `y` modulo `0x1p64` in\n"
+                     "    infinite precision. This function will not cause overflow\n"
+                     "    exceptions to be thrown.\n"
+                     "  * Returns the reduced difference of `x` and `y`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.subm"), args);
+            // Parse arguments.
+            G_integer x;
+            G_integer y;
+            if(reader.start().g(x).g(y).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_subm(x, y) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.mulm()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("mulm"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.mulm(x, y)`\n"
+                     "  * Multiplies `x` by `y` using modular arithmetic. `x` and `y`\n"
+                     "    must be of the `integer` type. The result is reduced to be\n"
+                     "    congruent to the product of `x` and `y` modulo `0x1p64` in\n"
+                     "    infinite precision. This function will not cause overflow\n"
+                     "    exceptions to be thrown.\n"
+                     "  * Returns the reduced product of `x` and `y`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.mulm"), args);
+            // Parse arguments.
+            G_integer x;
+            G_integer y;
+            if(reader.start().g(x).g(y).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_mulm(x, y) };
               return rocket::move(xref);
             }
             // Fail.

@@ -1280,17 +1280,43 @@
 
 	* Throws an exception if `lower` is not less than `upper`.
 
-`std.numeric.saturation_add(x, y)`
+`std.numeric.negm(x)`
 
-`std.numeric.saturation_add(x, y, lower, upper)`
+	* Subtracts `x` from zero using modular arithmetic. `x` must be
+	  of the `integer` type. The result is reduced to be congruent to
+	  the opposite of `x` modulo `0x1p64` in infinite precision. This
+	  function will not cause overflow exceptions to be thrown.
 
-`std.numeric.saturation_sub(x, y)`
+	* Returns the reduced opposite of `x`.
 
-`std.numeric.saturation_sub(x, y, lower, upper)`
+`std.numeric.addm(x, y)`
 
-`std.numeric.saturation_mul(x, y)`
+	* Adds `y` to `x` using modular arithmetic. `x` and `y` must be
+	  of the `integer` type. The result is reduced to be congruent to
+	  the sum of `x` and `y` modulo `0x1p64` in infinite precision.
+	  This function will not cause overflow exceptions to be thrown.
 
-`std.numeric.saturation_mul(x, y, lower, upper)`
+	* Returns the reduced sum of `x` and `y`.
+
+`std.numeric.subm(x, y)`
+
+	* Subtracts `y` from `x` using modular arithmetic. `x` and `y`
+	  must be of the `integer` type. The result is reduced to be
+	  congruent to the difference of `x` and `y` modulo `0x1p64` in
+	  infinite precision. This function will not cause overflow
+	  exceptions to be thrown.
+
+	* Returns the reduced difference of `x` and `y`.
+
+`std.numeric.mulm(x, y)`
+
+	* Multiplies `x` by `y` using modular arithmetic. `x` and `y`
+	  must be of the `integer` type. The result is reduced to be
+	  congruent to the product of `x` and `y` modulo `0x1p64` in
+	  infinite precision. This function will not cause overflow
+	  exceptions to be thrown.
+
+	* Returns the reduced product of `x` and `y`.
 
 `std.numeric.parse_integer(str)`
 
