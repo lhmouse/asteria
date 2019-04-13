@@ -203,7 +203,7 @@ int main()
           assert std.numeric.random(-1.5, -0.5) >= -1.5;
           assert std.numeric.random(-1.5, -0.5) <  -0.5;
           assert typeof std.numeric.random(-1.5, -0.5) == "real";
-        } while(--i != 0)
+        } while(--i != 0);
 
         assert std.numeric.addm(+1, +2) == +3;
         assert std.numeric.addm(+1, -2) == -1;

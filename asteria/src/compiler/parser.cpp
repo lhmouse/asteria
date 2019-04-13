@@ -663,6 +663,10 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
         Statement::S_do_while xstmt = { rocket::move(*qbody), *kneg, rocket::move(*qcond) };
         return rocket::move(xstmt);
       }
