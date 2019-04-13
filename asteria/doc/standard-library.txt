@@ -1280,6 +1280,21 @@
 
 	* Throws an exception if `lower` is not less than `upper`.
 
+`std.numeric.sqrt(x)`
+
+	* Calculates the square root of `x` which may be of either the
+	  `integer` or the `real` type. The result is always exact.
+
+	* Returns the square root of `x` as a `real`.
+
+`std.numeric.fma(x, y, z)`
+
+	* Performs fused multiply-add operation on `x`, `y` and `z`. This
+	  functions calculates `x * y + z` without intermediate rounding
+	  operations. The result is always exact.
+
+	* Returns the value of `x * y + z` as a `real`.
+
 `std.numeric.addm(x, y)`
 
 	* Adds `y` to `x` using modular arithmetic. `x` and `y` must be

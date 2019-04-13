@@ -205,6 +205,26 @@ int main()
           assert typeof std.numeric.random(-1.5, -0.5) == "real";
         } while(--i != 0);
 
+        assert std.numeric.sqrt(+16) == 4;
+        assert std.numeric.is_nan(std.numeric.sqrt(-16));
+        assert std.numeric.sqrt(+0.0) == 0;
+        assert std.numeric.sqrt(-0.0) == 0;
+        assert std.numeric.sqrt(+infinity) == infinity;
+        assert std.numeric.is_nan(std.numeric.sqrt(-infinity));
+        assert std.numeric.is_nan(nan);
+
+        assert std.numeric.fma(+5, +6, +7) == +37;
+        assert std.numeric.fma(+5, -6, +7) == -23;
+        assert                (0x1.0000000008p-460 * 0x1.0000000004p-460 + -0x1.000000000Cp-920) ==        0;  // no fma
+        assert std.numeric.fma(0x1.0000000008p-460,  0x1.0000000004p-460,  -0x1.000000000Cp-920) == 2.0p-996;  // fma
+        assert std.numeric.fma(+5, -infinity, +7) == -infinity;
+        assert std.numeric.fma(+5, -6, +infinity) == +infinity;
+        assert std.numeric.is_nan(std.numeric.fma(+infinity, +6, -infinity));
+        assert std.numeric.fma(+infinity, +6, +infinity) == +infinity;
+        assert std.numeric.is_nan(std.numeric.fma(nan, 6, 7));
+        assert std.numeric.is_nan(std.numeric.fma(5, nan, 7));
+        assert std.numeric.is_nan(std.numeric.fma(5, 6, nan));
+
         assert std.numeric.addm(+1, +2) == +3;
         assert std.numeric.addm(+1, -2) == -1;
         assert std.numeric.addm(std.constants.integer_max, +2) == std.constants.integer_min + 1;

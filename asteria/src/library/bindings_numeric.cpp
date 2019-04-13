@@ -228,6 +228,16 @@ G_real std_numeric_random(const Global_Context& global, const G_real& lower, con
     return lower + res;
   }
 
+G_real std_numeric_sqrt(const G_real& x)
+  {
+    return std::sqrt(x);
+  }
+
+G_real std_numeric_fma(const G_real& x, const G_real& y, const G_real& z)
+  {
+    return std::fma(x, y, z);
+  }
+
 G_integer std_numeric_addm(const G_integer& x, const G_integer& y)
   {
     return G_integer(static_cast<std::uint64_t>(x) + static_cast<std::uint64_t>(y));
@@ -798,6 +808,63 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             if(reader.start().g(rlower).g(rupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, rupper) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.sqrt()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sqrt"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.sqrt(x)`\n"
+                     "  * Calculates the square root of `x` which may be of either the\n"
+                     "    `integer` or the `real` type. The result is always exact.\n"
+                     "  * Returns the square root of `x` as a `real`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.sqrt"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_sqrt(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.numeric.fma()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("fma"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.numeric.fma(x, y, z)`\n"
+                     "  * Performs fused multiply-add operation on `x`, `y` and `z`. This\n"
+                     "    functions calculates `x * y + z` without intermediate rounding\n"
+                     "    operations. The result is always exact.\n"
+                     "  * Returns the value of `x * y + z` as a `real`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.fma"), args);
+            // Parse arguments.
+            G_real x;
+            G_real y;
+            G_real z;
+            if(reader.start().g(x).g(y).g(z).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_fma(x, y, z) };
               return rocket::move(xref);
             }
             // Fail.
