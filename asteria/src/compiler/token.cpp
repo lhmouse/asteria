@@ -150,6 +150,10 @@ const char* Token::get_keyword(Keyword keyword) noexcept
       {
         return "__isinf";
       }
+    case keyword_abs:
+      {
+        return "__abs";
+      }
     default:
       return "<unknown keyword>";
     }

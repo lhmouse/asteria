@@ -33,6 +33,7 @@ class Xprunit
         xop_prefix_sqrt      = 29,  // __sqrt
         xop_prefix_isnan     = 30,  // __isnan
         xop_prefix_isinf     = 31,  // __isinf
+        xop_prefix_abs       = 32,  // __abs
         // Infix relational operators
         xop_infix_cmp_eq     = 50,  // ==
         xop_infix_cmp_ne     = 51,  // !=

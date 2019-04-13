@@ -74,6 +74,10 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         return "prefix `__isinf`";
       }
+    case xop_prefix_abs:
+      {
+        return "prefix `__abs`";
+      }
     case xop_prefix_isnan:
       {
         return "prefix `__isnan`";
@@ -206,6 +210,14 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
     ROCKET_PURE_FUNCTION G_boolean do_operator_isnan(const G_integer& /*rhs*/)
       {
         return false;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_abs(const G_integer& rhs)
+      {
+        if(rhs == INT64_MIN) {
+          ASTERIA_THROW_RUNTIME_ERROR("The absolute value of `", rhs, "` cannot be represented as an `integer`.");
+        }
+        return std::abs(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_integer& rhs)
@@ -364,6 +376,11 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
     ROCKET_PURE_FUNCTION G_boolean do_operator_isnan(const G_real& rhs)
       {
         return std::isnan(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_abs(const G_real& rhs)
+      {
+        return std::fabs(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_add(const G_real& lhs, const G_real& rhs)
@@ -953,6 +970,29 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_isinf), " operation is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_abs(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Get the absolute value of the operand as a temporary value, then return it.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
+          rhs = do_operator_abs(rhs.as_integer());
+          goto z;
+        }
+        if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_abs(reg);
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_abs), " operation is not defined for `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1644,6 +1684,11 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         case xop_prefix_isinf:
           {
             code.emplace_back(do_execute_operator_rpn_prefix_isinf, rocket::move(p));
+            return;
+          }
+        case xop_prefix_abs:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_abs, rocket::move(p));
             return;
           }
         case xop_infix_cmp_eq:

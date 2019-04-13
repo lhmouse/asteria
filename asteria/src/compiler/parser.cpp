@@ -1151,7 +1151,7 @@ namespace Asteria {
         // prefix-operator ::=
         // "+" | "-" | "~" | "!" | "++" | "--" |
         // "unset" | "lengthof" | "typeof" | "not" |
-        // "__sqrt" | "__isnan" | "__isinf"
+        // "__abs" | "__sqrt" | "__isnan" | "__isinf"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
@@ -1172,6 +1172,7 @@ namespace Asteria {
               { Token::keyword_sqrt,      Xprunit::xop_prefix_sqrt     },
               { Token::keyword_isnan,     Xprunit::xop_prefix_isnan    },
               { Token::keyword_isinf,     Xprunit::xop_prefix_isinf    },
+              { Token::keyword_abs,       Xprunit::xop_prefix_abs      },
             };
           auto keyword = qtok->as_keyword();
           auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return keyword == r.keyword;  });

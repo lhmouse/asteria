@@ -153,7 +153,7 @@ prefix-operator-list ::=
 prefix-operator ::=
 	"+" | "-" | "~" | "!" | "++" | "--" |
 	"unset" | "lengthof" | "typeof" | "not" |
-	"__sqrt" | "__isnan" | "__isinf"
+	"__abs" | "__sqrt" | "__isnan" | "__isinf"
 
 primary-expression ::=
 	identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression

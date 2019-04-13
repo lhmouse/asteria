@@ -49,6 +49,7 @@ class Token
         keyword_sqrt      = 32,  // __sqrt
         keyword_isnan     = 33,  // __isnan
         keyword_isinf     = 34,  // __isinf
+        keyword_abs       = 35,  // __abs
       };
     enum Punctuator : std::uint8_t
       {

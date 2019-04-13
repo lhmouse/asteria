@@ -6,8 +6,8 @@ Postfix operators          | ()   []                     | Left-to-right
 ---------------------------+-----------------------------+---------------------
                            | +   -   ~   !               |
                            | ++   --                     |
-Prefix operators           | unset                       | Right-to-left
-                           | lengthof   typeof           |
+Prefix operators           | unset  lengthof   typeof    | Right-to-left
+                           | __abs                       |
                            | __sqrt  __isnan  __isinf    |
 ---------------------------+-----------------------------+---------------------
 Multiplicative operators   | *   /   %                   |
