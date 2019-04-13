@@ -998,29 +998,6 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_execute_operator_rpn_prefix_abs(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
-                                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
-      {
-        // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Get the absolute value of the operand as a temporary value, then return it.
-        auto rhs = stack.get_top_reference().read();
-        if(rhs.is_integer()) {
-          // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
-          rhs = do_operator_abs(rhs.as_integer());
-          goto z;
-        }
-        if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
-          reg = do_operator_abs(reg);
-          goto z;
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The ", Xprunit::get_operator_name(Xprunit::xop_prefix_abs), " operation is not defined for `", rhs, "`.");
-      z:
-        stack.set_temporary_result(assign, rocket::move(rhs));
-        return Air_Node::status_next;
-      }
-
     Air_Node::Status do_execute_operator_rpn_infix_cmp_xeq(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                            const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
