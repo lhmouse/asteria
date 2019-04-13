@@ -244,6 +244,9 @@ namespace Asteria {
             }
           static constexpr s_keywords[] =
             {
+              { "__isinf",   Token::keyword_isinf     },
+              { "__isnan",   Token::keyword_isnan     },
+              { "__sqrt",    Token::keyword_sqrt      },
               { "and",       Token::keyword_and       },
               { "assert",    Token::keyword_assert    },
               { "break",     Token::keyword_break     },

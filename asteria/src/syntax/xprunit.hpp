@@ -30,6 +30,9 @@ class Xprunit
         xop_prefix_unset     = 26,  // unset
         xop_prefix_lengthof  = 27,  // lengthof
         xop_prefix_typeof    = 28,  // typeof
+        xop_prefix_sqrt      = 29,  // __sqrt
+        xop_prefix_isnan     = 30,  // __isnan
+        xop_prefix_isinf     = 31,  // __isinf
         // Infix relational operators
         xop_infix_cmp_eq     = 50,  // ==
         xop_infix_cmp_ne     = 51,  // !=

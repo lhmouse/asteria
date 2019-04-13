@@ -151,7 +151,9 @@ prefix-operator-list-opt ::=
 prefix-operator-list ::=
 	prefix-operator prefix-operator-list-opt
 prefix-operator ::=
-	"+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof" | "not"
+	"+" | "-" | "~" | "!" | "++" | "--" |
+	"unset" | "lengthof" | "typeof" | "not" |
+	"__sqrt" | "__isnan" | "__isinf"
 
 primary-expression ::=
 	identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression

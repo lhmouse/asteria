@@ -1149,7 +1149,9 @@ namespace Asteria {
     bool do_accept_prefix_operator(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // prefix-operator ::=
-        //   "+" | "-" | "~" | "!" | "++" | "--" | "unset" | "lengthof" | "typeof" | "not"
+        // "+" | "-" | "~" | "!" | "++" | "--" |
+        // "unset" | "lengthof" | "typeof" | "not" |
+        // "__sqrt" | "__isnan" | "__isinf"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
           return false;
@@ -1167,6 +1169,9 @@ namespace Asteria {
               { Token::keyword_lengthof,  Xprunit::xop_prefix_lengthof },
               { Token::keyword_typeof,    Xprunit::xop_prefix_typeof   },
               { Token::keyword_not,       Xprunit::xop_prefix_notl     },
+              { Token::keyword_sqrt,      Xprunit::xop_prefix_sqrt     },
+              { Token::keyword_isnan,     Xprunit::xop_prefix_isnan    },
+              { Token::keyword_isinf,     Xprunit::xop_prefix_isinf    },
             };
           auto keyword = qtok->as_keyword();
           auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return keyword == r.keyword;  });

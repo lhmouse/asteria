@@ -89,8 +89,8 @@ int main()
         assert std.numeric.clamp(2.75, 2.5, 3.5) == 2.75;
         assert std.numeric.clamp(3.75, 2.5, 3.5) == 3.50;
         assert typeof std.numeric.clamp(1.75, 2.5, 3.5) == "real";
-        assert std.numeric.is_nan(std.numeric.clamp(+nan, 2.5, 3.5));
-        assert std.numeric.is_nan(std.numeric.clamp(-nan, 2.5, 3.5));
+        assert __isnan std.numeric.clamp(+nan, 2.5, 3.5);
+        assert __isnan std.numeric.clamp(-nan, 2.5, 3.5);
         assert std.numeric.clamp(+infinity, 2.5, 3.5) == 3.5;
         assert std.numeric.clamp(-infinity, 2.5, 3.5) == 2.5;
         assert std.numeric.clamp(1, 2, 2) == 2;
@@ -206,12 +206,12 @@ int main()
         } while(--i != 0);
 
         assert std.numeric.sqrt(+16) == 4;
-        assert std.numeric.is_nan(std.numeric.sqrt(-16));
+        assert __isnan std.numeric.sqrt(-16);
         assert std.numeric.sqrt(+0.0) == 0;
         assert std.numeric.sqrt(-0.0) == 0;
         assert std.numeric.sqrt(+infinity) == infinity;
-        assert std.numeric.is_nan(std.numeric.sqrt(-infinity));
-        assert std.numeric.is_nan(nan);
+        assert __isnan std.numeric.sqrt(-infinity);
+        assert __isnan std.numeric.sqrt(nan);
 
         assert std.numeric.fma(+5, +6, +7) == +37;
         assert std.numeric.fma(+5, -6, +7) == -23;
@@ -219,11 +219,11 @@ int main()
         assert std.numeric.fma(0x1.0000000008p-460,  0x1.0000000004p-460,  -0x1.000000000Cp-920) == 2.0p-996;  // fma
         assert std.numeric.fma(+5, -infinity, +7) == -infinity;
         assert std.numeric.fma(+5, -6, +infinity) == +infinity;
-        assert std.numeric.is_nan(std.numeric.fma(+infinity, +6, -infinity));
+        assert __isnan std.numeric.fma(+infinity, +6, -infinity);
         assert std.numeric.fma(+infinity, +6, +infinity) == +infinity;
-        assert std.numeric.is_nan(std.numeric.fma(nan, 6, 7));
-        assert std.numeric.is_nan(std.numeric.fma(5, nan, 7));
-        assert std.numeric.is_nan(std.numeric.fma(5, 6, nan));
+        assert __isnan std.numeric.fma(nan, 6, 7);
+        assert __isnan std.numeric.fma(5, nan, 7);
+        assert __isnan std.numeric.fma(5, 6, nan);
 
         assert std.numeric.addm(+1, +2) == +3;
         assert std.numeric.addm(+1, -2) == -1;
@@ -266,20 +266,20 @@ int main()
         assert std.numeric.adds(+2.5, +3.75) == +6.25;
         assert std.numeric.adds(+2.5, -3.75) == -1.25;
         assert std.numeric.adds(+infinity, +infinity) == +infinity;
-        assert std.numeric.is_nan(std.numeric.adds(+infinity, -infinity));
-        assert std.numeric.is_nan(std.numeric.adds(-infinity, +infinity));
+        assert __isnan std.numeric.adds(+infinity, -infinity);
+        assert __isnan std.numeric.adds(-infinity, +infinity);
         assert std.numeric.adds(-infinity, -infinity) == -infinity;
-        assert std.numeric.is_nan(std.numeric.adds(nan, 42));
-        assert std.numeric.is_nan(std.numeric.adds(42, nan));
+        assert __isnan std.numeric.adds(nan, 42);
+        assert __isnan std.numeric.adds(42, nan);
         assert std.numeric.adds(+2.5, +3.75, -1, +7.5) == +6.25;
         assert std.numeric.adds(+2.5, -3.75, -1, +7.5) == -1.00;
         assert std.numeric.adds(+2.5, +9.75, -1, +7.5) == +7.50;
         assert std.numeric.adds(+infinity, +infinity, 3, 9) == 9;
-        assert std.numeric.is_nan(std.numeric.adds(+infinity, -infinity, 3, 9));
-        assert std.numeric.is_nan(std.numeric.adds(-infinity, +infinity, 3, 9));
+        assert __isnan std.numeric.adds(+infinity, -infinity, 3, 9);
+        assert __isnan std.numeric.adds(-infinity, +infinity, 3, 9);
         assert std.numeric.adds(-infinity, -infinity, 3, 9) == 3;
-        assert std.numeric.is_nan(std.numeric.adds(nan, 42, 3, 9));
-        assert std.numeric.is_nan(std.numeric.adds(42, nan, 3, 9));
+        assert __isnan std.numeric.adds(nan, 42, 3, 9);
+        assert __isnan std.numeric.adds(42, nan, 3, 9);
 
         assert std.numeric.subs(+2, +3) == -1;
         assert std.numeric.subs(+2, -3) == +5;
@@ -294,21 +294,21 @@ int main()
         assert std.numeric.subs(+9, -2, +4, +8) == +8;
         assert std.numeric.subs(+2.5, +3.75) == -1.25;
         assert std.numeric.subs(+2.5, -3.75) == +6.25;
-        assert std.numeric.is_nan(std.numeric.subs(+infinity, +infinity));
+        assert __isnan std.numeric.subs(+infinity, +infinity);
         assert std.numeric.subs(+infinity, -infinity) == +infinity;
         assert std.numeric.subs(-infinity, +infinity) == -infinity;
-        assert std.numeric.is_nan(std.numeric.subs(-infinity, -infinity));
-        assert std.numeric.is_nan(std.numeric.subs(nan, 42));
-        assert std.numeric.is_nan(std.numeric.subs(42, nan));
+        assert __isnan std.numeric.subs(-infinity, -infinity);
+        assert __isnan std.numeric.subs(nan, 42);
+        assert __isnan std.numeric.subs(42, nan);
         assert std.numeric.subs(+2.5, +3.75, -1, +7.5) == -1.00;
         assert std.numeric.subs(+2.5, -3.75, -1, +7.5) == +6.25;
         assert std.numeric.subs(+7.0, -2.25, -1, +7.5) == +7.50;
-        assert std.numeric.is_nan(std.numeric.subs(+infinity, +infinity, 3, 9));
+        assert __isnan std.numeric.subs(+infinity, +infinity, 3, 9);
         assert std.numeric.subs(+infinity, -infinity, 3, 9) == 9;
         assert std.numeric.subs(-infinity, +infinity, 3, 9) == 3;
-        assert std.numeric.is_nan(std.numeric.subs(-infinity, -infinity, 3, 9));
-        assert std.numeric.is_nan(std.numeric.subs(nan, 42, 3, 9));
-        assert std.numeric.is_nan(std.numeric.subs(42, nan, 3, 9));
+        assert __isnan std.numeric.subs(-infinity, -infinity, 3, 9);
+        assert __isnan std.numeric.subs(nan, 42, 3, 9);
+        assert __isnan std.numeric.subs(42, nan, 3, 9);
 
         assert std.numeric.muls(+2, +3) == +6;
         assert std.numeric.muls(+2, -3) == -6;
@@ -341,8 +341,8 @@ int main()
         assert std.numeric.muls(+infinity, -infinity) == -infinity;
         assert std.numeric.muls(-infinity, +infinity) == -infinity;
         assert std.numeric.muls(-infinity, -infinity) == +infinity;
-        assert std.numeric.is_nan(std.numeric.muls(nan, 42));
-        assert std.numeric.is_nan(std.numeric.muls(42, nan));
+        assert __isnan std.numeric.muls(nan, 42);
+        assert __isnan std.numeric.muls(42, nan);
         assert std.numeric.muls(+2.5, +3.75, -1, +9.5) == +9.375;
         assert std.numeric.muls(+2.5, -3.75, -1, +9.5) == -1.000;
         assert std.numeric.muls(+2.5, +9.75, -1, +9.5) == +9.500;
@@ -350,8 +350,8 @@ int main()
         assert std.numeric.muls(+infinity, -infinity, 3, 9) == 3;
         assert std.numeric.muls(-infinity, +infinity, 3, 9) == 3;
         assert std.numeric.muls(-infinity, -infinity, 3, 9) == 9;
-        assert std.numeric.is_nan(std.numeric.muls(nan, 42, 3, 9));
-        assert std.numeric.is_nan(std.numeric.muls(42, nan, 3, 9));
+        assert __isnan std.numeric.muls(nan, 42, 3, 9);
+        assert __isnan std.numeric.muls(42, nan, 3, 9);
       )__";
 
     std::istringstream iss(s_source);

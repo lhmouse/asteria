@@ -138,6 +138,18 @@ const char* Token::get_keyword(Keyword keyword) noexcept
       {
         return "assert";
       }
+    case keyword_sqrt:
+      {
+        return "__sqrt";
+      }
+    case keyword_isnan:
+      {
+        return "__isnan";
+      }
+    case keyword_isinf:
+      {
+        return "__isinf";
+      }
     default:
       return "<unknown keyword>";
     }

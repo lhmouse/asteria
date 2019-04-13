@@ -46,6 +46,9 @@ class Token
         keyword_or        = 29,
         keyword_not       = 30,
         keyword_assert    = 31,
+        keyword_sqrt      = 32,  // __sqrt
+        keyword_isnan     = 33,  // __isnan
+        keyword_isinf     = 34,  // __isinf
       };
     enum Punctuator : std::uint8_t
       {
