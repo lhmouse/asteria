@@ -205,11 +205,6 @@ int main()
           assert typeof std.numeric.random(-1.5, -0.5) == "real";
         } while(--i != 0)
 
-        assert std.numeric.negm(+2) == -2;
-        assert std.numeric.negm(-2) == +2;
-        assert std.numeric.negm(std.constants.integer_max) == std.constants.integer_min + 1;
-        assert std.numeric.negm(std.constants.integer_min) == std.constants.integer_min;
-
         assert std.numeric.addm(+1, +2) == +3;
         assert std.numeric.addm(+1, -2) == -1;
         assert std.numeric.addm(std.constants.integer_max, +2) == std.constants.integer_min + 1;

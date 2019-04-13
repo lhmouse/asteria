@@ -1280,15 +1280,6 @@
 
 	* Throws an exception if `lower` is not less than `upper`.
 
-`std.numeric.negm(x)`
-
-	* Subtracts `x` from zero using modular arithmetic. `x` must be
-	  of the `integer` type. The result is reduced to be congruent to
-	  the opposite of `x` modulo `0x1p64` in infinite precision. This
-	  function will not cause overflow exceptions to be thrown.
-
-	* Returns the reduced opposite of `x`.
-
 `std.numeric.addm(x, y)`
 
 	* Adds `y` to `x` using modular arithmetic. `x` and `y` must be

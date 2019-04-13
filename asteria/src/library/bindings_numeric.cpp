@@ -228,31 +228,19 @@ G_real std_numeric_random(const Global_Context& global, const G_real& lower, con
     return lower + res;
   }
 
-G_integer std_numeric_negm(const G_integer& x)
-  {
-    auto ux = static_cast<std::uint64_t>(x);
-    return G_integer(-ux);
-  }
-
 G_integer std_numeric_addm(const G_integer& x, const G_integer& y)
   {
-    auto ux = static_cast<std::uint64_t>(x);
-    auto uy = static_cast<std::uint64_t>(y);
-    return G_integer(ux + uy);
+    return G_integer(static_cast<std::uint64_t>(x) + static_cast<std::uint64_t>(y));
   }
 
 G_integer std_numeric_subm(const G_integer& x, const G_integer& y)
   {
-    auto ux = static_cast<std::uint64_t>(x);
-    auto uy = static_cast<std::uint64_t>(y);
-    return G_integer(ux - uy);
+    return G_integer(static_cast<std::uint64_t>(x) - static_cast<std::uint64_t>(y));
   }
 
 G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
   {
-    auto ux = static_cast<std::uint64_t>(x);
-    auto uy = static_cast<std::uint64_t>(y);
-    return G_integer(ux * uy);
+    return G_integer(static_cast<std::uint64_t>(x) * static_cast<std::uint64_t>(y));
   }
 
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
@@ -810,35 +798,6 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             if(reader.start().g(rlower).g(rupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_random(global, rlower, rupper) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
-      )));
-    //===================================================================
-    // `std.numeric.negm()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("negm"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.numeric.negm(x)`\n"
-                     "  * Subtracts `x` from zero using modular arithmetic. `x` must be\n"
-                     "    of the `integer` type. The result is reduced to be congruent to\n"
-                     "    the opposite of `x` modulo `0x1p64` in infinite precision. This\n"
-                     "    function will not cause overflow exceptions to be thrown.\n"
-                     "  * Returns the reduced opposite of `x`.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.numeric.negm"), args);
-            // Parse arguments.
-            G_integer x;
-            if(reader.start().g(x).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_negm(x) };
               return rocket::move(xref);
             }
             // Fail.

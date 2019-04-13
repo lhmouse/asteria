@@ -47,7 +47,6 @@ extern G_real std_numeric_random(const Global_Context& global, const Opt<G_real>
 extern G_integer std_numeric_random(const Global_Context& global, const G_integer& lower, const G_integer& upper);
 extern G_real std_numeric_random(const Global_Context& global, const G_real& lower, const G_real& upper);
 
-extern G_integer std_numeric_negm(const G_integer& x);
 extern G_integer std_numeric_addm(const G_integer& x, const G_integer& y);
 extern G_integer std_numeric_subm(const G_integer& x, const G_integer& y);
 extern G_integer std_numeric_mulm(const G_integer& x, const G_integer& y);
