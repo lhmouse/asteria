@@ -147,11 +147,23 @@ int main()
         assert std.array.equal_range([10,11,12,12,12,12,13,13,14,15,15,15,15,15,16],  0) == [ 0, 0];
         assert std.array.equal_range([10,11,12,12,12,12,13,13,14,15,15,15,15,15,16], 24) == [15,15];
 
-        assert std.array.sort([17,13,14,11,16,18,10,15,12,19]) == [10,11,12,13,14,15,16,17,18,19];
-        assert std.array.sort([32,14,11,22,21,34,31,13,23,24,12,33], func(x,y) = (x % 10 <=> y % 10)) == [11,21,31,32,22,12,13,23,33,14,34,24];
+        assert std.array.sort([17,13,14,11,16,18,10,15,12,19])
+                           == [10,11,12,13,14,15,16,17,18,19];
+        assert std.array.sort([32,14,11,22,21,34,31,13,23,24,12,33], func(x, y) = (x % 10 <=> y % 10))
+                           == [11,21,31,32,22,12,13,23,33,14,34,24];
+        assert std.array.sort(["abb","baa","aaa","bbb","aba","bab","aab","bba"])
+                           == ["aaa","aab","aba","abb","baa","bab","bba","bbb"];
+        assert std.array.sort(["abb","baa","aaa","bbb","aba","bab","aab","bba"], func(x, y) = std.string.compare(x, y, 2))
+                           == ["aaa","aab","abb","aba","baa","bab","bbb","bba"];
 
-        assert std.array.sort_unique([17,13,14,11,16,18,10,15,12,19]) == [10,11,12,13,14,15,16,17,18,19];
-        assert std.array.sort_unique([32,14,11,22,21,34,31,13,23,24,12,33], func(x,y) = (x % 10 <=> y % 10)) == [11,32,13,14];
+        assert std.array.sort_unique([17,13,14,11,16,18,10,15,12,19])
+                                  == [10,11,12,13,14,15,16,17,18,19];
+        assert std.array.sort_unique([32,14,11,22,21,34,31,13,23,24,12,33], func(x, y) = (x % 10 <=> y % 10))
+                                  == [11,32,13,14];
+        assert std.array.sort_unique(["abb","baa","aaa","bbb","aba","bab","aab","bba"])
+                                  == ["aaa","aab","aba","abb","baa","bab","bba","bbb"];
+        assert std.array.sort_unique(["abb","baa","aaa","bbb","aba","bab","aab","bba"], func(x, y) = std.string.compare(x, y, 2))
+                                  == ["aaa","abb","baa","bbb"];
 
         assert std.array.generate(func(x,v) = x + (v ?? 1), 10) == [1,2,4,7,11,16,22,29,37,46];
 
