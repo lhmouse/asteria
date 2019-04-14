@@ -983,8 +983,8 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         // Get the absolute value of the operand as a temporary value, then return it.
         auto rhs = stack.get_top_reference().read();
         if(rhs.is_integer()) {
-          // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
-          rhs = do_operator_abs(rhs.as_integer());
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_abs(reg);
           goto z;
         }
         if(rhs.is_real()) {
