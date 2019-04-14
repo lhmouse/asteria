@@ -1798,7 +1798,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
       G_function(make_simple_binding(
         // Description
         rocket::sref("`std.string.reverse(text)`\n"
-                     "  * Reverses a byte `string`. This function returns a new `string`\n"
+                     "  * Reverses a byte string. This function returns a new `string`\n"
                      "    without modifying `text`.\n"
                      "  * Returns the reversed `string`.\n"),
         // Definition
