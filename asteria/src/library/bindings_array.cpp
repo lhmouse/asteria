@@ -308,7 +308,7 @@ Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_arra
 
     namespace {
 
-    Value::Compare do_compare(const Global_Context& global, const Opt<G_function>& comparator, const Value& lhs, const Value& rhs)
+    ROCKET_PURE_FUNCTION Value::Compare do_compare(const Global_Context& global, const Opt<G_function>& comparator, const Value& lhs, const Value& rhs)
       {
         if(!comparator) {
           // Perform the built-in 3-way comparison.
