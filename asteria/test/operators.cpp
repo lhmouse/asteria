@@ -198,12 +198,25 @@ int main()
         assert o.one == null;
         assert unset o.nonexistent == null;
 
+        assert b * false == false;
+        assert false * b == false;
+        assert true * false == false;
+        assert false * true == false;
+        assert true * true == true;
         assert i * 3 == 36;
         assert 3 * i == 36;
+        assert i * -3 == -36;
+        assert -3 * i == -36;
+        assert i * -1 == -12;
+        assert -1 * i == -12;
         assert r * 3.0 == 25.5;
         assert 3.0 * r == 25.5;
+        assert r * -3.0 == -25.5;
+        assert -3.0 * r == -25.5;
         assert r * 5 == 42.5;
         assert 5 * r == 42.5;
+        assert r * -5 == -42.5;
+        assert -5 * r == -42.5;
         assert s * 3 == 'aaa';
         assert 3 * s == 'aaa';
 

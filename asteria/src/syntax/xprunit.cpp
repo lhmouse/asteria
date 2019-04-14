@@ -274,13 +274,13 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           return 0;
         }
         if((lhs == 1) || (rhs == 1)) {
-          return lhs ^ rhs ^ 1;
+          return (lhs ^ rhs) ^ 1;
         }
         if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
           ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
         }
         if((lhs == -1) || (rhs == -1)) {
-          return -(lhs ^ rhs ^ -1);
+          return (lhs ^ rhs) + 1;
         }
         // signed lhs and absolute rhs
         auto slhs = lhs;

@@ -289,13 +289,13 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
           return 0;
         }
         if((lhs == 1) || (rhs == 1)) {
-          return lhs ^ rhs ^ 1;
+          return (lhs ^ rhs) ^ 1;
         }
         if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
           return (lhs >> 63) ^ (rhs >> 63) ^ INT64_MAX;
         }
         if((lhs == -1) || (rhs == -1)) {
-          return -(lhs ^ rhs ^ -1);
+          return (lhs ^ rhs) + 1;
         }
         // signed lhs and absolute rhs
         auto slhs = lhs;
