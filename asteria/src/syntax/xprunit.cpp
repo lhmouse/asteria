@@ -70,6 +70,10 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         return "prefix `__sqrt`";
       }
+    case xop_prefix_isnan:
+      {
+        return "prefix `__isnan`";
+      }
     case xop_prefix_isinf:
       {
         return "prefix `__isinf`";
@@ -77,10 +81,6 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
     case xop_prefix_abs:
       {
         return "prefix `__abs`";
-      }
-    case xop_prefix_isnan:
-      {
-        return "prefix `__isnan`";
       }
     case xop_infix_cmp_eq:
       {
