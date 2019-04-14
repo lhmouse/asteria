@@ -34,28 +34,36 @@ class Xprunit
         xop_prefix_isnan     = 30,  // __isnan
         xop_prefix_isinf     = 31,  // __isinf
         xop_prefix_abs       = 32,  // __abs
+        xop_prefix_round     = 33,  // __round
+        xop_prefix_floor     = 34,  // __floor
+        xop_prefix_ceil      = 35,  // __ceil
+        xop_prefix_trunc     = 36,  // __trunc
+        xop_prefix_iround    = 37,  // __iround
+        xop_prefix_ifloor    = 38,  // __ifloor
+        xop_prefix_iceil     = 39,  // __iceil
+        xop_prefix_itrunc    = 40,  // __itrunc
         // Infix relational operators
-        xop_infix_cmp_eq     = 50,  // ==
-        xop_infix_cmp_ne     = 51,  // !=
-        xop_infix_cmp_lt     = 52,  // <
-        xop_infix_cmp_gt     = 53,  // >
-        xop_infix_cmp_lte    = 54,  // <=
-        xop_infix_cmp_gte    = 55,  // >=
-        xop_infix_cmp_3way   = 56,  // <=>
+        xop_infix_cmp_eq     = 70,  // ==
+        xop_infix_cmp_ne     = 71,  // !=
+        xop_infix_cmp_lt     = 72,  // <
+        xop_infix_cmp_gt     = 73,  // >
+        xop_infix_cmp_lte    = 74,  // <=
+        xop_infix_cmp_gte    = 75,  // >=
+        xop_infix_cmp_3way   = 76,  // <=>
         // Infix general operators
-        xop_infix_add        = 60,  // +
-        xop_infix_sub        = 61,  // -
-        xop_infix_mul        = 62,  // *
-        xop_infix_div        = 63,  // /
-        xop_infix_mod        = 64,  // %
-        xop_infix_sll        = 65,  // <<<
-        xop_infix_srl        = 66,  // >>>
-        xop_infix_sla        = 67,  // <<
-        xop_infix_sra        = 68,  // >>
-        xop_infix_andb       = 69,  // &
-        xop_infix_orb        = 70,  // |
-        xop_infix_xorb       = 71,  // ^
-        xop_infix_assign     = 72,  // =
+        xop_infix_add        = 80,  // +
+        xop_infix_sub        = 81,  // -
+        xop_infix_mul        = 82,  // *
+        xop_infix_div        = 83,  // /
+        xop_infix_mod        = 84,  // %
+        xop_infix_sll        = 85,  // <<<
+        xop_infix_srl        = 86,  // >>>
+        xop_infix_sla        = 87,  // <<
+        xop_infix_sra        = 88,  // >>
+        xop_infix_andb       = 89,  // &
+        xop_infix_orb        = 90,  // |
+        xop_infix_xorb       = 91,  // ^
+        xop_infix_assign     = 92,  // =
       };
 
     struct S_literal
