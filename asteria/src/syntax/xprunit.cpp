@@ -930,7 +930,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_isnan(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
-                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
@@ -953,7 +953,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_isinf(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
-                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
