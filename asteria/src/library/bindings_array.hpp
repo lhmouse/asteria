@@ -35,6 +35,8 @@ extern Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const
 extern Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor);
 extern Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor);
 
+extern G_array std_array_reverse(const G_array& data);
+
 extern G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator = rocket::nullopt);
 extern Opt<G_integer> std_array_binary_search(const Global_Context& global, const G_array& data, const Value& target, const Opt<G_function>& comparator = rocket::nullopt);
 extern G_integer std_array_lower_bound(const Global_Context& global, const G_array& data, const Value& target, const Opt<G_function>& comparator = rocket::nullopt);
