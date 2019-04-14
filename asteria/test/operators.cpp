@@ -67,6 +67,120 @@ int main()
         assert ![] == true;
         assert !{} == false;
 
+        assert __sqrt 2 > 1.414;
+        assert __sqrt 2 < 1.415;
+        assert __sqrt +0.0 == 0;
+        assert __sqrt -0.0 == 0;
+        assert __sqrt infinity == infinity;
+
+        assert __isinf 42 == false;
+        assert __isinf 42.5 == false;
+        assert __isinf +infinity == true;
+        assert __isinf -infinity == true;
+        assert __isinf nan == false;
+
+        assert __isnan 42 == false;
+        assert __isnan 42.5 == false;
+        assert __isnan +infinity == false;
+        assert __isnan -infinity == false;
+        assert __isnan nan == true;
+
+        assert __abs +12 == 12;
+        assert __abs -12 == 12;
+        assert __abs +1.5 == 1.5;
+        assert __abs -1.5 == 1.5;
+        assert __abs +infinity == infinity;
+        assert __abs -infinity == infinity;
+        assert __isnan __abs nan;
+
+        assert __round +3 == +3;
+        assert typeof __round +3 == "integer";
+        assert __round -3 == -3;
+        assert typeof __round -3 == "integer";
+        assert __round +3.4 == +3;
+        assert __round +3.5 == +4;
+        assert typeof __round +3.5 == "real";
+        assert __round -3.4 == -3;
+        assert __round -3.5 == -4;
+        assert typeof __round -3.5 == "real";
+
+        assert __floor +3 == +3;
+        assert typeof __floor +3 == "integer";
+        assert __floor -3 == -3;
+        assert typeof __floor -3 == "integer";
+        assert __floor +3.4 == +3;
+        assert __floor +3.5 == +3;
+        assert typeof __floor +3.5 == "real";
+        assert __floor -3.4 == -4;
+        assert __floor -3.5 == -4;
+        assert typeof __floor -3.5 == "real";
+
+        assert __ceil +3 == +3;
+        assert typeof __ceil +3 == "integer";
+        assert __ceil -3 == -3;
+        assert typeof __ceil -3 == "integer";
+        assert __ceil +3.4 == +4;
+        assert __ceil +3.5 == +4;
+        assert typeof __ceil +3.5 == "real";
+        assert __ceil -3.4 == -3;
+        assert __ceil -3.5 == -3;
+        assert typeof __ceil -3.5 == "real";
+
+        assert __trunc +3 == +3;
+        assert typeof __trunc +3 == "integer";
+        assert __trunc -3 == -3;
+        assert typeof __trunc -3 == "integer";
+        assert __trunc +3.4 == +3;
+        assert __trunc +3.5 == +3;
+        assert typeof __trunc +3.5 == "real";
+        assert __trunc -3.4 == -3;
+        assert __trunc -3.5 == -3;
+        assert typeof __trunc -3.5 == "real";
+
+        assert __round +3 == +3;
+        assert typeof __round +3 == "integer";
+        assert __round -3 == -3;
+        assert typeof __round -3 == "integer";
+        assert __round +3.4 == +3;
+        assert __round +3.5 == +4;
+        assert typeof __round +3.5 == "real";
+        assert __round -3.4 == -3;
+        assert __round -3.5 == -4;
+        assert typeof __round -3.5 == "real";
+
+        assert __floor +3 == +3;
+        assert typeof __floor +3 == "integer";
+        assert __floor -3 == -3;
+        assert typeof __floor -3 == "integer";
+        assert __floor +3.4 == +3;
+        assert __floor +3.5 == +3;
+        assert typeof __floor +3.5 == "real";
+        assert __floor -3.4 == -4;
+        assert __floor -3.5 == -4;
+        assert typeof __floor -3.5 == "real";
+
+        assert __ceil +3 == +3;
+        assert typeof __ceil +3 == "integer";
+        assert __ceil -3 == -3;
+        assert typeof __ceil -3 == "integer";
+        assert __ceil +3.4 == +4;
+        assert __ceil +3.5 == +4;
+        assert typeof __ceil +3.5 == "real";
+        assert __ceil -3.4 == -3;
+        assert __ceil -3.5 == -3;
+        assert typeof __ceil -3.5 == "real";
+
+        assert __trunc +3 == +3;
+        assert typeof __trunc +3 == "integer";
+        assert __trunc -3 == -3;
+        assert typeof __trunc -3 == "integer";
+        assert __trunc +3.4 == +3;
+        assert __trunc +3.5 == +3;
+        assert typeof __trunc +3.5 == "real";
+        assert __trunc -3.4 == -3;
+        assert __trunc -3.5 == -3;
+        assert typeof __trunc -3.5 == "real";
+
         assert i++ == 12;
         assert i == 13;
         assert r++ == 8.5;

@@ -82,6 +82,38 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         return "prefix `__abs`";
       }
+    case xop_prefix_round:
+      {
+        return "prefix `__round`";
+      }
+    case xop_prefix_floor:
+      {
+        return "prefix `__floor`";
+      }
+    case xop_prefix_ceil:
+      {
+        return "prefix `__ceil`";
+      }
+    case xop_prefix_trunc:
+      {
+        return "prefix `__trunc`";
+      }
+    case xop_prefix_iround:
+      {
+        return "prefix `__iround`";
+      }
+    case xop_prefix_ifloor:
+      {
+        return "prefix `__ifloor`";
+      }
+    case xop_prefix_iceil:
+      {
+        return "prefix `__iceil`";
+      }
+    case xop_prefix_itrunc:
+      {
+        return "prefix `__itrunc`";
+      }
     case xop_infix_cmp_eq:
       {
         return "equality comparison";
@@ -381,6 +413,54 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
     ROCKET_PURE_FUNCTION G_real do_operator_abs(const G_real& rhs)
       {
         return std::fabs(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_round(const G_real& rhs)
+      {
+        return std::round(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_floor(const G_real& rhs)
+      {
+        return std::floor(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_ceil(const G_real& rhs)
+      {
+        return std::ceil(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_trunc(const G_real& rhs)
+      {
+        return std::trunc(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_icast(const G_real& value)
+      {
+        if(!std::islessequal(INT64_MIN, value) || !std::islessequal(value, INT64_MAX)) {
+          ASTERIA_THROW_RUNTIME_ERROR("The `real` value `", value, "` cannot be represented as an `integer`.");
+        }
+        return G_integer(value);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_iround(const G_real& rhs)
+      {
+        return do_icast(std::round(rhs));
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_ifloor(const G_real& rhs)
+      {
+        return do_icast(std::floor(rhs));
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_iceil(const G_real& rhs)
+      {
+        return do_icast(std::ceil(rhs));
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_itrunc(const G_real& rhs)
+      {
+        return do_icast(std::trunc(rhs));
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_add(const G_real& lhs, const G_real& rhs)
@@ -993,6 +1073,190 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_round(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Round the operand to the nearest integer as a temporary value, then return it.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+          goto z;
+        }
+        if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_round(reg);
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_floor(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Round the operand towards negative infinity as a temporary value, then return it.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+          goto z;
+        }
+        if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_floor(reg);
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_ceil(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                         const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Round the operand towards negative infinity as a temporary value, then return it.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+          goto z;
+        }
+        if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_ceil(reg);
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_trunc(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Round the operand towards negative infinity as a temporary value, then return it.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+          goto z;
+        }
+        if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_trunc(reg);
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_iround(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                           const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+          goto z;
+        }
+        if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_iround(rhs.as_real());
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_ifloor(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                           const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+          goto z;
+        }
+        if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_ifloor(rhs.as_real());
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_iceil(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+          goto z;
+        }
+        if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_iceil(rhs.as_real());
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_itrunc(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                           const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+          goto z;
+        }
+        if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_itrunc(rhs.as_real());
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1689,6 +1953,46 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         case xop_prefix_abs:
           {
             code.emplace_back(do_execute_operator_rpn_prefix_abs, rocket::move(p));
+            return;
+          }
+        case xop_prefix_round:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_round, rocket::move(p));
+            return;
+          }
+        case xop_prefix_floor:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_floor, rocket::move(p));
+            return;
+          }
+        case xop_prefix_ceil:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_ceil, rocket::move(p));
+            return;
+          }
+        case xop_prefix_trunc:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_trunc, rocket::move(p));
+            return;
+          }
+        case xop_prefix_iround:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_iround, rocket::move(p));
+            return;
+          }
+        case xop_prefix_ifloor:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_ifloor, rocket::move(p));
+            return;
+          }
+        case xop_prefix_iceil:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_iceil, rocket::move(p));
+            return;
+          }
+        case xop_prefix_itrunc:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_itrunc, rocket::move(p));
             return;
           }
         case xop_infix_cmp_eq:

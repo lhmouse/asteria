@@ -154,6 +154,38 @@ const char* Token::get_keyword(Keyword keyword) noexcept
       {
         return "__abs";
       }
+    case keyword_round:
+      {
+        return "__round";
+      }
+    case keyword_floor:
+      {
+        return "__floor";
+      }
+    case keyword_ceil:
+      {
+        return "__ceil";
+      }
+    case keyword_trunc:
+      {
+        return "__trunc";
+      }
+    case keyword_iround:
+      {
+        return "__iround";
+      }
+    case keyword_ifloor:
+      {
+        return "__ifloor";
+      }
+    case keyword_iceil:
+      {
+        return "__iceil";
+      }
+    case keyword_itrunc:
+      {
+        return "__itrunc";
+      }
     default:
       return "<unknown keyword>";
     }

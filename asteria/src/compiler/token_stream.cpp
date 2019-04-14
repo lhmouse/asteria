@@ -245,9 +245,17 @@ namespace Asteria {
           static constexpr s_keywords[] =
             {
               { "__abs",     Token::keyword_abs       },
+              { "__ceil",    Token::keyword_ceil      },
+              { "__floor",   Token::keyword_floor     },
+              { "__iceil",   Token::keyword_iceil     },
+              { "__ifloor",  Token::keyword_ifloor    },
+              { "__iround",  Token::keyword_iround    },
               { "__isinf",   Token::keyword_isinf     },
               { "__isnan",   Token::keyword_isnan     },
+              { "__itrunc",  Token::keyword_itrunc    },
+              { "__round",   Token::keyword_round     },
               { "__sqrt",    Token::keyword_sqrt      },
+              { "__trunc",   Token::keyword_trunc     },
               { "and",       Token::keyword_and       },
               { "assert",    Token::keyword_assert    },
               { "break",     Token::keyword_break     },
