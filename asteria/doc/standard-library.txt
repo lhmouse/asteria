@@ -1098,6 +1098,21 @@
 	  that in this case there is no guarantee whether an exception
 	  will be thrown or not.
 
+`std.array.sort_unique(data, [comparator])`
+
+	* Sorts elements in `data` in ascending order, then removes all
+	  elements that have preceding equivalents. The principle of
+	  user-defined `comparator`s is the same as the `is_sorted()`
+	  function. The algorithm shall finish in `O(n log n)` time where
+	  `n` is the number of elements in `data`. This function returns
+	  a new `array` without modifying `data`.
+
+	* Returns the sorted `array` with no duplicate elements.
+
+	* Throws an exception if any elements are unordered. Be advised
+	  that in this case there is no guarantee whether an exception
+	  will be thrown or not.
+
 `std.array.generate(generator, length)`
 
 	* Calls `generator` repeatedly up to `length` times and returns

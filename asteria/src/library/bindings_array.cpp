@@ -476,6 +476,85 @@ std::pair<G_integer, G_integer> std_array_equal_range(const Global_Context& glob
     return std::make_pair(lpos - data.begin(), upos - data.begin());
   }
 
+    namespace {
+
+    void do_unique_move(G_array::iterator& opos, const Global_Context& global, const Opt<G_function>& comparator,
+                        G_array::iterator ibegin, G_array::iterator iend, bool unique)
+      {
+        for(auto ipos = ibegin; ipos != iend; ++ipos) {
+          if(unique && (do_compare(global, comparator, *ipos, opos[-1]) == Value::compare_equal)) {
+            continue;
+          }
+          *(opos++) = rocket::move(*ipos);
+        }
+      }
+
+    G_array::iterator do_merge_blocks(G_array& output, const Global_Context& global, const Opt<G_function>& comparator,
+                                      G_array&& input, std::ptrdiff_t bsize, bool unique)
+      {
+        ROCKET_ASSERT(output.size() >= input.size());
+        // Define the range information for a pair of contiguous blocks.
+        G_array::iterator bpos[2];
+        G_array::iterator bend[2];
+        // Merge adjacent blocks of `bsize` elements.
+        auto opos = output.mut_begin();
+        auto ipos = input.mut_begin();
+        auto iend = input.mut_end();
+        for(;;) {
+          // Get the block of the first block to merge.
+          bpos[0] = ipos;
+          if(iend - ipos <= bsize) {
+            // Copy all remaining elements.
+            ROCKET_ASSERT(opos != output.begin());
+            do_unique_move(opos, global, comparator, ipos, iend, unique);
+            break;
+          }
+          ipos += bsize;
+          bend[0] = ipos;
+          // Get the range of the second block to merge.
+          bpos[1] = ipos;
+          ipos += rocket::min(iend - ipos, bsize);
+          bend[1] = ipos;
+          // Merge elements one by one, until either block has been exhausted, then store the index of it here.
+          std::size_t bi;
+          for(;;) {
+            auto cmp = do_compare(global, comparator, *(bpos[0]), *(bpos[1]));
+            if(cmp == Value::compare_unordered) {
+              ASTERIA_THROW_RUNTIME_ERROR("The elements `", *(bpos[0]), "` and `", *(bpos[1]), "` are unordered.");
+            }
+            // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
+            bi = (cmp == Value::compare_greater);
+            // Move this element unless uniqueness is requested and it is equal to the previous output.
+            if(!(unique && (opos != output.begin()) && (do_compare(global, comparator, *(bpos[bi]), opos[-1]) == Value::compare_equal))) {
+              *(opos++) = rocket::move(*(bpos[bi]));
+            }
+            bpos[bi]++;
+            // When uniqueness is requested, if elements from the two blocks are equal, discard the one from the second block.
+            // This may exhaust the second block.
+            if(unique && (cmp == Value::compare_equal)) {
+              std::size_t oi = bi ^ 1;
+              bpos[oi]++;
+              if(bpos[oi] == bend[oi]) {
+                // `bi` is the index of the block that has been exhausted.
+                bi = oi;
+                break;
+              }
+            }
+            if(bpos[bi] == bend[bi]) {
+              // `bi` is the index of the block that has been exhausted.
+              break;
+            }
+          }
+          // Move all elements from the other block.
+          ROCKET_ASSERT(opos != output.begin());
+          bi ^= 1;
+          do_unique_move(opos, global, comparator, bpos[bi], bend[bi], unique);
+        }
+        return opos;
+      }
+
+    }
+
 G_array std_array_sort(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {
     G_array res = data;
@@ -483,57 +562,36 @@ G_array std_array_sort(const Global_Context& global, const G_array& data, const 
       // Use reference counting as our advantage.
       return res;
     }
-    // Define the temporary storage for Merge Sort.
-    G_array temp;
-    temp.resize(res.size());
-    for(std::ptrdiff_t bsize = 1; bsize < res.ssize(); bsize *= 2) {
-      // Define range information for blocks.
-      struct Block
-        {
-          G_array::iterator pos;
-          G_array::iterator end;
-        }
-      left, right;
-      // Merge adjacent blocks of `bsize` elements.
-      auto wpos = temp.mut_begin();
-      auto rpos = res.mut_begin();
-      auto rend = res.mut_end();
-      for(;;) {
-        // Get the range of the first block to merge.
-        left.pos = rpos;
-        if(rend - rpos <= bsize) {
-          // Stop if there are no more blocks.
-          // Copy all remaining elements.
-          wpos = std::move(rpos, rend, wpos);
-          break;
-        }
-        rpos += bsize;
-        left.end = rpos;
-        // Get the range of the second block to merge.
-        right.pos = rpos;
-        rpos += rocket::min(rend - rpos, bsize);
-        right.end = rpos;
-        // Merge elements one by one, until either block has been exhausted.
-  z:
-        auto cmp = do_compare(global, comparator, *(left.pos), *(right.pos));
-        if(cmp == Value::compare_unordered) {
-          ASTERIA_THROW_RUNTIME_ERROR("The elements `", *(left.pos), "` and `", *(right.pos), "` are unordered.");
-        }
-        // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
-        auto refs = (cmp != Value::compare_greater) ? std::tie(left, right) : std::tie(right, left);
-        auto& from = std::get<0>(refs);
-        // Move the element from `from`.
-        *(wpos++) = rocket::move(*(from.pos++));
-        if(from.pos != from.end) {
-          goto z;
-        }
-        // Move all elements from the other block.
-        auto& other = std::get<1>(refs);
-        wpos = std::move(other.pos, other.end, wpos);
-      }
-      // Accept all merged blocks.
+    // The Merge Sort algorithm requires `O(n)` space.
+    G_array temp(res.size());
+    std::ptrdiff_t bsize;
+    // Merge blocks of exponential sizes.
+    for(bsize = 1; bsize < res.ssize(); bsize *= 2) {
+      do_merge_blocks(temp, global, comparator, rocket::move(res), bsize, false);
       res.swap(temp);
     }
+    return res;
+  }
+
+G_array std_array_sort_unique(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
+  {
+    G_array res = data;
+    if(res.size() <= 1) {
+      // Use reference counting as our advantage.
+      return res;
+    }
+    // The Merge Sort algorithm requires `O(n)` space.
+    G_array temp(res.size());
+    std::ptrdiff_t bsize;
+    // Merge blocks of exponential sizes.
+    for(bsize = 1; bsize * 2 < res.ssize(); bsize *= 2) {
+      do_merge_blocks(temp, global, comparator, rocket::move(res), bsize, false);
+      res.swap(temp);
+    }
+    // The final round is special.
+    auto epos = do_merge_blocks(temp, global, comparator, rocket::move(res), bsize, true);
+    temp.erase(epos, temp.end());
+    res.swap(temp);
     return res;
   }
 
@@ -1377,6 +1435,41 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             if(reader.start().g(data).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_sort(global, data, comparator) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.array.sort_unique()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sort_unique"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.sort_unique(data, [comparator])`\n"
+                     "  * Sorts elements in `data` in ascending order, then removes all\n"
+                     "    elements that have preceding equivalents. The principle of\n"
+                     "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+                     "    function. The algorithm shall finish in `O(n log n)` time where\n"
+                     "    `n` is the number of elements in `data`. This function returns\n"
+                     "    a new `array` without modifying `data`.\n"
+                     "  * Returns the sorted `array` with no duplicate elements.\n"
+                     "  * Throws an exception if any elements are unordered. Be advised\n"
+                     "    that in this case there is no guarantee whether an exception\n"
+                     "    will be thrown or not.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.sort_unique"), args);
+            // Parse arguments.
+            G_array data;
+            Opt<G_function> comparator;
+            if(reader.start().g(data).g(comparator).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_sort_unique(global, data, comparator) };
               return rocket::move(xref);
             }
             // Fail.
