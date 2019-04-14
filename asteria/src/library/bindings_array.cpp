@@ -564,11 +564,12 @@ G_array std_array_sort(const Global_Context& global, const G_array& data, const 
     }
     // The Merge Sort algorithm requires `O(n)` space.
     G_array temp(res.size());
-    std::ptrdiff_t bsize;
     // Merge blocks of exponential sizes.
-    for(bsize = 1; bsize < res.ssize(); bsize *= 2) {
+    std::ptrdiff_t bsize = 1;
+    while(bsize < res.ssize()) {
       do_merge_blocks(temp, global, comparator, rocket::move(res), bsize, false);
       res.swap(temp);
+      bsize *= 2;
     }
     return res;
   }
@@ -582,13 +583,13 @@ G_array std_array_sort_unique(const Global_Context& global, const G_array& data,
     }
     // The Merge Sort algorithm requires `O(n)` space.
     G_array temp(res.size());
-    std::ptrdiff_t bsize;
     // Merge blocks of exponential sizes.
-    for(bsize = 1; bsize * 2 < res.ssize(); bsize *= 2) {
+    std::ptrdiff_t bsize = 1;
+    while(bsize * 2 < res.ssize()) {
       do_merge_blocks(temp, global, comparator, rocket::move(res), bsize, false);
       res.swap(temp);
+      bsize *= 2;
     }
-    // The final round is special.
     auto epos = do_merge_blocks(temp, global, comparator, rocket::move(res), bsize, true);
     temp.erase(epos, temp.end());
     res.swap(temp);
