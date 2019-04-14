@@ -374,16 +374,15 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
       return true;
     }
     for(;;) {
-      auto next = cur + 1;
-      if(next == data.end()) {
+      const auto& prev = *cur;
+      if(++cur == data.end()) {
         break;
       }
       // Compare the two elements.
-      auto cmp = do_compare(global, comparator, *cur, *next);
-      if(rocket::is_any_of(cmp, { Value::compare_greater, Value::compare_unordered })) {
+      auto cmp = do_compare(global, comparator, prev, *cur);
+      if((cmp == Value::compare_greater) || (cmp == Value::compare_unordered)) {
         return false;
       }
-      cur = next;
     }
     return true;
   }
