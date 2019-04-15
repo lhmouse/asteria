@@ -43,7 +43,7 @@ extern G_integer std_numeric_itrunc(const G_integer& value);
 extern G_integer std_numeric_itrunc(const G_real& value);
 
 extern G_integer std_numeric_random(const Global_Context& global, const G_integer& upper);
-extern G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& upper);
+extern G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& upper = rocket::nullopt);
 extern G_integer std_numeric_random(const Global_Context& global, const G_integer& lower, const G_integer& upper);
 extern G_real std_numeric_random(const Global_Context& global, const G_real& lower, const G_real& upper);
 
