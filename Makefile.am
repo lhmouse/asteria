@@ -228,3 +228,8 @@ check_PROGRAMS =  \
   asteria/test/bindings_numeric.test
 
 TESTS = ${check_PROGRAMS}
+
+EXTRA_DIST =  \
+  doc/operator-precedence.txt  \
+  doc/standard-library.txt  \
+  doc/syntax.txt
