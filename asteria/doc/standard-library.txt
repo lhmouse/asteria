@@ -996,13 +996,6 @@
 	* Returns the subscript of such an element as an `integer`, if
 	  one is found; otherwise `null`.
 
-`std.array.reverse(data)`
-
-	* Reverses an `array`. This function returns a new `array`
-	  without modifying `text`.
-
-	* Returns the reversed `array`.
-
 `std.array.is_sorted(data, [comparator])`
 
 	* Checks whether `data` is sorted. That is, there is no pair of
@@ -1112,6 +1105,13 @@
 	* Throws an exception if any elements are unordered. Be advised
 	  that in this case there is no guarantee whether an exception
 	  will be thrown or not.
+
+`std.array.reverse(data)`
+
+	* Reverses an `array`. This function returns a new `array`
+	  without modifying `text`.
+
+	* Returns the reversed `array`.
 
 `std.array.generate(generator, length)`
 

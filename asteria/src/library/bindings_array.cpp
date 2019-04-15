@@ -198,12 +198,6 @@ Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const
     return data.rend() - *qit - 1;
   }
 
-G_array std_array_reverse(const G_array& data)
-  {
-    // This is an easy matter, isn't it?
-    return G_array(data.rbegin(), data.rend());
-  }
-
     namespace {
 
     inline void do_push_argument(Cow_Vector<Reference>& args, const Value& value)
@@ -589,6 +583,12 @@ G_array std_array_sortu(const Global_Context& global, const G_array& data, const
     temp.erase(epos, temp.end());
     res.swap(temp);
     return res;
+  }
+
+G_array std_array_reverse(const G_array& data)
+  {
+    // This is an easy matter, isn't it?
+    return G_array(data.rbegin(), data.rend());
   }
 
 G_array std_array_generate(const Global_Context& global, const G_function& generator, const G_integer& length)
@@ -1222,34 +1222,6 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
         G_null()
       )));
     //===================================================================
-    // `std.array.reverse()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("reverse"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.array.reverse(data)`\n"
-                     "  * Reverses an `array`. This function returns a new `array`\n"
-                     "    without modifying `text`.\n"
-                     "  * Returns the reversed `array`.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.reverse"), args);
-            // Parse arguments.
-            G_array data;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_reverse(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
-      )));
-    //===================================================================
     // `std.array.binary_search()`
     //===================================================================
     result.insert_or_assign(rocket::sref("binary_search"),
@@ -1468,6 +1440,34 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             if(reader.start().g(data).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_sortu(global, data, comparator) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.array.reverse()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("reverse"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.reverse(data)`\n"
+                     "  * Reverses an `array`. This function returns a new `array`\n"
+                     "    without modifying `text`.\n"
+                     "  * Returns the reversed `array`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.reverse"), args);
+            // Parse arguments.
+            G_array data;
+            Opt<G_function> comparator;
+            if(reader.start().g(data).g(comparator).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_reverse(data) };
               return rocket::move(xref);
             }
             // Fail.
