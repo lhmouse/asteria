@@ -1098,7 +1098,7 @@
 	  that in this case there is no guarantee whether an exception
 	  will be thrown or not.
 
-`std.array.sort_unique(data, [comparator])`
+`std.array.sortu(data, [comparator])`
 
 	* Sorts elements in `data` in ascending order, then removes all
 	  elements that have preceding equivalents. The principle of

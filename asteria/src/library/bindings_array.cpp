@@ -574,7 +574,7 @@ G_array std_array_sort(const Global_Context& global, const G_array& data, const 
     return res;
   }
 
-G_array std_array_sort_unique(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
+G_array std_array_sortu(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {
     G_array res = data;
     if(res.size() <= 1) {
@@ -1445,12 +1445,12 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
         G_null()
       )));
     //===================================================================
-    // `std.array.sort_unique()`
+    // `std.array.sortu()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("sort_unique"),
+    result.insert_or_assign(rocket::sref("sortu"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.sort_unique(data, [comparator])`\n"
+        rocket::sref("`std.array.sortu(data, [comparator])`\n"
                      "  * Sorts elements in `data` in ascending order, then removes all\n"
                      "    elements that have preceding equivalents. The principle of\n"
                      "    user-defined `comparator`s is the same as the `is_sorted()`\n"
@@ -1464,13 +1464,13 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.array.sort_unique"), args);
+            Argument_Reader reader(rocket::sref("std.array.sortu"), args);
             // Parse arguments.
             G_array data;
             Opt<G_function> comparator;
             if(reader.start().g(data).g(comparator).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_sort_unique(global, data, comparator) };
+              Reference_Root::S_temporary xref = { std_array_sortu(global, data, comparator) };
               return rocket::move(xref);
             }
             // Fail.

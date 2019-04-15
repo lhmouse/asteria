@@ -44,7 +44,7 @@ extern G_integer std_array_upper_bound(const Global_Context& global, const G_arr
 extern std::pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, const G_array& data, const Value& target, const Opt<G_function>& comparator = rocket::nullopt);
 
 extern G_array std_array_sort(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator = rocket::nullopt);
-extern G_array std_array_sort_unique(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator = rocket::nullopt);
+extern G_array std_array_sortu(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator = rocket::nullopt);
 
 extern G_array std_array_generate(const Global_Context& global, const G_function& generator, const G_integer& length);
 extern G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed);
