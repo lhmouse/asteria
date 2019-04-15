@@ -368,18 +368,13 @@ Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_arra
 
 G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {
-    auto cur = data.begin();
-    if(cur == data.end()) {
-      // If `data` contains no element, it is considered sorted.
+    if(data.size() <= 1) {
+      // If `data` contains no more than 2 elements, it is considered sorted.
       return true;
     }
-    for(;;) {
-      const auto& prev = *cur;
-      if(++cur == data.end()) {
-        break;
-      }
+    for(auto it = data.begin() + 1; it != data.end(); ++it) {
       // Compare the two elements.
-      auto cmp = do_compare(global, comparator, prev, *cur);
+      auto cmp = do_compare(global, comparator, it[-1], it[0]);
       if((cmp == Value::compare_greater) || (cmp == Value::compare_unordered)) {
         return false;
       }
@@ -557,13 +552,13 @@ std::pair<G_integer, G_integer> std_array_equal_range(const Global_Context& glob
 
 G_array std_array_sort(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {
-    G_array res = data;
-    if(res.size() <= 1) {
+    if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return res;
+      return data;
     }
     // The Merge Sort algorithm requires `O(n)` space.
-    G_array temp(res.size());
+    G_array res = data;
+    G_array temp(data.size());
     // Merge blocks of exponential sizes.
     std::ptrdiff_t bsize = 1;
     while(bsize < res.ssize()) {
@@ -576,12 +571,12 @@ G_array std_array_sort(const Global_Context& global, const G_array& data, const 
 
 G_array std_array_sortu(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {
-    G_array res = data;
-    if(res.size() <= 1) {
+    if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return res;
+      return data;
     }
     // The Merge Sort algorithm requires `O(n)` space.
+    G_array res = data;
     G_array temp(res.size());
     // Merge blocks of exponential sizes.
     std::ptrdiff_t bsize = 1;
@@ -615,10 +610,9 @@ G_array std_array_generate(const Global_Context& global, const G_function& gener
 
 G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed)
   {
-    G_array res = data;
-    if(res.size() <= 1) {
+    if(data.size() <= 1) {
       // Use reference counting as our advantage.
-      return res;
+      return data;
     }
     // Create a linear congruential generator.
     // The template arguments are the same as glibc's `rand48_r()` function.
@@ -627,15 +621,18 @@ G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed)
                                     0x5DEECE66D, 0xB,
                                     0x1000000000000> prng(seed ? static_cast<std::uint64_t>(*seed)
                                                                : generate_random_seed());
+    // Define the range to be shuffled.
+    G_array res = data;
+    auto rbase = res.mut_begin();
     // Shuffle elements.
-    for(auto bpos = res.mut_begin(); bpos != res.end(); ++bpos) {
+    for(auto it = rbase; it != res.end(); ++it) {
       // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
       // ratio <= [0.0, 1.0)
       auto ratio = static_cast<double>(static_cast<std::int64_t>(prng())) / 0x1p48;
       // offset <= [0, res.size())
       auto offset = static_cast<std::ptrdiff_t>(ratio * static_cast<double>(res.ssize()));
-      // Swap `*bpos` with the element at `offset`.
-      std::iter_swap(bpos, res.mut_begin() + offset);
+      // Swap `*it` with the element at `offset`.
+      std::iter_swap(it, rbase + offset);
     }
     return res;
   }
