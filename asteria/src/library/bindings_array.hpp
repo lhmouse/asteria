@@ -12,9 +12,6 @@ extern G_array std_array_slice(const G_array& data, const G_integer& from, const
 extern G_array std_array_replace_slice(const G_array& data, const G_integer& from, const G_array& replacement);
 extern G_array std_array_replace_slice(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_array& replacement);
 
-extern Value std_array_max_of(const G_array& data);
-extern Value std_array_min_of(const G_array& data);
-
 extern Opt<G_integer> std_array_find(const G_array& data, const Value& target);
 extern Opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const Value& target);
 extern Opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target);
@@ -44,9 +41,12 @@ extern std::pair<G_integer, G_integer> std_array_equal_range(const Global_Contex
 extern G_array std_array_sort(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator = rocket::nullopt);
 extern G_array std_array_sortu(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator = rocket::nullopt);
 
+extern Value std_array_max_of(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator = rocket::nullopt);
+extern Value std_array_min_of(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator = rocket::nullopt);
+
 extern G_array std_array_reverse(const G_array& data);
 extern G_array std_array_generate(const Global_Context& global, const G_function& generator, const G_integer& length);
-extern G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed);
+extern G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed = rocket::nullopt);
 
 // Create an object that is to be referenced as `std.array`.
 extern void create_bindings_array(G_object& result, API_Version version);

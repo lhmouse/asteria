@@ -56,12 +56,6 @@ int main()
         assert std.array.replace_slice([0,1,2,3,4], -9, ["a","b","c"]) == ["a","b","c"];
         assert std.array.replace_slice([0,1,2,3,4], -9, 1, ["a","b","c"]) == ["a","b","c",0,1,2,3,4];
 
-        assert std.array.max_of([ ]) == null;
-        assert std.array.max_of([5,null,3,"meow",7,4]) == 7;
-
-        assert std.array.min_of([ ]) == null;
-        assert std.array.min_of([5,null,3,"meow",7,4]) == 3;
-
         assert std.array.find([0,1,2,3,4,3,2,1,0], 2) == 2;
         assert std.array.find([0,1,2,3,4,3,2,1,0], 2, 2) == 2;
         assert std.array.find([0,1,2,3,4,3,2,1,0], 3, 2) == 6;
@@ -164,6 +158,16 @@ int main()
                             == ["aaa","aab","aba","abb","baa","bab","bba","bbb"];
         assert std.array.sortu(["abb","baa","aaa","bbb","aba","bab","aab","bba"], func(x, y) = std.string.compare(x, y, 2))
                             == ["aaa","abb","baa","bbb"];
+
+        assert std.array.max_of([ ]) == null;
+        assert std.array.max_of([5,null,3,"meow",7,4]) == 7;
+        assert std.array.max_of([ ], func(x,y) = y<=> x) == null;
+        assert std.array.max_of([5,null,3,"meow",7,4], func(x,y) = y<=> x) == 3;
+
+        assert std.array.min_of([ ]) == null;
+        assert std.array.min_of([5,null,3,"meow",7,4]) == 3;
+        assert std.array.min_of([ ], func(x,y) = y<=> x) == null;
+        assert std.array.min_of([5,null,3,"meow",7,4], func(x,y) = y<=> x) == 7;
 
         assert std.array.generate(func(x,v) = x + (v ?? 1), 10) == [1,2,4,7,11,16,22,29,37,46];
 

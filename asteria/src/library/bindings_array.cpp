@@ -92,40 +92,6 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
     return res;
   }
 
-Value std_array_max_of(const G_array& data)
-  {
-    auto maxp = data.begin();
-    if(maxp == data.end()) {
-      // Return `null` if `data` is empty.
-      return G_null();
-    }
-    for(auto cur = maxp + 1; cur != data.end(); ++cur) {
-      // Compare `*maxp` with the other elements, ignoring unordered elements.
-      if(maxp->compare(*cur) != Value::compare_less) {
-        continue;
-      }
-      maxp = cur;
-    }
-    return *maxp;
-  }
-
-Value std_array_min_of(const G_array& data)
-  {
-    auto minp = data.begin();
-    if(minp == data.end()) {
-      // Return `null` if `data` is empty.
-      return G_null();
-    }
-    for(auto cur = minp + 1; cur != data.end(); ++cur) {
-      // Compare `*minp` with the other elements, ignoring unordered elements.
-      if(minp->compare(*cur) != Value::compare_greater) {
-        continue;
-      }
-      minp = cur;
-    }
-    return *minp;
-  }
-
     namespace {
 
     template<typename IteratorT> Opt<IteratorT> do_find_opt(IteratorT begin, IteratorT end, const Value& target)
@@ -585,6 +551,40 @@ G_array std_array_sortu(const Global_Context& global, const G_array& data, const
     return res;
   }
 
+Value std_array_max_of(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
+  {
+    auto qmax = data.begin();
+    if(qmax == data.end()) {
+      // Return `null` if `data` is empty.
+      return G_null();
+    }
+    for(auto it = qmax + 1; it != data.end(); ++it) {
+      // Compare `*qmax` with the other elements, ignoring unordered elements.
+      if(do_compare(global, comparator, *qmax, *it) != Value::compare_less) {
+        continue;
+      }
+      qmax = it;
+    }
+    return *qmax;
+  }
+
+Value std_array_min_of(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
+  {
+    auto qmin = data.begin();
+    if(qmin == data.end()) {
+      // Return `null` if `data` is empty.
+      return G_null();
+    }
+    for(auto it = qmin + 1; it != data.end(); ++it) {
+      // Compare `*qmin` with the other elements, ignoring unordered elements.
+      if(do_compare(global, comparator, *qmin, *it) != Value::compare_greater) {
+        continue;
+      }
+      qmin = it;
+    }
+    return *qmin;
+  }
+
 G_array std_array_reverse(const G_array& data)
   {
     // This is an easy matter, isn't it?
@@ -712,62 +712,6 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             if(reader.load_state(state).g(length).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, length, replacement) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
-      )));
-    //===================================================================
-    // `std.array.max_of()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("max_of"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.array.max_of(data)`\n"
-                     "  * Finds and returns the maximum element in `data`. Elements that\n"
-                     "    are unordered with the first element are ignored.\n"
-                     "  * Returns a copy of the maximum element, or `null` if `data` is\n"
-                     "    empty.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.max_of"), args);
-            // Parse arguments.
-            G_array data;
-            if(reader.start().g(data).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_max_of(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
-      )));
-    //===================================================================
-    // `std.array.min_of()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("min_of"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.array.min_of(data)`\n"
-                     "  * Finds and returns the minimum element in `data`. Elements that\n"
-                     "    are unordered with the first element are ignored.\n"
-                     "  * Returns a copy of the minimum element, or `null` if `data` is\n"
-                     "    empty.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.min_of"), args);
-            // Parse arguments.
-            G_array data;
-            if(reader.start().g(data).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_min_of(data) };
               return rocket::move(xref);
             }
             // Fail.
@@ -1440,6 +1384,68 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             if(reader.start().g(data).g(comparator).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_sortu(global, data, comparator) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.array.max_of()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("max_of"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.max_of(data, [comparator])`\n"
+                     "  * Finds the maximum element in `data`. The principle of\n"
+                     "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+                     "    function. Elements that are unordered with the first element\n"
+                     "    are ignored silently.\n"
+                     "  * Returns a copy of the maximum element, or `null` if `data` is\n"
+                     "    empty.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.max_of"), args);
+            // Parse arguments.
+            G_array data;
+            Opt<G_function> comparator;
+            if(reader.start().g(data).g(comparator).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_max_of(global, data, comparator) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.array.min_of()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("min_of"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.array.min_of(data, [comparator])`\n"
+                     "  * Finds the minimum element in `data`. The principle of\n"
+                     "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+                     "    function. Elements that are unordered with the first element\n"
+                     "    are ignored silently.\n"
+                     "  * Returns a copy of the minimum element, or `null` if `data` is\n"
+                     "    empty.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.min_of"), args);
+            // Parse arguments.
+            G_array data;
+            Opt<G_function> comparator;
+            if(reader.start().g(data).g(comparator).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_min_of(global, data, comparator) };
               return rocket::move(xref);
             }
             // Fail.
