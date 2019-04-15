@@ -22,27 +22,23 @@ class Simple_Source_File
       {
       }
     Simple_Source_File(std::streambuf& cbuf, const Cow_String& filename)
-      : Simple_Source_File()
+      : m_throw_on_failure(true)
       {
-        this->set_throw_on_failure(true);
         this->reload(cbuf, filename);
       }
     Simple_Source_File(std::istream& cstrm, const Cow_String& filename)
-      : Simple_Source_File()
+      : m_throw_on_failure(true)
       {
-        this->set_throw_on_failure(true);
         this->reload(cstrm, filename);
       }
     Simple_Source_File(const Cow_String& cstr, const Cow_String& filename)
-      : Simple_Source_File()
+      : m_throw_on_failure(true)
       {
-        this->set_throw_on_failure(true);
         this->reload(cstr, filename);
       }
     explicit Simple_Source_File(const Cow_String& filename)
-      : Simple_Source_File()
+      : m_throw_on_failure(true)
       {
-        this->set_throw_on_failure(true);
         this->open(filename);
       }
 
