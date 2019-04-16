@@ -215,13 +215,13 @@ void Value::print(std::ostream& os, bool quote_strings) const
       }
     case gtype_string:
       {
-        if(quote_strings) {
-          // "hello"
-          os << quote(this->m_stor.as<gtype_string>());
+        if(!quote_strings) {
+          // hello
+          os << this->m_stor.as<gtype_string>();
           return;
         }
-        // hello
-        os << this->m_stor.as<gtype_string>();
+        // "hello"
+        os << quote(this->m_stor.as<gtype_string>());
         return;
       }
     case gtype_opaque:

@@ -11,10 +11,6 @@
 
 namespace Asteria {
 
-///////////////////////////////////////////////////////////////////////////////
-// Formatter
-///////////////////////////////////////////////////////////////////////////////
-
 Formatter::~Formatter()
   {
   }
@@ -119,14 +115,14 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
       // Control characters are ['\x00','\x20') and '\x7F'.
       static constexpr char s_replacements[][16] =
         {
-          "[NUL"   "\\x00]",   "[SOH"   "\\x01]",   "[STX"   "\\x02]",   "[ETX"   "\\x03]",
-          "[EOT"   "\\x04]",   "[ENQ"   "\\x05]",   "[ACK"   "\\x06]",   "[BEL"   "\\x07]",
-          "[BS"    "\\x08]",   /*TAB*/  "\t",       /*LF*/   "\n\t",     "[VT"    "\\x0B]",
-          "[FF"    "\\x0C]",   /*CR*/   "\r",       "[SO"    "\\x0E]",   "[SI"    "\\x0F]",
-          "[DLE"   "\\x10]",   "[DC1"   "\\x11]",   "[DC2"   "\\x12]",   "[DC3"   "\\x13]",
-          "[DC4"   "\\x14]",   "[NAK"   "\\x15]",   "[SYN"   "\\x16]",   "[ETB"   "\\x17]",
-          "[CAN"   "\\x18]",   "[EM"    "\\x19]",   "[SUB"   "\\x1A]",   "[ESC"   "\\x1B]",
-          "[FS"    "\\x1C]",   "[GS"    "\\x1D]",   "[RS"    "\\x1E]",   "[US"    "\\x1F]",
+          "[NUL\\x00]",  "[SOH\\x01]",  "[STX\\x02]",  "[ETX\\x03]",
+          "[EOT\\x04]",  "[ENQ\\x05]",  "[ACK\\x06]",  "[BEL\\x07]",
+          "[BS\\x08]",   /*TAB*/"\t",   /*LF*/"\n\t",  "[VT\\x0B]",
+          "[FF\\x0C]",   /*CR*/"\r",    "[SO\\x0E]",   "[SI\\x0F]",
+          "[DLE\\x10]",  "[DC1\\x11]",  "[DC2\\x12]",  "[DC3\\x13]",
+          "[DC4\\x14]",  "[NAK\\x15]",  "[SYN\\x16]",  "[ETB\\x17]",
+          "[CAN\\x18]",  "[EM\\x19]",   "[SUB\\x1A]",  "[ESC\\x1B]",
+          "[FS\\x1C]",   "[GS\\x1D]",   "[RS\\x1E]",   "[US\\x1F]",
         };
       // Check one character.
       std::size_t uch = ch & 0xFF;
@@ -147,10 +143,6 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     return res >= 0;
   }
 
-///////////////////////////////////////////////////////////////////////////////
-// Runtime_Error
-///////////////////////////////////////////////////////////////////////////////
-
 Runtime_Error::~Runtime_Error()
   {
   }
@@ -163,171 +155,52 @@ bool throw_runtime_error(const char* func, rocket::cow_string&& msg)
     throw Runtime_Error(rocket::move(msg));
   }
 
-///////////////////////////////////////////////////////////////////////////////
-// Quote
-///////////////////////////////////////////////////////////////////////////////
-
-std::ostream& operator<<(std::ostream& os, const Quote& q)
+void quote_string(rocket::cow_string& output, const char* data, std::size_t size)
   {
-    const std::ostream::sentry sentry(os);
-    if(!sentry) {
-      return os;
+    do_append_str(output, '\"');
+    // Append characters in `[data,data+size)`
+    for(std::size_t i = 0; i != size; ++i) {
+      // Use a lookup table?
+      static constexpr char s_replacements[][256] =
+        {
+          "\\0",    "\\x01",  "\\x02",  "\\x03",  "\\x04",  "\\x05",  "\\x06",  "\\a",
+          "\\b",    "\\t",    "\\n",    "\\v",    "\\f",    "\\r",    "\\x0E",  "\\x0F",
+          "\\x10",  "\\x11",  "\\x12",  "\\x13",  "\\x14",  "\\x15",  "\\x16",  "\\x17",
+          "\\x18",  "\\x19",  "\\Z",    "\\e",    "\\x1C",  "\\x1D",  "\\x1E",  "\\x1F",
+          " ",      "!",      "\\\"",   "#",      "$",      "%",      "&",      "\\\'",
+          "(",      ")",      "*",      "+",      ",",      "-",      ".",      "/",
+          "0",      "1",      "2",      "3",      "4",      "5",      "6",      "7",
+          "8",      "9",      ":",      ";",      "<",      "=",      ">",      "?",
+          "@",      "A" ,     "B",      "C" ,     "D",      "E",      "F" ,     "G",
+          "H",      "I",      "J",      "K",      "L",      "M",      "N",      "O",
+          "P",      "Q",      "R",      "S",      "T",      "U",      "V",      "W",
+          "X",      "Y",      "Z",      "[",      "\\\\",   "]",      "^",      "_",
+          "`",      "a",      "b",      "c",      "d",      "e",      "f",      "g",
+          "h",      "i" ,     "j",      "k" ,     "l",      "m",      "n" ,     "o",
+          "p",      "q",      "r",      "s",      "t",      "u",      "v",      "w",
+          "x",      "y",      "z",      "{",      "|",      "}",      "~",      "\\x7F",
+          "\\x80",  "\\x81",  "\\x82",  "\\x83",  "\\x84",  "\\x85",  "\\x86",  "\\x87",
+          "\\x88",  "\\x89",  "\\x8A",  "\\x8B",  "\\x8C",  "\\x8D",  "\\x8E",  "\\x8F",
+          "\\x90",  "\\x91",  "\\x92",  "\\x93",  "\\x94",  "\\x95",  "\\x96",  "\\x97",
+          "\\x98",  "\\x99",  "\\x9A",  "\\x9B",  "\\x9C",  "\\x9D",  "\\x9E",  "\\x9F",
+          "\\xA0",  "\\xA1",  "\\xA2",  "\\xA3",  "\\xA4",  "\\xA5",  "\\xA6",  "\\xA7",
+          "\\xA8",  "\\xA9",  "\\xAA",  "\\xAB",  "\\xAC",  "\\xAD",  "\\xAE",  "\\xAF",
+          "\\xB0",  "\\xB1",  "\\xB2",  "\\xB3",  "\\xB4",  "\\xB5",  "\\xB6",  "\\xB7",
+          "\\xB8",  "\\xB9",  "\\xBA",  "\\xBB",  "\\xBC",  "\\xBD",  "\\xBE",  "\\xBF",
+          "\\xC0",  "\\xC1",  "\\xC2",  "\\xC3",  "\\xC4",  "\\xC5",  "\\xC6",  "\\xC7",
+          "\\xC8",  "\\xC9",  "\\xCA",  "\\xCB",  "\\xCC",  "\\xCD",  "\\xCE",  "\\xCF",
+          "\\xD0",  "\\xD1",  "\\xD2",  "\\xD3",  "\\xD4",  "\\xD5",  "\\xD6",  "\\xD7",
+          "\\xD8",  "\\xD9",  "\\xDA",  "\\xDB",  "\\xDC",  "\\xDD",  "\\xDE",  "\\xDF",
+          "\\xE0",  "\\xE1",  "\\xE2",  "\\xE3",  "\\xE4",  "\\xE5",  "\\xE6",  "\\xE7",
+          "\\xE8",  "\\xE9",  "\\xEA",  "\\xEB",  "\\xEC",  "\\xED",  "\\xEE",  "\\xEF",
+          "\\xF0",  "\\xF1",  "\\xF2",  "\\xF3",  "\\xF4",  "\\xF5",  "\\xF6",  "\\xF7",
+          "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
+        };
+      std::size_t uch = data[i] & 0xFF;
+      do_append_str(output, s_replacements[uch]);
     }
-    auto state = std::ios_base::goodbit;
-    try {
-      auto eof = std::char_traits<char>::eof();
-      // Insert the open quote mark.
-      if(os.rdbuf()->sputc('\"') == eof) {
-        state |= std::ios_base::failbit;
-        goto z;
-      }
-      // Insert the string.
-      auto rbase = q.data() + q.size();
-      auto rem = q.size();
-      while(rem > 0) {
-        auto uch = static_cast<unsigned>(rbase[-rem] & 0xFF);
-        switch(uch) {
-        case '\a':
-          {
-            if(os.rdbuf()->sputn("\\a", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\b':
-          {
-            if(os.rdbuf()->sputn("\\b", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\f':
-          {
-            if(os.rdbuf()->sputn("\\f", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\n':
-          {
-            if(os.rdbuf()->sputn("\\n", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\r':
-          {
-            if(os.rdbuf()->sputn("\\r", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\t':
-          {
-            if(os.rdbuf()->sputn("\\t", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\v':
-          {
-            if(os.rdbuf()->sputn("\\v", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\0':
-          {
-            if(os.rdbuf()->sputn("\\0", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\x1A':
-          {
-            if(os.rdbuf()->sputn("\\Z", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\x1B':
-          {
-            if(os.rdbuf()->sputn("\\e", 2) < 2) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        case '\"':
-        case '\'':
-        case '\\':
-          {
-            if(os.rdbuf()->sputc('\\') == eof) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-          }
-          // Fallthrough.
-        case 0x20:  case 0x21:  /*  "  */   case 0x23:  case 0x24:  case 0x25:  case 0x26:  /*  '  */
-        case 0x28:  case 0x29:  case 0x2a:  case 0x2b:  case 0x2c:  case 0x2d:  case 0x2e:  case 0x2f:
-        case 0x30:  case 0x31:  case 0x32:  case 0x33:  case 0x34:  case 0x35:  case 0x36:  case 0x37:
-        case 0x38:  case 0x39:  case 0x3a:  case 0x3b:  case 0x3c:  case 0x3d:  case 0x3e:  case 0x3f:
-        case 0x40:  case 0x41:  case 0x42:  case 0x43:  case 0x44:  case 0x45:  case 0x46:  case 0x47:
-        case 0x48:  case 0x49:  case 0x4a:  case 0x4b:  case 0x4c:  case 0x4d:  case 0x4e:  case 0x4f:
-        case 0x50:  case 0x51:  case 0x52:  case 0x53:  case 0x54:  case 0x55:  case 0x56:  case 0x57:
-        case 0x58:  case 0x59:  case 0x5a:  case 0x5b:  /*  \  */   case 0x5d:  case 0x5e:  case 0x5f:
-        case 0x60:  case 0x61:  case 0x62:  case 0x63:  case 0x64:  case 0x65:  case 0x66:  case 0x67:
-        case 0x68:  case 0x69:  case 0x6a:  case 0x6b:  case 0x6c:  case 0x6d:  case 0x6e:  case 0x6f:
-        case 0x70:  case 0x71:  case 0x72:  case 0x73:  case 0x74:  case 0x75:  case 0x76:  case 0x77:
-        case 0x78:  case 0x79:  case 0x7a:  case 0x7b:  case 0x7c:  case 0x7d:  case 0x7e:
-          {
-            // Write the character as is.
-            if(os.rdbuf()->sputc(static_cast<char>(uch)) == eof) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        default:
-          {
-            static constexpr char s_digits[] = "0123456789ABCDEF";
-            char xseq[4] = { '\\', 'x', s_digits[(uch >> 4) & 0x0F], s_digits[uch & 0x0F] };
-            if(os.rdbuf()->sputn(xseq, 4) < 4) {
-              state |= std::ios_base::failbit;
-              goto z;
-            }
-            break;
-          }
-        }
-        --rem;
-      }
-      // Insert the closed quote mark.
-      if(os.rdbuf()->sputc('\"') == eof) {
-        state |= std::ios_base::failbit;
-        goto z;
-      }
-    } catch(...) {
-      rocket::handle_ios_exception(os, state);
-    }
-z:
-    if(state) {
-      os.setstate(state);
-    }
-    return os;
+    do_append_str(output, '\"');
   }
-
-///////////////////////////////////////////////////////////////////////////////
-// Wrap Index
-///////////////////////////////////////////////////////////////////////////////
 
 Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
   {
@@ -352,10 +225,6 @@ Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
     }
     return w;
   }
-
-///////////////////////////////////////////////////////////////////////////////
-// Random Seed
-///////////////////////////////////////////////////////////////////////////////
 
 std::uint64_t generate_random_seed() noexcept
   {

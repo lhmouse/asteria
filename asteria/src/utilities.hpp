@@ -14,17 +14,9 @@
 
 namespace Asteria {
 
-///////////////////////////////////////////////////////////////////////////////
-// Internal Macros
-///////////////////////////////////////////////////////////////////////////////
-
 #define ASTERIA_AND_(x_, y_)             (bool(x_) && bool(y_))
 #define ASTERIA_OR_(x_, y_)              (bool(x_) || bool(y_))
 #define ASTERIA_COMMA_(x_, y_)           (void(x_) ,      (y_))
-
-///////////////////////////////////////////////////////////////////////////////
-// Formatter
-///////////////////////////////////////////////////////////////////////////////
 
 class Formatter
   {
@@ -136,10 +128,6 @@ extern bool write_log_to_stderr(const char* file, long line, rocket::cow_string&
 #define ASTERIA_TERMINATE(...)     ASTERIA_COMMA_(::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
                                                   ::std::terminate())
 
-///////////////////////////////////////////////////////////////////////////////
-// Runtime_Error
-///////////////////////////////////////////////////////////////////////////////
-
 class Runtime_Error : public virtual std::exception
   {
   private:
@@ -169,51 +157,26 @@ class Runtime_Error : public virtual std::exception
 #define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
                                                             ::std::terminate())
 
-///////////////////////////////////////////////////////////////////////////////
-// Quote
-///////////////////////////////////////////////////////////////////////////////
+extern void quote_string(rocket::cow_string& output, const char* data, std::size_t size);
 
-class Quote
+inline rocket::cow_string quote(const char* str, std::size_t len)
   {
-  private:
-    const char* m_data;
-    std::size_t m_size;
-
-  public:
-    constexpr Quote(const char* xdata, std::size_t xsize) noexcept
-      : m_data(xdata), m_size(xsize)
-      {
-      }
-
-  public:
-    const char* data() const noexcept
-      {
-        return this->m_data;
-      }
-    std::size_t size() const noexcept
-      {
-        return this->m_size;
-      }
-  };
-
-constexpr Quote quote(const char* data, std::size_t size) noexcept
-  {
-    return Quote(data, size);
+    rocket::cow_string output;
+    quote_string(output, str, len);
+    return output;
   }
-inline Quote quote(const char* str) noexcept
+inline rocket::cow_string quote(const char* str)
   {
-    return Quote(str, std::char_traits<char>::length(str));
+    rocket::cow_string output;
+    quote_string(output, str, std::strlen(str));
+    return output;
   }
-inline Quote quote(const rocket::cow_string& str) noexcept
+inline rocket::cow_string quote(const rocket::cow_string& str)
   {
-    return Quote(str.data(), str.size());
+    rocket::cow_string output;
+    quote_string(output, str.data(), str.size());
+    return output;
   }
-
-extern std::ostream& operator<<(std::ostream& os, const Quote& q);
-
-///////////////////////////////////////////////////////////////////////////////
-// Wrap Index
-///////////////////////////////////////////////////////////////////////////////
 
 struct Wrapped_Index
   {
@@ -223,10 +186,6 @@ struct Wrapped_Index
   };
 
 extern Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept;
-
-///////////////////////////////////////////////////////////////////////////////
-// Random Seed
-///////////////////////////////////////////////////////////////////////////////
 
 // Note that the return value may be either positive or negative.
 extern std::uint64_t generate_random_seed() noexcept;
