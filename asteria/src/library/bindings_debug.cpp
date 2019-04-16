@@ -12,7 +12,7 @@ namespace Asteria {
 bool std_debug_print(const Cow_Vector<Value>& values)
   {
     rocket::insertable_ostream mos;
-    rocket::for_each(values, [&](const Value& value) { mos << value;  });
+    rocket::for_each(values, std::bind(&Value::print, std::placeholders::_1, std::ref(mos), false));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
     return succ;
   }
