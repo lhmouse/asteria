@@ -17,12 +17,12 @@ class Simple_Binding_Wrapper : public Abstract_Function
 
   private:
     Cow_String m_desc;
-    Prototype* m_fptr;
     Value m_opaque;
+    Prototype* m_fptr;
 
   public:
-    Simple_Binding_Wrapper(Cow_String desc, Prototype* fptr, Value&& opaque) noexcept
-      : m_desc(rocket::move(desc)), m_fptr(fptr), m_opaque(rocket::move(opaque))
+    Simple_Binding_Wrapper(Cow_String&& desc, Value&& opaque, Prototype* fptr) noexcept
+      : m_desc(rocket::move(desc)), m_opaque(rocket::move(opaque)), m_fptr(fptr)
       {
       }
     ~Simple_Binding_Wrapper() override;
@@ -33,9 +33,9 @@ class Simple_Binding_Wrapper : public Abstract_Function
     void enumerate_variables(const Abstract_Variable_Callback& callback) const override;
   };
 
-inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Simple_Binding_Wrapper::Prototype* fptr, Value opaque)
+inline Rcobj<Simple_Binding_Wrapper> make_simple_binding(Cow_String desc, Value opaque, Simple_Binding_Wrapper::Prototype* fptr)
   {
-    return Rcobj<Simple_Binding_Wrapper>(rocket::move(desc), fptr, rocket::move(opaque));
+    return Rcobj<Simple_Binding_Wrapper>(rocket::move(desc), rocket::move(opaque), fptr);
   }
 
 }  // namespace Asteria

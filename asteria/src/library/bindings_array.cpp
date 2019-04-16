@@ -660,6 +660,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    is returned.\n"
           "  * Returns the specified subarray of `data`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -675,9 +679,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.replace_slice()`
@@ -702,6 +704,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    function returns a new `array` without modifying `data`.\n"
           "  * Returns a `array` with the subrange replaced.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -724,9 +730,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.find()`
@@ -754,6 +758,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "  * Returns the subscript of the first match of `target` in `data`\n"
           "    if one is found, which is always non-negative, or `null`\n"
           "    otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -794,9 +802,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.rfind()`
@@ -824,6 +830,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "  * Returns the subscript of the last match of `target` in `data`\n"
           "    if one is found, which is always non-negative, or `null`\n"
           "    otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -864,9 +874,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.find_if()`
@@ -894,6 +902,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    `slice(data, from, length)`.\n"
           "  * Returns the subscript of such an element as an `integer`, if\n"
           "    one is found, or `null` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
@@ -934,9 +946,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.find_if_not()`
@@ -964,6 +974,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    `slice(data, from, length)`.\n"
           "  * Returns the subscript of such an element as an `integer`, if\n"
           "    one is found, or `null` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
@@ -1004,9 +1018,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.rfind_if()`
@@ -1034,6 +1046,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    `slice(data, from, length)`.\n"
           "  * Returns the subscript of such an element as an `integer`, if\n"
           "    one is found, or `null` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
@@ -1074,9 +1090,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.rfind_if_not()`
@@ -1104,6 +1118,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    `slice(data, from, length)`.\n"
           "  * Returns the subscript of such an element as an `integer`, if\n"
           "    one is found, or `null` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
@@ -1144,9 +1162,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.is_sorted()`
@@ -1170,6 +1186,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "  * Returns `true` if `data` is sorted or empty, or `false`\n"
           "    otherwise.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1184,9 +1204,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.binary_search()`
@@ -1207,6 +1225,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    advised that in this case there is no guarantee whether an\n"
           "    exception will be thrown or not.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1226,9 +1248,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.lower_bound()`
@@ -1251,6 +1271,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    advised that in this case there is no guarantee whether an\n"
           "    exception will be thrown or not.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1266,9 +1290,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.upper_bound()`
@@ -1291,6 +1313,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    advised that in this case there is no guarantee whether an\n"
           "    exception will be thrown or not.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1306,9 +1332,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.equal_range()`
@@ -1330,6 +1354,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    advised that in this case there is no guarantee whether an\n"
           "    exception will be thrown or not.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1345,9 +1373,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.sort()`
@@ -1367,6 +1393,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    that in this case there is no guarantee whether an exception\n"
           "    will be thrown or not.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1381,9 +1411,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.sortu()`
@@ -1404,6 +1432,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    that in this case there is no guarantee whether an exception\n"
           "    will be thrown or not.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1418,9 +1450,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.max_of()`
@@ -1437,6 +1467,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "  * Returns a copy of the maximum element, or `null` if `data` is\n"
           "    empty.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1451,9 +1485,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.min_of()`
@@ -1470,6 +1502,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "  * Returns a copy of the minimum element, or `null` if `data` is\n"
           "    empty.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1484,9 +1520,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.reverse()`
@@ -1499,6 +1533,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "  * Reverses an `array`. This function returns a new `array`\n"
           "    without modifying `text`.\n"
           "  * Returns the reversed `array`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1514,9 +1552,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.generate()`
@@ -1534,6 +1570,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    element.\n"
           "  * Returns an `array` containing all values generated.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1548,9 +1588,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.array.shuffle()`
@@ -1568,6 +1606,10 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    returns a new `array` without modifying `data`.\n"
           "  * Returns the shuffled `array`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1582,9 +1624,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // End of `std.array`

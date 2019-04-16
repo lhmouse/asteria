@@ -1095,6 +1095,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    returned.\n"
           "  * Returns the specified substring of `text`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1110,9 +1114,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.replace_slice()`
@@ -1137,6 +1139,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    returns a new `string` without modifying `text`.\n"
           "  * Returns a `string` with the subrange replaced.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1159,9 +1165,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.compare()`
@@ -1180,6 +1184,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    `text2`, a negative `integer` if `text1` compares less than\n"
           "    `text2`, or zero if `text1` compares equal to `text2`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1195,9 +1203,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.starts_with()`
@@ -1211,6 +1217,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    `string` is considered to be a prefix of any string.\n"
           "  * Returns `true` if `prefix` is a prefix of `text`, or `false`\n"
           "    otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1226,9 +1236,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.ends_with()`
@@ -1242,6 +1250,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    `string` is considered to be a suffix of any string.\n"
           "  * Returns `true` if `suffix` is a suffix of `text`, or `false`\n"
           "    otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1257,9 +1269,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.find()`
@@ -1287,6 +1297,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Returns the subscript of the first byte of the first match of\n"
           "    `pattern` in `text` if one is found, which is always\n"
           "    non-negative, or `null` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1327,9 +1341,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.rfind()`
@@ -1355,6 +1367,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Returns the subscript of the first byte of the last match of\n"
           "    `pattern` in `text` if one is found, which is always\n"
           "    non-negative, or `null` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1395,9 +1411,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.find_and_replace()`
@@ -1427,6 +1441,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Returns the string with `pattern` replaced. If `text` does not\n"
           "    contain `pattern`, it is returned intact.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1455,9 +1473,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.find_any_of()`
@@ -1482,6 +1498,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    returned by `slice(text, from, length)`.\n"
           "  * Returns the subscript of the first byte found, which is always\n"
           "    non-negative; or `null` if no such byte exists.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1522,9 +1542,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.rfind_any_of()`
@@ -1549,6 +1567,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    returned by `slice(text, from, length)`.\n"
           "  * Returns the subscript of the last byte found, which is always\n"
           "    non-negative; or `null` if no such byte exists.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1589,9 +1611,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.find_not_of()`
@@ -1616,6 +1636,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    be returned by `slice(text, from, length)`.\n"
           "  * Returns the subscript of the first byte found, which is always\n"
           "    non-negative; or `null` if no such byte exists.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1656,9 +1680,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.rfind_not_of()`
@@ -1683,6 +1705,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    be returned by `slice(text, from, length)`.\n"
           "  * Returns the subscript of the last byte found, which is always\n"
           "    non-negative; or `null` if no such byte exists.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1723,9 +1749,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.reverse()`
@@ -1738,6 +1762,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Reverses a byte string. This function returns a new `string`\n"
           "    without modifying `text`.\n"
           "  * Returns the reversed `string`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1752,9 +1780,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.trim()`
@@ -1770,6 +1796,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    function returns a new `string` without modifying `text`.\n"
           "  * Returns the trimmed `string`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1784,9 +1814,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.ltrim()`
@@ -1802,6 +1830,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    returns a new `string` without modifying `text`.\n"
           "  * Returns the trimmed `string`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1816,9 +1848,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.rtrim()`
@@ -1834,6 +1864,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    returns a new `string` without modifying `text`.\n"
           "  * Returns the trimmed `string`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1848,9 +1882,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.lpad()`
@@ -1867,6 +1899,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Returns the padded string.\n"
           "  * Throws an exception if `padding` is empty.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1882,9 +1918,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.rpad()`
@@ -1901,6 +1935,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Returns the padded string.\n"
           "  * Throws an exception if `padding` is empty.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1916,9 +1954,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.to_upper()`
@@ -1933,6 +1969,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    without modifying `text`.\n"
           "  * Returns a new `string` after the conversion.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1946,9 +1986,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.to_lower()`
@@ -1963,6 +2001,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    without modifying `text`.\n"
           "  * Returns a new `string` after the conversion.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1976,9 +2018,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.translate()`
@@ -1999,6 +2039,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    `text`.\n"
           "  * Returns the translated `string`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2014,9 +2058,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.explode()`
@@ -2035,6 +2077,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    `text` is empty, an empty `array` is returned.\n"
           "  * Throws an exception if `limit` is zero or negative.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2050,9 +2096,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.implode()`
@@ -2068,6 +2112,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Returns a `string` containing all segments. If `segments` is\n"
           "    empty, an empty `string` is returned.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2082,9 +2130,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.hex_encode()`
@@ -2102,6 +2148,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Returns the encoded `string`. If `text` is empty, an empty\n"
           "    `string` is returned.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2117,9 +2167,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.hex_decode()`
@@ -2135,6 +2183,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Returns a `string` containing decoded bytes. If `hstr` is empty\n"
           "    or consists only whitespaces, an empty `string` is returned. In\n"
           "    the case of parse errors, `null` is returned.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2153,9 +2205,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.utf8_encode()`
@@ -2172,6 +2222,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
           "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
           "  * Returns the encoded `string` on success, or `null` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2201,9 +2255,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.utf8_decode()`
@@ -2221,6 +2273,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    otherwise this function fails.\n"
           "  * Returns an `array` containing decoded code points, or `null`\n"
           "    otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2240,9 +2296,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.pack8()`
@@ -2256,6 +2310,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    be either an `integer` or an `array` of `integer`s, all of\n"
           "    which are truncated to 8 bits then copied into a `string`.\n"
           "  * Returns the packed `string`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2280,9 +2338,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.unpack8()`
@@ -2296,6 +2352,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
           "    which are sign-extended to 64 bits then copied into an `array`.\n"
           "  * Returns an `array` containing unpacked integers.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2312,9 +2372,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.pack16be()`
@@ -2329,6 +2387,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    which are truncated to 16 bits then copied into a `string` in\n"
           "    the big-endian byte order.\n"
           "  * Returns the packed `string`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2353,9 +2415,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.unpack16be()`
@@ -2373,6 +2433,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Throws an exception if the length of `text` is not a multiple\n"
           "    of 2.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2388,9 +2452,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.pack16le()`
@@ -2405,6 +2467,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    which are truncated to 16 bits then copied into a `string` in\n"
           "    the little-endian byte order.\n"
           "  * Returns the packed `string`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2429,9 +2495,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.unpack16le()`
@@ -2449,6 +2513,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Throws an exception if the length of `text` is not a multiple\n"
           "    of 2.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2464,9 +2532,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.pack32be()`
@@ -2481,6 +2547,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    which are truncated to 32 bits then copied into a `string` in\n"
           "    the big-endian byte order.\n"
           "  * Returns the packed `string`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2505,9 +2575,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.unpack32be()`
@@ -2525,6 +2593,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Throws an exception if the length of `text` is not a multiple\n"
           "    of 4.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2540,9 +2612,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.pack32le()`
@@ -2557,6 +2627,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    which are truncated to 32 bits then copied into a `string` in\n"
           "    the little-endian byte order.\n"
           "  * Returns the packed `string`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2581,9 +2655,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.unpack32le()`
@@ -2601,6 +2673,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Throws an exception if the length of `text` is not a multiple\n"
           "    of 4.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2616,9 +2692,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.pack64be()`
@@ -2632,6 +2706,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    be either an `integer` or an `array` of `integers`, all of\n"
           "    which are copied into a `string` in the big-endian byte order.\n"
           "  * Returns the packed `string`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2656,9 +2734,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.unpack64be()`
@@ -2675,6 +2751,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Throws an exception if the length of `text` is not a multiple\n"
           "    of 8.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2690,9 +2770,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.pack64le()`
@@ -2707,6 +2785,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "    which are copied into a `string` in the little-endian byte\n"
           "    order.\n"
           "  * Returns the packed `string`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -2731,9 +2813,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.string.unpack64le()`
@@ -2751,6 +2831,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           "  * Throws an exception if the length of `text` is not a multiple\n"
           "    of 8.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2766,9 +2850,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // End of `std.string`

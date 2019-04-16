@@ -429,6 +429,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Return the absolute value.\n"
           "  * Throws an exception if `value` is the `integer` `-0x1p63`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -448,9 +452,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.sign()`
@@ -464,6 +466,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    `integer` or `real`, to all bits of an `integer`. Be advised\n"
           "    that `-0.0` is distinct from `0.0` despite the equality.\n"
           "  * Returns `-1` if `value` is negative, or `0` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -484,9 +490,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.is_finite()`
@@ -502,6 +506,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    support infinities or NaNs.\n"
           "  * Returns `true` if `value` is an `integer` or is a `real` that\n"
           "    is neither an infinity or a NaN, or `false` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -522,9 +530,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.is_infinity()`
@@ -540,6 +546,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    support infinities.\n"
           "  * Returns `true` if `value` is a `real` that denotes an infinity;\n"
           "    or `false` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -560,9 +570,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.is_nan()`
@@ -577,6 +585,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    `integer`s for consistency; `integer`s do not support NaNs.\n"
           "  * Returns `true` if `value` is a `real` denoting a NaN, or\n"
           "    `false` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -597,9 +609,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.clamp()`
@@ -616,6 +626,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    type `integer`; otherwise it is of type `real`.\n"
           "  * Throws an exception if `lower` is not less than or equal to\n"
           "    `upper`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -640,9 +654,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.round()`
@@ -656,6 +668,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    nearest integer; halfway values are rounded away from zero. If\n"
           "    `value` is an `integer`, it is returned intact.\n"
           "  * Returns the rounded value.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -676,9 +692,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.floor()`
@@ -692,6 +706,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    nearest integer towards negative infinity. If `value` is an\n"
           "    `integer`, it is returned intact.\n"
           "  * Returns the rounded value.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -712,9 +730,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.ceil()`
@@ -728,6 +744,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    nearest integer towards positive infinity. If `value` is an\n"
           "    `integer`, it is returned intact.\n"
           "  * Returns the rounded value.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -748,9 +768,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.trunc()`
@@ -764,6 +782,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    nearest integer towards zero. If `value` is an `integer`, it is\n"
           "    returned intact.\n"
           "  * Returns the rounded value.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -784,9 +806,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.iround()`
@@ -803,6 +823,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Returns the rounded value as an `integer`.\n"
           "  * Throws an exception if the result cannot be represented as an\n"
           "    `integer`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -823,9 +847,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.ifloor()`
@@ -842,6 +864,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Returns the rounded value as an `integer`.\n"
           "  * Throws an exception if the result cannot be represented as an\n"
           "    `integer`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -862,9 +888,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.iceil()`
@@ -881,6 +905,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Returns the rounded value as an `integer`.\n"
           "  * Throws an exception if the result cannot be represented as an\n"
           "    `integer`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -901,9 +929,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.itrunc()`
@@ -920,6 +946,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Returns the rounded value as an `integer`.\n"
           "  * Throws an exception if the result cannot be represented as an\n"
           "    `integer`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -940,9 +970,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.random()`
@@ -968,6 +996,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    if both arguments are of type `integer`; otherwise it is of\n"
           "    type `real`.\n"
           "  * Throws an exception if `lower` is not less than `upper`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
@@ -1001,9 +1033,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.sqrt()`
@@ -1016,6 +1046,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Calculates the square root of `x` which may be of either the\n"
           "    `integer` or the `real` type. The result is always exact.\n"
           "  * Returns the square root of `x` as a `real`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1030,9 +1064,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.fma()`
@@ -1046,6 +1078,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    functions calculates `x * y + z` without intermediate rounding\n"
           "    operations. The result is always exact.\n"
           "  * Returns the value of `x * y + z` as a `real`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1062,9 +1098,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.addm()`
@@ -1080,6 +1114,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    This function will not cause overflow exceptions to be thrown.\n"
           "  * Returns the reduced sum of `x` and `y`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1094,9 +1132,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.subm()`
@@ -1113,6 +1149,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    exceptions to be thrown.\n"
           "  * Returns the reduced difference of `x` and `y`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1127,9 +1167,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.mulm()`
@@ -1146,6 +1184,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    exceptions to be thrown.\n"
           "  * Returns the reduced product of `x` and `y`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1160,9 +1202,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.adds()`
@@ -1187,6 +1227,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Returns the saturated sum of `x` and `y`. The result is of type\n"
           "    `integer` if all arguments are of type `integer`; otherwise it\n"
           "    is of type `real`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1224,9 +1268,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.subs()`
@@ -1251,6 +1293,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Returns the saturated difference of `x` and `y`. The result is\n"
           "    of type `integer` if all arguments are of type `integer`;\n"
           "    otherwise it is of type `real`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1288,9 +1334,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.numeric.muls()`
@@ -1315,6 +1359,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Returns the saturated product of `x` and `y`. The result is of\n"
           "    type `integer` if all arguments are of type `integer`;\n"
           "    otherwise it is of type `real`.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -1352,9 +1400,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // End of `std.numeric`

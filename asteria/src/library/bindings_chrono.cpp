@@ -419,6 +419,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "  * Returns the number of milliseconds since the Unix epoch,\n"
           "    represented as an `integer`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -431,9 +435,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.local_now()`
@@ -447,6 +449,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
           "    in the local time zone, represented as an `integer`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -459,9 +465,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.hires_now()`
@@ -478,6 +482,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "  * Returns the number of milliseconds since an unspecified time\n"
           "    point, represented as a `real`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -490,9 +498,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.steady_now()`
@@ -509,6 +515,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "  * Returns the number of milliseconds since an unspecified time\n"
           "    point, represented as an `integer`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -521,9 +531,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.local_from_utc()`
@@ -538,6 +546,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
           "    in the local time zone, represented as an `integer`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -551,9 +563,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.utc_from_local()`
@@ -569,6 +579,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "  * Returns the number of milliseconds since the Unix epoch,\n"
           "    represented as an `integer`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -582,9 +596,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.datetime_format()`
@@ -600,6 +612,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "    If `with_ms` is set to `true`, the string will have a 3-digit\n"
           "    fractional part. By default, no fractional part is added.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -614,9 +630,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.datetime_min()`
@@ -632,6 +646,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "  * Returns `'1601-01-01 00:00:00'` or `'1601-01-01 00:00:00.000'`\n"
           "    according to `with_ms`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -645,9 +663,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.datetime_max()`
@@ -663,6 +679,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "  * Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'`\n"
           "    according to `with_ms`.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -676,9 +696,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.chrono.datetime_parse()`
@@ -697,6 +715,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           "    if the time string has been parsed successfully, or `null`\n"
           "    otherwise.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -714,9 +736,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // End of `std.chrono`

@@ -39,6 +39,10 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           "    is appended to terminate the line.\n"
           "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -55,9 +59,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.debug.dump()`
@@ -74,6 +76,10 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           "    inserted and output lines are not indented. It has a default\n"
           "    value of `2`.\n"
           "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
@@ -92,9 +98,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // End of `std.debug`

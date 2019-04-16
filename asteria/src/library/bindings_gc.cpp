@@ -63,6 +63,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           "  * Returns the threshold. If `generation` is not valid, `null` is\n"
           "    returned.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -80,9 +84,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.gc.set_threshold()`
@@ -102,6 +104,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           "  * Returns the threshold before the call. If `generation` is not\n"
           "    valid, `null` is returned.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -120,9 +126,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // `std.gc.collect()`
@@ -138,6 +142,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           "  * Returns the number of variables that have been collected in\n"
           "    total.\n"
         ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -151,9 +159,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
             }
             // Fail.
             reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
+          }
       )));
     //===================================================================
     // End of `std.gc`
