@@ -187,21 +187,19 @@ G_string std_chrono_datetime_format(const G_integer& time_point, const Opt<G_boo
     auto wpos = time_str.mut_rbegin();
     // Define functions to write each field.
     // Be advised that these functions modify `wpos`.
-    auto write_int = [&](int value, int width)
+    auto write_int = [&](int value, unsigned width)
       {
         int r = value;
-        for(int i = 0; i < width; ++i) {
+        for(unsigned i = 0; i < width; ++i) {
           int d = r % 10;
           r /= 10;
-          *wpos = static_cast<char>('0' + d);
-          ++wpos;
+          *(wpos++) = static_cast<char>('0' + d);
         }
         return true;
       };
     auto write_sep = [&](char sep)
       {
-        *wpos = sep;
-        ++wpos;
+        *(wpos++) = sep;
         return true;
       };
     // Break the time point down.
