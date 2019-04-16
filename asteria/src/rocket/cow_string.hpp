@@ -2016,7 +2016,7 @@ template<typename charT, typename traitsT, typename allocatorT> basic_istream<ch
                                                                                                           basic_cow_string<charT, traitsT, allocatorT>& str)
   {
     // Initiate this FormattedInputFunction.
-    const typename basic_istream<charT, traitsT>::sentry sentry(is, false);
+    typename basic_istream<charT, traitsT>::sentry sentry(is, false);
     if(!sentry) {
       return is;
     }
@@ -2067,7 +2067,7 @@ template<typename charT, typename traitsT, typename allocatorT> basic_ostream<ch
                                                                                                           const basic_cow_string<charT, traitsT, allocatorT>& str)
   {
     // Initiate this FormattedOutputFunction.
-    const typename basic_ostream<charT, traitsT>::sentry sentry(os);
+    typename basic_ostream<charT, traitsT>::sentry sentry(os);
     if(!sentry) {
       return os;
     }
@@ -2112,7 +2112,7 @@ template<typename charT, typename traitsT, typename allocatorT> basic_istream<ch
                                                                                                        basic_cow_string<charT, traitsT, allocatorT>& str, charT delim)
   {
     // Initiate this UnformattedInputFunction.
-    const typename basic_istream<charT, traitsT>::sentry sentry(is, true);
+    typename basic_istream<charT, traitsT>::sentry sentry(is, true);
     if(!sentry) {
       return is;
     }
