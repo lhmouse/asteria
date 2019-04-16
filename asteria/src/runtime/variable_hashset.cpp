@@ -148,7 +148,7 @@ bool Variable_HashSet::has(const Rcptr<Variable>& var) const noexcept
     return true;
   }
 
-void Variable_HashSet::for_each(const Abstract_Variable_Callback& callback) const
+void Variable_HashSet::enumerate(const Abstract_Variable_Callback& callback) const
   {
     if(ROCKET_UNEXPECT(this->m_stor.empty())) {
       return;
@@ -159,7 +159,11 @@ void Variable_HashSet::for_each(const Abstract_Variable_Callback& callback) cons
     // Enumerate all buckets. The return value of `callback(bkt->first)` is ignored.
     for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
       ROCKET_ASSERT(*bkt);
-      callback(bkt->first);
+      if(!callback(bkt->first)) {
+        continue;
+      }
+      // Descend into this variable recursively when the callback returns `true`.
+      bkt->first->enumerate_variables(callback);
     }
   }
 

@@ -64,14 +64,14 @@ bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
           }
       };
 
-    template<typename FunctionT> class Variable_Callback : public Abstract_Variable_Callback
+    template<typename FuncT> class Variable_Callback : public Abstract_Variable_Callback
       {
       private:
-        FunctionT m_func;  // If `FunctionT` is a reference type then this is a reference.
+        FuncT m_func;  // If `FuncT` is a reference type then this is a reference.
 
       public:
-        explicit Variable_Callback(FunctionT&& func)
-          : m_func(rocket::forward<FunctionT>(func))
+        explicit Variable_Callback(FuncT&& func)
+          : m_func(rocket::forward<FuncT>(func))
           {
           }
 
@@ -82,13 +82,13 @@ bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
           }
       };
 
-    template<typename PointerT, typename FunctionT> void do_enumerate_variables(const PointerT& ptr, FunctionT&& func)
+    template<typename PtrT, typename FuncT> void do_enumerate_variables(const PtrT& ptr, FuncT&& func)
       {
-        ptr->enumerate_variables(Variable_Callback<FunctionT>(rocket::forward<FunctionT>(func)));
+        ptr->enumerate_variables(Variable_Callback<FuncT>(rocket::forward<FuncT>(func)));
       }
-    template<typename FunctionT> void do_enumerate_variables(const Variable_HashSet& set, FunctionT&& func)
+    template<typename FuncT> void do_enumerate_variables(const Variable_HashSet& set, FuncT&& func)
       {
-        set.for_each(Variable_Callback<FunctionT>(rocket::forward<FunctionT>(func)));
+        set.enumerate(Variable_Callback<FuncT>(rocket::forward<FuncT>(func)));
       }
 
     }  // namespace

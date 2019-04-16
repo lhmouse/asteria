@@ -82,7 +82,7 @@ class Variable_HashSet
       }
 
     bool has(const Rcptr<Variable>& var) const noexcept;
-    void for_each(const Abstract_Variable_Callback& callback) const;
+    void enumerate(const Abstract_Variable_Callback& callback) const;
     bool insert(const Rcptr<Variable>& var);
     bool erase(const Rcptr<Variable>& var) noexcept;
     Rcptr<Variable> erase_random_opt() noexcept;
