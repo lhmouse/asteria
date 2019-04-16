@@ -213,11 +213,9 @@ G_string std_string_find_and_replace(const G_string& text, const G_string& patte
         // Make use of reference counting if no match has been found.
         break;
       }
-      // Save the offsets here due to possibility of invalidation of iterators.
+      // Save offsets before replacing due to possibility of invalidation of iterators.
       auto roffs = std::make_pair(*qit - res.begin(), range.second - res.begin());
-      // Replace the subrange.
       res.replace(*qit, *qit + pattern.ssize(), replacement);
-      // Set up range for the next search operation.
       range = std::make_pair(res.begin() + roffs.first + replacement.ssize(), res.begin() + roffs.second);
     }
     return res;
@@ -233,11 +231,9 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
         // Make use of reference counting if no match has been found.
         break;
       }
-      // Save the offsets here due to possibility of invalidation of iterators.
+      // Save offsets before replacing due to possibility of invalidation of iterators.
       auto roffs = std::make_pair(*qit - res.begin(), range.second - res.begin());
-      // Replace the subrange.
       res.replace(*qit, *qit + pattern.ssize(), replacement);
-      // Set up range for the next search operation.
       range = std::make_pair(res.begin() + roffs.first + replacement.ssize(), res.begin() + roffs.second);
     }
     return res;
@@ -253,11 +249,9 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
         // Make use of reference counting if no match has been found.
         break;
       }
-      // Save the offsets here due to possibility of invalidation of iterators.
+      // Save offsets before replacing due to possibility of invalidation of iterators.
       auto roffs = std::make_pair(*qit - res.begin(), range.second - res.begin());
-      // Replace the subrange.
       res.replace(*qit, *qit + pattern.ssize(), replacement);
-      // Set up range for the next search operation.
       range = std::make_pair(res.begin() + roffs.first + replacement.ssize(), res.begin() + roffs.second);
     }
     return res;
