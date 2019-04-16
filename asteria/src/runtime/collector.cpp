@@ -122,6 +122,11 @@ Collector* Collector::collect_single_opt()
           if(!this->m_staging.insert(root)) {
             return false;
           }
+          if(root->use_count() <= 1) {
+            // This variable can be marked for collection immediately.
+            root->reset(Source_Location(rocket::sref("<defunct-1>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
+            return false;
+          }
           // Add variables reachable indirectly.
           do_enumerate_variables(root,
             [&](const Rcptr<Variable>& var)
@@ -152,7 +157,7 @@ Collector* Collector::collect_single_opt()
           switch(value_nref) {
           case 0:
             {
-              // `root->get_value()` is null.
+              // `root->get_value()` is `null`.
               break;
             }
           case 1:
@@ -227,7 +232,7 @@ Collector* Collector::collect_single_opt()
           if(root->get_gcref() >= root->use_count()) {
             ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
             // Overwrite the value of this variable with a scalar value to break reference cycles.
-            root->reset(Source_Location(rocket::sref("<defunct>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
+            root->reset(Source_Location(rocket::sref("<defunct-2>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
             // Cache this variable if a pool is provided.
             if(output) {
               output->insert(root);
