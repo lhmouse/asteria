@@ -26,9 +26,6 @@ extern Opt<G_integer> std_string_rfind(const G_string& text, const G_integer& fr
 extern G_string std_string_find_and_replace(const G_string& text, const G_string& pattern, const G_string& replacement);
 extern G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const G_string& pattern, const G_string& replacement);
 extern G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const Opt<G_integer>& length, const G_string& pattern, const G_string& replacement);
-extern G_string std_string_rfind_and_replace(const G_string& text, const G_string& pattern, const G_string& replacement);
-extern G_string std_string_rfind_and_replace(const G_string& text, const G_integer& from, const G_string& pattern, const G_string& replacement);
-extern G_string std_string_rfind_and_replace(const G_string& text, const G_integer& from, const Opt<G_integer>& length, const G_string& pattern, const G_string& replacement);
 
 extern Opt<G_integer> std_string_find_any_of(const G_string& text, const G_string& accept);
 extern Opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& from, const G_string& accept);

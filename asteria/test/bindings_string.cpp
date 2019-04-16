@@ -91,8 +91,8 @@ int main()
         assert std.string.rfind("hello hello world", 4, 6, "lo") == null;
         assert std.string.rfind("hello hello world", 5, 6, "lo") == 9;
 
-        assert std.string.find_and_replace("hello hello world", "llo", "####") == "he#### hello world";
-        assert std.string.find_and_replace("hello hello world", 2, "llo", "####") == "he#### hello world";
+        assert std.string.find_and_replace("hello hello world", "llo", "####") == "he#### he#### world";
+        assert std.string.find_and_replace("hello hello world", 2, "llo", "####") == "he#### he#### world";
         assert std.string.find_and_replace("hello hello world", 3, "llo", "####") == "hello he#### world";
         assert std.string.find_and_replace("hello hello world", 8, "llo", "####") == "hello he#### world";
         assert std.string.find_and_replace("hello hello world", 9, "llo", "####") == "hello hello world";
@@ -100,16 +100,6 @@ int main()
         assert std.string.find_and_replace("hello hello world", 2, 9, "llo", "####") == "he#### hello world";
         assert std.string.find_and_replace("hello hello world", 3, 7, "llo", "####") == "hello hello world";
         assert std.string.find_and_replace("hello hello world", 4, 7, "llo", "####") == "hello he#### world";
-
-        assert std.string.rfind_and_replace("hello hello world", "llo", "####") == "hello he#### world";
-        assert std.string.rfind_and_replace("hello hello world", 2, "llo", "####") == "hello he#### world";
-        assert std.string.rfind_and_replace("hello hello world", 3, "llo", "####") == "hello he#### world";
-        assert std.string.rfind_and_replace("hello hello world", 8, "llo", "####") == "hello he#### world";
-        assert std.string.rfind_and_replace("hello hello world", 9, "llo", "####") == "hello hello world";
-        assert std.string.rfind_and_replace("hello hello world", 2, 7, "llo", "####") == "he#### hello world";
-        assert std.string.rfind_and_replace("hello hello world", 2, 9, "llo", "####") == "hello he#### world";
-        assert std.string.rfind_and_replace("hello hello world", 3, 7, "llo", "####") == "hello hello world";
-        assert std.string.rfind_and_replace("hello hello world", 4, 7, "llo", "####") == "hello he#### world";
 
         assert std.string.find_any_of("hello", "aeiou") == 1;
         assert std.string.find_any_of("hello", 1, "aeiou") == 1;
