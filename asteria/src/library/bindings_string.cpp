@@ -145,7 +145,8 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
 
 Opt<G_integer> std_string_find(const G_string& text, const G_string& pattern)
   {
-    auto qit = do_find_opt(text.begin(), text.end(), pattern.begin(), pattern.end());
+    auto range = std::make_pair(text.begin(), text.end());
+    auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
       return rocket::nullopt;
     }
@@ -174,7 +175,8 @@ Opt<G_integer> std_string_find(const G_string& text, const G_integer& from, cons
 
 Opt<G_integer> std_string_rfind(const G_string& text, const G_string& pattern)
   {
-    auto qit = do_find_opt(text.rbegin(), text.rend(), pattern.rbegin(), pattern.rend());
+    auto range = std::make_pair(text.begin(), text.end());
+    auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
     if(!qit) {
       return rocket::nullopt;
     }
@@ -204,7 +206,8 @@ Opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, con
 G_string std_string_find_and_replace(const G_string& text, const G_string& pattern, const G_string& replacement)
   {
     G_string res = text;
-    auto qit = do_find_opt(res.begin(), res.end(), pattern.begin(), pattern.end());
+    auto range = std::make_pair(res.begin(), res.end());
+    auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
       // Make use of reference counting if no match has been found.
       return res;
