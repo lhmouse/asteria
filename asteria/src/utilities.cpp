@@ -3,7 +3,6 @@
 
 #include "precompiled.hpp"
 #include "utilities.hpp"
-#include <iostream>  // std::cerr
 #ifdef _WIN32
 #  include <windows.h>  // ::SYSTEMTIME, ::GetSystemTime()
 #else
@@ -40,174 +39,112 @@ bool are_debug_logs_enabled() noexcept
 
     namespace {
 
-    int do_ltoa_fixed(char* buf, int width, long num) noexcept
+    inline void do_ltoa_fixed(rocket::cow_string& str, long num, unsigned width)
       {
+        std::array<char, 64> sbuf;
+        auto spos = sbuf.end();
         // Write digits from the right to the left.
         long reg = num;
-        for(int i = width - 1; i >= 0; --i) {
+        for(unsigned i = 0; i < width; ++i) {
           long d = reg % 10;
           reg /= 10;
-          buf[i] = static_cast<char>('0' + d);
+          *--spos = static_cast<char>('0' + d);
         }
-        // Return the number of characters written.
-        return width;
+        // Append the formatted string.
+        str.append(spos, sbuf.end());
       }
 
-    int do_print_timestamp(char* buf, long year, long mon, long day, long hour, long min, long sec, long msec) noexcept
+    template<typename ParamT> inline void do_append_str(rocket::cow_string& str, ParamT&& param)
       {
-        int len = 0;
-        // YYYY-MM-DD hh:mm:ss.sss
-        len += do_ltoa_fixed(buf + len, 4, year);
-        buf[len++] = '-';
-        len += do_ltoa_fixed(buf + len, 2, mon);
-        buf[len++] = '-';
-        len += do_ltoa_fixed(buf + len, 2, day);
-        buf[len++] = ' ';
-        len += do_ltoa_fixed(buf + len, 2, hour);
-        buf[len++] = ':';
-        len += do_ltoa_fixed(buf + len, 2, min);
-        buf[len++] = ':';
-        len += do_ltoa_fixed(buf + len, 2, sec);
-        buf[len++] = '.';
-        len += do_ltoa_fixed(buf + len, 3, msec);
-        return len;
+        str.append(rocket::forward<ParamT>(param));
+      }
+    inline void do_append_str(rocket::cow_string& str, char ch)
+      {
+        str.push_back(ch);
       }
 
     }  // namespace
 
 bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) noexcept
   {
-    // Behaves like an UnformattedOutputFunction.
-    auto& os = std::cerr;
-    const std::ostream::sentry sentry(os);
-    if(!sentry) {
-      return false;
-    }
-    auto state = std::ios_base::goodbit;
-    try {
-      auto eof = std::char_traits<char>::eof();
-      char tstr[64];
-      long tlen;
-      // Prepend the timestamp.
+    rocket::cow_string str;
+    str.reserve(1023);
+    // Append the timestamp.
 #ifdef _WIN32
-      ::SYSTEMTIME st;
-      ::GetSystemTime(&st);
-      tlen = do_print_timestamp(tstr, st.wYear, st.wMonth, st.wDay,
-                                      st.wHour, st.wMinute, st.wSecond,
-                                      st.wMilliseconds);
+    ::SYSTEMTIME st;
+    ::GetSystemTime(&st);
+    // YYYY-MM-DD hh:mm:ss.sss
+    do_ltoa_fixed(str, st.wYear, 4);
+    do_append_str(str, '-');
+    do_ltoa_fixed(str, st.wMonth, 2);
+    do_append_str(str, '-');
+    do_ltoa_fixed(str, st.wDay, 2);
+    do_append_str(str, ' ');
+    do_ltoa_fixed(str, st.wHour, 2);
+    do_append_str(str, ':');
+    do_ltoa_fixed(str, st.wMinute, 2);
+    do_append_str(str, ':');
+    do_ltoa_fixed(str, st.wSecond, 2);
+    do_append_str(str, '.');
+    do_ltoa_fixed(str, st.wMillisecond, 3);
 #else
-      ::timespec ts;
-      ::clock_gettime(CLOCK_REALTIME, &ts);
-      ::tm tr;
-      ::localtime_r(&(ts.tv_sec), &tr);
-      tlen = do_print_timestamp(tstr, tr.tm_year + 1900, tr.tm_mon + 1, tr.tm_mday,
-                                      tr.tm_hour, tr.tm_min, tr.tm_sec,
-                                      static_cast<long>(ts.tv_nsec / 1000000));
+    ::timespec ts;
+    ::clock_gettime(CLOCK_REALTIME, &ts);
+    ::tm tr;
+    ::localtime_r(&(ts.tv_sec), &tr);
+    // YYYY-MM-DD hh:mm:ss.sss
+    do_ltoa_fixed(str, tr.tm_year + 1900, 4);
+    do_append_str(str, '-');
+    do_ltoa_fixed(str, tr.tm_mon + 1, 2);
+    do_append_str(str, '-');
+    do_ltoa_fixed(str, tr.tm_mday, 2);
+    do_append_str(str, ' ');
+    do_ltoa_fixed(str, tr.tm_hour, 2);
+    do_append_str(str, ':');
+    do_ltoa_fixed(str, tr.tm_min, 2);
+    do_append_str(str, ':');
+    do_ltoa_fixed(str, tr.tm_sec, 2);
+    do_append_str(str, '.');
+    do_ltoa_fixed(str, ts.tv_nsec / 1000000, 3);
 #endif
-      if(os.rdbuf()->sputn(tstr, tlen) < tlen) {
-        state |= std::ios_base::failbit;
-        goto z;
+    // Append the file name and line number.
+    do_append_str(str, " @@ ");
+    do_append_str(str, file);
+    do_append_str(str, ':');
+    do_ltoa_fixed(str, line, 1);
+    // Start a new line for the user-defined message.
+    do_append_str(str, "\n\t");
+    // Neutralize control characters and indent paragraphs.
+    for(char ch : msg) {
+      // Control characters are ['\x00','\x20') and '\x7F'.
+      static constexpr char s_replacements[][16] =
+        {
+          "[NUL"   "\\x00]",   "[SOH"   "\\x01]",   "[STX"   "\\x02]",   "[ETX"   "\\x03]",
+          "[EOT"   "\\x04]",   "[ENQ"   "\\x05]",   "[ACK"   "\\x06]",   "[BEL"   "\\x07]",
+          "[BS"    "\\x08]",   /*TAB*/  "\t",       /*LF*/   "\n\t",     "[VT"    "\\x0B]",
+          "[FF"    "\\x0C]",   /*CR*/   "\r",       "[SO"    "\\x0E]",   "[SI"    "\\x0F]",
+          "[DLE"   "\\x10]",   "[DC1"   "\\x11]",   "[DC2"   "\\x12]",   "[DC3"   "\\x13]",
+          "[DC4"   "\\x14]",   "[NAK"   "\\x15]",   "[SYN"   "\\x16]",   "[ETB"   "\\x17]",
+          "[CAN"   "\\x18]",   "[EM"    "\\x19]",   "[SUB"   "\\x1A]",   "[ESC"   "\\x1B]",
+          "[FS"    "\\x1C]",   "[GS"    "\\x1D]",   "[RS"    "\\x1E]",   "[US"    "\\x1F]",
+        };
+      // Check one character.
+      std::size_t uch = ch & 0xFF;
+      if(uch == 0x7F) {
+        do_append_str(str, "[DEL\\x7F]");
+        continue;
       }
-      // Insert the file name and line number.
-      if(os.rdbuf()->sputn(" @@ ", 4) < 4) {
-        state |= std::ios_base::failbit;
-        goto z;
+      if(uch < rocket::countof(s_replacements)) {
+        do_append_str(str, s_replacements[uch]);
+        continue;
       }
-      tlen = static_cast<long>(std::strlen(file));
-      if(os.rdbuf()->sputn(file, tlen) < tlen) {
-        state |= std::ios_base::failbit;
-        goto z;
-      }
-      if(os.rdbuf()->sputc(':') == eof) {
-        state |= std::ios_base::failbit;
-        goto z;
-      }
-      tlen = do_ltoa_fixed(tstr, 1, line);
-      if(os.rdbuf()->sputn(tstr, tlen) < tlen) {
-        state |= std::ios_base::failbit;
-        goto z;
-      }
-      // Start a new line for the user-defined message.
-      if(os.rdbuf()->sputn("\n\t", 2) < 2) {
-        state |= std::ios_base::failbit;
-        goto z;
-      }
-      // Neutralize control characters and indent paragraphs.
-      for(auto it = msg.begin(); it != msg.end(); ++it) {
-        // Control characters are ['\x00','\x20') and '\x7F'.
-        static constexpr char s_replacements[][16] =
-          {
-            "[NUL"   "\\x00]",
-            "[SOH"   "\\x01]",
-            "[STX"   "\\x02]",
-            "[ETX"   "\\x03]",
-            "[EOT"   "\\x04]",
-            "[ENQ"   "\\x05]",
-            "[ACK"   "\\x06]",
-            "[BEL"   "\\x07]",
-            "[BS"    "\\x08]",
-            /*TAB*/  "\t",
-            /*LF*/   "\n\t",
-            "[VT"    "\\x0B]",
-            "[FF"    "\\x0C]",
-            /*CR*/   "\r",
-            "[SO"    "\\x0E]",
-            "[SI"    "\\x0F]",
-            "[DLE"   "\\x10]",
-            "[DC1"   "\\x11]",
-            "[DC2"   "\\x12]",
-            "[DC3"   "\\x13]",
-            "[DC4"   "\\x14]",
-            "[NAK"   "\\x15]",
-            "[SYN"   "\\x16]",
-            "[ETB"   "\\x17]",
-            "[CAN"   "\\x18]",
-            "[EM"    "\\x19]",
-            "[SUB"   "\\x1A]",
-            "[ESC"   "\\x1B]",
-            "[FS"    "\\x1C]",
-            "[GS"    "\\x1D]",
-            "[RS"    "\\x1E]",
-            "[US"    "\\x1F]",
-          };
-        // Check one character.
-        auto uch = static_cast<unsigned>(*it & 0xFF);
-        if(uch == 0x7F) {
-          auto srep = "[DEL\\x7F]";
-          tlen = static_cast<long>(std::strlen(srep));
-          if(os.rdbuf()->sputn(srep, tlen) < tlen) {
-            state |= std::ios_base::failbit;
-            goto z;
-          }
-          continue;
-        }
-        if(uch < rocket::countof(s_replacements)) {
-          auto srep = s_replacements[uch];
-          tlen = static_cast<long>(std::strlen(srep));
-          if(os.rdbuf()->sputn(srep, tlen) < tlen) {
-            state |= std::ios_base::failbit;
-            goto z;
-          }
-          continue;
-        }
-        if(os.rdbuf()->sputc(static_cast<char>(uch)) == eof) {
-          state |= std::ios_base::failbit;
-          goto z;
-        }
-      }
-      // Terminate the message with a line feed.
-      if(os.rdbuf()->sputc('\n') == eof) {
-        state |= std::ios_base::failbit;
-        goto z;
-      }
-    } catch(...) {
-      rocket::handle_ios_exception(os, state);
-    }
-  z:
-    if(state) {
-      os.setstate(state);
-    }
-    return !!os;
+      do_append_str(str, ch);
+    };
+    // Terminate the message with a line feed.
+    do_append_str(str, '\n');
+    // Write the string now.
+    int res = std::fputs(str.c_str(), stderr);
+    return res >= 0;
   }
 
 ///////////////////////////////////////////////////////////////////////////////
