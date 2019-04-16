@@ -1084,21 +1084,23 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("slice"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.slice(text, from, [length])`\n"
-          "  * Copies a subrange of `text` to create a new byte string. Bytes\n"
-          "    are copied from `from` if it is non-negative, or from\n"
-          "    `lengthof(text) + from` otherwise. If `length` is set to an\n"
-          "    `integer`, no more than this number of bytes will be copied. If\n"
-          "    it is absent, all bytes from `from` to the end of `text` will\n"
-          "    be copied. If `from` is outside `text`, an empty `string` is\n"
-          "    returned.\n"
-          "  * Returns the specified substring of `text`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.slice(text, from, [length])`\n"
+            "  * Copies a subrange of `text` to create a new byte string. Bytes\n"
+            "    are copied from `from` if it is non-negative, or from\n"
+            "    `lengthof(text) + from` otherwise. If `length` is set to an\n"
+            "    `integer`, no more than this number of bytes will be copied. If\n"
+            "    it is absent, all bytes from `from` to the end of `text` will\n"
+            "    be copied. If `from` is outside `text`, an empty `string` is\n"
+            "    returned.\n"
+            "  * Returns the specified substring of `text`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1122,27 +1124,29 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("replace_slice"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.replace_slice(text, from, replacement)`\n"
-          "  * Replaces all bytes from `from` to the end of `text` with\n"
-          "    `replacement` and returns the new byte string. If `from` is\n"
-          "    negative, it specifies an offset from the end of `text`. This\n"
-          "    function returns a new `string` without modifying `text`.\n"
-          "  * Returns a `string` with the subrange replaced.\n"
-          "`std.string.replace_slice(text, from, [length], replacement)`\n"
-          "  * Replaces a subrange of `text` with `replacement` to create a\n"
-          "    new byte string. `from` specifies the start of the subrange to\n"
-          "    replace. If `from` is negative, it specifies an offset from the\n"
-          "    end of `text`. `length` specifies the maximum number of bytes\n"
-          "    to replace. If it is set to `null`, this function is equivalent\n"
-          "    to `replace_slice(text, from, replacement)`. This function\n"
-          "    returns a new `string` without modifying `text`.\n"
-          "  * Returns a `string` with the subrange replaced.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.replace_slice(text, from, replacement)`\n"
+            "  * Replaces all bytes from `from` to the end of `text` with\n"
+            "    `replacement` and returns the new byte string. If `from` is\n"
+            "    negative, it specifies an offset from the end of `text`. This\n"
+            "    function returns a new `string` without modifying `text`.\n"
+            "  * Returns a `string` with the subrange replaced.\n"
+            "`std.string.replace_slice(text, from, [length], replacement)`\n"
+            "  * Replaces a subrange of `text` with `replacement` to create a\n"
+            "    new byte string. `from` specifies the start of the subrange to\n"
+            "    replace. If `from` is negative, it specifies an offset from the\n"
+            "    end of `text`. `length` specifies the maximum number of bytes\n"
+            "    to replace. If it is set to `null`, this function is equivalent\n"
+            "    to `replace_slice(text, from, replacement)`. This function\n"
+            "    returns a new `string` without modifying `text`.\n"
+            "  * Returns a `string` with the subrange replaced.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1173,21 +1177,23 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("compare"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.compare(text1, text2, [length])`\n"
-          "  * Performs lexicographical comparison on two byte strings. If\n"
-          "    `length` is set to an `integer`, no more than this number of\n"
-          "    bytes are compared. This function behaves like the `strncmp()`\n"
-          "    function in C, except that null characters do not terminate\n"
-          "    strings.\n"
-          "  * Returns a positive `integer` if `text1` compares greater than\n"
-          "    `text2`, a negative `integer` if `text1` compares less than\n"
-          "    `text2`, or zero if `text1` compares equal to `text2`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.compare(text1, text2, [length])`\n"
+            "  * Performs lexicographical comparison on two byte strings. If\n"
+            "    `length` is set to an `integer`, no more than this number of\n"
+            "    bytes are compared. This function behaves like the `strncmp()`\n"
+            "    function in C, except that null characters do not terminate\n"
+            "    strings.\n"
+            "  * Returns a positive `integer` if `text1` compares greater than\n"
+            "    `text2`, a negative `integer` if `text1` compares less than\n"
+            "    `text2`, or zero if `text1` compares equal to `text2`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1211,17 +1217,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("starts_with"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.starts_with(text, prefix)`\n"
-          "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
-          "    `string` is considered to be a prefix of any string.\n"
-          "  * Returns `true` if `prefix` is a prefix of `text`, or `false`\n"
-          "    otherwise.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.starts_with(text, prefix)`\n"
+            "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
+            "    `string` is considered to be a prefix of any string.\n"
+            "  * Returns `true` if `prefix` is a prefix of `text`, or `false`\n"
+            "    otherwise.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1244,17 +1252,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("ends_with"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.ends_with(text, suffix)`\n"
-          "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
-          "    `string` is considered to be a suffix of any string.\n"
-          "  * Returns `true` if `suffix` is a suffix of `text`, or `false`\n"
-          "    otherwise.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.ends_with(text, suffix)`\n"
+            "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
+            "    `string` is considered to be a suffix of any string.\n"
+            "  * Returns `true` if `suffix` is a suffix of `text`, or `false`\n"
+            "    otherwise.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1277,31 +1287,33 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("find"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.find(text, pattern)`\n"
-          "  * Searches `text` for the first occurrence of `pattern`.\n"
-          "  * Returns the subscript of the first byte of the first match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-          "`std.string.find(text, from, pattern)`\n"
-          "  * Searches `text` for the first occurrence of `pattern`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from)`.\n"
-          "  * Returns the subscript of the first byte of the first match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-          "`std.string.find(text, from, [length], pattern)`\n"
-          "  * Searches `text` for the first occurrence of `pattern`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from, length)`.\n"
-          "  * Returns the subscript of the first byte of the first match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.find(text, pattern)`\n"
+            "  * Searches `text` for the first occurrence of `pattern`.\n"
+            "  * Returns the subscript of the first byte of the first match of\n"
+            "    `pattern` in `text` if one is found, which is always\n"
+            "    non-negative, or `null` otherwise.\n"
+            "`std.string.find(text, from, pattern)`\n"
+            "  * Searches `text` for the first occurrence of `pattern`. The\n"
+            "    search operation is performed on the same subrange that would\n"
+            "    be returned by `slice(text, from)`.\n"
+            "  * Returns the subscript of the first byte of the first match of\n"
+            "    `pattern` in `text` if one is found, which is always\n"
+            "    non-negative, or `null` otherwise.\n"
+            "`std.string.find(text, from, [length], pattern)`\n"
+            "  * Searches `text` for the first occurrence of `pattern`. The\n"
+            "    search operation is performed on the same subrange that would\n"
+            "    be returned by `slice(text, from, length)`.\n"
+            "  * Returns the subscript of the first byte of the first match of\n"
+            "    `pattern` in `text` if one is found, which is always\n"
+            "    non-negative, or `null` otherwise.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1349,29 +1361,31 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("rfind"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.rfind(text, pattern)`\n"
-          "  * Searches `text` for the last occurrence of `pattern`.\n"
-          "  * Returns the subscript of the first byte of the last match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-          "`std.string.rfind(text, from, pattern)`\n"
-          "  * Searches `text` for the last occurrence of `pattern`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from)`.\n"
-          "  * Returns the subscript of the first byte of the last match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-          "`std.string.rfind(text, from, [length], pattern)`\n"
-          "  * Searches `text` for the last occurrence of `pattern`.\n"
-          "  * Returns the subscript of the first byte of the last match of\n"
-          "    `pattern` in `text` if one is found, which is always\n"
-          "    non-negative, or `null` otherwise.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.rfind(text, pattern)`\n"
+            "  * Searches `text` for the last occurrence of `pattern`.\n"
+            "  * Returns the subscript of the first byte of the last match of\n"
+            "    `pattern` in `text` if one is found, which is always\n"
+            "    non-negative, or `null` otherwise.\n"
+            "`std.string.rfind(text, from, pattern)`\n"
+            "  * Searches `text` for the last occurrence of `pattern`. The\n"
+            "    search operation is performed on the same subrange that would\n"
+            "    be returned by `slice(text, from)`.\n"
+            "  * Returns the subscript of the first byte of the last match of\n"
+            "    `pattern` in `text` if one is found, which is always\n"
+            "    non-negative, or `null` otherwise.\n"
+            "`std.string.rfind(text, from, [length], pattern)`\n"
+            "  * Searches `text` for the last occurrence of `pattern`.\n"
+            "  * Returns the subscript of the first byte of the last match of\n"
+            "    `pattern` in `text` if one is found, which is always\n"
+            "    non-negative, or `null` otherwise.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1419,32 +1433,34 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("find_and_replace"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.find_and_replace(text, pattern, replacement)`\n"
-          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-          "    `replacement`. This function returns a new `string` without\n"
-          "    modifying `text`.\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-          "`std.string.find_and_replace(text, from, pattern, replacement)`\n"
-          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-          "    `replacement`. The search operation is performed on the same\n"
-          "    subrange that would be returned by `slice(text, from)`. This\n"
-          "    function returns a new `string` without modifying `text`.\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-          "`std.string.find_and_replace(text, from, [length], pattern, replacement)`\n"
-          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-          "    `replacement`. The search operation is performed on the same\n"
-          "    subrange that would be returned by `slice(text, from, length)`.\n"
-          "    This function returns a new `string` without modifying `text`.\n"
-          "  * Returns the string with `pattern` replaced. If `text` does not\n"
-          "    contain `pattern`, it is returned intact.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.find_and_replace(text, pattern, replacement)`\n"
+            "  * Searches `text` and replaces all occurrences of `pattern` with\n"
+            "    `replacement`. This function returns a new `string` without\n"
+            "    modifying `text`.\n"
+            "  * Returns the string with `pattern` replaced. If `text` does not\n"
+            "    contain `pattern`, it is returned intact.\n"
+            "`std.string.find_and_replace(text, from, pattern, replacement)`\n"
+            "  * Searches `text` and replaces all occurrences of `pattern` with\n"
+            "    `replacement`. The search operation is performed on the same\n"
+            "    subrange that would be returned by `slice(text, from)`. This\n"
+            "    function returns a new `string` without modifying `text`.\n"
+            "  * Returns the string with `pattern` replaced. If `text` does not\n"
+            "    contain `pattern`, it is returned intact.\n"
+            "`std.string.find_and_replace(text, from, [length], pattern, replacement)`\n"
+            "  * Searches `text` and replaces all occurrences of `pattern` with\n"
+            "    `replacement`. The search operation is performed on the same\n"
+            "    subrange that would be returned by `slice(text, from, length)`.\n"
+            "    This function returns a new `string` without modifying `text`.\n"
+            "  * Returns the string with `pattern` replaced. If `text` does not\n"
+            "    contain `pattern`, it is returned intact.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1481,28 +1497,30 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("find_any_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.find_any_of(text, accept)`\n"
-          "  * Searches `text` for bytes that exist in `accept`.\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "`std.string.find_any_of(text, from, accept)`\n"
-          "  * Searches `text` for bytes that exist in `accept`. The search\n"
-          "    operation is performed on the same subrange that would be\n"
-          "    returned by `slice(text, from)`.\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "`std.string.find_any_of(text, from, [length], accept)`\n"
-          "  * Searches `text` for bytes that exist in `accept`. The search\n"
-          "    operation is performed on the same subrange that would be\n"
-          "    returned by `slice(text, from, length)`.\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.find_any_of(text, accept)`\n"
+            "  * Searches `text` for bytes that exist in `accept`.\n"
+            "  * Returns the subscript of the first byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+            "`std.string.find_any_of(text, from, accept)`\n"
+            "  * Searches `text` for bytes that exist in `accept`. The search\n"
+            "    operation is performed on the same subrange that would be\n"
+            "    returned by `slice(text, from)`.\n"
+            "  * Returns the subscript of the first byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+            "`std.string.find_any_of(text, from, [length], accept)`\n"
+            "  * Searches `text` for bytes that exist in `accept`. The search\n"
+            "    operation is performed on the same subrange that would be\n"
+            "    returned by `slice(text, from, length)`.\n"
+            "  * Returns the subscript of the first byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1550,28 +1568,30 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("rfind_any_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.rfind_any_of(text, accept)`\n"
-          "  * Searches `text` for bytes that exist in `accept`.\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "`std.string.rfind_any_of(text, from, accept)`\n"
-          "  * Searches `text` for bytes that exist in `accept`. The search\n"
-          "    operation is performed on the same subrange that would be\n"
-          "    returned by `slice(text, from)`.\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "`std.string.rfind_any_of(text, from, [length], accept)`\n"
-          "  * Searches `text` for bytes that exist in `accept`. The search\n"
-          "    operation is performed on the same subrange that would be\n"
-          "    returned by `slice(text, from, length)`.\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.rfind_any_of(text, accept)`\n"
+            "  * Searches `text` for bytes that exist in `accept`.\n"
+            "  * Returns the subscript of the last byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+            "`std.string.rfind_any_of(text, from, accept)`\n"
+            "  * Searches `text` for bytes that exist in `accept`. The search\n"
+            "    operation is performed on the same subrange that would be\n"
+            "    returned by `slice(text, from)`.\n"
+            "  * Returns the subscript of the last byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+            "`std.string.rfind_any_of(text, from, [length], accept)`\n"
+            "  * Searches `text` for bytes that exist in `accept`. The search\n"
+            "    operation is performed on the same subrange that would be\n"
+            "    returned by `slice(text, from, length)`.\n"
+            "  * Returns the subscript of the last byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1619,28 +1639,30 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("find_not_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.find_not_of(text, reject)`\n"
-          "  * Searches `text` for bytes that does not exist in `reject`.\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "`std.string.find_not_of(text, from, reject)`\n"
-          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from)`.\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "`std.string.find_not_of(text, from, [length], reject)`\n"
-          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from, length)`.\n"
-          "  * Returns the subscript of the first byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.find_not_of(text, reject)`\n"
+            "  * Searches `text` for bytes that does not exist in `reject`.\n"
+            "  * Returns the subscript of the first byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+            "`std.string.find_not_of(text, from, reject)`\n"
+            "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+            "    search operation is performed on the same subrange that would\n"
+            "    be returned by `slice(text, from)`.\n"
+            "  * Returns the subscript of the first byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+            "`std.string.find_not_of(text, from, [length], reject)`\n"
+            "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+            "    search operation is performed on the same subrange that would\n"
+            "    be returned by `slice(text, from, length)`.\n"
+            "  * Returns the subscript of the first byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1688,28 +1710,30 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("rfind_not_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.rfind_not_of(text, reject)`\n"
-          "  * Searches `text` for bytes that does not exist in `reject`.\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "`std.string.rfind_not_of(text, from, reject)`\n"
-          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from)`.\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-          "`std.string.rfind_not_of(text, from, [length], reject)`\n"
-          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-          "    search operation is performed on the same subrange that would\n"
-          "    be returned by `slice(text, from, length)`.\n"
-          "  * Returns the subscript of the last byte found, which is always\n"
-          "    non-negative; or `null` if no such byte exists.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.rfind_not_of(text, reject)`\n"
+            "  * Searches `text` for bytes that does not exist in `reject`.\n"
+            "  * Returns the subscript of the last byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+            "`std.string.rfind_not_of(text, from, reject)`\n"
+            "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+            "    search operation is performed on the same subrange that would\n"
+            "    be returned by `slice(text, from)`.\n"
+            "  * Returns the subscript of the last byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+            "`std.string.rfind_not_of(text, from, [length], reject)`\n"
+            "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+            "    search operation is performed on the same subrange that would\n"
+            "    be returned by `slice(text, from, length)`.\n"
+            "  * Returns the subscript of the last byte found, which is always\n"
+            "    non-negative; or `null` if no such byte exists.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1757,16 +1781,18 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("reverse"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.reverse(text)`\n"
-          "  * Reverses a byte string. This function returns a new `string`\n"
-          "    without modifying `text`.\n"
-          "  * Returns the reversed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.reverse(text)`\n"
+            "  * Reverses a byte string. This function returns a new `string`\n"
+            "    without modifying `text`.\n"
+            "  * Returns the reversed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1788,18 +1814,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("trim"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.trim(text, [reject])`\n"
-          "  * Removes the longest prefix and suffix consisting solely bytes\n"
-          "    from `reject`. If `reject` is empty, no byte is removed. If\n"
-          "    `reject` is not specified, spaces and tabs are removed. This\n"
-          "    function returns a new `string` without modifying `text`.\n"
-          "  * Returns the trimmed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.trim(text, [reject])`\n"
+            "  * Removes the longest prefix and suffix consisting solely bytes\n"
+            "    from `reject`. If `reject` is empty, no byte is removed. If\n"
+            "    `reject` is not specified, spaces and tabs are removed. This\n"
+            "    function returns a new `string` without modifying `text`.\n"
+            "  * Returns the trimmed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1822,18 +1850,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("ltrim"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.ltrim(text, [reject])`\n"
-          "  * Removes the longest prefix consisting solely bytes from\n"
-          "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
-          "    is not specified, spaces and tabs are removed. This function\n"
-          "    returns a new `string` without modifying `text`.\n"
-          "  * Returns the trimmed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.ltrim(text, [reject])`\n"
+            "  * Removes the longest prefix consisting solely bytes from\n"
+            "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
+            "    is not specified, spaces and tabs are removed. This function\n"
+            "    returns a new `string` without modifying `text`.\n"
+            "  * Returns the trimmed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1856,18 +1886,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("rtrim"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.rtrim(text, [reject])`\n"
-          "  * Removes the longest suffix consisting solely bytes from\n"
-          "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
-          "    is not specified, spaces and tabs are removed. This function\n"
-          "    returns a new `string` without modifying `text`.\n"
-          "  * Returns the trimmed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.rtrim(text, [reject])`\n"
+            "  * Removes the longest suffix consisting solely bytes from\n"
+            "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
+            "    is not specified, spaces and tabs are removed. This function\n"
+            "    returns a new `string` without modifying `text`.\n"
+            "  * Returns the trimmed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1890,19 +1922,21 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("lpad"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.lpad(text, length, [padding])`\n"
-          "  * Prepends `text` with `padding` repeatedly, until its length\n"
-          "    would exceed `length`. The default value of `padding` is a\n"
-          "    `string` consisting of a space. This function returns a new\n"
-          "    `string` without modifying `text`.\n"
-          "  * Returns the padded string.\n"
-          "  * Throws an exception if `padding` is empty.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.lpad(text, length, [padding])`\n"
+            "  * Prepends `text` with `padding` repeatedly, until its length\n"
+            "    would exceed `length`. The default value of `padding` is a\n"
+            "    `string` consisting of a space. This function returns a new\n"
+            "    `string` without modifying `text`.\n"
+            "  * Returns the padded string.\n"
+            "  * Throws an exception if `padding` is empty.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1926,19 +1960,21 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("rpad"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.rpad(text, length, [padding])`\n"
-          "  * Appends `text` with `padding` repeatedly, until its length\n"
-          "    would exceed `length`. The default value of `padding` is a\n"
-          "    `string` consisting of a space. This function returns a new\n"
-          "    `string` without modifying `text`.\n"
-          "  * Returns the padded string.\n"
-          "  * Throws an exception if `padding` is empty.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.rpad(text, length, [padding])`\n"
+            "  * Appends `text` with `padding` repeatedly, until its length\n"
+            "    would exceed `length`. The default value of `padding` is a\n"
+            "    `string` consisting of a space. This function returns a new\n"
+            "    `string` without modifying `text`.\n"
+            "  * Returns the padded string.\n"
+            "  * Throws an exception if `padding` is empty.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1962,17 +1998,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("to_upper"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.to_upper(text)`\n"
-          "  * Converts all lowercase English letters in `text` to their\n"
-          "    uppercase counterparts. This function returns a new `string`\n"
-          "    without modifying `text`.\n"
-          "  * Returns a new `string` after the conversion.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.to_upper(text)`\n"
+            "  * Converts all lowercase English letters in `text` to their\n"
+            "    uppercase counterparts. This function returns a new `string`\n"
+            "    without modifying `text`.\n"
+            "  * Returns a new `string` after the conversion.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1994,17 +2032,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("to_lower"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.to_lower(text)`\n"
-          "  * Converts all lowercase English letters in `text` to their\n"
-          "    uppercase counterparts. This function returns a new `string`\n"
-          "    without modifying `text`.\n"
-          "  * Returns a new `string` after the conversion.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.to_lower(text)`\n"
+            "  * Converts all lowercase English letters in `text` to their\n"
+            "    uppercase counterparts. This function returns a new `string`\n"
+            "    without modifying `text`.\n"
+            "  * Returns a new `string` after the conversion.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2026,23 +2066,25 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("translate"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "`std.string.translate(text, inputs, [outputs])`\n"
-          "  * Performs bytewise translation on the given string. For every\n"
-          "    byte in `text` that is also found in `inputs`, if there is a\n"
-          "    corresponding replacement byte in `outputs` with the same\n"
-          "    subscript, it is replaced with the latter; if no replacement\n"
-          "    exists, because `outputs` is shorter than `inputs` or is null,\n"
-          "    it is deleted. If `outputs` is longer than `inputs`, excess\n"
-          "    bytes are ignored. Bytes that do not exist in `inputs` are left\n"
-          "    intact. This function returns a new `string` without modifying\n"
-          "    `text`.\n"
-          "  * Returns the translated `string`.\n"
-        ),
+        rocket::sref
+          (
+            "`std.string.translate(text, inputs, [outputs])`\n"
+            "  * Performs bytewise translation on the given string. For every\n"
+            "    byte in `text` that is also found in `inputs`, if there is a\n"
+            "    corresponding replacement byte in `outputs` with the same\n"
+            "    subscript, it is replaced with the latter; if no replacement\n"
+            "    exists, because `outputs` is shorter than `inputs` or is null,\n"
+            "    it is deleted. If `outputs` is longer than `inputs`, excess\n"
+            "    bytes are ignored. Bytes that do not exist in `inputs` are left\n"
+            "    intact. This function returns a new `string` without modifying\n"
+            "    `text`.\n"
+            "  * Returns the translated `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2066,21 +2108,23 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("explode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.explode(text, [delim], [limit])`\n"
-          "  * Breaks `text` down into segments, separated by `delim`. If\n"
-          "    `delim` is `null` or an empty `string`, every byte becomes a\n"
-          "    segment. If `limit` is set to a positive `integer`, there will\n"
-          "    be no more segments than this number; the last segment will\n"
-          "    contain all the remaining bytes of the `text`.\n"
-          "  * Returns an `array` containing the broken-down segments. If\n"
-          "    `text` is empty, an empty `array` is returned.\n"
-          "  * Throws an exception if `limit` is zero or negative.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.explode(text, [delim], [limit])`\n"
+            "  * Breaks `text` down into segments, separated by `delim`. If\n"
+            "    `delim` is `null` or an empty `string`, every byte becomes a\n"
+            "    segment. If `limit` is set to a positive `integer`, there will\n"
+            "    be no more segments than this number; the last segment will\n"
+            "    contain all the remaining bytes of the `text`.\n"
+            "  * Returns an `array` containing the broken-down segments. If\n"
+            "    `text` is empty, an empty `array` is returned.\n"
+            "  * Throws an exception if `limit` is zero or negative.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2104,18 +2148,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("implode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.implode(segments, [delim])`\n"
-          "  * Concatenates elements of an array, `segments`, to create a new\n"
-          "    `string`. All segments shall be `string`s. If `delim` is\n"
-          "    specified, it is inserted between adjacent segments.\n"
-          "  * Returns a `string` containing all segments. If `segments` is\n"
-          "    empty, an empty `string` is returned.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.implode(segments, [delim])`\n"
+            "  * Concatenates elements of an array, `segments`, to create a new\n"
+            "    `string`. All segments shall be `string`s. If `delim` is\n"
+            "    specified, it is inserted between adjacent segments.\n"
+            "  * Returns a `string` containing all segments. If `segments` is\n"
+            "    empty, an empty `string` is returned.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2138,20 +2184,22 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("hex_encode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.hex_encode(text, [delim], [uppercase])`\n"
-          "  * Encodes all bytes in `text` as 2-digit hexadecimal numbers and\n"
-          "    concatenates them. If `delim` is specified, it is inserted\n"
-          "    between adjacent bytes. If `uppercase` is set to `true`,\n"
-          "    hexadecimal digits above `9` are encoded as `ABCDEF`; otherwise\n"
-          "    they are encoded as `abcdef`.\n"
-          "  * Returns the encoded `string`. If `text` is empty, an empty\n"
-          "    `string` is returned.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.hex_encode(text, [delim], [uppercase])`\n"
+            "  * Encodes all bytes in `text` as 2-digit hexadecimal numbers and\n"
+            "    concatenates them. If `delim` is specified, it is inserted\n"
+            "    between adjacent bytes. If `uppercase` is set to `true`,\n"
+            "    hexadecimal digits above `9` are encoded as `ABCDEF`; otherwise\n"
+            "    they are encoded as `abcdef`.\n"
+            "  * Returns the encoded `string`. If `text` is empty, an empty\n"
+            "    `string` is returned.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2175,19 +2223,21 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("hex_decode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.hex_decode(hstr)`\n"
-          "  * Decodes all hexadecimal digits from `hstr` and converts them to\n"
-          "    bytes. Whitespaces are ignored. Characters that are neither\n"
-          "    hexadecimal digits nor whitespaces will cause parse errors.\n"
-          "  * Returns a `string` containing decoded bytes. If `hstr` is empty\n"
-          "    or consists only whitespaces, an empty `string` is returned. In\n"
-          "    the case of parse errors, `null` is returned.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.hex_decode(hstr)`\n"
+            "  * Decodes all hexadecimal digits from `hstr` and converts them to\n"
+            "    bytes. Whitespaces are ignored. Characters that are neither\n"
+            "    hexadecimal digits nor whitespaces will cause parse errors.\n"
+            "  * Returns a `string` containing decoded bytes. If `hstr` is empty\n"
+            "    or consists only whitespaces, an empty `string` is returned. In\n"
+            "    the case of parse errors, `null` is returned.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2213,20 +2263,22 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("utf8_encode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.utf8_encode(code_points, [permissive])`\n"
-          "  * Encodes code points from `code_points` into an UTF-8 `string`.\n"
-          "  `code_points` can be either an `integer` or an `array` of\n"
-          "  `integer`s. When an invalid code point is encountered, if\n"
-          "  `permissive` is set to `true`, it is replaced with the\n"
-          "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
-          "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
-          "  * Returns the encoded `string` on success, or `null` otherwise.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.utf8_encode(code_points, [permissive])`\n"
+            "  * Encodes code points from `code_points` into an UTF-8 `string`.\n"
+            "  `code_points` can be either an `integer` or an `array` of\n"
+            "  `integer`s. When an invalid code point is encountered, if\n"
+            "  `permissive` is set to `true`, it is replaced with the\n"
+            "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
+            "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
+            "  * Returns the encoded `string` on success, or `null` otherwise.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2263,21 +2315,23 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("utf8_decode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.utf8_decode(text, [permissive])`\n"
-          "  * Decodes `text`, which is expected to be a `string` containing\n"
-          "    UTF-8 code units, into an `array` of code points, represented\n"
-          "    as `integer`s. When an invalid code sequence is encountered, if\n"
-          "    `permissive` is set to `true`, all code units of it are\n"
-          "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
-          "    otherwise this function fails.\n"
-          "  * Returns an `array` containing decoded code points, or `null`\n"
-          "    otherwise.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.utf8_decode(text, [permissive])`\n"
+            "  * Decodes `text`, which is expected to be a `string` containing\n"
+            "    UTF-8 code units, into an `array` of code points, represented\n"
+            "    as `integer`s. When an invalid code sequence is encountered, if\n"
+            "    `permissive` is set to `true`, all code units of it are\n"
+            "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
+            "    otherwise this function fails.\n"
+            "  * Returns an `array` containing decoded code points, or `null`\n"
+            "    otherwise.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2304,17 +2358,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("pack8"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.pack8(values)`\n"
-          "  * Packs a series of 8-bit integers into a `string`. `values` can\n"
-          "    be either an `integer` or an `array` of `integer`s, all of\n"
-          "    which are truncated to 8 bits then copied into a `string`.\n"
-          "  * Returns the packed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.pack8(values)`\n"
+            "  * Packs a series of 8-bit integers into a `string`. `values` can\n"
+            "    be either an `integer` or an `array` of `integer`s, all of\n"
+            "    which are truncated to 8 bits then copied into a `string`.\n"
+            "  * Returns the packed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2346,17 +2402,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("unpack8"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.unpack8(text)`\n"
-          "  * Unpacks 8-bit integers from a `string`. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
-          "    which are sign-extended to 64 bits then copied into an `array`.\n"
-          "  * Returns an `array` containing unpacked integers.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.unpack8(text)`\n"
+            "  * Unpacks 8-bit integers from a `string`. The contents of `text`\n"
+            "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
+            "    which are sign-extended to 64 bits then copied into an `array`.\n"
+            "  * Returns an `array` containing unpacked integers.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2380,18 +2438,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("pack16be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.pack16be(values)`\n"
-          "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
-          "    be either an `integer` or an `array` of `integers`, all of\n"
-          "    which are truncated to 16 bits then copied into a `string` in\n"
-          "    the big-endian byte order.\n"
-          "  * Returns the packed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.pack16be(values)`\n"
+            "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
+            "    be either an `integer` or an `array` of `integers`, all of\n"
+            "    which are truncated to 16 bits then copied into a `string` in\n"
+            "    the big-endian byte order.\n"
+            "  * Returns the packed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2423,20 +2483,22 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("unpack16be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.unpack16be(text)`\n"
-          "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 16-bit integers in the\n"
-          "    big-endian byte order, all of which are sign-extended to 64\n"
-          "    bits then copied into an `array`.\n"
-          "  * Returns an `array` containing unpacked integers.\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 2.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.unpack16be(text)`\n"
+            "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
+            "    are re-interpreted as contiguous signed 16-bit integers in the\n"
+            "    big-endian byte order, all of which are sign-extended to 64\n"
+            "    bits then copied into an `array`.\n"
+            "  * Returns an `array` containing unpacked integers.\n"
+            "  * Throws an exception if the length of `text` is not a multiple\n"
+            "    of 2.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2460,18 +2522,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("pack16le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.pack16le(values)`\n"
-          "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
-          "    be either an `integer` or an `array` of `integers`, all of\n"
-          "    which are truncated to 16 bits then copied into a `string` in\n"
-          "    the little-endian byte order.\n"
-          "  * Returns the packed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.pack16le(values)`\n"
+            "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
+            "    be either an `integer` or an `array` of `integers`, all of\n"
+            "    which are truncated to 16 bits then copied into a `string` in\n"
+            "    the little-endian byte order.\n"
+            "  * Returns the packed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2503,20 +2567,22 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("unpack16le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.unpack16le(text)`\n"
-          "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 16-bit integers in the\n"
-          "    little-endian byte order, all of which are sign-extended to 64\n"
-          "    bits then copied into an `array`.\n"
-          "  * Returns an `array` containing unpacked integers.\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 2.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.unpack16le(text)`\n"
+            "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
+            "    are re-interpreted as contiguous signed 16-bit integers in the\n"
+            "    little-endian byte order, all of which are sign-extended to 64\n"
+            "    bits then copied into an `array`.\n"
+            "  * Returns an `array` containing unpacked integers.\n"
+            "  * Throws an exception if the length of `text` is not a multiple\n"
+            "    of 2.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2540,18 +2606,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("pack32be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.pack32be(values)`\n"
-          "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
-          "    be either an `integer` or an `array` of `integers`, all of\n"
-          "    which are truncated to 32 bits then copied into a `string` in\n"
-          "    the big-endian byte order.\n"
-          "  * Returns the packed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.pack32be(values)`\n"
+            "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
+            "    be either an `integer` or an `array` of `integers`, all of\n"
+            "    which are truncated to 32 bits then copied into a `string` in\n"
+            "    the big-endian byte order.\n"
+            "  * Returns the packed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2583,20 +2651,22 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("unpack32be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.unpack32be(text)`\n"
-          "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 32-bit integers in the\n"
-          "    big-endian byte order, all of which are sign-extended to 64\n"
-          "    bits then copied into an `array`.\n"
-          "  * Returns an `array` containing unpacked integers.\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 4.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.unpack32be(text)`\n"
+            "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
+            "    are re-interpreted as contiguous signed 32-bit integers in the\n"
+            "    big-endian byte order, all of which are sign-extended to 64\n"
+            "    bits then copied into an `array`.\n"
+            "  * Returns an `array` containing unpacked integers.\n"
+            "  * Throws an exception if the length of `text` is not a multiple\n"
+            "    of 4.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2620,18 +2690,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("pack32le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.pack32le(values)`\n"
-          "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
-          "    be either an `integer` or an `array` of `integers`, all of\n"
-          "    which are truncated to 32 bits then copied into a `string` in\n"
-          "    the little-endian byte order.\n"
-          "  * Returns the packed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.pack32le(values)`\n"
+            "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
+            "    be either an `integer` or an `array` of `integers`, all of\n"
+            "    which are truncated to 32 bits then copied into a `string` in\n"
+            "    the little-endian byte order.\n"
+            "  * Returns the packed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2663,20 +2735,22 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("unpack32le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.unpack32le(text)`\n"
-          "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 32-bit integers in the\n"
-          "    little-endian byte order, all of which are sign-extended to 64\n"
-          "    bits then copied into an `array`.\n"
-          "  * Returns an `array` containing unpacked integers.\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 4.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.unpack32le(text)`\n"
+            "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
+            "    are re-interpreted as contiguous signed 32-bit integers in the\n"
+            "    little-endian byte order, all of which are sign-extended to 64\n"
+            "    bits then copied into an `array`.\n"
+            "  * Returns an `array` containing unpacked integers.\n"
+            "  * Throws an exception if the length of `text` is not a multiple\n"
+            "    of 4.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2700,17 +2774,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("pack64be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.pack64be(values)`\n"
-          "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
-          "    be either an `integer` or an `array` of `integers`, all of\n"
-          "    which are copied into a `string` in the big-endian byte order.\n"
-          "  * Returns the packed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.pack64be(values)`\n"
+            "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
+            "    be either an `integer` or an `array` of `integers`, all of\n"
+            "    which are copied into a `string` in the big-endian byte order.\n"
+            "  * Returns the packed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2742,19 +2818,21 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("unpack64be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.unpack64be(text)`\n"
-          "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 64-bit integers in the\n"
-          "    big-endian byte order, all of which are copied into an `array`.\n"
-          "  * Returns an `array` containing unpacked integers.\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 8.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.unpack64be(text)`\n"
+            "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
+            "    are re-interpreted as contiguous signed 64-bit integers in the\n"
+            "    big-endian byte order, all of which are copied into an `array`.\n"
+            "  * Returns an `array` containing unpacked integers.\n"
+            "  * Throws an exception if the length of `text` is not a multiple\n"
+            "    of 8.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2778,18 +2856,20 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("pack64le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.pack64le(values)`\n"
-          "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
-          "    be either an `integer` or an `array` of `integers`, all of\n"
-          "    which are copied into a `string` in the little-endian byte\n"
-          "    order.\n"
-          "  * Returns the packed `string`.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.pack64le(values)`\n"
+            "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
+            "    be either an `integer` or an `array` of `integers`, all of\n"
+            "    which are copied into a `string` in the little-endian byte\n"
+            "    order.\n"
+            "  * Returns the packed `string`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2821,20 +2901,22 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("unpack64le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.string.unpack64le(text)`\n"
-          "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
-          "    are re-interpreted as contiguous signed 64-bit integers in the\n"
-          "    little-endian byte order, all of which are copied into an\n"
-          "    `array`.\n"
-          "  * Returns an `array` containing unpacked integers.\n"
-          "  * Throws an exception if the length of `text` is not a multiple\n"
-          "    of 8.\n"
-        ),
+        rocket::sref
+          (
+            "std.string.unpack64le(text)`\n"
+            "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
+            "    are re-interpreted as contiguous signed 64-bit integers in the\n"
+            "    little-endian byte order, all of which are copied into an\n"
+            "    `array`.\n"
+            "  * Returns an `array` containing unpacked integers.\n"
+            "  * Throws an exception if the length of `text` is not a multiple\n"
+            "    of 8.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {

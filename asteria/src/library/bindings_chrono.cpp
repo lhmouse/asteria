@@ -413,16 +413,18 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("utc_now"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.utc_now()`\n"
-          "  * Retrieves the wall clock time in UTC.\n"
-          "  * Returns the number of milliseconds since the Unix epoch,\n"
-          "    represented as an `integer`.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.utc_now()`\n"
+            "  * Retrieves the wall clock time in UTC.\n"
+            "  * Returns the number of milliseconds since the Unix epoch,\n"
+            "    represented as an `integer`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -443,16 +445,18 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("local_now"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.local_now()`\n"
-          "  * Retrieves the wall clock time in the local time zone.\n"
-          "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-          "    in the local time zone, represented as an `integer`.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.local_now()`\n"
+            "  * Retrieves the wall clock time in the local time zone.\n"
+            "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
+            "    in the local time zone, represented as an `integer`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -473,19 +477,21 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("hires_now"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.hires_now()`\n"
-          "  * Retrieves a time point from a high resolution clock. The clock\n"
-          "    goes monotonically and cannot be adjusted, being suitable for\n"
-          "    time measurement. This function provides accuracy and might be\n"
-          "    quite heavyweight.\n"
-          "  * Returns the number of milliseconds since an unspecified time\n"
-          "    point, represented as a `real`.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.hires_now()`\n"
+            "  * Retrieves a time point from a high resolution clock. The clock\n"
+            "    goes monotonically and cannot be adjusted, being suitable for\n"
+            "    time measurement. This function provides accuracy and might be\n"
+            "    quite heavyweight.\n"
+            "  * Returns the number of milliseconds since an unspecified time\n"
+            "    point, represented as a `real`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -506,19 +512,21 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("steady_now"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.steady_now()`\n"
-          "  * Retrieves a time point from a steady clock. The clock goes\n"
-          "    monotonically and cannot be adjusted, being suitable for time\n"
-          "    measurement. This function is supposed to be fast and might\n"
-          "    have poor accuracy.\n"
-          "  * Returns the number of milliseconds since an unspecified time\n"
-          "    point, represented as an `integer`.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.steady_now()`\n"
+            "  * Retrieves a time point from a steady clock. The clock goes\n"
+            "    monotonically and cannot be adjusted, being suitable for time\n"
+            "    measurement. This function is supposed to be fast and might\n"
+            "    have poor accuracy.\n"
+            "  * Returns the number of milliseconds since an unspecified time\n"
+            "    point, represented as an `integer`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -539,17 +547,19 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("local_from_utc"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.local_from_utc(time_utc)`\n"
-          "  * Converts a UTC time point to a local one. `time_utc` shall be\n"
-          "    the number of milliseconds since the Unix epoch.\n"
-          "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-          "    in the local time zone, represented as an `integer`.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.local_from_utc(time_utc)`\n"
+            "  * Converts a UTC time point to a local one. `time_utc` shall be\n"
+            "    the number of milliseconds since the Unix epoch.\n"
+            "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
+            "    in the local time zone, represented as an `integer`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -571,18 +581,20 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("utc_from_local"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.utc_from_local(time_local)`\n"
-          "  * Converts a local time point to a UTC one. `time_local` shall\n"
-          "    be the number of milliseconds since `1970-01-01 00:00:00` in\n"
-          "    the local time zone.\n"
-          "  * Returns the number of milliseconds since the Unix epoch,\n"
-          "    represented as an `integer`.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.utc_from_local(time_local)`\n"
+            "  * Converts a local time point to a UTC one. `time_local` shall\n"
+            "    be the number of milliseconds since `1970-01-01 00:00:00` in\n"
+            "    the local time zone.\n"
+            "  * Returns the number of milliseconds since the Unix epoch,\n"
+            "    represented as an `integer`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -604,18 +616,20 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("datetime_format"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.datetime_format(time_point, [with_ms])`\n"
-          "  * Converts `time_point`, which represents the number of\n"
-          "    milliseconds since `1970-01-01 00:00:00`, to an ASCII string in\n"
-          "    the aforementioned format, according to the ISO 8601 standard.\n"
-          "    If `with_ms` is set to `true`, the string will have a 3-digit\n"
-          "    fractional part. By default, no fractional part is added.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.datetime_format(time_point, [with_ms])`\n"
+            "  * Converts `time_point`, which represents the number of\n"
+            "    milliseconds since `1970-01-01 00:00:00`, to an ASCII string in\n"
+            "    the aforementioned format, according to the ISO 8601 standard.\n"
+            "    If `with_ms` is set to `true`, the string will have a 3-digit\n"
+            "    fractional part. By default, no fractional part is added.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -638,18 +652,20 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("datetime_min"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.datetime_min([with_ms])`\n"
-          "  * Gets the special string that denotes the negative infinity time\n"
-          "    point. Calling this function has the same effect as calling\n"
-          "    `datetime_format(-0x8000000000000000, with_ms)`.\n"
-          "  * Returns `'1601-01-01 00:00:00'` or `'1601-01-01 00:00:00.000'`\n"
-          "    according to `with_ms`.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.datetime_min([with_ms])`\n"
+            "  * Gets the special string that denotes the negative infinity time\n"
+            "    point. Calling this function has the same effect as calling\n"
+            "    `datetime_format(-0x8000000000000000, with_ms)`.\n"
+            "  * Returns `'1601-01-01 00:00:00'` or `'1601-01-01 00:00:00.000'`\n"
+            "    according to `with_ms`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -671,18 +687,20 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("datetime_max"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.datetime_max([with_ms])`\n"
-          "  * Gets the special string that denotes the positive infinity time\n"
-          "    point. Calling this function has the same effect as calling\n"
-          "    `datetime_format(0x7FFFFFFFFFFFFFFF, with_ms)`.\n"
-          "  * Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'`\n"
-          "    according to `with_ms`.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.datetime_max([with_ms])`\n"
+            "  * Gets the special string that denotes the positive infinity time\n"
+            "    point. Calling this function has the same effect as calling\n"
+            "    `datetime_format(0x7FFFFFFFFFFFFFFF, with_ms)`.\n"
+            "  * Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'`\n"
+            "    according to `with_ms`.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -704,21 +722,23 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("datetime_parse"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref(
-          "std.chrono.datetime_parse(time_str)`\n"
-          "  * Parses `time_str`, which is an ASCII string representing a time\n"
-          "    point in the format `1970-01-01 00:00:00.000`, according to the\n"
-          "    ISO 8601 standard; the subsecond part is optional and may have\n"
-          "    fewer or more digits. There shall be no leading or trailing\n"
-          "    spaces.\n"
-          "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-          "    if the time string has been parsed successfully, or `null`\n"
-          "    otherwise.\n"
-        ),
+        rocket::sref
+          (
+            "std.chrono.datetime_parse(time_str)`\n"
+            "  * Parses `time_str`, which is an ASCII string representing a time\n"
+            "    point in the format `1970-01-01 00:00:00.000`, according to the\n"
+            "    ISO 8601 standard; the subsecond part is optional and may have\n"
+            "    fewer or more digits. There shall be no leading or trailing\n"
+            "    spaces.\n"
+            "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
+            "    if the time string has been parsed successfully, or `null`\n"
+            "    otherwise.\n"
+          ),
         // Opaque parameter
-        G_null(
-          nullptr
-        ),
+        G_null
+          (
+            nullptr
+          ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {

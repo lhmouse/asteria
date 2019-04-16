@@ -3,14 +3,14 @@
 `std.version.major`
 
 	* Denotes the major version number of the standard library that
-	  has been enabled. This member is always set, unless there is no
-	  standard library.
+	  has been enabled. This member is always set, even when there is
+	  no standard library.
 
 `std.version.minor`
 
 	* Denotes the minor version number of the standard library that
-	  has been enabled. This member is always set, unless there is no
-	  standard library.
+	  has been enabled. This member is always set, even when there is
+	  no standard library.
 
 ### `std.gc`
 
@@ -68,8 +68,8 @@
 
 `std.constants.real_epsilon`
 
-	* Denotes the minimum finite value of a `real`, namely `x`, such
-	  that `1 + x > x`; that is, `+0x1p-52`.
+	* Denotes the minimum finite value of a `real` such that
+	  `1 + real_epsilon > 1`; that is, `+0x1p-52`.
 
 `std.constants.size_max`
 

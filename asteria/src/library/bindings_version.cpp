@@ -16,6 +16,7 @@ void create_bindings_version(G_object& result, API_Version version)
     //===================================================================
     result.insert_or_assign(rocket::sref("major"),
       G_integer(
+        // The major version number of the standard library that has been enabled.
         version / 0x10000
       ));
     //===================================================================
@@ -23,6 +24,7 @@ void create_bindings_version(G_object& result, API_Version version)
     //===================================================================
     result.insert_or_assign(rocket::sref("minor"),
       G_integer(
+        // The minor version number of the standard library that has been enabled.
         version % 0x10000
       ));
     //===================================================================
