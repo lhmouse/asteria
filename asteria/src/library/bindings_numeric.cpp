@@ -419,14 +419,16 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("abs"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.abs(value)`\n"
-                     "  * Gets the absolute value of `value`, which may be an `integer`\n"
-                     "    or `real`. Negative `integer`s are negated, which might cause\n"
-                     "    an exception to be thrown due to overflow. Sign bits of `real`s\n"
-                     "    are removed, which works on infinities and NaNs and does not\n"
-                     "    result in exceptions.\n"
-                     "  * Return the absolute value.\n"
-                     "  * Throws an exception if `value` is the `integer` `-0x1p63`.\n"),
+        rocket::sref(
+          "std.numeric.abs(value)`\n"
+          "  * Gets the absolute value of `value`, which may be an `integer`\n"
+          "    or `real`. Negative `integer`s are negated, which might cause\n"
+          "    an exception to be thrown due to overflow. Sign bits of `real`s\n"
+          "    are removed, which works on infinities and NaNs and does not\n"
+          "    result in exceptions.\n"
+          "  * Return the absolute value.\n"
+          "  * Throws an exception if `value` is the `integer` `-0x1p63`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -456,11 +458,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("sign"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.sign(value)`\n"
-                     "  * Propagates the sign bit of the number `value`, which may be an\n"
-                     "    `integer` or `real`, to all bits of an `integer`. Be advised\n"
-                     "    that `-0.0` is distinct from `0.0` despite the equality.\n"
-                     "  * Returns `-1` if `value` is negative, or `0` otherwise.\n"),
+        rocket::sref(
+          "std.numeric.sign(value)`\n"
+          "  * Propagates the sign bit of the number `value`, which may be an\n"
+          "    `integer` or `real`, to all bits of an `integer`. Be advised\n"
+          "    that `-0.0` is distinct from `0.0` despite the equality.\n"
+          "  * Returns `-1` if `value` is negative, or `0` otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -490,13 +494,15 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("is_finite"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.is_finite(value)`\n"
-                     "  * Checks whether `value` is a finite number. `value` may be an\n"
-                     "    `integer` or `real`. Be adviced that this functions returns\n"
-                     "    `true` for `integer`s for consistency; `integer`s do not\n"
-                     "    support infinities or NaNs.\n"
-                     "  * Returns `true` if `value` is an `integer` or is a `real` that\n"
-                     "    is neither an infinity or a NaN, or `false` otherwise.\n"),
+        rocket::sref(
+          "std.numeric.is_finite(value)`\n"
+          "  * Checks whether `value` is a finite number. `value` may be an\n"
+          "    `integer` or `real`. Be adviced that this functions returns\n"
+          "    `true` for `integer`s for consistency; `integer`s do not\n"
+          "    support infinities or NaNs.\n"
+          "  * Returns `true` if `value` is an `integer` or is a `real` that\n"
+          "    is neither an infinity or a NaN, or `false` otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -526,13 +532,15 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("is_infinity"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.is_infinity(value)`\n"
-                     "  * Checks whether `value` is an infinity. `value` may be an\n"
-                     "    `integer` or `real`. Be adviced that this functions returns\n"
-                     "    `false` for `integer`s for consistency; `integer`s do not\n"
-                     "    support infinities.\n"
-                     "  * Returns `true` if `value` is a `real` that denotes an infinity;\n"
-                     "    or `false` otherwise.\n"),
+        rocket::sref(
+          "std.numeric.is_infinity(value)`\n"
+          "  * Checks whether `value` is an infinity. `value` may be an\n"
+          "    `integer` or `real`. Be adviced that this functions returns\n"
+          "    `false` for `integer`s for consistency; `integer`s do not\n"
+          "    support infinities.\n"
+          "  * Returns `true` if `value` is a `real` that denotes an infinity;\n"
+          "    or `false` otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -562,12 +570,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("is_nan"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.is_nan(value)`\n"
-                     "  * Checks whether `value` is a NaN. `value` may be an `integer` or\n"
-                     "    `real`. Be adviced that this functions returns `false` for\n"
-                     "    `integer`s for consistency; `integer`s do not support NaNs.\n"
-                     "  * Returns `true` if `value` is a `real` denoting a NaN, or\n"
-                     "    `false` otherwise.\n"),
+        rocket::sref(
+          "std.numeric.is_nan(value)`\n"
+          "  * Checks whether `value` is a NaN. `value` may be an `integer` or\n"
+          "    `real`. Be adviced that this functions returns `false` for\n"
+          "    `integer`s for consistency; `integer`s do not support NaNs.\n"
+          "  * Returns `true` if `value` is a `real` denoting a NaN, or\n"
+          "    `false` otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -597,14 +607,16 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("clamp"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.clamp(value, lower, upper)`\n"
-                     "  * Limits `value` between `lower` and `upper`.\n"
-                     "  * Returns `lower` if `value < lower`, `upper` if `value > upper`,\n"
-                     "    or `value` otherwise, including when `value` is a NaN. The\n"
-                     "    returned value is of type `integer` if all arguments are of\n"
-                     "    type `integer`; otherwise it is of type `real`.\n"
-                     "  * Throws an exception if `lower` is not less than or equal to\n"
-                     "    `upper`.\n"),
+        rocket::sref(
+          "std.numeric.clamp(value, lower, upper)`\n"
+          "  * Limits `value` between `lower` and `upper`.\n"
+          "  * Returns `lower` if `value < lower`, `upper` if `value > upper`,\n"
+          "    or `value` otherwise, including when `value` is a NaN. The\n"
+          "    returned value is of type `integer` if all arguments are of\n"
+          "    type `integer`; otherwise it is of type `real`.\n"
+          "  * Throws an exception if `lower` is not less than or equal to\n"
+          "    `upper`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -638,11 +650,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("round"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.round(value)`\n"
-                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
-                     "    nearest integer; halfway values are rounded away from zero. If\n"
-                     "    `value` is an `integer`, it is returned intact.\n"
-                     "  * Returns the rounded value.\n"),
+        rocket::sref(
+          "std.numeric.round(value)`\n"
+          "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+          "    nearest integer; halfway values are rounded away from zero. If\n"
+          "    `value` is an `integer`, it is returned intact.\n"
+          "  * Returns the rounded value.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -672,11 +686,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("floor"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.floor(value)`\n"
-                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
-                     "    nearest integer towards negative infinity. If `value` is an\n"
-                     "    `integer`, it is returned intact.\n"
-                     "  * Returns the rounded value.\n"),
+        rocket::sref(
+          "std.numeric.floor(value)`\n"
+          "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+          "    nearest integer towards negative infinity. If `value` is an\n"
+          "    `integer`, it is returned intact.\n"
+          "  * Returns the rounded value.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -706,11 +722,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("ceil"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.ceil(value)`\n"
-                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
-                     "    nearest integer towards positive infinity. If `value` is an\n"
-                     "    `integer`, it is returned intact.\n"
-                     "  * Returns the rounded value.\n"),
+        rocket::sref(
+          "std.numeric.ceil(value)`\n"
+          "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+          "    nearest integer towards positive infinity. If `value` is an\n"
+          "    `integer`, it is returned intact.\n"
+          "  * Returns the rounded value.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -740,11 +758,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("trunc"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.trunc(value)`\n"
-                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
-                     "    nearest integer towards zero. If `value` is an `integer`, it is\n"
-                     "    returned intact.\n"
-                     "  * Returns the rounded value.\n"),
+        rocket::sref(
+          "std.numeric.trunc(value)`\n"
+          "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+          "    nearest integer towards zero. If `value` is an `integer`, it is\n"
+          "    returned intact.\n"
+          "  * Returns the rounded value.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -774,14 +794,16 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("iround"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.iround(value)`\n"
-                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
-                     "    nearest integer; halfway values are rounded away from zero. If\n"
-                     "    `value` is an `integer`, it is returned intact. If `value` is a\n"
-                     "    `real`, it is converted to an `integer`.\n"
-                     "  * Returns the rounded value as an `integer`.\n"
-                     "  * Throws an exception if the result cannot be represented as an\n"
-                     "    `integer`.\n"),
+        rocket::sref(
+          "std.numeric.iround(value)`\n"
+          "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+          "    nearest integer; halfway values are rounded away from zero. If\n"
+          "    `value` is an `integer`, it is returned intact. If `value` is a\n"
+          "    `real`, it is converted to an `integer`.\n"
+          "  * Returns the rounded value as an `integer`.\n"
+          "  * Throws an exception if the result cannot be represented as an\n"
+          "    `integer`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -811,14 +833,16 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("ifloor"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.ifloor(value)`\n"
-                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
-                     "    nearest integer towards negative infinity. If `value` is an\n"
-                     "    `integer`, it is returned intact. If `value` is a `real`, it is\n"
-                     "    converted to an `integer`.\n"
-                     "  * Returns the rounded value as an `integer`.\n"
-                     "  * Throws an exception if the result cannot be represented as an\n"
-                     "    `integer`.\n"),
+        rocket::sref(
+          "std.numeric.ifloor(value)`\n"
+          "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+          "    nearest integer towards negative infinity. If `value` is an\n"
+          "    `integer`, it is returned intact. If `value` is a `real`, it is\n"
+          "    converted to an `integer`.\n"
+          "  * Returns the rounded value as an `integer`.\n"
+          "  * Throws an exception if the result cannot be represented as an\n"
+          "    `integer`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -848,14 +872,16 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("iceil"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.iceil(value)`\n"
-                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
-                     "    nearest integer towards positive infinity. If `value` is an\n"
-                     "    `integer`, it is returned intact. If `value` is a `real`, it is\n"
-                     "    converted to an `integer`.\n"
-                     "  * Returns the rounded value as an `integer`.\n"
-                     "  * Throws an exception if the result cannot be represented as an\n"
-                     "    `integer`.\n"),
+        rocket::sref(
+          "std.numeric.iceil(value)`\n"
+          "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+          "    nearest integer towards positive infinity. If `value` is an\n"
+          "    `integer`, it is returned intact. If `value` is a `real`, it is\n"
+          "    converted to an `integer`.\n"
+          "  * Returns the rounded value as an `integer`.\n"
+          "  * Throws an exception if the result cannot be represented as an\n"
+          "    `integer`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -885,14 +911,16 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("itrunc"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.itrunc(value)`\n"
-                     "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
-                     "    nearest integer towards zero. If `value` is an `integer`, it is\n"
-                     "    returned intact. If `value` is a `real`, it is converted to an\n"
-                     "    `integer`.\n"
-                     "  * Returns the rounded value as an `integer`.\n"
-                     "  * Throws an exception if the result cannot be represented as an\n"
-                     "    `integer`.\n"),
+        rocket::sref(
+          "std.numeric.itrunc(value)`\n"
+          "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
+          "    nearest integer towards zero. If `value` is an `integer`, it is\n"
+          "    returned intact. If `value` is a `real`, it is converted to an\n"
+          "    `integer`.\n"
+          "  * Returns the rounded value as an `integer`.\n"
+          "  * Throws an exception if the result cannot be represented as an\n"
+          "    `integer`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -922,23 +950,25 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("random"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.random([upper])`\n"
-                     "  * Generates a random `integer` or `real` that is less than\n"
-                     "    `upper`. If `upper` is absent, it has a default value of `1.0`\n"
-                     "    which is a `real`.\n"
-                     "  * Returns a non-negative `integer` or `real` that is less than\n"
-                     "    `upper`. The return value is of type `integer` if `upper` is of\n"
-                     "    type `integer`; otherwise it is of type `real`.\n"
-                     "  * Throws an exception if `upper` is negative or zero.\n"
-                     "`std.numeric.random(lower, upper)`\n"
-                     "  * Generates a random `integer` or `real` that is not less than\n"
-                     "    `lower` but is less than `upper`. `lower` and `upper` shall be\n"
-                     "    of the same type.\n"
-                     "  * Returns an `integer` or `real` that is not less than `lower`\n"
-                     "    but is less than `upper`. The return value is of type `integer`\n"
-                     "    if both arguments are of type `integer`; otherwise it is of\n"
-                     "    type `real`.\n"
-                     "  * Throws an exception if `lower` is not less than `upper`.\n"),
+        rocket::sref(
+          "std.numeric.random([upper])`\n"
+          "  * Generates a random `integer` or `real` that is less than\n"
+          "    `upper`. If `upper` is absent, it has a default value of `1.0`\n"
+          "    which is a `real`.\n"
+          "  * Returns a non-negative `integer` or `real` that is less than\n"
+          "    `upper`. The return value is of type `integer` if `upper` is of\n"
+          "    type `integer`; otherwise it is of type `real`.\n"
+          "  * Throws an exception if `upper` is negative or zero.\n"
+          "`std.numeric.random(lower, upper)`\n"
+          "  * Generates a random `integer` or `real` that is not less than\n"
+          "    `lower` but is less than `upper`. `lower` and `upper` shall be\n"
+          "    of the same type.\n"
+          "  * Returns an `integer` or `real` that is not less than `lower`\n"
+          "    but is less than `upper`. The return value is of type `integer`\n"
+          "    if both arguments are of type `integer`; otherwise it is of\n"
+          "    type `real`.\n"
+          "  * Throws an exception if `lower` is not less than `upper`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -981,10 +1011,12 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("sqrt"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.sqrt(x)`\n"
-                     "  * Calculates the square root of `x` which may be of either the\n"
-                     "    `integer` or the `real` type. The result is always exact.\n"
-                     "  * Returns the square root of `x` as a `real`.\n"),
+        rocket::sref(
+          "std.numeric.sqrt(x)`\n"
+          "  * Calculates the square root of `x` which may be of either the\n"
+          "    `integer` or the `real` type. The result is always exact.\n"
+          "  * Returns the square root of `x` as a `real`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1008,11 +1040,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("fma"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.fma(x, y, z)`\n"
-                     "  * Performs fused multiply-add operation on `x`, `y` and `z`. This\n"
-                     "    functions calculates `x * y + z` without intermediate rounding\n"
-                     "    operations. The result is always exact.\n"
-                     "  * Returns the value of `x * y + z` as a `real`.\n"),
+        rocket::sref(
+          "std.numeric.fma(x, y, z)`\n"
+          "  * Performs fused multiply-add operation on `x`, `y` and `z`. This\n"
+          "    functions calculates `x * y + z` without intermediate rounding\n"
+          "    operations. The result is always exact.\n"
+          "  * Returns the value of `x * y + z` as a `real`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1038,12 +1072,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("addm"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.addm(x, y)`\n"
-                     "  * Adds `y` to `x` using modular arithmetic. `x` and `y` must be\n"
-                     "    of the `integer` type. The result is reduced to be congruent to\n"
-                     "    the sum of `x` and `y` modulo `0x1p64` in infinite precision.\n"
-                     "    This function will not cause overflow exceptions to be thrown.\n"
-                     "  * Returns the reduced sum of `x` and `y`.\n"),
+        rocket::sref(
+          "std.numeric.addm(x, y)`\n"
+          "  * Adds `y` to `x` using modular arithmetic. `x` and `y` must be\n"
+          "    of the `integer` type. The result is reduced to be congruent to\n"
+          "    the sum of `x` and `y` modulo `0x1p64` in infinite precision.\n"
+          "    This function will not cause overflow exceptions to be thrown.\n"
+          "  * Returns the reduced sum of `x` and `y`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1068,13 +1104,15 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("subm"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.subm(x, y)`\n"
-                     "  * Subtracts `y` from `x` using modular arithmetic. `x` and `y`\n"
-                     "    must be of the `integer` type. The result is reduced to be\n"
-                     "    congruent to the difference of `x` and `y` modulo `0x1p64` in\n"
-                     "    infinite precision. This function will not cause overflow\n"
-                     "    exceptions to be thrown.\n"
-                     "  * Returns the reduced difference of `x` and `y`.\n"),
+        rocket::sref(
+          "std.numeric.subm(x, y)`\n"
+          "  * Subtracts `y` from `x` using modular arithmetic. `x` and `y`\n"
+          "    must be of the `integer` type. The result is reduced to be\n"
+          "    congruent to the difference of `x` and `y` modulo `0x1p64` in\n"
+          "    infinite precision. This function will not cause overflow\n"
+          "    exceptions to be thrown.\n"
+          "  * Returns the reduced difference of `x` and `y`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1099,13 +1137,15 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("mulm"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.mulm(x, y)`\n"
-                     "  * Multiplies `x` by `y` using modular arithmetic. `x` and `y`\n"
-                     "    must be of the `integer` type. The result is reduced to be\n"
-                     "    congruent to the product of `x` and `y` modulo `0x1p64` in\n"
-                     "    infinite precision. This function will not cause overflow\n"
-                     "    exceptions to be thrown.\n"
-                     "  * Returns the reduced product of `x` and `y`.\n"),
+        rocket::sref(
+          "std.numeric.mulm(x, y)`\n"
+          "  * Multiplies `x` by `y` using modular arithmetic. `x` and `y`\n"
+          "    must be of the `integer` type. The result is reduced to be\n"
+          "    congruent to the product of `x` and `y` modulo `0x1p64` in\n"
+          "    infinite precision. This function will not cause overflow\n"
+          "    exceptions to be thrown.\n"
+          "  * Returns the reduced product of `x` and `y`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1130,22 +1170,24 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("adds"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.adds(x, y)`\n"
-                     "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
-                     "    `integer` or `real` values. The result is limited within the\n"
-                     "    range of representable values of its type, hence will not cause\n"
-                     "    overflow exceptions to be thrown. When either argument is of\n"
-                     "    type `real` which supports infinities, this function is\n"
-                     "    equivalent to the built-in addition operator.\n"
-                     "  * Returns the saturated sum of `x` and `y`.\n"
-                     "`std.numeric.adds(x, y, lower, upper)`\n"
-                     "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
-                     "    `integer` or `real` values. The result is limited between\n"
-                     "    `lower` and `upper`, hence will not cause overflow exceptions\n"
-                     "    to be thrown.\n"
-                     "  * Returns the saturated sum of `x` and `y`. The result is of type\n"
-                     "    `integer` if all arguments are of type `integer`; otherwise it\n"
-                     "    is of type `real`.\n"),
+        rocket::sref(
+          "std.numeric.adds(x, y)`\n"
+          "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
+          "    `integer` or `real` values. The result is limited within the\n"
+          "    range of representable values of its type, hence will not cause\n"
+          "    overflow exceptions to be thrown. When either argument is of\n"
+          "    type `real` which supports infinities, this function is\n"
+          "    equivalent to the built-in addition operator.\n"
+          "  * Returns the saturated sum of `x` and `y`.\n"
+          "`std.numeric.adds(x, y, lower, upper)`\n"
+          "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
+          "    `integer` or `real` values. The result is limited between\n"
+          "    `lower` and `upper`, hence will not cause overflow exceptions\n"
+          "    to be thrown.\n"
+          "  * Returns the saturated sum of `x` and `y`. The result is of type\n"
+          "    `integer` if all arguments are of type `integer`; otherwise it\n"
+          "    is of type `real`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1192,22 +1234,24 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("subs"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.subs(x, y)`\n"
-                     "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
-                     "    may be `integer` or `real` values. The result is limited within\n"
-                     "    the range of representable values of its type, hence will not\n"
-                     "    cause overflow exceptions to be thrown. When either argument is\n"
-                     "    of type `real` which supports infinities, this function is\n"
-                     "    equivalent to the built-in subtraction operator.\n"
-                     "  * Returns the saturated difference of `x` and `y`.\n"
-                     "`std.numeric.subs(x, y, lower, upper)`\n"
-                     "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
-                     "    may be `integer` or `real` values. The result is limited\n"
-                     "    between `lower` and `upper`, hence will not cause overflow\n"
-                     "    exceptions to be thrown.\n"
-                     "  * Returns the saturated difference of `x` and `y`. The result is\n"
-                     "    of type `integer` if all arguments are of type `integer`;\n"
-                     "    otherwise it is of type `real`.\n"),
+        rocket::sref(
+          "std.numeric.subs(x, y)`\n"
+          "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
+          "    may be `integer` or `real` values. The result is limited within\n"
+          "    the range of representable values of its type, hence will not\n"
+          "    cause overflow exceptions to be thrown. When either argument is\n"
+          "    of type `real` which supports infinities, this function is\n"
+          "    equivalent to the built-in subtraction operator.\n"
+          "  * Returns the saturated difference of `x` and `y`.\n"
+          "`std.numeric.subs(x, y, lower, upper)`\n"
+          "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
+          "    may be `integer` or `real` values. The result is limited\n"
+          "    between `lower` and `upper`, hence will not cause overflow\n"
+          "    exceptions to be thrown.\n"
+          "  * Returns the saturated difference of `x` and `y`. The result is\n"
+          "    of type `integer` if all arguments are of type `integer`;\n"
+          "    otherwise it is of type `real`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1254,22 +1298,24 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("muls"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.numeric.muls(x, y)`\n"
-                     "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
-                     "    may be `integer` or `real` values. The result is limited within\n"
-                     "    the range of representable values of its type, hence will not\n"
-                     "    cause overflow exceptions to be thrown. When either argument is\n"
-                     "    of type `real` which supports infinities, this function is\n"
-                     "    equivalent to the built-in multiplication operator.\n"
-                     "  * Returns the saturated product of `x` and `y`.\n"
-                     "`std.numeric.muls(x, y, lower, upper)`\n"
-                     "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
-                     "    may be `integer` or `real` values. The result is limited\n"
-                     "    between `lower` and `upper`, hence will not cause overflow\n"
-                     "    exceptions to be thrown.\n"
-                     "  * Returns the saturated product of `x` and `y`. The result is of\n"
-                     "    type `integer` if all arguments are of type `integer`;\n"
-                     "    otherwise it is of type `real`.\n"),
+        rocket::sref(
+          "std.numeric.muls(x, y)`\n"
+          "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
+          "    may be `integer` or `real` values. The result is limited within\n"
+          "    the range of representable values of its type, hence will not\n"
+          "    cause overflow exceptions to be thrown. When either argument is\n"
+          "    of type `real` which supports infinities, this function is\n"
+          "    equivalent to the built-in multiplication operator.\n"
+          "  * Returns the saturated product of `x` and `y`.\n"
+          "`std.numeric.muls(x, y, lower, upper)`\n"
+          "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
+          "    may be `integer` or `real` values. The result is limited\n"
+          "    between `lower` and `upper`, hence will not cause overflow\n"
+          "    exceptions to be thrown.\n"
+          "  * Returns the saturated product of `x` and `y`. The result is of\n"
+          "    type `integer` if all arguments are of type `integer`;\n"
+          "    otherwise it is of type `real`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {

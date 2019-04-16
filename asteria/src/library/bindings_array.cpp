@@ -649,15 +649,17 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("slice"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.slice(data, from, [length])`\n"
-                     "  * Copies a subrange of `data` to create a new `array`. Elements\n"
-                     "    are copied from `from` if it is non-negative, or from\n"
-                     "    `lengthof(data) + from` otherwise. If `length` is set to an\n"
-                     "    `integer`, no more than this number of elements will be copied.\n"
-                     "    If it is absent, all elements from `from` to the end of `data`\n"
-                     "    will be copied. If `from` is outside `data`, an empty `array`\n"
-                     "    is returned.\n"
-                     "  * Returns the specified subarray of `data`.\n"),
+        rocket::sref(
+          "std.array.slice(data, from, [length])`\n"
+          "  * Copies a subrange of `data` to create a new `array`. Elements\n"
+          "    are copied from `from` if it is non-negative, or from\n"
+          "    `lengthof(data) + from` otherwise. If `length` is set to an\n"
+          "    `integer`, no more than this number of elements will be copied.\n"
+          "    If it is absent, all elements from `from` to the end of `data`\n"
+          "    will be copied. If `from` is outside `data`, an empty `array`\n"
+          "    is returned.\n"
+          "  * Returns the specified subarray of `data`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -683,21 +685,23 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("replace_slice"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.replace_slice(data, from, replacement)`\n"
-                     "  * Replaces all elements from `from` to the end of `data` with\n"
-                     "    `replacement` and returns the new `array`. If `from` is\n"
-                     "    negative, it specifies an offset from the end of `data`. This\n"
-                     "    function returns a new `array` without modifying `data`.\n"
-                     "  * Returns a `array` with the subrange replaced.\n"
-                     "`std.array.replace_slice(data, from, [length], replacement)`\n"
-                     "  * Replaces a subrange of `data` with `replacement` to create a\n"
-                     "    new `array`. `from` specifies the start of the subrange to\n"
-                     "    replace. If `from` is negative, it specifies an offset from the\n"
-                     "    end of `data`. `length` specifies the maximum number of\n"
-                     "    elements to replace. If it is set to `null`, this function is\n"
-                     "    equivalent to `replace_slice(data, from, replacement)`. This\n"
-                     "    function returns a new `array` without modifying `data`.\n"
-                     "  * Returns a `array` with the subrange replaced.\n"),
+        rocket::sref(
+          "std.array.replace_slice(data, from, replacement)`\n"
+          "  * Replaces all elements from `from` to the end of `data` with\n"
+          "    `replacement` and returns the new `array`. If `from` is\n"
+          "    negative, it specifies an offset from the end of `data`. This\n"
+          "    function returns a new `array` without modifying `data`.\n"
+          "  * Returns a `array` with the subrange replaced.\n"
+          "`std.array.replace_slice(data, from, [length], replacement)`\n"
+          "  * Replaces a subrange of `data` with `replacement` to create a\n"
+          "    new `array`. `from` specifies the start of the subrange to\n"
+          "    replace. If `from` is negative, it specifies an offset from the\n"
+          "    end of `data`. `length` specifies the maximum number of\n"
+          "    elements to replace. If it is set to `null`, this function is\n"
+          "    equivalent to `replace_slice(data, from, replacement)`. This\n"
+          "    function returns a new `array` without modifying `data`.\n"
+          "  * Returns a `array` with the subrange replaced.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -730,25 +734,27 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("find"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.find(data, target)`\n"
-                     "  * Searches `data` for the first occurrence of `target`.\n"
-                     "  * Returns the subscript of the first match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative, or `null`\n"
-                     "    otherwise.\n"
-                     "`std.array.find(data, from, target)`\n"
-                     "  * Searches `data` for the first occurrence of `target`. The\n"
-                     "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(data, from)`.\n"
-                     "  * Returns the subscript of the first match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative, or `null`\n"
-                     "    otherwise.\n"
-                     "`std.array.find(data, from, [length], target)`\n"
-                     "  * Searches `data` for the first occurrence of `target`. The\n"
-                     "    search operation is performed on the same subrange that would\n"
-                     "    be returned by `slice(data, from, length)`.\n"
-                     "  * Returns the subscript of the first match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative, or `null`\n"
-                     "    otherwise.\n"),
+        rocket::sref(
+          "std.array.find(data, target)`\n"
+          "  * Searches `data` for the first occurrence of `target`.\n"
+          "  * Returns the subscript of the first match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+          "`std.array.find(data, from, target)`\n"
+          "  * Searches `data` for the first occurrence of `target`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(data, from)`.\n"
+          "  * Returns the subscript of the first match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+          "`std.array.find(data, from, [length], target)`\n"
+          "  * Searches `data` for the first occurrence of `target`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(data, from, length)`.\n"
+          "  * Returns the subscript of the first match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -798,25 +804,27 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("rfind"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.rfind(data, target)`\n"
-                     "  * Searches `data` for the last occurrence of `target`.\n"
-                     "  * Returns the subscript of the last match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative, or `null`\n"
-                     "    otherwise.\n"
-                     "`std.array.rfind(data, from, target)`\n"
-                     "  * Searches `data` for the last occurrence of `target`. The search\n"
-                     "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(data, from)`.\n"
-                     "  * Returns the subscript of the last match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative, or `null`\n"
-                     "    otherwise.\n"
-                     "`std.array.rfind(data, from, [length], target)`\n"
-                     "  * Searches `data` for the last occurrence of `target`. The search\n"
-                     "    operation is performed on the same subrange that would be\n"
-                     "    returned by `slice(data, from, length)`.\n"
-                     "  * Returns the subscript of the last match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative, or `null`\n"
-                     "    otherwise.\n"),
+        rocket::sref(
+          "std.array.rfind(data, target)`\n"
+          "  * Searches `data` for the last occurrence of `target`.\n"
+          "  * Returns the subscript of the last match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+          "`std.array.rfind(data, from, target)`\n"
+          "  * Searches `data` for the last occurrence of `target`. The search\n"
+          "    operation is performed on the same subrange that would be\n"
+          "    returned by `slice(data, from)`.\n"
+          "  * Returns the subscript of the last match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+          "`std.array.rfind(data, from, [length], target)`\n"
+          "  * Searches `data` for the last occurrence of `target`. The search\n"
+          "    operation is performed on the same subrange that would be\n"
+          "    returned by `slice(data, from, length)`.\n"
+          "  * Returns the subscript of the last match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -866,25 +874,27 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("find_if"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.find_if(data, predictor)`\n"
-                     "  * Finds the first element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically true.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "`std.array.find_if(data, from, predictor)`\n"
-                     "  * Finds the first element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically true. The search operation is\n"
-                     "    performed on the same subrange that would be returned by\n"
-                     "    `slice(data, from)`.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "`std.array.find_if(data, from, [length], predictor)`\n"
-                     "  * Finds the first element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically true. The search operation is\n"
-                     "    performed on the same subrange that would be returned by\n"
-                     "    `slice(data, from, length)`.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"),
+        rocket::sref(
+          "std.array.find_if(data, predictor)`\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "`std.array.find_if(data, from, predictor)`\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from)`.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "`std.array.find_if(data, from, [length], predictor)`\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from, length)`.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -934,25 +944,27 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("find_if_not"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.find_if_not(data, predictor)`\n"
-                     "  * Finds the first element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically false.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "`std.array.find_if_not(data, from, predictor)`\n"
-                     "  * Finds the first element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically false. The search operation is\n"
-                     "    performed on the same subrange that would be returned by\n"
-                     "    `slice(data, from)`.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "`std.array.find_if_not(data, from, [length], predictor)`\n"
-                     "  * Finds the first element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically false. The search operation is\n"
-                     "    performed on the same subrange that would be returned by\n"
-                     "    `slice(data, from, length)`.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"),
+        rocket::sref(
+          "std.array.find_if_not(data, predictor)`\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "`std.array.find_if_not(data, from, predictor)`\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from)`.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "`std.array.find_if_not(data, from, [length], predictor)`\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from, length)`.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1002,25 +1014,27 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("rfind_if"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.rfind_if(data, predictor)`\n"
-                     "  * Finds the last element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically true.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "`std.array.rfind_if(data, from, predictor)`\n"
-                     "  * Finds the last element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically true. The search operation is\n"
-                     "    performed on the same subrange that would be returned by\n"
-                     "    `slice(data, from)`.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "`std.array.rfind_if(data, from, [length], predictor)`\n"
-                     "  * Finds the last element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically true. The search operation is\n"
-                     "    performed on the same subrange that would be returned by\n"
-                     "    `slice(data, from, length)`.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"),
+        rocket::sref(
+          "std.array.rfind_if(data, predictor)`\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "`std.array.rfind_if(data, from, predictor)`\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from)`.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "`std.array.rfind_if(data, from, [length], predictor)`\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from, length)`.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1070,25 +1084,27 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("rfind_if_not"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.rfind_if_not(data, predictor)`\n"
-                     "  * Finds the last element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically false.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "`std.array.rfind_if_not(data, from, predictor)`\n"
-                     "  * Finds the last element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically false. The search operation is\n"
-                     "    performed on the same subrange that would be returned by\n"
-                     "    `slice(data, from)`.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "`std.array.rfind_if_not(data, from, [length], predictor)`\n"
-                     "  * Finds the last element, namely `x`, in `data`, for which\n"
-                     "    `predictor(x)` yields logically false. The search operation is\n"
-                     "    performed on the same subrange that would be returned by\n"
-                     "    `slice(data, from, length)`.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"),
+        rocket::sref(
+          "std.array.rfind_if_not(data, predictor)`\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "`std.array.rfind_if_not(data, from, predictor)`\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from)`.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "`std.array.rfind_if_not(data, from, [length], predictor)`\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from, length)`.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1138,20 +1154,22 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("is_sorted"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.is_sorted(data, [comparator])`\n"
-                     "  * Checks whether `data` is sorted. That is, there is no pair of\n"
-                     "    adjacent elements in `data` such that the first one is greater\n"
-                     "    than or unordered with the second one. Elements are compared\n"
-                     "    using `comparator`, which shall be a binary `function` that\n"
-                     "    returns a negative `integer` or `real` if the first argument is\n"
-                     "    less than the second one, a positive `integer` or `real` if the\n"
-                     "    first argument is greater than the second one, or `0` if the\n"
-                     "    arguments are equal; other values indicate that the arguments\n"
-                     "    are unordered. If no `comparator` is provided, the built-in\n"
-                     "    3-way comparison operator is used. An `array` that contains no\n"
-                     "    elements is considered to have been sorted.\n"
-                     "  * Returns `true` if `data` is sorted or empty, or `false`\n"
-                     "    otherwise.\n"),
+        rocket::sref(
+          "std.array.is_sorted(data, [comparator])`\n"
+          "  * Checks whether `data` is sorted. That is, there is no pair of\n"
+          "    adjacent elements in `data` such that the first one is greater\n"
+          "    than or unordered with the second one. Elements are compared\n"
+          "    using `comparator`, which shall be a binary `function` that\n"
+          "    returns a negative `integer` or `real` if the first argument is\n"
+          "    less than the second one, a positive `integer` or `real` if the\n"
+          "    first argument is greater than the second one, or `0` if the\n"
+          "    arguments are equal; other values indicate that the arguments\n"
+          "    are unordered. If no `comparator` is provided, the built-in\n"
+          "    3-way comparison operator is used. An `array` that contains no\n"
+          "    elements is considered to have been sorted.\n"
+          "  * Returns `true` if `data` is sorted or empty, or `false`\n"
+          "    otherwise.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1176,17 +1194,19 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("binary_search"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.binary_search(data, target, [comparator])`\n"
-                     "  * Finds the first element in `data` that is equal to `target`.\n"
-                     "    The principle of user-defined `comparator`s is the same as the\n"
-                     "    `is_sorted()` function. As a consequence, the function call\n"
-                     "    `is_sorted(data, comparator)` shall yield `true` prior to this\n"
-                     "    call, otherwise the effect is undefined.\n"
-                     "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found, or `null` otherwise.\n"
-                     "  * Throws an exception if `data` has not been sorted properly. Be\n"
-                     "    advised that in this case there is no guarantee whether an\n"
-                     "    exception will be thrown or not.\n"),
+        rocket::sref(
+          "std.array.binary_search(data, target, [comparator])`\n"
+          "  * Finds the first element in `data` that is equal to `target`.\n"
+          "    The principle of user-defined `comparator`s is the same as the\n"
+          "    `is_sorted()` function. As a consequence, the function call\n"
+          "    `is_sorted(data, comparator)` shall yield `true` prior to this\n"
+          "    call, otherwise the effect is undefined.\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "  * Throws an exception if `data` has not been sorted properly. Be\n"
+          "    advised that in this case there is no guarantee whether an\n"
+          "    exception will be thrown or not.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1216,19 +1236,21 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("lower_bound"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.lower_bound(data, target, [comparator])`\n"
-                     "  * Finds the first element in `data` that is greater than or equal\n"
-                     "    to `target` and precedes all elements that are less than\n"
-                     "    `target` if any. The principle of user-defined `comparator`s is\n"
-                     "    the same as the `is_sorted()` function. As a consequence, the\n"
-                     "    function call `is_sorted(data, comparator)` shall yield `true`\n"
-                     "    prior to this call, otherwise the effect is undefined.\n"
-                     "  * Returns the subscript of such an element as an `integer`. This\n"
-                     "    function returns `lengthof(data)` if all elements are less than\n"
-                     "    `target`.\n"
-                     "  * Throws an exception if `data` has not been sorted properly. Be\n"
-                     "    advised that in this case there is no guarantee whether an\n"
-                     "    exception will be thrown or not.\n"),
+        rocket::sref(
+          "std.array.lower_bound(data, target, [comparator])`\n"
+          "  * Finds the first element in `data` that is greater than or equal\n"
+          "    to `target` and precedes all elements that are less than\n"
+          "    `target` if any. The principle of user-defined `comparator`s is\n"
+          "    the same as the `is_sorted()` function. As a consequence, the\n"
+          "    function call `is_sorted(data, comparator)` shall yield `true`\n"
+          "    prior to this call, otherwise the effect is undefined.\n"
+          "  * Returns the subscript of such an element as an `integer`. This\n"
+          "    function returns `lengthof(data)` if all elements are less than\n"
+          "    `target`.\n"
+          "  * Throws an exception if `data` has not been sorted properly. Be\n"
+          "    advised that in this case there is no guarantee whether an\n"
+          "    exception will be thrown or not.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1254,19 +1276,21 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("upper_bound"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.upper_bound(data, target, [comparator])`\n"
-                     "  * Finds the first element in `data` that is greater than `target`\n"
-                     "    and precedes all elements that are less than or equal to\n"
-                     "    `target` if any. The principle of user-defined `comparator`s is\n"
-                     "    the same as the `is_sorted()` function. As a consequence, the\n"
-                     "    function call `is_sorted(data, comparator)` shall yield `true`\n"
-                     "    prior to this call, otherwise the effect is undefined.\n"
-                     "  * Returns the subscript of such an element as an `integer`. This\n"
-                     "    function returns `lengthof(data)` if all elements are less than\n"
-                     "    or equal to `target`.\n"
-                     "  * Throws an exception if `data` has not been sorted properly. Be\n"
-                     "    advised that in this case there is no guarantee whether an\n"
-                     "    exception will be thrown or not.\n"),
+        rocket::sref(
+          "std.array.upper_bound(data, target, [comparator])`\n"
+          "  * Finds the first element in `data` that is greater than `target`\n"
+          "    and precedes all elements that are less than or equal to\n"
+          "    `target` if any. The principle of user-defined `comparator`s is\n"
+          "    the same as the `is_sorted()` function. As a consequence, the\n"
+          "    function call `is_sorted(data, comparator)` shall yield `true`\n"
+          "    prior to this call, otherwise the effect is undefined.\n"
+          "  * Returns the subscript of such an element as an `integer`. This\n"
+          "    function returns `lengthof(data)` if all elements are less than\n"
+          "    or equal to `target`.\n"
+          "  * Throws an exception if `data` has not been sorted properly. Be\n"
+          "    advised that in this case there is no guarantee whether an\n"
+          "    exception will be thrown or not.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1292,18 +1316,20 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("equal_range"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.equal_range(data, target, [comparator])`\n"
-                     "  * Gets the range of elements equivalent to `target` in `data` as\n"
-                     "    a single function call. This function is equivalent to calling\n"
-                     "    `lower_bound(data, target, comparator)` and\n"
-                     "    `upper_bound(data, target, comparator)` respectively then\n"
-                     "    storing both results in an `array`.\n"
-                     "  * Returns an `array` of two `integer`s, the first of which\n"
-                     "    specifies the lower bound and the other specifies the upper\n"
-                     "    bound.\n"
-                     "  * Throws an exception if `data` has not been sorted properly. Be\n"
-                     "    advised that in this case there is no guarantee whether an\n"
-                     "    exception will be thrown or not.\n"),
+        rocket::sref(
+          "std.array.equal_range(data, target, [comparator])`\n"
+          "  * Gets the range of elements equivalent to `target` in `data` as\n"
+          "    a single function call. This function is equivalent to calling\n"
+          "    `lower_bound(data, target, comparator)` and\n"
+          "    `upper_bound(data, target, comparator)` respectively then\n"
+          "    storing both results in an `array`.\n"
+          "  * Returns an `array` of two `integer`s, the first of which\n"
+          "    specifies the lower bound and the other specifies the upper\n"
+          "    bound.\n"
+          "  * Throws an exception if `data` has not been sorted properly. Be\n"
+          "    advised that in this case there is no guarantee whether an\n"
+          "    exception will be thrown or not.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1329,16 +1355,18 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("sort"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.sort(data, [comparator])`\n"
-                     "  * Sorts elements in `data` in ascending order. The principle of\n"
-                     "    user-defined `comparator`s is the same as the `is_sorted()`\n"
-                     "    function. The algorithm shall finish in `O(n log n)` time where\n"
-                     "    `n` is the number of elements in `data`, and shall be stable.\n"
-                     "    This function returns a new `array` without modifying `data`.\n"
-                     "  * Returns the sorted `array`.\n"
-                     "  * Throws an exception if any elements are unordered. Be advised\n"
-                     "    that in this case there is no guarantee whether an exception\n"
-                     "    will be thrown or not.\n"),
+        rocket::sref(
+          "std.array.sort(data, [comparator])`\n"
+          "  * Sorts elements in `data` in ascending order. The principle of\n"
+          "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+          "    function. The algorithm shall finish in `O(n log n)` time where\n"
+          "    `n` is the number of elements in `data`, and shall be stable.\n"
+          "    This function returns a new `array` without modifying `data`.\n"
+          "  * Returns the sorted `array`.\n"
+          "  * Throws an exception if any elements are unordered. Be advised\n"
+          "    that in this case there is no guarantee whether an exception\n"
+          "    will be thrown or not.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1363,17 +1391,19 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("sortu"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.sortu(data, [comparator])`\n"
-                     "  * Sorts elements in `data` in ascending order, then removes all\n"
-                     "    elements that have preceding equivalents. The principle of\n"
-                     "    user-defined `comparator`s is the same as the `is_sorted()`\n"
-                     "    function. The algorithm shall finish in `O(n log n)` time where\n"
-                     "    `n` is the number of elements in `data`. This function returns\n"
-                     "    a new `array` without modifying `data`.\n"
-                     "  * Returns the sorted `array` with no duplicate elements.\n"
-                     "  * Throws an exception if any elements are unordered. Be advised\n"
-                     "    that in this case there is no guarantee whether an exception\n"
-                     "    will be thrown or not.\n"),
+        rocket::sref(
+          "std.array.sortu(data, [comparator])`\n"
+          "  * Sorts elements in `data` in ascending order, then removes all\n"
+          "    elements that have preceding equivalents. The principle of\n"
+          "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+          "    function. The algorithm shall finish in `O(n log n)` time where\n"
+          "    `n` is the number of elements in `data`. This function returns\n"
+          "    a new `array` without modifying `data`.\n"
+          "  * Returns the sorted `array` with no duplicate elements.\n"
+          "  * Throws an exception if any elements are unordered. Be advised\n"
+          "    that in this case there is no guarantee whether an exception\n"
+          "    will be thrown or not.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1398,13 +1428,15 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("max_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.max_of(data, [comparator])`\n"
-                     "  * Finds the maximum element in `data`. The principle of\n"
-                     "    user-defined `comparator`s is the same as the `is_sorted()`\n"
-                     "    function. Elements that are unordered with the first element\n"
-                     "    are ignored silently.\n"
-                     "  * Returns a copy of the maximum element, or `null` if `data` is\n"
-                     "    empty.\n"),
+        rocket::sref(
+          "std.array.max_of(data, [comparator])`\n"
+          "  * Finds the maximum element in `data`. The principle of\n"
+          "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+          "    function. Elements that are unordered with the first element\n"
+          "    are ignored silently.\n"
+          "  * Returns a copy of the maximum element, or `null` if `data` is\n"
+          "    empty.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1429,13 +1461,15 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("min_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.min_of(data, [comparator])`\n"
-                     "  * Finds the minimum element in `data`. The principle of\n"
-                     "    user-defined `comparator`s is the same as the `is_sorted()`\n"
-                     "    function. Elements that are unordered with the first element\n"
-                     "    are ignored silently.\n"
-                     "  * Returns a copy of the minimum element, or `null` if `data` is\n"
-                     "    empty.\n"),
+        rocket::sref(
+          "std.array.min_of(data, [comparator])`\n"
+          "  * Finds the minimum element in `data`. The principle of\n"
+          "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+          "    function. Elements that are unordered with the first element\n"
+          "    are ignored silently.\n"
+          "  * Returns a copy of the minimum element, or `null` if `data` is\n"
+          "    empty.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1460,10 +1494,12 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("reverse"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.reverse(data)`\n"
-                     "  * Reverses an `array`. This function returns a new `array`\n"
-                     "    without modifying `text`.\n"
-                     "  * Returns the reversed `array`.\n"),
+        rocket::sref(
+          "std.array.reverse(data)`\n"
+          "  * Reverses an `array`. This function returns a new `array`\n"
+          "    without modifying `text`.\n"
+          "  * Returns the reversed `array`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1488,14 +1524,16 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("generate"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.generate(generator, length)`\n"
-                     "  * Calls `generator` repeatedly up to `length` times and returns\n"
-                     "    an `array` consisting of all values returned. `generator` shall\n"
-                     "    be a binary function. The first argument will be the number of\n"
-                     "    elements having been generated; the second argument is the\n"
-                     "    previous element generated, or `null` in the case of the first\n"
-                     "    element.\n"
-                     "  * Returns an `array` containing all values generated.\n"),
+        rocket::sref(
+          "std.array.generate(generator, length)`\n"
+          "  * Calls `generator` repeatedly up to `length` times and returns\n"
+          "    an `array` consisting of all values returned. `generator` shall\n"
+          "    be a binary function. The first argument will be the number of\n"
+          "    elements having been generated; the second argument is the\n"
+          "    previous element generated, or `null` in the case of the first\n"
+          "    element.\n"
+          "  * Returns an `array` containing all values generated.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1520,14 +1558,16 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("shuffle"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref("`std.array.shuffle(data, [seed])`\n"
-                     "  * Shuffles elements in `data` randomly. If `seed` is set to an\n"
-                     "    `integer`, the internal pseudo random number generator will be\n"
-                     "    initialized with it and will produce the same series of numbers\n"
-                     "    for a specific `seed` value. If it is absent, an unspecified\n"
-                     "    seed is generated when this function is called. This function\n"
-                     "    returns a new `array` without modifying `data`.\n"
-                     "  * Returns the shuffled `array`.\n"),
+        rocket::sref(
+          "std.array.shuffle(data, [seed])`\n"
+          "  * Shuffles elements in `data` randomly. If `seed` is set to an\n"
+          "    `integer`, the internal pseudo random number generator will be\n"
+          "    initialized with it and will produce the same series of numbers\n"
+          "    for a specific `seed` value. If it is absent, an unspecified\n"
+          "    seed is generated when this function is called. This function\n"
+          "    returns a new `array` without modifying `data`.\n"
+          "  * Returns the shuffled `array`.\n"
+        ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
