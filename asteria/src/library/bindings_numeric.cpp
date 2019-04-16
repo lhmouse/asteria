@@ -460,7 +460,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
                      "  * Propagates the sign bit of the number `value`, which may be an\n"
                      "    `integer` or `real`, to all bits of an `integer`. Be advised\n"
                      "    that `-0.0` is distinct from `0.0` despite the equality.\n"
-                     "  * Returns `-1` if `value` is negative and `0` otherwise.\n"),
+                     "  * Returns `-1` if `value` is negative, or `0` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -495,8 +495,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
                      "    `integer` or `real`. Be adviced that this functions returns\n"
                      "    `true` for `integer`s for consistency; `integer`s do not\n"
                      "    support infinities or NaNs.\n"
-                     "  * Returns `true` if `value` is an `integer`, or is a `real` that\n"
-                     "    is neither an infinity or a NaN; otherwise `false`.\n"),
+                     "  * Returns `true` if `value` is an `integer` or is a `real` that\n"
+                     "    is neither an infinity or a NaN, or `false` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -532,7 +532,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
                      "    `false` for `integer`s for consistency; `integer`s do not\n"
                      "    support infinities.\n"
                      "  * Returns `true` if `value` is a `real` that denotes an infinity;\n"
-                     "    otherwise `false`.\n"),
+                     "    or `false` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -566,8 +566,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
                      "  * Checks whether `value` is a NaN. `value` may be an `integer` or\n"
                      "    `real`. Be adviced that this functions returns `false` for\n"
                      "    `integer`s for consistency; `integer`s do not support NaNs.\n"
-                     "  * Returns `true` if `value` is a `real` denoting a NaN; otherwise\n"
-                     "    `false`.\n"),
+                     "  * Returns `true` if `value` is a `real` denoting a NaN, or\n"
+                     "    `false` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -600,7 +600,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         rocket::sref("`std.numeric.clamp(value, lower, upper)`\n"
                      "  * Limits `value` between `lower` and `upper`.\n"
                      "  * Returns `lower` if `value < lower`, `upper` if `value > upper`,\n"
-                     "    and `value` otherwise (including when `value` is a NaN). The\n"
+                     "    or `value` otherwise, including when `value` is a NaN. The\n"
                      "    returned value is of type `integer` if all arguments are of\n"
                      "    type `integer`; otherwise it is of type `real`.\n"
                      "  * Throws an exception if `lower` is not less than or equal to\n"

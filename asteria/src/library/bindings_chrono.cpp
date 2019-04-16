@@ -675,8 +675,8 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
                      "    fewer or more digits. There shall be no leading or trailing\n"
                      "    spaces.\n"
                      "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-                     "    if the time string has been parsed successfully; otherwise\n"
-                     "    `null`.\n"),
+                     "    if the time string has been parsed successfully, or `null`\n"
+                     "    otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {

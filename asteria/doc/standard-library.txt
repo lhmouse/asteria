@@ -100,7 +100,7 @@
 	* Prints all arguments to the standard error stream. A line break
 	  is appended to terminate the line.
 
-	* Returns `true` if the operation succeeds; otherwise `null`.
+	* Returns `true` if the operation succeeds, or `null` otherwise.
 
 `std.debug.dump(value, [indent])`
 
@@ -111,7 +111,7 @@
 	  inserted and output lines are not indented. It has a default
 	  value of `2`.
 
-	* Returns `true` if the operation succeeds; otherwise `null`.
+	* Returns `true` if the operation succeeds, or `null` otherwise.
 
 ### `std.chrono`
 
@@ -203,15 +203,15 @@
 	  spaces.
 
 	* Returns the number of milliseconds since `1970-01-01 00:00:00`
-	  if the time string has been parsed successfully; otherwise
-	  `null`.
+	  if the time string has been parsed successfully, or `null`
+	  otherwise.
 
 ### `std.string`
 
 `std.string.slice(text, from, [length])`
 
 	* Copies a subrange of `text` to create a new byte string. Bytes
-	  are copied from `from` if it is non-negative, and from
+	  are copied from `from` if it is non-negative, or from
 	  `lengthof(text) + from` otherwise. If `length` is set to an
 	  `integer`, no more than this number of bytes will be copied. If
 	  it is absent, all bytes from `from` to the end of `text` will
@@ -258,16 +258,16 @@
 	* Checks whether `prefix` is a prefix of `text`. The empty
 	  `string` is considered to be a prefix of any string.
 
-	* Returns `true` if `prefix` is a prefix of `text`; otherwise
-	  `false`.
+	* Returns `true` if `prefix` is a prefix of `text`, or `false`
+	  otherwise.
 
 `std.string.ends_with(text, suffix)`
 
 	* Checks whether `suffix` is a suffix of `text`. The empty
 	  `string` is considered to be a suffix of any string.
 
-	* Returns `true` if `suffix` is a suffix of `text`; otherwise
-	  `false`.
+	* Returns `true` if `suffix` is a suffix of `text`, or `false`
+	  otherwise.
 
 `std.string.find(text, pattern)`
 
@@ -275,7 +275,7 @@
 
 	* Returns the subscript of the first byte of the first match of
 	  `pattern` in `text` if one is found, which is always
-	  non-negative; otherwise `null`.
+	  non-negative, or `null` otherwise.
 
 `std.string.find(text, from, pattern)`
 
@@ -285,7 +285,7 @@
 
 	* Returns the subscript of the first byte of the first match of
 	  `pattern` in `text` if one is found, which is always
-	  non-negative; otherwise `null`.
+	  non-negative, or `null` otherwise.
 
 `std.string.find(text, from, [length], pattern)`
 
@@ -295,7 +295,7 @@
 
 	* Returns the subscript of the first byte of the first match of
 	  `pattern` in `text` if one is found, which is always
-	  non-negative; otherwise `null`.
+	  non-negative, or `null` otherwise.
 
 `std.string.rfind(text, pattern)`
 
@@ -303,7 +303,7 @@
 
 	* Returns the subscript of the first byte of the last match of
 	  `pattern` in `text` if one is found, which is always
-	  non-negative; otherwise `null`.
+	  non-negative, or `null` otherwise.
 
 `std.string.rfind(text, from, pattern)`
 
@@ -313,7 +313,7 @@
 
 	* Returns the subscript of the first byte of the last match of
 	  `pattern` in `text` if one is found, which is always
-	  non-negative; otherwise `null`.
+	  non-negative, or `null` otherwise.
 
 `std.string.rfind(text, from, [length], pattern)`
 
@@ -321,7 +321,7 @@
 
 	* Returns the subscript of the first byte of the last match of
 	  `pattern` in `text` if one is found, which is always
-	  non-negative; otherwise `null`.
+	  non-negative, or `null` otherwise.
 
 `std.string.find_and_replace(text, pattern, replacement)`
 
@@ -590,7 +590,7 @@
 	  replacement character `"\uFFFD"` and consequently encoded as
 	  `"\xEF\xBF\xBD"`; otherwise this function fails.
 
-	* Returns the encoded `string` on success; otherwise `null`.
+	* Returns the encoded `string` on success, or `null` otherwise.
 
 `std.string.utf8_decode(text, [permissive])`
 
@@ -601,8 +601,8 @@
 	  re-interpreted as isolated bytes according to ISO/IEC 8859-1;
 	  otherwise this function fails.
 
-	* Returns an `array` containing decoded code points; otherwise
-	  `null`.
+	* Returns an `array` containing decoded code points, or `null`
+	  otherwise.
 
 `std.string.pack8(values)`
 
@@ -749,7 +749,7 @@
 `std.array.slice(data, from, [length])`
 
 	* Copies a subrange of `data` to create a new `array`. Elements
-	  are copied from `from` if it is non-negative, and from
+	  are copied from `from` if it is non-negative, or from
 	  `lengthof(data) + from` otherwise. If `length` is set to an
 	  `integer`, no more than this number of elements will be copied.
 	  If it is absent, all elements from `from` to the end of `data`
@@ -784,8 +784,8 @@
 	* Searches `data` for the first occurrence of `target`.
 
 	* Returns the subscript of the first match of `target` in `data`
-	  if one is found, which is always non-negative; otherwise
-	  `null`.
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
 
 `std.array.find(data, from, target)`
 
@@ -794,8 +794,8 @@
 	  be returned by `slice(data, from)`.
 
 	* Returns the subscript of the first match of `target` in `data`
-	  if one is found, which is always non-negative; otherwise
-	  `null`.
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
 
 `std.array.find(data, from, [length], target)`
 
@@ -804,16 +804,16 @@
 	  be returned by `slice(data, from, length)`.
 
 	* Returns the subscript of the first match of `target` in `data`
-	  if one is found, which is always non-negative; otherwise
-	  `null`.
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
 
 `std.array.rfind(data, target)`
 
 	* Searches `data` for the last occurrence of `target`.
 
 	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative; otherwise
-	  `null`.
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
 
 `std.array.rfind(data, from, target)`
 
@@ -822,8 +822,8 @@
 	  returned by `slice(data, from)`.
 
 	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative; otherwise
-	  `null`.
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
 
 `std.array.rfind(data, from, [length], target)`
 
@@ -832,8 +832,8 @@
 	  returned by `slice(data, from, length)`.
 
 	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative; otherwise
-	  `null`.
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
 
 `std.array.find_if(data, predictor)`
 
@@ -841,7 +841,7 @@
 	  `predictor(x)` yields logically true.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.find_if(data, from, predictor)`
 
@@ -851,7 +851,7 @@
 	  `slice(data, from)`.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.find_if(data, from, [length], predictor)`
 
@@ -861,7 +861,7 @@
 	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.find_if_not(data, predictor)`
 
@@ -869,7 +869,7 @@
 	  `predictor(x)` yields logically false.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.find_if_not(data, from, predictor)`
 
@@ -879,7 +879,7 @@
 	  `slice(data, from)`.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.find_if_not(data, from, [length], predictor)`
 
@@ -889,7 +889,7 @@
 	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.rfind_if(data, predictor)`
 
@@ -897,7 +897,7 @@
 	  `predictor(x)` yields logically true.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.rfind_if(data, from, predictor)`
 
@@ -907,7 +907,7 @@
 	  `slice(data, from)`.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.rfind_if(data, from, [length], predictor)`
 
@@ -917,7 +917,7 @@
 	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.rfind_if_not(data, predictor)`
 
@@ -925,7 +925,7 @@
 	  `predictor(x)` yields logically false.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.rfind_if_not(data, from, predictor)`
 
@@ -935,7 +935,7 @@
 	  `slice(data, from)`.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.rfind_if_not(data, from, [length], predictor)`
 
@@ -945,7 +945,7 @@
 	  `slice(data, from, length)`.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 `std.array.is_sorted(data, [comparator])`
 
@@ -961,7 +961,8 @@
 	  3-way comparison operator is used. An `array` that contains no
 	  elements is considered to have been sorted.
 
-	* Returns `true` if `data` is sorted or empty; otherwise `false`.
+	* Returns `true` if `data` is sorted or empty, or `false`
+	  otherwise.
 
 `std.array.binary_search(data, target, [comparator])`
 
@@ -972,7 +973,7 @@
 	  call, otherwise the effect is undefined.
 
 	* Returns the subscript of such an element as an `integer`, if
-	  one is found; otherwise `null`.
+	  one is found, or `null` otherwise.
 
 	* Throws an exception if `data` has not been sorted properly. Be
 	  advised that in this case there is no guarantee whether an
@@ -1126,7 +1127,7 @@
 	  `integer` or `real`, to all bits of an `integer`. Be advised
 	  that `-0.0` is distinct from `0.0` despite the equality.
 
-	* Returns `-1` if `value` is negative and `0` otherwise.
+	* Returns `-1` if `value` is negative, or `0` otherwise.
 
 `std.numeric.is_finite(value)`
 
@@ -1135,8 +1136,8 @@
 	  `true` for `integer`s for consistency; `integer`s do not
 	  support infinities or NaNs.
 
-	* Returns `true` if `value` is an `integer`, or is a `real` that
-	  is neither an infinity or a NaN; otherwise `false`.
+	* Returns `true` if `value` is an `integer` or is a `real` that
+	  is neither an infinity or a NaN, or `false` otherwise.
 
 `std.numeric.is_infinity(value)`
 
@@ -1146,7 +1147,7 @@
 	  support infinities.
 
 	* Returns `true` if `value` is a `real` that denotes an infinity;
-	  otherwise `false`.
+	  or `false` otherwise.
 
 `std.numeric.is_nan(value)`
 
@@ -1154,15 +1155,15 @@
 	  `real`. Be adviced that this functions returns `false` for
 	  `integer`s for consistency; `integer`s do not support NaNs.
 
-	* Returns `true` if `value` is a `real` denoting a NaN; otherwise
-	  `false`.
+	* Returns `true` if `value` is a `real` denoting a NaN, or
+	  `false` otherwise.
 
 `std.numeric.clamp(value, lower, upper)`
 
 	* Limits `value` between `lower` and `upper`.
 
 	* Returns `lower` if `value < lower`, `upper` if `value > upper`,
-	  and `value` otherwise (including when `value` is a NaN). The
+	  or `value` otherwise, including when `value` is a NaN. The
 	  returned value is of type `integer` if all arguments are of
 	  type `integer`; otherwise it is of type `real`.
 

@@ -651,7 +651,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref("`std.array.slice(data, from, [length])`\n"
                      "  * Copies a subrange of `data` to create a new `array`. Elements\n"
-                     "    are copied from `from` if it is non-negative, and from\n"
+                     "    are copied from `from` if it is non-negative, or from\n"
                      "    `lengthof(data) + from` otherwise. If `length` is set to an\n"
                      "    `integer`, no more than this number of elements will be copied.\n"
                      "    If it is absent, all elements from `from` to the end of `data`\n"
@@ -733,22 +733,22 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
         rocket::sref("`std.array.find(data, target)`\n"
                      "  * Searches `data` for the first occurrence of `target`.\n"
                      "  * Returns the subscript of the first match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative; otherwise\n"
-                     "    `null`.\n"
+                     "    if one is found, which is always non-negative, or `null`\n"
+                     "    otherwise.\n"
                      "`std.array.find(data, from, target)`\n"
                      "  * Searches `data` for the first occurrence of `target`. The\n"
                      "    search operation is performed on the same subrange that would\n"
                      "    be returned by `slice(data, from)`.\n"
                      "  * Returns the subscript of the first match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative; otherwise\n"
-                     "    `null`.\n"
+                     "    if one is found, which is always non-negative, or `null`\n"
+                     "    otherwise.\n"
                      "`std.array.find(data, from, [length], target)`\n"
                      "  * Searches `data` for the first occurrence of `target`. The\n"
                      "    search operation is performed on the same subrange that would\n"
                      "    be returned by `slice(data, from, length)`.\n"
                      "  * Returns the subscript of the first match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative; otherwise\n"
-                     "    `null`.\n"),
+                     "    if one is found, which is always non-negative, or `null`\n"
+                     "    otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -801,22 +801,22 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
         rocket::sref("`std.array.rfind(data, target)`\n"
                      "  * Searches `data` for the last occurrence of `target`.\n"
                      "  * Returns the subscript of the last match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative; otherwise\n"
-                     "    `null`.\n"
+                     "    if one is found, which is always non-negative, or `null`\n"
+                     "    otherwise.\n"
                      "`std.array.rfind(data, from, target)`\n"
                      "  * Searches `data` for the last occurrence of `target`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
                      "    returned by `slice(data, from)`.\n"
                      "  * Returns the subscript of the last match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative; otherwise\n"
-                     "    `null`.\n"
+                     "    if one is found, which is always non-negative, or `null`\n"
+                     "    otherwise.\n"
                      "`std.array.rfind(data, from, [length], target)`\n"
                      "  * Searches `data` for the last occurrence of `target`. The search\n"
                      "    operation is performed on the same subrange that would be\n"
                      "    returned by `slice(data, from, length)`.\n"
                      "  * Returns the subscript of the last match of `target` in `data`\n"
-                     "    if one is found, which is always non-negative; otherwise\n"
-                     "    `null`.\n"),
+                     "    if one is found, which is always non-negative, or `null`\n"
+                     "    otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -870,21 +870,21 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
                      "  * Finds the first element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically true.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "`std.array.find_if(data, from, predictor)`\n"
                      "  * Finds the first element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically true. The search operation is\n"
                      "    performed on the same subrange that would be returned by\n"
                      "    `slice(data, from)`.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "`std.array.find_if(data, from, [length], predictor)`\n"
                      "  * Finds the first element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically true. The search operation is\n"
                      "    performed on the same subrange that would be returned by\n"
                      "    `slice(data, from, length)`.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"),
+                     "    one is found, or `null` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -938,21 +938,21 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
                      "  * Finds the first element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically false.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "`std.array.find_if_not(data, from, predictor)`\n"
                      "  * Finds the first element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically false. The search operation is\n"
                      "    performed on the same subrange that would be returned by\n"
                      "    `slice(data, from)`.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "`std.array.find_if_not(data, from, [length], predictor)`\n"
                      "  * Finds the first element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically false. The search operation is\n"
                      "    performed on the same subrange that would be returned by\n"
                      "    `slice(data, from, length)`.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"),
+                     "    one is found, or `null` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1006,21 +1006,21 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
                      "  * Finds the last element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically true.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "`std.array.rfind_if(data, from, predictor)`\n"
                      "  * Finds the last element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically true. The search operation is\n"
                      "    performed on the same subrange that would be returned by\n"
                      "    `slice(data, from)`.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "`std.array.rfind_if(data, from, [length], predictor)`\n"
                      "  * Finds the last element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically true. The search operation is\n"
                      "    performed on the same subrange that would be returned by\n"
                      "    `slice(data, from, length)`.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"),
+                     "    one is found, or `null` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1074,21 +1074,21 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
                      "  * Finds the last element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically false.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "`std.array.rfind_if_not(data, from, predictor)`\n"
                      "  * Finds the last element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically false. The search operation is\n"
                      "    performed on the same subrange that would be returned by\n"
                      "    `slice(data, from)`.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "`std.array.rfind_if_not(data, from, [length], predictor)`\n"
                      "  * Finds the last element, namely `x`, in `data`, for which\n"
                      "    `predictor(x)` yields logically false. The search operation is\n"
                      "    performed on the same subrange that would be returned by\n"
                      "    `slice(data, from, length)`.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"),
+                     "    one is found, or `null` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1150,7 +1150,8 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
                      "    are unordered. If no `comparator` is provided, the built-in\n"
                      "    3-way comparison operator is used. An `array` that contains no\n"
                      "    elements is considered to have been sorted.\n"
-                     "  * Returns `true` if `data` is sorted or empty; otherwise `false`.\n"),
+                     "  * Returns `true` if `data` is sorted or empty, or `false`\n"
+                     "    otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1182,7 +1183,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
                      "    `is_sorted(data, comparator)` shall yield `true` prior to this\n"
                      "    call, otherwise the effect is undefined.\n"
                      "  * Returns the subscript of such an element as an `integer`, if\n"
-                     "    one is found; otherwise `null`.\n"
+                     "    one is found, or `null` otherwise.\n"
                      "  * Throws an exception if `data` has not been sorted properly. Be\n"
                      "    advised that in this case there is no guarantee whether an\n"
                      "    exception will be thrown or not.\n"),

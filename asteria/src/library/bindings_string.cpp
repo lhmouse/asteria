@@ -1086,7 +1086,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref("`std.string.slice(text, from, [length])`\n"
                      "  * Copies a subrange of `text` to create a new byte string. Bytes\n"
-                     "    are copied from `from` if it is non-negative, and from\n"
+                     "    are copied from `from` if it is non-negative, or from\n"
                      "    `lengthof(text) + from` otherwise. If `length` is set to an\n"
                      "    `integer`, no more than this number of bytes will be copied. If\n"
                      "    it is absent, all bytes from `from` to the end of `text` will\n"
@@ -1160,6 +1160,98 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         G_null()
       )));
     //===================================================================
+    // `std.string.compare()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("compare"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.compare(text1, text2, [length])`\n"
+                     "  * Performs lexicographical comparison on two byte strings. If\n"
+                     "    `length` is set to an `integer`, no more than this number of\n"
+                     "    bytes are compared. This function behaves like the `strncmp()`\n"
+                     "    function in C, except that null characters do not terminate\n"
+                     "    strings.\n"
+                     "  * Returns a positive `integer` if `text1` compares greater than\n"
+                     "    `text2`, a negative `integer` if `text1` compares less than\n"
+                     "    `text2`, or zero if `text1` compares equal to `text2`.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.compare"), args);
+            // Parse arguments.
+            G_string text1;
+            G_string text2;
+            Opt<G_integer> length;
+            if(reader.start().g(text1).g(text2).g(length).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_compare(text1, text2, length) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.string.starts_with()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("starts_with"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.starts_with(text, prefix)`\n"
+                     "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
+                     "    `string` is considered to be a prefix of any string.\n"
+                     "  * Returns `true` if `prefix` is a prefix of `text`, or `false`\n"
+                     "    otherwise.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
+            // Parse arguments.
+            G_string text;
+            G_string prefix;
+            if(reader.start().g(text).g(prefix).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_starts_with(text, prefix) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
+    // `std.string.ends_with()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("ends_with"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref("`std.string.ends_with(text, suffix)`\n"
+                     "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
+                     "    `string` is considered to be a suffix of any string.\n"
+                     "  * Returns `true` if `suffix` is a suffix of `text`, or `false`\n"
+                     "    otherwise.\n"),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
+            // Parse arguments.
+            G_string text;
+            G_string suffix;
+            if(reader.start().g(text).g(suffix).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_ends_with(text, suffix) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          },
+        // Opaque parameter
+        G_null()
+      )));
+    //===================================================================
     // `std.string.find()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find"),
@@ -1169,21 +1261,21 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
                      "  * Searches `text` for the first occurrence of `pattern`.\n"
                      "  * Returns the subscript of the first byte of the first match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
-                     "    non-negative; otherwise `null`.\n"
+                     "    non-negative, or `null` otherwise.\n"
                      "`std.string.find(text, from, pattern)`\n"
                      "  * Searches `text` for the first occurrence of `pattern`. The\n"
                      "    search operation is performed on the same subrange that would\n"
                      "    be returned by `slice(text, from)`.\n"
                      "  * Returns the subscript of the first byte of the first match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
-                     "    non-negative; otherwise `null`.\n"
+                     "    non-negative, or `null` otherwise.\n"
                      "`std.string.find(text, from, [length], pattern)`\n"
                      "  * Searches `text` for the first occurrence of `pattern`. The\n"
                      "    search operation is performed on the same subrange that would\n"
                      "    be returned by `slice(text, from, length)`.\n"
                      "  * Returns the subscript of the first byte of the first match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
-                     "    non-negative; otherwise `null`.\n"),
+                     "    non-negative, or `null` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1237,19 +1329,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
                      "  * Searches `text` for the last occurrence of `pattern`.\n"
                      "  * Returns the subscript of the first byte of the last match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
-                     "    non-negative; otherwise `null`.\n"
+                     "    non-negative, or `null` otherwise.\n"
                      "`std.string.rfind(text, from, pattern)`\n"
                      "  * Searches `text` for the last occurrence of `pattern`. The\n"
                      "    search operation is performed on the same subrange that would\n"
                      "    be returned by `slice(text, from)`.\n"
                      "  * Returns the subscript of the first byte of the last match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
-                     "    non-negative; otherwise `null`.\n"
+                     "    non-negative, or `null` otherwise.\n"
                      "`std.string.rfind(text, from, [length], pattern)`\n"
                      "  * Searches `text` for the last occurrence of `pattern`.\n"
                      "  * Returns the subscript of the first byte of the last match of\n"
                      "    `pattern` in `text` if one is found, which is always\n"
-                     "    non-negative; otherwise `null`.\n"),
+                     "    non-negative, or `null` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -1603,98 +1695,6 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
-      )));
-    //===================================================================
-    // `std.string.compare()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("compare"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.string.compare(text1, text2, [length])`\n"
-                     "  * Performs lexicographical comparison on two byte strings. If\n"
-                     "    `length` is set to an `integer`, no more than this number of\n"
-                     "    bytes are compared. This function behaves like the `strncmp()`\n"
-                     "    function in C, except that null characters do not terminate\n"
-                     "    strings.\n"
-                     "  * Returns a positive `integer` if `text1` compares greater than\n"
-                     "    `text2`, a negative `integer` if `text1` compares less than\n"
-                     "    `text2`, or zero if `text1` compares equal to `text2`.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.compare"), args);
-            // Parse arguments.
-            G_string text1;
-            G_string text2;
-            Opt<G_integer> length;
-            if(reader.start().g(text1).g(text2).g(length).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_compare(text1, text2, length) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
-      )));
-    //===================================================================
-    // `std.string.starts_with()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("starts_with"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.string.starts_with(text, prefix)`\n"
-                     "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
-                     "    `string` is considered to be a prefix of any string.\n"
-                     "  * Returns `true` if `prefix` is a prefix of `text`; otherwise\n"
-                     "    `false`.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
-            // Parse arguments.
-            G_string text;
-            G_string prefix;
-            if(reader.start().g(text).g(prefix).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_starts_with(text, prefix) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          },
-        // Opaque parameter
-        G_null()
-      )));
-    //===================================================================
-    // `std.string.ends_with()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("ends_with"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref("`std.string.ends_with(text, suffix)`\n"
-                     "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
-                     "    `string` is considered to be a suffix of any string.\n"
-                     "  * Returns `true` if `suffix` is a suffix of `text`; otherwise\n"
-                     "    `false`.\n"),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
-            // Parse arguments.
-            G_string text;
-            G_string suffix;
-            if(reader.start().g(text).g(suffix).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_ends_with(text, suffix) };
               return rocket::move(xref);
             }
             // Fail.
@@ -2120,7 +2120,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
                      "  `permissive` is set to `true`, it is replaced with the\n"
                      "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
                      "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
-                     "  * Returns the encoded `string` on success; otherwise `null`.\n"),
+                     "  * Returns the encoded `string` on success, or `null` otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
@@ -2166,8 +2166,8 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
                      "    `permissive` is set to `true`, all code units of it are\n"
                      "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
                      "    otherwise this function fails.\n"
-                     "  * Returns an `array` containing decoded code points; otherwise\n"
-                     "    `null`.\n"),
+                     "  * Returns an `array` containing decoded code points, or `null`\n"
+                     "    otherwise.\n"),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
