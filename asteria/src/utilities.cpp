@@ -82,7 +82,7 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     do_append_str(str, ':');
     do_ltoa_fixed(str, st.wSecond, 2);
     do_append_str(str, '.');
-    do_ltoa_fixed(str, st.wMillisecond, 3);
+    do_ltoa_fixed(str, st.wMilliseconds, 3);
 #else
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
