@@ -82,13 +82,9 @@ bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
           }
       };
 
-    template<typename PtrT, typename FuncT> void do_enumerate_variables(const PtrT& ptr, FuncT&& func)
+    template<typename FuncT> Variable_Callback<FuncT> do_make_variable_callback(FuncT&& func)
       {
-        ptr->enumerate_variables(Variable_Callback<FuncT>(rocket::forward<FuncT>(func)));
-      }
-    template<typename FuncT> void do_enumerate_variables(const Variable_HashSet& set, FuncT&& func)
-      {
-        set.enumerate(Variable_Callback<FuncT>(rocket::forward<FuncT>(func)));
+        return Variable_Callback<FuncT>(rocket::forward<FuncT>(func));
       }
 
     }  // namespace
@@ -114,145 +110,133 @@ Collector* Collector::collect_single_opt()
     //   Add variables that are either tracked or reachable from tracked ones
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
-    do_enumerate_variables(this->m_tracked,
+    this->m_tracked.enumerate(do_make_variable_callback(
       [&](const Rcptr<Variable>& root)
         {
-          // Add a variable reachable directly. Do not include references from `m_tracked`.
-          root->init_gcref(1);
+          // Add a variable that is reachable directly.
+          // The reference from `m_tracked` should be excluded, so we initialize the gcref counter to 1.
+          root->reset_gcref(1);
+          // If this variable has been inserted indirectly, finish.
           if(!this->m_staging.insert(root)) {
             return false;
           }
-          if(root->use_count() <= 1) {
-            // This variable can be marked for collection immediately.
+          // If `root` is the last reference to this variable, it can be marked for collection immediately.
+          auto nref = root->use_count();
+          if(nref <= 1) {
             root->reset(Source_Location(rocket::sref("<defunct-1>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
             return false;
           }
-          // Add variables reachable indirectly.
-          do_enumerate_variables(root,
-            [&](const Rcptr<Variable>& var)
+          // Enumerate variables that are reachable from `root` indirectly.
+          root->enumerate_variables(do_make_variable_callback(
+            [&](const Rcptr<Variable>& child)
               {
-                if(!this->m_staging.insert(var)) {
+                // If this variable has been inserted indirectly, finish.
+                if(!this->m_staging.insert(child)) {
                   return false;
                 }
-                var->init_gcref(0);
+                // Initialize the gcref counter.
+                // N.B. If this variable is encountered later from `m_tracked`, the gcref counter will be overwritten to 1.
+                child->reset_gcref(0);
+                // Decend into grandchildren.
                 return true;
               }
-            );
+            ));
           return false;
         }
-      );
-    ASTERIA_DEBUG_LOG("\tNumber of variables gathered in total: ", this->m_staging.size());
+      ));
     ///////////////////////////////////////////////////////////////////////////
     // Phase 2
     //   Drop references directly or indirectly from `m_staging`.
     ///////////////////////////////////////////////////////////////////////////
-    do_enumerate_variables(this->m_staging,
+    this->m_staging.enumerate(do_make_variable_callback(
       [&](const Rcptr<Variable>& root)
         {
           // Drop a direct reference.
-          root->add_gcref(1);
+          root->increment_gcref(1);
           ROCKET_ASSERT(root->get_gcref() <= root->use_count());
-          // Drop indirect references.
-          auto value_nref = root->get_value().use_count();
-          switch(value_nref) {
-          case 0:
-            {
-              // `root->get_value()` is `null`.
-              break;
-            }
-          case 1:
-            {
-              // `root->get_value()` is unique.
-              do_enumerate_variables(root,
-                [&](const Rcptr<Variable>& var)
-                  {
-                    var->add_gcref(1);
-                    ROCKET_ASSERT(var->get_gcref() <= var->use_count());
-                    // This is not going to be recursive.
-                    return false;
-                  }
-                );
-              break;
-            }
-          default:
-            {
-              // `root->get_value()` is shared.
-              do_enumerate_variables(root,
-                [&](const Rcptr<Variable>& var)
-                  {
-                    var->add_gcref(1 / static_cast<double>(value_nref));
-                    ROCKET_ASSERT(var->get_gcref() <= var->use_count());
-                    // This is not going to be recursive.
-                    return false;
-                  }
-                );
-              break;
-            }
-          }
-          return false;
-        }
-      );
-    ///////////////////////////////////////////////////////////////////////////
-    // Phase 3
-    //   Mark variables reachable indirectly from ones reachable directly.
-    ///////////////////////////////////////////////////////////////////////////
-    do_enumerate_variables(this->m_staging,
-      [&](const Rcptr<Variable>& root)
-        {
-          if(root->get_gcref() >= root->use_count()) {
-            // This variable is possibly unreachable.
+          // Skip variables that cannot have any children.
+          auto split = root->gcref_split();
+          if(split <= 0) {
             return false;
           }
-          // Mark this variable reachable so it will not be collected.
-          root->init_gcref(-1);
-          // Mark variables reachable indirectly.
-          do_enumerate_variables(root,
-            [&](const Rcptr<Variable>& var)
+          // Enumerate variables that are reachable from `root` indirectly.
+          root->enumerate_variables(do_make_variable_callback(
+            [&](const Rcptr<Variable>& child)
               {
-                if(var->get_gcref() < 0) {
-                  // This variable has already been marked.
-                  return false;
-                }
-                var->init_gcref(-1);
-                // Mark all children recursively.
-                return true;
+                // Drop an indirect reference.
+                child->increment_gcref(split);
+                ROCKET_ASSERT(child->get_gcref() <= child->use_count());
+                // This is not going to be recursive.
+                return false;
               }
-            );
+            ));
           return false;
         }
-      );
+      ));
+    ///////////////////////////////////////////////////////////////////////////
+    // Phase 3
+    //   Mark variables reachable indirectly from those reachable directly.
+    ///////////////////////////////////////////////////////////////////////////
+    this->m_staging.enumerate(do_make_variable_callback(
+      [&](const Rcptr<Variable>& root)
+        {
+          // Skip variables that are possibly unreachable.
+          if(root->get_gcref() >= root->use_count()) {
+            return false;
+          }
+          // Make this variable reachable, ...
+          root->reset_gcref(-1);
+          // ... as well as all children.
+          root->enumerate_variables(do_make_variable_callback(
+            [&](const Rcptr<Variable>& child)
+              {
+                // Skip variables that have already been marked.
+                if(child->get_gcref() < 0) {
+                  return false;
+                }
+                // Mark it, ...
+                child->reset_gcref(-1);
+                // ... as well as all grandchildren.
+                return true;
+              }
+            ));
+          return false;
+        }
+      ));
     ///////////////////////////////////////////////////////////////////////////
     // Phase 4
     //   Wipe out variables whose `gcref` counters have excceeded their
     //   reference counts.
     ///////////////////////////////////////////////////////////////////////////
-    do_enumerate_variables(this->m_staging,
+    this->m_staging.enumerate(do_make_variable_callback(
       [&](const Rcptr<Variable>& root)
         {
-          if(root->get_gcref() >= root->use_count()) {
-            ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
-            // Overwrite the value of this variable with a scalar value to break reference cycles.
-            root->reset(Source_Location(rocket::sref("<defunct-2>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
-            // Cache this variable if a pool is provided.
-            if(output) {
-              output->insert(root);
+          // All reachable variables will have negative gcref counters.
+          if(root->get_gcref() < 0) {
+            // Transfer this variable to the next generational collector, if one has been tied.
+            if(!tied) {
+              ASTERIA_DEBUG_LOG("\tKeeping reachable variable: ", root->get_value());
+              return false;
             }
-            // Collect it.
+            ASTERIA_DEBUG_LOG("\tTransferring variable to the next generation: ", root->get_value());
+            // Strong exception safety is paramount here.
+            tied->m_tracked.insert(root);
+            collect_tied |= tied->m_counter++ >= tied->m_threshold;
             this->m_tracked.erase(root);
             return false;
           }
-          if(!tied) {
-            ASTERIA_DEBUG_LOG("\tKeeping reachable variable: ", root->get_value());
-            return false;
+          // Overwrite the value of this variable with a scalar value to break reference cycles.
+          ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
+          root->reset(Source_Location(rocket::sref("<defunct-2>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
+          // Cache this variable if a pool is specified.
+          if(output) {
+            output->insert(root);
           }
-          ASTERIA_DEBUG_LOG("\tTransferring variable to the next generation: ", root->get_value());
-          // Strong exception safety is paramount here.
-          tied->m_tracked.insert(root);
-          collect_tied |= tied->m_counter++ >= tied->m_threshold;
+          // Untrack the variable now.
           this->m_tracked.erase(root);
           return false;
         }
-      );
+      ));
     ///////////////////////////////////////////////////////////////////////////
     // Finish
     ///////////////////////////////////////////////////////////////////////////

@@ -17,10 +17,8 @@ class Variable : public virtual Rcbase
     Source_Location m_sloc;
     Value m_value;
     bool m_immutable;
-
-    // These are only used during garbage collection and are uninitialized by default.
-    mutable long m_gcref_intg;
-    mutable double m_gcref_mant;
+    // Garbage collection support.
+    mutable std::pair<long, double> m_gcref;
 
   public:
     explicit Variable(const Source_Location& sloc) noexcept
@@ -63,6 +61,10 @@ class Variable : public virtual Rcbase
         this->m_immutable = immutable;
       }
 
+    long gcref_split() const noexcept
+      {
+        return this->m_value.gcref_split();
+      }
     void enumerate_variables(const Abstract_Variable_Callback& callback) const
       {
         this->m_value.enumerate_variables(callback);
@@ -70,24 +72,26 @@ class Variable : public virtual Rcbase
 
     long get_gcref() const noexcept
       {
-        return this->m_gcref_intg;
+        return this->m_gcref.first;
       }
-    void init_gcref(long intg) const noexcept
+    void reset_gcref(long iref) const noexcept
       {
-        this->m_gcref_intg = intg;
-        this->m_gcref_mant = 1e-9;
+        // Reset the integral part to the specified value.
+        this->m_gcref = std::make_pair(iref, 1.0e-10);
       }
-    void add_gcref(int dintg) const noexcept
+    void increment_gcref(long split) const noexcept
       {
-        this->m_gcref_intg += dintg;
-      }
-    void add_gcref(double dmant) const noexcept
-      {
-        this->m_gcref_mant += dmant;
-        // Add with carry.
-        auto carry = static_cast<int>(this->m_gcref_mant);
-        this->m_gcref_intg += carry;
-        this->m_gcref_mant -= carry;
+        if(ROCKET_EXPECT(split <= 1)) {
+          // Update the integral part only.
+          this->m_gcref.first += 1;
+          return;
+        }
+        // Update the fractional part.
+        this->m_gcref.second += 1 / static_cast<double>(split);
+        // If the result is equal to or greater than one, accumulate the integral part separatedly.
+        auto carry = static_cast<long>(this->m_gcref.second);
+        this->m_gcref.first += carry;
+        this->m_gcref.second -= static_cast<double>(carry);
       }
   };
 
