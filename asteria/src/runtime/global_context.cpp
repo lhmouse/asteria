@@ -16,6 +16,7 @@
 #include "../library/bindings_string.hpp"
 #include "../library/bindings_array.hpp"
 #include "../library/bindings_numeric.hpp"
+#include "../library/bindings_filesystem.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -51,14 +52,15 @@ void Global_Context::initialize(API_Version version)
       }
     static constexpr s_ymods[] =
       {
-        { api_version_none,       "",           nullptr                    },
-        { api_version_0001_0000,  "gc",         create_bindings_gc         },
-        { api_version_0001_0000,  "constants",  create_bindings_constants  },
-        { api_version_0001_0000,  "debug",      create_bindings_debug      },
-        { api_version_0001_0000,  "chrono",     create_bindings_chrono     },
-        { api_version_0001_0000,  "string",     create_bindings_string     },
-        { api_version_0001_0000,  "array",      create_bindings_array      },
-        { api_version_0001_0000,  "numeric",    create_bindings_numeric    },
+        { api_version_none,       "",            nullptr                     },
+        { api_version_0001_0000,  "gc",          create_bindings_gc          },
+        { api_version_0001_0000,  "constants",   create_bindings_constants   },
+        { api_version_0001_0000,  "debug",       create_bindings_debug       },
+        { api_version_0001_0000,  "chrono",      create_bindings_chrono      },
+        { api_version_0001_0000,  "string",      create_bindings_string      },
+        { api_version_0001_0000,  "array",       create_bindings_array       },
+        { api_version_0001_0000,  "numeric",     create_bindings_numeric     },
+        { api_version_0001_0000,  "filesystem",  create_bindings_filesystem  },
       };
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(std::is_sorted(std::begin(s_ymods), std::end(s_ymods), [&](const Module& lhs, const Module& rhs) { return lhs.version < rhs.version;  }));
