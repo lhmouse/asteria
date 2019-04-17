@@ -8,6 +8,7 @@
 
 namespace Asteria {
 
+extern Opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation);
 extern Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation);
 extern Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold);
 extern G_integer std_gc_collect(const Global_Context& global, const Opt<G_integer>& generation_limit);

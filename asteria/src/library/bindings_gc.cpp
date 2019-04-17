@@ -11,6 +11,20 @@
 
 namespace Asteria {
 
+Opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation)
+  {
+    if((generation < 0) || (generation > 2)) {
+      return rocket::nullopt;
+    }
+    auto qcoll = global.get_collector_opt(generation & 0xFF);
+    if(!qcoll) {
+      return rocket::nullopt;
+    }
+    // Get the current number of variables being tracked.
+    auto count = qcoll->get_tracked_variable_count();
+    return G_integer(count);
+  }
+
 Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
   {
     if((generation < 0) || (generation > 2)) {
@@ -50,6 +64,45 @@ G_integer std_gc_collect(const Global_Context& global, const Opt<G_integer>& gen
 
 void create_bindings_gc(G_object& result, API_Version /*version*/)
   {
+    //===================================================================
+    // `std.gc.tracked_count()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("tracked_count"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "`std.gc.count_tracked(generation)`\n"
+            "  * Gets the number of variables that are being tracked by the\n"
+            "    the collector for `generation`. Valid values for `generation`\n"
+            "    are `0`, `1` and `2`. This value is only informative.\n"
+            "  * Returns the number of variables being tracked. If `generation`\n"
+            "    is not valid, `null` is returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.gc.tracked_count"), args);
+            // Parse arguments.
+            G_integer generation;
+            if(reader.start().g(generation).finish()) {
+              // Call the binding function.
+              auto qthres = std_gc_tracked_count(global, generation);
+              if(!qthres) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { *qthres };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
     //===================================================================
     // `std.gc.get_threshold()`
     //===================================================================
