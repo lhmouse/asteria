@@ -27,7 +27,7 @@ install:
   - make -j$(nproc)
 
 script:
-  - make -j$(nproc) check
+  - make -j$(nproc) check || (cat ./test-suite.log; false)
 
 notifications:
   irc:

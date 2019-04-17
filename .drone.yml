@@ -16,7 +16,7 @@ build:
     - mkdir -p m4
     - autoreconf -ifv
     - ./configure --disable-silent-rules $${_options}
-    - make -j$(nproc) check
+    - make -j$(nproc) check || (cat ./test-suite.log; false)
 
 notify:
   irc:
