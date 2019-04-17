@@ -221,7 +221,7 @@ Collector* Collector::collect_single_opt()
             ASTERIA_DEBUG_LOG("\tTransferring variable to the next generation: ", root->get_value());
             // Strong exception safety is paramount here.
             tied->m_tracked.insert(root);
-            collect_tied |= tied->m_counter++ >= tied->m_threshold;
+            collect_tied |= (tied->m_counter++ >= tied->m_threshold);
             this->m_tracked.erase(root);
             return false;
           }
