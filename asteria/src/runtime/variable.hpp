@@ -77,7 +77,7 @@ class Variable : public virtual Rcbase
     void reset_gcref(long iref) const noexcept
       {
         // Reset the integral part to the specified value.
-        this->m_gcref = std::make_pair(iref, 1.0e-10);
+        this->m_gcref = std::make_pair(iref, 1.0 / 0x4000000);
       }
     void increment_gcref(long split) const noexcept
       {
