@@ -36,11 +36,11 @@ class Collector
       = delete;
 
   public:
-    Variable_HashSet* getput_pool_opt() const noexcept
+    Variable_HashSet* get_output_pool_opt() const noexcept
       {
         return this->m_output_opt;
       }
-    void setput_pool(Variable_HashSet* output_opt) noexcept
+    void set_output_pool(Variable_HashSet* output_opt) noexcept
       {
         this->m_output_opt = output_opt;
       }
