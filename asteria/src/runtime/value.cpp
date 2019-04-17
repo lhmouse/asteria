@@ -454,6 +454,38 @@ long Value::use_count() const noexcept
     }
   }
 
+long Value::gcref_split() const noexcept
+  {
+    switch(static_cast<Gtype>(this->m_stor.index())) {
+    case gtype_null:
+    case gtype_boolean:
+    case gtype_integer:
+    case gtype_real:
+    case gtype_string:
+      {
+        return 0;
+      }
+    case gtype_opaque:
+      {
+        return this->m_stor.as<gtype_opaque>().use_count();
+      }
+    case gtype_function:
+      {
+        return this->m_stor.as<gtype_function>().use_count();
+      }
+    case gtype_array:
+      {
+        return this->m_stor.as<gtype_array>().use_count();
+      }
+    case gtype_object:
+      {
+        return this->m_stor.as<gtype_object>().use_count();
+      }
+    default:
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+    }
+  }
+
 void Value::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     switch(static_cast<Gtype>(this->m_stor.index())) {

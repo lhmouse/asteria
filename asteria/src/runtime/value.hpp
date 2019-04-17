@@ -211,6 +211,7 @@ class Value
 
     ROCKET_PURE_FUNCTION bool unique() const noexcept;
     ROCKET_PURE_FUNCTION long use_count() const noexcept;
+    ROCKET_PURE_FUNCTION long gcref_split() const noexcept;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
