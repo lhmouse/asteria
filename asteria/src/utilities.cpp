@@ -155,7 +155,7 @@ bool throw_runtime_error(const char* func, rocket::cow_string&& msg)
     throw Runtime_Error(rocket::move(msg));
   }
 
-void quote_string(rocket::cow_string& output, const char* data, std::size_t size)
+void quote(rocket::cow_string& output, const char* data, std::size_t size)
   {
     do_append_str(output, '\"');
     // Append characters in `[data,data+size)`

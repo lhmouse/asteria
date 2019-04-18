@@ -157,24 +157,24 @@ class Runtime_Error : public virtual std::exception
 #define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
                                                             ::std::terminate())
 
-extern void quote_string(rocket::cow_string& output, const char* data, std::size_t size);
+extern void quote(rocket::cow_string& output, const char* data, std::size_t size);
 
 inline rocket::cow_string quote(const char* str, std::size_t len)
   {
     rocket::cow_string output;
-    quote_string(output, str, len);
+    quote(output, str, len);
     return output;
   }
 inline rocket::cow_string quote(const char* str)
   {
     rocket::cow_string output;
-    quote_string(output, str, std::strlen(str));
+    quote(output, str, std::strlen(str));
     return output;
   }
 inline rocket::cow_string quote(const rocket::cow_string& str)
   {
     rocket::cow_string output;
-    quote_string(output, str.data(), str.size());
+    quote(output, str.data(), str.size());
     return output;
   }
 
