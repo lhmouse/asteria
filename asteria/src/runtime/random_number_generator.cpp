@@ -24,6 +24,7 @@ Random_Number_Generator::~Random_Number_Generator()
       {
         return reg << bits;
       }
+
     constexpr std::uint32_t do_srl(std::uint32_t reg, int bits) noexcept
       {
         return reg >> bits;
@@ -137,7 +138,7 @@ void Random_Number_Generator::reset() noexcept
     // Scramble words.
     Scrambler regs;
     for(std::size_t i = 0; i < 64; ++i) {
-      auto view = this->m_mm + i % 32 * 8;
+      auto view = this->m_mm + i%32*8;
       regs.combine(view);
       regs.mix();
       regs.output(view);
