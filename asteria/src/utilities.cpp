@@ -155,6 +155,117 @@ bool throw_runtime_error(const char* func, rocket::cow_string&& msg)
     throw Runtime_Error(rocket::move(msg));
   }
 
+bool utf8_encode(char*& pos, char32_t cp)
+  {
+    if((0xD800 <= cp) && (cp < 0xE000)) {
+      // Surrogates are reserved for UTF-16.
+      return false;
+    }
+    if(cp >= 0x110000) {
+      // Code point is too large.
+      return false;
+    }
+    // Encode bits into a byte.
+    auto encode_one = [&](int sh, char32_t m)
+      {
+        *(pos++) = static_cast<char>((~m << 1) | ((cp >> sh) & m));
+      };
+    // Encode the code point now. The result may be 1, 2, 3 or 4 bytes.
+    if(cp < 0x80) {
+      encode_one( 0, 0xFF);
+      return true;
+    }
+    if(cp < 0x800) {
+      encode_one( 6, 0x1F);
+      encode_one( 0, 0x3F);
+      return true;
+    }
+    if(cp < 0x10000) {
+      encode_one(12, 0x0F);
+      encode_one( 6, 0x3F);
+      encode_one( 0, 0x3F);
+      return true;
+    }
+    encode_one(18, 0x07);
+    encode_one(12, 0x3F);
+    encode_one( 6, 0x3F);
+    encode_one( 0, 0x3F);
+    return true;
+  }
+
+bool utf8_encode(rocket::cow_string& text, char32_t cp)
+  {
+    char str[4];
+    char* pos = str;
+    // Encode the code point into this temporary buffer.
+    if(!utf8_encode(pos, cp)) {
+      return false;
+    }
+    // Append all bytes encoded.
+    text.append(str, pos);
+    return true;
+  }
+
+bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail)
+  {
+    // Read the first byte.
+    cp = *(pos++) & 0xFF;
+    if(cp < 0x80) {
+      // This sequence contains only one byte.
+      return true;
+    }
+    if((cp < 0xC0) || (0xF8 <= cp)) {
+      // This is not a leading character.
+      return false;
+    }
+    // Calculate the number of bytes in this code point.
+    auto u8len = static_cast<std::size_t>(2 + (cp >= 0xE0) + (cp >= 0xF0));
+    ROCKET_ASSERT(u8len >= 2);
+    ROCKET_ASSERT(u8len <= 4);
+    if(u8len > avail) {
+      // No enough characters have been provided.
+      return false;
+    }
+    // Unset bits that are not part of the payload.
+    cp &= UINT32_C(0xFF) >> u8len;
+    // Accumulate trailing code units.
+    for(std::size_t i = 1; i < u8len; ++i) {
+      char32_t cu = *(pos++) & 0xFF;
+      if((cu < 0x80) || (0xC0 <= cu)) {
+        // This trailing character is not valid.
+        return false;
+      }
+      cp = (cp << 6) | (cu & 0x3F);
+    }
+    if((0xD800 <= cp) && (cp < 0xE000)) {
+      // Surrogates are reserved for UTF-16.
+      return false;
+    }
+    if(cp >= 0x110000) {
+      // Code point is too large.
+      return false;
+    }
+    // Re-encode it and check for overlong sequences.
+    auto milen = static_cast<std::size_t>(1 + (cp >= 0x80) + (cp >= 0x800) + (cp >= 0x10000));
+    if(milen != u8len) {
+      // Overlong sequences are not allowed.
+      return false;
+    }
+    return true;
+  }
+
+bool utf8_decode(char32_t& cp, const rocket::cow_string& text, std::size_t& offset)
+  {
+    const char* pos = std::addressof(text.at(offset));
+    // Decode bytes.
+    if(!utf8_decode(cp, pos, text.size() - offset)) {
+      return false;
+    }
+    // Update the offset.
+    offset = static_cast<std::size_t>(pos - text.data());
+    return true;
+  }
+
 void quote(rocket::cow_string& output, const char* data, std::size_t size)
   {
     do_append_str(output, '\"');

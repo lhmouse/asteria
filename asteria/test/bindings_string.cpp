@@ -209,7 +209,7 @@ int main()
 
         assert std.string.utf8_decode("abcdАВГД甲乙丙丁") == [ 97, 98, 99, 100, 1040, 1042, 1043, 1044, 30002, 20057, 19993, 19969 ];
         assert std.string.utf8_decode("\xC0\x80\x61") == null;
-        assert std.string.utf8_decode("\xC0\x80\x61", true) == [ 65533, 97 ];
+        assert std.string.utf8_decode("\xC0\x80\x61", true) == [ 192, 128, 97 ];
         assert std.string.utf8_decode("\xFF\xFE\x62") == null;
         assert std.string.utf8_decode("\xFF\xFE\x62", true) == [ 255, 254, 98 ];
 

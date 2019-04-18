@@ -714,56 +714,22 @@ Opt<G_string> std_string_hex_decode(const G_string& hstr)
     return rocket::move(text);
   }
 
-    namespace {
-
-    bool do_utf8_encode_one(G_string& text, const G_integer& code_point, const Opt<G_boolean>& permissive)
-      {
-        auto value = code_point;
-        if(((0xD800 <= value) && (value < 0xE000)) || (0x110000 <= value)) {
-          // Code point value is reserved or too large.
-          if(permissive != true) {
-            return false;
-          }
-          // Replace it with the replacement character.
-          value = 0xFFFD;
-        }
-        char32_t cpnt = value & 0x1FFFFF;
-        // Encode it.
-        auto encode_one = [&](unsigned shift, unsigned mask)
-          {
-            text.push_back(static_cast<char>((~mask << 1) | ((cpnt >> shift) & mask)));
-          };
-        if(cpnt < 0x80) {
-          encode_one( 0, 0xFF);
-          return true;
-        }
-        if(cpnt < 0x800) {
-          encode_one( 6, 0x1F);
-          encode_one( 0, 0x3F);
-          return true;
-        }
-        if(cpnt < 0x10000) {
-          encode_one(12, 0x0F);
-          encode_one( 6, 0x3F);
-          encode_one( 0, 0x3F);
-          return true;
-        }
-        encode_one(18, 0x07);
-        encode_one(12, 0x3F);
-        encode_one( 6, 0x3F);
-        encode_one( 0, 0x3F);
-        return true;
-      }
-
-    }
-
 Opt<G_string> std_string_utf8_encode(const G_integer& code_point, const Opt<G_boolean>& permissive)
   {
     G_string text;
     text.reserve(4);
-    if(!do_utf8_encode_one(text, code_point, permissive)) {
+    // Try encoding the code point.
+    auto cp = static_cast<char32_t>(rocket::clamp(code_point, -1, INT32_MAX));
+    if(utf8_encode(text, cp)) {
+      // Succeed.
+      return rocket::move(text);
+    }
+    // This comparison with `true` is by intention, because it may be unset.
+    if(permissive != true) {
       return rocket::nullopt;
     }
+    // Encode the replacement character.
+    utf8_encode(text, 0xFFFD);
     return rocket::move(text);
   }
 
@@ -772,9 +738,18 @@ Opt<G_string> std_string_utf8_encode(const G_array& code_points, const Opt<G_boo
     G_string text;
     text.reserve(code_points.size() * 3);
     for(const auto& elem : code_points) {
-      if(!do_utf8_encode_one(text, elem.as_integer(), permissive)) {
+      // Try encoding the code point.
+      auto cp = static_cast<char32_t>(rocket::clamp(elem.as_integer(), -1, INT32_MAX));
+      if(utf8_encode(text, cp)) {
+        // Succeed.
+        continue;
+      }
+      // This comparison with `true` is by intention, because it may be unset.
+      if(permissive != true) {
         return rocket::nullopt;
       }
+      // Encode the replacement character.
+      utf8_encode(text, 0xFFFD);
     }
     return rocket::move(text);
   }
@@ -783,78 +758,24 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
   {
     G_array code_points;
     code_points.reserve(text.size());
-    for(std::size_t i = 0; i < text.size(); ++i) {
-      // Read the first byte.
-      char32_t cpnt = text[i] & 0xFF;
-      if(cpnt < 0x80) {
-        // This sequence contains only one byte.
-        code_points.emplace_back(G_integer(cpnt));
+    // Decode code points repeatedly.
+    std::size_t offset = 0;
+    for(;;) {
+      if(offset >= text.size()) {
+        break;
+      }
+      char32_t cp;
+      if(utf8_decode(cp, text, offset)) {
+        // Succeed.
+        code_points.emplace_back(G_integer(cp));
         continue;
       }
-      if((cpnt < 0xC0) || (0xF8 <= cpnt)) {
-        // This is not a leading character.
-        if(permissive != true) {
-          return rocket::nullopt;
-        }
-        // Re-interpret it as an isolated byte.
-        code_points.emplace_back(G_integer(cpnt));
-        continue;
+      // This comparison with `true` is by intention, because it may be unset.
+      if(permissive != true) {
+        return rocket::nullopt;
       }
-      // Calculate the number of bytes in this code point.
-      auto u8len = static_cast<std::size_t>(2 + (cpnt >= 0xE0) + (cpnt >= 0xF0));
-      ROCKET_ASSERT(u8len >= 2);
-      ROCKET_ASSERT(u8len <= 4);
-      if(u8len > text.size() - i) {
-        // No enough characters have been provided.
-        if(permissive != true) {
-          return rocket::nullopt;
-        }
-        // Re-interpret it as an isolated byte.
-        code_points.emplace_back(G_integer(cpnt));
-        continue;
-      }
-      // Unset bits that are not part of the payload.
-      cpnt &= UINT32_C(0xFF) >> u8len;
-      // Accumulate trailing code units.
-      std::size_t k;
-      for(k = 1; k < u8len; ++k) {
-        char32_t next = text[++i] & 0xFF;
-        if((next < 0x80) || (0xC0 <= next)) {
-          // This trailing character is not valid.
-          break;
-        }
-        cpnt = (cpnt << 6) | (next & 0x3F);
-      }
-      if(k != u8len) {
-        // An error has been encountered when parsing trailing characters.
-        if(permissive != true) {
-          return rocket::nullopt;
-        }
-        // Replace this character.
-        code_points.emplace_back(G_integer(0xFFFD));
-        continue;
-      }
-      if(((0xD800 <= cpnt) && (cpnt < 0xE000)) || (0x110000 <= cpnt)) {
-        // Code point value is reserved or too large.
-        if(permissive != true) {
-          return rocket::nullopt;
-        }
-        // Replace this character.
-        code_points.emplace_back(G_integer(0xFFFD));
-        continue;
-      }
-      // Re-encode it and check for overlong sequences.
-      auto mlen = static_cast<std::size_t>(1 + (cpnt >= 0x80) + (cpnt >= 0x800) + (cpnt >= 0x10000));
-      if(mlen != u8len) {
-        // Overlong sequences are not allowed.
-        if(permissive != true) {
-          return rocket::nullopt;
-        }
-        // Replace this character.
-        code_points.emplace_back(G_integer(0xFFFD));
-        continue;
-      }
-      code_points.emplace_back(G_integer(cpnt));
+      // Re-interpret it as an isolated byte.
+      code_points.emplace_back(G_integer(text[offset++] & 0xFF));
     }
     return rocket::move(code_points);
   }
