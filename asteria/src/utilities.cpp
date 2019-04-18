@@ -202,6 +202,27 @@ void quote(rocket::cow_string& output, const char* data, std::size_t size)
     do_append_str(output, '\"');
   }
 
+rocket::cow_string quote(const char* str, std::size_t len)
+  {
+    rocket::cow_string output;
+    quote(output, str, len);
+    return output;
+  }
+
+rocket::cow_string quote(const char* str)
+  {
+    rocket::cow_string output;
+    quote(output, str, std::strlen(str));
+    return output;
+  }
+
+rocket::cow_string quote(const rocket::cow_string& str)
+  {
+    rocket::cow_string output;
+    quote(output, str.data(), str.size());
+    return output;
+  }
+
 Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
   {
     ROCKET_ASSERT(size <= PTRDIFF_MAX);
