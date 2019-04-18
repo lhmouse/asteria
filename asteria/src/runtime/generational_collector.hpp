@@ -15,17 +15,14 @@ class Generational_Collector : public virtual Rcbase
   {
   private:
     Variable_HashSet m_pool;
-    Collector m_coll_oldest;
-    Collector m_coll_middle;
-    Collector m_coll_newest;
+    Static_Vector<Collector, 3> m_colls;
 
   public:
-    Generational_Collector()
-      : m_pool(),
-        m_coll_oldest(&(this->m_pool), nullptr, 10),
-        m_coll_middle(&(this->m_pool), &(this->m_coll_oldest), 50),
-        m_coll_newest(&(this->m_pool), &(this->m_coll_middle), 500)
+    Generational_Collector() noexcept
       {
+        this->m_colls.emplace_back(&(this->m_pool), nullptr,                      10);
+        this->m_colls.emplace_back(&(this->m_pool), &(this->m_colls.mut_back()),  50);
+        this->m_colls.emplace_back(&(this->m_pool), &(this->m_colls.mut_back()), 500);
       }
     ~Generational_Collector() override;
 
@@ -35,9 +32,25 @@ class Generational_Collector : public virtual Rcbase
       = delete;
 
   public:
-    Collector* get_collector_opt(unsigned generation) noexcept;
-    Rcptr<Variable> create_variable();
-    std::size_t collect_variables(unsigned generation_limit);
+    std::size_t pool_size() const noexcept
+      {
+        return this->m_pool.size();
+      }
+    std::size_t collector_count() const noexcept
+      {
+        return this->m_colls.size();
+      }
+    const Collector& collector(std::size_t gindex) const
+      {
+        return this->m_colls.at(gindex);
+      }
+    Collector& collector(std::size_t gindex)
+      {
+        return this->m_colls.mut(gindex);
+      }
+
+    Rcptr<Variable> create_variable(std::size_t glimit);
+    std::size_t collect_variables(std::size_t glimit);
   };
 
 }  // namespace Asteria

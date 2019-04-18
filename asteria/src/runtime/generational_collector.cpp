@@ -13,55 +13,28 @@ Generational_Collector::~Generational_Collector()
   {
   }
 
-Collector* Generational_Collector::get_collector_opt(unsigned generation) noexcept
+Rcptr<Variable> Generational_Collector::create_variable(std::size_t glimit)
   {
-    auto coll = &(this->m_coll_newest);
-    auto gcnt = generation;
-    for(;;) {
-      // Found?
-      if(gcnt == 0) {
-        break;
-      }
-      --gcnt;
-      // Get the next generation.
-      coll = coll->get_tied_collector_opt();
-      if(!coll) {
-        break;
-      }
-    }
-    return coll;
-  }
-
-Rcptr<Variable> Generational_Collector::create_variable()
-  {
+    auto rlimit = rocket::min(glimit, this->m_colls.size() - 1);
+    // Get a variable from the pool.
     auto qvar = this->m_pool.erase_random_opt();
     if(ROCKET_UNEXPECT(!qvar)) {
       // Create a new one if the pool has been exhausted.
       qvar = rocket::make_refcnt<Variable>(Source_Location(rocket::sref("<fresh>"), 0));
     }
-    // Track it so it can be collected when out of use.
-    this->m_coll_newest.track_variable(qvar);
+    // Track this variable.
+    this->m_colls.mut(rlimit).track_variable(qvar);
+    // Return it.
     return qvar;
   }
 
-std::size_t Generational_Collector::collect_variables(unsigned generation_limit)
+std::size_t Generational_Collector::collect_variables(std::size_t glimit)
   {
-    // Collect each generation.
-    auto coll = &(this->m_coll_newest);
-    auto gcnt = generation_limit;
-    for(;;) {
+    auto rlimit = rocket::min(glimit, this->m_colls.size() - 1);
+    // Collect variables from the newest generation to the oldest generation.
+    for(std::size_t gindex = 0; gindex <= rlimit; ++gindex) {
       // Collect it.
-      coll->collect_single_opt();
-      // Found?
-      if(gcnt == 0) {
-        break;
-      }
-      --gcnt;
-      // Get the next generation.
-      coll = coll->get_tied_collector_opt();
-      if(!coll) {
-        break;
-      }
+      this->m_colls.mut(gindex).collect_single_opt();
     }
     // Clear the variable pool.
     auto nvars = this->m_pool.size();

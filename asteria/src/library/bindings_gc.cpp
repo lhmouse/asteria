@@ -16,7 +16,7 @@ Opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_intege
     if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<unsigned>(generation);
+    auto rgen = static_cast<std::size_t>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
@@ -32,7 +32,7 @@ Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_intege
     if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<unsigned>(generation);
+    auto rgen = static_cast<std::size_t>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
@@ -48,7 +48,7 @@ Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_intege
     if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<unsigned>(generation);
+    auto rgen = static_cast<std::size_t>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
@@ -63,7 +63,7 @@ Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_intege
 
 G_integer std_gc_collect(const Global_Context& global, const Opt<G_integer>& generation_limit)
   {
-    auto rgen = static_cast<unsigned>(rocket::clamp(generation_limit.value_or(9), 0, 9));
+    auto rgen = static_cast<std::size_t>(rocket::clamp(generation_limit.value_or(9), 0, 9));
     // Perform full garbage collection.
     auto nvars = global.collect_variables(rgen);
     return G_integer(nvars);

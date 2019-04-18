@@ -19,7 +19,7 @@ class Global_Context : public Abstract_Context
     // This is the global garbage collector.
     Rcptr<Rcbase> m_gcoll;
     // This is the variable holding an object referenced as `std` in this context.
-    Rcptr<Rcbase> m_std_var;
+    Rcptr<Rcbase> m_yvar;
 
   public:
     // A global context does not have a parent context.
@@ -51,9 +51,9 @@ class Global_Context : public Abstract_Context
     std::uint32_t get_random_uint32() const noexcept;
 
     // These are interfaces of the global garbage collector.
-    Collector* get_collector_opt(unsigned generation) const;
-    Rcptr<Variable> create_variable() const;
-    std::size_t collect_variables(unsigned generation_limit = INT_MAX) const;
+    Collector* get_collector_opt(std::size_t gindex) const;
+    Rcptr<Variable> create_variable(std::size_t ghint = 0) const;
+    std::size_t collect_variables(std::size_t glimit = 9) const;
 
     // These are interfaces of the standard library.
     const Value& get_std_member(const PreHashed_String& name) const;
