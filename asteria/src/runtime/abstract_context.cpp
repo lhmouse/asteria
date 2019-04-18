@@ -13,7 +13,8 @@ void Abstract_Context::Collection_Trigger::operator()(Rcbase* base_opt) noexcept
     // Take ownership of the argument.
     auto qcoll = rocket::dynamic_pointer_cast<Generational_Collector>(Rcptr<Rcbase>(base_opt));
     if(qcoll) {
-      qcoll->collect_variables(UINT_MAX);
+      // Collect all generations.
+      qcoll->collect_variables(9);
     }
   } catch(std::exception& stdex) {
     ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection; some resources might have leaked: ", stdex.what());

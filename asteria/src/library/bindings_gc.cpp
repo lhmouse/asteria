@@ -13,10 +13,12 @@ namespace Asteria {
 
 Opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation)
   {
-    if((generation < 0) || (generation > 2)) {
+    if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto qcoll = global.get_collector_opt(generation & 0xFF);
+    auto rgen = static_cast<unsigned>(generation);
+    // Get the collector.
+    auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
       return rocket::nullopt;
     }
@@ -27,10 +29,12 @@ Opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_intege
 
 Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
   {
-    if((generation < 0) || (generation > 2)) {
+    if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto qcoll = global.get_collector_opt(generation & 0xFF);
+    auto rgen = static_cast<unsigned>(generation);
+    // Get the collector.
+    auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
       return rocket::nullopt;
     }
@@ -41,10 +45,12 @@ Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_intege
 
 Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold)
   {
-    if((generation < 0) || (generation > 2)) {
+    if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto qcoll = global.get_collector_opt(generation & 0xFF);
+    auto rgen = static_cast<unsigned>(generation);
+    // Get the collector.
+    auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
       return rocket::nullopt;
     }
@@ -57,8 +63,9 @@ Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_intege
 
 G_integer std_gc_collect(const Global_Context& global, const Opt<G_integer>& generation_limit)
   {
+    auto rgen = static_cast<unsigned>(rocket::clamp(generation_limit.value_or(9), 0, 9));
     // Perform full garbage collection.
-    auto nvars = global.collect_variables(static_cast<unsigned>(rocket::clamp(generation_limit.value_or(INT_MAX), 0, INT_MAX)));
+    auto nvars = global.collect_variables(rgen);
     return G_integer(nvars);
   }
 
