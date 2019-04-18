@@ -212,27 +212,28 @@ Collector* Collector::collect_single_opt()
       [&](const Rcptr<Variable>& root)
         {
           // All reachable variables will have negative gcref counters.
-          if(root->get_gcref() < 0) {
-            // Transfer this variable to the next generational collector, if one has been tied.
-            if(!tied) {
-              ASTERIA_DEBUG_LOG("\tKeeping reachable variable: ", root->get_value());
-              return false;
+          if(root->get_gcref() >= 0) {
+            // Overwrite the value of this variable with a scalar value to break reference cycles.
+            ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
+            root->reset(Source_Location(rocket::sref("<defunct-2>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
+            // Cache this variable if a pool is specified.
+            if(output) {
+              output->insert(root);
             }
-            ASTERIA_DEBUG_LOG("\tTransferring variable to the next generation: ", root->get_value());
-            // Strong exception safety is paramount here.
-            tied->m_tracked.insert(root);
-            collect_tied |= (tied->m_counter++ >= tied->m_threshold);
             this->m_tracked.erase(root);
             return false;
           }
-          // Overwrite the value of this variable with a scalar value to break reference cycles.
-          ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
-          root->reset(Source_Location(rocket::sref("<defunct-2>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
-          // Cache this variable if a pool is specified.
-          if(output) {
-            output->insert(root);
+          // Transfer this variable to the next generational collector, if one has been tied.
+          if(!tied) {
+            ASTERIA_DEBUG_LOG("\tKeeping reachable variable: ", root->get_value());
+            return false;
           }
-          // Untrack the variable now.
+          ASTERIA_DEBUG_LOG("\tTransferring variable to the next generation: ", root->get_value());
+          tied->m_tracked.insert(root);
+          // Check whether the next generation needs to be checked as well.
+          if(tied->m_counter++ >= tied->m_threshold) {
+            collect_tied = true;
+          }
           this->m_tracked.erase(root);
           return false;
         }
