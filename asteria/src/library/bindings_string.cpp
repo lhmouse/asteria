@@ -720,16 +720,14 @@ Opt<G_string> std_string_utf8_encode(const G_integer& code_point, const Opt<G_bo
     text.reserve(4);
     // Try encoding the code point.
     auto cp = static_cast<char32_t>(rocket::clamp(code_point, -1, INT32_MAX));
-    if(utf8_encode(text, cp)) {
-      // Succeed.
-      return rocket::move(text);
+    if(!utf8_encode(text, cp)) {
+      // This comparison with `true` is by intention, because it may be unset.
+      if(permissive != true) {
+        return rocket::nullopt;
+      }
+      // Encode the replacement character.
+      utf8_encode(text, 0xFFFD);
     }
-    // This comparison with `true` is by intention, because it may be unset.
-    if(permissive != true) {
-      return rocket::nullopt;
-    }
-    // Encode the replacement character.
-    utf8_encode(text, 0xFFFD);
     return rocket::move(text);
   }
 
@@ -740,16 +738,14 @@ Opt<G_string> std_string_utf8_encode(const G_array& code_points, const Opt<G_boo
     for(const auto& elem : code_points) {
       // Try encoding the code point.
       auto cp = static_cast<char32_t>(rocket::clamp(elem.as_integer(), -1, INT32_MAX));
-      if(utf8_encode(text, cp)) {
-        // Succeed.
-        continue;
+      if(!utf8_encode(text, cp)) {
+        // This comparison with `true` is by intention, because it may be unset.
+        if(permissive != true) {
+          return rocket::nullopt;
+        }
+        // Encode the replacement character.
+        utf8_encode(text, 0xFFFD);
       }
-      // This comparison with `true` is by intention, because it may be unset.
-      if(permissive != true) {
-        return rocket::nullopt;
-      }
-      // Encode the replacement character.
-      utf8_encode(text, 0xFFFD);
     }
     return rocket::move(text);
   }
@@ -765,17 +761,15 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
         break;
       }
       char32_t cp;
-      if(utf8_decode(cp, text, offset)) {
-        // Succeed.
-        code_points.emplace_back(G_integer(cp));
-        continue;
+      if(!utf8_decode(cp, text, offset)) {
+        // This comparison with `true` is by intention, because it may be unset.
+        if(permissive != true) {
+          return rocket::nullopt;
+        }
+        // Re-interpret it as an isolated byte.
+        cp = text[offset++] & 0xFF;
       }
-      // This comparison with `true` is by intention, because it may be unset.
-      if(permissive != true) {
-        return rocket::nullopt;
-      }
-      // Re-interpret it as an isolated byte.
-      code_points.emplace_back(G_integer(text[offset++] & 0xFF));
+      code_points.emplace_back(G_integer(cp));
     }
     return rocket::move(code_points);
   }
