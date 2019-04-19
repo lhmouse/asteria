@@ -162,6 +162,11 @@ extern bool utf8_encode(rocket::cow_string& text, char32_t cp);
 extern bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail);
 extern bool utf8_decode(char32_t& cp, const rocket::cow_string& text, std::size_t& offset);
 
+extern bool utf16_encode(char16_t*& pos, char32_t cp);
+extern bool utf16_encode(rocket::cow_u16string& text, char32_t cp);
+extern bool utf16_decode(char32_t& cp, const char16_t*& pos, std::size_t avail);
+extern bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& offset);
+
 extern void quote(rocket::cow_string& output, const char* data, std::size_t size);
 extern rocket::cow_string quote(const char* str, std::size_t len);
 extern rocket::cow_string quote(const char* str);

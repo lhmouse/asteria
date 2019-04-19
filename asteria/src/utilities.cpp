@@ -157,6 +157,11 @@ bool throw_runtime_error(const char* func, rocket::cow_string&& msg)
 
 bool utf8_encode(char*& pos, char32_t cp)
   {
+    if(cp < 0x80) {
+      // This character takes only one byte.
+      *(pos++) = static_cast<char>(cp);
+      return true;
+    }
     if((0xD800 <= cp) && (cp < 0xE000)) {
       // Surrogates are reserved for UTF-16.
       return false;
@@ -170,11 +175,7 @@ bool utf8_encode(char*& pos, char32_t cp)
       {
         *(pos++) = static_cast<char>((~m << 1) | ((cp >> sh) & m));
       };
-    // Encode the code point now. The result may be 1, 2, 3 or 4 bytes.
-    if(cp < 0x80) {
-      encode_one( 0, 0xFF);
-      return true;
-    }
+    // Encode the code point now. The result may be 2, 3 or 4 bytes.
     if(cp < 0x800) {
       encode_one( 6, 0x1F);
       encode_one( 0, 0x3F);
@@ -208,6 +209,9 @@ bool utf8_encode(rocket::cow_string& text, char32_t cp)
 
 bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail)
   {
+    if(avail == 0) {
+      return false;
+    }
     // Read the first byte.
     cp = *(pos++) & 0xFF;
     if(cp < 0x80) {
@@ -256,9 +260,90 @@ bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail)
 
 bool utf8_decode(char32_t& cp, const rocket::cow_string& text, std::size_t& offset)
   {
-    const char* pos = std::addressof(text.at(offset));
+    if(offset >= text.size()) {
+      return false;
+    }
+    const char* pos = text.data() + offset;
     // Decode bytes.
     if(!utf8_decode(cp, pos, text.size() - offset)) {
+      return false;
+    }
+    // Update the offset.
+    offset = static_cast<std::size_t>(pos - text.data());
+    return true;
+  }
+
+bool utf16_encode(char16_t*& pos, char32_t cp)
+  {
+    if((0xD800 <= cp) && (cp < 0xE000)) {
+      // Surrogates are reserved for UTF-16.
+      return false;
+    }
+    if(cp < 0x10000) {
+      // This character takes only one code unit.
+      *(pos++) = static_cast<char16_t>(cp);
+      return true;
+    }
+    if(cp >= 0x110000) {
+      // Code point is too large.
+      return false;
+    }
+    // Write surrogates.
+    *(pos++) = static_cast<char16_t>(0xD800 + ((cp - 0x10000) >> 10));
+    *(pos++) = static_cast<char16_t>(0xDC00 + (cp & 0x3FF));
+    return true;
+  }
+
+bool utf16_encode(rocket::cow_u16string& text, char32_t cp)
+  {
+    char16_t str[2];
+    char16_t* pos = str;
+    // Encode the code point into this temporary buffer.
+    if(!utf16_encode(pos, cp)) {
+      return false;
+    }
+    // Append all bytes encoded.
+    text.append(str, pos);
+    return true;
+  }
+
+bool utf16_decode(char32_t& cp, const char16_t*& pos, std::size_t avail)
+  {
+    if(avail == 0) {
+      return false;
+    }
+    // Read the first code unit.
+    cp = *(pos++) & 0xFFFF;
+    if((cp < 0xD800) || (0xE000 <= cp)) {
+      // This sequence contains only one code unit.
+      return true;
+    }
+    if(cp >= 0xDC00) {
+      // A trailing surrogate is not allowed unless following a leading surrogate.
+      return false;
+    }
+    if(avail < 2) {
+      // No enough code units have been provided.
+      return false;
+    }
+    // Read the trailing surrogate.
+    char16_t cu = *(pos++);
+    if((cu < 0xDC00) || (0xE000 <= cu)) {
+      // Only a trailing surrogate is allowed to follow a leading surrogate.
+      return false;
+    }
+    cp = 0x10000 + ((cp & 0x3FF) << 10) + (cu & 0x3FF);
+    return true;
+  }
+
+bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& offset)
+  {
+    if(offset >= text.size()) {
+      return false;
+    }
+    const char16_t* pos = text.data() + offset;
+    // Decode bytes.
+    if(!utf16_decode(cp, pos, text.size() - offset)) {
       return false;
     }
     // Update the offset.
