@@ -810,107 +810,100 @@ namespace Asteria {
     }  // namespace
 
 bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Parser_Options& options)
-  try {
+  {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
     // Store tokens parsed here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
     Cow_Vector<Token> seq;
-    // Save the position of an unterminated block comment.
-    Tack bcomm;
-    // Read source code line by line.
-    Line_Reader reader(cbuf, file);
-    while(reader.advance()) {
-      // Discard the first line if it looks like a shebang.
-      if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::char_traits<char>::compare(reader.data_avail(), "#!", 2) == 0)) {
-        continue;
-      }
-      /////////////////////////////////////////////////////////////////////////
-      // Phase 1
-      //   Ensure this line is a valid UTF-8 string.
-      /////////////////////////////////////////////////////////////////////////
-      while(reader.size_avail() != 0) {
-        char32_t cp;
-        auto bptr = reader.data_avail();
-        auto tptr = bptr;
-        if(!utf8_decode(cp, tptr, reader.size_avail())) {
-          throw do_make_parser_error(reader, static_cast<std::size_t>(tptr - bptr), Parser_Error::code_utf8_sequence_invalid);
+    try {
+      // Save the position of an unterminated block comment.
+      Tack bcomm;
+      // Read source code line by line.
+      Line_Reader reader(cbuf, file);
+      while(reader.advance()) {
+        // Discard the first line if it looks like a shebang.
+        if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::char_traits<char>::compare(reader.data_avail(), "#!", 2) == 0)) {
+          continue;
         }
-        reader.consume(static_cast<std::size_t>(tptr - bptr));
-      }
-      reader.rewind();
-      /////////////////////////////////////////////////////////////////////////
-      // Phase 2
-      //   Break this line down into tokens.
-      /////////////////////////////////////////////////////////////////////////
-      while(reader.size_avail() != 0) {
-        // Are we inside a block comment?
-        if(bcomm) {
-          // Search for the terminator of this block comment.
-          static constexpr char s_bcomm_term[2] = { '*', '/' };
+        // Ensure this line is a valid UTF-8 string.
+        while(reader.size_avail() != 0) {
+          char32_t cp;
           auto bptr = reader.data_avail();
-          auto eptr = bptr + reader.size_avail();
-          auto tptr = std::search(bptr, eptr, s_bcomm_term, s_bcomm_term + 2);
-          if(tptr == eptr) {
-            // The block comment will not end in this line. Stop.
-            reader.consume(reader.size_avail());
-            break;
+          auto tptr = bptr;
+          if(!utf8_decode(cp, tptr, reader.size_avail())) {
+            throw do_make_parser_error(reader, static_cast<std::size_t>(tptr - bptr), Parser_Error::code_utf8_sequence_invalid);
           }
-          tptr += 2;
-          // Finish this comment and resume from the end of it.
-          bcomm.clear();
           reader.consume(static_cast<std::size_t>(tptr - bptr));
-          continue;
         }
-        // Read a character.
-        auto head = reader.peek();
-        if(std::char_traits<char>::find(" \t\v\f\r\n", 6, head) != nullptr) {
-          // Skip a space.
-          reader.consume(1);
-          continue;
-        }
-        if(head == '/') {
-          auto next = reader.peek(1);
-          if(next == '/') {
-            // Start a line comment. Discard all remaining characters in this line.
-            reader.consume(reader.size_avail());
-            break;
-          }
-          if(next == '*') {
-            // Start a block comment.
-            bcomm.set(reader, 2);
-            reader.consume(2);
+        reader.rewind();
+        // Break this line down into tokens.
+        while(reader.size_avail() != 0) {
+          // Are we inside a block comment?
+          if(bcomm) {
+            // Search for the terminator of this block comment.
+            static constexpr char s_bcomm_term[2] = { '*', '/' };
+            auto bptr = reader.data_avail();
+            auto eptr = bptr + reader.size_avail();
+            auto tptr = std::search(bptr, eptr, s_bcomm_term, s_bcomm_term + 2);
+            if(tptr == eptr) {
+              // The block comment will not end in this line. Stop.
+              reader.consume(reader.size_avail());
+              break;
+            }
+            tptr += 2;
+            // Finish this comment and resume from the end of it.
+            bcomm.clear();
+            reader.consume(static_cast<std::size_t>(tptr - bptr));
             continue;
           }
+          // Read a character.
+          auto head = reader.peek();
+          if(std::char_traits<char>::find(" \t\v\f\r\n", 6, head) != nullptr) {
+            // Skip a space.
+            reader.consume(1);
+            continue;
+          }
+          if(head == '/') {
+            auto next = reader.peek(1);
+            if(next == '/') {
+              // Start a line comment. Discard all remaining characters in this line.
+              reader.consume(reader.size_avail());
+              break;
+            }
+            if(next == '*') {
+              // Start a block comment.
+              bcomm.set(reader, 2);
+              reader.consume(2);
+              continue;
+            }
+          }
+          bool token_got = do_accept_punctuator(seq, reader) ||
+                           do_accept_string_literal(seq, reader, '\"', true) ||
+                           do_accept_string_literal(seq, reader, '\'', options.escapable_single_quote_string) ||
+                           do_accept_identifier_or_keyword(seq, reader, options.keyword_as_identifier) ||
+                           do_accept_numeric_literal(seq, reader, options.integer_as_real);
+          if(!token_got) {
+            ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data_avail());
+            throw do_make_parser_error(reader, 1, Parser_Error::code_token_character_unrecognized);
+          }
         }
-        bool token_got = do_accept_punctuator(seq, reader) ||
-                         do_accept_string_literal(seq, reader, '\"', true) ||
-                         do_accept_string_literal(seq, reader, '\'', options.escapable_single_quote_string) ||
-                         do_accept_identifier_or_keyword(seq, reader, options.keyword_as_identifier) ||
-                         do_accept_numeric_literal(seq, reader, options.integer_as_real);
-        if(!token_got) {
-          ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data_avail());
-          throw do_make_parser_error(reader, 1, Parser_Error::code_token_character_unrecognized);
-        }
+        reader.rewind();
       }
-      reader.rewind();
+      if(bcomm) {
+        // A block comment may straddle multiple lines. We just mark the first line here.
+        throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_Error::code_block_comment_unclosed);
+      }
+    } catch(Parser_Error& err) {  // Don't play with this at home.
+      ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
+                        "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
+                        "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
+      this->m_stor = rocket::move(err);
+      return false;
     }
-    if(bcomm) {
-      // A block comment may straddle multiple lines. We just mark the first line here.
-      throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_Error::code_block_comment_unclosed);
-    }
-    ///////////////////////////////////////////////////////////////////////////
-    // Finish
-    ///////////////////////////////////////////////////////////////////////////
     std::reverse(seq.mut_begin(), seq.mut_end());
     this->m_stor = rocket::move(seq);
     return true;
-  } catch(Parser_Error& err) {  // Don't play with this at home.
-    ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
-                      "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
-                      "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
-    this->m_stor = rocket::move(err);
-    return false;
   }
 
 void Token_Stream::clear() noexcept

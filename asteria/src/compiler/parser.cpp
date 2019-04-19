@@ -1825,37 +1825,33 @@ namespace Asteria {
     }  // namespace
 
 bool Parser::load(Token_Stream& tstrm, const Parser_Options& /*options*/)
-  try {
+  {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
-    ///////////////////////////////////////////////////////////////////////////
-    // Phase 3
-    //   Parse the document recursively.
-    ///////////////////////////////////////////////////////////////////////////
-    Cow_Vector<Statement> stmts;
     // document ::=
     //   statement-list-opt
-    for(;;) {
-      auto qstmt = do_accept_statement_opt(tstrm);
-      if(!qstmt) {
-        break;
+    Cow_Vector<Statement> stmts;
+    try {
+      // Parse the document recursively.
+      for(;;) {
+        auto qstmt = do_accept_statement_opt(tstrm);
+        if(!qstmt) {
+          break;
+        }
+        stmts.emplace_back(rocket::move(*qstmt));
       }
-      stmts.emplace_back(rocket::move(*qstmt));
+      if(!tstrm.empty()) {
+        throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
+      }
+    } catch(Parser_Error& err) {  // Don't play with this at home.
+      ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
+                        "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
+                        "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
+      this->m_stor = rocket::move(err);
+      return false;
     }
-    if(!tstrm.empty()) {
-      throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
-    }
-    ///////////////////////////////////////////////////////////////////////////
-    // Finish
-    ///////////////////////////////////////////////////////////////////////////
     this->m_stor = rocket::move(stmts);
     return true;
-  } catch(Parser_Error& err) {  // Don't play with this at home.
-    ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
-                      "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
-                      "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
-    this->m_stor = rocket::move(err);
-    return false;
   }
 
 void Parser::clear() noexcept
