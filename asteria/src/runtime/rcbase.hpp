@@ -5,7 +5,6 @@
 #define ASTERIA_RUNTIME_RCBASE_HPP_
 
 #include "../fwd.hpp"
-#include "../rocket/refcnt_ptr.hpp"
 
 namespace Asteria {
 
