@@ -1764,15 +1764,15 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& code_null = p.at(0).as<Cow_Vector<Air_Node>>();
         const auto& assign = static_cast<bool>(p.at(1).as<std::int64_t>());
         // Pick a branch basing on the condition.
-        if(stack.get_top_reference().read().is_null()) {
-          // Evaluate the null branch. If the branch is empty, leave the condition on the stack.
-          if(!code_null.empty()) {
-            rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
-            stack.forward_result(assign);
-          }
+        if(!stack.get_top_reference().read().is_null()) {
+          // Leave the condition on the stack.
           return Air_Node::status_next;
         }
-        // Leave the condition on the stack.
+        // Evaluate the null branch. If the branch is empty, leave the condition on the stack.
+        if(!code_null.empty()) {
+          rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+          stack.forward_result(assign);
+        }
         return Air_Node::status_next;
       }
 
