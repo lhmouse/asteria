@@ -52,6 +52,10 @@ class Reference
       {
         return this->m_root.is_temporary();
       }
+    bool is_variable() const noexcept
+      {
+        return this->m_root.is_variable();
+      }
 
     template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
       {

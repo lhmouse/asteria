@@ -832,6 +832,10 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
+        if(!stack.get_top_reference().is_variable()) {
+          // Do nothing.
+          return Air_Node::status_next;
+        }
         auto rhs = stack.get_top_reference().read();
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;

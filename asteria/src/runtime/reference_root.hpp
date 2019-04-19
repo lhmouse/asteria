@@ -74,6 +74,10 @@ class Reference_Root
       {
         return (this->m_stor.index() == index_null) || (this->m_stor.index() == index_temporary);
       }
+    bool is_variable() const noexcept
+      {
+        return (this->m_stor.index() == index_variable);
+      }
 
     void swap(Reference_Root& other) noexcept
       {
