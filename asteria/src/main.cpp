@@ -28,16 +28,17 @@ int main(int argc, char** argv)
               << "---" << std::endl;
     Simple_Source_File code(std::cin, rocket::sref("<stdin>"));
 #else
-    static constexpr char src[] = R"_____(
-      func fib(n) {
-        var r = n;
-        if!(n <= 1) {
-          r = fib(n-1) + fib(n-2);
+    static constexpr char src[] =
+      R"_____(
+        func fib(n) {
+          var r = n;
+          if!(n <= 1) {
+            r = fib(n-1) + fib(n-2);
+          }
+          return& r;
         }
-        return& r;
-      }
-      return fib(30);
-    )_____";
+        return fib(30);
+      )_____";
     rocket::insertable_istream iss(rocket::sref(src));
     std::cerr << "Source code:" << std::endl
               << "---" << std::endl
