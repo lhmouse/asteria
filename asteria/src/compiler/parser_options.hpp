@@ -10,14 +10,15 @@ namespace Asteria {
 
 struct Parser_Options
   {
-    bool integer_as_real : 1;
-    bool keyword_as_identifier : 1;
-    bool escapable_single_quote_string : 1;
-
-    constexpr Parser_Options() noexcept
-      : integer_as_real(false), keyword_as_identifier(false), escapable_single_quote_string(false)
-      {
-      }
+    // Make single quotes behave similiar to double quotes.
+    //   [useful when parsing JSON5 text]
+    bool escapable_single_quote_string = false;
+    // Parse keywords as identifiers.
+    //   [useful when parsing JSON text]
+    bool keyword_as_identifier = false;
+    // Parse integer literals as real literals.
+    //   [useful when parsing JSON text]
+    bool integer_as_real = false;
   };
 
 }  // namespace Asteria
