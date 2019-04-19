@@ -950,11 +950,16 @@ namespace Asteria {
         if(!kexpr) {
           kexpr.emplace();
         }
+        if(!*qref) {
+          // Return by value.
+          Xprunit::S_operator_rpn xunit = { Xprunit::xop_prefix_pos, false };
+          kexpr->emplace_back(rocket::move(xunit));
+        }
         auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        Statement::S_return xstmt = { *qref, rocket::move(*kexpr) };
+        Statement::S_return xstmt = { rocket::move(*kexpr) };
         return rocket::move(xstmt);
       }
 
@@ -1278,7 +1283,12 @@ namespace Asteria {
         }
         auto qinit = do_accept_equal_initializer_opt(tstrm);
         if(qinit) {
-          Statement::S_return xstmt = { false, rocket::move(*qinit) };
+          // In the case of an `equal-initializer`, behave as if a `return-statement`.
+          // Note that the result is returned by value.
+          Xprunit::S_operator_rpn xunit = { Xprunit::xop_prefix_pos, false };
+          qinit->emplace_back(rocket::move(xunit));
+          // The body contains solely a `return-statement`.
+          Statement::S_return xstmt = { rocket::move(*qinit) };
           qblock.emplace().emplace_back(rocket::move(xstmt));
           return qblock;
         }
@@ -1479,21 +1489,32 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // postfix-function-call ::=
-        //   "(" expression-list-opt ")"
-        // expression-list ::=
-        //   expression ( "," expression-list | "" )
+        //   "(" argument-list-opt ")"
+        // argument-list ::=
+        //   argument ( "," argument-list | "" )
+        // argument ::=
+        //   reference-specifier-opt expression
         auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
         if(!kpunct) {
           return false;
         }
         std::size_t nargs = 0;
         for(;;) {
+          auto qref = do_accept_reference_specifier_opt(tstrm);
+          if(!qref) {
+            qref.emplace();
+          }
           bool succ = do_accept_expression(units, tstrm);
           if(!succ) {
             if(nargs == 0) {
               break;
             }
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+          }
+          if(!*qref) {
+            // Pass by value.
+            Xprunit::S_operator_rpn xunit = { Xprunit::xop_prefix_pos, false };
+            units.emplace_back(rocket::move(xunit));
           }
           nargs += 1;
           // Look for the separator.

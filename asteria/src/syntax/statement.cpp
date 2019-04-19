@@ -486,18 +486,6 @@ namespace Asteria {
         throw Traceable_Exception(stack.get_top_reference().read(), sloc, func);
       }
 
-    Air_Node::Status do_execute_convert_to_temporary(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
-                                                     const Cow_Vector<Air_Node::Param>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
-      {
-        // Replace the result with a temporary value, if it isn't.
-        if(stack.get_top_reference().is_temporary()) {
-          return Air_Node::status_next;
-        }
-        Reference_Root::S_temporary xref = { stack.get_top_reference().read() };
-        stack.open_top_reference() = rocket::move(xref);
-        return Air_Node::status_next;
-      }
-
     Air_Node::Status do_execute_assert(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                        const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
@@ -784,11 +772,6 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
         rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
-        if(!altr.by_ref) {
-          // If the result is to be passed by value, convert it as necessary.
-          p.clear();
-          code.emplace_back(do_execute_convert_to_temporary, rocket::move(p));
-        }
         // Encode arguments.
         p.clear();
         p.emplace_back(static_cast<std::int64_t>(Air_Node::status_return));  // 0
