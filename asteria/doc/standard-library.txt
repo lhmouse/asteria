@@ -1405,6 +1405,13 @@
 
 ### `std.filesystem`
 
+`std.filesystem.get_working_directory()`
+
+	* Gets the absolute path of the current working directory.
+
+	* Returns a `string` containing the path to the current working
+	  directory.
+
 `std.filesystem.get_information(path)`
 
 	* Retrieves information of the file or directory designated by
@@ -1419,6 +1426,13 @@
 	  * `time_m`   `integer`   time of last modification.
 
 	  On failure, `null` is returned.
+
+`std.filesystem.move(path_old, path_new)`
+
+	* Moves (renames) the file or directory at `path_old` to
+	  `path_new`.
+
+	* Returns `true` on success, or `null` on failure.
 
 `std.filesystem.remove_recursive(path)`
 
