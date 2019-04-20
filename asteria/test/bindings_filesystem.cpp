@@ -1,0 +1,66 @@
+// This file is part of Asteria.
+// Copyleft 2018, LH_Mouse. All wrongs reserved.
+
+#include "test_utilities.hpp"
+#include "../src/compiler/simple_source_file.hpp"
+#include "../src/runtime/global_context.hpp"
+#include <sstream>
+
+using namespace Asteria;
+
+int main()
+  {
+    static constexpr char s_source[] =
+      R"__(
+        const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
+        // We presume these random strings will never match any real files.
+        var dname = ".filesystem-test_dir_" + std.string.implode(std.array.shuffle(std.string.explode(chars)));
+        var fname = ".filesystem-test_file_" + std.string.implode(std.array.shuffle(std.string.explode(chars)));
+
+        assert std.filesystem.get_information(dname) == null;
+        assert std.filesystem.get_information(fname) == null;
+
+        assert std.filesystem.directory_create(dname) == 1;
+        assert std.filesystem.get_information(dname).is_dir == true;
+        assert std.filesystem.directory_create(dname + "/child") == 1;
+        assert std.filesystem.directory_create(dname) == 0;
+        assert std.filesystem.file_remove(dname) == null;
+        assert std.filesystem.directory_remove(dname) == 0;
+        assert std.filesystem.directory_remove(dname + "/child") == 1;
+        assert std.filesystem.directory_remove(dname) == 1;
+        assert std.filesystem.directory_remove(dname) == null;
+
+        assert std.filesystem.file_read(fname) == null;
+        assert std.filesystem.file_write(fname, "hello") == true;  // "hello"
+        assert std.filesystem.get_information(fname).is_dir == false;
+        assert std.filesystem.get_information(fname).size_c == 5;
+        assert std.filesystem.file_write(fname, "HELLO", 3) == true; // "helHELLO"
+        assert std.filesystem.get_information(fname).size_c == 8;
+        assert std.filesystem.file_write(fname, "#", 5) == true; // "helHE#"
+        assert std.filesystem.get_information(fname).size_c == 6;
+
+        assert std.filesystem.file_append(fname, "??") == true; // "helHE#??"
+        assert std.filesystem.get_information(fname).size_c == 8;
+        assert std.filesystem.file_append(fname, "!!") == true; // "helHE#??!!"
+        assert std.filesystem.get_information(fname).size_c == 10;
+        assert std.filesystem.file_append(fname, "!!", true) == null;
+
+        assert std.filesystem.file_read(fname) == "helHE#??!!";
+        assert std.filesystem.file_read(fname, 2) == "lHE#??!!";
+        assert std.filesystem.file_read(fname, 1000) == "";
+        assert std.filesystem.file_read(fname, 2, 1000) == "lHE#??!!";
+        assert std.filesystem.file_read(fname, 2, 3) == "lHE";
+
+        assert std.filesystem.directory_create(fname) == null;
+        assert std.filesystem.file_remove(fname) == true;
+        assert std.filesystem.file_remove(fname) == null;
+
+        assert std.filesystem.directory_create(fname) == 1;
+        assert std.filesystem.file_remove(fname) == null;
+      )__";
+
+    std::istringstream iss(s_source);
+    Simple_Source_File code(iss, rocket::sref("my_file"));
+    Global_Context global;
+    code.execute(global, { });
+  }
