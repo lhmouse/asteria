@@ -15,6 +15,7 @@
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
 #  include <unistd.h>  // ::rmdir(), ::close(), ::pread(), ::pwrite(), ::unlink()
+#  include <stdio.h>  // ::rename()
 #endif
 
 namespace Asteria {
@@ -201,6 +202,24 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
     stat.insert_or_assign(rocket::sref("time_m"), G_integer(static_cast<std::int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000));
 #endif
     return rocket::move(stat);
+  }
+
+bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old)
+  {
+#ifdef _WIN32
+    auto wpath_new = do_translate_winnt_path(path_new);
+    auto wpath_old = do_translate_winnt_path(path_old);
+    if(::MoveFileExW(reinterpret_cast<const wchar_t*>(wpath_old.c_str()), reinterpret_cast<const wchar_t*>(wpath_new.c_str()), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == FALSE) {
+      auto err = ::GetLastError();
+      ASTERIA_DEBUG_LOG("`MoveFileExW()` failed on \'", path_old, "\' and \'", path_new, "\' (last error was `", err, "`).");
+#else
+    if(::rename(path_old.c_str(), path_new.c_str()) != 0) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`rename()` failed on \'", path_old, "\' and \'", path_new, "\' (errno was `", err, "`).");
+#endif
+      return false;
+    }
+    return true;
   }
 
 Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
@@ -677,6 +696,43 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { rocket::move(*qres) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.filesystem.move_from(path_new, path_old)`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("move_from"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "`std.filesystem.move_from(path_new, path_old)`\n"
+            "  * Moves (renames) the file or directory at `path_old` to\n"
+            "    `path_new`.\n"
+            "  * Returns `true` on success, or `null` on failure.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.filesystem.move_from"), args);
+            // Parse arguments.
+            G_string path_new;
+            G_string path_old;
+            if(reader.start().g(path_new).g(path_old).finish()) {
+              // Call the binding function.
+              if(!std_filesystem_move_from(path_new, path_old)) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { true };
               return rocket::move(xref);
             }
             // Fail.
