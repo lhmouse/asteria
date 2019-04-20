@@ -224,7 +224,8 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 
 Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
   {
-    return { };
+    G_integer count = 0;
+    return 8;
   }
 
 Opt<G_integer> std_filesystem_directory_create(const G_string& path)
