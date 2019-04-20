@@ -10,7 +10,7 @@
 #  include <windows.h>  // ::CreateFile(), ::CloseHandle(), ::GetFileInformationByHandleEx()
                         // ::ReadFile(), ::WriteFile(), ::GetConsoleMode(), ::ReadConsole(), ::WriteConsole()
 #else
-#  include <sys/stat.h>  // ::stat()
+#  include <sys/stat.h>  // ::stat(), ::mkdir()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
 #  include <unistd.h>  // ::close(), ::read(), ::write()
@@ -55,10 +55,10 @@ namespace Asteria {
       };
     using Directory_Handle = rocket::unique_handle<::HANDLE, Directory_Closer>;
 
-    const wchar_t* do_convert_to_utf16(rocket::cow_u16string& u16str, const G_string& path)
+    // UTF-16 is used on Windows.
+    rocket::cow_u16string do_convert_to_utf16(const G_string& path)
       {
-        // Clear the output buffer.
-        u16str.clear();
+        rocket::cow_u16string u16str;
         u16str.reserve(path.size());
         // Convert all characters.
         std::size_t offset = 0;
@@ -69,8 +69,7 @@ namespace Asteria {
           }
           utf16_encode(u16str, cp);
         }
-        // UTF-16 is used on Windows.
-        return reinterpret_cast<const wchar_t*>(u16str.c_str());
+        return u16str;
       }
 #else
     struct File_Closer
@@ -113,12 +112,11 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
   {
     G_object stat;
 #ifdef _WIN32
-    File_Handle hf;
-    rocket::cow_u16string wpath;
+    auto wpath = do_convert_to_utf16(path);
     // Open the file or directory.
-    hf.reset(::CreateFileW(do_convert_to_utf16(wpath, path),
-                           FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                           nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
+    File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+                                 FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+                                 nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
     if(!hf) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was ", err, ").");
@@ -166,7 +164,45 @@ Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
 
 Opt<G_integer> std_filesystem_directory_create(const G_string& path)
   {
-    return { };
+    G_integer status = 1;
+#ifdef _WIN32
+    auto wpath = do_convert_to_utf16(path);
+    if(::CreateDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str()), nullptr) == FALSE) {
+      auto err = ::GetLastError();
+      if(err != ERROR_ALREADY_EXISTS) {
+        ASTERIA_DEBUG_LOG("`CreateDirectoryW()` failed on \'", path, "\' (last error was ", err, ").");
+        return rocket::nullopt;
+      }
+      // Fail only if it is not a directory that exists.
+      auto attr = ::GetFileAttributesW(reinterpret_cast<const wchar_t*>(wpath.c_str()));
+      if(attr == INVALID_FILE_ATTRIBUTES) {
+        err = ::GetLastError();
+        ASTERIA_DEBUG_LOG("`GetFileAttributesW()` failed on \'", path, "\' (last error was ", err, ").");
+        return rocket::nullopt;
+      }
+      if(!(attr & FILE_ATTRIBUTE_DIRECTORY)) {
+#else
+    if(::mkdir(path.c_str(), 0777) != 0) {
+      auto err = errno;
+      if(err != EEXIST) {
+        ASTERIA_DEBUG_LOG("`mkdir()` failed on \'", path, "\' (errno was ", err, ").");
+        return rocket::nullopt;
+      }
+      // Fail only if it is not a directory that exists.
+      struct ::stat stb;
+      if(::stat(path.c_str(), &stb) != 0) {
+        err = errno;
+        ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was ", err, ").");
+        return rocket::nullopt;
+      }
+      if(!S_ISDIR(stb.st_mode)) {
+#endif
+        ASTERIA_DEBUG_LOG("A file that is not a directory exists on \'", path, "\'.");
+        return rocket::nullopt;
+      }
+      status = -1;
+    }
+    return rocket::move(status);
   }
 
 Opt<G_array> std_filesystem_directory_list(const G_string& path)
