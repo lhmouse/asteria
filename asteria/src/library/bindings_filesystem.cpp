@@ -62,7 +62,7 @@ namespace Asteria {
         rocket::cow_u16string u16str;
         u16str.reserve(path.size() + 8);
         // If `path` is an absolute path, translate it to an NT path for long filename support.
-        if((path.size() >= 2) && (L'A' <= (path[0] & ~0x20)) && ((path[0] & ~0x20) <= L'Z') && (path[1] == ':')) {
+        if((path.size() >= 2) && (L'A' <= (path[0] & ~0x20)) && ((path[0] & ~0x20) <= L'Z') && (path[1] == L':')) {
           u16str.append(uR"(\\?\)");
         }
         // Convert all characters.
@@ -215,6 +215,11 @@ Opt<G_array> std_filesystem_directory_list(const G_string& path)
     G_array children;
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
+    // Remove trailing slashes if any.
+    wpath.erase(wpath.find_last_not_of(u"\\/") + 1);
+    // Append a wild card which will match all files and subdirectories.
+    wpath.append(u"\\*");
+    // Open it later...
     Directory_Handle hd;
     for(;;) {
       ::WIN32_FIND_DATAW entry;
