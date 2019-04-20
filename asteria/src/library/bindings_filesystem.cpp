@@ -288,8 +288,12 @@ Opt<G_array> std_filesystem_directory_list(const G_string& path)
         // Open a find handle and read the first file.
         if(!hd.reset(::FindFirstFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()), &entry))) {
           auto err = ::GetLastError();
-          ASTERIA_DEBUG_LOG("`FindFirstFileW()` failed on \'", path, "\' (last error was `", err, "`).");
-          return rocket::nullopt;
+          if(err != ERROR_FILE_NOT_FOUND) {
+            ASTERIA_DEBUG_LOG("`FindFirstFileW()` failed on \'", path, "\' (last error was `", err, "`).");
+            return rocket::nullopt;
+          }
+          // The directory is empty.
+          break;
         }
       } else {
         // Read the next file.
