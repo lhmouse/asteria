@@ -182,7 +182,8 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       return rocket::nullopt;
     }
     // Fill `stat`.
-    stat.insert_or_assign(rocket::sref("is_dir"), G_boolean(fsi.Directory));
+    stat.insert_or_assign(rocket::sref("is_dir"), G_boolean(fbi.FileAttributes & FILE_ATTRIBUTE_DIRECTORY));
+    stat.insert_or_assign(rocket::sref("is_link"), G_boolean(fbi.FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT));
     stat.insert_or_assign(rocket::sref("size_c"), G_integer(fsi.EndOfFile.QuadPart));
     stat.insert_or_assign(rocket::sref("size_o"), G_integer(fsi.AllocationSize.QuadPart));
     stat.insert_or_assign(rocket::sref("time_a"), G_integer((fbi.LastAccessTime.QuadPart - 116444736000000000) / 10000));
@@ -195,7 +196,8 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       return rocket::nullopt;
     }
     // Fill `stat`.
-    stat.insert_or_assign(rocket::sref("is_dir"), G_boolean(S_ISDIR(stb.st_mode)));
+    stat.insert_or_assign(rocket::sref("is_dir"), G_boolean((stb.st_mode & S_IFMT) == S_IFDIR));
+    stat.insert_or_assign(rocket::sref("is_link"), G_boolean((stb.st_mode & S_IFMT) == S_IFLNK));
     stat.insert_or_assign(rocket::sref("size_c"), G_integer(stb.st_size));
     stat.insert_or_assign(rocket::sref("size_o"), G_integer(static_cast<std::int64_t>(stb.st_blocks) * 512));
     stat.insert_or_assign(rocket::sref("time_a"), G_integer(static_cast<std::int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000));

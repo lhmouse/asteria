@@ -1419,11 +1419,12 @@
 
 	* Returns an `object` consisting of the following members:
 
-	  * `is_dir`   `boolean`   whether this is a directory.
-	  * `size_c`   `integer`   number of bytes this file contains.
-	  * `size_o`   `integer`   number of bytes this file occupies.
-	  * `time_a`   `integer`   time of last access.
-	  * `time_m`   `integer`   time of last modification.
+	  * `is_dir`    `boolean`   whether this is a directory.
+	  * `is_link`   `boolean`   whether this is a symbol link.
+	  * `size_c`    `integer`   number of bytes this file contains.
+	  * `size_o`    `integer`   number of bytes this file occupies.
+	  * `time_a`    `integer`   time of last access.
+	  * `time_m`    `integer`   time of last modification.
 
 	  On failure, `null` is returned.
 
