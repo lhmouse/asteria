@@ -288,7 +288,99 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 
 bool std_filesystem_file_write(const G_string& path, const G_string& data, const Opt<G_integer>& offset)
   {
-    return { };
+    if(offset && (*offset < 0)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
+    }
+    std::int64_t roffset = offset.value_or(0);
+    // This is a signed integer.
+    auto nremaining = data.ssize();
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    // Calculate the `dwCreationDisposition` argument.
+    // If we are to write from the beginning, truncate the file at creation.
+    // This saves us two syscalls to truncate the file below.
+    ::DWORD create_disposition = OPEN_ALWAYS;
+    if(roffset == 0) {
+      create_disposition = CREATE_ALWAYS;
+    }
+    // Open the file for writing.
+    File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+                                 GENERIC_WRITE, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
+    if(!hf) {
+      auto err = ::GetLastError();
+      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
+      return false;
+    }
+    if(roffset != 0) {
+      // If `roffset` is not zero, truncate the file there.
+      // Otherwise, the file will have been truncate at creation.
+      ::LARGE_INTEGER fpos;
+      fpos.QuadPart = roffset;
+      if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
+        auto err = ::GetLastError();
+        ASTERIA_DEBUG_LOG("`SetFilePointerEx()` failed on \'", path, "\' (last error was `", err, "`).");
+        return false;
+      }
+      if(::SetEndOfFile(hf) == FALSE) {
+        auto err = ::GetLastError();
+        ASTERIA_DEBUG_LOG("`SetEndOfFile()` failed on \'", path, "\' (last error was `", err, "`).");
+        return false;
+      }
+    }
+    // Write data in a loop.
+    while(nremaining > 0) {
+      // Set the write position.
+      ::OVERLAPPED ctx = { };
+      ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
+      ctx.Offset = static_cast<::DWORD>(roffset);
+      // Write data to the offset specified.
+      ::DWORD nwritten;
+      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<::DWORD>(rocket::min(nremaining, INT_MAX)), &nwritten, &ctx) == FALSE) {
+        auto err = ::GetLastError();
+        ASTERIA_DEBUG_LOG("`WriteFile()` failed on \'", path, "\' (last error was `", err, "`).");
+        return false;
+      }
+      roffset += nwritten;
+      nremaining -= static_cast<int>(nwritten);
+    }
+#else
+    // Calculate the `flags` argument.
+    // If we are to write from the beginning, truncate the file at creation.
+    // This saves us two syscalls to truncate the file below.
+    int flags = O_WRONLY | O_CREAT;
+    if(roffset == 0) {
+      flags |= O_TRUNC;
+    }
+    // Open the file for writing.
+    File_Handle hf(::open(path.c_str(), flags, 0666));
+    if(!hf) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
+      return false;
+    }
+    if(roffset != 0) {
+      // If `roffset` is not zero, truncate the file there.
+      // Otherwise, the file will have been truncate at creation.
+      if(::ftruncate(hf, roffset) != 0) {
+        auto err = errno;
+        ASTERIA_DEBUG_LOG("`ftruncate()` failed on \'", path, "\' (errno was `", err, "`).");
+        return false;
+      }
+    }
+    // Write data in a loop.
+    while(nremaining > 0) {
+      // Write data to the offset specified.
+      ::ssize_t nwritten = ::pwrite(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining), roffset);
+      if(nwritten < 0) {
+        auto err = errno;
+        ASTERIA_DEBUG_LOG("`pwrite()` failed on \'", path, "\' (errno was `", err, "`).");
+        return false;
+      }
+      roffset += nwritten;
+      nremaining -= nwritten;
+    }
+#endif
+    return true;
   }
 
 bool std_filesystem_file_append(const G_string& path, const G_string& data, const Opt<G_boolean>& exclusive)
