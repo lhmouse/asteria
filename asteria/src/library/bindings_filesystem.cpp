@@ -113,6 +113,44 @@ namespace Asteria {
 #endif
     }
 
+G_string std_filesystem_get_working_directory()
+  {
+    G_string cwd;
+#ifdef _WIN32
+    // Get the current directory as UTF-16.
+    rocket::cow_u16string ucwd(MAX_PATH);
+    auto nreq = ::GetCurrentDirectoryW(ucwd.mut_data(), ucwd.size());
+    if(nreq > ucwd.size()) {
+      // The buffer was too small.
+      ucwd.append(nreq - ucwd.size());
+      nreq = ::GetCurrentDirectoryW(ucwd.mut_data(), ucwd.size());
+    }
+    // Convert UTF-16 to UTF-8.
+    // We only want to stop when a NUL character is encountered.
+    cwd.reserve(ucwd.size() + 20);
+    auto pos = reinterpret_cast<const char16_t*>(ucwd.c_str());
+    for(;;) {
+      char32_t cp;
+      if(!utf16_decode(cp, pos, SIZE_MAX)) {
+        ASTERIA_THROW_RUNTIME_ERROR("The path of the current working directory is not valid UTF-16.");
+      }
+      utf8_encode(cwd, cp);
+    }
+#else
+    // Get the current directory, resizing the buffer as needed.
+    cwd.resize(1);
+    while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
+      auto err = errno;
+      if(err != ERANGE) {
+        ASTERIA_THROW_RUNTIME_ERROR("`getcwd()` failed.");
+      }
+      cwd.append(cwd.size() / 2, '*');
+    }
+    cwd.erase(cwd.find('\0'));
+#endif
+    return cwd;
+  }
+
 Opt<G_object> std_filesystem_get_information(const G_string& path)
   {
     G_object stat;
@@ -529,6 +567,38 @@ bool std_filesystem_file_remove(const G_string& path)
 
 void create_bindings_filesystem(G_object& result, API_Version /*version*/)
   {
+    //===================================================================
+    // `std.filesystem.get_working_directory()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("get_working_directory"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "`std.filesystem.get_working_directory()`\n"
+            "  * Gets the absolute path of the current working directory.\n"
+            "  * Returns a `string` containing the path to the current working\n"
+            "    directory.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.filesystem.get_working_directory"), args);
+            // Parse arguments.
+            if(reader.start().finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_filesystem_get_working_directory() };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
     //===================================================================
     // `std.filesystem.get_information()`
     //===================================================================
