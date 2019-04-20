@@ -13,7 +13,7 @@
 #  include <sys/stat.h>  // ::stat(), ::mkdir()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
-#  include <unistd.h>  // ::rmdir(), ::close(), ::read(), ::write()
+#  include <unistd.h>  // ::rmdir(), ::close(), ::pread(), ::pwrite()
 #endif
 
 namespace Asteria {
@@ -119,23 +119,23 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
     auto wpath = do_translate_winnt_path(path);
     // Open the file or directory.
     File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
-                                 FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-                                 nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
+                                 FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+                                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
     if(!hf) {
       auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was ", err, ").");
+      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
     ::FILE_BASIC_INFO fbi;
     if(::GetFileInformationByHandleEx(hf, FileBasicInfo, &fbi, sizeof(fbi)) == FALSE) {
       auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`GetFileInformationByHandleEx()` failed on \'", path, "\' (last error was ", err, ").");
+      ASTERIA_DEBUG_LOG("`GetFileInformationByHandleEx()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
     ::FILE_STANDARD_INFO fsi;
     if(::GetFileInformationByHandleEx(hf, FileStandardInfo, &fsi, sizeof(fsi)) == FALSE) {
       auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`GetFileInformationByHandleEx()` failed on \'", path, "\' (last error was ", err, ").");
+      ASTERIA_DEBUG_LOG("`GetFileInformationByHandleEx()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
     // Fill `stat`.
@@ -148,7 +148,7 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
     struct ::stat stb;
     if(::stat(path.c_str(), &stb) != 0) {
       auto err = errno;
-      ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was ", err, ").");
+      ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was `", err, "`).");
       return rocket::nullopt;
     }
     // Fill `stat`.
@@ -174,14 +174,14 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
     if(::CreateDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str()), nullptr) == FALSE) {
       auto err = ::GetLastError();
       if(err != ERROR_ALREADY_EXISTS) {
-        ASTERIA_DEBUG_LOG("`CreateDirectoryW()` failed on \'", path, "\' (last error was ", err, ").");
+        ASTERIA_DEBUG_LOG("`CreateDirectoryW()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
       // Fail only if it is not a directory that exists.
       auto attr = ::GetFileAttributesW(reinterpret_cast<const wchar_t*>(wpath.c_str()));
       if(attr == INVALID_FILE_ATTRIBUTES) {
         err = ::GetLastError();
-        ASTERIA_DEBUG_LOG("`GetFileAttributesW()` failed on \'", path, "\' (last error was ", err, ").");
+        ASTERIA_DEBUG_LOG("`GetFileAttributesW()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
       if(!(attr & FILE_ATTRIBUTE_DIRECTORY)) {
@@ -189,14 +189,14 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
     if(::mkdir(path.c_str(), 0777) != 0) {
       auto err = errno;
       if(err != EEXIST) {
-        ASTERIA_DEBUG_LOG("`mkdir()` failed on \'", path, "\' (errno was ", err, ").");
+        ASTERIA_DEBUG_LOG("`mkdir()` failed on \'", path, "\' (errno was `", err, "`).");
         return rocket::nullopt;
       }
       // Fail only if it is not a directory that exists.
       struct ::stat stb;
       if(::stat(path.c_str(), &stb) != 0) {
         err = errno;
-        ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was ", err, ").");
+        ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was `", err, "`).");
         return rocket::nullopt;
       }
       if(!S_ISDIR(stb.st_mode)) {
@@ -222,12 +222,12 @@ Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
     if(::RemoveDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str())) == FALSE) {
       auto err = ::GetLastError();
       if(err != ERROR_DIR_NOT_EMPTY) {
-        ASTERIA_DEBUG_LOG("`RemoveDirectoryW()` failed on \'", path, "\' (last error was ", err, ").");
+        ASTERIA_DEBUG_LOG("`RemoveDirectoryW()` failed on \'", path, "\' (last error was `", err, "`).");
 #else
     if(::rmdir(path.c_str()) != 0) {
       auto err = errno;
       if(err != ENOTEMPTY) {
-        ASTERIA_DEBUG_LOG("`rmdir()` failed on \'", path, "\' (errno was ", err, ").");
+        ASTERIA_DEBUG_LOG("`rmdir()` failed on \'", path, "\' (errno was `", err, "`).");
 #endif
         return rocket::nullopt;
       }
@@ -238,7 +238,53 @@ Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
 
 Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer>& offset, const Opt<G_integer>& limit)
   {
-    return { };
+    if(offset && (*offset < 0)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
+    }
+    std::int64_t roffset = offset.value_or(0);
+    // Don't read too many bytes at a time.
+    G_string data(static_cast<std::size_t>(rocket::clamp(limit.value_or(65536), 0, 1048576)), '*');
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    // Open the file for reading.
+    File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+                                 FILE_READ_DATA, FILE_SHARE_READ, nullptr,
+                                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
+    if(!hf) {
+      auto err = ::GetLastError();
+      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
+      return rocket::nullopt;
+    }
+    // Set the read position.
+    ::OVERLAPPED ctx = { };
+    ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
+    ctx.Offset = static_cast<::DWORD>(roffset);
+    // Read data from the offset specified.
+    ::DWORD nread;
+    if(::ReadFile(hf, data.mut_data(), static_cast<::DWORD>(data.size()), &nread, &ctx) == FALSE) {
+      auto err = ::GetLastError();
+      ASTERIA_DEBUG_LOG("`ReadFile()` failed on \'", path, "\' (last error was `", err, "`).");
+      return rocket::nullopt;
+    }
+    data.erase(nread);
+#else
+    // Open the file for reading.
+    File_Handle hf(::open(path.c_str(), O_RDONLY));
+    if(!hf) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
+      return rocket::nullopt;
+    }
+    // Read data from the offset specified.
+    ::ssize_t nread = ::pread(hf, data.mut_data(), data.size(), roffset);
+    if(nread < 0) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`pread()` failed on \'", path, "\' (errno was `", err, "`).");
+      return rocket::nullopt;
+    }
+    data.erase(static_cast<std::size_t>(nread));
+#endif
+    return rocket::move(data);
   }
 
 bool std_filesystem_file_write(const G_string& path, const G_string& data, const Opt<G_integer>& offset)
@@ -469,6 +515,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    read.\n"
             "  * Returns the bytes that have been read as a `string`, or `null`\n"
             "    on failure.\n"
+            "  * Throws an exception of `offset` is negative.\n"
           ),
         // Opaque parameter
         G_null
@@ -513,6 +560,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    function fails if the data can only be written partially.\n"
             "  * Returns `true` if all data have been written successfully, or\n"
             "    `null` on failure.\n"
+            "  * Throws an exception of `offset` is negative.\n"
           ),
         // Opaque parameter
         G_null
