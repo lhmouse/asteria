@@ -1463,6 +1463,8 @@
 	* Returns the bytes that have been read as a `string`, or `null`
 	  on failure.
 
+	* Throws an exception of `offset` is negative.
+
 `std.filesystem.file_write(path, data, [offset])`
 
 	* Writes the file at `path` in binary mode. The write operation
@@ -1474,6 +1476,8 @@
 
 	* Returns `true` if all data have been written successfully, or
 	  `null` on failure.
+
+	* Throws an exception of `offset` is negative.
 
 `std.filesystem.file_append(path, data)`
 
