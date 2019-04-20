@@ -61,8 +61,8 @@ namespace Asteria {
       {
         rocket::cow_u16string u16str;
         u16str.reserve(path.size() + 8);
-        // If `path` is a DOS path, translate it to an NT path for long filename support.
-        if(!path.starts_with(u8R"(\\?\)")) {
+        // If `path` is an absolute path, translate it to an NT path for long filename support.
+        if((path.size() >= 2) && (L'A' <= (path[0] & ~0x20)) && ((path[0] & ~0x20) <= L'Z') && (path[1] == ':')) {
           u16str.append(uR"(\\?\)");
         }
         // Convert all characters.
