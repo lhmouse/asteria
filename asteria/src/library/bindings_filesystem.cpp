@@ -196,10 +196,10 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
-    ::FILE_BASIC_INFO fbi;
-    if(::GetFileInformationByHandleEx(hf, FileBasicInfo, &fbi, sizeof(fbi)) == FALSE) {
+    ::BY_HANDLE_FILE_INFORMATION fbi;
+    if(::GetFileInformationByHandle(hf, &fbi) == FALSE) {
       auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`GetFileInformationByHandleEx()` failed on \'", path, "\' (last error was `", err, "`).");
+      ASTERIA_DEBUG_LOG("`GetFileInformationByHandle()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
     ::FILE_STANDARD_INFO fsi;
@@ -209,12 +209,42 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       return rocket::nullopt;
     }
     // Fill `stat`.
-    stat.insert_or_assign(rocket::sref("is_dir"), G_boolean(fbi.FileAttributes & FILE_ATTRIBUTE_DIRECTORY));
-    stat.insert_or_assign(rocket::sref("is_link"), G_boolean(fbi.FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT));
-    stat.insert_or_assign(rocket::sref("size_c"), G_integer(fsi.EndOfFile.QuadPart));
-    stat.insert_or_assign(rocket::sref("size_o"), G_integer(fsi.AllocationSize.QuadPart));
-    stat.insert_or_assign(rocket::sref("time_a"), G_integer((fbi.LastAccessTime.QuadPart - 116444736000000000) / 10000));
-    stat.insert_or_assign(rocket::sref("time_m"), G_integer((fbi.LastWriteTime.QuadPart - 116444736000000000) / 10000));
+    stat.insert_or_assign(rocket::sref("id_dev"),
+      G_integer(
+        fbi.dwVolumeSerialNumber  // device ID
+      ));
+    stat.insert_or_assign(rocket::sref("id_file"),
+      G_integer(
+        (static_cast<std::uint64_t>(fbi.nFileIndexHigh) << 32) | fbi.nFileIndexLow  // file ID
+      ));
+    stat.insert_or_assign(rocket::sref("nlinks"),
+      G_integer(
+        fbi.nNumberOfLinks  // number of hard links
+      ));
+    stat.insert_or_assign(rocket::sref("is_dir"),
+      G_boolean(
+        fbi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY  // is a directory?
+      ));
+    stat.insert_or_assign(rocket::sref("is_link"),
+      G_boolean(
+        fbi.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT  // is a symbol link?
+      ));
+    stat.insert_or_assign(rocket::sref("size_c"),
+      G_integer(
+        fsi.EndOfFile.QuadPart  // number of bytes in file
+      ));
+    stat.insert_or_assign(rocket::sref("size_o"),
+      G_integer(
+        fsi.AllocationSize.QuadPart  // number of bytes on disk
+      ));
+    stat.insert_or_assign(rocket::sref("time_a"),
+      G_integer(
+        ((static_cast<std::int64_t>(fbi.ftLastAccessTime.dwHighDateTime) << 32) + fbi.ftLastAccessTime.dwLowDateTime - 116444736000000000) / 10000  // time of last access in UNIX timestamp
+      ));
+    stat.insert_or_assign(rocket::sref("time_m"),
+      G_integer(
+        ((static_cast<std::int64_t>(fbi.ftLastWriteTime.dwHighDateTime) << 32) + fbi.ftLastWriteTime.dwLowDateTime - 116444736000000000) / 10000  // time of last write in UNIX timestamp
+      ));
 #else
     struct ::stat stb;
     if(::stat(path.c_str(), &stb) != 0) {
@@ -223,12 +253,42 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       return rocket::nullopt;
     }
     // Fill `stat`.
-    stat.insert_or_assign(rocket::sref("is_dir"), G_boolean((stb.st_mode & S_IFMT) == S_IFDIR));
-    stat.insert_or_assign(rocket::sref("is_link"), G_boolean((stb.st_mode & S_IFMT) == S_IFLNK));
-    stat.insert_or_assign(rocket::sref("size_c"), G_integer(stb.st_size));
-    stat.insert_or_assign(rocket::sref("size_o"), G_integer(static_cast<std::int64_t>(stb.st_blocks) * 512));
-    stat.insert_or_assign(rocket::sref("time_a"), G_integer(static_cast<std::int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000));
-    stat.insert_or_assign(rocket::sref("time_m"), G_integer(static_cast<std::int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000));
+    stat.insert_or_assign(rocket::sref("id_dev"),
+      G_integer(
+        stb.st_dev  // device ID
+      ));
+    stat.insert_or_assign(rocket::sref("id_file"),
+      G_integer(
+        stb.st_ino  // file ID
+      ));
+    stat.insert_or_assign(rocket::sref("nlinks"),
+      G_integer(
+        stb.st_nlink  // number of hard links
+      ));
+    stat.insert_or_assign(rocket::sref("is_dir"),
+      G_boolean(
+        (stb.st_mode & S_IFMT) == S_IFDIR  // is a directory?
+      ));
+    stat.insert_or_assign(rocket::sref("is_link"),
+      G_boolean(
+        (stb.st_mode & S_IFMT) == S_IFLNK  // is a symbol link?
+      ));
+    stat.insert_or_assign(rocket::sref("size_c"),
+      G_integer(
+        stb.st_size  // number of bytes in file
+      ));
+    stat.insert_or_assign(rocket::sref("size_o"),
+      G_integer(
+        static_cast<std::int64_t>(stb.st_blocks) * 512  // number of bytes on disk
+      ));
+    stat.insert_or_assign(rocket::sref("time_a"),
+      G_integer(
+        static_cast<std::int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // time of last access in UNIX timestamp
+      ));
+    stat.insert_or_assign(rocket::sref("time_m"),
+      G_integer(
+        static_cast<std::int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // time of last write in UNIX timestamp
+      ));
 #endif
     return rocket::move(stat);
   }
@@ -666,13 +726,17 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "`std.filesystem.get_information(path)`\n"
             "  * Retrieves information of the file or directory designated by\n"
             "    `path`.\n"
-            "  * Returns an `object` consisting of the following members:\n"
-            "    * `is_dir`   `boolean`   whether this is a directory.\n"
-            "    * `size_c`   `integer`   number of bytes this file contains.\n"
-            "    * `size_o`   `integer`   number of bytes this file occupies.\n"
-            "    * `time_a`   `integer`   time of last access.\n"
-            "    * `time_m`   `integer`   time of last modification.\n"
-            "    On failure, `null` is returned.\n"
+            "    * Returns an `object` consisting of the following members:\n"
+            "      * `id_dev`   `integer`  unique device id on this machine.\n"
+            "      * `id_file`  `integer`  unique file id on this device.\n"
+            "      * `nlinks`   `integer`  number of hard links to this file.\n"
+            "      * `is_dir`   `boolean`  whether this is a directory.\n"
+            "      * `is_link`  `boolean`  whether this is a symbol link.\n"
+            "      * `size_c`   `integer`  number of bytes this file contains.\n"
+            "      * `size_o`   `integer`  number of bytes this file occupies.\n"
+            "      * `time_a`   `integer`  time of last access.\n"
+            "      * `time_m`   `integer`  time of last modification.\n"
+            "      On failure, `null` is returned.\n"
           ),
         // Opaque parameter
         G_null
