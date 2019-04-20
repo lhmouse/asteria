@@ -292,7 +292,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     return { };
   }
 
-bool std_filesystem_file_append(const G_string& path, const G_string& data)
+bool std_filesystem_file_append(const G_string& path, const G_string& data, const Opt<G_boolean>& exclusive)
   {
     return { };
   }
@@ -597,9 +597,10 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           (
             "`std.filesystem.file_append(path, data)`\n"
             "  * Writes the file at `path` in binary mode. The write operation\n"
-            "    starts from the end of the file. Existent contents of the file\n"
-            "    are left intact. This function fails if the data can only be\n"
-            "    written partially.\n"
+            "    starts from the end of the file; existent contents of the file\n"
+            "    are left intact. If `exclusive` is `true` and a file exists on\n"
+            "    `path`, this function fails. This function also fails if the\n"
+            "    data can only be written partially.\n"
             "  * Returns `true` if all data have been written successfully, or\n"
             "    `null` on failure.\n"
           ),
@@ -615,9 +616,10 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_string path;
             G_string data;
-            if(reader.start().g(path).g(data).finish()) {
+            Opt<G_boolean> exclusive;
+            if(reader.start().g(path).g(data).g(exclusive).finish()) {
               // Call the binding function.
-              if(!std_filesystem_file_append(path, data)) {
+              if(!std_filesystem_file_append(path, data, exclusive)) {
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { true };
