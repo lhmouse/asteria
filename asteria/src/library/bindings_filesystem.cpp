@@ -248,8 +248,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     auto wpath = do_translate_winnt_path(path);
     // Open the file for reading.
     File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
-                                 FILE_READ_DATA, FILE_SHARE_READ, nullptr,
-                                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
+                                 GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
