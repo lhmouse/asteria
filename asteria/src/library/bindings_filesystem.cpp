@@ -22,24 +22,89 @@ namespace Asteria {
 
     namespace {
 
-#ifdef _WIN32
-    struct File_Closer
+    class File
       {
-        ::HANDLE null() const noexcept
+      public:
+        // `Handle` is the native handle for a file.
+#ifdef _WIN32
+        using Handle = ::HANDLE;
+#else
+        using Handle = int;
+#endif
+
+        // `Closer` is used to close an opened file.
+        struct Closer
           {
-            return INVALID_HANDLE_VALUE;
+            Handle null() const noexcept
+              {
+#ifdef _WIN32
+                return INVALID_HANDLE_VALUE;
+#else
+                return -1;
+#endif
+              }
+            bool is_null(Handle hf) const noexcept
+              {
+                return hf == this->null();
+              }
+            void close(Handle hf) const noexcept
+              {
+#ifdef _WIN32
+                ::CloseHandle(hf);
+#else
+                ::close(hf);
+#endif
+              }
+          };
+
+      private:
+        rocket::unique_handle<Handle, Closer> m_hf;
+
+      public:
+        explicit File(Handle hf) noexcept
+          : m_hf(hf)
+          {
           }
-        bool is_null(::HANDLE h) const noexcept
+
+      public:
+        explicit operator bool () const noexcept
           {
-            return h == INVALID_HANDLE_VALUE;
+            return !!this->m_hf;
           }
-        void close(::HANDLE h) const noexcept
+        operator Handle () const noexcept
           {
-            ::CloseHandle(h);
+            return this->m_hf.get();
           }
       };
-    using File_Handle = rocket::unique_handle<::HANDLE, File_Closer>;
 
+#ifdef _WIN32
+    // UTF-16 is used on Windows.
+    rocket::cow_u16string do_translate_winnt_path(const G_string& path)
+      {
+        rocket::cow_u16string u16str;
+        u16str.reserve(path.size() + 8);
+        // If `path` is an absolute path, translate it to an NT path for long filename support.
+        if((path.size() >= 2) && (path[1] == L':')) {
+          // Convert lowercase letters to uppercase ones.
+          auto letter = path[0] & ~0x20;
+          if((L'A' <= letter) && (letter <= L'Z')) {
+            u16str.append(uR"(\\?\)");
+          }
+        }
+        // Convert all characters.
+        std::size_t offset = 0;
+        while(offset < path.size()) {
+          char32_t cp;
+          if(!utf8_decode(cp, path, offset)) {
+            ASTERIA_THROW_RUNTIME_ERROR("The path `", path, "` is not a valid UTF-8 string.");
+          }
+          utf16_encode(u16str, cp);
+        }
+        return u16str;
+      }
+#endif
+
+#ifdef _WIN32
     struct Directory_Closer
       {
         ::HANDLE null() const noexcept
@@ -56,45 +121,7 @@ namespace Asteria {
           }
       };
     using Directory_Handle = rocket::unique_handle<::HANDLE, Directory_Closer>;
-
-    // UTF-16 is used on Windows.
-    rocket::cow_u16string do_translate_winnt_path(const G_string& path)
-      {
-        rocket::cow_u16string u16str;
-        u16str.reserve(path.size() + 8);
-        // If `path` is an absolute path, translate it to an NT path for long filename support.
-        if((path.size() >= 2) && (L'A' <= (path[0] & ~0x20)) && ((path[0] & ~0x20) <= L'Z') && (path[1] == L':')) {
-          u16str.append(uR"(\\?\)");
-        }
-        // Convert all characters.
-        std::size_t offset = 0;
-        while(offset < path.size()) {
-          char32_t cp;
-          if(!utf8_decode(cp, path, offset)) {
-            ASTERIA_THROW_RUNTIME_ERROR("The path `", path, "` is not a valid UTF-8 string.");
-          }
-          utf16_encode(u16str, cp);
-        }
-        return u16str;
-      }
 #else
-    struct File_Closer
-      {
-        int null() const noexcept
-          {
-            return -1;
-          }
-        bool is_null(int fd) const noexcept
-          {
-            return fd == -1;
-          }
-        void close(int fd) const noexcept
-          {
-            ::close(fd);
-          }
-      };
-    using File_Handle = rocket::unique_handle<int, File_Closer>;
-
     struct Directory_Closer
       {
         ::DIR* null() const noexcept
@@ -161,9 +188,9 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Open the file or directory.
-    File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
-                                 FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
-                                 OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
+    File hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+                          FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+                          OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
     if(!hf) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
@@ -372,8 +399,8 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Open the file for reading.
-    File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
-                                 FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
+    File hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+                          FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
@@ -397,7 +424,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     data.erase(nread);
 #else
     // Open the file for reading.
-    File_Handle hf(::open(path.c_str(), O_RDONLY));
+    File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
       auto err = errno;
       ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
@@ -433,8 +460,8 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       create_disposition = CREATE_ALWAYS;
     }
     // Open the file for writing.
-    File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
-                                 FILE_WRITE_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
+    File hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+                          FILE_WRITE_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
@@ -481,7 +508,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       flags |= O_TRUNC;
     }
     // Open the file for writing.
-    File_Handle hf(::open(path.c_str(), flags, 0666));
+    File hf(::open(path.c_str(), flags, 0666));
     if(!hf) {
       auto err = errno;
       ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
@@ -525,8 +552,8 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       create_disposition = CREATE_NEW;
     }
     // Open the file for writing.
-    File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
-                                 FILE_APPEND_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
+    File hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+                          FILE_APPEND_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
@@ -556,7 +583,7 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       flags |= O_EXCL;
     }
     // Open the file for writing.
-    File_Handle hf(::open(path.c_str(), flags, 0666));
+    File hf(::open(path.c_str(), flags, 0666));
     if(!hf) {
       auto err = errno;
       ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
