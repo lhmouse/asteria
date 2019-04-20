@@ -1435,7 +1435,7 @@
 	  with the specified path already exists.
 
 	* Returns `1` if a new directory has been created successfully,
-	  `-1` if a directory already exists, or `null` on failure.
+	  `0` if the directory already exists, or `null` on failure.
 
 `std.filesystem.directory_list(path)`
 
@@ -1449,8 +1449,8 @@
 	* Removes the directory at `path`. The directory must be empty.
 	  This function fails if `path` does not designate a directory.
 
-	* Returns `true` if the directory has been removed successfully,
-	  or `null` on failure.
+	* Returns `1` if the directory has been removed successfully, `0`
+	  if it is not empty, or `null` on failure.
 
 `std.filesystem.file_read(path, [offset], [limit])`
 

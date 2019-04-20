@@ -13,7 +13,7 @@
 #  include <sys/stat.h>  // ::stat(), ::mkdir()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
-#  include <unistd.h>  // ::close(), ::read(), ::write()
+#  include <unistd.h>  // ::rmdir(), ::close(), ::read(), ::write()
 #endif
 
 namespace Asteria {
@@ -56,10 +56,14 @@ namespace Asteria {
     using Directory_Handle = rocket::unique_handle<::HANDLE, Directory_Closer>;
 
     // UTF-16 is used on Windows.
-    rocket::cow_u16string do_convert_to_utf16(const G_string& path)
+    rocket::cow_u16string do_translate_winnt_path(const G_string& path)
       {
         rocket::cow_u16string u16str;
-        u16str.reserve(path.size());
+        u16str.reserve(path.size() + 8);
+        // If `path` is a DOS path, translate it to an NT path for long filename support.
+        if(!path.starts_with(u8R"(\\?\)")) {
+          u16str.append(uR"(\\?\)");
+        }
         // Convert all characters.
         std::size_t offset = 0;
         while(offset < path.size()) {
@@ -112,7 +116,7 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
   {
     G_object stat;
 #ifdef _WIN32
-    auto wpath = do_convert_to_utf16(path);
+    auto wpath = do_translate_winnt_path(path);
     // Open the file or directory.
     File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
                                  FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
@@ -150,7 +154,7 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
     // Fill `stat`.
     stat.insert_or_assign(rocket::sref("is_dir"), G_boolean(S_ISDIR(stb.st_mode)));
     stat.insert_or_assign(rocket::sref("size_c"), G_integer(stb.st_size));
-    stat.insert_or_assign(rocket::sref("size_o"), G_integer(static_cast<std::int64_t>(stb.st_blksize) * stb.st_blocks));
+    stat.insert_or_assign(rocket::sref("size_o"), G_integer(static_cast<std::int64_t>(stb.st_blocks) * 512));
     stat.insert_or_assign(rocket::sref("time_a"), G_integer(static_cast<std::int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000));
     stat.insert_or_assign(rocket::sref("time_m"), G_integer(static_cast<std::int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000));
 #endif
@@ -164,9 +168,9 @@ Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
 
 Opt<G_integer> std_filesystem_directory_create(const G_string& path)
   {
-    G_integer status = 1;
+    G_integer count = 1;
 #ifdef _WIN32
-    auto wpath = do_convert_to_utf16(path);
+    auto wpath = do_translate_winnt_path(path);
     if(::CreateDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str()), nullptr) == FALSE) {
       auto err = ::GetLastError();
       if(err != ERROR_ALREADY_EXISTS) {
@@ -200,9 +204,9 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
         ASTERIA_DEBUG_LOG("A file that is not a directory exists on \'", path, "\'.");
         return rocket::nullopt;
       }
-      status = -1;
+      count = 0;
     }
-    return rocket::move(status);
+    return rocket::move(count);
   }
 
 Opt<G_array> std_filesystem_directory_list(const G_string& path)
@@ -210,9 +214,26 @@ Opt<G_array> std_filesystem_directory_list(const G_string& path)
     return { };
   }
 
-bool std_filesystem_directory_remove(const G_string& path)
+Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
   {
-    return { };
+    G_integer count = 1;
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    if(::RemoveDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str())) == FALSE) {
+      auto err = ::GetLastError();
+      if(err != ERROR_DIR_NOT_EMPTY) {
+        ASTERIA_DEBUG_LOG("`RemoveDirectoryW()` failed on \'", path, "\' (last error was ", err, ").");
+#else
+    if(::rmdir(path.c_str()) != 0) {
+      auto err = errno;
+      if(err != ENOTEMPTY) {
+        ASTERIA_DEBUG_LOG("`rmdir()` failed on \'", path, "\' (errno was ", err, ").");
+#endif
+        return rocket::nullopt;
+      }
+      count = 0;
+    }
+    return rocket::move(count);
   }
 
 Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer>& offset, const Opt<G_integer>& limit)
@@ -331,7 +352,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    and must be accessible. This function succeeds if a direcotry\n"
             "    with the specified path already exists.\n"
             "  * Returns `1` if a new directory has been created successfully,\n"
-            "    `-1` if a directory already exists, or `null` on failure.\n"
+            "    `0` if the directory already exists, or `null` on failure.\n"
           ),
         // Opaque parameter
         G_null
@@ -405,8 +426,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "`std.filesystem.directory_remove(path)`\n"
             "  * Removes the directory at `path`. The directory must be empty.\n"
             "    This function fails if `path` does not designate a directory.\n"
-            "  * Returns `true` if the directory has been removed successfully,\n"
-            "    or `null` on failure.\n"
+            "  * Returns `1` if the directory has been removed successfully, `0`\n"
+            "    if it is not empty, or `null` on failure.\n"
           ),
         // Opaque parameter
         G_null
@@ -421,10 +442,11 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             G_string path;
             if(reader.start().g(path).finish()) {
               // Call the binding function.
-              if(!std_filesystem_directory_remove(path)) {
+              auto qres = std_filesystem_directory_remove(path);
+              if(!qres) {
                 return Reference_Root::S_null();
               }
-              Reference_Root::S_temporary xref = { true };
+              Reference_Root::S_temporary xref = { rocket::move(*qres) };
               return rocket::move(xref);
             }
             // Fail.
