@@ -22,11 +22,18 @@ int main()
 
         assert std.filesystem.directory_create(dname) == 1;
         assert std.filesystem.get_information(dname).is_dir == true;
-        assert std.filesystem.directory_create(dname + "/child") == 1;
+        assert std.filesystem.file_append(dname + "/f1", "1") == true;
+        assert std.filesystem.file_append(dname + "/f2", "2") == true;
+        assert std.filesystem.file_append(dname + "/f3", "3") == true;
+        assert std.filesystem.file_append(dname + "/f4", "4") == true;
+        assert std.array.sort(std.filesystem.directory_list(dname)) == ["f1","f2","f3","f4"];
         assert std.filesystem.directory_create(dname) == 0;
         assert std.filesystem.file_remove(dname) == null;
         assert std.filesystem.directory_remove(dname) == 0;
-        assert std.filesystem.directory_remove(dname + "/child") == 1;
+        assert std.filesystem.file_remove(dname + "/f1") == true;
+        assert std.filesystem.file_remove(dname + "/f2") == true;
+        assert std.filesystem.file_remove(dname + "/f3") == true;
+        assert std.filesystem.file_remove(dname + "/f4") == true;
         assert std.filesystem.directory_remove(dname) == 1;
         assert std.filesystem.directory_remove(dname) == null;
 

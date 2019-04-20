@@ -212,7 +212,59 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
 
 Opt<G_array> std_filesystem_directory_list(const G_string& path)
   {
-    return { };
+    G_array children;
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    Directory_Handle hd;
+    for(;;) {
+      ::WIN32_FIND_DATAW entry;
+      if(!hd) {
+        // Open a find handle and read the first file.
+        if(!hd.reset(::FindFirstFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()), &entry))) {
+          auto err = ::GetLastError();
+          ASTERIA_DEBUG_LOG("`FindFirstFileW()` failed on \'", path, "\' (last error was `", err, "`).");
+          return rocket::nullopt;
+        }
+      } else {
+        // Read the next file.
+        if(!::FindNextFileW(hd, &entry)) {
+          break;
+        }
+      }
+      if((std::wcscmp(entry.cFileName, L".") == 0) || (std::wcscmp(entry.cFileName, L"..") == 0)) {
+        continue;
+      }
+      // Convert the file name back into UTF-8.
+      // We only want to stop when a NUL character is encountered.
+      G_string child;
+      auto pos = reinterpret_cast<const char16_t*>(entry.cFileName);
+      for(;;) {
+        char32_t cp;
+        if(!utf16_decode(cp, pos, SIZE_MAX)) {
+          ASTERIA_THROW_RUNTIME_ERROR("The directory \'", path, "\' contains a file whose name is not valid UTF-16.");
+        }
+        if(cp == 0) {
+          break;
+        }
+        utf8_encode(child, cp);
+      }
+      children.emplace_back(rocket::move(child));
+    }
+#else
+    Directory_Handle hd(::opendir(path.c_str()));
+    for(;;) {
+      // Get an entry.
+      auto entry = ::readdir(hd);
+      if(!entry) {
+        break;
+      }
+      if((std::strcmp(entry->d_name, ".") == 0) || (std::strcmp(entry->d_name, "..") == 0)) {
+        continue;
+      }
+      children.emplace_back(G_string(entry->d_name));
+    }
+#endif
+    return rocket::move(children);
   }
 
 Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
