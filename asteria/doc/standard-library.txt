@@ -1405,10 +1405,20 @@
 
 ### `std.filesystem`
 
-`std.filesystem.status(path)`
+`std.filesystem.get_information(path)`
 
 	* Retrieves information of the file or directory designated by
 	  `path`.
+
+	* Returns an `object` consisting of the following members:
+
+	  * `is_dir`   `boolean`   whether this is a directory.
+	  * `size_c`   `integer`   number of bytes this file contains.
+	  * `size_o`   `integer`   number of bytes this file occupies.
+	  * `time_a`   `integer`   time of last access.
+	  * `time_m`   `integer`   time of last modification.
+
+	  On failure, `null` is returned.
 
 `std.filesystem.remove_recursive(path)`
 
@@ -1416,7 +1426,7 @@
 	  a directory, all of its contents are removed recursively.
 
 	* Returns the number of files and directories that have been
-	  removed on success, or `null` on failure.
+	  successfully removed in total, or `null` on failure.
 
 `std.filesystem.directory_create(path)`
 
@@ -1439,8 +1449,8 @@
 	* Removes the directory at `path`. The directory must be empty.
 	  This function fails if `path` does not designate a directory.
 
-	* Returns `1` if the directory has been removed successfully, or
-	  `null` on failure.
+	* Returns `true` if the directory has been removed successfully,
+	  or `null` on failure.
 
 `std.filesystem.file_read(path, [offset], [limit])`
 
