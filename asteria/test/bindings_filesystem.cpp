@@ -31,8 +31,10 @@ int main()
         assert std.filesystem.directory_remove(dname) == null;
 
         assert std.filesystem.file_read(fname) == null;
-        assert std.filesystem.file_write(fname, "hello") == true;  // "hello"
+        assert std.filesystem.file_append(fname, "@@@@$$", true) == true; // "@@@@$$"
         assert std.filesystem.get_information(fname).is_dir == false;
+        assert std.filesystem.get_information(fname).size_c == 6;
+        assert std.filesystem.file_write(fname, "hello") == true;  // "hello"
         assert std.filesystem.get_information(fname).size_c == 5;
         assert std.filesystem.file_write(fname, "HELLO", 3) == true; // "helHELLO"
         assert std.filesystem.get_information(fname).size_c == 8;
@@ -57,6 +59,7 @@ int main()
 
         assert std.filesystem.directory_create(fname) == 1;
         assert std.filesystem.file_remove(fname) == null;
+        assert std.filesystem.directory_remove(fname) == 1;
       )__";
 
     std::istringstream iss(s_source);

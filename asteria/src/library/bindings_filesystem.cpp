@@ -7,13 +7,14 @@
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
 #ifdef _WIN32
-#  include <windows.h>  // ::CreateFile(), ::CloseHandle(), ::GetFileInformationByHandleEx()
-                        // ::ReadFile(), ::WriteFile(), ::GetConsoleMode(), ::ReadConsole(), ::WriteConsole()
+#  include <windows.h>  // ::CreateFile(), ::CloseHandle(), ::GetFileInformationByHandleEx(),
+                        // ::FindFirstFile(), ::FindNextFile(), ::CreateDirectory(), ::RemoveDirectory(),
+                        // ::ReadFile(), ::WriteFile(), ::DeleteFile()
 #else
 #  include <sys/stat.h>  // ::stat(), ::mkdir()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
-#  include <unistd.h>  // ::rmdir(), ::close(), ::pread(), ::pwrite()
+#  include <unistd.h>  // ::rmdir(), ::close(), ::pread(), ::pwrite(), ::unlink()
 #endif
 
 namespace Asteria {
@@ -248,7 +249,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     auto wpath = do_translate_winnt_path(path);
     // Open the file for reading.
     File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
-                                 GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
+                                 FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
@@ -305,7 +306,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     }
     // Open the file for writing.
     File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
-                                 GENERIC_WRITE, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
+                                 FILE_WRITE_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
@@ -340,8 +341,8 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
         ASTERIA_DEBUG_LOG("`WriteFile()` failed on \'", path, "\' (last error was `", err, "`).");
         return false;
       }
-      roffset += nwritten;
       nremaining -= static_cast<int>(nwritten);
+      roffset += nwritten;
     }
 #else
     // Calculate the `flags` argument.
@@ -376,8 +377,8 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
         ASTERIA_DEBUG_LOG("`pwrite()` failed on \'", path, "\' (errno was `", err, "`).");
         return false;
       }
-      roffset += nwritten;
       nremaining -= nwritten;
+      roffset += nwritten;
     }
 #endif
     return true;
@@ -385,12 +386,84 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
 
 bool std_filesystem_file_append(const G_string& path, const G_string& data, const Opt<G_boolean>& exclusive)
   {
-    return { };
+    // This is a signed integer.
+    auto nremaining = data.ssize();
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    // Calculate the `dwCreationDisposition` argument.
+    // If `exclusive` is set to `true`, fail if the file exists.
+    ::DWORD create_disposition = OPEN_ALWAYS;
+    if(exclusive == true) {
+      create_disposition = CREATE_NEW;
+    }
+    // Open the file for writing.
+    File_Handle hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+                                 FILE_APPEND_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
+    if(!hf) {
+      auto err = ::GetLastError();
+      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
+      return false;
+    }
+    // Write data in a loop.
+    while(nremaining > 0) {
+      // Set the write position.
+      ::OVERLAPPED ctx = { };
+      ctx.OffsetHigh = UINT32_MAX;
+      ctx.Offset = UINT32_MAX;
+      // Write data to the offset specified.
+      ::DWORD nwritten;
+      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<::DWORD>(rocket::min(nremaining, INT_MAX)), &nwritten, &ctx) == FALSE) {
+        auto err = ::GetLastError();
+        ASTERIA_DEBUG_LOG("`WriteFile()` failed on \'", path, "\' (last error was `", err, "`).");
+        return false;
+      }
+      nremaining -= static_cast<int>(nwritten);
+    }
+#else
+    // Calculate the `flags` argument.
+    // If we are to write from the beginning, truncate the file at creation.
+    // This saves us two syscalls to truncate the file below.
+    int flags = O_WRONLY | O_CREAT | O_APPEND;
+    if(exclusive == true) {
+      flags |= O_EXCL;
+    }
+    // Open the file for writing.
+    File_Handle hf(::open(path.c_str(), flags, 0666));
+    if(!hf) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
+      return false;
+    }
+    // Write data in a loop.
+    while(nremaining > 0) {
+      // Write data to the offset specified.
+      ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining));
+      if(nwritten < 0) {
+        auto err = errno;
+        ASTERIA_DEBUG_LOG("`pwrite()` failed on \'", path, "\' (errno was `", err, "`).");
+        return false;
+      }
+      nremaining -= nwritten;
+    }
+#endif
+    return true;
   }
 
 bool std_filesystem_file_remove(const G_string& path)
   {
-    return { };
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    if(::DeleteFileW(reinterpret_cast<const wchar_t*>(wpath.c_str())) == FALSE) {
+      auto err = ::GetLastError();
+      ASTERIA_DEBUG_LOG("`DeleteFileW()` failed on \'", path, "\' (last error was `", err, "`).");
+#else
+    if(::unlink(path.c_str()) != 0) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`unlink()` failed on \'", path, "\' (errno was `", err, "`).");
+#endif
+      return false;
+    }
+    return true;
   }
 
 void create_bindings_filesystem(G_object& result, API_Version /*version*/)
