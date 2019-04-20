@@ -1427,7 +1427,7 @@
 
 	  On failure, `null` is returned.
 
-`std.filesystem.move(path_old, path_new)`
+`std.filesystem.move_from(path_new, path_old)`
 
 	* Moves (renames) the file or directory at `path_old` to
 	  `path_new`.
