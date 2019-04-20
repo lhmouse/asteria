@@ -263,10 +263,12 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     ::DWORD nread;
     if(::ReadFile(hf, data.mut_data(), static_cast<::DWORD>(data.size()), &nread, &ctx) == FALSE) {
       auto err = ::GetLastError();
+      // This error can happen if `roffset` is past the end of the file.
       if(err != ERROR_HANDLE_EOF) {
         ASTERIA_DEBUG_LOG("`ReadFile()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
+      nread = 0;
     }
     data.erase(nread);
 #else
