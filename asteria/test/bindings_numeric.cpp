@@ -186,24 +186,21 @@ int main()
         assert std.numeric.itrunc(-42.5) == -42;
         assert typeof std.numeric.itrunc(-42.5) == "integer";
 
-        var i = 1000;
-        do {
-          assert std.numeric.random() >= 0.0;
-          assert std.numeric.random() <  1.0;
-          assert typeof std.numeric.random() == "real";
-          assert std.numeric.random(2) >= 0;
-          assert std.numeric.random(2) <  2;
-          assert typeof std.numeric.random(2) == "integer";
-          assert std.numeric.random(1.5) >= 0.0;
-          assert std.numeric.random(1.5) <  1.5;
-          assert typeof std.numeric.random(1.5) == "real";
-          assert std.numeric.random(-1, 1) >= -1;
-          assert std.numeric.random(-1, 1) <   1;
-          assert typeof std.numeric.random(-1, 1) == "integer";
-          assert std.numeric.random(-1.5, -0.5) >= -1.5;
-          assert std.numeric.random(-1.5, -0.5) <  -0.5;
-          assert typeof std.numeric.random(-1.5, -0.5) == "real";
-        } while(--i != 0);
+        assert std.numeric.random() >= 0.0;
+        assert std.numeric.random() <  1.0;
+        assert typeof std.numeric.random() == "real";
+        assert std.numeric.random(2) >= 0;
+        assert std.numeric.random(2) <  2;
+        assert typeof std.numeric.random(2) == "integer";
+        assert std.numeric.random(1.5) >= 0.0;
+        assert std.numeric.random(1.5) <  1.5;
+        assert typeof std.numeric.random(1.5) == "real";
+        assert std.numeric.random(-1, 1) >= -1;
+        assert std.numeric.random(-1, 1) <   1;
+        assert typeof std.numeric.random(-1, 1) == "integer";
+        assert std.numeric.random(-1.5, -0.5) >= -1.5;
+        assert std.numeric.random(-1.5, -0.5) <  -0.5;
+        assert typeof std.numeric.random(-1.5, -0.5) == "real";
 
         assert std.numeric.sqrt(+16) == 4;
         assert __isnan std.numeric.sqrt(-16);
