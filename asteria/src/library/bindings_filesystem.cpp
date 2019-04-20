@@ -118,21 +118,24 @@ G_string std_filesystem_get_working_directory()
     G_string cwd;
 #ifdef _WIN32
     // Get the current directory as UTF-16.
-    rocket::cow_u16string ucwd(MAX_PATH);
-    auto nreq = ::GetCurrentDirectoryW(ucwd.mut_data(), ucwd.size());
+    rocket::cow_u16string ucwd(MAX_PATH, L'*');
+    auto nreq = ::GetCurrentDirectoryW(static_cast<::DWORD>(ucwd.size()), reinterpret_cast<wchar_t*>(ucwd.mut_data()));
     if(nreq > ucwd.size()) {
       // The buffer was too small.
-      ucwd.append(nreq - ucwd.size());
-      nreq = ::GetCurrentDirectoryW(ucwd.mut_data(), ucwd.size());
+      ucwd.append(nreq - ucwd.size(), L'*');
+      nreq = ::GetCurrentDirectoryW(nreq, reinterpret_cast<wchar_t*>(ucwd.mut_data()));
     }
     // Convert UTF-16 to UTF-8.
     // We only want to stop when a NUL character is encountered.
     cwd.reserve(ucwd.size() + 20);
-    auto pos = reinterpret_cast<const char16_t*>(ucwd.c_str());
+    auto pos = ucwd.c_str();
     for(;;) {
       char32_t cp;
       if(!utf16_decode(cp, pos, SIZE_MAX)) {
         ASTERIA_THROW_RUNTIME_ERROR("The path of the current working directory is not valid UTF-16.");
+      }
+      if(cp == 0) {
+        break;
       }
       utf8_encode(cwd, cp);
     }
