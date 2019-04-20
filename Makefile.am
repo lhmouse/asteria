@@ -227,7 +227,8 @@ check_PROGRAMS =  \
   asteria/test/bindings_chrono.test  \
   asteria/test/bindings_string.test  \
   asteria/test/bindings_array.test  \
-  asteria/test/bindings_numeric.test
+  asteria/test/bindings_numeric.test  \
+  asteria/test/bindings_filesystem.test
 
 TESTS = ${check_PROGRAMS}
 
