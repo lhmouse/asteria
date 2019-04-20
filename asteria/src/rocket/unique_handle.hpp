@@ -95,29 +95,6 @@ template<typename handleT, typename closerT> class unique_handle;
           }
       };
 
-    template<typename handleT,
-             typename = void> struct dereference_helper
-      {
-        using result_type = handleT;
-
-        constexpr result_type operator()(handleT h) const
-          {
-            return h;
-          }
-      };
-
-    template<typename pointerT
-             > struct dereference_helper<pointerT,
-                                         typename make_void<decltype(*(::std::declval<pointerT>()))>::type>
-      {
-        using result_type = decltype(*(::std::declval<pointerT>()));
-
-        constexpr result_type operator()(pointerT p) const
-          {
-            return *p;
-          }
-      };
-
     }  // namespace details_unique_handle
 
 template<typename handleT, typename closerT> class unique_handle
@@ -172,14 +149,6 @@ template<typename handleT, typename closerT> class unique_handle
 
   public:
     // 23.11.1.2.4, observers
-    template<typename checkT = handleT> constexpr typename details_unique_handle::dereference_helper<handleT>::result_type operator*() const noexcept
-      {
-        return details_unique_handle::dereference_helper<handleT>()(this->m_sth.get());
-      }
-    constexpr handle_type operator->() const noexcept
-      {
-        return this->m_sth.get();
-      }
     constexpr handle_type get() const noexcept
       {
         return this->m_sth.get();
