@@ -11,7 +11,7 @@
                         // ::FindFirstFile(), ::FindNextFile(), ::CreateDirectory(), ::RemoveDirectory(),
                         // ::ReadFile(), ::WriteFile(), ::DeleteFile()
 #else
-#  include <sys/stat.h>  // ::stat(), ::mkdir()
+#  include <sys/stat.h>  // ::lstat(), ::mkdir()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
 #  include <unistd.h>  // ::rmdir(), ::close(), ::pread(), ::pwrite(), ::unlink()
@@ -21,6 +21,39 @@
 namespace Asteria {
 
     namespace {
+
+#ifdef _WIN32
+    // UTF-16 is used on Windows.
+    rocket::cow_u16string do_translate_winnt_path(const G_string& path)
+      {
+        rocket::cow_u16string u16str;
+        u16str.reserve(path.size() + 8);
+        // If `path` is an absolute path, translate it to an NT path for long filename support.
+        if((path.size() >= 2) && (path[1] == L':')) {
+          // Convert lowercase letters to uppercase ones.
+          auto letter = path[0] & ~0x20;
+          if((L'A' <= letter) && (letter <= L'Z')) {
+            u16str.append(uR"(\\?\)");
+          }
+        }
+        // Convert all characters.
+        std::size_t offset = 0;
+        while(offset < path.size()) {
+          char32_t cp;
+          if(!utf8_decode(cp, path, offset)) {
+            ASTERIA_THROW_RUNTIME_ERROR("The path `", path, "` is not a valid UTF-8 string.");
+          }
+          utf16_encode(u16str, cp);
+        }
+        return u16str;
+      }
+
+    // Compose a high-order and a low-order `DWORD` to form an `uint64_t`.
+    constexpr std::uint64_t do_compose(std::uint32_t high, std::uint32_t low) noexcept
+      {
+        return (static_cast<std::uint64_t>(high) << 32) + low;
+      }
+#endif
 
     class File
       {
@@ -76,33 +109,6 @@ namespace Asteria {
             return this->m_hf.get();
           }
       };
-
-#ifdef _WIN32
-    // UTF-16 is used on Windows.
-    rocket::cow_u16string do_translate_winnt_path(const G_string& path)
-      {
-        rocket::cow_u16string u16str;
-        u16str.reserve(path.size() + 8);
-        // If `path` is an absolute path, translate it to an NT path for long filename support.
-        if((path.size() >= 2) && (path[1] == L':')) {
-          // Convert lowercase letters to uppercase ones.
-          auto letter = path[0] & ~0x20;
-          if((L'A' <= letter) && (letter <= L'Z')) {
-            u16str.append(uR"(\\?\)");
-          }
-        }
-        // Convert all characters.
-        std::size_t offset = 0;
-        while(offset < path.size()) {
-          char32_t cp;
-          if(!utf8_decode(cp, path, offset)) {
-            ASTERIA_THROW_RUNTIME_ERROR("The path `", path, "` is not a valid UTF-8 string.");
-          }
-          utf16_encode(u16str, cp);
-        }
-        return u16str;
-      }
-#endif
 
 #ifdef _WIN32
     struct Directory_Closer
@@ -209,85 +215,85 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       return rocket::nullopt;
     }
     // Fill `stat`.
-    stat.insert_or_assign(rocket::sref("id_dev"),
+    stat.insert_or_assign(rocket::sref("i_dev"),
       G_integer(
-        fbi.dwVolumeSerialNumber  // device ID
+        fbi.dwVolumeSerialNumber  // unique device id on this machine.
       ));
-    stat.insert_or_assign(rocket::sref("id_file"),
+    stat.insert_or_assign(rocket::sref("i_file"),
       G_integer(
-        (static_cast<std::uint64_t>(fbi.nFileIndexHigh) << 32) | fbi.nFileIndexLow  // file ID
+        do_compose(fbi.nFileIndexHigh, fbi.nFileIndexLow)  // unique file id on this device.
       ));
-    stat.insert_or_assign(rocket::sref("nlinks"),
+    stat.insert_or_assign(rocket::sref("n_ref"),
       G_integer(
-        fbi.nNumberOfLinks  // number of hard links
+        fbi.nNumberOfLinks  // number of hard links to this file.
       ));
-    stat.insert_or_assign(rocket::sref("is_dir"),
+    stat.insert_or_assign(rocket::sref("b_dir"),
       G_boolean(
-        fbi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY  // is a directory?
+        fbi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY  // whether this is a directory.
       ));
-    stat.insert_or_assign(rocket::sref("is_link"),
+    stat.insert_or_assign(rocket::sref("b_sym"),
       G_boolean(
-        fbi.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT  // is a symbol link?
+        fbi.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT  // whether this is a symbol link.
       ));
-    stat.insert_or_assign(rocket::sref("size_c"),
+    stat.insert_or_assign(rocket::sref("n_size"),
       G_integer(
-        fsi.EndOfFile.QuadPart  // number of bytes in file
+        fsi.EndOfFile.QuadPart  // number of bytes this file contains.
       ));
-    stat.insert_or_assign(rocket::sref("size_o"),
+    stat.insert_or_assign(rocket::sref("n_ocup"),
       G_integer(
-        fsi.AllocationSize.QuadPart  // number of bytes on disk
+        fsi.AllocationSize.QuadPart  // number of bytes this file occupies.
       ));
-    stat.insert_or_assign(rocket::sref("time_a"),
+    stat.insert_or_assign(rocket::sref("t_accs"),
       G_integer(
-        ((static_cast<std::int64_t>(fbi.ftLastAccessTime.dwHighDateTime) << 32) + fbi.ftLastAccessTime.dwLowDateTime - 116444736000000000) / 10000  // time of last access in UNIX timestamp
+        (do_compose(fbi.ftLastAccessTime.dwHighDateTime, fbi.ftLastAccessTime.dwLowDateTime) - 116444736000000000) / 10000  // timestamp of last access.
       ));
-    stat.insert_or_assign(rocket::sref("time_m"),
+    stat.insert_or_assign(rocket::sref("t_mod"),
       G_integer(
-        ((static_cast<std::int64_t>(fbi.ftLastWriteTime.dwHighDateTime) << 32) + fbi.ftLastWriteTime.dwLowDateTime - 116444736000000000) / 10000  // time of last write in UNIX timestamp
+        (do_compose(fbi.ftLastWriteTime.dwHighDateTime, fbi.ftLastWriteTime.dwLowDateTime) - 116444736000000000) / 10000  // timestamp of last modification.
       ));
 #else
     struct ::stat stb;
-    if(::stat(path.c_str(), &stb) != 0) {
+    if(::lstat(path.c_str(), &stb) != 0) {
       auto err = errno;
-      ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was `", err, "`).");
+      ASTERIA_DEBUG_LOG("`lstat()` failed on \'", path, "\' (errno was `", err, "`).");
       return rocket::nullopt;
     }
     // Fill `stat`.
-    stat.insert_or_assign(rocket::sref("id_dev"),
+    stat.insert_or_assign(rocket::sref("i_dev"),
       G_integer(
-        stb.st_dev  // device ID
+        stb.st_dev  // unique device id on this machine.
       ));
-    stat.insert_or_assign(rocket::sref("id_file"),
+    stat.insert_or_assign(rocket::sref("i_file"),
       G_integer(
-        stb.st_ino  // file ID
+        stb.st_ino  // unique file id on this device.
       ));
-    stat.insert_or_assign(rocket::sref("nlinks"),
+    stat.insert_or_assign(rocket::sref("n_ref"),
       G_integer(
-        stb.st_nlink  // number of hard links
+        stb.st_nlink  // number of hard links to this file.
       ));
-    stat.insert_or_assign(rocket::sref("is_dir"),
+    stat.insert_or_assign(rocket::sref("b_dir"),
       G_boolean(
-        (stb.st_mode & S_IFMT) == S_IFDIR  // is a directory?
+        S_ISDIR(stb.st_mode)  // whether this is a directory.
       ));
-    stat.insert_or_assign(rocket::sref("is_link"),
+    stat.insert_or_assign(rocket::sref("b_sym"),
       G_boolean(
-        (stb.st_mode & S_IFMT) == S_IFLNK  // is a symbol link?
+        S_ISLNK(stb.st_mode)  // whether this is a symbol link.
       ));
-    stat.insert_or_assign(rocket::sref("size_c"),
+    stat.insert_or_assign(rocket::sref("n_size"),
       G_integer(
-        stb.st_size  // number of bytes in file
+        stb.st_size  // number of bytes this file contains.
       ));
-    stat.insert_or_assign(rocket::sref("size_o"),
+    stat.insert_or_assign(rocket::sref("n_ocup"),
       G_integer(
-        static_cast<std::int64_t>(stb.st_blocks) * 512  // number of bytes on disk
+        static_cast<std::uint64_t>(stb.st_blocks) * 512  // number of bytes this file occupies.
       ));
-    stat.insert_or_assign(rocket::sref("time_a"),
+    stat.insert_or_assign(rocket::sref("t_accs"),
       G_integer(
-        static_cast<std::int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // time of last access in UNIX timestamp
+        static_cast<std::int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access.
       ));
-    stat.insert_or_assign(rocket::sref("time_m"),
+    stat.insert_or_assign(rocket::sref("t_mod"),
       G_integer(
-        static_cast<std::int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // time of last write in UNIX timestamp
+        static_cast<std::int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification.
       ));
 #endif
     return rocket::move(stat);
@@ -726,17 +732,21 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "`std.filesystem.get_information(path)`\n"
             "  * Retrieves information of the file or directory designated by\n"
             "    `path`.\n"
-            "    * Returns an `object` consisting of the following members:\n"
-            "      * `id_dev`   `integer`  unique device id on this machine.\n"
-            "      * `id_file`  `integer`  unique file id on this device.\n"
-            "      * `nlinks`   `integer`  number of hard links to this file.\n"
-            "      * `is_dir`   `boolean`  whether this is a directory.\n"
-            "      * `is_link`  `boolean`  whether this is a symbol link.\n"
-            "      * `size_c`   `integer`  number of bytes this file contains.\n"
-            "      * `size_o`   `integer`  number of bytes this file occupies.\n"
-            "      * `time_a`   `integer`  time of last access.\n"
-            "      * `time_m`   `integer`  time of last modification.\n"
-            "      On failure, `null` is returned.\n"
+            "  * Returns an `object` consisting of the following members (names\n"
+            "    that start with `b_` are `boolean` flags; names that start with\n"
+            "    `i_` are IDs as `integer`s; names that start with `n_` are\n"
+            "    plain `integer`s; names that start with `t_` are timestamps in\n"
+            "    UTC as `integer`s):\n"
+            "    * `i_dev`   unique device id on this machine.\n"
+            "    * `i_file`  unique file id on this device.\n"
+            "    * `n_ref`   number of hard links to this file.\n"
+            "    * `b_dir`   whether this is a directory.\n"
+            "    * `b_sym`   whether this is a symbol link.\n"
+            "    * `n_size`  number of bytes this file contains.\n"
+            "    * `n_ocup`  number of bytes this file occupies.\n"
+            "    * `t_accs`  timestamp of last access.\n"
+            "    * `t_mod`   timestamp of last modification.\n"
+            "    On failure, `null` is returned.\n"
           ),
         // Opaque parameter
         G_null
