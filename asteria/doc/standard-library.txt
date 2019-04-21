@@ -1417,17 +1417,21 @@
 	* Retrieves information of the file or directory designated by
 	  `path`.
 
-	* Returns an `object` consisting of the following members:
+	* Returns an `object` consisting of the following members (names
+	  that start with `b_` are `boolean` flags; names that start with
+	  `i_` are IDs as `integer`s; names that start with `n_` are
+	  plain `integer`s; names that start with `t_` are timestamps in
+	  UTC as `integer`s):
 
-	  * `id_dev`   `integer`  unique device id on this machine.
-	  * `id_file`  `integer`  unique file id on this device.
-	  * `nlinks`   `integer`  number of hard links to this file.
-	  * `is_dir`   `boolean`  whether this is a directory.
-	  * `is_link`  `boolean`  whether this is a symbol link.
-	  * `size_c`   `integer`  number of bytes this file contains.
-	  * `size_o`   `integer`  number of bytes this file occupies.
-	  * `time_a`   `integer`  time of last access.
-	  * `time_m`   `integer`  time of last modification.
+          * `i_dev`   unique device id on this machine.
+          * `i_file`  unique file id on this device.
+          * `n_ref`   number of hard links to this file.
+          * `b_dir`   whether this is a directory.
+          * `b_sym`   whether this is a symbol link.
+          * `n_size`  number of bytes this file contains.
+          * `n_ocup`  number of bytes this file occupies.
+          * `t_accs`  timestamp of last access.
+          * `t_mod`   timestamp of last modification.
 
 	  On failure, `null` is returned.
 
