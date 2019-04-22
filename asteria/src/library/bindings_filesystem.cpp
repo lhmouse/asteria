@@ -677,8 +677,11 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.get_working_directory()`\n"
+            "  \n"
             "  * Gets the absolute path of the current working directory.\n"
+            "  \n"
             "  * Returns a `string` containing the path to the current working\n"
             "    directory.\n"
           ),
@@ -709,14 +712,18 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.get_information(path)`\n"
+            "  \n"
             "  * Retrieves information of the file or directory designated by\n"
             "    `path`.\n"
+            "  \n"
             "  * Returns an `object` consisting of the following members (names\n"
             "    that start with `b_` are `boolean` flags; names that start with\n"
             "    `i_` are IDs as `integer`s; names that start with `n_` are\n"
             "    plain `integer`s; names that start with `t_` are timestamps in\n"
             "    UTC as `integer`s):\n"
+            "  \n"
             "    * `i_dev`   unique device id on this machine.\n"
             "    * `i_file`  unique file id on this device.\n"
             "    * `n_ref`   number of hard links to this file.\n"
@@ -726,6 +733,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    * `n_ocup`  number of bytes this file occupies.\n"
             "    * `t_accs`  timestamp of last access.\n"
             "    * `t_mod`   timestamp of last modification.\n"
+            "  \n"
             "    On failure, `null` is returned.\n"
           ),
         // Opaque parameter
@@ -760,9 +768,12 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.remove_recursive(path)`\n"
+            "  \n"
             "  * Removes the file or directory at `path`. If `path` designates\n"
             "    a directory, all of its contents are removed recursively.\n"
+            "  \n"
             "  * Returns the number of files and directories that have been\n"
             "    successfully removed in total, or `null` on failure.\n"
           ),
@@ -798,9 +809,12 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.move_from(path_new, path_old)`\n"
+            "  \n"
             "  * Moves (renames) the file or directory at `path_old` to\n"
             "    `path_new`.\n"
+            "  \n"
             "  * Returns `true` on success, or `null` on failure.\n"
           ),
         // Opaque parameter
@@ -835,11 +849,14 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.directory_create(path)`\n"
+            "  \n"
             "  * Creates a directory at `path`. Its parent directory must exist\n"
             "    and must be accessible. This function does not fail if either\n"
             "    a directory or a symbol link to a directory already exists on\n"
             "    `path`.\n"
+            "  \n"
             "  * Returns `1` if a new directory has been created successfully,\n"
             "    `0` if the directory already exists, or `null` on failure.\n"
           ),
@@ -875,17 +892,22 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.directory_list(path)`\n"
+            "  \n"
             "  * Lists the contents of the directory at `path`.\n"
+            "  \n"
             "  * Returns an `object` containing all children of the directory at\n"
             "    `path`, including the special subdirectories '.' and '..'. For\n"
             "    each element, its key specifies the filename and the value is\n"
             "    an `object` consisting of the following members (names that\n"
             "    start with `b_` are `boolean` flags; names that start with `i_`\n"
             "    are IDs as `integer`s):\n"
+            "  \n"
             "    * `i_file`  unique file id on this device.\n"
             "    * `b_dir`   whether this is a directory.\n"
             "    * `b_sym`   whether this is a symbol link.\n"
+            "  \n"
             "    On failure, `null` is returned.\n"
           ),
         // Opaque parameter
@@ -920,9 +942,12 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.directory_remove(path)`\n"
+            "  \n"
             "  * Removes the directory at `path`. The directory must be empty.\n"
             "    This function fails if `path` does not designate a directory.\n"
+            "  \n"
             "  * Returns `1` if the directory has been removed successfully, `0`\n"
             "    if it is not empty, or `null` on failure.\n"
           ),
@@ -958,14 +983,18 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.file_read(path, [offset], [limit])`\n"
+            "  \n"
             "  * Reads the file at `path` in binary mode. The read operation\n"
             "    starts from the byte offset that is denoted by `offset` if it\n"
             "    is specified, or from the beginning of the file otherwise. If\n"
             "    `limit` is specified, no more than this number of bytes will be\n"
             "    read.\n"
+            "  \n"
             "  * Returns the bytes that have been read as a `string`, or `null`\n"
             "    on failure.\n"
+            "  \n"
             "  * Throws an exception of `offset` is negative.\n"
           ),
         // Opaque parameter
@@ -1002,15 +1031,19 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.file_write(path, data, [offset])`\n"
+            "  \n"
             "  * Writes the file at `path` in binary mode. The write operation\n"
             "    starts from the byte offset that is denoted by `offset` if it\n"
             "    is specified, or from the beginning of the file otherwise. The\n"
             "    file is truncated to this length before the write operation;\n"
             "    any existent contents after the write point are discarded. This\n"
             "    function fails if the data can only be written partially.\n"
+            "  \n"
             "  * Returns `true` if all data have been written successfully, or\n"
             "    `null` on failure.\n"
+            "  \n"
             "  * Throws an exception of `offset` is negative.\n"
           ),
         // Opaque parameter
@@ -1046,12 +1079,15 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.file_append(path, data)`\n"
+            "  \n"
             "  * Writes the file at `path` in binary mode. The write operation\n"
             "    starts from the end of the file; existent contents of the file\n"
             "    are left intact. If `exclusive` is `true` and a file exists on\n"
             "    `path`, this function fails. This function also fails if the\n"
             "    data can only be written partially.\n"
+            "  \n"
             "  * Returns `true` if all data have been written successfully, or\n"
             "    `null` on failure.\n"
           ),
@@ -1088,9 +1124,12 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.filesystem.file_remove(path)`\n"
+            "  \n"
             "  * Removes the file at `path`. This function fails if `path`\n"
             "    designates a directory.\n"
+            "  \n"
             "  * Returns `true` if the file has been removed successfully, or\n"
             "    `null` on failure.\n"
           ),

@@ -1001,7 +1001,9 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.slice(text, from, [length])`\n"
+            "\n"
+            "`std.string.slice(text, from, [length])`\n"
+            "  \n"
             "  * Copies a subrange of `text` to create a new byte string. Bytes\n"
             "    are copied from `from` if it is non-negative, or from\n"
             "    `lengthof(text) + from` otherwise. If `length` is set to an\n"
@@ -1009,6 +1011,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             "    it is absent, all bytes from `from` to the end of `text` will\n"
             "    be copied. If `from` is outside `text`, an empty `string` is\n"
             "    returned.\n"
+            "  \n"
             "  * Returns the specified substring of `text`.\n"
           ),
         // Opaque parameter
@@ -1041,13 +1044,18 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.replace_slice(text, from, replacement)`\n"
+            "\n"
+            "`std.string.replace_slice(text, from, replacement)`\n"
+            "  \n"
             "  * Replaces all bytes from `from` to the end of `text` with\n"
             "    `replacement` and returns the new byte string. If `from` is\n"
             "    negative, it specifies an offset from the end of `text`. This\n"
             "    function returns a new `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns a `string` with the subrange replaced.\n"
+            "\n"
             "`std.string.replace_slice(text, from, [length], replacement)`\n"
+            "  \n"
             "  * Replaces a subrange of `text` with `replacement` to create a\n"
             "    new byte string. `from` specifies the start of the subrange to\n"
             "    replace. If `from` is negative, it specifies an offset from the\n"
@@ -1055,6 +1063,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             "    to replace. If it is set to `null`, this function is equivalent\n"
             "    to `replace_slice(text, from, replacement)`. This function\n"
             "    returns a new `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns a `string` with the subrange replaced.\n"
           ),
         // Opaque parameter
@@ -1094,12 +1103,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.compare(text1, text2, [length])`\n"
+            "\n"
+            "`std.string.compare(text1, text2, [length])`\n"
+            "  \n"
             "  * Performs lexicographical comparison on two byte strings. If\n"
             "    `length` is set to an `integer`, no more than this number of\n"
             "    bytes are compared. This function behaves like the `strncmp()`\n"
             "    function in C, except that null characters do not terminate\n"
             "    strings.\n"
+            "  \n"
             "  * Returns a positive `integer` if `text1` compares greater than\n"
             "    `text2`, a negative `integer` if `text1` compares less than\n"
             "    `text2`, or zero if `text1` compares equal to `text2`.\n"
@@ -1134,9 +1146,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.starts_with(text, prefix)`\n"
+            "\n"
+            "`std.string.starts_with(text, prefix)`\n"
+            "  \n"
             "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
             "    `string` is considered to be a prefix of any string.\n"
+            "  \n"
             "  * Returns `true` if `prefix` is a prefix of `text`, or `false`\n"
             "    otherwise.\n"
           ),
@@ -1169,9 +1184,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.ends_with(text, suffix)`\n"
+            "\n"
+            "`std.string.ends_with(text, suffix)`\n"
+            "  \n"
             "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
             "    `string` is considered to be a suffix of any string.\n"
+            "  \n"
             "  * Returns `true` if `suffix` is a suffix of `text`, or `false`\n"
             "    otherwise.\n"
           ),
@@ -1204,22 +1222,31 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.find(text, pattern)`\n"
+            "\n"
+            "`std.string.find(text, pattern)`\n"
+            "  \n"
             "  * Searches `text` for the first occurrence of `pattern`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte of the first match of\n"
             "    `pattern` in `text` if one is found, which is always\n"
             "    non-negative, or `null` otherwise.\n"
+            "\n"
             "`std.string.find(text, from, pattern)`\n"
+            "  \n"
             "  * Searches `text` for the first occurrence of `pattern`. The\n"
             "    search operation is performed on the same subrange that would\n"
             "    be returned by `slice(text, from)`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte of the first match of\n"
             "    `pattern` in `text` if one is found, which is always\n"
             "    non-negative, or `null` otherwise.\n"
+            "\n"
             "`std.string.find(text, from, [length], pattern)`\n"
+            "  \n"
             "  * Searches `text` for the first occurrence of `pattern`. The\n"
             "    search operation is performed on the same subrange that would\n"
             "    be returned by `slice(text, from, length)`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte of the first match of\n"
             "    `pattern` in `text` if one is found, which is always\n"
             "    non-negative, or `null` otherwise.\n"
@@ -1278,20 +1305,29 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.rfind(text, pattern)`\n"
+            "\n"
+            "`std.string.rfind(text, pattern)`\n"
+            "  \n"
             "  * Searches `text` for the last occurrence of `pattern`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte of the last match of\n"
             "    `pattern` in `text` if one is found, which is always\n"
             "    non-negative, or `null` otherwise.\n"
+            "\n"
             "`std.string.rfind(text, from, pattern)`\n"
+            "  \n"
             "  * Searches `text` for the last occurrence of `pattern`. The\n"
             "    search operation is performed on the same subrange that would\n"
             "    be returned by `slice(text, from)`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte of the last match of\n"
             "    `pattern` in `text` if one is found, which is always\n"
             "    non-negative, or `null` otherwise.\n"
+            "\n"
             "`std.string.rfind(text, from, [length], pattern)`\n"
+            "  \n"
             "  * Searches `text` for the last occurrence of `pattern`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte of the last match of\n"
             "    `pattern` in `text` if one is found, which is always\n"
             "    non-negative, or `null` otherwise.\n"
@@ -1350,24 +1386,33 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.find_and_replace(text, pattern, replacement)`\n"
+            "\n"
+            "`std.string.find_and_replace(text, pattern, replacement)`\n"
+            "  \n"
             "  * Searches `text` and replaces all occurrences of `pattern` with\n"
             "    `replacement`. This function returns a new `string` without\n"
             "    modifying `text`.\n"
+            "  \n"
             "  * Returns the string with `pattern` replaced. If `text` does not\n"
             "    contain `pattern`, it is returned intact.\n"
+            "\n"
             "`std.string.find_and_replace(text, from, pattern, replacement)`\n"
+            "  \n"
             "  * Searches `text` and replaces all occurrences of `pattern` with\n"
             "    `replacement`. The search operation is performed on the same\n"
             "    subrange that would be returned by `slice(text, from)`. This\n"
             "    function returns a new `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns the string with `pattern` replaced. If `text` does not\n"
             "    contain `pattern`, it is returned intact.\n"
+            "\n"
             "`std.string.find_and_replace(text, from, [length], pattern, replacement)`\n"
+            "  \n"
             "  * Searches `text` and replaces all occurrences of `pattern` with\n"
             "    `replacement`. The search operation is performed on the same\n"
             "    subrange that would be returned by `slice(text, from, length)`.\n"
             "    This function returns a new `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns the string with `pattern` replaced. If `text` does not\n"
             "    contain `pattern`, it is returned intact.\n"
           ),
@@ -1414,20 +1459,29 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.find_any_of(text, accept)`\n"
+            "\n"
+            "`std.string.find_any_of(text, accept)`\n"
+            "  \n"
             "  * Searches `text` for bytes that exist in `accept`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
+            "\n"
             "`std.string.find_any_of(text, from, accept)`\n"
+            "  \n"
             "  * Searches `text` for bytes that exist in `accept`. The search\n"
             "    operation is performed on the same subrange that would be\n"
             "    returned by `slice(text, from)`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
+            "\n"
             "`std.string.find_any_of(text, from, [length], accept)`\n"
+            "  \n"
             "  * Searches `text` for bytes that exist in `accept`. The search\n"
             "    operation is performed on the same subrange that would be\n"
             "    returned by `slice(text, from, length)`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
           ),
@@ -1485,20 +1539,29 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.rfind_any_of(text, accept)`\n"
+            "\n"
+            "`std.string.rfind_any_of(text, accept)`\n"
+            "  \n"
             "  * Searches `text` for bytes that exist in `accept`.\n"
+            "  \n"
             "  * Returns the subscript of the last byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
+            "\n"
             "`std.string.rfind_any_of(text, from, accept)`\n"
+            "  \n"
             "  * Searches `text` for bytes that exist in `accept`. The search\n"
             "    operation is performed on the same subrange that would be\n"
             "    returned by `slice(text, from)`.\n"
+            "  \n"
             "  * Returns the subscript of the last byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
+            "\n"
             "`std.string.rfind_any_of(text, from, [length], accept)`\n"
+            "  \n"
             "  * Searches `text` for bytes that exist in `accept`. The search\n"
             "    operation is performed on the same subrange that would be\n"
             "    returned by `slice(text, from, length)`.\n"
+            "  \n"
             "  * Returns the subscript of the last byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
           ),
@@ -1556,20 +1619,29 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.find_not_of(text, reject)`\n"
+            "\n"
+            "`std.string.find_not_of(text, reject)`\n"
+            "  \n"
             "  * Searches `text` for bytes that does not exist in `reject`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
+            "\n"
             "`std.string.find_not_of(text, from, reject)`\n"
+            "  \n"
             "  * Searches `text` for bytes that does not exist in `reject`. The\n"
             "    search operation is performed on the same subrange that would\n"
             "    be returned by `slice(text, from)`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
+            "\n"
             "`std.string.find_not_of(text, from, [length], reject)`\n"
+            "  \n"
             "  * Searches `text` for bytes that does not exist in `reject`. The\n"
             "    search operation is performed on the same subrange that would\n"
             "    be returned by `slice(text, from, length)`.\n"
+            "  \n"
             "  * Returns the subscript of the first byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
           ),
@@ -1627,20 +1699,29 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.rfind_not_of(text, reject)`\n"
+            "\n"
+            "`std.string.rfind_not_of(text, reject)`\n"
+            "  \n"
             "  * Searches `text` for bytes that does not exist in `reject`.\n"
+            "  \n"
             "  * Returns the subscript of the last byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
+            "\n"
             "`std.string.rfind_not_of(text, from, reject)`\n"
+            "  \n"
             "  * Searches `text` for bytes that does not exist in `reject`. The\n"
             "    search operation is performed on the same subrange that would\n"
             "    be returned by `slice(text, from)`.\n"
+            "  \n"
             "  * Returns the subscript of the last byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
+            "\n"
             "`std.string.rfind_not_of(text, from, [length], reject)`\n"
+            "  \n"
             "  * Searches `text` for bytes that does not exist in `reject`. The\n"
             "    search operation is performed on the same subrange that would\n"
             "    be returned by `slice(text, from, length)`.\n"
+            "  \n"
             "  * Returns the subscript of the last byte found, which is always\n"
             "    non-negative; or `null` if no such byte exists.\n"
           ),
@@ -1698,9 +1779,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.reverse(text)`\n"
+            "\n"
+            "`std.string.reverse(text)`\n"
+            "  \n"
             "  * Reverses a byte string. This function returns a new `string`\n"
             "    without modifying `text`.\n"
+            "  \n"
             "  * Returns the reversed `string`.\n"
           ),
         // Opaque parameter
@@ -1731,11 +1815,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.trim(text, [reject])`\n"
+            "\n"
+            "`std.string.trim(text, [reject])`\n"
+            "  \n"
             "  * Removes the longest prefix and suffix consisting solely bytes\n"
             "    from `reject`. If `reject` is empty, no byte is removed. If\n"
             "    `reject` is not specified, spaces and tabs are removed. This\n"
             "    function returns a new `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns the trimmed `string`.\n"
           ),
         // Opaque parameter
@@ -1767,11 +1854,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.ltrim(text, [reject])`\n"
+            "\n"
+            "`std.string.ltrim(text, [reject])`\n"
+            "  \n"
             "  * Removes the longest prefix consisting solely bytes from\n"
             "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
             "    is not specified, spaces and tabs are removed. This function\n"
             "    returns a new `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns the trimmed `string`.\n"
           ),
         // Opaque parameter
@@ -1803,11 +1893,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.rtrim(text, [reject])`\n"
+            "\n"
+            "`std.string.rtrim(text, [reject])`\n"
+            "  \n"
             "  * Removes the longest suffix consisting solely bytes from\n"
             "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
             "    is not specified, spaces and tabs are removed. This function\n"
             "    returns a new `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns the trimmed `string`.\n"
           ),
         // Opaque parameter
@@ -1839,12 +1932,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.lpad(text, length, [padding])`\n"
+            "\n"
+            "`std.string.lpad(text, length, [padding])`\n"
+            "  \n"
             "  * Prepends `text` with `padding` repeatedly, until its length\n"
             "    would exceed `length`. The default value of `padding` is a\n"
             "    `string` consisting of a space. This function returns a new\n"
             "    `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns the padded string.\n"
+            "  \n"
             "  * Throws an exception if `padding` is empty.\n"
           ),
         // Opaque parameter
@@ -1877,12 +1974,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.rpad(text, length, [padding])`\n"
+            "\n"
+            "`std.string.rpad(text, length, [padding])`\n"
+            "  \n"
             "  * Appends `text` with `padding` repeatedly, until its length\n"
             "    would exceed `length`. The default value of `padding` is a\n"
             "    `string` consisting of a space. This function returns a new\n"
             "    `string` without modifying `text`.\n"
+            "  \n"
             "  * Returns the padded string.\n"
+            "  \n"
             "  * Throws an exception if `padding` is empty.\n"
           ),
         // Opaque parameter
@@ -1915,10 +2016,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.to_upper(text)`\n"
+            "\n"
+            "`std.string.to_upper(text)`\n"
+            "  \n"
             "  * Converts all lowercase English letters in `text` to their\n"
             "    uppercase counterparts. This function returns a new `string`\n"
             "    without modifying `text`.\n"
+            "  \n"
             "  * Returns a new `string` after the conversion.\n"
           ),
         // Opaque parameter
@@ -1949,10 +2053,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.to_lower(text)`\n"
+            "\n"
+            "`std.string.to_lower(text)`\n"
+            "  \n"
             "  * Converts all lowercase English letters in `text` to their\n"
             "    uppercase counterparts. This function returns a new `string`\n"
             "    without modifying `text`.\n"
+            "  \n"
             "  * Returns a new `string` after the conversion.\n"
           ),
         // Opaque parameter
@@ -1983,7 +2090,9 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
+            "\n"
             "`std.string.translate(text, inputs, [outputs])`\n"
+            "  \n"
             "  * Performs bytewise translation on the given string. For every\n"
             "    byte in `text` that is also found in `inputs`, if there is a\n"
             "    corresponding replacement byte in `outputs` with the same\n"
@@ -1993,6 +2102,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             "    bytes are ignored. Bytes that do not exist in `inputs` are left\n"
             "    intact. This function returns a new `string` without modifying\n"
             "    `text`.\n"
+            "  \n"
             "  * Returns the translated `string`.\n"
           ),
         // Opaque parameter
@@ -2025,14 +2135,18 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.explode(text, [delim], [limit])`\n"
+            "\n"
+            "`std.string.explode(text, [delim], [limit])`\n"
+            "  \n"
             "  * Breaks `text` down into segments, separated by `delim`. If\n"
             "    `delim` is `null` or an empty `string`, every byte becomes a\n"
             "    segment. If `limit` is set to a positive `integer`, there will\n"
             "    be no more segments than this number; the last segment will\n"
             "    contain all the remaining bytes of the `text`.\n"
+            "  \n"
             "  * Returns an `array` containing the broken-down segments. If\n"
             "    `text` is empty, an empty `array` is returned.\n"
+            "  \n"
             "  * Throws an exception if `limit` is zero or negative.\n"
           ),
         // Opaque parameter
@@ -2065,10 +2179,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.implode(segments, [delim])`\n"
+            "\n"
+            "`std.string.implode(segments, [delim])`\n"
+            "  \n"
             "  * Concatenates elements of an array, `segments`, to create a new\n"
             "    `string`. All segments shall be `string`s. If `delim` is\n"
             "    specified, it is inserted between adjacent segments.\n"
+            "  \n"
             "  * Returns a `string` containing all segments. If `segments` is\n"
             "    empty, an empty `string` is returned.\n"
           ),
@@ -2101,12 +2218,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.hex_encode(text, [delim], [uppercase])`\n"
+            "\n"
+            "`std.string.hex_encode(text, [delim], [uppercase])`\n"
+            "  \n"
             "  * Encodes all bytes in `text` as 2-digit hexadecimal numbers and\n"
             "    concatenates them. If `delim` is specified, it is inserted\n"
             "    between adjacent bytes. If `uppercase` is set to `true`,\n"
             "    hexadecimal digits above `9` are encoded as `ABCDEF`; otherwise\n"
             "    they are encoded as `abcdef`.\n"
+            "  \n"
             "  * Returns the encoded `string`. If `text` is empty, an empty\n"
             "    `string` is returned.\n"
           ),
@@ -2140,10 +2260,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.hex_decode(hstr)`\n"
+            "\n"
+            "`std.string.hex_decode(hstr)`\n"
+            "  \n"
             "  * Decodes all hexadecimal digits from `hstr` and converts them to\n"
             "    bytes. Whitespaces are ignored. Characters that are neither\n"
             "    hexadecimal digits nor whitespaces will cause parse errors.\n"
+            "  \n"
             "  * Returns a `string` containing decoded bytes. If `hstr` is empty\n"
             "    or consists only whitespaces, an empty `string` is returned. In\n"
             "    the case of parse errors, `null` is returned.\n"
@@ -2180,13 +2303,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.utf8_encode(code_points, [permissive])`\n"
+            "\n"
+            "`std.string.utf8_encode(code_points, [permissive])`\n"
+            "  \n"
             "  * Encodes code points from `code_points` into an UTF-8 `string`.\n"
             "  `code_points` can be either an `integer` or an `array` of\n"
             "  `integer`s. When an invalid code point is encountered, if\n"
             "  `permissive` is set to `true`, it is replaced with the\n"
             "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
             "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
+            "  \n"
             "  * Returns the encoded `string` on success, or `null` otherwise.\n"
           ),
         // Opaque parameter
@@ -2232,13 +2358,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.utf8_decode(text, [permissive])`\n"
+            "\n"
+            "`std.string.utf8_decode(text, [permissive])`\n"
+            "  \n"
             "  * Decodes `text`, which is expected to be a `string` containing\n"
             "    UTF-8 code units, into an `array` of code points, represented\n"
             "    as `integer`s. When an invalid code sequence is encountered, if\n"
             "    `permissive` is set to `true`, all code units of it are\n"
             "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
             "    otherwise this function fails.\n"
+            "  \n"
             "  * Returns an `array` containing decoded code points, or `null`\n"
             "    otherwise.\n"
           ),
@@ -2275,10 +2404,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.pack8(values)`\n"
+            "\n"
+            "`std.string.pack8(values)`\n"
+            "  \n"
             "  * Packs a series of 8-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integer`s, all of\n"
             "    which are truncated to 8 bits then copied into a `string`.\n"
+            "  \n"
             "  * Returns the packed `string`.\n"
           ),
         // Opaque parameter
@@ -2319,10 +2451,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.unpack8(text)`\n"
+            "\n"
+            "`std.string.unpack8(text)`\n"
+            "  \n"
             "  * Unpacks 8-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
             "    which are sign-extended to 64 bits then copied into an `array`.\n"
+            "  \n"
             "  * Returns an `array` containing unpacked integers.\n"
           ),
         // Opaque parameter
@@ -2355,11 +2490,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.pack16be(values)`\n"
+            "\n"
+            "`std.string.pack16be(values)`\n"
+            "  \n"
             "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
             "    which are truncated to 16 bits then copied into a `string` in\n"
             "    the big-endian byte order.\n"
+            "  \n"
             "  * Returns the packed `string`.\n"
           ),
         // Opaque parameter
@@ -2400,12 +2538,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.unpack16be(text)`\n"
+            "\n"
+            "`std.string.unpack16be(text)`\n"
+            "  \n"
             "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 16-bit integers in the\n"
             "    big-endian byte order, all of which are sign-extended to 64\n"
             "    bits then copied into an `array`.\n"
+            "  \n"
             "  * Returns an `array` containing unpacked integers.\n"
+            "  \n"
             "  * Throws an exception if the length of `text` is not a multiple\n"
             "    of 2.\n"
           ),
@@ -2439,11 +2581,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.pack16le(values)`\n"
+            "\n"
+            "`std.string.pack16le(values)`\n"
+            "  \n"
             "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
             "    which are truncated to 16 bits then copied into a `string` in\n"
             "    the little-endian byte order.\n"
+            "  \n"
             "  * Returns the packed `string`.\n"
           ),
         // Opaque parameter
@@ -2484,12 +2629,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.unpack16le(text)`\n"
+            "\n"
+            "`std.string.unpack16le(text)`\n"
+            "  \n"
             "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 16-bit integers in the\n"
             "    little-endian byte order, all of which are sign-extended to 64\n"
             "    bits then copied into an `array`.\n"
+            "  \n"
             "  * Returns an `array` containing unpacked integers.\n"
+            "  \n"
             "  * Throws an exception if the length of `text` is not a multiple\n"
             "    of 2.\n"
           ),
@@ -2523,11 +2672,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.pack32be(values)`\n"
+            "\n"
+            "`std.string.pack32be(values)`\n"
+            "  \n"
             "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
             "    which are truncated to 32 bits then copied into a `string` in\n"
             "    the big-endian byte order.\n"
+            "  \n"
             "  * Returns the packed `string`.\n"
           ),
         // Opaque parameter
@@ -2568,12 +2720,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.unpack32be(text)`\n"
+            "\n"
+            "`std.string.unpack32be(text)`\n"
+            "  \n"
             "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 32-bit integers in the\n"
             "    big-endian byte order, all of which are sign-extended to 64\n"
             "    bits then copied into an `array`.\n"
+            "  \n"
             "  * Returns an `array` containing unpacked integers.\n"
+            "  \n"
             "  * Throws an exception if the length of `text` is not a multiple\n"
             "    of 4.\n"
           ),
@@ -2607,11 +2763,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.pack32le(values)`\n"
+            "\n"
+            "`std.string.pack32le(values)`\n"
+            "  \n"
             "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
             "    which are truncated to 32 bits then copied into a `string` in\n"
             "    the little-endian byte order.\n"
+            "  \n"
             "  * Returns the packed `string`.\n"
           ),
         // Opaque parameter
@@ -2652,12 +2811,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.unpack32le(text)`\n"
+            "\n"
+            "`std.string.unpack32le(text)`\n"
+            "  \n"
             "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 32-bit integers in the\n"
             "    little-endian byte order, all of which are sign-extended to 64\n"
             "    bits then copied into an `array`.\n"
+            "  \n"
             "  * Returns an `array` containing unpacked integers.\n"
+            "  \n"
             "  * Throws an exception if the length of `text` is not a multiple\n"
             "    of 4.\n"
           ),
@@ -2691,10 +2854,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.pack64be(values)`\n"
+            "\n"
+            "`std.string.pack64be(values)`\n"
+            "  \n"
             "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
             "    which are copied into a `string` in the big-endian byte order.\n"
+            "  \n"
             "  * Returns the packed `string`.\n"
           ),
         // Opaque parameter
@@ -2735,11 +2901,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.unpack64be(text)`\n"
+            "\n"
+            "`std.string.unpack64be(text)`\n"
+            "  \n"
             "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 64-bit integers in the\n"
             "    big-endian byte order, all of which are copied into an `array`.\n"
+            "  \n"
             "  * Returns an `array` containing unpacked integers.\n"
+            "  \n"
             "  * Throws an exception if the length of `text` is not a multiple\n"
             "    of 8.\n"
           ),
@@ -2773,11 +2943,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.pack64le(values)`\n"
+            "\n"
+            "`std.string.pack64le(values)`\n"
+            "  \n"
             "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
             "    which are copied into a `string` in the little-endian byte\n"
             "    order.\n"
+            "  \n"
             "  * Returns the packed `string`.\n"
           ),
         // Opaque parameter
@@ -2818,12 +2991,16 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Description
         rocket::sref
           (
-            "std.string.unpack64le(text)`\n"
+            "\n"
+            "`std.string.unpack64le(text)`\n"
+            "  \n"
             "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 64-bit integers in the\n"
             "    little-endian byte order, all of which are copied into an\n"
             "    `array`.\n"
+            "  \n"
             "  * Returns an `array` containing unpacked integers.\n"
+            "  \n"
             "  * Throws an exception if the length of `text` is not a multiple\n"
             "    of 8.\n"
           ),
