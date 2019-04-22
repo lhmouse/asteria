@@ -21,7 +21,7 @@ int main()
         assert std.filesystem.get_information(fname) == null;
 
         assert std.filesystem.directory_create(dname) == 1;
-        assert std.filesystem.get_information(dname).is_dir == true;
+        assert std.filesystem.get_information(dname).b_dir == true;
         assert std.filesystem.directory_create(dname) == 0;
 
         assert std.filesystem.file_append(dname + "/f1", "1") == true;
@@ -61,19 +61,19 @@ int main()
 
         assert std.filesystem.file_read(fname) == null;
         assert std.filesystem.file_append(fname, "@@@@$$", true) == true; // "@@@@$$"
-        assert std.filesystem.get_information(fname).is_dir == false;
-        assert std.filesystem.get_information(fname).size_c == 6;
+        assert std.filesystem.get_information(fname).b_dir == false;
+        assert std.filesystem.get_information(fname).n_size == 6;
         assert std.filesystem.file_write(fname, "hello") == true;  // "hello"
-        assert std.filesystem.get_information(fname).size_c == 5;
+        assert std.filesystem.get_information(fname).n_size == 5;
         assert std.filesystem.file_write(fname, "HELLO", 3) == true; // "helHELLO"
-        assert std.filesystem.get_information(fname).size_c == 8;
+        assert std.filesystem.get_information(fname).n_size == 8;
         assert std.filesystem.file_write(fname, "#", 5) == true; // "helHE#"
-        assert std.filesystem.get_information(fname).size_c == 6;
+        assert std.filesystem.get_information(fname).n_size == 6;
 
         assert std.filesystem.file_append(fname, "??") == true; // "helHE#??"
-        assert std.filesystem.get_information(fname).size_c == 8;
+        assert std.filesystem.get_information(fname).n_size == 8;
         assert std.filesystem.file_append(fname, "!!") == true; // "helHE#??!!"
-        assert std.filesystem.get_information(fname).size_c == 10;
+        assert std.filesystem.get_information(fname).n_size == 10;
         assert std.filesystem.file_append(fname, "!!", true) == null;
 
         assert std.filesystem.file_read(fname) == "helHE#??!!";
