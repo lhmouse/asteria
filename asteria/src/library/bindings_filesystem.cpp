@@ -48,8 +48,8 @@ namespace Asteria {
         return u16str;
       }
 
-    // Compose a high-order and a low-order `DWORD` to form an `uint64_t`.
-    constexpr std::uint64_t do_compose(std::uint32_t high, std::uint32_t low) noexcept
+    // Compose a pair of `DWORD`s to form an `uint64_t`.
+    constexpr std::uint64_t do_compose(::DWORD high, ::DWORD low) noexcept
       {
         return (static_cast<std::uint64_t>(high) << 32) + low;
       }
