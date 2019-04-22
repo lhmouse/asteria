@@ -322,11 +322,11 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           // Pop an element off the stack.
           auto pair = rocket::move(stack.back());
           stack.pop_back();
-          auto& path = pair.second;
+          auto& wpath = pair.second;
           // Do something.
           if(pair.first == rmlist_rmdir) {
             // This is an empty directory. Remove it.
-            if(::RemoveDirectoryW(path.c_str()) == FALSE) {
+            if(::RemoveDirectoryW(wpath.c_str()) == FALSE) {
               return rocket::nullopt;
             }
             count++;
@@ -334,7 +334,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           }
           if(pair.first == rmlist_unlink) {
             // This is a plain file. Remove it.
-            if(::DeleteFileW(path.c_str()) == FALSE) {
+            if(::DeleteFileW(wpath.c_str()) == FALSE) {
               return rocket::nullopt;
             }
             count++;
@@ -343,17 +343,18 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           // This is a subdirectory that has not been expanded. Expand it.
           // Push the directory itself. Since elements are maintained in LIFO order, only when this element
           // is encountered for a second time, will all of its children have been removed.
-          stack.emplace_back(rmlist_rmdir, path);
+          stack.emplace_back(rmlist_rmdir, wpath);
           // Append all entries.
           // Make a pattern that will match everything.
-          path.append(L"\\*");
+          wpath.append(L"\\*");
           // On Windows, `FindFirstFile()` returns the first entry in the directory.
           // Although for a non-root directory this is always '.', it could be a conventional entry when
           // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
           // if no file exists in such a case, `FindFirstFile()` fails and `GetLastError()` returns
           // `ERROR_FILE_NOT_FOUND`.
           ::WIN32_FIND_DATAW next;
-          Directory hd(::FindFirstFileW(path.c_str(), &next));
+          Directory hd(::FindFirstFileW(wpath.c_str(), &next));
+          wpath.erase(wpath.size() - 2);
           if(!hd) {
             auto err = ::GetLastError();
             if(err != ERROR_FILE_NOT_FOUND) {
@@ -369,7 +370,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
               continue;
             }
             // Get the name and type of this entry.
-            auto child = path + L'\\' + next.cFileName;
+            auto child = wpath + L'\\' + next.cFileName;
             bool is_dir = next.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
             // Append the entry.
             stack.emplace_back(is_dir ? rmlist_expand : rmlist_unlink, rocket::move(child));
@@ -509,6 +510,7 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
     // `ERROR_FILE_NOT_FOUND`.
     ::WIN32_FIND_DATAW next;
     Directory hd(::FindFirstFileW(wpath.c_str(), &next));
+    wpath.erase(path.size() - 2);
     if(!hd) {
       auto err = ::GetLastError();
       if(err != ERROR_FILE_NOT_FOUND) {
