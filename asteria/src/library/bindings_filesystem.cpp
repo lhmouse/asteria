@@ -302,49 +302,6 @@ Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
     return -1;
   }
 
-Opt<G_integer> std_filesystem_directory_create(const G_string& path)
-  {
-    G_integer count = 1;
-#ifdef _WIN32
-    auto wpath = do_translate_winnt_path(path);
-    if(::CreateDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str()), nullptr) == FALSE) {
-      auto err = ::GetLastError();
-      if(err != ERROR_ALREADY_EXISTS) {
-        ASTERIA_DEBUG_LOG("`CreateDirectoryW()` failed on \'", path, "\' (last error was `", err, "`).");
-        return rocket::nullopt;
-      }
-      // Fail only if it is not a directory that exists.
-      auto attr = ::GetFileAttributesW(reinterpret_cast<const wchar_t*>(wpath.c_str()));
-      if(attr == INVALID_FILE_ATTRIBUTES) {
-        err = ::GetLastError();
-        ASTERIA_DEBUG_LOG("`GetFileAttributesW()` failed on \'", path, "\' (last error was `", err, "`).");
-        return rocket::nullopt;
-      }
-      if(!(attr & FILE_ATTRIBUTE_DIRECTORY)) {
-#else
-    if(::mkdir(path.c_str(), 0777) != 0) {
-      auto err = errno;
-      if(err != EEXIST) {
-        ASTERIA_DEBUG_LOG("`mkdir()` failed on \'", path, "\' (errno was `", err, "`).");
-        return rocket::nullopt;
-      }
-      // Fail only if it is not a directory that exists.
-      struct ::stat stb;
-      if(::stat(path.c_str(), &stb) != 0) {
-        err = errno;
-        ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was `", err, "`).");
-        return rocket::nullopt;
-      }
-      if(!S_ISDIR(stb.st_mode)) {
-#endif
-        ASTERIA_DEBUG_LOG("A file that is not a directory exists on \'", path, "\'.");
-        return rocket::nullopt;
-      }
-      count = 0;
-    }
-    return rocket::move(count);
-  }
-
 Opt<G_object> std_filesystem_directory_list(const G_string& path)
   {
     G_object entries;
@@ -451,6 +408,49 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
     }
 #endif
     return rocket::move(entries);
+  }
+
+Opt<G_integer> std_filesystem_directory_create(const G_string& path)
+  {
+    G_integer count = 1;
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    if(::CreateDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str()), nullptr) == FALSE) {
+      auto err = ::GetLastError();
+      if(err != ERROR_ALREADY_EXISTS) {
+        ASTERIA_DEBUG_LOG("`CreateDirectoryW()` failed on \'", path, "\' (last error was `", err, "`).");
+        return rocket::nullopt;
+      }
+      // Fail only if it is not a directory that exists.
+      auto attr = ::GetFileAttributesW(reinterpret_cast<const wchar_t*>(wpath.c_str()));
+      if(attr == INVALID_FILE_ATTRIBUTES) {
+        err = ::GetLastError();
+        ASTERIA_DEBUG_LOG("`GetFileAttributesW()` failed on \'", path, "\' (last error was `", err, "`).");
+        return rocket::nullopt;
+      }
+      if(!(attr & FILE_ATTRIBUTE_DIRECTORY)) {
+#else
+    if(::mkdir(path.c_str(), 0777) != 0) {
+      auto err = errno;
+      if(err != EEXIST) {
+        ASTERIA_DEBUG_LOG("`mkdir()` failed on \'", path, "\' (errno was `", err, "`).");
+        return rocket::nullopt;
+      }
+      // Fail only if it is not a directory that exists.
+      struct ::stat stb;
+      if(::stat(path.c_str(), &stb) != 0) {
+        err = errno;
+        ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was `", err, "`).");
+        return rocket::nullopt;
+      }
+      if(!S_ISDIR(stb.st_mode)) {
+#endif
+        ASTERIA_DEBUG_LOG("A file that is not a directory exists on \'", path, "\'.");
+        return rocket::nullopt;
+      }
+      count = 0;
+    }
+    return rocket::move(count);
   }
 
 Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
@@ -883,49 +883,6 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.filesystem.directory_create()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("directory_create"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.directory_create(path)`\n"
-            "  \n"
-            "  * Creates a directory at `path`. Its parent directory must exist\n"
-            "    and must be accessible. This function does not fail if either\n"
-            "    a directory or a symbol link to a directory already exists on\n"
-            "    `path`.\n"
-            "  \n"
-            "  * Returns `1` if a new directory has been created successfully,\n"
-            "    `0` if the directory already exists, or `null` on failure.\n"
-          ),
-        // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.directory_create"), args);
-            // Parse arguments.
-            G_string path;
-            if(reader.start().g(path).finish()) {
-              // Call the binding function.
-              auto qres = std_filesystem_directory_create(path);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          }
-      )));
-    //===================================================================
     // `std.filesystem.directory_list()`
     //===================================================================
     result.insert_or_assign(rocket::sref("directory_list"),
@@ -964,6 +921,49 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             if(reader.start().g(path).finish()) {
               // Call the binding function.
               auto qres = std_filesystem_directory_list(path);
+              if(!qres) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qres) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.filesystem.directory_create()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("directory_create"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.filesystem.directory_create(path)`\n"
+            "  \n"
+            "  * Creates a directory at `path`. Its parent directory must exist\n"
+            "    and must be accessible. This function does not fail if either\n"
+            "    a directory or a symbol link to a directory already exists on\n"
+            "    `path`.\n"
+            "  \n"
+            "  * Returns `1` if a new directory has been created successfully,\n"
+            "    `0` if the directory already exists, or `null` on failure.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.filesystem.directory_create"), args);
+            // Parse arguments.
+            G_string path;
+            if(reader.start().g(path).finish()) {
+              // Call the binding function.
+              auto qres = std_filesystem_directory_create(path);
               if(!qres) {
                 return Reference_Root::S_null();
               }

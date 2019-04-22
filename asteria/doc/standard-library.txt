@@ -1450,16 +1450,6 @@
 	* Returns the number of files and directories that have been
 	  successfully removed in total, or `null` on failure.
 
-`std.filesystem.directory_create(path)`
-
-	* Creates a directory at `path`. Its parent directory must exist
-	  and must be accessible. This function does not fail if either
-	  a directory or a symbol link to a directory already exists on
-	  `path`.
-
-	* Returns `1` if a new directory has been created successfully,
-	  `0` if the directory already exists, or `null` on failure.
-
 `std.filesystem.directory_list(path)`
 
 	* Lists the contents of the directory at `path`.
@@ -1475,6 +1465,16 @@
 	  * `b_sym`   whether this is a symbol link.
 
 	  On failure, `null` is returned.
+
+`std.filesystem.directory_create(path)`
+
+	* Creates a directory at `path`. Its parent directory must exist
+	  and must be accessible. This function does not fail if either
+	  a directory or a symbol link to a directory already exists on
+	  `path`.
+
+	* Returns `1` if a new directory has been created successfully,
+	  `0` if the directory already exists, or `null` on failure.
 
 `std.filesystem.directory_remove(path)`
 
