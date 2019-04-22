@@ -131,7 +131,7 @@ namespace Asteria {
       public:
         struct Entry
           {
-            Cow_String name;
+            rocket::cow_string name;
             bool is_dir;
             bool is_sym;
           };
@@ -139,7 +139,7 @@ namespace Asteria {
       private:
         // On POSIX systems, `readdir()` might not return the type of the entry.
         // When this happens, we have to call `lstat()` to reveal the real type of the entry.
-        Cow_String m_path;
+        rocket::cow_string m_path;
 #ifdef _WIN32
         // On Windows, `FindFirstFile()` returns the first entry in the directory.
         // Although for a non-root directory this is always '.', it could be a conventional entry when
@@ -234,11 +234,14 @@ namespace Asteria {
               return false;
             }
             entry.name.assign(next->d_name);
+#  ifdef _DIRENT_HAVE_D_TYPE
             if(next->d_type != DT_UNKNOWN) {
               // Get the file type if it is available immediately.
               entry.is_dir = next->d_type == DT_DIR;
               entry.is_sym = next->d_type == DT_LNK;
-            } else {
+            } else
+#  endif
+            {
               // If the file type is unknown, ask for it using `lstat()`.
               auto child_path = this->m_path + '/' + entry.name;
               struct ::stat stb;
@@ -429,8 +432,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 
 Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
   {
-    G_integer count = 0;
-    return 8;
+    return -1;
   }
 
 Opt<G_integer> std_filesystem_directory_create(const G_string& path)
@@ -507,7 +509,7 @@ Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
 #else
     if(::rmdir(path.c_str()) != 0) {
       auto err = errno;
-      if(err != ENOTEMPTY) {
+      if((err != ENOTEMPTY) && (err != EEXIST)) {
         ASTERIA_DEBUG_LOG("`rmdir()` failed on \'", path, "\' (errno was `", err, "`).");
 #endif
         return rocket::nullopt;
