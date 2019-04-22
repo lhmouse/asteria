@@ -319,7 +319,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           // Pop an element off the stack.
           auto pair = rocket::move(stack.back());
           stack.pop_back();
-          const auto& path = pair.second;
+          auto& path = pair.second;
           // Do something.
           if(pair.first == rmlist_rmdir) {
             // This is an empty directory. Remove it.
@@ -362,7 +362,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           }
           do {
             // Skip special entries.
-            if((std::wcscmp(next->d_name, L".") == 0) || (std::wcscmp(next->d_name, L"..") == 0)) {
+            if((std::wcscmp(next.cFileName, L".") == 0) || (std::wcscmp(next.cFileName, L"..") == 0)) {
               continue;
             }
             // Get the name and type of this entry.
@@ -386,7 +386,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           // Pop an element off the stack.
           auto pair = rocket::move(stack.back());
           stack.pop_back();
-          const auto& path = pair.second;
+          auto& path = pair.second;
           // Do something.
           if(pair.first == rmlist_rmdir) {
             // This is an empty directory. Remove it.
