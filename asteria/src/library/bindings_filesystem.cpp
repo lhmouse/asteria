@@ -184,20 +184,14 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
                           FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
     if(!hf) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
     ::BY_HANDLE_FILE_INFORMATION fbi;
     if(::GetFileInformationByHandle(hf, &fbi) == FALSE) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`GetFileInformationByHandle()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
     ::FILE_STANDARD_INFO fsi;
     if(::GetFileInformationByHandleEx(hf, FileStandardInfo, &fsi, sizeof(fsi)) == FALSE) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`GetFileInformationByHandleEx()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
     // Fill `stat`.
@@ -240,8 +234,6 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
 #else
     struct ::stat stb;
     if(::lstat(path.c_str(), &stb) != 0) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`lstat()` failed on \'", path, "\' (errno was `", err, "`).");
       return rocket::nullopt;
     }
     // Fill `stat`.
@@ -291,12 +283,8 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
     auto wpath_new = do_translate_winnt_path(path_new);
     auto wpath_old = do_translate_winnt_path(path_old);
     if(::MoveFileExW(wpath_old.c_str(), wpath_new.c_str(), MOVEFILE_REPLACE_EXISTING) == FALSE) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`MoveFileExW()` failed on \'", path_old, "\' and \'", path_new, "\' (last error was `", err, "`).");
 #else
     if(::rename(path_old.c_str(), path_new.c_str()) != 0) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`rename()` failed on \'", path_old, "\' and \'", path_new, "\' (errno was `", err, "`).");
 #endif
       return false;
     }
@@ -439,8 +427,6 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
               // If the file type is unknown, ask for it.
               struct ::stat stb;
               if(::lstat(child.c_str(), &stb) != 0) {
-                auto err = errno;
-                ASTERIA_DEBUG_LOG("`lstat()` failed on \'", child, "\' (errno was `", err, "`).");
                 return rocket::nullopt;
               }
               is_dir = S_ISDIR(stb.st_mode);
@@ -469,8 +455,6 @@ Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
     if(err == ERROR_DIRECTORY) {
       // This is something not a directory.
       if(::DeleteFileW(wpath.c_str()) == FALSE) {
-        err = ::GetLastError();
-        ASTERIA_DEBUG_LOG("`DeleteFileW()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
       // Succeed.
@@ -487,8 +471,6 @@ Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
     if(err == ENOTDIR) {
       // This is something not a directory.
       if(::unlink(path.c_str()) != 0) {
-        err = errno;
-        ASTERIA_DEBUG_LOG("`unlink()` failed on \'", path, "\' (errno was `", err, "`).");
         return rocket::nullopt;
       }
       // Succeed.
@@ -516,7 +498,6 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
     if(!hd) {
       auto err = ::GetLastError();
       if(err != ERROR_FILE_NOT_FOUND) {
-        ASTERIA_DEBUG_LOG("`FindFirstFileW()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
       // The directory is empty.
@@ -554,8 +535,6 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
 #else
     Directory hd(::opendir(path.c_str()));
     if(!hd) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`opendir()` failed on \'", path, "\' (errno was `", err, "`).");
       return rocket::nullopt;
     }
     // Write entries.
@@ -585,8 +564,6 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
         // Identify the entry.
         struct ::stat stb;
         if(::lstat(child.c_str(), &stb) != 0) {
-          auto err = errno;
-          ASTERIA_DEBUG_LOG("`lstat()` failed on \'", child, "\' (errno was `", err, "`).");
           return rocket::nullopt;
         }
         // Get the file type if it is available immediately.
@@ -614,14 +591,11 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
     if(::CreateDirectoryW(wpath.c_str(), nullptr) == FALSE) {
       auto err = ::GetLastError();
       if(err != ERROR_ALREADY_EXISTS) {
-        ASTERIA_DEBUG_LOG("`CreateDirectoryW()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
       // Fail only if it is not a directory that exists.
       auto attr = ::GetFileAttributesW(wpath.c_str());
       if(attr == INVALID_FILE_ATTRIBUTES) {
-        err = ::GetLastError();
-        ASTERIA_DEBUG_LOG("`GetFileAttributesW()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
       if(!(attr & FILE_ATTRIBUTE_DIRECTORY)) {
@@ -629,14 +603,11 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
     if(::mkdir(path.c_str(), 0777) != 0) {
       auto err = errno;
       if(err != EEXIST) {
-        ASTERIA_DEBUG_LOG("`mkdir()` failed on \'", path, "\' (errno was `", err, "`).");
         return rocket::nullopt;
       }
       // Fail only if it is not a directory that exists.
       struct ::stat stb;
       if(::stat(path.c_str(), &stb) != 0) {
-        err = errno;
-        ASTERIA_DEBUG_LOG("`stat()` failed on \'", path, "\' (errno was `", err, "`).");
         return rocket::nullopt;
       }
       if(!S_ISDIR(stb.st_mode)) {
@@ -657,12 +628,10 @@ Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
     if(::RemoveDirectoryW(wpath.c_str()) == FALSE) {
       auto err = ::GetLastError();
       if(err != ERROR_DIR_NOT_EMPTY) {
-        ASTERIA_DEBUG_LOG("`RemoveDirectoryW()` failed on \'", path, "\' (last error was `", err, "`).");
 #else
     if(::rmdir(path.c_str()) != 0) {
       auto err = errno;
       if((err != ENOTEMPTY) && (err != EEXIST)) {
-        ASTERIA_DEBUG_LOG("`rmdir()` failed on \'", path, "\' (errno was `", err, "`).");
 #endif
         return rocket::nullopt;
       }
@@ -685,8 +654,6 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     File hf(::CreateFileW(wpath.c_str(),
                           FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
     // Set the read position.
@@ -699,7 +666,6 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
       auto err = ::GetLastError();
       // This error can happen if `roffset` is past the end of the file.
       if(err != ERROR_HANDLE_EOF) {
-        ASTERIA_DEBUG_LOG("`ReadFile()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
       nread = 0;
@@ -709,15 +675,11 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     // Open the file for reading.
     File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
       return rocket::nullopt;
     }
     // Read data from the offset specified.
     ::ssize_t nread = ::pread(hf, data.mut_data(), data.size(), roffset);
     if(nread < 0) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`pread()` failed on \'", path, "\' (errno was `", err, "`).");
       return rocket::nullopt;
     }
     data.erase(static_cast<std::size_t>(nread));
@@ -746,8 +708,6 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     File hf(::CreateFileW(wpath.c_str(),
                           FILE_WRITE_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
       return false;
     }
     if(roffset != 0) {
@@ -756,13 +716,9 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       ::LARGE_INTEGER fpos;
       fpos.QuadPart = roffset;
       if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
-        auto err = ::GetLastError();
-        ASTERIA_DEBUG_LOG("`SetFilePointerEx()` failed on \'", path, "\' (last error was `", err, "`).");
         return false;
       }
       if(::SetEndOfFile(hf) == FALSE) {
-        auto err = ::GetLastError();
-        ASTERIA_DEBUG_LOG("`SetEndOfFile()` failed on \'", path, "\' (last error was `", err, "`).");
         return false;
       }
     }
@@ -775,8 +731,6 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       // Write data to the offset specified.
       ::DWORD nwritten;
       if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<::DWORD>(rocket::min(nremaining, INT_MAX)), &nwritten, &ctx) == FALSE) {
-        auto err = ::GetLastError();
-        ASTERIA_DEBUG_LOG("`WriteFile()` failed on \'", path, "\' (last error was `", err, "`).");
         return false;
       }
       nremaining -= static_cast<int>(nwritten);
@@ -793,16 +747,12 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     // Open the file for writing.
     File hf(::open(path.c_str(), flags, 0666));
     if(!hf) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
       return false;
     }
     if(roffset != 0) {
       // If `roffset` is not zero, truncate the file there.
       // Otherwise, the file will have been truncate at creation.
       if(::ftruncate(hf, roffset) != 0) {
-        auto err = errno;
-        ASTERIA_DEBUG_LOG("`ftruncate()` failed on \'", path, "\' (errno was `", err, "`).");
         return false;
       }
     }
@@ -811,8 +761,6 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       // Write data to the offset specified.
       ::ssize_t nwritten = ::pwrite(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining), roffset);
       if(nwritten < 0) {
-        auto err = errno;
-        ASTERIA_DEBUG_LOG("`pwrite()` failed on \'", path, "\' (errno was `", err, "`).");
         return false;
       }
       nremaining -= nwritten;
@@ -838,8 +786,6 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
     File hf(::CreateFileW(wpath.c_str(),
                           FILE_APPEND_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`CreateFileW()` failed on \'", path, "\' (last error was `", err, "`).");
       return false;
     }
     // Write data in a loop.
@@ -851,8 +797,6 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       // Write data to the offset specified.
       ::DWORD nwritten;
       if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<::DWORD>(rocket::min(nremaining, INT_MAX)), &nwritten, &ctx) == FALSE) {
-        auto err = ::GetLastError();
-        ASTERIA_DEBUG_LOG("`WriteFile()` failed on \'", path, "\' (last error was `", err, "`).");
         return false;
       }
       nremaining -= static_cast<int>(nwritten);
@@ -868,8 +812,6 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
     // Open the file for writing.
     File hf(::open(path.c_str(), flags, 0666));
     if(!hf) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`open()` failed on \'", path, "\' (errno was `", err, "`).");
       return false;
     }
     // Write data in a loop.
@@ -877,8 +819,6 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       // Write data to the offset specified.
       ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining));
       if(nwritten < 0) {
-        auto err = errno;
-        ASTERIA_DEBUG_LOG("`pwrite()` failed on \'", path, "\' (errno was `", err, "`).");
         return false;
       }
       nremaining -= nwritten;
@@ -893,35 +833,26 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
     auto wpath_new = do_translate_winnt_path(path_new);
     auto wpath_old = do_translate_winnt_path(path_old);
     if(::CopyFileW(wpath_old.c_str(), wpath_new.c_str(), FALSE) == FALSE) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`CopyFileW()` failed on \'", path_old, "\' and \'", path_new, "\' (last error was `", err, "`).");
 #else
     // Open the old file.
     File hf_old(::open(path_old.c_str(), O_RDONLY));
     if(!hf_old) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`open()` failed on \'", path_old, "\' (errno was `", err, "`).");
       return false;
     }
     // Get the file mode and preferred I/O block size.
     struct ::stat stb_old;
     if(::fstat(hf_old, &stb_old) != 0) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`fstat()` failed on \'", path_old, "\' (errno was `", err, "`).");
       return false;
     }
     // Create the new file, discarding its contents.
     File hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0200));
     if(!hf_new) {
-      auto err = errno;
       // If the file cannot be opened, unlink it and try again.
       if(::unlink(path_new.c_str()) != 0) {
         return false;
       }
       hf_new.reset(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0200));
       if(!hf_new) {
-        err = errno;
-        ASTERIA_DEBUG_LOG("`open()` failed on \'", path_new, "\' (errno was `", err, "`).");
         return false;
       }
     }
@@ -933,8 +864,6 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
     for(;;) {
       ::ssize_t nread = ::pread(hf_old, buff.data(), buff.size(), offset);
       if(nread < 0) {
-        auto err = errno;
-        ASTERIA_DEBUG_LOG("`pread()` failed on \'", path_old, "\' (errno was `", err, "`).");
         return false;
       }
       if(nread == 0) {
@@ -943,8 +872,6 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
       }
       ::ssize_t nwritten = ::write(hf_new, buff.data(), static_cast<std::size_t>(nread));
       if(nwritten < 0) {
-        auto err = errno;
-        ASTERIA_DEBUG_LOG("`write()` failed on \'", path_new, "\' (errno was `", err, "`).");
         return false;
       }
       offset += nwritten;
@@ -962,12 +889,8 @@ bool std_filesystem_file_remove(const G_string& path)
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     if(::DeleteFileW(wpath.c_str()) == FALSE) {
-      auto err = ::GetLastError();
-      ASTERIA_DEBUG_LOG("`DeleteFileW()` failed on \'", path, "\' (last error was `", err, "`).");
 #else
     if(::unlink(path.c_str()) != 0) {
-      auto err = errno;
-      ASTERIA_DEBUG_LOG("`unlink()` failed on \'", path, "\' (errno was `", err, "`).");
 #endif
       return false;
     }
