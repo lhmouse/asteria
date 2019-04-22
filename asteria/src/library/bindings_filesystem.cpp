@@ -125,139 +125,6 @@ namespace Asteria {
     // It is convertible to a native handle implicitly.
     using Directory = rocket::unique_handle<decltype(Directory_Closer().null()), Directory_Closer>;
 
-    // This is going to be nasty.
-    class Directory_Reader
-      {
-      public:
-        struct Entry
-          {
-            rocket::cow_string name;
-            bool is_dir;
-            bool is_sym;
-          };
-
-      private:
-        // On POSIX systems, `readdir()` might not return the type of the entry.
-        // When this happens, we have to call `lstat()` to reveal the real type of the entry.
-        rocket::cow_string m_path;
-#ifdef _WIN32
-        // On Windows, `FindFirstFile()` returns the first entry in the directory.
-        // Although for a non-root directory this is always '.', it could be a conventional entry when
-        // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
-        // if no file exists in such a case, `FindFirstFile()` fails and `GetLastError()` returns
-        // `ERROR_FILE_NOT_FOUND`.
-        // This member is only valid when the first character of `cFileName` is not NUL.
-        ::WIN32_FIND_DATAW m_next;
-#endif
-        Directory m_hd;
-
-      public:
-        Directory_Reader() noexcept
-          {
-          }
-
-        Directory_Reader(const Directory_Reader&)
-          = delete;
-        Directory_Reader& operator=(const Directory_Reader&)
-          = delete;
-
-      public:
-        explicit operator bool () const noexcept
-          {
-            return !this->m_path.empty();
-          }
-        bool open(const G_string& path)
-          {
-            this->close();
-            // Open the directory.
-#ifdef _WIN32
-            auto wpath = do_translate_winnt_path(path);
-            if(!this->m_hd.reset(::FindFirstFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()), &(this->m_next)))) {
-              auto err = ::GetLastError();
-              if(err != ERROR_FILE_NOT_FOUND) {
-                ASTERIA_DEBUG_LOG("`FindFirstFileW()` failed on \'", path, "\' (last error was `", err, "`).");
-                return false;
-              }
-              // The directory is empty.
-              this->m_next.cFileName[0] = 0;
-#else
-            if(!this->m_hd.reset(::opendir(path.c_str()))) {
-              auto err = errno;
-              ASTERIA_DEBUG_LOG("`opendir()` failed on \'", path, "\' (errno was `", err, "`).");
-              return false;
-#endif
-            }
-            this->m_path = path;
-            return true;
-          }
-        void close() noexcept
-          {
-            // Clear current contents.
-            this->m_path.clear();
-            this->m_hd.reset();
-          }
-
-        bool get(Entry& entry)
-          {
-#ifdef _WIN32
-            // Check whether `m_next` is valid.
-            if(this->m_next.cFileName[0] == 0) {
-              return false;
-            }
-            // Convert UTF-16 to UTF-8.
-            // We only want to stop when a NUL character is encountered.
-            entry.name.clear();
-            auto pos = reinterpret_cast<const char16_t*>(this->m_next.cFileName);
-            for(;;) {
-              char32_t cp;
-              if(!utf16_decode(cp, pos, SIZE_MAX)) {
-                ASTERIA_THROW_RUNTIME_ERROR("The directory \'", this->m_path, "\' contains a file whose name is not valid UTF-16.");
-              }
-              if(cp == 0) {
-                break;
-              }
-              utf8_encode(entry.name, cp);
-            }
-            // Get the file type.
-            entry.is_dir = this->m_next.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
-            entry.is_sym = this->m_next.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT;
-            // Read the next entry.
-            if(::FindNextFileW(this->m_hd, &(this->m_next)) == false) {
-              // There are no more entries.
-              this->m_next.cFileName[0] = 0;
-            }
-#else
-            // Read the next entry.
-            auto next = ::readdir(this->m_hd);
-            if(!next) {
-              // There are no more entries.
-              return false;
-            }
-            entry.name.assign(next->d_name);
-#  ifdef _DIRENT_HAVE_D_TYPE
-            if(next->d_type != DT_UNKNOWN) {
-              // Get the file type if it is available immediately.
-              entry.is_dir = next->d_type == DT_DIR;
-              entry.is_sym = next->d_type == DT_LNK;
-            } else
-#  endif
-            {
-              // If the file type is unknown, ask for it using `lstat()`.
-              auto child_path = this->m_path + '/' + entry.name;
-              struct ::stat stb;
-              if(::lstat(child_path.c_str(), &stb) != 0) {
-                auto err = errno;
-                ASTERIA_DEBUG_LOG("`lstat()` failed on \'", child_path, "\' (errno was `", err, "`).");
-                return false;
-              }
-              entry.is_dir = S_ISDIR(stb.st_mode);
-              entry.is_sym = S_ISLNK(stb.st_mode);
-            }
-#endif
-            return true;
-          }
-      };
-
     }
 
 G_string std_filesystem_get_working_directory()
@@ -480,21 +347,110 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
 
 Opt<G_object> std_filesystem_directory_list(const G_string& path)
   {
-    Directory_Reader reader;
-    if(!reader.open(path)) {
+    G_object entries;
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    // Make a pattern that will match everything.
+    // Uglify the string so stupid regular expressions will not identify this the as start of a block comment.
+    wpath.append(u"/""*");
+    // On Windows, `FindFirstFile()` returns the first entry in the directory.
+    // Although for a non-root directory this is always '.', it could be a conventional entry when
+    // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
+    // if no file exists in such a case, `FindFirstFile()` fails and `GetLastError()` returns
+    // `ERROR_FILE_NOT_FOUND`.
+    ::WIN32_FIND_DATAW next;
+    Directory hd(::FindFirstFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()), &next));
+    if(!hd) {
+      auto err = ::GetLastError();
+      if(err == ERROR_FILE_NOT_FOUND) {
+        // The directory is empty.
+        return rocket::move(entries);
+      }
+      ASTERIA_DEBUG_LOG("`FindFirstFileW()` failed on \'", path, "\' (last error was `", err, "`).");
       return rocket::nullopt;
     }
-    G_object children;
-    // Read entries.
-    Directory_Reader::Entry entry;
-    while(reader.get(entry)) {
-      // Fill entry information.
-      G_object info;
-      info.insert_or_assign(rocket::sref("b_dir"), entry.is_dir);
-      info.insert_or_assign(rocket::sref("b_sym"), entry.is_sym);
-      children.insert_or_assign(rocket::move(entry.name), rocket::move(info));
+    do {
+      Cow_String name;
+      G_object entry;
+      // Convert UTF-16 to UTF-8.
+      // We only want to stop when a NUL character is encountered.
+      auto pos = reinterpret_cast<const char16_t*>(next.cFileName);
+      for(;;) {
+        char32_t cp;
+        if(!utf16_decode(cp, pos, SIZE_MAX)) {
+          ASTERIA_THROW_RUNTIME_ERROR("The directory \'", path, "\' contains a file whose name is not valid UTF-16.");
+        }
+        if(cp == 0) {
+          break;
+        }
+        utf8_encode(name, cp);
+      }
+      // Get the file type.
+      entry.insert_or_assign(rocket::sref("b_dir"),
+        G_boolean(
+          next.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY
+        ));
+      entry.insert_or_assign(rocket::sref("b_sym"),
+        G_boolean(
+          next.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT
+        ));
+      // Insert the entry.
+      entries.insert_or_assign(rocket::move(name), rocket::move(entry));
+      // Read the next entry.
+    } while(::FindNextFileW(hd, &next) != FALSE);
+#else
+    Directory hd(::opendir(path.c_str()));
+    if(!hd) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`opendir()` failed on \'", path, "\' (errno was `", err, "`).");
+      return rocket::nullopt;
     }
-    return rocket::move(children);
+    // Write entries.
+    struct ::dirent* next;
+    while((next = ::readdir(hd)) != nullptr) {
+      Cow_String name;
+      G_object entry;
+      // Assume the name is in UTF-8.
+      name.assign(next->d_name);
+#  ifdef _DIRENT_HAVE_D_TYPE
+      if(next->d_type != DT_UNKNOWN) {
+        // Get the file type if it is available immediately.
+        entry.insert_or_assign(rocket::sref("b_dir"),
+          G_boolean(
+            next->d_type == DT_DIR
+          ));
+        entry.insert_or_assign(rocket::sref("b_sym"),
+          G_boolean(
+            next->d_type == DT_LNK
+          ));
+      } else
+#  endif
+      {
+        // If the file type is unknown, ask for it.
+        // Compose the path.
+        auto child = path + '/' + name;
+        // Identify the entry.
+        struct ::stat stb;
+        if(::lstat(child.c_str(), &stb) != 0) {
+          auto err = errno;
+          ASTERIA_DEBUG_LOG("`lstat()` failed on \'", child, "\' (errno was `", err, "`).");
+          return rocket::nullopt;
+        }
+        // Get the file type if it is available immediately.
+        entry.insert_or_assign(rocket::sref("b_dir"),
+          G_boolean(
+            S_ISDIR(stb.st_mode)
+          ));
+        entry.insert_or_assign(rocket::sref("b_sym"),
+          G_boolean(
+            S_ISLNK(stb.st_mode)
+          ));
+      }
+      // Insert the entry.
+      entries.insert_or_assign(rocket::move(name), rocket::move(entry));
+    }
+#endif
+    return rocket::move(entries);
   }
 
 Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
