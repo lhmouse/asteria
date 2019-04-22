@@ -90,6 +90,7 @@ namespace Asteria {
           }
 #endif
       };
+
     // This is the smart handle type.
     // It is convertible to a native handle implicitly.
     using File = rocket::unique_handle<decltype(File_Closer().null()), File_Closer>;
@@ -125,6 +126,7 @@ namespace Asteria {
           }
 #endif
       };
+
     // This is the smart handle type.
     // It is convertible to a native handle implicitly.
     using Directory = rocket::unique_handle<decltype(Directory_Closer().null()), Directory_Closer>;
