@@ -877,8 +877,16 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           (
             "`std.filesystem.directory_list(path)`\n"
             "  * Lists the contents of the directory at `path`.\n"
-            "  * Returns names of all files and subdirectories as an `array` of\n"
-            "    `string`s, or `null` on failure.\n"
+            "  * Returns an `object` containing all children of the directory at\n"
+            "    `path`, including the special subdirectories '.' and '..'. For\n"
+            "    each element, its key specifies the filename and the value is\n"
+            "    an `object` consisting of the following members (names that\n"
+            "    start with `b_` are `boolean` flags; names that start with `i_`\n"
+            "    are IDs as `integer`s):\n"
+            "    * `i_file`  unique file id on this device.\n"
+            "    * `b_dir`   whether this is a directory.\n"
+            "    * `b_sym`   whether this is a symbol link.\n"
+            "    On failure, `null` is returned.\n"
           ),
         // Opaque parameter
         G_null
