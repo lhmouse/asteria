@@ -288,7 +288,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 #ifdef _WIN32
     auto wpath_new = do_translate_winnt_path(path_new);
     auto wpath_old = do_translate_winnt_path(path_old);
-    if(::MoveFileExW(wpath_old.c_str(), wpath_new.c_str(), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == FALSE) {
+    if(::MoveFileExW(wpath_old.c_str(), wpath_new.c_str(), MOVEFILE_REPLACE_EXISTING) == FALSE) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`MoveFileExW()` failed on \'", path_old, "\' and \'", path_new, "\' (last error was `", err, "`).");
 #else
