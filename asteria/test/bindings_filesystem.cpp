@@ -32,13 +32,27 @@ int main()
         assert std.filesystem.directory_create(dname + "/f4/f5") == 1;
         assert std.filesystem.file_append(dname + "/f4/f5/a", "4") == true;
         assert std.filesystem.file_append(dname + "/f4/f5/b", "5") == true;
-        assert std.array.sort(std.filesystem.directory_list(dname)) == ["f1","f2","f3","f4"];
+
+        // create a sorted array of names in this directory.
+        var files = [];
+        for(each k, v : std.filesystem.directory_list(dname)) {
+          var ipos = std.array.upper_bound(files, k);
+          files = std.array.replace_slice(files, ipos, 0, [k]);
+        }
+        assert files == [".","..","f1","f2","f3","f4"];
 
         assert std.filesystem.remove_recursive(dname + "/f1") == 1;
         assert std.filesystem.remove_recursive(dname + "/f1") == null;
         assert std.filesystem.move_from(dname + "/f5", dname + "/f2") == true;
         assert std.filesystem.move_from(dname + "/f5", dname + "/f2") == null;
-        assert std.array.sort(std.filesystem.directory_list(dname)) == ["f3","f4","f5"];
+
+        // create a sorted array of names in this directory.
+        var files = [];
+        for(each k, v : std.filesystem.directory_list(dname)) {
+          var ipos = std.array.upper_bound(files, k);
+          files = std.array.replace_slice(files, ipos, 0, [k]);
+        }
+        assert files == [".","..","f3","f4","f5"];
 
         assert std.filesystem.file_remove(dname) == null;
         assert std.filesystem.directory_remove(dname) == 0;
