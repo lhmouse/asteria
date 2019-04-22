@@ -11,7 +11,7 @@
                         // ::FindFirstFile(), ::FindNextFile(), ::CreateDirectory(), ::RemoveDirectory(),
                         // ::ReadFile(), ::WriteFile(), ::DeleteFile()
 #else
-#  include <sys/stat.h>  // ::lstat(), ::mkdir()
+#  include <sys/stat.h>  // ::lstat(), ::stat(), ::mkdir()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
 #  include <unistd.h>  // ::rmdir(), ::close(), ::pread(), ::pwrite(), ::unlink()
@@ -857,8 +857,9 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           (
             "`std.filesystem.directory_create(path)`\n"
             "  * Creates a directory at `path`. Its parent directory must exist\n"
-            "    and must be accessible. This function succeeds if a direcotry\n"
-            "    with the specified path already exists.\n"
+            "    and must be accessible. This function does not fail if either\n"
+            "    a directory or a symbol link to a directory already exists on\n"
+            "    `path`.\n"
             "  * Returns `1` if a new directory has been created successfully,\n"
             "    `0` if the directory already exists, or `null` on failure.\n"
           ),

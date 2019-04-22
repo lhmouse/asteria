@@ -1453,8 +1453,9 @@
 `std.filesystem.directory_create(path)`
 
 	* Creates a directory at `path`. Its parent directory must exist
-	  and must be accessible. This function succeeds if a direcotry
-	  with the specified path already exists.
+	  and must be accessible. This function does not fail if either
+	  a directory or a symbol link to a directory already exists on
+	  `path`.
 
 	* Returns `1` if a new directory has been created successfully,
 	  `0` if the directory already exists, or `null` on failure.
