@@ -6,6 +6,7 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
+#include <vector>
 #ifdef _WIN32
 #  include <windows.h>  // ::CreateFile(), ::CloseHandle(), ::GetFileInformationByHandleEx(),
                         // ::FindFirstFile(), ::FindNextFile(), ::CreateDirectory(), ::RemoveDirectory(),
@@ -297,9 +298,198 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
     return true;
   }
 
+    namespace {
+
+    enum Rmlist
+      {
+        rmlist_rmdir,     // a subdirectory which should be empty and can be removed.
+        rmlist_unlink,    // a plain file to be unlinked.
+        rmlist_expand,    // a subdirectory to be expanded.
+      };
+
+    // Remove the directory recursively.
+#ifdef _WIN32
+    Opt<G_integer> do_remove_directory_recursive(const rocket::cow_u16string& root)
+      {
+        G_integer count = 0;
+        // This is the list of files and directories to be removed.
+        std::vector<std::pair<Rmlist, rocket::cow_u16string>> stack;
+        stack.emplace_back(rmlist_expand, root);
+        while(!stack.empty()) {
+          // Pop an element off the stack.
+          auto pair = rocket::move(stack.back());
+          stack.pop_back();
+          const auto& path = pair.second;
+          // Do something.
+          if(pair.first == rmlist_rmdir) {
+            // This is an empty directory. Remove it.
+            if(::RemoveDirectoryW(reinterpret_cast<const wchar_t*>(path.c_str())) == FALSE) {
+              return rocket::nullopt;
+            }
+            count++;
+            continue;
+          }
+          if(pair.first == rmlist_unlink) {
+            // This is a plain file. Remove it.
+            if(::DeleteFileW(reinterpret_cast<const wchar_t*>(path.c_str())) == FALSE) {
+              return rocket::nullopt;
+            }
+            count++;
+            continue;
+          }
+          // This is a subdirectory that has not been expanded. Expand it.
+          // Push the directory itself. Since elements are maintained in LIFO order, only when this element
+          // is encountered for a second time, will all of its children have been removed.
+          stack.emplace_back(rmlist_rmdir, path);
+          // Append all entries.
+          // Make a pattern that will match everything.
+          path.append(u"\\*");
+          // On Windows, `FindFirstFile()` returns the first entry in the directory.
+          // Although for a non-root directory this is always '.', it could be a conventional entry when
+          // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
+          // if no file exists in such a case, `FindFirstFile()` fails and `GetLastError()` returns
+          // `ERROR_FILE_NOT_FOUND`.
+          ::WIN32_FIND_DATAW next;
+          Directory hd(::FindFirstFileW(reinterpret_cast<const wchar_t*>(path.c_str()), &next));
+          if(!hd) {
+            auto err = ::GetLastError();
+            if(err != ERROR_FILE_NOT_FOUND) {
+              return rocket::nullopt;
+            }
+            // The directory is empty.
+            // Be advised that this can only happen on a root directory, which cannot be removed.
+            continue;
+          }
+          do {
+            // Skip special entries.
+            if((std::wcscmp(next->d_name, L".") == 0) || (std::wcscmp(next->d_name, L"..") == 0)) {
+              continue;
+            }
+            // Get the name and type of this entry.
+            auto child = path + u'\\' + reinterpret_cast<const char16_t*>(next.cFileName);
+            bool is_dir = next.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+            // Append the entry.
+            stack.emplace_back(is_dir ? rmlist_expand : rmlist_unlink, rocket::move(child));
+            // Read the next entry.
+          } while(::FindNextFileW(hd, &next) != FALSE);
+        }
+        return rocket::move(count);
+      }
+#else
+    Opt<G_integer> do_remove_directory_recursive(const rocket::cow_string& root)
+      {
+        G_integer count = 0;
+        // This is the list of files and directories to be removed.
+        std::vector<std::pair<Rmlist, rocket::cow_string>> stack;
+        stack.emplace_back(rmlist_expand, root);
+        while(!stack.empty()) {
+          // Pop an element off the stack.
+          auto pair = rocket::move(stack.back());
+          stack.pop_back();
+          const auto& path = pair.second;
+          // Do something.
+          if(pair.first == rmlist_rmdir) {
+            // This is an empty directory. Remove it.
+            if(::rmdir(path.c_str()) != 0) {
+              return rocket::nullopt;
+            }
+            count++;
+            continue;
+          }
+          if(pair.first == rmlist_unlink) {
+            // This is a plain file. Remove it.
+            if(::unlink(path.c_str()) != 0) {
+              return rocket::nullopt;
+            }
+            count++;
+            continue;
+          }
+          // This is a subdirectory that has not been expanded. Expand it.
+          // Push the directory itself. Since elements are maintained in LIFO order, only when this element
+          // is encountered for a second time, will all of its children have been removed.
+          stack.emplace_back(rmlist_rmdir, path);
+          // Append all entries.
+          Directory hd(::opendir(path.c_str()));
+          if(!hd) {
+            return rocket::nullopt;
+          }
+          // Write entries.
+          struct ::dirent* next;
+          while((next = ::readdir(hd)) != nullptr) {
+            // Skip special entries.
+            if((std::strcmp(next->d_name, ".") == 0) || (std::strcmp(next->d_name, "..") == 0)) {
+              continue;
+            }
+            // Get the name and type of this entry.
+            auto child = path + '/' + next->d_name;
+            bool is_dir;
+#  ifdef _DIRENT_HAVE_D_TYPE
+            if(next->d_type != DT_UNKNOWN) {
+              // Get the file type if it is available immediately.
+              is_dir = next->d_type == DT_DIR;
+            } else
+#  endif
+            {
+              // If the file type is unknown, ask for it.
+              struct ::stat stb;
+              if(::lstat(child.c_str(), &stb) != 0) {
+                auto err = errno;
+                ASTERIA_DEBUG_LOG("`lstat()` failed on \'", child, "\' (errno was `", err, "`).");
+                return rocket::nullopt;
+              }
+              is_dir = S_ISDIR(stb.st_mode);
+            }
+            // Append the entry.
+            stack.emplace_back(is_dir ? rmlist_expand : rmlist_unlink, rocket::move(child));
+          }
+        }
+        return rocket::move(count);
+      }
+#endif
+
+    }
+
 Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
   {
-    return -1;
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    // Assume `path` designates a directory and try removing it first.
+    if(::RemoveDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str())) != FALSE) {
+      // An empty directory has been removed.
+      // Succeed.
+      return G_integer(1);
+    }
+    auto err = ::GetLastError();
+    if(err == ERROR_DIRECTORY) {
+      // This is something not a directory.
+      if(::DeleteFileW(reinterpret_cast<const wchar_t*>(wpath.c_str())) == FALSE) {
+        err = ::GetLastError();
+        ASTERIA_DEBUG_LOG("`DeleteFileW()` failed on \'", path, "\' (last error was `", err, "`).");
+        return rocket::nullopt;
+      }
+      // Succeed.
+      return G_integer(1);
+    }
+    return do_remove_directory_recursive(wpath);
+#else
+    if(::rmdir(path.c_str()) == 0) {
+      // An empty directory has been removed.
+      // Succeed.
+      return G_integer(1);
+    }
+    auto err = errno;
+    if(err == ENOTDIR) {
+      // This is something not a directory.
+      if(::unlink(path.c_str()) != 0) {
+        err = errno;
+        ASTERIA_DEBUG_LOG("`unlink()` failed on \'", path, "\' (errno was `", err, "`).");
+        return rocket::nullopt;
+      }
+      // Succeed.
+      return G_integer(1);
+    }
+    return do_remove_directory_recursive(path);
+#endif
   }
 
 Opt<G_object> std_filesystem_directory_list(const G_string& path)
@@ -308,8 +498,7 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Make a pattern that will match everything.
-    // Uglify the string so stupid regular expressions will not identify this the as start of a block comment.
-    wpath.append(u"/""*");
+    wpath.append(u"\\*");
     // On Windows, `FindFirstFile()` returns the first entry in the directory.
     // Although for a non-root directory this is always '.', it could be a conventional entry when
     // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
@@ -319,12 +508,12 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
     Directory hd(::FindFirstFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()), &next));
     if(!hd) {
       auto err = ::GetLastError();
-      if(err == ERROR_FILE_NOT_FOUND) {
-        // The directory is empty.
-        return rocket::move(entries);
+      if(err != ERROR_FILE_NOT_FOUND) {
+        ASTERIA_DEBUG_LOG("`FindFirstFileW()` failed on \'", path, "\' (last error was `", err, "`).");
+        return rocket::nullopt;
       }
-      ASTERIA_DEBUG_LOG("`FindFirstFileW()` failed on \'", path, "\' (last error was `", err, "`).");
-      return rocket::nullopt;
+      // The directory is empty.
+      return rocket::move(entries);
     }
     do {
       Cow_String name;
