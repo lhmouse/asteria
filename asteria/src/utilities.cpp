@@ -3,6 +3,7 @@
 
 #include "precompiled.hpp"
 #include "utilities.hpp"
+#include <iostream>
 #ifdef _WIN32
 #  include <windows.h>  // ::SYSTEMTIME, ::GetSystemTime()
 #else
@@ -139,8 +140,8 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     // Terminate the message with a line feed.
     do_append_str(str, '\n');
     // Write the string now.
-    int res = std::fputs(str.c_str(), stderr);
-    return res >= 0;
+    std::cerr << str << std::flush;
+    return !!std::cerr;
   }
 
 Runtime_Error::~Runtime_Error()
