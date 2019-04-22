@@ -25,16 +25,16 @@ namespace Asteria {
 
 #ifdef _WIN32
     // UTF-16 is used on Windows.
-    rocket::cow_u16string do_translate_winnt_path(const G_string& path)
+    rocket::cow_wstring do_translate_winnt_path(const G_string& path)
       {
-        rocket::cow_u16string u16str;
-        u16str.reserve(path.size() + 8);
+        rocket::cow_wstring wstr;
+        wstr.reserve(path.size() + 8);
         // If `path` is an absolute path, translate it to an NT path for long filename support.
         if((path.size() >= 2) && (path[1] == L':')) {
           // Convert lowercase letters to uppercase ones.
           auto letter = path[0] & ~0x20;
           if((L'A' <= letter) && (letter <= L'Z')) {
-            u16str.append(uR"(\\?\)");
+            wstr.append(L"\\\\\?\\");
           }
         }
         // Convert all characters.
@@ -44,9 +44,12 @@ namespace Asteria {
           if(!utf8_decode(cp, path, offset)) {
             ASTERIA_THROW_RUNTIME_ERROR("The path `", path, "` is not a valid UTF-8 string.");
           }
-          utf16_encode(u16str, cp);
+          char16_t str[2];
+          char16_t* pos = str;
+          utf16_encode(pos, cp);
+          wstr.append(str, pos);
         }
-        return u16str;
+        return wstr;
       }
 
     // Compose a pair of `DWORD`s to form an `uint64_t`.
@@ -133,17 +136,17 @@ G_string std_filesystem_get_working_directory()
     G_string cwd;
 #ifdef _WIN32
     // Get the current directory as UTF-16.
-    rocket::cow_u16string ucwd(MAX_PATH, L'*');
-    auto nreq = ::GetCurrentDirectoryW(static_cast<::DWORD>(ucwd.size()), reinterpret_cast<wchar_t*>(ucwd.mut_data()));
+    rocket::cow_wstring ucwd(MAX_PATH, L'*');
+    auto nreq = ::GetCurrentDirectoryW(static_cast<::DWORD>(ucwd.size()), ucwd.mut_data());
     if(nreq > ucwd.size()) {
       // The buffer was too small.
       ucwd.append(nreq - ucwd.size(), L'*');
-      nreq = ::GetCurrentDirectoryW(nreq, reinterpret_cast<wchar_t*>(ucwd.mut_data()));
+      nreq = ::GetCurrentDirectoryW(nreq, ucwd.mut_data());
     }
     // Convert UTF-16 to UTF-8.
     // We only want to stop when a NUL character is encountered.
     cwd.reserve(ucwd.size() + 20);
-    auto pos = ucwd.c_str();
+    auto pos = reinterpret_cast<const char16_t*>(ucwd.c_str());
     for(;;) {
       char32_t cp;
       if(!utf16_decode(cp, pos, SIZE_MAX)) {
@@ -175,7 +178,7 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Open the file or directory.
-    File hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+    File hf(::CreateFileW(wpath.c_str(),
                           FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
     if(!hf) {
@@ -285,7 +288,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 #ifdef _WIN32
     auto wpath_new = do_translate_winnt_path(path_new);
     auto wpath_old = do_translate_winnt_path(path_old);
-    if(::MoveFileExW(reinterpret_cast<const wchar_t*>(wpath_old.c_str()), reinterpret_cast<const wchar_t*>(wpath_new.c_str()), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == FALSE) {
+    if(::MoveFileExW(wpath_old.c_str(), wpath_new.c_str(), MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING) == FALSE) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`MoveFileExW()` failed on \'", path_old, "\' and \'", path_new, "\' (last error was `", err, "`).");
 #else
@@ -309,11 +312,11 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 
     // Remove the directory recursively.
 #ifdef _WIN32
-    Opt<G_integer> do_remove_directory_recursive(const rocket::cow_u16string& root)
+    Opt<G_integer> do_remove_directory_recursive(const rocket::cow_wstring& root)
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
-        std::vector<std::pair<Rmlist, rocket::cow_u16string>> stack;
+        std::vector<std::pair<Rmlist, rocket::cow_wstring>> stack;
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.
@@ -323,7 +326,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           // Do something.
           if(pair.first == rmlist_rmdir) {
             // This is an empty directory. Remove it.
-            if(::RemoveDirectoryW(reinterpret_cast<const wchar_t*>(path.c_str())) == FALSE) {
+            if(::RemoveDirectoryW(path.c_str()) == FALSE) {
               return rocket::nullopt;
             }
             count++;
@@ -331,7 +334,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           }
           if(pair.first == rmlist_unlink) {
             // This is a plain file. Remove it.
-            if(::DeleteFileW(reinterpret_cast<const wchar_t*>(path.c_str())) == FALSE) {
+            if(::DeleteFileW(path.c_str()) == FALSE) {
               return rocket::nullopt;
             }
             count++;
@@ -343,14 +346,14 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           stack.emplace_back(rmlist_rmdir, path);
           // Append all entries.
           // Make a pattern that will match everything.
-          path.append(u"\\*");
+          path.append(L"\\*");
           // On Windows, `FindFirstFile()` returns the first entry in the directory.
           // Although for a non-root directory this is always '.', it could be a conventional entry when
           // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
           // if no file exists in such a case, `FindFirstFile()` fails and `GetLastError()` returns
           // `ERROR_FILE_NOT_FOUND`.
           ::WIN32_FIND_DATAW next;
-          Directory hd(::FindFirstFileW(reinterpret_cast<const wchar_t*>(path.c_str()), &next));
+          Directory hd(::FindFirstFileW(path.c_str(), &next));
           if(!hd) {
             auto err = ::GetLastError();
             if(err != ERROR_FILE_NOT_FOUND) {
@@ -366,7 +369,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
               continue;
             }
             // Get the name and type of this entry.
-            auto child = path + u'\\' + reinterpret_cast<const char16_t*>(next.cFileName);
+            auto child = path + L'\\' + next.cFileName;
             bool is_dir = next.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
             // Append the entry.
             stack.emplace_back(is_dir ? rmlist_expand : rmlist_unlink, rocket::move(child));
@@ -454,7 +457,7 @@ Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Assume `path` designates a directory and try removing it first.
-    if(::RemoveDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str())) != FALSE) {
+    if(::RemoveDirectoryW(wpath.c_str()) != FALSE) {
       // An empty directory has been removed.
       // Succeed.
       return G_integer(1);
@@ -462,7 +465,7 @@ Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
     auto err = ::GetLastError();
     if(err == ERROR_DIRECTORY) {
       // This is something not a directory.
-      if(::DeleteFileW(reinterpret_cast<const wchar_t*>(wpath.c_str())) == FALSE) {
+      if(::DeleteFileW(wpath.c_str()) == FALSE) {
         err = ::GetLastError();
         ASTERIA_DEBUG_LOG("`DeleteFileW()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
@@ -498,14 +501,14 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Make a pattern that will match everything.
-    wpath.append(u"\\*");
+    wpath.append(L"\\*");
     // On Windows, `FindFirstFile()` returns the first entry in the directory.
     // Although for a non-root directory this is always '.', it could be a conventional entry when
     // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
     // if no file exists in such a case, `FindFirstFile()` fails and `GetLastError()` returns
     // `ERROR_FILE_NOT_FOUND`.
     ::WIN32_FIND_DATAW next;
-    Directory hd(::FindFirstFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()), &next));
+    Directory hd(::FindFirstFileW(wpath.c_str(), &next));
     if(!hd) {
       auto err = ::GetLastError();
       if(err != ERROR_FILE_NOT_FOUND) {
@@ -604,14 +607,14 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
     G_integer count = 1;
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
-    if(::CreateDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str()), nullptr) == FALSE) {
+    if(::CreateDirectoryW(wpath.c_str(), nullptr) == FALSE) {
       auto err = ::GetLastError();
       if(err != ERROR_ALREADY_EXISTS) {
         ASTERIA_DEBUG_LOG("`CreateDirectoryW()` failed on \'", path, "\' (last error was `", err, "`).");
         return rocket::nullopt;
       }
       // Fail only if it is not a directory that exists.
-      auto attr = ::GetFileAttributesW(reinterpret_cast<const wchar_t*>(wpath.c_str()));
+      auto attr = ::GetFileAttributesW(wpath.c_str());
       if(attr == INVALID_FILE_ATTRIBUTES) {
         err = ::GetLastError();
         ASTERIA_DEBUG_LOG("`GetFileAttributesW()` failed on \'", path, "\' (last error was `", err, "`).");
@@ -647,7 +650,7 @@ Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
     G_integer count = 1;
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
-    if(::RemoveDirectoryW(reinterpret_cast<const wchar_t*>(wpath.c_str())) == FALSE) {
+    if(::RemoveDirectoryW(wpath.c_str()) == FALSE) {
       auto err = ::GetLastError();
       if(err != ERROR_DIR_NOT_EMPTY) {
         ASTERIA_DEBUG_LOG("`RemoveDirectoryW()` failed on \'", path, "\' (last error was `", err, "`).");
@@ -675,7 +678,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Open the file for reading.
-    File hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+    File hf(::CreateFileW(wpath.c_str(),
                           FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
@@ -736,7 +739,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       create_disposition = CREATE_ALWAYS;
     }
     // Open the file for writing.
-    File hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+    File hf(::CreateFileW(wpath.c_str(),
                           FILE_WRITE_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
@@ -828,7 +831,7 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       create_disposition = CREATE_NEW;
     }
     // Open the file for writing.
-    File hf(::CreateFileW(reinterpret_cast<const wchar_t*>(wpath.c_str()),
+    File hf(::CreateFileW(wpath.c_str(),
                           FILE_APPEND_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       auto err = ::GetLastError();
@@ -884,7 +887,7 @@ bool std_filesystem_file_remove(const G_string& path)
   {
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
-    if(::DeleteFileW(reinterpret_cast<const wchar_t*>(wpath.c_str())) == FALSE) {
+    if(::DeleteFileW(wpath.c_str()) == FALSE) {
       auto err = ::GetLastError();
       ASTERIA_DEBUG_LOG("`DeleteFileW()` failed on \'", path, "\' (last error was `", err, "`).");
 #else
