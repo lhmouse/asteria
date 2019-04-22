@@ -1522,6 +1522,12 @@
 	* Returns `true` if all data have been written successfully, or
 	  `null` on failure.
 
+`std.filesystem.file_copy_from(path_new, path_old)`
+
+	* Copies the file `path_old` to `path_new`.
+
+	* Returns `true` on success, or `null` on failure.
+
 `std.filesystem.file_remove(path)`
 
 	* Removes the file at `path`. This function fails if `path`

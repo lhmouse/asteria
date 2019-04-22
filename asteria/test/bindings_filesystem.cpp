@@ -82,9 +82,13 @@ int main()
         assert std.filesystem.file_read(fname, 2, 1000) == "lHE#??!!";
         assert std.filesystem.file_read(fname, 2, 3) == "lHE";
 
+        assert std.filesystem.file_copy_from(fname + ".2", fname) == true;
+        assert std.filesystem.file_read(fname + ".2") == "helHE#??!!";
+
         assert std.filesystem.directory_create(fname) == null;
         assert std.filesystem.file_remove(fname) == true;
         assert std.filesystem.file_remove(fname) == null;
+        assert std.filesystem.file_remove(fname + ".2") == true;
 
         assert std.filesystem.directory_create(fname) == 1;
         assert std.filesystem.file_remove(fname) == null;

@@ -12,7 +12,7 @@
                         // ::FindFirstFile(), ::FindNextFile(), ::CreateDirectory(), ::RemoveDirectory(),
                         // ::ReadFile(), ::WriteFile(), ::DeleteFile()
 #else
-#  include <sys/stat.h>  // ::lstat(), ::stat(), ::mkdir()
+#  include <sys/stat.h>  // ::stat(), ::fstat(), ::lstat(), ::mkdir(), ::fchmod()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
 #  include <unistd.h>  // ::rmdir(), ::close(), ::pread(), ::pwrite(), ::unlink()
@@ -887,6 +887,76 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
     return true;
   }
 
+bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& path_old)
+  {
+#ifdef _WIN32
+    auto wpath_new = do_translate_winnt_path(path_new);
+    auto wpath_old = do_translate_winnt_path(path_old);
+    if(::CopyFileW(wpath_old.c_str(), wpath_new.c_str(), FALSE) == FALSE) {
+      auto err = ::GetLastError();
+      ASTERIA_DEBUG_LOG("`CopyFileW()` failed on \'", path_old, "\' and \'", path_new, "\' (last error was `", err, "`).");
+#else
+    // Open the old file.
+    File hf_old(::open(path_old.c_str(), O_RDONLY));
+    if(!hf_old) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`open()` failed on \'", path_old, "\' (errno was `", err, "`).");
+      return false;
+    }
+    // Get the file mode and preferred I/O block size.
+    struct ::stat stb_old;
+    if(::fstat(hf_old, &stb_old) != 0) {
+      auto err = errno;
+      ASTERIA_DEBUG_LOG("`fstat()` failed on \'", path_old, "\' (errno was `", err, "`).");
+      return false;
+    }
+    // Create the new file, discarding its contents.
+    File hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0200));
+    if(!hf_new) {
+      auto err = errno;
+      // If the file cannot be opened, unlink it and try again.
+      if(::unlink(path_new.c_str()) != 0) {
+        return false;
+      }
+      hf_new.reset(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0200));
+      if(!hf_new) {
+        err = errno;
+        ASTERIA_DEBUG_LOG("`open()` failed on \'", path_new, "\' (errno was `", err, "`).");
+        return false;
+      }
+    }
+    // Allocate the I/O buffer.
+    std::vector<char> buff;
+    buff.resize(static_cast<std::size_t>(rocket::min(rocket::max(512, stb_old.st_blksize), stb_old.st_size)));
+    // Copy the contents in a loop.
+    ::off_t offset = 0;
+    for(;;) {
+      ::ssize_t nread = ::pread(hf_old, buff.data(), buff.size(), offset);
+      if(nread < 0) {
+        auto err = errno;
+        ASTERIA_DEBUG_LOG("`pread()` failed on \'", path_old, "\' (errno was `", err, "`).");
+        return false;
+      }
+      if(nread == 0) {
+        // EOF
+        break;
+      }
+      ::ssize_t nwritten = ::write(hf_new, buff.data(), static_cast<std::size_t>(nread));
+      if(nwritten < 0) {
+        auto err = errno;
+        ASTERIA_DEBUG_LOG("`write()` failed on \'", path_new, "\' (errno was `", err, "`).");
+        return false;
+      }
+      offset += nwritten;
+    }
+    // Set the file mode. This must be at the last.
+    if(::fchmod(hf_new, stb_old.st_mode) != 0) {
+#endif
+      return false;
+    }
+    return true;
+  }
+
 bool std_filesystem_file_remove(const G_string& path)
   {
 #ifdef _WIN32
@@ -1343,6 +1413,45 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             if(reader.start().g(path).g(data).g(exclusive).finish()) {
               // Call the binding function.
               if(!std_filesystem_file_append(path, data, exclusive)) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { true };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.filesystem.file_copy_from(path_new, path_old)`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("file_copy_from"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.filesystem.file_copy_from(path_new, path_old)`\n"
+            "  \n"
+            "  * Copies the file `path_old` to `path_new`.\n"
+            "  \n"
+            "  * Returns `true` on success, or `null` on failure.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.filesystem.file_copy_from"), args);
+            // Parse arguments.
+            G_string path_new;
+            G_string path_old;
+            if(reader.start().g(path_new).g(path_old).finish()) {
+              // Call the binding function.
+              if(!std_filesystem_file_copy_from(path_new, path_old)) {
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { true };
