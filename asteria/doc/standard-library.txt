@@ -1464,14 +1464,13 @@
 
 	* Lists the contents of the directory at `path`.
 
-	* Returns an `object` containing all children of the directory at
+	* Returns an `object` containing all entries of the directory at
 	  `path`, including the special subdirectories '.' and '..'. For
 	  each element, its key specifies the filename and the value is
 	  an `object` consisting of the following members (names that
 	  start with `b_` are `boolean` flags; names that start with `i_`
 	  are IDs as `integer`s):
 
-	  * `i_file`  unique file id on this device.
 	  * `b_dir`   whether this is a directory.
 	  * `b_sym`   whether this is a symbol link.
 
