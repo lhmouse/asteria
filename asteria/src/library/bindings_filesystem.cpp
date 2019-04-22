@@ -55,60 +55,40 @@ namespace Asteria {
       }
 #endif
 
-    class File
+    struct File_Closer
       {
-      public:
-        // `Handle` is the native handle for a file.
 #ifdef _WIN32
-        using Handle = ::HANDLE;
-#else
-        using Handle = int;
-#endif
-
-        // `Closer` is used to close an opened file.
-        struct Closer
+        ::HANDLE null() const noexcept
           {
-            Handle null() const noexcept
-              {
-#ifdef _WIN32
-                return INVALID_HANDLE_VALUE;
-#else
-                return -1;
-#endif
-              }
-            bool is_null(Handle hf) const noexcept
-              {
-                return hf == this->null();
-              }
-            void close(Handle hf) const noexcept
-              {
-#ifdef _WIN32
-                ::CloseHandle(hf);
-#else
-                ::close(hf);
-#endif
-              }
-          };
-
-      private:
-        rocket::unique_handle<Handle, Closer> m_hf;
-
-      public:
-        explicit File(Handle hf) noexcept
-          : m_hf(hf)
-          {
+            return INVALID_HANDLE_VALUE;
           }
-
-      public:
-        explicit operator bool () const noexcept
+        bool is_null(::HANDLE fd) const noexcept
           {
-            return !!this->m_hf;
+            return fd == INVALID_HANDLE_VALUE;
           }
-        operator Handle () const noexcept
+        void close(::HANDLE fd) const noexcept
           {
-            return this->m_hf.get();
+            ::CloseHandle(fd);
           }
+#else
+        constexpr int null() const noexcept
+          {
+            return -1;
+          }
+        constexpr bool is_null(int fd) const noexcept
+          {
+            return fd == -1;
+          }
+        void close(int fd) const noexcept
+          {
+            ::close(fd);
+          }
+#endif
       };
+
+    // This is the actual handle type.
+    // It is convertible to a native handle implicitly.
+    using File = rocket::unique_handle<decltype(File_Closer().null()), File_Closer>;
 
 #ifdef _WIN32
     struct Directory_Closer
