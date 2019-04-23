@@ -718,23 +718,6 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
         return false;
       }
       if(::SetEndOfFile(hf) == FALSE) {
-        return false;
-      }
-    }
-    // Write data in a loop.
-    while(nremaining > 0) {
-      // Set the write position.
-      ::OVERLAPPED ctx = { };
-      ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
-      ctx.Offset = static_cast<::DWORD>(roffset);
-      // Write data to the offset specified.
-      ::DWORD nwritten;
-      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<::DWORD>(rocket::min(nremaining, INT_MAX)), &nwritten, &ctx) == FALSE) {
-        return false;
-      }
-      nremaining -= static_cast<int>(nwritten);
-      roffset += nwritten;
-    }
 #else
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
@@ -752,20 +735,29 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       // If `roffset` is not zero, truncate the file there.
       // Otherwise, the file will have been truncate at creation.
       if(::ftruncate(hf, roffset) != 0) {
+#endif
         return false;
       }
     }
     // Write data in a loop.
     while(nremaining > 0) {
       // Write data to the offset specified.
+#ifdef _WIN32
+      ::OVERLAPPED ctx = { };
+      ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
+      ctx.Offset = static_cast<::DWORD>(roffset);
+      // Write data to the offset specified.
+      ::DWORD nwritten;
+      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<::DWORD>(rocket::min(nremaining, INT_MAX)), &nwritten, &ctx) == FALSE) {
+#else
       ::ssize_t nwritten = ::pwrite(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining), roffset);
       if(nwritten < 0) {
+#endif
         return false;
       }
       nremaining -= nwritten;
       roffset += nwritten;
     }
-#endif
     return true;
   }
 
