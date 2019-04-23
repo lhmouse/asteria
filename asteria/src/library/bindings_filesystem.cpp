@@ -5,6 +5,7 @@
 #include "bindings_filesystem.hpp"
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
+#include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
 #include <vector>
 #ifdef _WIN32
@@ -659,8 +660,8 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
       return rocket::nullopt;
     }
 #endif
-    // Don't read too many bytes at a time.
     G_string data;
+    // Don't read too many bytes at a time.
     data.resize(static_cast<std::size_t>(rlimit));
     // Read data from the offset specified.
 #ifdef _WIN32
@@ -685,6 +686,87 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     data.erase(static_cast<std::size_t>(nread));
 #endif
     return rocket::move(data);
+  }
+
+    namespace {
+
+    inline void do_push_argument(Cow_Vector<Reference>& args, const Value& value)
+      {
+        Reference_Root::S_temporary xref = { value };
+        args.emplace_back(rocket::move(xref));
+      }
+
+    void do_process_block(const Global_Context& global, const G_function& callback, const G_integer& offset, const G_string& data)
+      {
+        // Set up arguments for the user-defined predictor.
+        Cow_Vector<Reference> args;
+        do_push_argument(args, offset);
+        do_push_argument(args, data);
+        // Call it.
+        Reference self;
+        callback.get().invoke(self, global, rocket::move(args));
+        // The return value is ignored.
+      }
+
+    }
+
+bool std_filesystem_file_traverse(const Global_Context& global, const G_string& path, const G_function& callback, const Opt<G_integer>& offset, const Opt<G_integer>& limit)
+  {
+    if(offset && (*offset < 0)) {
+      ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
+    }
+    std::int64_t roffset = offset.value_or(0);
+    std::int64_t rlimit = rocket::clamp(limit.value_or(INT_MAX), 0, 65535);
+    // Open the file for reading.
+#ifdef _WIN32
+    auto wpath = do_translate_winnt_path(path);
+    File hf(::CreateFileW(wpath.c_str(), FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
+    if(!hf) {
+      return false;
+    }
+#else
+    File hf(::open(path.c_str(), O_RDONLY));
+    if(!hf) {
+      return false;
+    }
+#endif
+    auto nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
+    G_string data;
+    while(nremaining > 0) {
+      // Don't read too many bytes at a time.
+      data.resize(static_cast<std::size_t>(rlimit));
+      // Read data from the offset specified.
+#ifdef _WIN32
+      ::OVERLAPPED ctx = { };
+      ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
+      ctx.Offset = static_cast<::DWORD>(roffset);
+      ::DWORD nread;
+      if(::ReadFile(hf, data.mut_data(), static_cast<::DWORD>(data.size()), &nread, &ctx) == FALSE) {
+        auto err = ::GetLastError();
+        // This error can happen if `roffset` is past the end of the file.
+        if(err != ERROR_HANDLE_EOF) {
+          return false;
+        }
+        nread = 0;
+      }
+      data.erase(nread);
+#else
+      ::ssize_t nread = ::pread(hf, data.mut_data(), data.size(), roffset);
+      if(nread < 0) {
+        return false;
+      }
+      data.erase(static_cast<std::size_t>(nread));
+#endif
+      if(data.empty()) {
+        // EOF
+        break;
+      }
+      do_process_block(global, callback, roffset, data);
+      // Seek the next block.
+      nremaining -= nread;
+      roffset += nread;
+    }
+    return true;
   }
 
 bool std_filesystem_file_write(const G_string& path, const G_string& data, const Opt<G_integer>& offset)
@@ -1236,6 +1318,61 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { rocket::move(*qres) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.filesystem.file_traverse()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("file_traverse"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.filesystem.file_traverse(path, callback, [offset], [limit])`\n"
+            "  \n"
+            "  * Reads the file at `path` in binary mode and invokes `callback`\n"
+            "    with the data read repeatedly. `callback` shall be a binary\n"
+            "    `function` whose first argument is the absolute offset of the\n"
+            "    data block that has been read, and whose second argument is the\n"
+            "    bytes read and stored in a `string`. Data may be transferred in\n"
+            "    multiple blocks of variable sizes; the caller shall make no\n"
+            "    assumption about the number of times that `callback` will be\n"
+            "    called or the size of each individual block. The read operation\n"
+            "    starts from the byte offset that is denoted by `offset` if it\n"
+            "    is specified, or from the beginning of the file otherwise. If\n"
+            "    `limit` is specified, no more than this number of bytes will be\n"
+            "    read.\n"
+            "  \n"
+            "  * Returns `true` if all data have been processed successfully, or\n"
+            "    `null` on failure.\n"
+            "  \n"
+            "  * Throws an exception of `offset` is negative.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.filesystem.file_traverse"), args);
+            // Parse arguments.
+            G_string path;
+            G_function callback = global.get_placeholder_function();
+            Opt<G_integer> offset;
+            Opt<G_integer> limit;
+            if(reader.start().g(path).g(callback).g(offset).g(limit).finish()) {
+              // Call the binding function.
+              if(!std_filesystem_file_traverse(global, path, callback, offset, limit)) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { true };
               return rocket::move(xref);
             }
             // Fail.

@@ -85,6 +85,23 @@ int main()
         assert std.filesystem.file_copy_from(fname + ".2", fname) == true;
         assert std.filesystem.file_read(fname + ".2") == "helHE#??!!";
 
+        var data = "";
+        var appender = func(off, str) { data += str;  };
+        assert std.filesystem.file_traverse(fname, appender) == true;
+        assert data == "helHE#??!!";
+        data = "";
+        assert std.filesystem.file_traverse(fname, appender, 2) == true;
+        assert data == "lHE#??!!";
+        data = "";
+        assert std.filesystem.file_traverse(fname, appender, 1000) == true;
+        assert data == "";
+        data = "";
+        assert std.filesystem.file_traverse(fname, appender, 2, 1000) == true;
+        assert data == "lHE#??!!";
+        data = "";
+        assert std.filesystem.file_traverse(fname, appender, 2, 3) == true;
+        assert data == "lHE";
+
         assert std.filesystem.directory_create(fname) == null;
         assert std.filesystem.file_remove(fname) == true;
         assert std.filesystem.file_remove(fname) == null;
