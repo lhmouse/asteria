@@ -213,7 +213,7 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       ));
     stat.insert_or_assign(rocket::sref("b_sym"),
       G_boolean(
-        fbi.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT  // whether this is a symbol link.
+        fbi.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT  // whether this is a symbolic link.
       ));
     stat.insert_or_assign(rocket::sref("n_size"),
       G_integer(
@@ -255,7 +255,7 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       ));
     stat.insert_or_assign(rocket::sref("b_sym"),
       G_boolean(
-        S_ISLNK(stb.st_mode)  // whether this is a symbol link.
+        S_ISLNK(stb.st_mode)  // whether this is a symbolic link.
       ));
     stat.insert_or_assign(rocket::sref("n_size"),
       G_integer(
@@ -958,7 +958,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    * `i_file`  unique file id on this device.\n"
             "    * `n_ref`   number of hard links to this file.\n"
             "    * `b_dir`   whether this is a directory.\n"
-            "    * `b_sym`   whether this is a symbol link.\n"
+            "    * `b_sym`   whether this is a symbolic link.\n"
             "    * `n_size`  number of bytes this file contains.\n"
             "    * `n_ocup`  number of bytes this file occupies.\n"
             "    * `t_accs`  timestamp of last access.\n"
@@ -1092,7 +1092,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    are IDs as `integer`s):\n"
             "  \n"
             "    * `b_dir`   whether this is a directory.\n"
-            "    * `b_sym`   whether this is a symbol link.\n"
+            "    * `b_sym`   whether this is a symbolic link.\n"
             "  \n"
             "    On failure, `null` is returned.\n"
           ),
@@ -1133,7 +1133,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "  \n"
             "  * Creates a directory at `path`. Its parent directory must exist\n"
             "    and must be accessible. This function does not fail if either\n"
-            "    a directory or a symbol link to a directory already exists on\n"
+            "    a directory or a symbolic link to a directory already exists on\n"
             "    `path`.\n"
             "  \n"
             "  * Returns `1` if a new directory has been created successfully,\n"

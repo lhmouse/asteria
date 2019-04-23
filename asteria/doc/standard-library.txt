@@ -1427,7 +1427,7 @@
 	  * `i_file`  unique file id on this device.
 	  * `n_ref`   number of hard links to this file.
 	  * `b_dir`   whether this is a directory.
-	  * `b_sym`   whether this is a symbol link.
+	  * `b_sym`   whether this is a symbolic link.
 	  * `n_size`  number of bytes this file contains.
 	  * `n_ocup`  number of bytes this file occupies.
 	  * `t_accs`  timestamp of last access.
@@ -1462,7 +1462,7 @@
 	  are IDs as `integer`s):
 
 	  * `b_dir`   whether this is a directory.
-	  * `b_sym`   whether this is a symbol link.
+	  * `b_sym`   whether this is a symbolic link.
 
 	  On failure, `null` is returned.
 
@@ -1470,7 +1470,7 @@
 
 	* Creates a directory at `path`. Its parent directory must exist
 	  and must be accessible. This function does not fail if either
-	  a directory or a symbol link to a directory already exists on
+	  a directory or a symbolic link to a directory already exists on
 	  `path`.
 
 	* Returns `1` if a new directory has been created successfully,
