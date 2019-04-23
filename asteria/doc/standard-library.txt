@@ -1524,7 +1524,10 @@
 
 `std.filesystem.file_copy_from(path_new, path_old)`
 
-	* Copies the file `path_old` to `path_new`.
+	* Copies the file `path_old` to `path_new`. If `path_old` is a
+	  symbolic link, it is the target that will be copied, rather
+	  than the symbolic link itself. This function fails if
+	  `path_old` designates a directory.
 
 	* Returns `true` on success, or `null` on failure.
 

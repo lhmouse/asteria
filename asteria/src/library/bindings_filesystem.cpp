@@ -1356,7 +1356,10 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "\n"
             "`std.filesystem.file_copy_from(path_new, path_old)`\n"
             "  \n"
-            "  * Copies the file `path_old` to `path_new`.\n"
+            "  * Copies the file `path_old` to `path_new`. If `path_old` is a\n"
+            "    symbolic link, it is the target that will be copied, rather\n"
+            "    than the symbolic link itself. This function fails if\n"
+            "    `path_old` designates a directory.\n"
             "  \n"
             "  * Returns `true` on success, or `null` on failure.\n"
           ),
