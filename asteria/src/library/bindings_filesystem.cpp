@@ -645,6 +645,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
     std::int64_t roffset = offset.value_or(0);
+    std::int64_t rlimit = rocket::clamp(limit.value_or(INT_MAX), 0, 65535);
     // Open the file for reading.
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
@@ -660,13 +661,12 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 #endif
     // Don't read too many bytes at a time.
     G_string data;
-    data.resize(static_cast<std::size_t>(rocket::clamp(limit.value_or(65536), 0, 1048576)), '*');
+    data.resize(static_cast<std::size_t>(rlimit));
     // Read data from the offset specified.
 #ifdef _WIN32
     ::OVERLAPPED ctx = { };
     ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
     ctx.Offset = static_cast<::DWORD>(roffset);
-    // Read data from the offset specified.
     ::DWORD nread;
     if(::ReadFile(hf, data.mut_data(), static_cast<::DWORD>(data.size()), &nread, &ctx) == FALSE) {
       auto err = ::GetLastError();
