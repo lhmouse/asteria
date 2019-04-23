@@ -102,7 +102,7 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     do_append_str(str, ':');
     do_ltoa_fixed(str, tr.tm_sec, 2);
     do_append_str(str, '.');
-    do_ltoa_fixed(str, ts.tv_nsec / 1000000, 3);
+    do_ltoa_fixed(str, static_cast<long>(ts.tv_nsec / 1000000), 3);
 #endif
     // Append the file name and line number.
     do_append_str(str, " @@ ");

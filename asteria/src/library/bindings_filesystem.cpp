@@ -716,6 +716,7 @@ bool std_filesystem_file_traverse(const Global_Context& global, const G_string& 
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
     std::int64_t roffset = offset.value_or(0);
+    std::int64_t nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
     std::int64_t rlimit = rocket::clamp(limit.value_or(INT_MAX), 0, 65535);
     // Open the file for reading.
 #ifdef _WIN32
@@ -730,7 +731,6 @@ bool std_filesystem_file_traverse(const Global_Context& global, const G_string& 
       return false;
     }
 #endif
-    auto nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
     G_string data;
     while(nremaining > 0) {
       // Don't read too many bytes at a time.
@@ -775,8 +775,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
     std::int64_t roffset = offset.value_or(0);
-    // This is a signed integer.
-    auto nremaining = data.ssize();
+    std::int64_t nremaining = static_cast<std::int64_t>(data.size());
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Calculate the `dwCreationDisposition` argument.
