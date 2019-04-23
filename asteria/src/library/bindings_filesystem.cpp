@@ -180,8 +180,7 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Open the file or directory.
-    File hf(::CreateFileW(wpath.c_str(),
-                          FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+    File hf(::CreateFileW(wpath.c_str(), FILE_READ_ATTRIBUTES, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
                           OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS, NULL));
     if(!hf) {
       return rocket::nullopt;
@@ -651,8 +650,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Open the file for reading.
-    File hf(::CreateFileW(wpath.c_str(),
-                          FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
+    File hf(::CreateFileW(wpath.c_str(), FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       return rocket::nullopt;
     }
@@ -705,8 +703,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       create_disposition = CREATE_ALWAYS;
     }
     // Open the file for writing.
-    File hf(::CreateFileW(wpath.c_str(),
-                          FILE_WRITE_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
+    File hf(::CreateFileW(wpath.c_str(), FILE_WRITE_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       return false;
     }
@@ -783,8 +780,7 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       create_disposition = CREATE_NEW;
     }
     // Open the file for writing.
-    File hf(::CreateFileW(wpath.c_str(),
-                          FILE_APPEND_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
+    File hf(::CreateFileW(wpath.c_str(), FILE_APPEND_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       return false;
     }
