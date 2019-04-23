@@ -162,7 +162,7 @@ G_string std_filesystem_get_working_directory()
     }
 #else
     // Get the current directory, resizing the buffer as needed.
-    cwd.resize(1);
+    cwd.resize(PATH_MAX);
     while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
       auto err = errno;
       if(err != ERANGE) {
