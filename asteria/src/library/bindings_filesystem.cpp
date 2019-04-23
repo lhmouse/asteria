@@ -645,16 +645,24 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
     std::int64_t roffset = offset.value_or(0);
-    // Don't read too many bytes at a time.
-    G_string data(static_cast<std::size_t>(rocket::clamp(limit.value_or(65536), 0, 1048576)), '*');
+    // Open the file for reading.
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
-    // Open the file for reading.
     File hf(::CreateFileW(wpath.c_str(), FILE_READ_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL));
     if(!hf) {
       return rocket::nullopt;
     }
-    // Set the read position.
+#else
+    File hf(::open(path.c_str(), O_RDONLY));
+    if(!hf) {
+      return rocket::nullopt;
+    }
+#endif
+    // Don't read too many bytes at a time.
+    G_string data;
+    data.resize(static_cast<std::size_t>(rocket::clamp(limit.value_or(65536), 0, 1048576)), '*');
+    // Read data from the offset specified.
+#ifdef _WIN32
     ::OVERLAPPED ctx = { };
     ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
     ctx.Offset = static_cast<::DWORD>(roffset);
@@ -670,12 +678,6 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     }
     data.erase(nread);
 #else
-    // Open the file for reading.
-    File hf(::open(path.c_str(), O_RDONLY));
-    if(!hf) {
-      return rocket::nullopt;
-    }
-    // Read data from the offset specified.
     ::ssize_t nread = ::pread(hf, data.mut_data(), data.size(), roffset);
     if(nread < 0) {
       return rocket::nullopt;

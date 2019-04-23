@@ -1497,6 +1497,26 @@
 
 	* Throws an exception of `offset` is negative.
 
+`std.filesystem.file_traverse(path, callback, [offset], [limit])`
+
+	* Reads the file at `path` in binary mode and invokes `callback`
+	  with the data read repeatedly. `callback` shall be a binary
+	  `function` whose first argument is the absolute offset of the
+	  data block that has been read, and whose second argument is the
+	  bytes read and stored in a `string`. Data may be transferred in
+	  multiple blocks of variable sizes; the caller shall make no
+	  assumption about the number of times that `callback` will be
+	  called or the size of each individual block. The read operation
+	  starts from the byte offset that is denoted by `offset` if it
+	  is specified, or from the beginning of the file otherwise. If
+	  `limit` is specified, no more than this number of bytes will be
+	  read.
+
+	* Returns `true` if all data have been processed successfully, or
+	  `null` on failure.
+
+	* Throws an exception of `offset` is negative.
+
 `std.filesystem.file_write(path, data, [offset])`
 
 	* Writes the file at `path` in binary mode. The write operation
