@@ -406,6 +406,303 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
     return rocket::clamp(do_saturing_mul(x, y), lower, do_verify_bounds(lower, upper));
   }
 
+    namespace {
+
+    constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
+
+    inline std::uint8_t do_verify_base(const Opt<G_integer>& base)
+      {
+        // The default base is `10`.
+        std::uint8_t value = 10;
+        if(base) {
+          // If the user has provided a custom base, ensure it is acceptable.
+          if((*base != 2) && (*base != 10) && (*base != 16)) {
+            ASTERIA_THROW_RUNTIME_ERROR("`base` must be either `2`, `10` or `16` (got `", *base, "`).");
+          }
+          value = static_cast<std::uint8_t>(*base);
+        }
+        return value;
+      }
+
+    inline std::uint8_t do_verify_exp_base(const Opt<G_integer>& exp_base)
+      {
+        // The default base is `10`.
+        std::uint8_t value = 10;
+        if(exp_base) {
+          // If the user has provided a custom base, ensure it is acceptable.
+          if((*exp_base != 2) && (*exp_base != 10)) {
+            ASTERIA_THROW_RUNTIME_ERROR("`exp_base` must be either `2` or `10` (got `", *exp_base, "`).");
+          }
+          value = static_cast<std::uint8_t>(*exp_base);
+        }
+        return value;
+      }
+
+    inline bool do_handle_special_values(G_string& text, const G_real& value)
+      {
+        switch(std::fpclassify(value)) {
+        case FP_INFINITE:
+          {
+            // Infinities.
+            text = rocket::sref(std::signbit(value) ? "-infinity" : "infinity");
+            return true;
+          }
+        case FP_NAN:
+          {
+            // NaNs.
+            text = rocket::sref(std::signbit(value) ? "-nan" : "nan");
+            return true;
+          }
+        case FP_ZERO:
+          {
+            // Zeroes - they are indeed special.
+            text = rocket::sref(std::signbit(value) ? "-0" : "0");
+            return true;
+          }
+        default:
+          return false;
+        }
+      }
+
+    inline std::uint8_t do_shift_digit(G_integer& reg, bool neg, std::uint8_t base)
+      {
+        auto dvalue = static_cast<int>(reg % base);
+        reg /= base;
+        // Return the absolute value of the digit.
+        return static_cast<std::uint8_t>((dvalue ^ -neg) + neg);
+      }
+    inline std::uint8_t do_shift_digit(G_real& reg, bool neg, std::uint8_t base)
+      {
+        auto frac = std::modf(reg / base, &reg);
+        auto dvalue = static_cast<std::int64_t>(frac * base + 0.5 - neg);
+        // Return the absolute value of the digit.
+        return static_cast<std::uint8_t>((dvalue ^ -neg) + neg);
+      }
+
+    template<typename XvalueT> void do_append_integer_reverse(G_string& text, int& count, const XvalueT& value, bool neg, std::uint8_t base)
+      {
+        auto reg = value;
+        do {
+          auto dvalue = do_shift_digit(reg, neg, base);
+          text.push_back(s_digits[dvalue * 2]);
+          count--;
+        } while(reg != 0);
+      }
+
+    G_string& do_append_integer_prefixes(G_string& text, bool neg, std::uint8_t base)
+      {
+        // N.B. Characters are appended in reverse order.
+        if(base == 2) {
+          text.push_back('b');
+          text.push_back('0');
+        }
+        if(base == 16) {
+          text.push_back('x');
+          text.push_back('0');
+        }
+        if(neg) {
+          text.push_back('-');
+        }
+        return text;
+      }
+
+    inline std::uint8_t do_pop_digit(G_real& reg, bool neg, std::uint8_t base)
+      {
+        G_real intg;
+        reg = std::modf(reg * base, &intg);
+        auto dvalue = static_cast<std::int64_t>(intg);
+        // Return the absolute value of the digit.
+        return static_cast<std::uint8_t>((dvalue ^ -neg) + neg);
+      }
+
+    template<typename XvalueT> void do_append_fraction_normal(G_string& text, int& count, const XvalueT& value, bool neg, std::uint8_t base)
+      {
+        auto reg = value;
+        do {
+          auto dvalue = do_pop_digit(reg, neg, base);
+          text.push_back(s_digits[dvalue * 2]);
+          count--;
+        } while((reg != 0) && (count > 0));
+      }
+
+    G_string& do_append_exponent_prefixes(G_string& text, bool neg, std::uint8_t ebase)
+      {
+        // N.B. Characters are appended in reverse order.
+        if(ebase == 2) {
+          text.push_back('p');
+        }
+        if(ebase == 10) {
+          text.push_back('e');
+        }
+        if(neg) {
+          text.push_back('-');
+        }
+        return text;
+      }
+
+    G_string& do_reverse_suffix(G_string& text, std::size_t from)
+      {
+        // Get the suffix range.
+        std::size_t b = from;
+        std::size_t e = text.size();
+        if(b >= e) {
+          return text;
+        }
+        char* ptr = text.mut_data();
+        while(e - b >= 2) {
+          --e;
+          std::swap(ptr[b], ptr[e]);
+          ++b;
+        }
+        return text;
+      }
+
+    }
+
+G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base)
+  {
+    bool rneg = value < 0;
+    std::uint8_t rbase = do_verify_base(base);
+    // Define the result string.
+    G_string text;
+    int rcount = SCHAR_MAX;
+    // The value itself is the integral part. There are no fractional or exponent parts.
+    G_integer intg = value;
+    // Write the integral part.
+    do_append_integer_reverse(text, rcount, intg, rneg, rbase);
+    do_append_integer_prefixes(text, rneg, rbase);
+    do_reverse_suffix(text, 0);
+    // Finish.
+    return text;
+  }
+
+G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base)
+  {
+    bool rneg = std::signbit(value);
+    std::uint8_t rbase = do_verify_base(base);
+    // Define the result string.
+    // When `value` is special, the other arguments still have to be valid.
+    G_string text;
+    if(do_handle_special_values(text, value)) {
+      return text;
+    }
+    int rcount = DECIMAL_DIG;
+    // Break the number down into integral and fractional parts.
+    G_real intg;
+    G_real frac = std::modf(value, &intg);
+    // Write the integral part.
+    do_append_integer_reverse(text, rcount, intg, rneg, rbase);
+    do_append_integer_prefixes(text, rneg, rbase);
+    do_reverse_suffix(text, 0);
+    // If the fractional part is not zero, append it after a decimal point.
+    if((frac != 0) && (rcount > 0)) {
+      text.push_back('.');
+      do_append_fraction_normal(text, rcount, frac, rneg, rbase);
+    }
+    // Finish.
+    return text;
+  }
+
+G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const G_integer& exp_base)
+  {
+    bool rneg = value < 0;
+    std::uint8_t rbase = do_verify_base(base);
+    std::uint8_t ebase = do_verify_exp_base(exp_base);
+    // Define the result string.
+    G_string text;
+    int rcount = SCHAR_MAX;
+    int ecount = SCHAR_MAX;
+    // The value itself is the integral part. There are no fractional or exponent parts.
+    G_integer intg = value;
+    // Calculate the exponent. In the case of integers it will never be negative.
+    G_integer eint = 0;
+    for(;;) {
+      auto next = intg / ebase;
+      if(intg % ebase != 0) {
+        break;
+      }
+      intg = next;
+      eint++;
+    }
+    bool eneg = eint < 0;
+    // Write the integral part.
+    do_append_integer_reverse(text, rcount, intg, rneg, rbase);
+    do_append_integer_prefixes(text, rneg, rbase);
+    do_reverse_suffix(text, 0);
+    // Write the exponent part.
+    auto expb = text.size();
+    do_append_integer_reverse(text, ecount, eint, eneg, 10);
+    do_append_exponent_prefixes(text, eneg, ebase);
+    do_reverse_suffix(text, expb);
+    // Finish.
+    return text;
+  }
+
+G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const G_integer& exp_base)
+  {
+    bool rneg = std::signbit(value);
+    std::uint8_t rbase = do_verify_base(base);
+    std::uint8_t ebase = do_verify_exp_base(exp_base);
+    // Define the result string.
+    // When `value` is special, the other arguments still have to be valid.
+    G_string text;
+    if(do_handle_special_values(text, value)) {
+      return text;
+    }
+    int rcount = DECIMAL_DIG;
+    int ecount = SCHAR_MAX;
+    // Calculate the exponent. In the case of integers it will never be negative.
+    G_real intg = 1;
+    G_integer eint = 0;
+    for(;;) {
+      // How to normalize `intg`?
+      int eadd = 0;
+      auto test = std::abs(value * intg);
+      if(test >= ebase) {
+        // 12.3e45  =>  1.23e46
+        intg /= ebase;
+        eadd = +1;
+      } else if(test < 1) {
+        // 0.123e4  =>  1.23e3
+        intg *= ebase;
+        eadd = -1;
+      }
+      if(eadd == 0) {
+        break;
+      }
+      eint += eadd;
+    }
+    bool eneg = eint < 0;
+    // Break the number down into integral and fractional parts.
+    G_real frac = std::modf(value * intg, &intg);
+    // Write the integral part.
+    do_append_integer_reverse(text, rcount, intg, rneg, rbase);
+    do_append_integer_prefixes(text, rneg, rbase);
+    do_reverse_suffix(text, 0);
+    // If the fractional part is not zero, append it after a decimal point.
+    if((frac != 0) && (rcount > 0)) {
+      text.push_back('.');
+      do_append_fraction_normal(text, rcount, frac, rneg, rbase);
+    }
+    // Write the exponent part.
+    auto expb = text.size();
+    do_append_integer_reverse(text, ecount, eint, eneg, 10);
+    do_append_exponent_prefixes(text, eneg, ebase);
+    do_reverse_suffix(text, expb);
+    // Finish.
+    return text;
+  }
+
+G_integer std_numeric_parse_integer(const G_string& text)
+  {
+    return -1;
+  }
+
+G_real std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating)
+  {
+    return -1;
+  }
+
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -1526,6 +1823,172 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             if(reader.load(fstate).g(flower).g(fupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy, flower, fupper) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.format()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("format"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.format(value, [base], [exp_base])`\n"
+            "  \n"
+            "  * Converts an `integer` or `real` to a `string` in `base`. This\n"
+            "    function writes as many digits as possible for precision. If\n"
+            "    `value` is non-negative, no plus sign appears. If `base` is not\n"
+            "    specified, `10` is assumed. When `exo_base` is specified, if\n"
+            "    `value` is of type `real`, the number is written in scientific\n"
+            "    notation; otherwise (when it is of type `integer`), an exponent\n"
+            "    part is still appended, however no decimal point shall occur in\n"
+            "    the result.\n"
+            "  \n"
+            "  * Returns a `string` converted from `value`.\n"
+            "  \n"
+            "  * Throws an exception if `base` is neither `2` nor `10` nor `16`,\n"
+            "    or if `exp_base` is neither `2` nor `10`, or if `base` is `16`\n"
+            "    and `exp_base` is `10`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.format"), args);
+            Argument_Reader::State istate, fstate;
+            // Parse arguments.
+            G_integer ivalue;
+            Opt<G_integer> base;
+            if(reader.start().g(ivalue).g(base).save(istate).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_format(ivalue, base) };
+              return rocket::move(xref);
+            }
+            G_real fvalue;
+            if(reader.start().g(fvalue).g(base).save(fstate).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_format(fvalue, base) };
+              return rocket::move(xref);
+            }
+            G_integer exp_base;
+            if(reader.load(istate).g(exp_base).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_format(ivalue, base, exp_base) };
+              return rocket::move(xref);
+            }
+            if(reader.load(fstate).g(exp_base).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_format(fvalue, base, exp_base) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.parse_integer()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("parse_integer"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.parse_integer(text)`\n"
+            "  \n"
+            "  * Parses `text` for an `integer`. `text` shall be a `string`. All\n"
+            "    leading and trailing blank characters are stripped from `text`.\n"
+            "    If it becomes empty, this function fails; otherwise, it shall\n"
+            "    match one of the following Perl regular expressions, ignoring\n"
+            "    case of characters:\n"
+            "    \n"
+            "    * Base-2:   `[+-]?0b[01]+[ep][+]?[0-9]+`\n"
+            "    * Base-16:  `[+-]?0x[0-9a-f]+[ep][+]?[0-9]+`\n"
+            "    * Base-10:  `[+-]?[0-9]+[ep][+]?[0-9]+`\n"
+            "    \n"
+            "    If the string does not match any of the above, this function\n"
+            "    fails. If the result is outside the range of representable\n"
+            "    values of type `integer`, this function fails.\n"
+            "  \n"
+            "  * Returns the `integer` number converted from `text`. On failure,\n"
+            "    `null` is returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.parse_integer"), args);
+            // Parse arguments.
+            G_string text;
+            if(reader.start().g(text).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_parse_integer(text) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.parse_real()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("parse_real"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.parse_real(text, [saturating])`\n"
+            "  \n"
+            "  * Parses `text` for a `real`. `text` shall be a `string`. All\n"
+            "    leading and trailing blank characters are stripped from `text`.\n"
+            "    If it becomes empty, this function fails; otherwise, it shall\n"
+            "    match any of the following Perl regular expressions, ignoring\n"
+            "    case of characters:\n"
+            "    \n"
+            "    * Infinities:  `[+-]?infinity`\n"
+            "    * NaNs:        `[+-]?nan`\n"
+            "    * Base-2:      `[+-]?0b[01]+(\\.[01])?[ep][-+]?[0-9]+`\n"
+            "    * Base-16:     `[+-]?0x[0-9a-f]+(\\.[0-9a-f])?[ep][-+]?[0-9]+`\n"
+            "    * Base-10:     `[+-]?[0-9]+(\\.[0-9])?[ep][-+]?[0-9]+`\n"
+            "    \n"
+            "    If the string does not match any of the above, this function\n"
+            "    fails. If the absolute value of the result is too small to fit\n"
+            "    in a `real`, a signed zero is returned. When the absolute value\n"
+            "    is too large, if `saturating` is set to `true`, a signed\n"
+            "    infinity is returned; otherwise this function fails.\n"
+            "  \n"
+            "  * Returns the `real` number converted from `text`. On failure,\n"
+            "    `null` is returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.parse_real"), args);
+            // Parse arguments.
+            G_string text;
+            Opt<G_boolean> saturating;
+            if(reader.start().g(text).g(saturating).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_parse_real(text, saturating) };
               return rocket::move(xref);
             }
             // Fail.
