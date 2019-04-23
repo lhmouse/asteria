@@ -48,6 +48,9 @@ extern G_array std_array_reverse(const G_array& data);
 extern G_array std_array_generate(const Global_Context& global, const G_function& generator, const G_integer& length);
 extern G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed = rocket::nullopt);
 
+extern Opt<G_array> std_array_copy_keys(const Opt<G_object>& source);
+extern Opt<G_array> std_array_copy_values(const Opt<G_object>& source);
+
 // Create an object that is to be referenced as `std.array`.
 extern void create_bindings_array(G_object& result, API_Version version);
 

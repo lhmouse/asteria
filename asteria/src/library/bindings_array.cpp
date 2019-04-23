@@ -641,6 +641,28 @@ G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed)
     return res;
   }
 
+Opt<G_array> std_array_copy_keys(const Opt<G_object>& source)
+  {
+    if(!source) {
+      return rocket::nullopt;
+    }
+    G_array res;
+    res.reserve(source->size());
+    rocket::for_each(*source, [&](const auto& pair) { res.emplace_back(G_string(pair.first));  });
+    return res;
+  }
+
+Opt<G_array> std_array_copy_values(const Opt<G_object>& source)
+  {
+    if(!source) {
+      return rocket::nullopt;
+    }
+    G_array res;
+    res.reserve(source->size());
+    rocket::for_each(*source, [&](const auto& pair) { res.emplace_back(pair.second);  });
+    return res;
+  }
+
 void create_bindings_array(G_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -1765,6 +1787,88 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             if(reader.start().g(data).g(seed).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_shuffle(data, seed) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.array.copy_keys()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("copy_keys"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.array.copy_keys([source])`\n"
+            "  \n"
+            "  * Copies all keys from `source`, which shall be an `object`, to\n"
+            "    create an `array`.\n"
+            "  \n"
+            "  * Returns an `array` of all keys in `source`. If `source` is\n"
+            "    `null`, `null` is returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.copy_keys"), args);
+            // Parse arguments.
+            Opt<G_object> source;
+            if(reader.start().g(source).finish()) {
+              // Call the binding function.
+              auto qres = std_array_copy_keys(source);
+              if(!qres) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qres) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.array.copy_values()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("copy_values"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "  \n"
+            "`std.array.copy_values([source])`\n"
+            "  \n"
+            "  * Copies all values from `source`, which shall be an `object`, to\n"
+            "    create an `array`.\n"
+            "  \n"
+            "  * Returns an `array` of all values in `source`. If `source` is\n"
+            "    `null`, `null` is returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.copy_values"), args);
+            // Parse arguments.
+            Opt<G_object> source;
+            if(reader.start().g(source).finish()) {
+              // Call the binding function.
+              auto qres = std_array_copy_values(source);
+              if(!qres) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qres) };
               return rocket::move(xref);
             }
             // Fail.

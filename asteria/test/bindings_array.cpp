@@ -110,13 +110,6 @@ int main()
         assert std.array.rfind_if_not([0,1,2,3,4,5,6,7,8,9], 5, 4, func(x) = (x % 5 != 3)) == 8;
         assert std.array.rfind_if_not([0,1,2,3,4,5,6,7,8,9], 3, 6, func(x) = (x % 5 != 3)) == 8;
 
-        assert std.array.reverse([]) == [];
-        assert std.array.reverse([0]) == [0];
-        assert std.array.reverse([0,1]) == [1,0];
-        assert std.array.reverse([0,1,2]) == [2,1,0];
-        assert std.array.reverse([0,1,2,3]) == [3,2,1,0];
-        assert std.array.reverse([0,1,2,3,4]) == [4,3,2,1,0];
-
         assert std.array.is_sorted([]) == true;
         assert std.array.is_sorted([10]) == true;
         assert std.array.is_sorted([10,11,12]) == true;
@@ -169,9 +162,21 @@ int main()
         assert std.array.min_of([ ], func(x,y) = y<=> x) == null;
         assert std.array.min_of([5,null,3,"meow",7,4], func(x,y) = y<=> x) == 7;
 
-        assert std.array.generate(func(x,v) = x + (v ?? 1), 10) == [1,2,4,7,11,16,22,29,37,46];
+        assert std.array.reverse([]) == [];
+        assert std.array.reverse([0]) == [0];
+        assert std.array.reverse([0,1]) == [1,0];
+        assert std.array.reverse([0,1,2]) == [2,1,0];
+        assert std.array.reverse([0,1,2,3]) == [3,2,1,0];
+        assert std.array.reverse([0,1,2,3,4]) == [4,3,2,1,0];
 
+        assert std.array.generate(func(x,v) = x + (v ?? 1), 10) == [1,2,4,7,11,16,22,29,37,46];
         assert std.array.shuffle([1,2,3,4,5], 42) == std.array.shuffle([1,2,3,4,5], 42);
+
+        assert std.array.copy_keys(null) == null;
+        assert std.array.sort(std.array.copy_keys({a:1,b:2,c:3,d:4})) == ['a','b','c','d'];
+
+        assert std.array.copy_values(null) == null;
+        assert std.array.sort(std.array.copy_values({a:1,b:2,c:3,d:4})) == [1,2,3,4];
       )__";
 
     std::istringstream iss(s_source);
