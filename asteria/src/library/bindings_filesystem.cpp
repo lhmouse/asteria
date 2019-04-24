@@ -1024,7 +1024,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    `i_` are IDs as `integer`s; names that start with `n_` are\n"
             "    plain `integer`s; names that start with `t_` are timestamps in\n"
             "    UTC as `integer`s):\n"
-            "  \n"
+            "    \n"
             "    * `i_dev`   unique device id on this machine.\n"
             "    * `i_file`  unique file id on this device.\n"
             "    * `n_ref`   number of hard links to this file.\n"
@@ -1034,7 +1034,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    * `n_ocup`  number of bytes this file occupies.\n"
             "    * `t_accs`  timestamp of last access.\n"
             "    * `t_mod`   timestamp of last modification.\n"
-            "  \n"
+            "    \n"
             "    On failure, `null` is returned.\n"
           ),
         // Opaque parameter
@@ -1161,10 +1161,10 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "    an `object` consisting of the following members (names that\n"
             "    start with `b_` are `boolean` flags; names that start with `i_`\n"
             "    are IDs as `integer`s):\n"
-            "  \n"
+            "    \n"
             "    * `b_dir`   whether this is a directory.\n"
             "    * `b_sym`   whether this is a symbolic link.\n"
-            "  \n"
+            "    \n"
             "    On failure, `null` is returned.\n"
           ),
         // Opaque parameter
