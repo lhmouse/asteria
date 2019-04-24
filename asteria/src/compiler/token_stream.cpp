@@ -708,7 +708,7 @@ namespace Asteria {
               continue;
             }
             auto dvalue = static_cast<std::uint64_t>((dptr - s_digits) / 2);
-            std::uint64_t bound = ((UINT64_C(1) << 63) - dvalue) / static_cast<unsigned>(radix);
+            std::uint64_t bound = (0x8000000000000000 - dvalue) / static_cast<unsigned>(radix);
             if(value > bound) {
               throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
             }
@@ -717,7 +717,7 @@ namespace Asteria {
           // Raise the significant part to the power of `exp`.
           if(value != 0) {
             for(int i = 0; i < exp; ++i) {
-              std::uint64_t bound = (UINT64_C(1) << 63) / static_cast<unsigned>(exp_base);
+              std::uint64_t bound = 0x8000000000000000 / static_cast<unsigned>(exp_base);
               if(value > bound) {
                 throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
               }
@@ -731,7 +731,7 @@ namespace Asteria {
             imask = UINT64_MAX;
           }
           // The special value `0x1p63` is only allowed if a contiguous minus symbol precedes it.
-          if((value == static_cast<std::uint64_t>(INT64_MIN)) && (imask == 0)) {
+          if((value == 0x8000000000000000) && (imask == 0)) {
             throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
           }
           if(qstok) {
