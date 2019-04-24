@@ -154,6 +154,10 @@ const char* Token::get_keyword(Keyword keyword) noexcept
       {
         return "__abs";
       }
+    case keyword_signb:
+      {
+        return "__signb";
+      }
     case keyword_round:
       {
         return "__round";

@@ -1157,7 +1157,7 @@ namespace Asteria {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" |
         //   "unset" | "lengthof" | "typeof" | "not" |
-        //   "__abs" | "__sqrt" | "__isnan" | "__isinf" |
+        //   "__abs" | "__sqrt" | "__signb" | "__isnan" | "__isinf" |
         //   "__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -1177,6 +1177,7 @@ namespace Asteria {
               { Token::keyword_typeof,    Xprunit::xop_prefix_typeof    },
               { Token::keyword_not,       Xprunit::xop_prefix_notl      },
               { Token::keyword_abs,       Xprunit::xop_prefix_abs       },
+              { Token::keyword_signb,     Xprunit::xop_prefix_signb     },
               { Token::keyword_sqrt,      Xprunit::xop_prefix_sqrt      },
               { Token::keyword_isnan,     Xprunit::xop_prefix_isnan     },
               { Token::keyword_isinf,     Xprunit::xop_prefix_isinf     },

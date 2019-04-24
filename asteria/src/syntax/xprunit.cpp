@@ -82,6 +82,10 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
       {
         return "prefix `__abs`";
       }
+    case xop_prefix_signb:
+      {
+        return "prefix `__signb`";
+      }
     case xop_prefix_round:
       {
         return "prefix `__round`";
@@ -252,6 +256,11 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return std::abs(rhs);
       }
 
+    ROCKET_PURE_FUNCTION G_integer do_operator_signb(const G_integer& rhs)
+      {
+        return rhs >> 63;
+      }
+
     ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_integer& rhs)
       {
         if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
@@ -413,6 +422,11 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
     ROCKET_PURE_FUNCTION G_real do_operator_abs(const G_real& rhs)
       {
         return std::fabs(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_signb(const G_real& rhs)
+      {
+        return static_cast<std::int64_t>(std::signbit(rhs) == 0) - 1;
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_round(const G_real& rhs)
@@ -1077,6 +1091,29 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           goto z;
         }
         ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_execute_operator_rpn_prefix_signb(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                                          const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Get the sign bit of the operand as a temporary value, then return it.
+        auto rhs = stack.get_top_reference().read();
+        if(rhs.is_integer()) {
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_signb(reg);
+          goto z;
+        }
+        if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_signb(rhs.as_real());
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
       z:
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
@@ -1957,6 +1994,11 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         case xop_prefix_abs:
           {
             code.emplace_back(do_execute_operator_rpn_prefix_abs, rocket::move(p));
+            return;
+          }
+        case xop_prefix_signb:
+          {
+            code.emplace_back(do_execute_operator_rpn_prefix_signb, rocket::move(p));
             return;
           }
         case xop_prefix_round:

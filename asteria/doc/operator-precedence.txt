@@ -5,7 +5,7 @@ Postfix operators          | ++   --   ()   []   .          | Left-to-right
                            | +    -    ~    !    ++    --   |
                            | unset     lengthof   typeof    |
                            | __abs     __sqrt               |
-Prefix operators           | __isnan   __isinf              | Right-to-left
+Prefix operators           | __signb   __isnan    __isinf   | Right-to-left
                            | __round   __floor    __ceil    |
                            | __trunc   __iround   __ifloor  |
                            | __iceil   __itrunc             |

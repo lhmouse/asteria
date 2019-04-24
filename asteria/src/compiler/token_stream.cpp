@@ -461,6 +461,7 @@ namespace Asteria {
               { "__isnan",   Token::keyword_isnan     },
               { "__itrunc",  Token::keyword_itrunc    },
               { "__round",   Token::keyword_round     },
+              { "__signb",   Token::keyword_signb     },
               { "__sqrt",    Token::keyword_sqrt      },
               { "__trunc",   Token::keyword_trunc     },
               { "and",       Token::keyword_and       },

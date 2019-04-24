@@ -50,14 +50,15 @@ class Token
         keyword_isnan     = 33,  // __isnan
         keyword_isinf     = 34,  // __isinf
         keyword_abs       = 35,  // __abs
-        keyword_round     = 36,  // __round
-        keyword_floor     = 37,  // __floor
-        keyword_ceil      = 38,  // __ceil
-        keyword_trunc     = 39,  // __trunc
-        keyword_iround    = 40,  // __iround
-        keyword_ifloor    = 41,  // __ifloor
-        keyword_iceil     = 42,  // __iceil
-        keyword_itrunc    = 43,  // __itrunc
+        keyword_signb     = 36,  // __signb
+        keyword_round     = 37,  // __round
+        keyword_floor     = 38,  // __floor
+        keyword_ceil      = 39,  // __ceil
+        keyword_trunc     = 40,  // __trunc
+        keyword_iround    = 41,  // __iround
+        keyword_ifloor    = 42,  // __ifloor
+        keyword_iceil     = 43,  // __iceil
+        keyword_itrunc    = 44,  // __itrunc
       };
     enum Punctuator : std::uint8_t
       {

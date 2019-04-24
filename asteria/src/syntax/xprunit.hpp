@@ -34,14 +34,15 @@ class Xprunit
         xop_prefix_isnan     = 30,  // __isnan
         xop_prefix_isinf     = 31,  // __isinf
         xop_prefix_abs       = 32,  // __abs
-        xop_prefix_round     = 33,  // __round
-        xop_prefix_floor     = 34,  // __floor
-        xop_prefix_ceil      = 35,  // __ceil
-        xop_prefix_trunc     = 36,  // __trunc
-        xop_prefix_iround    = 37,  // __iround
-        xop_prefix_ifloor    = 38,  // __ifloor
-        xop_prefix_iceil     = 39,  // __iceil
-        xop_prefix_itrunc    = 40,  // __itrunc
+        xop_prefix_signb     = 33,  // __signb
+        xop_prefix_round     = 34,  // __round
+        xop_prefix_floor     = 35,  // __floor
+        xop_prefix_ceil      = 36,  // __ceil
+        xop_prefix_trunc     = 37,  // __trunc
+        xop_prefix_iround    = 38,  // __iround
+        xop_prefix_ifloor    = 39,  // __ifloor
+        xop_prefix_iceil     = 40,  // __iceil
+        xop_prefix_itrunc    = 41,  // __itrunc
         // Infix relational operators
         xop_infix_cmp_eq     = 70,  // ==
         xop_infix_cmp_ne     = 71,  // !=
