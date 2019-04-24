@@ -426,7 +426,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
 
     ROCKET_PURE_FUNCTION G_integer do_operator_signb(const G_real& rhs)
       {
-        return static_cast<std::int64_t>(std::signbit(rhs) == 0) - 1;
+        return -static_cast<std::int64_t>(std::signbit(rhs)) >> 63;
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_round(const G_real& rhs)
