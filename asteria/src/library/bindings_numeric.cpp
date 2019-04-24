@@ -1359,28 +1359,28 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_integer ix;
             G_integer iy;
-            if(reader.start().g(ix).g(iy).save_state(istate).finish()) {
+            if(reader.start().g(ix).g(iy).save(istate).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_adds(ix, iy) };
               return rocket::move(xref);
             }
             G_real fx;
             G_real fy;
-            if(reader.start().g(fx).g(fy).save_state(fstate).finish()) {
+            if(reader.start().g(fx).g(fy).save(fstate).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_adds(fx, fy) };
               return rocket::move(xref);
             }
             G_integer ilower;
             G_integer iupper;
-            if(reader.load_state(istate).g(ilower).g(iupper).finish()) {
+            if(reader.load(istate).g(ilower).g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_adds(ix, iy, ilower, iupper) };
               return rocket::move(xref);
             }
             G_real flower;
             G_real fupper;
-            if(reader.load_state(fstate).g(flower).g(fupper).finish()) {
+            if(reader.load(fstate).g(flower).g(fupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_adds(fx, fy, flower, fupper) };
               return rocket::move(xref);
@@ -1433,28 +1433,28 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_integer ix;
             G_integer iy;
-            if(reader.start().g(ix).g(iy).save_state(istate).finish()) {
+            if(reader.start().g(ix).g(iy).save(istate).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_subs(ix, iy) };
               return rocket::move(xref);
             }
             G_real fx;
             G_real fy;
-            if(reader.start().g(fx).g(fy).save_state(fstate).finish()) {
+            if(reader.start().g(fx).g(fy).save(fstate).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_subs(fx, fy) };
               return rocket::move(xref);
             }
             G_integer ilower;
             G_integer iupper;
-            if(reader.load_state(istate).g(ilower).g(iupper).finish()) {
+            if(reader.load(istate).g(ilower).g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_subs(ix, iy, ilower, iupper) };
               return rocket::move(xref);
             }
             G_real flower;
             G_real fupper;
-            if(reader.load_state(fstate).g(flower).g(fupper).finish()) {
+            if(reader.load(fstate).g(flower).g(fupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_subs(fx, fy, flower, fupper) };
               return rocket::move(xref);
@@ -1507,28 +1507,28 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_integer ix;
             G_integer iy;
-            if(reader.start().g(ix).g(iy).save_state(istate).finish()) {
+            if(reader.start().g(ix).g(iy).save(istate).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_muls(ix, iy) };
               return rocket::move(xref);
             }
             G_real fx;
             G_real fy;
-            if(reader.start().g(fx).g(fy).save_state(fstate).finish()) {
+            if(reader.start().g(fx).g(fy).save(fstate).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy) };
               return rocket::move(xref);
             }
             G_integer ilower;
             G_integer iupper;
-            if(reader.load_state(istate).g(ilower).g(iupper).finish()) {
+            if(reader.load(istate).g(ilower).g(iupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_muls(ix, iy, ilower, iupper) };
               return rocket::move(xref);
             }
             G_real flower;
             G_real fupper;
-            if(reader.load_state(fstate).g(flower).g(fupper).finish()) {
+            if(reader.load(fstate).g(flower).g(fupper).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy, flower, fupper) };
               return rocket::move(xref);

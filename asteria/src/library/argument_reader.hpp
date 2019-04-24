@@ -80,17 +80,17 @@ class Argument_Reader
         this->m_throw_on_failure = throw_on_failure;
       }
 
-    const Argument_Reader& save_state(State& state) const noexcept
+    const Argument_Reader& save(State& state) const noexcept
       {
         state = this->m_state;
         return *this;
       }
-    Argument_Reader& save_state(State& state) noexcept
+    Argument_Reader& save(State& state) noexcept
       {
         state = this->m_state;
         return *this;
       }
-    Argument_Reader& load_state(const State& state) noexcept
+    Argument_Reader& load(const State& state) noexcept
       {
         this->m_state = state;
         return *this;

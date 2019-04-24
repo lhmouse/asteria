@@ -752,13 +752,13 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             G_array data;
             G_integer from;
             G_array replacement;
-            if(reader.start().g(data).g(from).save_state(state).g(replacement).finish()) {
+            if(reader.start().g(data).g(from).save(state).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, replacement) };
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(replacement).finish()) {
+            if(reader.load(state).g(length).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, length, replacement) };
               return rocket::move(xref);
@@ -817,7 +817,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_array data;
             Value target;
-            if(reader.start().g(data).save_state(state).g(target).finish()) {
+            if(reader.start().g(data).save(state).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_find(data, target);
               if(!qindex) {
@@ -827,7 +827,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(target).finish()) {
+            if(reader.load(state).g(from).save(state).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_find(data, from, target);
               if(!qindex) {
@@ -837,7 +837,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(target).finish()) {
+            if(reader.load(state).g(length).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_find(data, from, length, target);
               if(!qindex) {
@@ -900,7 +900,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_array data;
             Value target;
-            if(reader.start().g(data).save_state(state).g(target).finish()) {
+            if(reader.start().g(data).save(state).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind(data, target);
               if(!qindex) {
@@ -910,7 +910,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(target).finish()) {
+            if(reader.load(state).g(from).save(state).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind(data, from, target);
               if(!qindex) {
@@ -920,7 +920,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(target).finish()) {
+            if(reader.load(state).g(length).g(target).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind(data, from, length, target);
               if(!qindex) {
@@ -983,7 +983,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_array data;
             G_function predictor = global.get_placeholder_function();
-            if(reader.start().g(data).save_state(state).g(predictor).finish()) {
+            if(reader.start().g(data).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if(global, data, predictor);
               if(!qindex) {
@@ -993,7 +993,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
+            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if(global, data, from, predictor);
               if(!qindex) {
@@ -1003,7 +1003,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(predictor).finish()) {
+            if(reader.load(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if(global, data, from, length, predictor);
               if(!qindex) {
@@ -1066,7 +1066,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_array data;
             G_function predictor = global.get_placeholder_function();
-            if(reader.start().g(data).save_state(state).g(predictor).finish()) {
+            if(reader.start().g(data).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if_not(global, data, predictor);
               if(!qindex) {
@@ -1076,7 +1076,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
+            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if_not(global, data, from, predictor);
               if(!qindex) {
@@ -1086,7 +1086,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(predictor).finish()) {
+            if(reader.load(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if_not(global, data, from, length, predictor);
               if(!qindex) {
@@ -1149,7 +1149,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_array data;
             G_function predictor = global.get_placeholder_function();
-            if(reader.start().g(data).save_state(state).g(predictor).finish()) {
+            if(reader.start().g(data).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if(global, data, predictor);
               if(!qindex) {
@@ -1159,7 +1159,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
+            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if(global, data, from, predictor);
               if(!qindex) {
@@ -1169,7 +1169,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(predictor).finish()) {
+            if(reader.load(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if(global, data, from, length, predictor);
               if(!qindex) {
@@ -1232,7 +1232,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_array data;
             G_function predictor = global.get_placeholder_function();
-            if(reader.start().g(data).save_state(state).g(predictor).finish()) {
+            if(reader.start().g(data).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if_not(global, data, predictor);
               if(!qindex) {
@@ -1242,7 +1242,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(predictor).finish()) {
+            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if_not(global, data, from, predictor);
               if(!qindex) {
@@ -1252,7 +1252,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(predictor).finish()) {
+            if(reader.load(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if_not(global, data, from, length, predictor);
               if(!qindex) {

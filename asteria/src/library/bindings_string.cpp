@@ -1080,13 +1080,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             G_string text;
             G_integer from;
             G_string replacement;
-            if(reader.start().g(text).g(from).save_state(state).g(replacement).finish()) {
+            if(reader.start().g(text).g(from).save(state).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_replace_slice(text, from, replacement) };
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(replacement).finish()) {
+            if(reader.load(state).g(length).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_replace_slice(text, from, length, replacement) };
               return rocket::move(xref);
@@ -1264,7 +1264,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_string text;
             G_string pattern;
-            if(reader.start().g(text).save_state(state).g(pattern).finish()) {
+            if(reader.start().g(text).save(state).g(pattern).finish()) {
               // Call the binding function.
               auto qindex = std_string_find(text, pattern);
               if(!qindex) {
@@ -1274,7 +1274,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(pattern).finish()) {
+            if(reader.load(state).g(from).save(state).g(pattern).finish()) {
               // Call the binding function.
               auto qindex = std_string_find(text, from, pattern);
               if(!qindex) {
@@ -1284,7 +1284,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(pattern).finish()) {
+            if(reader.load(state).g(length).g(pattern).finish()) {
               // Call the binding function.
               auto qindex = std_string_find(text, from, length, pattern);
               if(!qindex) {
@@ -1345,7 +1345,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_string text;
             G_string pattern;
-            if(reader.start().g(text).save_state(state).g(pattern).finish()) {
+            if(reader.start().g(text).save(state).g(pattern).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind(text, pattern);
               if(!qindex) {
@@ -1355,7 +1355,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(pattern).finish()) {
+            if(reader.load(state).g(from).save(state).g(pattern).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind(text, from, pattern);
               if(!qindex) {
@@ -1365,7 +1365,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(pattern).finish()) {
+            if(reader.load(state).g(length).g(pattern).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind(text, from, length, pattern);
               if(!qindex) {
@@ -1430,19 +1430,19 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             G_string text;
             G_string pattern;
             G_string replacement;
-            if(reader.start().g(text).save_state(state).g(pattern).g(replacement).finish()) {
+            if(reader.start().g(text).save(state).g(pattern).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_find_and_replace(text, pattern, replacement) };
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(pattern).g(replacement).finish()) {
+            if(reader.load(state).g(from).save(state).g(pattern).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, pattern, replacement) };
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(pattern).g(replacement).finish()) {
+            if(reader.load(state).g(length).g(pattern).g(replacement).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, length, pattern, replacement) };
               return rocket::move(xref);
@@ -1498,7 +1498,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_string text;
             G_string accept;
-            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+            if(reader.start().g(text).save(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_find_any_of(text, accept);
               if(!qindex) {
@@ -1508,7 +1508,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+            if(reader.load(state).g(from).save(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_find_any_of(text, from, accept);
               if(!qindex) {
@@ -1518,7 +1518,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(accept).finish()) {
+            if(reader.load(state).g(length).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_find_any_of(text, from, length, accept);
               if(!qindex) {
@@ -1578,7 +1578,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_string text;
             G_string accept;
-            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+            if(reader.start().g(text).save(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind_any_of(text, accept);
               if(!qindex) {
@@ -1588,7 +1588,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+            if(reader.load(state).g(from).save(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind_any_of(text, from, accept);
               if(!qindex) {
@@ -1598,7 +1598,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(accept).finish()) {
+            if(reader.load(state).g(length).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind_any_of(text, from, length, accept);
               if(!qindex) {
@@ -1658,7 +1658,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_string text;
             G_string accept;
-            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+            if(reader.start().g(text).save(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_find_not_of(text, accept);
               if(!qindex) {
@@ -1668,7 +1668,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+            if(reader.load(state).g(from).save(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_find_not_of(text, from, accept);
               if(!qindex) {
@@ -1678,7 +1678,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(accept).finish()) {
+            if(reader.load(state).g(length).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_find_not_of(text, from, length, accept);
               if(!qindex) {
@@ -1738,7 +1738,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             // Parse arguments.
             G_string text;
             G_string accept;
-            if(reader.start().g(text).save_state(state).g(accept).finish()) {
+            if(reader.start().g(text).save(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind_not_of(text, accept);
               if(!qindex) {
@@ -1748,7 +1748,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             G_integer from;
-            if(reader.load_state(state).g(from).save_state(state).g(accept).finish()) {
+            if(reader.load(state).g(from).save(state).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind_not_of(text, from, accept);
               if(!qindex) {
@@ -1758,7 +1758,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
               return rocket::move(xref);
             }
             Opt<G_integer> length;
-            if(reader.load_state(state).g(length).g(accept).finish()) {
+            if(reader.load(state).g(length).g(accept).finish()) {
               // Call the binding function.
               auto qindex = std_string_rfind_not_of(text, from, length, accept);
               if(!qindex) {
