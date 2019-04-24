@@ -593,29 +593,29 @@ namespace Asteria {
         // 0. The integral part is required. The fractional and exponent parts are optional.
         // 1. If `frac_begin` equals `int_end` then there is no fractional part.
         // 2. If `exp_begin` equals `frac_end` then there is no exponent part.
-        int radix = 10;
+        std::uint8_t base = 10;
         std::size_t int_begin = 0, int_end = 0;
         std::size_t frac_begin = 0, frac_end = 0;
-        int exp_base = 0;
+        std::uint8_t exp_base = 0;
         bool exp_sign = false;
         std::size_t exp_begin = 0, exp_end = 0;
-        // Check for radix prefixes.
+        // Check for base prefixes.
         if(bptr[int_begin] == '0') {
           auto next = bptr[int_begin + 1];
           switch(next) {
           case 'B':
           case 'b':
-            radix = 2;
+            base = 2;
             int_begin += 2;
             break;
           case 'X':
           case 'x':
-            radix = 16;
+            base = 16;
             int_begin += 2;
             break;
           }
         }
-        auto max_digits = static_cast<std::size_t>(radix * 2);
+        auto max_digits = static_cast<std::size_t>(base * 2);
         // Look for the end of the integral part.
         auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch);  });
         int_end = static_cast<std::size_t>(tptr - bptr);
@@ -707,21 +707,21 @@ namespace Asteria {
             if(!dptr) {
               continue;
             }
-            auto dvalue = static_cast<std::uint64_t>((dptr - s_digits) / 2);
-            std::uint64_t bound = (0x8000000000000000 - dvalue) / static_cast<unsigned>(radix);
+            auto dvalue = static_cast<std::size_t>((dptr - s_digits) / 2);
+            std::uint64_t bound = (0x8000000000000000 - dvalue) / base;
             if(value > bound) {
               throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
             }
-            value = value * static_cast<unsigned>(radix) + dvalue;
+            value = value * base + dvalue;
           }
           // Raise the significant part to the power of `exp`.
           if(value != 0) {
             for(int i = 0; i < exp; ++i) {
-              std::uint64_t bound = 0x8000000000000000 / static_cast<unsigned>(exp_base);
+              std::uint64_t bound = 0x8000000000000000 / exp_base;
               if(value > bound) {
                 throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
               }
-              value *= static_cast<unsigned>(exp_base);
+              value *= exp_base;
             }
           }
           // Check for a previous sign symbol.
@@ -756,7 +756,7 @@ namespace Asteria {
             continue;
           }
           auto dvalue = static_cast<int>((dptr - s_digits) / 2);
-          value = value * radix + dvalue;
+          value = value * base + dvalue;
           zero |= dvalue;
         }
         // Parse the fractional part.
@@ -767,7 +767,7 @@ namespace Asteria {
             continue;
           }
           auto dvalue = static_cast<int>((dptr - s_digits) / 2);
-          frac = (frac + dvalue) / radix;
+          frac = (frac + dvalue) / base;
           zero |= dvalue;
         }
         value += frac;
