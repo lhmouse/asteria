@@ -64,20 +64,33 @@ G_boolean std_numeric_is_nan(const G_real& value)
     return std::isnan(value);
   }
 
+    namespace {
+
+    inline const G_integer& do_verify_bounds(const G_integer& lower, const G_integer& upper)
+      {
+        if(!(lower <= upper)) {
+          ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than or equal to the `upper` bound (got `", lower, "` and `", upper, "`).");
+        }
+        return upper;
+      }
+    inline const G_real& do_verify_bounds(const G_real& lower, const G_real& upper)
+      {
+        if(!std::islessequal(lower, upper)) {
+          ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than or equal to the `upper` bound (got `", lower, "` and `", upper, "`).");
+        }
+        return upper;
+      }
+
+    }
+
 G_integer std_numeric_clamp(const G_integer& value, const G_integer& lower, const G_integer& upper)
   {
-    if(!(lower <= upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(value, lower, upper);
+    return rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
 G_real std_numeric_clamp(const G_real& value, const G_real& lower, const G_real& upper)
   {
-    if(!std::islessequal(lower, upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than or equal to the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(value, lower, upper);
+    return rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
 G_integer std_numeric_round(const G_integer& value)
@@ -189,7 +202,7 @@ G_integer std_numeric_itrunc(const G_real& value)
 G_integer std_numeric_random(const Global_Context& global, const G_integer& upper)
   {
     if(!(0 < upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `upper` limit must be greater than zero (got `", upper, "`).");
+      ASTERIA_THROW_RUNTIME_ERROR("The `upper` bound must be greater than zero (got `", upper, "`).");
     }
     auto res = do_random_ratio(global);
     res *= static_cast<double>(upper);
@@ -199,7 +212,7 @@ G_integer std_numeric_random(const Global_Context& global, const G_integer& uppe
 G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& upper)
   {
     if(upper && !std::isless(0, *upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `upper` limit must be greater than zero (got `", *upper, "`).");
+      ASTERIA_THROW_RUNTIME_ERROR("The `upper` bound must be greater than zero (got `", *upper, "`).");
     }
     auto res = do_random_ratio(global);
     if(upper) {
@@ -211,7 +224,7 @@ G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& upper
 G_integer std_numeric_random(const Global_Context& global, const G_integer& lower, const G_integer& upper)
   {
     if(!(lower < upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than the `upper` bound (got `", lower, "` and `", upper, "`).");
     }
     auto res = do_random_ratio(global);
     res *= static_cast<double>(upper - lower);
@@ -221,7 +234,7 @@ G_integer std_numeric_random(const Global_Context& global, const G_integer& lowe
 G_real std_numeric_random(const Global_Context& global, const G_real& lower, const G_real& upper)
   {
     if(!std::isless(lower, upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
+      ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than the `upper` bound (got `", lower, "` and `", upper, "`).");
     }
     auto res = do_random_ratio(global);
     res *= upper - lower;
@@ -345,18 +358,12 @@ G_real std_numeric_adds(const G_real& x, const G_real& y)
 
 G_integer std_numeric_adds(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
   {
-    if(!(lower < upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(do_saturing_add(x, y), lower, upper);
+    return rocket::clamp(do_saturing_add(x, y), lower, do_verify_bounds(lower, upper));
   }
 
 G_real std_numeric_adds(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
   {
-    if(!std::isless(lower, upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(do_saturing_add(x, y), lower, upper);
+    return rocket::clamp(do_saturing_add(x, y), lower, do_verify_bounds(lower, upper));
   }
 
 G_integer std_numeric_subs(const G_integer& x, const G_integer& y)
@@ -371,18 +378,12 @@ G_real std_numeric_subs(const G_real& x, const G_real& y)
 
 G_integer std_numeric_subs(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
   {
-    if(!(lower < upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(do_saturing_sub(x, y), lower, upper);
+    return rocket::clamp(do_saturing_sub(x, y), lower, do_verify_bounds(lower, upper));
   }
 
 G_real std_numeric_subs(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
   {
-    if(!std::isless(lower, upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(do_saturing_sub(x, y), lower, upper);
+    return rocket::clamp(do_saturing_sub(x, y), lower, do_verify_bounds(lower, upper));
   }
 
 G_integer std_numeric_muls(const G_integer& x, const G_integer& y)
@@ -397,18 +398,12 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
 
 G_integer std_numeric_muls(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
   {
-    if(!(lower < upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(do_saturing_mul(x, y), lower, upper);
+    return rocket::clamp(do_saturing_mul(x, y), lower, do_verify_bounds(lower, upper));
   }
 
 G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
   {
-    if(!std::isless(lower, upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` limit must be less than the `upper` limit (got `", lower, "` and `", upper, "`).");
-    }
-    return rocket::clamp(do_saturing_mul(x, y), lower, upper);
+    return rocket::clamp(do_saturing_mul(x, y), lower, do_verify_bounds(lower, upper));
   }
 
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
