@@ -10,7 +10,7 @@ namespace Asteria {
 
 extern G_string std_filesystem_get_working_directory();
 
-extern Opt<G_object> std_filesystem_status(const G_string& path);
+extern Opt<G_object> std_filesystem_get_information(const G_string& path);
 extern bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old);
 extern Opt<G_integer> std_filesystem_remove_recursive(const G_string& path);
 
