@@ -393,7 +393,7 @@ namespace Asteria {
                   if(!dptr) {
                     throw do_make_parser_error(reader, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                   }
-                  auto dvalue = static_cast<char32_t>((dptr - s_digits) / 2);
+                  auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
                   cp = cp * 16 + dvalue;
                 }
                 if(next == 'x') {
@@ -683,7 +683,7 @@ namespace Asteria {
           if(!dptr) {
             continue;
           }
-          auto dvalue = static_cast<int>((dptr - s_digits) / 2);
+          auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
           int bound = (INT_MAX - dvalue) / 10;
           if(exp > bound) {
             throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
@@ -707,7 +707,7 @@ namespace Asteria {
             if(!dptr) {
               continue;
             }
-            auto dvalue = static_cast<std::size_t>((dptr - s_digits) / 2);
+            auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
             std::uint64_t bound = (0x8000000000000000 - dvalue) / base;
             if(value > bound) {
               throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
@@ -755,7 +755,7 @@ namespace Asteria {
           if(!dptr) {
             continue;
           }
-          auto dvalue = static_cast<int>((dptr - s_digits) / 2);
+          auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
           value = value * base + dvalue;
           zero |= dvalue;
         }
@@ -766,7 +766,7 @@ namespace Asteria {
           if(!dptr) {
             continue;
           }
-          auto dvalue = static_cast<int>((dptr - s_digits) / 2);
+          auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
           frac = (frac + dvalue) / base;
           zero |= dvalue;
         }
