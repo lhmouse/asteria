@@ -916,13 +916,13 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
       return false;
     }
     // Create the new file, discarding its contents.
-    File hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0200));
+    File hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200));
     if(!hf_new) {
       // If the file cannot be opened, unlink it and try again.
       if(::unlink(path_new.c_str()) != 0) {
         return false;
       }
-      hf_new.reset(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_APPEND, 0200));
+      hf_new.reset(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200));
       if(!hf_new) {
         return false;
       }
