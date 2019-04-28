@@ -31,7 +31,7 @@ G_integer std_numeric_sign(const G_integer& value)
 
 G_integer std_numeric_sign(const G_real& value)
   {
-    return -static_cast<std::int64_t>(std::signbit(value)) >> 63;
+    return std::signbit(value) ? -1 : 0;
   }
 
 G_boolean std_numeric_is_finite(const G_integer& /*value*/)
