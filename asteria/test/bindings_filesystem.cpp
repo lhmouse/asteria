@@ -73,19 +73,19 @@ int main()
 
         var data = "";
         var appender = func(off, str) { data += str;  };
-        assert std.filesystem.file_traverse(fname, appender) == true;
+        assert std.filesystem.file_stream(fname, appender) == true;
         assert data == "helHE#??!!";
         data = "";
-        assert std.filesystem.file_traverse(fname, appender, 2) == true;
+        assert std.filesystem.file_stream(fname, appender, 2) == true;
         assert data == "lHE#??!!";
         data = "";
-        assert std.filesystem.file_traverse(fname, appender, 1000) == true;
+        assert std.filesystem.file_stream(fname, appender, 1000) == true;
         assert data == "";
         data = "";
-        assert std.filesystem.file_traverse(fname, appender, 2, 1000) == true;
+        assert std.filesystem.file_stream(fname, appender, 2, 1000) == true;
         assert data == "lHE#??!!";
         data = "";
-        assert std.filesystem.file_traverse(fname, appender, 2, 3) == true;
+        assert std.filesystem.file_stream(fname, appender, 2, 3) == true;
         assert data == "lHE";
 
         assert std.filesystem.directory_create(fname) == null;

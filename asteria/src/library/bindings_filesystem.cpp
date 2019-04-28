@@ -710,7 +710,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 
     }
 
-bool std_filesystem_file_traverse(const Global_Context& global, const G_string& path, const G_function& callback, const Opt<G_integer>& offset, const Opt<G_integer>& limit)
+bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const Opt<G_integer>& offset, const Opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
@@ -1324,15 +1324,15 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.filesystem.file_traverse()`
+    // `std.filesystem.file_stream()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("file_traverse"),
+    result.insert_or_assign(rocket::sref("file_stream"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.filesystem.file_traverse(path, callback, [offset], [limit])`\n"
+            "`std.filesystem.file_stream(path, callback, [offset], [limit])`\n"
             "  \n"
             "  * Reads the file at `path` in binary mode and invokes `callback`\n"
             "    with the data read repeatedly. `callback` shall be a binary\n"
@@ -1360,7 +1360,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.filesystem.file_traverse"), args);
+            Argument_Reader reader(rocket::sref("std.filesystem.file_stream"), args);
             // Parse arguments.
             G_string path;
             G_function callback = global.get_placeholder_function();
@@ -1368,7 +1368,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             Opt<G_integer> limit;
             if(reader.start().g(path).g(callback).g(offset).g(limit).finish()) {
               // Call the binding function.
-              if(!std_filesystem_file_traverse(global, path, callback, offset, limit)) {
+              if(!std_filesystem_file_stream(global, path, callback, offset, limit)) {
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { true };

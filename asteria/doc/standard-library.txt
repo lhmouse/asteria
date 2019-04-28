@@ -1513,7 +1513,7 @@
 
 	* Throws an exception of `offset` is negative.
 
-`std.filesystem.file_traverse(path, callback, [offset], [limit])`
+`std.filesystem.file_stream(path, callback, [offset], [limit])`
 
 	* Reads the file at `path` in binary mode and invokes `callback`
 	  with the data read repeatedly. `callback` shall be a binary
