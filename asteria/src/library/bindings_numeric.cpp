@@ -528,14 +528,14 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
     G_string& do_append_exponent_prefixes(G_string& text, bool neg, std::uint8_t ebase)
       {
         // N.B. Characters are appended in reverse order.
+        if(neg) {
+          text.push_back('-');
+        }
         if(ebase == 2) {
           text.push_back('p');
         }
         if(ebase == 10) {
           text.push_back('e');
-        }
-        if(neg) {
-          text.push_back('-');
         }
         return text;
       }
@@ -651,30 +651,31 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
     }
     int rcount = DECIMAL_DIG;
     int ecount = SCHAR_MAX;
-    // Calculate the exponent. In the case of integers it will never be negative.
-    G_real intg = 1;
+    // Calculate the exponent.
     G_integer eint = 0;
-    for(;;) {
-      // How to normalize `intg`?
-      int eadd = 0;
-      auto test = std::abs(value * intg);
-      if(test >= ebase) {
-        // 12.3e45  =>  1.23e46
-        intg /= ebase;
-        eadd = +1;
-      } else if(test < 1) {
-        // 0.123e4  =>  1.23e3
-        intg *= ebase;
-        eadd = -1;
-      }
-      if(eadd == 0) {
+    G_real epow;
+    switch(ebase) {
+    case 2:
+      {
+        auto elog = std::floor(std::logb(std::abs(value)));
+        eint = static_cast<std::int64_t>(elog);
+        epow = std::exp2(elog);
         break;
       }
-      eint += eadd;
+    case 10:
+      {
+        auto elog = std::floor(std::log10(std::abs(value)));
+        eint = static_cast<std::int64_t>(elog);
+        epow = std::pow(10, elog);
+        break;
+      }
+    default:
+      ROCKET_ASSERT(false);
     }
     bool eneg = eint < 0;
     // Break the number down into integral and fractional parts.
-    G_real frac = std::modf(value * intg, &intg);
+    G_real intg;
+    G_real frac = std::modf(value / epow, &intg);
     // Write the integral part.
     do_append_integer_reverse(text, rcount, intg, rneg, rbase);
     do_append_integer_prefixes(text, rneg, rbase);
