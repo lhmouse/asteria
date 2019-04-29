@@ -134,7 +134,6 @@ pkginclude_library_HEADERS =  \
   asteria/src/library/simple_binding_wrapper.hpp  \
   asteria/src/library/bindings_version.hpp  \
   asteria/src/library/bindings_gc.hpp  \
-  asteria/src/library/bindings_constants.hpp  \
   asteria/src/library/bindings_debug.hpp  \
   asteria/src/library/bindings_chrono.hpp  \
   asteria/src/library/bindings_string.hpp  \
@@ -182,7 +181,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/library/simple_binding_wrapper.cpp  \
   asteria/src/library/bindings_version.cpp  \
   asteria/src/library/bindings_gc.cpp  \
-  asteria/src/library/bindings_constants.cpp  \
   asteria/src/library/bindings_debug.cpp  \
   asteria/src/library/bindings_chrono.cpp  \
   asteria/src/library/bindings_string.cpp  \

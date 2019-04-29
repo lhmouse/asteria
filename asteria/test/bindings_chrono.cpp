@@ -18,8 +18,8 @@ int main()
         assert std.chrono.datetime_max() == "9999-01-01 00:00:00";
         assert std.chrono.datetime_max(true) == "9999-01-01 00:00:00.000";
 
-        assert std.chrono.datetime_format(std.constants.integer_min) == std.chrono.datetime_min();
-        assert std.chrono.datetime_format(std.constants.integer_max) == std.chrono.datetime_max();
+        assert std.chrono.datetime_format(std.numeric.integer_min) == std.chrono.datetime_min();
+        assert std.chrono.datetime_format(std.numeric.integer_max) == std.chrono.datetime_max();
 
         var s, t;
 
@@ -35,11 +35,11 @@ int main()
 
         s = "1000-01-01 01:02:03";
         t = std.chrono.datetime_parse(s);
-        assert t == std.constants.integer_min;
+        assert t == std.numeric.integer_min;
 
         s = "9999-01-01 01:02:03";
         t = std.chrono.datetime_parse(s);
-        assert t == std.constants.integer_max;
+        assert t == std.numeric.integer_max;
 
         s = "invalid";
         t = std.chrono.datetime_parse(s);

@@ -26,8 +26,8 @@ int main()
         assert std.string.slice("hello", 4, 3) == "o";
         assert std.string.slice("hello", 5, 3) == "";
         assert std.string.slice("hello", 6, 3) == "";
-        assert std.string.slice("hello", std.constants.integer_max) == "";
-        assert std.string.slice("hello", std.constants.integer_max, std.constants.integer_max) == "";
+        assert std.string.slice("hello", std.numeric.integer_max) == "";
+        assert std.string.slice("hello", std.numeric.integer_max, std.numeric.integer_max) == "";
 
         assert std.string.slice("hello", -1) == "o";
         assert std.string.slice("hello", -2) == "lo";
@@ -44,8 +44,8 @@ int main()
         assert std.string.slice("hello", -7, 3) == "h";
         assert std.string.slice("hello", -8, 3) == "";
         assert std.string.slice("hello", -9, 3) == "";
-        assert std.string.slice("hello", std.constants.integer_min) == "hello";
-        assert std.string.slice("hello", std.constants.integer_min, std.constants.integer_max) == "hell";
+        assert std.string.slice("hello", std.numeric.integer_min) == "hello";
+        assert std.string.slice("hello", std.numeric.integer_min, std.numeric.integer_max) == "hell";
 
         assert std.string.replace_slice("hello", 2, "##") == "he##";
         assert std.string.replace_slice("hello", 2, 1, "##") == "he##lo";

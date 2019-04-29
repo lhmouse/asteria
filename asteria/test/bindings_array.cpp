@@ -26,8 +26,8 @@ int main()
         assert std.array.slice([0,1,2,3,4], 4, 3) == [4];
         assert std.array.slice([0,1,2,3,4], 5, 3) == [];
         assert std.array.slice([0,1,2,3,4], 6, 3) == [];
-        assert std.array.slice([0,1,2,3,4], std.constants.integer_max) == [];
-        assert std.array.slice([0,1,2,3,4], std.constants.integer_max, std.constants.integer_max) == [];
+        assert std.array.slice([0,1,2,3,4], std.numeric.integer_max) == [];
+        assert std.array.slice([0,1,2,3,4], std.numeric.integer_max, std.numeric.integer_max) == [];
 
         assert std.array.slice([0,1,2,3,4], -1) == [4];
         assert std.array.slice([0,1,2,3,4], -2) == [3,4];
@@ -44,8 +44,8 @@ int main()
         assert std.array.slice([0,1,2,3,4], -7, 3) == [0];
         assert std.array.slice([0,1,2,3,4], -8, 3) == [];
         assert std.array.slice([0,1,2,3,4], -9, 3) == [];
-        assert std.array.slice([0,1,2,3,4], std.constants.integer_min) == [0,1,2,3,4];
-        assert std.array.slice([0,1,2,3,4], std.constants.integer_min, std.constants.integer_max) == [0,1,2,3];
+        assert std.array.slice([0,1,2,3,4], std.numeric.integer_min) == [0,1,2,3,4];
+        assert std.array.slice([0,1,2,3,4], std.numeric.integer_min, std.numeric.integer_max) == [0,1,2,3];
 
         assert std.array.replace_slice([0,1,2,3,4], 1, ["a","b","c"]) == [0,"a","b","c"];
         assert std.array.replace_slice([0,1,2,3,4], 1, 2, ["a","b","c"]) == [0,"a","b","c",3,4];

@@ -10,7 +10,6 @@
 #include "variable.hpp"
 #include "../library/bindings_version.hpp"
 #include "../library/bindings_gc.hpp"
-#include "../library/bindings_constants.hpp"
 #include "../library/bindings_debug.hpp"
 #include "../library/bindings_chrono.hpp"
 #include "../library/bindings_string.hpp"
@@ -54,7 +53,6 @@ void Global_Context::initialize(API_Version version)
       {
         { api_version_none,       "",            nullptr                     },
         { api_version_0001_0000,  "gc",          create_bindings_gc          },
-        { api_version_0001_0000,  "constants",   create_bindings_constants   },
         { api_version_0001_0000,  "debug",       create_bindings_debug       },
         { api_version_0001_0000,  "chrono",      create_bindings_chrono      },
         { api_version_0001_0000,  "string",      create_bindings_string      },

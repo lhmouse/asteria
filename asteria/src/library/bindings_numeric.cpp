@@ -711,6 +711,54 @@ G_real std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& satura
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
   {
     //===================================================================
+    // `std.numeric.integer_max`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("integer_max"),
+      G_integer(
+        // The maximum value of an `integer`.
+        INT64_MAX
+      ));
+    //===================================================================
+    // `std.numeric.integer_min`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("integer_min"),
+      G_integer(
+        // The minimum value of an `integer`.
+        INT64_MIN
+      ));
+    //===================================================================
+    // `std.numeric.real_max`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("real_max"),
+      G_real(
+        // The maximum finite value of a `real`.
+        DBL_MAX
+      ));
+    //===================================================================
+    // `std.numeric.real_min`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("real_min"),
+      G_real(
+        // The minimum finite value of a `real`.
+        -DBL_MAX
+      ));
+    //===================================================================
+    // `std.numeric.real_epsilon`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("real_epsilon"),
+      G_real(
+        // The minimum finite value of a `real` such that `1 + real_epsilon > 1`.
+        DBL_EPSILON
+      ));
+    //===================================================================
+    // `std.numeric.size_max`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("size_max"),
+      G_integer(
+        // The maximum length of a `string` or `array`.
+        PTRDIFF_MAX
+      ));
+    //===================================================================
     // `std.numeric.abs()`
     //===================================================================
     result.insert_or_assign(rocket::sref("abs"),
