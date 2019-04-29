@@ -458,7 +458,7 @@ void Token::print(std::ostream& os) const
       {
         const auto& altr = this->m_stor.as<index_real_literal>();
         // real-number-literal `123.456`
-        os << "real-number-literal `" << std::dec << std::nouppercase << std::setprecision(DECIMAL_DIG) << altr.value << "`";
+        os << "real-number-literal `" << std::dec << std::nouppercase << std::setprecision(17) << altr.value << "`";
         return;
       }
     case index_string_literal:
