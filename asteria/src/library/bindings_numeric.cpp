@@ -565,6 +565,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base)
     std::uint8_t rbase = do_verify_base(base);
     // Define the result string.
     G_string text;
+    // The string will always be exact.
     int rcount = SCHAR_MAX;
     // The value itself is the integral part. There are no fractional or exponent parts.
     G_integer intg = value;
@@ -586,7 +587,8 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base)
     if(do_handle_special_values(text, value)) {
       return text;
     }
-    int rcount = DECIMAL_DIG;
+    // The string will be exact if and only if the base is a power of two.
+    int rcount = (rbase % 2 == 0) ? SCHAR_MAX : static_cast<int>(std::ceil(53 / std::log2(rbase)) + 1);
     // Break the number down into integral and fractional parts.
     G_real intg;
     G_real frac = std::modf(value, &intg);
@@ -610,6 +612,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
     std::uint8_t ebase = do_verify_exp_base(exp_base);
     // Define the result string.
     G_string text;
+    // The string will always be exact.
     int rcount = SCHAR_MAX;
     int ecount = SCHAR_MAX;
     // The value itself is the integral part. There are no fractional or exponent parts.
@@ -649,7 +652,8 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
     if(do_handle_special_values(text, value)) {
       return text;
     }
-    int rcount = DECIMAL_DIG;
+    // The string will be exact if and only if the base is a power of two.
+    int rcount = (rbase % 2 == 0) ? SCHAR_MAX : static_cast<int>(std::ceil(53 / std::log2(rbase)) + 1);
     int ecount = SCHAR_MAX;
     // Calculate the exponent.
     G_integer eint = 0;

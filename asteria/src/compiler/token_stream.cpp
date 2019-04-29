@@ -772,12 +772,8 @@ namespace Asteria {
         }
         value += frac;
         // Raise the significant part to the power of `exp`.
-        if(exp_base == FLT_RADIX) {
-          value = std::scalbn(value, exp);
-#if FLT_RADIX != 2
-        } else if(exp_base == 2) {
+        if(exp_base == 2) {
           value = std::ldexp(value, exp);
-#endif
         } else {
           value = value * std::pow(exp_base, exp);
         }
