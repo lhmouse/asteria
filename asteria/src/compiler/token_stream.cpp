@@ -11,6 +11,8 @@ namespace Asteria {
 
     namespace {
 
+    constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
+
     class Line_Reader
       {
       private:
@@ -310,104 +312,75 @@ namespace Asteria {
             next = bptr[tlen];
             ++tlen;
             unsigned xcnt = 0;
+            char32_t cp = 0;
             switch(next) {
             case '\'':
             case '\"':
             case '\\':
             case '?':
-              {
-                value.push_back(next);
-                break;
-              }
+              value.push_back(next);
+              break;
             case 'a':
-              {
-                value.push_back('\a');
-                break;
-              }
+              value.push_back('\a');
+              break;
             case 'b':
-              {
-                value.push_back('\b');
-                break;
-              }
+              value.push_back('\b');
+              break;
             case 'f':
-              {
-                value.push_back('\f');
-                break;
-              }
+              value.push_back('\f');
+              break;
             case 'n':
-              {
-                value.push_back('\n');
-                break;
-              }
+              value.push_back('\n');
+              break;
             case 'r':
-              {
-                value.push_back('\r');
-                break;
-              }
+              value.push_back('\r');
+              break;
             case 't':
-              {
-                value.push_back('\t');
-                break;
-              }
+              value.push_back('\t');
+              break;
             case 'v':
-              {
-                value.push_back('\v');
-                break;
-              }
+              value.push_back('\v');
+              break;
             case '0':
-              {
-                value.push_back('\0');
-                break;
-              }
+              value.push_back('\0');
+              break;
             case 'Z':
-              {
-                value.push_back('\x1A');
-                break;
-              }
+              value.push_back('\x1A');
+              break;
             case 'e':
-              {
-                value.push_back('\x1B');
-                break;
-              }
+              value.push_back('\x1B');
+              break;
             case 'U':
-              {
-                xcnt += 2;  // 6: "\U123456"
-              }
+              xcnt += 2;  // 6: "\U123456"
               // Fallthrough.
             case 'u':
-              {
-                xcnt += 2;  // 4: "\u1234"
-              }
+              xcnt += 2;  // 4: "\u1234"
               // Fallthrough.
             case 'x':
-              {
-                xcnt += 2;  // 2: "\x12"
-                // Read hex digits.
-                if(qavail < xcnt + 2) {
-                  throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_escape_sequence_incomplete);
+              xcnt += 2;  // 2: "\x12"
+              // Read hex digits.
+              if(qavail < xcnt + 2) {
+                throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_escape_sequence_incomplete);
+              }
+              for(auto i = tlen; i < tlen + xcnt; ++i) {
+                auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
+                if(!dptr) {
+                  throw do_make_parser_error(reader, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                 }
-                char32_t cp = 0;
-                for(auto i = tlen; i < tlen + xcnt; ++i) {
-                  static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
-                  auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
-                  if(!dptr) {
-                    throw do_make_parser_error(reader, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
-                  }
-                  auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
-                  cp = cp * 16 + dvalue;
-                }
-                if(next == 'x') {
-                  // Write the character verbatim.
-                  value.push_back(static_cast<char>(cp));
-                  break;
-                }
-                // Write a Unicode code point.
-                if(!utf8_encode(value, cp)) {
-                  // Code point value is reserved or too large.
-                  throw do_make_parser_error(reader, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
-                }
+                auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
+                cp = cp * 16 + dvalue;
+              }
+              if(next == 'x') {
+                // Write the character verbatim.
+                value.push_back(static_cast<char>(cp));
                 break;
               }
+              // Write a Unicode code point.
+              if(!utf8_encode(value, cp)) {
+                // Code point value is reserved or too large.
+                throw do_make_parser_error(reader, tlen + xcnt, Parser_Error::code_escape_utf_code_point_invalid);
+              }
+              break;
             default:
               throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_unknown);
             }
@@ -582,7 +555,6 @@ namespace Asteria {
         //   PCRE([eE][-+]?[0-9`]+)
         // binary-exponent-suffix ::=
         //   PCRE([pP][-+]?[0-9`]+)
-        static constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
         auto bptr = reader.data_avail();
         if(std::char_traits<char>::find(s_digits, 20, bptr[0]) == nullptr) {
           return false;
