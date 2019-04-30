@@ -1243,14 +1243,17 @@ namespace Asteria {
         // Replace special names. This is what macros in C do.
         if(*qname == "__file") {
           Xprunit::S_literal xunit = { G_string(sloc.file()) };
-          return units.emplace_back(rocket::move(xunit)), true;
+          units.emplace_back(rocket::move(xunit));
+          return true;
         }
         if(*qname == "__line") {
           Xprunit::S_literal xunit = { G_integer(sloc.line()) };
-          return units.emplace_back(rocket::move(xunit)), true;
+          units.emplace_back(rocket::move(xunit));
+          return true;
         }
         Xprunit::S_named_reference xunit = { rocket::move(*qname) };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     bool do_accept_literal(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1261,7 +1264,8 @@ namespace Asteria {
           return false;
         }
         Xprunit::S_literal xunit = { rocket::move(*qvalue) };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     bool do_accept_this(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1272,7 +1276,8 @@ namespace Asteria {
           return false;
         }
         Xprunit::S_named_reference xunit = { rocket::sref("__this") };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     Opt<Cow_Vector<Statement>> do_accept_closure_body_opt(Token_Stream& tstrm)
@@ -1316,7 +1321,8 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_brace_or_equal_initializer_expected);
         }
         Xprunit::S_closure_function xunit = { rocket::move(sloc), rocket::move(*kparams), rocket::move(*qbody) };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     bool do_accept_unnamed_array(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1349,7 +1355,8 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
         Xprunit::S_unnamed_array xunit = { nelems };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     bool do_accept_unnamed_object(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1395,7 +1402,8 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_expected);
         }
         Xprunit::S_unnamed_object xunit = { rocket::move(keys) };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     bool do_accept_nested_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1530,7 +1538,8 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
         Xprunit::S_function_call xunit = { rocket::move(sloc), nargs };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1550,7 +1559,8 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
         Xprunit::S_operator_rpn xunit = { Xprunit::xop_postfix_at, false };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
@@ -1566,7 +1576,8 @@ namespace Asteria {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
         Xprunit::S_member_access xunit = { rocket::move(*qkey) };
-        return units.emplace_back(rocket::move(xunit)), true;
+        units.emplace_back(rocket::move(xunit));
+        return true;
       }
 
     bool do_accept_infix_element(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
