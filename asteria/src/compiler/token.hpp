@@ -59,6 +59,7 @@ class Token
         keyword_ifloor    = 42,  // __ifloor
         keyword_iceil     = 43,  // __iceil
         keyword_itrunc    = 44,  // __itrunc
+        keyword_fma       = 45,  // __fma
       };
     enum Punctuator : std::uint8_t
       {

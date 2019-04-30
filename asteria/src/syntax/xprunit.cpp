@@ -1813,6 +1813,29 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
+    Air_Node::Status do_execute_operator_fma(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
+                                             const Cow_Vector<Air_Node::Param>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
+      {
+        // Decode arguments.
+        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // Pop the third and second operands.
+        auto rhs = stack.get_top_reference().read();
+        stack.pop_reference();
+        auto mid = stack.get_top_reference().read();
+        stack.pop_reference();
+        const auto& lhs = stack.get_top_reference().read();
+        // We store the result in `rhs`.
+        if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
+          rhs = std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
+          goto z;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
+      z:
+        stack.set_temporary_result(assign, rocket::move(rhs));
+        return Air_Node::status_next;
+      }
+
     }  // namespace
 
 void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& ctx) const
@@ -2183,6 +2206,15 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         p.emplace_back(rocket::move(code_branch));  // 0
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 1
         code.emplace_back(do_execute_coalescence, rocket::move(p));
+        return;
+      }
+    case index_operator_fma:
+      {
+        const auto& altr = this->m_stor.as<index_operator_fma>();
+        // Encode arguments.
+        Cow_Vector<Air_Node::Param> p;
+        p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 0
+        code.emplace_back(do_execute_operator_fma, rocket::move(p));
         return;
       }
     default:

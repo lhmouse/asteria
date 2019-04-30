@@ -190,6 +190,10 @@ const char* Token::get_keyword(Keyword keyword) noexcept
       {
         return "__itrunc";
       }
+    case keyword_fma:
+      {
+        return "__fma";
+      }
     default:
       return "<unknown keyword>";
     }

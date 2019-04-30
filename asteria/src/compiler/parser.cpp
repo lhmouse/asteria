@@ -1425,10 +1425,52 @@ namespace Asteria {
         return true;
       }
 
+    bool do_accept_fused_multiply_add(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+      {
+        // fused-multiply-add ::=
+        //   "__fma" "(" expression "," expression "," expression ")"
+        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_fma });
+        if(!qkwrd) {
+          return false;
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
+        }
+        bool succ = do_accept_expression(units, tstrm);
+        if(!succ) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_comma_expected);
+        }
+        succ = do_accept_expression(units, tstrm);
+        if(!succ) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_comma_expected);
+        }
+        succ = do_accept_expression(units, tstrm);
+        if(!succ) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
+        }
+        Xprunit::S_operator_fma xunit = { false };
+        units.emplace_back(rocket::move(xunit));
+        return true;
+      }
+
     bool do_accept_primary_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // primary-expression ::=
-        //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression
+        //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression |
+        //   fused-multiply-add
         bool succ = do_accept_named_reference(units, tstrm);
         if(succ) {
           return succ;
@@ -1454,6 +1496,10 @@ namespace Asteria {
           return succ;
         }
         succ = do_accept_nested_expression(units, tstrm);
+        if(succ) {
+          return succ;
+        }
+        succ = do_accept_fused_multiply_add(units, tstrm);
         if(succ) {
           return succ;
         }

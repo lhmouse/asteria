@@ -114,6 +114,10 @@ class Xprunit
         Cow_Vector<Xprunit> branch_null;
         bool assign;
       };
+    struct S_operator_fma
+      {
+        bool assign;
+      };
 
     enum Index : std::uint8_t
       {
@@ -127,6 +131,7 @@ class Xprunit
         index_unnamed_array     =  7,
         index_unnamed_object    =  8,
         index_coalescence       =  9,
+        index_operator_fma      = 10,
       };
     using Xvariant = Variant<
       ROCKET_CDR(
@@ -140,6 +145,7 @@ class Xprunit
         , S_unnamed_array     //  7,
         , S_unnamed_object    //  8,
         , S_coalescence       //  9,
+        , S_operator_fma      // 10,
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 

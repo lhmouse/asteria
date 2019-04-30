@@ -427,6 +427,7 @@ namespace Asteria {
               { "__abs",     Token::keyword_abs       },
               { "__ceil",    Token::keyword_ceil      },
               { "__floor",   Token::keyword_floor     },
+              { "__fma",     Token::keyword_fma       },
               { "__iceil",   Token::keyword_iceil     },
               { "__ifloor",  Token::keyword_ifloor    },
               { "__iround",  Token::keyword_iround    },
