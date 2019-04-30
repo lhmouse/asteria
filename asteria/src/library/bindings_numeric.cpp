@@ -440,28 +440,25 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
 
     inline bool do_handle_special_values(G_string& text, const G_real& value)
       {
+        const char* sptr;
+        // Get FP class.
         switch(std::fpclassify(value)) {
         case FP_INFINITE:
-          {
-            // Infinities.
-            text = rocket::sref(std::signbit(value) ? "-infinity" : "infinity");
-            return true;
-          }
+          sptr = "-infinity";
+          break;
         case FP_NAN:
-          {
-            // NaNs.
-            text = rocket::sref(std::signbit(value) ? "-nan" : "nan");
-            return true;
-          }
+          sptr = "-nan";
+          break;
         case FP_ZERO:
-          {
-            // Zeroes - they are indeed special.
-            text = rocket::sref(std::signbit(value) ? "-0" : "0");
-            return true;
-          }
+          sptr = "-0";
+          break;
         default:
           return false;
         }
+        // Check whether to remove the leading minus sign.
+        sptr += !std::signbit(value);
+        text = rocket::sref(sptr);
+        return true;
       }
 
     inline std::uint8_t do_shift_digit(G_integer& reg, bool neg, std::uint8_t base)
@@ -517,6 +514,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
 
     template<typename XvalueT> void do_append_fraction_normal(G_string& text, int& count, const XvalueT& value, bool neg, std::uint8_t base)
       {
+        // Write at least one digit.
         auto reg = value;
         do {
           auto dvalue = do_pop_digit(reg, neg, base);
@@ -588,7 +586,7 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base)
       return text;
     }
     // The string will be exact if and only if the base is a power of two.
-    int rcount = (rbase % 2 == 0) ? SCHAR_MAX : static_cast<int>(std::ceil(53 / std::log2(rbase)) + 1);
+    int rcount = (rbase % 2 == 0) ? SCHAR_MAX : static_cast<int>(std::ceil(53 / std::log2(rbase) - 0.001) + 1);
     // Break the number down into integral and fractional parts.
     G_real intg;
     G_real frac = std::modf(value, &intg);
@@ -653,7 +651,7 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
       return text;
     }
     // The string will be exact if and only if the base is a power of two.
-    int rcount = (rbase % 2 == 0) ? SCHAR_MAX : static_cast<int>(std::ceil(53 / std::log2(rbase)) + 1);
+    int rcount = (rbase % 2 == 0) ? SCHAR_MAX : static_cast<int>(std::ceil(53 / std::log2(rbase) - 0.001) + 1);
     int ecount = SCHAR_MAX;
     // Calculate the exponent.
     G_integer eint = 0;
