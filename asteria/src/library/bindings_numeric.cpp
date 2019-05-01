@@ -66,14 +66,14 @@ G_boolean std_numeric_is_nan(const G_real& value)
 
     namespace {
 
-    inline const G_integer& do_verify_bounds(const G_integer& lower, const G_integer& upper)
+    const G_integer& do_verify_bounds(const G_integer& lower, const G_integer& upper)
       {
         if(!(lower <= upper)) {
           ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than or equal to the `upper` bound (got `", lower, "` and `", upper, "`).");
         }
         return upper;
       }
-    inline const G_real& do_verify_bounds(const G_real& lower, const G_real& upper)
+    const G_real& do_verify_bounds(const G_real& lower, const G_real& upper)
       {
         if(!std::islessequal(lower, upper)) {
           ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than or equal to the `upper` bound (got `", lower, "` and `", upper, "`).");
@@ -410,7 +410,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
 
     constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
 
-    inline std::uint8_t do_verify_base(const Opt<G_integer>& base)
+    std::uint8_t do_verify_base(const Opt<G_integer>& base)
       {
         // The default base is `10`.
         std::uint8_t value = 10;
@@ -424,7 +424,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
         return value;
       }
 
-    inline std::uint8_t do_verify_exp_base(const Opt<G_integer>& exp_base)
+    std::uint8_t do_verify_exp_base(const Opt<G_integer>& exp_base)
       {
         // The default base is `10`.
         std::uint8_t value = 10;
@@ -438,7 +438,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
         return value;
       }
 
-    inline bool do_handle_special_values(G_string& text, const G_real& value)
+    bool do_handle_special_values(G_string& text, const G_real& value)
       {
         const char* sptr;
         // Get FP class.
@@ -461,39 +461,26 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
         return true;
       }
 
-    inline std::uint8_t do_shift_digit(G_integer& reg, bool neg, std::uint8_t base)
-      {
-        auto dvalue = static_cast<int>(reg % base);
-        reg /= base;
-        // Return the absolute value of the digit.
-        return static_cast<std::uint8_t>((dvalue ^ -neg) + neg);
-      }
-    inline std::uint8_t do_shift_digit(G_real& reg, bool neg, std::uint8_t base)
-      {
-        auto frac = std::modf(reg / base, &reg);
-        auto dvalue = static_cast<std::int64_t>(frac * base + 0.5 - neg);
-        // Return the absolute value of the digit.
-        return static_cast<std::uint8_t>((dvalue ^ -neg) + neg);
-      }
-
-    template<typename XvalueT> void do_append_integer_reverse(G_string& text, int& count, const XvalueT& value, bool neg, std::uint8_t base)
+    void do_append_integer_reverse(G_string& text, const G_integer& value, std::uint8_t rbase)
       {
         auto reg = value;
         do {
-          auto dvalue = do_shift_digit(reg, neg, base);
-          text.push_back(s_digits[dvalue * 2]);
-          count--;
+          auto div = std::div(reg, G_integer(rbase));
+          reg = div.quot;
+          // Write hexadecimal digits in upper case only.
+          auto dptr = s_digits + std::abs(div.rem * 2);
+          text.push_back(*dptr);
         } while(reg != 0);
       }
 
-    G_string& do_append_integer_prefixes(G_string& text, bool neg, std::uint8_t base)
+    G_string& do_append_integer_prefixes(G_string& text, bool neg, std::uint8_t rbase)
       {
         // N.B. Characters are appended in reverse order.
-        if(base == 2) {
+        if(rbase == 2) {
           text.push_back('b');
           text.push_back('0');
         }
-        if(base == 16) {
+        if(rbase == 16) {
           text.push_back('x');
           text.push_back('0');
         }
@@ -501,26 +488,6 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
           text.push_back('-');
         }
         return text;
-      }
-
-    inline std::uint8_t do_pop_digit(G_real& reg, bool neg, std::uint8_t base)
-      {
-        G_real intg;
-        reg = std::modf(reg * base, &intg);
-        auto dvalue = static_cast<std::int64_t>(intg);
-        // Return the absolute value of the digit.
-        return static_cast<std::uint8_t>((dvalue ^ -neg) + neg);
-      }
-
-    template<typename XvalueT> void do_append_fraction_normal(G_string& text, int& count, const XvalueT& value, bool neg, std::uint8_t base)
-      {
-        // Write at least one digit.
-        auto reg = value;
-        do {
-          auto dvalue = do_pop_digit(reg, neg, base);
-          text.push_back(s_digits[dvalue * 2]);
-          count--;
-        } while((reg != 0) && (count > 0));
       }
 
     G_string& do_append_exponent_prefixes(G_string& text, bool neg, std::uint8_t ebase)
@@ -559,17 +526,14 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
 
 G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base)
   {
-    bool rneg = value < 0;
     std::uint8_t rbase = do_verify_base(base);
     // Define the result string.
     G_string text;
-    // The string will always be exact.
-    int rcount = SCHAR_MAX;
     // The value itself is the integral part. There are no fractional or exponent parts.
     G_integer intg = value;
     // Write the integral part.
-    do_append_integer_reverse(text, rcount, intg, rneg, rbase);
-    do_append_integer_prefixes(text, rneg, rbase);
+    do_append_integer_reverse(text, intg, rbase);
+    do_append_integer_prefixes(text, value < 0, rbase);
     do_reverse_suffix(text, 0);
     // Finish.
     return text;
@@ -585,8 +549,8 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base)
     if(do_handle_special_values(text, value)) {
       return text;
     }
-    // The string will be exact if and only if the base is a power of two.
-    int rcount = (rbase % 2 == 0) ? SCHAR_MAX : static_cast<int>(std::ceil(53 / std::log2(rbase) - 0.001) + 1);
+/*    // The string will be exact if and only if the base is a power of two.
+    int rcount = static_cast<int>(std::ceil(53 / std::log2(rbase) - 0.001)) + 1;
     // Break the number down into integral and fractional parts.
     G_real intg;
     G_real frac = std::modf(value, &intg);
@@ -597,41 +561,36 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base)
     // Append the fractional part after a decimal point.
     text.push_back('.');
     do_append_fraction_normal(text, rcount, frac, rneg, rbase);
-    // Finish.
+*/    // Finish.
     return text;
   }
 
 G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const G_integer& exp_base)
   {
-    bool rneg = value < 0;
     std::uint8_t rbase = do_verify_base(base);
     std::uint8_t ebase = do_verify_exp_base(exp_base);
     // Define the result string.
     G_string text;
-    // The string will always be exact.
-    int rcount = SCHAR_MAX;
-    int ecount = SCHAR_MAX;
     // The value itself is the integral part. There are no fractional or exponent parts.
     G_integer intg = value;
     // Calculate the exponent. In the case of integers it will never be negative.
     G_integer eint = 0;
     for(;;) {
-      auto next = intg / ebase;
-      if(intg % ebase != 0) {
+      auto div = std::div(intg, G_integer(ebase));
+      if(div.rem != 0) {
         break;
       }
-      intg = next;
+      intg = div.quot;
       eint++;
     }
-    bool eneg = eint < 0;
     // Write the integral part.
-    do_append_integer_reverse(text, rcount, intg, rneg, rbase);
-    do_append_integer_prefixes(text, rneg, rbase);
+    do_append_integer_reverse(text, intg, rbase);
+    do_append_integer_prefixes(text, value < 0, rbase);
     do_reverse_suffix(text, 0);
     // Write the exponent part.
     auto expb = text.size();
-    do_append_integer_reverse(text, ecount, eint, eneg, 10);
-    do_append_exponent_prefixes(text, eneg, ebase);
+    do_append_integer_reverse(text, eint, 10);
+    do_append_exponent_prefixes(text, false, ebase);
     do_reverse_suffix(text, expb);
     // Finish.
     return text;
@@ -648,8 +607,8 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
     if(do_handle_special_values(text, value)) {
       return text;
     }
-    // The string will be exact if and only if the base is a power of two.
-    int rcount = (rbase % 2 == 0) ? SCHAR_MAX : static_cast<int>(std::ceil(53 / std::log2(rbase) - 0.001) + 1);
+/*    // The string will be exact if and only if the base is a power of two.
+    int rcount = static_cast<int>(std::ceil(53 / std::log2(rbase) - 0.001)) + 1;
     int ecount = SCHAR_MAX;
     // Calculate the exponent.
     G_integer eint = 0;
@@ -690,7 +649,7 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
     do_append_integer_reverse(text, ecount, eint, eneg, 10);
     do_append_exponent_prefixes(text, eneg, ebase);
     do_reverse_suffix(text, expb);
-    // Finish.
+*/    // Finish.
     return text;
   }
 
