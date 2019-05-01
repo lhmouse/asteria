@@ -594,11 +594,9 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base)
     do_append_integer_reverse(text, rcount, intg, rneg, rbase);
     do_append_integer_prefixes(text, rneg, rbase);
     do_reverse_suffix(text, 0);
-    // If the fractional part is not zero, append it after a decimal point.
-    if((frac != 0) && (rcount > 0)) {
-      text.push_back('.');
-      do_append_fraction_normal(text, rcount, frac, rneg, rbase);
-    }
+    // Append the fractional part after a decimal point.
+    text.push_back('.');
+    do_append_fraction_normal(text, rcount, frac, rneg, rbase);
     // Finish.
     return text;
   }
@@ -1892,13 +1890,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "`std.numeric.format(value, [base], [exp_base])`\n"
             "  \n"
             "  * Converts an `integer` or `real` to a `string` in `base`. This\n"
-            "    function writes as many digits as possible for precision. If\n"
-            "    `value` is non-negative, no plus sign appears. If `base` is not\n"
-            "    specified, `10` is assumed. When `exo_base` is specified, if\n"
-            "    `value` is of type `real`, the number is written in scientific\n"
-            "    notation; otherwise (when it is of type `integer`), an exponent\n"
-            "    part is still appended, however no decimal point shall occur in\n"
-            "    the result.\n"
+            "    function writes as many digits as possible to ensure precision.\n"
+            "    No plus sign appears in the result. If `base` is not specified,\n"
+            "    `10` is assumed. When `exp_base` is specified, if `value` is of\n"
+            "    type `integer`, the significant figure part is kept as short as\n"
+            "    possible without a decimal point, followed by an exponent part;\n"
+            "    otherwise (when `value` is of type `real`), it is written in\n"
+            "    scientific notation which always contains a decimal point.\n"
             "  \n"
             "  * Returns a `string` converted from `value`.\n"
             "  \n"

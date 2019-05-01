@@ -1396,13 +1396,13 @@
 `std.numeric.format(value, [base], [exp_base])`
 
 	* Converts an `integer` or `real` to a `string` in `base`. This
-	  function writes as many digits as possible for precision. If
-	  `value` is non-negative, no plus sign appears. If `base` is not
-	  specified, `10` is assumed. When `exo_base` is specified, if
-	  `value` is of type `real`, the number is written in scientific
-	  notation; otherwise (when it is of type `integer`), an exponent
-	  part is still appended, however no decimal point shall occur in
-	  the result.
+	  function writes as many digits as possible to ensure precision.
+	  No plus sign appears in the result. If `base` is not specified,
+	  `10` is assumed. When `exp_base` is specified, if `value` is of
+	  type `integer`, the significant figure part is kept as short as
+	  possible without a decimal point, followed by an exponent part;
+	  otherwise (when `value` is of type `real`), it is written in
+	  scientific notation which always contains a decimal point.
 
 	* Returns a `string` converted from `value`.
 
