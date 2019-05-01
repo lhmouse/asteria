@@ -110,6 +110,10 @@ namespace Asteria {
       {
         return Parser_Error(reader.line(), reader.offset(), length, code);
       }
+    inline Parser_Error do_make_parser_error(const Line_Reader& reader, const char* pos, Parser_Error::Code code)
+      {
+        return Parser_Error(reader.line(), reader.offset(), static_cast<std::size_t>(pos - reader.data_avail()), code);
+      }
 
     class Tack
       {
@@ -368,7 +372,8 @@ namespace Asteria {
                   throw do_make_parser_error(reader, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                 }
                 auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
-                cp = cp * 16 + dvalue;
+                cp *= 16;
+                cp += dvalue;
               }
               if(next == 'x') {
                 // Write the character verbatim.
@@ -562,217 +567,236 @@ namespace Asteria {
         }
         auto eptr = bptr + reader.size_avail();
         // Get a numeric literal.
-        // Declare everything that will be calculated later.
-        // 0. The integral part is required. The fractional and exponent parts are optional.
-        // 1. If `frac_begin` equals `int_end` then there is no fractional part.
-        // 2. If `exp_begin` equals `frac_end` then there is no exponent part.
-        std::uint8_t base = 10;
-        std::size_t int_begin = 0, int_end = 0;
-        std::size_t frac_begin = 0, frac_end = 0;
-        std::uint8_t exp_base = 0;
-        bool exp_sign = false;
-        std::size_t exp_begin = 0, exp_end = 0;
+        // Positions.
+        //   0. The integral part is required. The fractional and exponent parts are optional.
+        //   1. If `bfrac` equals `eintg` then there is no fractional part.
+        //   2. If `bexp` equals `efrac` then there is no exponent part.
+        const char* bintg;  // beginning of the integral part.
+        const char* eintg;  // end of the integral part.
+        const char* bfrac;  // beginning of the fractional part.
+        const char* efrac;  // end of the fractional part.
+        const char* bexp;  // beginning of the exponent part.
+        const char* eexp;  // end of the exponent part.
+        // Characteristics.
+        std::uint8_t rbase = 10;  // base of the integral and fractional parts.
+        bool rneg = false;  // is the number negative?
+        std::uint8_t pbase = 0;  // base of the exponent.
+        bool pneg = false;  // is the exponent negative?
+        // Check for a previous sign symbol.
+        auto qstok = do_check_mergeability(seq, reader);
+        if(qstok && (qstok->as_punctuator() == Token::punctuator_sub)) {
+          rneg = true;
+        }
+        // Parse the number.
         // Check for base prefixes.
-        if(bptr[int_begin] == '0') {
-          auto next = bptr[int_begin + 1];
-          switch(next) {
+        bintg = bptr;
+        if(bintg[0] == '0') {
+          switch(bintg[1]) {
           case 'B':
           case 'b':
-            base = 2;
-            int_begin += 2;
+            bintg += 2;
+            rbase = 2;
             break;
           case 'X':
           case 'x':
-            base = 16;
-            int_begin += 2;
+            bintg += 2;
+            rbase = 16;
             break;
           }
         }
-        auto max_digits = static_cast<std::size_t>(base * 2);
+        auto rdigits = static_cast<std::size_t>(rbase) * 2;
         // Look for the end of the integral part.
-        auto tptr = std::find_if_not(bptr + int_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch);  });
-        int_end = static_cast<std::size_t>(tptr - bptr);
-        if(int_end == int_begin) {
-          throw do_make_parser_error(reader, int_end, Parser_Error::code_numeric_literal_incomplete);
+        eintg = std::find_if_not(bintg, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_digits, ch, rdigits);  });
+        if(eintg == bintg) {
+          throw do_make_parser_error(reader, eintg, Parser_Error::code_numeric_literal_incomplete);
         }
         // Look for the fractional part.
-        frac_begin = int_end;
-        frac_end = frac_begin;
-        auto next = bptr[int_end];
-        if(next == '.') {
-          ++frac_begin;
-          tptr = std::find_if_not(bptr + frac_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, max_digits, ch);  });
-          frac_end = static_cast<std::size_t>(tptr - bptr);
-          if(frac_end == frac_begin) {
-            throw do_make_parser_error(reader, frac_end, Parser_Error::code_numeric_literal_incomplete);
+        bfrac = eintg;
+        efrac = eintg;
+        if(bfrac[0] == '.') {
+          bfrac++;
+          // Look for the end of the fractional part.
+          efrac = std::find_if_not(bfrac, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_digits, ch, rdigits);  });
+          if(efrac == bfrac) {
+            throw do_make_parser_error(reader, efrac, Parser_Error::code_numeric_literal_incomplete);
           }
         }
-        // Look for the exponent.
-        exp_begin = frac_end;
-        exp_end = exp_begin;
-        next = bptr[frac_end];
-        switch(next) {
+        // Look for the exponent part.
+        bexp = efrac;
+        eexp = efrac;
+        switch(bexp[0]) {
         case 'E':
         case 'e':
-          exp_base = 10;
-          ++exp_begin;
+          bexp++;
+          pbase = 10;
           break;
         case 'P':
         case 'p':
-          exp_base = 2;
-          ++exp_begin;
+          bexp++;
+          pbase = 2;
           break;
         }
-        if(exp_base != 0) {
-          next = bptr[exp_begin];
-          switch(next) {
+        if(bexp != efrac) {
+          // Look for the end of the exponent.
+          switch(bexp[0]) {
           case '+':
-            exp_sign = false;
-            ++exp_begin;
+            bexp++;
+            pneg = false;
             break;
           case '-':
-            exp_sign = true;
-            ++exp_begin;
+            bexp++;
+            pneg = true;
             break;
           }
-          tptr = std::find_if_not(bptr + exp_begin, eptr, [&](char ch) { return (ch == '`') || std::char_traits<char>::find(s_digits, 20, ch);  });
-          exp_end = static_cast<std::size_t>(tptr - bptr);
-          if(exp_end == exp_begin) {
-            throw do_make_parser_error(reader, exp_end, Parser_Error::code_numeric_literal_incomplete);
+          eexp = std::find_if_not(bexp, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_digits, ch, 20);  });
+          if(eexp == bexp) {
+            throw do_make_parser_error(reader, eexp, Parser_Error::code_numeric_literal_incomplete);
           }
         }
-        // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
-        // Since we make no use of them, we just reserve them for further use for good.
-        static constexpr char s_suffix_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789.";
-        tptr = std::find_if_not(bptr + exp_end, eptr, [&](char ch) { return std::char_traits<char>::find(s_suffix_chars, 64, ch);  });
-        auto tlen = static_cast<std::size_t>(tptr - bptr);
-        if(tlen != exp_end) {
-          throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_suffix_disallowed);
+        if(eexp != eptr) {
+          // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
+          // Since we make no use of them, we just reserve them for further use for good.
+          auto bsfx = std::find_if_not(eexp, eptr, [&](char ch) { return std::strchr("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_", ch);  });
+          if(bsfx != eexp) {
+            throw do_make_parser_error(reader, bsfx, Parser_Error::code_numeric_literal_suffix_disallowed);
+          }
         }
         // Parse the exponent.
-        int exp = 0;
-        for(auto i = exp_begin; i != exp_end; ++i) {
-          auto dptr = std::char_traits<char>::find(s_digits, 20, bptr[i]);
+        std::int32_t exp = 0;
+        for(auto p = bexp; p != eexp; ++p) {
+          // Read a digit.
+          auto dptr = std::char_traits<char>::find(s_digits, 20, *p);
           if(!dptr) {
             continue;
           }
           auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
-          int bound = (INT_MAX - dvalue) / 10;
+          // Check for integer overflow.
+          auto bound = (0x7FFFFFFF - dvalue) / 10;
           if(exp > bound) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
+            throw do_make_parser_error(reader, eexp, Parser_Error::code_numeric_literal_exponent_overflow);
           }
-          exp = exp * 10 + dvalue;
+          // Accumulate this digit.
+          exp *= 10;
+          exp += dvalue;
         }
-        if(exp_sign) {
+        if(pneg) {
           exp = -exp;
         }
-        // Is this literal an integral or floating-point number?
-        if(!integer_as_real && (frac_begin == int_end)) {
+        // Is this literal an integer or a real number?
+        if(!integer_as_real && (bfrac == efrac)) {
           // Parse the literal as an integer.
+          std::uint64_t value = 0;
           // Negative exponents are not allowed, even when the significant part is zero.
           if(exp < 0) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_exponent_negative);
+            throw do_make_parser_error(reader, eexp, Parser_Error::code_integer_literal_exponent_negative);
           }
           // Parse the significant part.
-          std::uint64_t value = 0;
-          for(auto i = int_begin; i != int_end; ++i) {
-            auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
+          for(auto p = bintg; p != eintg; ++p) {
+            // Read a digit.
+            auto dptr = std::char_traits<char>::find(s_digits, rdigits, *p);
             if(!dptr) {
               continue;
             }
             auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
-            std::uint64_t bound = (0x8000000000000000 - dvalue) / base;
+            // Check for integer overflow, but allow `0x1p63` here.
+            auto bound = (0x8000000000000000 - dvalue) / rbase;
             if(value > bound) {
-              throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
+              throw do_make_parser_error(reader, eexp, Parser_Error::code_integer_literal_overflow);
             }
-            value = value * base + dvalue;
+            // Accumulate this digit.
+            value *= rbase;
+            value += dvalue;
           }
-          // Raise the significant part to the power of `exp`.
-          if(value != 0) {
-            for(int i = 0; i < exp; ++i) {
-              std::uint64_t bound = 0x8000000000000000 / exp_base;
+          // Raise the significant part to the power of `pbase`.
+          if((value != 0) && (pbase >= 2)) {
+            for(std::int32_t i = 0; i < exp; ++i) {
+              // Check for integer overflow, but allow `0x1p63` here.
+              auto bound = 0x8000000000000000 / pbase;
               if(value > bound) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
+                throw do_make_parser_error(reader, eexp, Parser_Error::code_integer_literal_overflow);
               }
-              value *= exp_base;
+              // Accumulate this digit.
+              value *= pbase;
             }
-          }
-          // Check for a previous sign symbol.
-          auto qstok = do_check_mergeability(seq, reader);
-          std::uint64_t imask = 0;
-          if(qstok && (qstok->as_punctuator() == Token::punctuator_sub)) {
-            imask = UINT64_MAX;
           }
           // The special value `0x1p63` is only allowed if a contiguous minus symbol precedes it.
-          if((value == 0x8000000000000000) && (imask == 0)) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
+          if((value == 0x8000000000000000) && !rneg) {
+            throw do_make_parser_error(reader, eexp, Parser_Error::code_integer_literal_overflow);
+          }
+          if(rneg) {
+            value = -value;
           }
           if(qstok) {
             // Overwrite the previous token.
-            tlen += reader.offset() - qstok->offset();
             reader.rewind(qstok->offset());
             qstok = nullptr;
             seq.pop_back();
           }
+          auto tlen = static_cast<std::size_t>(eexp - reader.data_avail());
           // Push an integer literal.
-          Token::S_integer_literal xtoken = { static_cast<std::int64_t>((value ^ imask) - imask) };
+          Token::S_integer_literal xtoken = { static_cast<std::int64_t>(value) };
           do_push_token(seq, reader, tlen, rocket::move(xtoken));
           return true;
         }
         // Parse the literal as a floating-point number.
-        // Parse the integral part.
-        double value = 0;
+        long double intg = 0;
+        long double frac = 0;
         bool zero = true;
-        for(auto i = int_begin; i != int_end; ++i) {
-          auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
+        // Parse the integral part.
+        for(auto p = bintg; p != eintg; ++p) {
+          // Read a digit.
+          auto dptr = std::char_traits<char>::find(s_digits, rdigits, *p);
           if(!dptr) {
             continue;
           }
           auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
-          value = value * base + dvalue;
+          // Accumulate this digit.
+          intg *= rbase;
+          intg += dvalue;
           zero |= dvalue;
         }
         // Parse the fractional part.
-        double frac = 0;
-        for(auto i = frac_end - 1; i + 1 != frac_begin; --i) {
-          auto dptr = std::char_traits<char>::find(s_digits, max_digits, bptr[i]);
+        for(auto p = efrac - 1; p != bfrac - 1; --p) {
+          // Read a digit.
+          auto dptr = std::char_traits<char>::find(s_digits, rdigits, *p);
           if(!dptr) {
             continue;
           }
           auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
-          frac = (frac + dvalue) / base;
+          // Accumulate this digit.
+          frac += dvalue;
+          frac /= rbase;
           zero |= dvalue;
         }
-        value += frac;
+        // Combine the integral and fractional parts.
+        double value = static_cast<double>(intg + frac);
         // Raise the significant part to the power of `exp`.
-        if(exp_base == 2) {
+        if(pbase == 2) {
           value = std::ldexp(value, exp);
         } else {
-          value = value * std::pow(exp_base, exp);
+          value *= std::pow(pbase, exp);
         }
         // Check for overflow or underflow.
-        int fpc = std::fpclassify(value);
-        if(fpc == FP_INFINITE) {
-          throw do_make_parser_error(reader, tlen, Parser_Error::code_real_literal_overflow);
+        int fpcls = std::fpclassify(value);
+        if(fpcls == FP_INFINITE) {
+          throw do_make_parser_error(reader, eexp, Parser_Error::code_real_literal_overflow);
         }
-        if((fpc == FP_ZERO) && !zero) {
-          throw do_make_parser_error(reader, tlen, Parser_Error::code_real_literal_underflow);
+        if((fpcls == FP_ZERO) && !zero) {
+          throw do_make_parser_error(reader, eexp, Parser_Error::code_real_literal_underflow);
         }
         // Check for a previous sign symbol.
-        auto qstok = do_check_mergeability(seq, reader);
-        double fmask = 0;
-        if(qstok && (qstok->as_punctuator() == Token::punctuator_sub)) {
-          fmask = -1;
+        if(rneg) {
+          value = -value;
         }
         if(qstok) {
           // Overwrite the previous token.
-          tlen += reader.offset() - qstok->offset();
           reader.rewind(qstok->offset());
           qstok = nullptr;
           seq.pop_back();
         }
+        auto tlen = static_cast<std::size_t>(eexp - reader.data_avail());
         // Push a floating-point literal.
-        Token::S_real_literal xtoken = { std::copysign(value, fmask) };
+        Token::S_real_literal xtoken = { value };
         do_push_token(seq, reader, tlen, rocket::move(xtoken));
         return true;
       }
@@ -802,7 +826,7 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Pars
           auto bptr = reader.data_avail();
           auto tptr = bptr;
           if(!utf8_decode(cp, tptr, reader.size_avail())) {
-            throw do_make_parser_error(reader, static_cast<std::size_t>(tptr - bptr), Parser_Error::code_utf8_sequence_invalid);
+            throw do_make_parser_error(reader, tptr, Parser_Error::code_utf8_sequence_invalid);
           }
           reader.consume(static_cast<std::size_t>(tptr - bptr));
         }
