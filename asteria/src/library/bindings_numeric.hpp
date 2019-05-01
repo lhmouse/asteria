@@ -72,8 +72,8 @@ extern G_string std_numeric_format(const G_real& value, const Opt<G_integer>& ba
 extern G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const G_integer& exp_base);
 extern G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const G_integer& exp_base);
 
-extern G_integer std_numeric_parse_integer(const G_string& text);
-extern G_real std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating = rocket::nullopt);
+extern Opt<G_integer> std_numeric_parse_integer(const G_string& text);
+extern Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating = rocket::nullopt);
 
 // Create an object that is to be referenced as `std.numeric`.
 extern void create_bindings_numeric(G_object& result, API_Version version);

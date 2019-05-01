@@ -653,14 +653,14 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
     return text;
   }
 
-G_integer std_numeric_parse_integer(const G_string& text)
+Opt<G_integer> std_numeric_parse_integer(const G_string& text)
   {
-    return -1;
+    return { };
   }
 
-G_real std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating)
+Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating)
   {
-    return -1;
+    return { };
   }
 
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
@@ -1943,7 +1943,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             G_string text;
             if(reader.start().g(text).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_parse_integer(text) };
+              auto qres = std_numeric_parse_integer(text);
+              if(!qres) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qres) };
               return rocket::move(xref);
             }
             // Fail.
@@ -1996,7 +2000,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             Opt<G_boolean> saturating;
             if(reader.start().g(text).g(saturating).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_parse_real(text, saturating) };
+              auto qres = std_numeric_parse_real(text, saturating);
+              if(!qres) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qres) };
               return rocket::move(xref);
             }
             // Fail.
