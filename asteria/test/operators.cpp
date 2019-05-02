@@ -224,7 +224,7 @@ int main()
         assert 23 / i == 1;
         assert r / 2.0 == 4.25;
         assert 17.0 / r == 2.0;
-        assert r / 5 == 1.7;
+        assert r / 17 == 0.5;
         assert 17 / 8.5 == 2.0;
 
         assert i % 7 == 5;
