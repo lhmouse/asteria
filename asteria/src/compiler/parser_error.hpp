@@ -24,6 +24,7 @@ class Parser_Error
         code_utf8_sequence_invalid                      = 2003,
         code_utf8_sequence_incomplete                   = 2004,
         code_utf_code_point_invalid                     = 2005,
+        code_null_character_disallowed                  = 2006,
         // Phase 2
         //   Tokenizer
         code_token_character_unrecognized               = 3001,

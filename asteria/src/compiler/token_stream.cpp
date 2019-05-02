@@ -828,6 +828,9 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Pars
           if(!utf8_decode(cp, tptr, reader.size_avail())) {
             throw do_make_parser_error(reader, tptr, Parser_Error::code_utf8_sequence_invalid);
           }
+          if(cp == 0) {
+            throw do_make_parser_error(reader, tptr, Parser_Error::code_null_character_disallowed);
+          }
           reader.consume(static_cast<std::size_t>(tptr - bptr));
         }
         reader.rewind();
