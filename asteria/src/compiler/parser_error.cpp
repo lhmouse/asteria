@@ -111,6 +111,10 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
       {
         return "A block comment was not properly terminated.";
       }
+    case code_stray_digit_separator:
+      {
+        return "A digit separator must follow a digit.";
+      }
     ///////////////////////////////////////////////////////////////////////////
     // Phase 3
     //   Parser

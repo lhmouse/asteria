@@ -16,19 +16,21 @@ string-literal ::=
 noescape-string-literal ::=
 	PCRE('[^']*?')
 numeric-literal ::=
-	( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
+	number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
+number-sign-opt ::=
+	PCRE([+-]?)
+binary-literal ::=
+	PCRE(0[bB][01][01`]*(\.[01][01`]*))
+decimal-literal ::=
+	PCRE([0-9][0-9`]*(\.[0-9][0-9`]*))
+hexadecimal-literal ::=
+	PCRE(0[xX][0-9A-Fa-f][0-9A-Fa-f`]*(\.[0-9A-Fa-f][0-9A-Fa-f`]*))
 exponent-suffix-opt ::=
 	decimal-exponent-suffix | binary-exponent-suffix | ""
-binary-literal ::=
-	PCRE(0[bB][01`]+(\.[01`]+))
-decimal-literal ::=
-	PCRE([0-9`]+(\.[0-9`]+))
-hexadecimal-literal ::=
-	PCRE(0[xX][0-9A-Fa-f`]+(\.[0-9A-Fa-f`]+))
 decimal-exponent-suffix ::=
-	PCRE([eE][-+]?[0-9`]+)
+	PCRE([eE][-+]?[0-9][0-9`]*)
 binary-exponent-suffix ::=
-	PCRE([pP][-+]?[0-9`]+)
+	PCRE([pP][-+]?[0-9][0-9`]*)
 nan-literal ::=
 	"nan"
 infinity-literal ::=

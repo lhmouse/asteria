@@ -15,7 +15,7 @@ int main()
       R"__(#!some shebang
         hh+++
         if <<<->>>>>"\u55b5b喵"/
-        * - 0x`01`7.8`4p+4  // comments
+        * - 0x01`7.8`4p+4  // comments
         .false/*more
         comments*/;/*yet more*/-42e13
       )__");

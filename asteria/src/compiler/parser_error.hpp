@@ -41,6 +41,7 @@ class Parser_Error
         code_real_literal_overflow                      = 3012,
         code_real_literal_underflow                     = 3013,
         code_block_comment_unclosed                     = 3014,
+        code_stray_digit_separator                      = 3015,
         // Phase 3
         //   Parser
         code_identifier_expected                        = 4002,
