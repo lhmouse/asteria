@@ -51,7 +51,7 @@ int main(int argc, char** argv)
     auto t1 = std_chrono_hires_now();
     auto res = code.execute(global, rocket::move(args));
     auto t2 = std_chrono_hires_now();
-    // print the time elasped and the result.
+    // print the time elapsed and the result.
     std::cerr << std::endl
               << "---" << std::endl
               << "Finished in " << std::fixed << std::setprecision(3) << (t2 - t1) << " ms:" << std::endl
