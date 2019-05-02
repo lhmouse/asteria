@@ -233,6 +233,17 @@ namespace Asteria {
         reader.consume(tlen);
       }
 
+    inline void do_mul_or_div(long double& mul, long double& div, std::uint8_t base, std::int64_t exp) noexcept
+      {
+        long double fexp = exp;
+        if(exp > 0) {
+          mul *= (base == 2) ? std::exp2(+fexp) : std::pow(base, +fexp);
+        }
+        if(exp < 0) {
+          div *= (base == 2) ? std::exp2(-fexp) : std::pow(base, -fexp);
+        }
+      }
+
     bool do_accept_numeric_literal(Cow_Vector<Token>& seq, Line_Reader& reader, bool integer_as_real)
       {
         // numeric-literal ::=
@@ -484,10 +495,11 @@ namespace Asteria {
           }
         }
         // How to raise the result?
-        double rmul = (rbase == 2) ? std::exp2(tcnt) : std::pow(rbase, tcnt);
-        double pmul = (pbase == 2) ? std::exp2(pexp) : std::pow(pbase, pexp);
+        long double mul = 1, div = 1;
+        do_mul_or_div(mul, div, rbase, tcnt);
+        do_mul_or_div(mul, div, pbase, pexp);
         // Raise the result.
-        double value = static_cast<double>(tvalue) * rmul * pmul;
+        double value = static_cast<double>(tvalue * mul / div);
         // Check for overflow or underflow.
         int fpcls = std::fpclassify(value);
         if(fpcls == FP_INFINITE) {
