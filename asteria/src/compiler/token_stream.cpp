@@ -57,7 +57,7 @@ namespace Asteria {
             // Buffer a line.
             for(;;) {
               auto ich = this->m_cbuf.get().sbumpc();
-              if(ich == std::char_traits<char>::eof()) {
+              if(ich == std::istream::traits_type::eof()) {
                 // Return `false` to indicate that there are no more data, when nothing has been read so far.
                 if(this->m_str.empty()) {
                   return false;
