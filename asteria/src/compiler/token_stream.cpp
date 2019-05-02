@@ -11,7 +11,44 @@ namespace Asteria {
 
     namespace {
 
-    constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
+    enum : std::uint8_t
+      {
+        cctype_space   = 0x01,  // [ \t\v\f\r\n]
+        cctype_alpha   = 0x02,  // [A-Za-z]
+        cctype_digit   = 0x04,  // [0-9]
+        cctype_xdigit  = 0x08,  // [0-9A-Fa-f]
+        cctype_punct   = 0x10,  // []!%&()*+,./:;<=>?^{|}~[-]
+        cctype_namel   = 0x20,  // [A-Za-z_]
+      };
+
+    constexpr std::uint8_t s_cctypes[128] =
+      {
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x01, 0x10, 0x00, 0x00, 0x00, 0x10, 0x10, 0x00,
+        0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+        0x0c, 0x0c, 0x0c, 0x0c, 0x0c, 0x0c, 0x0c, 0x0c,
+        0x0c, 0x0c, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+        0x00, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x22,
+        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
+        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
+        0x22, 0x22, 0x22, 0x10, 0x00, 0x10, 0x10, 0x20,
+        0x00, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x22,
+        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
+        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
+        0x22, 0x22, 0x22, 0x10, 0x10, 0x10, 0x10, 0x00,
+      };
+
+    inline bool do_check_cctype(char ch, std::uint8_t mask) noexcept
+      {
+        int index = ch & 0x7F;
+        if(index != ch) {
+          return false;
+        }
+        return s_cctypes[index] & mask;
+      }
 
     class Line_Reader
       {
@@ -164,6 +201,8 @@ namespace Asteria {
         seq.emplace_back(reader.file(), reader.line(), reader.offset(), length, rocket::forward<XtokenT>(xtoken));
         reader.consume(length);
       }
+
+    constexpr char s_xdigits[] = "00112233445566778899AaBbCcDdEeFf";
 
     struct Prefix_Comparator
       {
@@ -367,11 +406,11 @@ namespace Asteria {
                 throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_escape_sequence_incomplete);
               }
               for(auto i = tlen; i < tlen + xcnt; ++i) {
-                auto dptr = std::char_traits<char>::find(s_digits, 32, bptr[i]);
+                auto dptr = std::char_traits<char>::find(s_xdigits, 32, bptr[i]);
                 if(!dptr) {
                   throw do_make_parser_error(reader, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                 }
-                auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
+                auto dvalue = static_cast<std::uint8_t>((dptr - s_xdigits) / 2);
                 cp *= 16;
                 cp += dvalue;
               }
@@ -562,7 +601,7 @@ namespace Asteria {
         // binary-exponent-suffix ::=
         //   PCRE([pP][-+]?[0-9`]+)
         auto bptr = reader.data_avail();
-        if(std::char_traits<char>::find(s_digits, 20, bptr[0]) == nullptr) {
+        if(std::char_traits<char>::find(s_xdigits, 20, bptr[0]) == nullptr) {
           return false;
         }
         auto eptr = bptr + reader.size_avail();
@@ -606,7 +645,7 @@ namespace Asteria {
         }
         auto rdigits = static_cast<std::size_t>(rbase) * 2;
         // Look for the end of the integral part.
-        eintg = std::find_if_not(bintg, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_digits, ch, rdigits);  });
+        eintg = std::find_if_not(bintg, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_xdigits, ch, rdigits);  });
         if(eintg == bintg) {
           throw do_make_parser_error(reader, eintg, Parser_Error::code_numeric_literal_incomplete);
         }
@@ -616,7 +655,7 @@ namespace Asteria {
         if(bfrac[0] == '.') {
           bfrac++;
           // Look for the end of the fractional part.
-          efrac = std::find_if_not(bfrac, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_digits, ch, rdigits);  });
+          efrac = std::find_if_not(bfrac, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_xdigits, ch, rdigits);  });
           if(efrac == bfrac) {
             throw do_make_parser_error(reader, efrac, Parser_Error::code_numeric_literal_incomplete);
           }
@@ -648,7 +687,7 @@ namespace Asteria {
             pneg = true;
             break;
           }
-          eexp = std::find_if_not(bexp, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_digits, ch, 20);  });
+          eexp = std::find_if_not(bexp, eptr, [&](char ch) { return (ch == '`') || std::memchr(s_xdigits, ch, 20);  });
           if(eexp == bexp) {
             throw do_make_parser_error(reader, eexp, Parser_Error::code_numeric_literal_incomplete);
           }
@@ -665,11 +704,11 @@ namespace Asteria {
         std::int32_t exp = 0;
         for(auto p = bexp; p != eexp; ++p) {
           // Read a digit.
-          auto dptr = std::char_traits<char>::find(s_digits, 20, *p);
+          auto dptr = std::char_traits<char>::find(s_xdigits, 20, *p);
           if(!dptr) {
             continue;
           }
-          auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
+          auto dvalue = static_cast<std::uint8_t>((dptr - s_xdigits) / 2);
           // Check for integer overflow.
           auto bound = (0x7FFFFFFF - dvalue) / 10;
           if(exp > bound) {
@@ -693,11 +732,11 @@ namespace Asteria {
           // Parse the significant part.
           for(auto p = bintg; p != eintg; ++p) {
             // Read a digit.
-            auto dptr = std::char_traits<char>::find(s_digits, rdigits, *p);
+            auto dptr = std::char_traits<char>::find(s_xdigits, rdigits, *p);
             if(!dptr) {
               continue;
             }
-            auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
+            auto dvalue = static_cast<std::uint8_t>((dptr - s_xdigits) / 2);
             // Check for integer overflow, but allow `0x1p63` here.
             auto bound = (0x8000000000000000 - dvalue) / rbase;
             if(value > bound) {
@@ -745,11 +784,11 @@ namespace Asteria {
         // Parse the integral part.
         for(auto p = bintg; p != eintg; ++p) {
           // Read a digit.
-          auto dptr = std::char_traits<char>::find(s_digits, rdigits, *p);
+          auto dptr = std::char_traits<char>::find(s_xdigits, rdigits, *p);
           if(!dptr) {
             continue;
           }
-          auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
+          auto dvalue = static_cast<std::uint8_t>((dptr - s_xdigits) / 2);
           // Accumulate this digit.
           intg *= rbase;
           intg += dvalue;
@@ -758,11 +797,11 @@ namespace Asteria {
         // Parse the fractional part.
         for(auto p = efrac - 1; p != bfrac - 1; --p) {
           // Read a digit.
-          auto dptr = std::char_traits<char>::find(s_digits, rdigits, *p);
+          auto dptr = std::char_traits<char>::find(s_xdigits, rdigits, *p);
           if(!dptr) {
             continue;
           }
-          auto dvalue = static_cast<std::uint8_t>((dptr - s_digits) / 2);
+          auto dvalue = static_cast<std::uint8_t>((dptr - s_xdigits) / 2);
           // Accumulate this digit.
           frac += dvalue;
           frac /= rbase;
