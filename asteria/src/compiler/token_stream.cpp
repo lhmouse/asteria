@@ -17,8 +17,7 @@ namespace Asteria {
         cctype_alpha   = 0x02,  // [A-Za-z]
         cctype_digit   = 0x04,  // [0-9]
         cctype_xdigit  = 0x08,  // [0-9A-Fa-f]
-        cctype_punct   = 0x10,  // []!%&()*+,./:;<=>?^{|}~[-]
-        cctype_namel   = 0x20,  // [A-Za-z_]
+        cctype_namel   = 0x10,  // [A-Za-z_]
       };
 
     constexpr std::uint8_t s_cctypes[128] =
@@ -27,18 +26,18 @@ namespace Asteria {
         0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x01, 0x10, 0x00, 0x00, 0x00, 0x10, 0x10, 0x00,
-        0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
+        0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x0c, 0x0c, 0x0c, 0x0c, 0x0c, 0x0c, 0x0c, 0x0c,
-        0x0c, 0x0c, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10,
-        0x00, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x22,
-        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
-        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
-        0x22, 0x22, 0x22, 0x10, 0x00, 0x10, 0x10, 0x20,
-        0x00, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x2a, 0x22,
-        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
-        0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22,
-        0x22, 0x22, 0x22, 0x10, 0x10, 0x10, 0x10, 0x00,
+        0x0c, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x1a, 0x1a, 0x1a, 0x1a, 0x1a, 0x1a, 0x12,
+        0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+        0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+        0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x10,
+        0x00, 0x1a, 0x1a, 0x1a, 0x1a, 0x1a, 0x1a, 0x12,
+        0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+        0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12,
+        0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00,
       };
 
     inline bool do_check_cctype(char ch, std::uint8_t mask) noexcept
@@ -222,11 +221,7 @@ namespace Asteria {
 
     bool do_accept_punctuator(Cow_Vector<Token>& seq, Line_Reader& reader)
       {
-        static constexpr char s_punct_chars[] = "!%&()*+,-./:;<=>?[]^{|}~";
         auto bptr = reader.data_avail();
-        if(std::char_traits<char>::find(s_punct_chars, std::char_traits<char>::length(s_punct_chars), bptr[0]) == nullptr) {
-          return false;
-        }
         // Get a punctuator.
         struct Punctuator_Element
           {
@@ -300,11 +295,12 @@ namespace Asteria {
         auto range = std::equal_range(std::begin(s_punctuators), std::end(s_punctuators), bptr[0], Prefix_Comparator());
         for(;;) {
           if(range.first == range.second) {
+            // No matching punctuator has been found so far.
             break;
           }
           const auto& cur = range.second[-1];
-          auto tlen = std::char_traits<char>::length(cur.first);
-          if((tlen <= reader.size_avail()) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
+          auto tlen = std::strlen(cur.first);
+          if((tlen <= reader.size_avail()) && (std::memcmp(bptr, cur.first, tlen) == 0)) {
             // A punctuator has been found.
             Token::S_punctuator xtoken = { cur.second };
             do_push_token(seq, reader, tlen, rocket::move(xtoken));
@@ -312,9 +308,7 @@ namespace Asteria {
           }
           range.second--;
         }
-        // No matching punctuator has been found so far.
-        // This is caused by a character in `punct_chars` that does not exist in the table above.
-        ASTERIA_TERMINATE("The punctuator `", bptr[0], "` is unhandled.");
+        return false;
       }
 
     bool do_accept_string_literal(Cow_Vector<Token>& seq, Line_Reader& reader, char head, bool escapable)
@@ -406,7 +400,7 @@ namespace Asteria {
                 throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_escape_sequence_incomplete);
               }
               for(auto i = tlen; i < tlen + xcnt; ++i) {
-                auto dptr = std::char_traits<char>::find(s_xdigits, 32, bptr[i]);
+                auto dptr = static_cast<const char*>(std::memchr(s_xdigits, bptr[i], 32));
                 if(!dptr) {
                   throw do_make_parser_error(reader, i + 1, Parser_Error::code_escape_sequence_invalid_hex);
                 }
@@ -432,7 +426,7 @@ namespace Asteria {
           }
         } else {
           // Copy escape sequences verbatim.
-          auto tptr = std::char_traits<char>::find(bptr + 1, reader.size_avail() - 1, head);
+          auto tptr = static_cast<const char*>(std::memchr(bptr + 1, head, reader.size_avail() - 1));
           if(!tptr) {
             throw do_make_parser_error(reader, reader.size_avail(), Parser_Error::code_string_literal_unclosed);
           }
@@ -449,14 +443,12 @@ namespace Asteria {
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
-        static constexpr char s_name_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_0123456789";
         auto bptr = reader.data_avail();
-        if(std::char_traits<char>::find(s_name_chars, 53, bptr[0]) == nullptr) {
+        if(!do_check_cctype(bptr[0], cctype_namel)) {
           return false;
         }
         // Get an identifier.
-        auto eptr = bptr + reader.size_avail();
-        auto tptr = std::find_if_not(bptr, eptr, [&](char ch) { return std::char_traits<char>::find(s_name_chars, 63, ch);  });
+        auto tptr = std::find_if_not(bptr, bptr + reader.size_avail(), [&](char ch) { return do_check_cctype(ch, cctype_namel | cctype_digit);  });
         auto tlen = static_cast<std::size_t>(tptr - bptr);
         if(!keyword_as_identifier) {
           // Check whether this identifier matches a keyword.
@@ -525,7 +517,7 @@ namespace Asteria {
               break;
             }
             const auto& cur = range.first[0];
-            if((std::char_traits<char>::length(cur.first) == tlen) && (std::char_traits<char>::compare(bptr, cur.first, tlen) == 0)) {
+            if((std::strlen(cur.first) == tlen) && (std::memcmp(bptr, cur.first, tlen) == 0)) {
               // A keyword has been found.
               Token::S_keyword xtoken = { cur.second };
               do_push_token(seq, reader, tlen, rocket::move(xtoken));
@@ -601,7 +593,7 @@ namespace Asteria {
         // binary-exponent-suffix ::=
         //   PCRE([pP][-+]?[0-9`]+)
         auto bptr = reader.data_avail();
-        if(std::char_traits<char>::find(s_xdigits, 20, bptr[0]) == nullptr) {
+        if(!do_check_cctype(bptr[0], cctype_digit)) {
           return false;
         }
         auto eptr = bptr + reader.size_avail();
@@ -704,7 +696,7 @@ namespace Asteria {
         std::int32_t exp = 0;
         for(auto p = bexp; p != eexp; ++p) {
           // Read a digit.
-          auto dptr = std::char_traits<char>::find(s_xdigits, 20, *p);
+          auto dptr = static_cast<const char*>(std::memchr(s_xdigits, *p, 20));
           if(!dptr) {
             continue;
           }
@@ -732,7 +724,7 @@ namespace Asteria {
           // Parse the significant part.
           for(auto p = bintg; p != eintg; ++p) {
             // Read a digit.
-            auto dptr = std::char_traits<char>::find(s_xdigits, rdigits, *p);
+            auto dptr = static_cast<const char*>(std::memchr(s_xdigits, *p, rdigits));
             if(!dptr) {
               continue;
             }
@@ -784,7 +776,7 @@ namespace Asteria {
         // Parse the integral part.
         for(auto p = bintg; p != eintg; ++p) {
           // Read a digit.
-          auto dptr = std::char_traits<char>::find(s_xdigits, rdigits, *p);
+          auto dptr = static_cast<const char*>(std::memchr(s_xdigits, *p, rdigits));
           if(!dptr) {
             continue;
           }
@@ -797,7 +789,7 @@ namespace Asteria {
         // Parse the fractional part.
         for(auto p = efrac - 1; p != bfrac - 1; --p) {
           // Read a digit.
-          auto dptr = std::char_traits<char>::find(s_xdigits, rdigits, *p);
+          auto dptr = static_cast<const char*>(std::memchr(s_xdigits, *p, rdigits));
           if(!dptr) {
             continue;
           }
@@ -856,7 +848,7 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Pars
       Line_Reader reader(cbuf, file);
       while(reader.advance()) {
         // Discard the first line if it looks like a shebang.
-        if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::char_traits<char>::compare(reader.data_avail(), "#!", 2) == 0)) {
+        if((reader.line() == 1) && (reader.size_avail() >= 2) && (std::memcmp(reader.data_avail(), "#!", 2) == 0)) {
           continue;
         }
         // Ensure this line is a valid UTF-8 string.
@@ -895,7 +887,7 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Pars
           }
           // Read a character.
           auto head = reader.peek();
-          if(std::char_traits<char>::find(" \t\v\f\r\n", 6, head) != nullptr) {
+          if(do_check_cctype(head, cctype_space)) {
             // Skip a space.
             reader.consume(1);
             continue;
