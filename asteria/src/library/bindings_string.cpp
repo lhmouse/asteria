@@ -681,7 +681,7 @@ Opt<G_string> std_string_hex_decode(const G_string& hstr)
     for(char ch : hstr) {
       // Identify this character.
       static constexpr char s_table[] = "00112233445566778899aAbBcCdDeEfF \f\n\r\t\v";
-      auto pos = std::strchr(s_table, ch);
+      auto pos = static_cast<const char*>(std::memchr(s_table, ch, sizeof(s_table) - 1));
       if(!pos) {
         // Fail due to an invalid character.
         return rocket::nullopt;
