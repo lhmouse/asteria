@@ -276,12 +276,15 @@ namespace Asteria {
         std::int64_t pexp = 0;  // `pbase`'d exponent
         // Get the sign of the number if any.
         std::size_t tlen = 0;
-        if(reader.peek(tlen) == '+') {
+        switch(reader.peek(tlen)) {
+        case '+':
           tlen++;
           rneg = false;
-        } else if(reader.peek(tlen) == '-') {
+          break;
+        case '-':
           tlen++;
           rneg = true;
+          break;
         }
         if(!do_check_cctype(reader.peek(tlen), cctype_digit)) {
           return false;
@@ -289,12 +292,17 @@ namespace Asteria {
         // Check for the base prefix.
         if(reader.peek(tlen) == '0') {
           tlen++;
-          if(rocket::is_any_of(reader.peek(tlen), { 'b', 'B' })) {
+          switch(reader.peek(tlen)) {
+          case 'b':
+          case 'B':
             tlen++;
             rbase = 2;
-          } else if(rocket::is_any_of(reader.peek(tlen), { 'x', 'X' })) {
+            break;
+          case 'x':
+          case 'X':
             tlen++;
             rbase = 16;
+            break;
           }
         }
         rbegin = tlen;
@@ -348,22 +356,30 @@ namespace Asteria {
           }
         }
         // Check for the exponent part.
-        if(rocket::is_any_of(reader.peek(tlen), { 'e', 'E' })) {
+        switch(reader.peek(tlen)) {
+        case 'e':
+        case 'E':
           tlen++;
           pbase = 10;
-        } else if(rocket::is_any_of(reader.peek(tlen), { 'p', 'P' })) {
+          break;
+        case 'p':
+        case 'P':
           tlen++;
           pbase = 2;
+          break;
         }
         if(pbase != 0) {
           // Get the sign of the exponent if any.
           bool pneg = false;
-          if(reader.peek(tlen) == '+') {
+          switch(reader.peek(tlen)) {
+          case '+':
             tlen++;
             pneg = false;
-          } else if(reader.peek(tlen) == '-') {
+            break;
+          case '-':
             tlen++;
             pneg = true;
+            break;
           }
           // Parse the exponent as an integer. The value must fit in 24 bits.
           has_digit = false;
