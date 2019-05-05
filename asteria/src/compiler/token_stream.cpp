@@ -251,21 +251,17 @@ namespace Asteria {
         // number-sign-opt ::=
         //   PCRE([+-]?)
         // binary-literal ::=
-        //   PCRE(0[bB][01][01`]*(\.[01][01`]*))
+        //   PCRE(0[bB]([01]`?)+(\.([01]`?)+))
         // decimal-literal ::=
-        //   PCRE([0-9][0-9`]*(\.[0-9][0-9`]*))
+        //   PCRE(([0-9]`?)+(\.([0-9]`?)+))
         // hexadecimal-literal ::=
-        //   PCRE(0[xX][0-9A-Fa-f][0-9A-Fa-f`]*(\.[0-9A-Fa-f][0-9A-Fa-f`]*))
+        //   PCRE(0[xX]([0-9A-Fa-f]`?)+(\.([0-9A-Fa-f]`?)+))
         // exponent-suffix-opt ::=
         //   decimal-exponent-suffix | binary-exponent-suffix | ""
         // decimal-exponent-suffix ::=
-        //   PCRE([eE][-+]?[0-9][0-9`]*)
+        //   PCRE([eE][-+]?([0-9]`?)+)
         // binary-exponent-suffix ::=
-        //   PCRE([pP][-+]?[0-9][0-9`]*)
-        // nan-literal ::=
-        //   "nan"
-        // infinity-literal ::=
-        //   "infinity"
+        //   PCRE([pP][-+]?([0-9]`?)+)
         bool rneg = false;  // is the number negative?
         std::size_t rbegin = 0;  // beginning of significant figures
         std::size_t rend = 0;  // end of significant figures
@@ -308,51 +304,37 @@ namespace Asteria {
         rbegin = tlen;
         rend = tlen;
         // Parse the integral part.
-        bool has_digit = false;
         for(;;) {
-          auto next = reader.peek(tlen);
-          if(next == '`') {
-            if(!has_digit) {
-              throw do_make_parser_error(reader, tlen, Parser_Error::code_stray_digit_separator);
-            }
-            // Skip this digit separator.
-            tlen++;
-            continue;
-          }
-          auto dvalue = do_translate_digit(next);
+          auto dvalue = do_translate_digit(reader.peek(tlen));
           if(dvalue >= rbase) {
             break;
           }
           tlen++;
-          has_digit = true;
           // Accept a digit.
           rend = tlen;
           icnt++;
+          // Is the next character a digit separator?
+          if(reader.peek(tlen) == '`') {
+            tlen++;
+          }
         }
         // Check for the fractional part.
         if(reader.peek(tlen) == '.') {
           tlen++;
           // Parse the fractional part.
-          has_digit = false;
           for(;;) {
-            auto next = reader.peek(tlen);
-            if(next == '`') {
-              if(!has_digit) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_stray_digit_separator);
-              }
-              // Skip this digit separator.
-              tlen++;
-              continue;
-            }
-            auto dvalue = do_translate_digit(next);
+            auto dvalue = do_translate_digit(reader.peek(tlen));
             if(dvalue >= rbase) {
               break;
             }
             tlen++;
-            has_digit = true;
             // Accept a digit.
             rend = tlen;
             fcnt++;
+            // Is the next character a digit separator?
+            if(reader.peek(tlen) == '`') {
+              tlen++;
+            }
           }
         }
         // Check for the exponent part.
@@ -382,23 +364,12 @@ namespace Asteria {
             break;
           }
           // Parse the exponent as an integer. The value must fit in 24 bits.
-          has_digit = false;
           for(;;) {
-            auto next = reader.peek(tlen);
-            if(next == '`') {
-              if(!has_digit) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_stray_digit_separator);
-              }
-              // Skip this digit separator.
-              tlen++;
-              continue;
-            }
-            auto dvalue = do_translate_digit(next);
+            auto dvalue = do_translate_digit(reader.peek(tlen));
             if(dvalue >= rbase) {
               break;
             }
             tlen++;
-            has_digit = true;
             // Accept a digit.
             if(pneg) {
               std::int64_t bound = (-0x800000 + dvalue) / 10;
@@ -415,7 +386,14 @@ namespace Asteria {
               pexp *= 10;
               pexp += dvalue;
             }
+            // Is the next character a digit separator?
+            if(reader.peek(tlen) == '`') {
+              tlen++;
+            }
           }
+        }
+        if(reader.peek(tlen) == '`') {
+          throw do_make_parser_error(reader, tlen, Parser_Error::code_digit_separator_following_nondigit);
         }
         // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
         // Since we make no use of them, we just reserve them for further use for good.
