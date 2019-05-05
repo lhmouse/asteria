@@ -134,7 +134,7 @@ namespace Asteria {
               }
               this->m_str.push_back(static_cast<char>(ich));
             }
-            // Increment the line number.
+            // Increment the line number if a line has been read successfully.
             this->m_line++;
             ASTERIA_DEBUG_LOG("Read line ", std::setw(4), this->m_line, ": ", this->m_str);
             return true;
