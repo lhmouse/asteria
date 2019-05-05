@@ -408,249 +408,26 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
 
     namespace {
 
-    constexpr char s_digits[] = "00112233445566778899AaBbCcDdEeFf";
-
-    std::uint8_t do_verify_base(const Opt<G_integer>& base)
-      {
-        // The default base is `10`.
-        std::uint8_t value = 10;
-        if(base) {
-          // If the user has provided a custom base, ensure it is acceptable.
-          if((*base != 2) && (*base != 10) && (*base != 16)) {
-            ASTERIA_THROW_RUNTIME_ERROR("`base` must be either `2`, `10` or `16` (got `", *base, "`).");
-          }
-          value = static_cast<std::uint8_t>(*base);
-        }
-        return value;
-      }
-
-    std::uint8_t do_verify_exp_base(const Opt<G_integer>& exp_base)
-      {
-        // The default base is `10`.
-        std::uint8_t value = 10;
-        if(exp_base) {
-          // If the user has provided a custom base, ensure it is acceptable.
-          if((*exp_base != 2) && (*exp_base != 10)) {
-            ASTERIA_THROW_RUNTIME_ERROR("`exp_base` must be either `2` or `10` (got `", *exp_base, "`).");
-          }
-          value = static_cast<std::uint8_t>(*exp_base);
-        }
-        return value;
-      }
-
-    bool do_handle_special_values(G_string& text, const G_real& value)
-      {
-        const char* sptr;
-        // Get FP class.
-        switch(std::fpclassify(value)) {
-        case FP_INFINITE:
-          sptr = "-infinity";
-          break;
-        case FP_NAN:
-          sptr = "-nan";
-          break;
-        case FP_ZERO:
-          sptr = "-0";
-          break;
-        default:
-          return false;
-        }
-        // Check whether to remove the leading minus sign.
-        sptr += !std::signbit(value);
-        text = rocket::sref(sptr);
-        return true;
-      }
-
-    void do_append_integer_reverse(G_string& text, const G_integer& value, std::uint8_t rbase)
-      {
-        auto reg = value;
-        do {
-          auto div = std::div(reg, G_integer(rbase));
-          reg = div.quot;
-          // Write hexadecimal digits in upper case only.
-          auto dptr = s_digits + std::abs(div.rem * 2);
-          text.push_back(*dptr);
-        } while(reg != 0);
-      }
-
-    G_string& do_append_integer_prefixes(G_string& text, bool neg, std::uint8_t rbase)
-      {
-        // N.B. Characters are appended in reverse order.
-        if(rbase == 2) {
-          text.push_back('b');
-          text.push_back('0');
-        }
-        if(rbase == 16) {
-          text.push_back('x');
-          text.push_back('0');
-        }
-        if(neg) {
-          text.push_back('-');
-        }
-        return text;
-      }
-
-    G_string& do_append_exponent_prefixes(G_string& text, bool neg, std::uint8_t ebase)
-      {
-        // N.B. Characters are appended in reverse order.
-        if(neg) {
-          text.push_back('-');
-        }
-        if(ebase == 2) {
-          text.push_back('p');
-        }
-        if(ebase == 10) {
-          text.push_back('e');
-        }
-        return text;
-      }
-
-    G_string& do_reverse_suffix(G_string& text, std::size_t from)
-      {
-        // Get the suffix range.
-        std::size_t b = from;
-        std::size_t e = text.size();
-        if(b >= e) {
-          return text;
-        }
-        char* ptr = text.mut_data();
-        while(e - b >= 2) {
-          --e;
-          std::swap(ptr[b], ptr[e]);
-          ++b;
-        }
-        return text;
-      }
-
     }
 
 G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base)
   {
-    std::uint8_t rbase = do_verify_base(base);
-    // Define the result string.
-    G_string text;
-    // The value itself is the integral part. There are no fractional or exponent parts.
-    G_integer intg = value;
-    // Write the integral part.
-    do_append_integer_reverse(text, intg, rbase);
-    do_append_integer_prefixes(text, value < 0, rbase);
-    do_reverse_suffix(text, 0);
-    // Finish.
-    return text;
+    return { };
   }
 
 G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base)
   {
-    bool rneg = std::signbit(value);
-    std::uint8_t rbase = do_verify_base(base);
-    // Define the result string.
-    // When `value` is special, the other arguments still have to be valid.
-    G_string text;
-    if(do_handle_special_values(text, value)) {
-      return text;
-    }
-/*    // The string will be exact if and only if the base is a power of two.
-    int rcount = static_cast<int>(std::ceil(53 / std::log2(rbase) - 0.001)) + 1;
-    // Break the number down into integral and fractional parts.
-    G_real intg;
-    G_real frac = std::modf(value, &intg);
-    // Write the integral part.
-    do_append_integer_reverse(text, rcount, intg, rneg, rbase);
-    do_append_integer_prefixes(text, rneg, rbase);
-    do_reverse_suffix(text, 0);
-    // Append the fractional part after a decimal point.
-    text.push_back('.');
-    do_append_fraction_normal(text, rcount, frac, rneg, rbase);
-*/    // Finish.
-    return text;
+    return { };
   }
 
 G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const G_integer& exp_base)
   {
-    std::uint8_t rbase = do_verify_base(base);
-    std::uint8_t ebase = do_verify_exp_base(exp_base);
-    // Define the result string.
-    G_string text;
-    // The value itself is the integral part. There are no fractional or exponent parts.
-    G_integer intg = value;
-    // Calculate the exponent. In the case of integers it will never be negative.
-    G_integer eint = 0;
-    for(;;) {
-      auto div = std::div(intg, G_integer(ebase));
-      if(div.rem != 0) {
-        break;
-      }
-      intg = div.quot;
-      eint++;
-    }
-    // Write the integral part.
-    do_append_integer_reverse(text, intg, rbase);
-    do_append_integer_prefixes(text, value < 0, rbase);
-    do_reverse_suffix(text, 0);
-    // Write the exponent part.
-    auto expb = text.size();
-    do_append_integer_reverse(text, eint, 10);
-    do_append_exponent_prefixes(text, false, ebase);
-    do_reverse_suffix(text, expb);
-    // Finish.
-    return text;
+    return { };
   }
 
 G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const G_integer& exp_base)
   {
-    bool rneg = std::signbit(value);
-    std::uint8_t rbase = do_verify_base(base);
-    std::uint8_t ebase = do_verify_exp_base(exp_base);
-    // Define the result string.
-    // When `value` is special, the other arguments still have to be valid.
-    G_string text;
-    if(do_handle_special_values(text, value)) {
-      return text;
-    }
-/*    // The string will be exact if and only if the base is a power of two.
-    int rcount = static_cast<int>(std::ceil(53 / std::log2(rbase) - 0.001)) + 1;
-    int ecount = SCHAR_MAX;
-    // Calculate the exponent.
-    G_integer eint = 0;
-    G_real epow;
-    switch(ebase) {
-    case 2:
-      {
-        auto elog = std::floor(std::logb(std::abs(value)));
-        eint = static_cast<std::int64_t>(elog);
-        epow = std::exp2(elog);
-        break;
-      }
-    case 10:
-      {
-        auto elog = std::floor(std::log10(std::abs(value)));
-        eint = static_cast<std::int64_t>(elog);
-        epow = std::pow(10, elog);
-        break;
-      }
-    default:
-      ROCKET_ASSERT(false);
-    }
-    bool eneg = eint < 0;
-    // Break the number down into integral and fractional parts.
-    G_real intg;
-    G_real frac = std::modf(value / epow, &intg);
-    // Write the integral part.
-    do_append_integer_reverse(text, rcount, intg, rneg, rbase);
-    do_append_integer_prefixes(text, rneg, rbase);
-    do_reverse_suffix(text, 0);
-    // If the fractional part is not zero, append it after a decimal point.
-    if((frac != 0) && (rcount > 0)) {
-      text.push_back('.');
-      do_append_fraction_normal(text, rcount, frac, rneg, rbase);
-    }
-    // Write the exponent part.
-    auto expb = text.size();
-    do_append_integer_reverse(text, ecount, eint, eneg, 10);
-    do_append_exponent_prefixes(text, eneg, ebase);
-    do_reverse_suffix(text, expb);
-*/    // Finish.
-    return text;
+    return { };
   }
 
 Opt<G_integer> std_numeric_parse_integer(const G_string& text)
