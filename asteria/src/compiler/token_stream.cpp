@@ -233,14 +233,13 @@ namespace Asteria {
         reader.consume(tlen);
       }
 
-    inline void do_mul_or_div(long double& mul, long double& div, std::uint8_t base, std::int64_t exp) noexcept
+    inline void do_raise(double& value, std::uint8_t base, std::int64_t exp) noexcept
       {
-        long double fexp = exp;
         if(exp > 0) {
-          mul *= (base == 2) ? std::exp2(+fexp) : std::pow(base, +fexp);
+          value *= std::pow(base, static_cast<double>(+exp));
         }
         if(exp < 0) {
-          div *= (base == 2) ? std::exp2(-fexp) : std::pow(base, -fexp);
+          value /= std::pow(base, static_cast<double>(-exp));
         }
       }
 
@@ -488,12 +487,10 @@ namespace Asteria {
             tcnt--;
           }
         }
-        // How to raise the result?
-        long double mul = 1, div = 1;
-        do_mul_or_div(mul, div, rbase, tcnt);
-        do_mul_or_div(mul, div, pbase, pexp);
         // Raise the result.
-        double value = static_cast<double>(tvalue * mul / div);
+        double value = static_cast<double>(tvalue);
+        do_raise(value, rbase, tcnt);
+        do_raise(value, pbase, pexp);
         // Check for overflow or underflow.
         int fpcls = std::fpclassify(value);
         if(fpcls == FP_INFINITE) {
