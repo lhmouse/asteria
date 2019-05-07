@@ -1561,7 +1561,7 @@
 	* Returns the bytes that have been read as a `string`, or `null`
 	  on failure.
 
-	* Throws an exception of `offset` is negative.
+	* Throws an exception if `offset` is negative.
 
 `std.filesystem.file_stream(path, callback, [offset], [limit])`
 
@@ -1581,7 +1581,7 @@
 	* Returns `true` if all data have been processed successfully, or
 	  `null` on failure.
 
-	* Throws an exception of `offset` is negative.
+	* Throws an exception if `offset` is negative.
 
 `std.filesystem.file_write(path, data, [offset])`
 
@@ -1595,7 +1595,7 @@
 	* Returns `true` if all data have been written successfully, or
 	  `null` on failure.
 
-	* Throws an exception of `offset` is negative.
+	* Throws an exception if `offset` is negative.
 
 `std.filesystem.file_append(path, data, [exclusive])`
 

@@ -1295,7 +1295,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "  * Returns the bytes that have been read as a `string`, or `null`\n"
             "    on failure.\n"
             "  \n"
-            "  * Throws an exception of `offset` is negative.\n"
+            "  * Throws an exception if `offset` is negative.\n"
           ),
         // Opaque parameter
         G_null
@@ -1350,7 +1350,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "  * Returns `true` if all data have been processed successfully, or\n"
             "    `null` on failure.\n"
             "  \n"
-            "  * Throws an exception of `offset` is negative.\n"
+            "  * Throws an exception if `offset` is negative.\n"
           ),
         // Opaque parameter
         G_null
@@ -1399,7 +1399,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             "  * Returns `true` if all data have been written successfully, or\n"
             "    `null` on failure.\n"
             "  \n"
-            "  * Throws an exception of `offset` is negative.\n"
+            "  * Throws an exception if `offset` is negative.\n"
           ),
         // Opaque parameter
         G_null
