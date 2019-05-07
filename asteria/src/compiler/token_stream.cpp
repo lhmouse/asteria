@@ -490,9 +490,14 @@ namespace Asteria {
           }
         }
         // Raise the result.
-        double value = (tvalue == 0) ? std::copysign(0.0, -rneg) : static_cast<double>(tvalue);
-        do_raise(value, rbase, tcnt);
-        do_raise(value, pbase, pexp);
+        double value;
+        if(tvalue == 0) {
+          value = std::copysign(0.0, -rneg);
+        } else {
+          value = static_cast<double>(tvalue);
+          do_raise(value, rbase, tcnt);
+          do_raise(value, pbase, pexp);
+        }
         // Check for overflow or underflow.
         int fpcls = std::fpclassify(value);
         if(fpcls == FP_INFINITE) {
