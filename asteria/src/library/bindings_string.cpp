@@ -645,6 +645,12 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
     return text;
   }
 
+    namespace {
+
+    constexpr char s_xdigits_and_spaces[] = "00112233445566778899aAbBcCdDeEfF \f\n\r\t\v";
+
+    }
+
 G_string std_string_hex_encode(const G_string& text, const Opt<G_string>& delim, const Opt<G_boolean>& uppercase)
   {
     G_string hstr;
@@ -659,9 +665,8 @@ G_string std_string_hex_encode(const G_string& text, const Opt<G_string>& delim,
     hstr.reserve(2 + (ndcs + 2) * (text.size() - 1));
     for(;;) {
       // Encode a byte.
-      static constexpr char s_digits[] = "00112233445566778899aAbBcCdDeEfF";
-      hstr += s_digits[(*rpos & 0xF0) / 8 + upc];
-      hstr += s_digits[(*rpos & 0x0F) * 2 + upc];
+      hstr += s_xdigits_and_spaces[(*rpos & 0xF0) / 8 + upc];
+      hstr += s_xdigits_and_spaces[(*rpos & 0x0F) * 2 + upc];
       if(++rpos == text.end()) {
         break;
       }
@@ -680,16 +685,15 @@ Opt<G_string> std_string_hex_decode(const G_string& hstr)
     int dprev = -1;
     for(char ch : hstr) {
       // Identify this character.
-      static constexpr char s_table[] = "00112233445566778899aAbBcCdDeEfF \f\n\r\t\v";
-      auto pos = static_cast<const char*>(std::memchr(s_table, ch, sizeof(s_table) - 1));
-      if(!pos) {
+      auto pos = std::find(std::begin(s_xdigits_and_spaces), std::end(s_xdigits_and_spaces) - 1, ch);
+      if(*pos == 0) {
         // Fail due to an invalid character.
         return rocket::nullopt;
       }
-      auto dcur = static_cast<int>(pos - s_table) / 2;
+      // The first 32 characters are hex digits. The others are spaces.
+      auto dcur = static_cast<std::uint8_t>((pos - s_xdigits_and_spaces) / 2);
       if(dcur >= 16) {
-        // Ignore space characters.
-        // But if we have had a digit, flush it.
+        // Ignore space characters. But if we have had a digit, flush it.
         if(dprev != -1) {
           text.push_back(static_cast<char>(dprev));
           dprev = -1;
