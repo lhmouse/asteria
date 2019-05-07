@@ -367,7 +367,7 @@ namespace Asteria {
           // Parse the exponent as an integer. The value must fit in 24 bits.
           for(;;) {
             auto dvalue = do_translate_digit(reader.peek(tlen));
-            if(dvalue >= rbase) {
+            if(dvalue >= 10) {
               break;
             }
             tlen++;
