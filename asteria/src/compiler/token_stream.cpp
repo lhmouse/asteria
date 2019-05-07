@@ -490,7 +490,7 @@ namespace Asteria {
           }
         }
         // Raise the result.
-        double value = static_cast<double>(tvalue);
+        double value = (tvalue == 0) ? std::copysign(0.0, -rneg) : static_cast<double>(tvalue);
         do_raise(value, rbase, tcnt);
         do_raise(value, pbase, pexp);
         // Check for overflow or underflow.
