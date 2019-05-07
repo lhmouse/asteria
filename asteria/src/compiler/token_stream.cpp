@@ -123,13 +123,15 @@ namespace Asteria {
             for(;;) {
               auto ich = this->m_cbuf.get().sbumpc();
               if(ich == std::istream::traits_type::eof()) {
-                // Return `false` to indicate that there are no more data, when nothing has been read so far.
                 if(this->m_str.empty()) {
+                  // Return `false` to indicate that there are no more data, when nothing has been read so far.
                   return false;
                 }
+                // If the last line doesn't end with an LF, accept it anyway.
                 break;
               }
               if(ich == '\n') {
+                // Accept a line.
                 break;
               }
               this->m_str.push_back(static_cast<char>(ich));
