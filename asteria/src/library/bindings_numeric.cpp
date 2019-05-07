@@ -425,6 +425,13 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
     return { };
   }
 
+    namespace {
+
+    constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
+    constexpr char s_spaces[] = " \f\n\r\t\v";
+
+    }
+
 G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const G_integer& exp_base)
   {
     return { };
@@ -435,9 +442,233 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
     return { };
   }
 
+    namespace {
+
+    inline int do_compare_lowercase(const G_string& str, std::size_t from, const char* cmp, std::size_t len) noexcept
+      {
+        for(std::size_t si = from, ci = 0; ci != len; ++si, ++ci) {
+          // Read a character from `str` and convert it into lowercase.
+          int sc = static_cast<unsigned char>(str[si]);
+          if(('A' <= sc) && (sc <= 'Z')) {
+            sc |= 0x20;
+          }
+          // Compare it with the character from `cmp`, which must not be in uppercase.
+          sc -= static_cast<unsigned char>(cmp[ci]);
+          if(sc != 0) {
+            return sc;
+          }
+        }
+        // The strings are equal.
+        return 0;
+      }
+
+    inline std::uint8_t do_translate_digit(char ch) noexcept
+      {
+        return static_cast<std::uint8_t>((std::find(s_xdigits, s_xdigits + 32, ch) - s_xdigits) / 2);
+      }
+
+    inline void do_raise(double& value, std::uint8_t base, std::int64_t exp) noexcept
+      {
+        if(exp > 0) {
+          value *= std::pow(base, static_cast<double>(+exp));
+        }
+        if(exp < 0) {
+          value /= std::pow(base, static_cast<double>(-exp));
+        }
+      }
+
+    }
+
 Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating)
   {
-    return { };
+    auto tpos = text.find_first_not_of(s_spaces);
+    if(tpos == G_string::npos) {
+      // `text` consists of only spaces. Fail.
+      return rocket::nullopt;
+    }
+    bool rneg = false;  // is the number negative?
+    std::size_t rbegin = 0;  // beginning of significant figures
+    std::size_t rend = 0;  // end of significant figures
+    std::uint8_t rbase = 10;  // the base of the integral and fractional parts.
+    std::int64_t icnt = 0;  // number of integral digits (always non-negative)
+    std::int64_t fcnt = 0;  // number of fractional digits (always non-negative)
+    std::uint8_t pbase = 0;  // the base of the exponent.
+    std::int64_t pexp = 0;  // `pbase`'d exponent
+    // Get the sign of the number if any.
+    switch(text[tpos]) {
+    case '+':
+      tpos++;
+      rneg = false;
+      break;
+    case '-':
+      tpos++;
+      rneg = true;
+      break;
+    }
+    if((text[tpos] < '0') || ('9' < text[tpos])) {
+      // Check for special values.
+      if((do_compare_lowercase(text, tpos, "infinity", 8) == 0) && (text.find_first_not_of(s_spaces, tpos + 8) == G_string::npos)) {
+        // Return a signed infinity.
+        return std::copysign(INFINITY, -rneg);
+      }
+      if((do_compare_lowercase(text, tpos, "nan", 3) == 0) && (text.find_first_not_of(s_spaces, tpos + 3) == G_string::npos)) {
+        // Return a signed NaN.
+        return std::copysign(NAN, -rneg);
+      }
+      // Fail.
+      return rocket::nullopt;
+    }
+    // Check for the base prefix.
+    if(text[tpos] == '0') {
+      tpos++;
+      switch(text[tpos]) {
+      case 'b':
+      case 'B':
+        tpos++;
+        rbase = 2;
+        break;
+      case 'x':
+      case 'X':
+        tpos++;
+        rbase = 16;
+        break;
+      }
+    }
+    rbegin = tpos;
+    rend = tpos;
+    // Parse the integral part.
+    for(;;) {
+      auto dvalue = do_translate_digit(text[tpos]);
+      if(dvalue >= rbase) {
+        break;
+      }
+      tpos++;
+      // Accept a digit.
+      rend = tpos;
+      icnt++;
+    }
+    // Check for the fractional part.
+    if(text[tpos] == '.') {
+      tpos++;
+      // Parse the fractional part.
+      for(;;) {
+        auto dvalue = do_translate_digit(text[tpos]);
+        if(dvalue >= rbase) {
+          break;
+        }
+        tpos++;
+        // Accept a digit.
+        rend = tpos;
+        fcnt++;
+      }
+    }
+    // Check for the exponent part.
+    switch(text[tpos]) {
+    case 'e':
+    case 'E':
+      tpos++;
+      pbase = 10;
+      break;
+    case 'p':
+    case 'P':
+      tpos++;
+      pbase = 2;
+      break;
+    }
+    if(pbase != 0) {
+      // Get the sign of the exponent if any.
+      bool pneg = false;
+      switch(text[tpos]) {
+      case '+':
+        tpos++;
+        pneg = false;
+        break;
+      case '-':
+        tpos++;
+        pneg = true;
+        break;
+      }
+      // Parse the exponent as an integer. The value must fit in 24 bits.
+      for(;;) {
+        auto dvalue = do_translate_digit(text[tpos]);
+        if(dvalue >= 10) {
+          break;
+        }
+        tpos++;
+        // Accept a digit.
+        if(pneg) {
+          std::int64_t bound = (-0x800000 + dvalue) / 10;
+          if(pexp < bound) {
+            return rocket::nullopt;
+          }
+          pexp *= 10;
+          pexp -= dvalue;
+        } else {
+          std::int64_t bound = (+0x7FFFFF - dvalue) / 10;
+          if(pexp > bound) {
+            return rocket::nullopt;
+          }
+          pexp *= 10;
+          pexp += dvalue;
+        }
+      }
+    }
+    // Only spaces are allowed to follow the number.
+    if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
+      return rocket::nullopt;
+    }
+    // The literal is a `real` if there is a decimal point.
+    if(rbase == pbase) {
+      // Contract floating operations to minimize rounding errors.
+      pexp -= fcnt;
+      icnt += fcnt;
+      fcnt = 0;
+    }
+    // Digits are accumulated using a 64-bit integer with no fractional part.
+    // Excess significant figures are discard if the integer would overflow.
+    std::int64_t tvalue = 0;
+    std::int64_t tcnt = icnt;
+    // Accumulate digits from left to right.
+    for(auto ri = rbegin; ri != rend; ++ri) {
+      auto dvalue = do_translate_digit(text[ri]);
+      if(dvalue >= rbase) {
+        continue;
+      }
+      if(rneg) {
+        std::int64_t bound = (INT64_MIN + dvalue) / rbase;
+        if(tvalue < bound) {
+          break;
+        }
+        tvalue *= rbase;
+        tvalue -= dvalue;
+        tcnt--;
+      } else {
+        std::int64_t bound = (INT64_MAX - dvalue) / rbase;
+        if(tvalue > bound) {
+          break;
+        }
+        tvalue *= rbase;
+        tvalue += dvalue;
+        tcnt--;
+      }
+    }
+    // Raise the result.
+    double value;
+    if(tvalue == 0) {
+      value = std::copysign(0.0, -rneg);
+    } else {
+      value = static_cast<double>(tvalue);
+      do_raise(value, rbase, tcnt);
+      do_raise(value, pbase, pexp);
+    }
+    // Check for overflow or underflow.
+    int fpcls = std::fpclassify(value);
+    if((fpcls == FP_INFINITE) && !saturating) {
+      // Make sure we return an infinity only when the string is an explicit one.
+      return rocket::nullopt;
+    }
+    // N.B. The sign bit of a negative zero shall have been preserved.
+    return value;
   }
 
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
