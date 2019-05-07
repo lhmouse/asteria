@@ -490,10 +490,9 @@ namespace Asteria {
           }
         }
         // Raise the result.
-        double value = 1;
+        double value = static_cast<double>(tvalue);
         do_raise(value, rbase, tcnt);
         do_raise(value, pbase, pexp);
-        value *= static_cast<double>(tvalue);
         // Check for overflow or underflow.
         int fpcls = std::fpclassify(value);
         if(fpcls == FP_INFINITE) {
