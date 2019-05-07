@@ -150,21 +150,21 @@ namespace Asteria {
           }
         const char* data(std::size_t add = 0) const
           {
-            if(add > this->navail()) {
+            if(add > this->m_str.size() - this->m_offset) {
               ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
             }
             return this->m_str.data() + (this->m_offset + add);
           }
         char peek(std::size_t add = 0) const noexcept
           {
-            if(add > this->navail()) {
+            if(add > this->m_str.size() - this->m_offset) {
               return 0;
             }
             return this->m_str[this->m_offset + add];
           }
         void consume(std::size_t add)
           {
-            if(add > this->navail()) {
+            if(add > this->m_str.size() - this->m_offset) {
               ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
             }
             this->m_offset += add;
