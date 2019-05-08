@@ -437,11 +437,6 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
     return { };
   }
 
-Opt<G_integer> std_numeric_parse_integer(const G_string& text)
-  {
-    return { };
-  }
-
     namespace {
 
     inline int do_compare_lowercase(const G_string& str, std::size_t from, const char* cmp, std::size_t len) noexcept
@@ -490,6 +485,155 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
       }
 
     }
+
+Opt<G_integer> std_numeric_parse_integer(const G_string& text)
+  {
+    auto tpos = text.find_first_not_of(s_spaces);
+    if(tpos == G_string::npos) {
+      // `text` consists of only spaces. Fail.
+      return rocket::nullopt;
+    }
+    bool rneg = false;  // is the number negative?
+    std::size_t rbegin = 0;  // beginning of significant figures
+    std::size_t rend = 0;  // end of significant figures
+    std::uint8_t rbase = 10;  // the base of the integral and fractional parts.
+    std::uint8_t pbase = 0;  // the base of the exponent.
+    std::int64_t pexp = 0;  // `pbase`'d exponent
+    // Get the sign of the number if any.
+    switch(text[tpos]) {
+    case '+':
+      tpos++;
+      rneg = false;
+      break;
+    case '-':
+      tpos++;
+      rneg = true;
+      break;
+    }
+    switch(text[tpos]) {
+    case '0':
+      // Check for the base prefix.
+      tpos++;
+      switch(text[tpos]) {
+      case 'b':
+      case 'B':
+        tpos++;
+        rbase = 2;
+        break;
+      case 'x':
+      case 'X':
+        tpos++;
+        rbase = 16;
+        break;
+      }
+      // Fallthrough
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      // Do nothing.
+      break;
+    default:
+      // Fail.
+      return rocket::nullopt;
+    }
+    rbegin = tpos;
+    rend = tpos;
+    // Parse the integral part.
+    for(;;) {
+      auto dvalue = do_translate_digit(text[tpos]);
+      if(dvalue >= rbase) {
+        break;
+      }
+      tpos++;
+      // Accept a digit.
+      rend = tpos;
+      // Is the next character a digit separator?
+      if(text[tpos] == '`') {
+        tpos++;
+      }
+    }
+    // Check for the exponent part.
+    switch(text[tpos]) {
+    case 'e':
+    case 'E':
+      tpos++;
+      pbase = 10;
+      break;
+    case 'p':
+    case 'P':
+      tpos++;
+      pbase = 2;
+      break;
+    }
+    if(pbase != 0) {
+      // Get the sign of the exponent if any.
+      bool pneg = false;
+      switch(text[tpos]) {
+      case '+':
+        tpos++;
+        pneg = false;
+        break;
+      case '-':
+        tpos++;
+        pneg = true;
+        break;
+      }
+      // Parse the exponent as an integer. The value must fit in 24 bits.
+      for(;;) {
+        auto dvalue = do_translate_digit(text[tpos]);
+        if(dvalue >= 10) {
+          break;
+        }
+        tpos++;
+        // Accept a digit.
+        if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
+          return rocket::nullopt;
+        }
+        // Is the next character a digit separator?
+        if(text[tpos] == '`') {
+          tpos++;
+        }
+      }
+    }
+    // Only spaces are allowed to follow the number.
+    if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
+      return rocket::nullopt;
+    }
+    // The literal is an `integer` if there is no decimal point.
+    std::int64_t value = 0;
+    // Accumulate digits from left to right.
+    for(auto ri = rbegin; ri != rend; ++ri) {
+      auto dvalue = do_translate_digit(text[ri]);
+      if(dvalue >= rbase) {
+        continue;
+      }
+      // Accept a digit.
+      if(!do_accumulate_digit(value, rneg ? INT64_MIN : INT64_MAX, rbase, dvalue)) {
+        return rocket::nullopt;
+      }
+    }
+    // Negative exponents are not allowed, not even when the significant part is zero.
+    if(pexp < 0) {
+      return rocket::nullopt;
+    }
+    // Raise the result.
+    if(value != 0) {
+      for(auto i = pexp; i != 0; --i) {
+        // Append a digit zero.
+        if(!do_accumulate_digit(value, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
+          return rocket::nullopt;
+        }
+      }
+    }
+    // Return the integer.
+    return value;
+  }
 
 Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating)
   {
