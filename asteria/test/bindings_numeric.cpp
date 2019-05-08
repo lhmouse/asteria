@@ -444,6 +444,9 @@ int main()
         assert std.numeric.parse_real(" 1234") == +1234;
         assert std.numeric.parse_real("+1234") == +1234;
         assert std.numeric.parse_real("-1234") == -1234;
+        assert std.numeric.parse_real(" 1`234") == +1234;
+        assert std.numeric.parse_real("+12`34") == +1234;
+        assert std.numeric.parse_real("-123`4") == -1234;
         assert std.numeric.parse_real(" 0b101") == +5;
         assert std.numeric.parse_real("+0b101") == +5;
         assert std.numeric.parse_real("-0b101") == -5;
@@ -453,6 +456,9 @@ int main()
         assert std.numeric.parse_real(" 123.75") == +123.75;
         assert std.numeric.parse_real("+123.75") == +123.75;
         assert std.numeric.parse_real("-123.75") == -123.75;
+        assert std.numeric.parse_real(" 1`23.75") == +123.75;
+        assert std.numeric.parse_real("+12`3.75") == +123.75;
+        assert std.numeric.parse_real("-123.7`5") == -123.75;
         assert std.numeric.parse_real(" 0   ") == 0;
         assert std.numeric.parse_real("+0   ") == 0;
         assert __signb std.numeric.parse_real("+0   ") ==  0;

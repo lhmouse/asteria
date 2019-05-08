@@ -546,6 +546,10 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
       // Accept a digit.
       rend = tpos;
       icnt++;
+      // Is the next character a digit separator?
+      if(text[tpos] == '`') {
+        tpos++;
+      }
     }
     // Check for the fractional part.
     if(text[tpos] == '.') {
@@ -560,6 +564,10 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
         // Accept a digit.
         rend = tpos;
         fcnt++;
+        // Is the next character a digit separator?
+        if(text[tpos] == '`') {
+          tpos++;
+        }
       }
     }
     // Check for the exponent part.
@@ -610,6 +618,10 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
           }
           pexp *= 10;
           pexp += dvalue;
+        }
+        // Is the next character a digit separator?
+        if(text[tpos] == '`') {
+          tpos++;
         }
       }
     }
@@ -1927,9 +1939,12 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "    match one of the following Perl regular expressions, ignoring\n"
             "    case of characters:\n"
             "    \n"
-            "    * Base-2:   `[+-]?0b[01]+[ep][+]?[0-9]+`\n"
-            "    * Base-16:  `[+-]?0x[0-9a-f]+[ep][+]?[0-9]+`\n"
-            "    * Base-10:  `[+-]?[0-9]+[ep][+]?[0-9]+`\n"
+            "    * Binary (base-2):\n"
+            "      `[+-]?0b([01]`?)+[ep][+]?([0-9]`?)+`\n"
+            "    * Hexadecimal (base-16):\n"
+            "      `[+-]?0x([0-9a-f]`?)+[ep][+]?([0-9]`?)+`\n"
+            "    * Decimal (base-10):\n"
+            "      `[+-]?([0-9]`?)+[ep][+]?([0-9]`?)+`\n"
             "    \n"
             "    If the string does not match any of the above, this function\n"
             "    fails. If the result is outside the range of representable\n"
@@ -1979,11 +1994,16 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "    match any of the following Perl regular expressions, ignoring\n"
             "    case of characters:\n"
             "    \n"
-            "    * Infinities:  `[+-]?infinity`\n"
-            "    * NaNs:        `[+-]?nan`\n"
-            "    * Base-2:      `[+-]?0b[01]+(\\.[01])?[ep][-+]?[0-9]+`\n"
-            "    * Base-16:     `[+-]?0x[0-9a-f]+(\\.[0-9a-f])?[ep][-+]?[0-9]+`\n"
-            "    * Base-10:     `[+-]?[0-9]+(\\.[0-9])?[ep][-+]?[0-9]+`\n"
+            "    * Infinities:\n"
+            "      `[+-]?infinity`\n"
+            "    * NaNs:\n"
+            "      `[+-]?nan`\n"
+            "    * Binary (base-2):\n"
+            "      `[+-]?0b([01]`?)+(\\.([01]`?))?[ep][-+]?([0-9]`?)+`\n"
+            "    * Hexadecimal (base-16):\n"
+            "      `[+-]?0x([0-9a-f]`?)+(\\.([0-9a-f]`?))?[ep][-+]?([0-9]`?)+`\n"
+            "    * Decimal (base-10):\n"
+            "      `[+-]?([0-9]`?)+(\\.([0-9]`?))?[ep][-+]?([0-9]`?)+`\n"
             "    \n"
             "    If the string does not match any of the above, this function\n"
             "    fails. If the absolute value of the result is too small to fit\n"
