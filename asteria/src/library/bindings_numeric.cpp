@@ -505,21 +505,9 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
       rneg = true;
       break;
     }
-    if((text[tpos] < '0') || ('9' < text[tpos])) {
-      // Check for special values.
-      if((do_compare_lowercase(text, tpos, "infinity", 8) == 0) && (text.find_first_not_of(s_spaces, tpos + 8) == G_string::npos)) {
-        // Return a signed infinity.
-        return std::copysign(INFINITY, -rneg);
-      }
-      if((do_compare_lowercase(text, tpos, "nan", 3) == 0) && (text.find_first_not_of(s_spaces, tpos + 3) == G_string::npos)) {
-        // Return a signed NaN.
-        return std::copysign(NAN, -rneg);
-      }
-      // Fail.
-      return rocket::nullopt;
-    }
-    // Check for the base prefix.
-    if(text[tpos] == '0') {
+    switch(text[tpos]) {
+    case '0':
+      // Check for the base prefix.
       tpos++;
       switch(text[tpos]) {
       case 'b':
@@ -533,6 +521,47 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
         rbase = 16;
         break;
       }
+      // Fallthrough
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      // Do nothing.
+      break;
+    case 'i':
+    case 'I':
+      // Check for infinities.
+      if(do_compare_lowercase(text, tpos + 1, "nfinity", 7) != 0) {
+        return rocket::nullopt;
+      }
+      tpos += 8;
+      // Only spaces are allowed to follow the number.
+      if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
+        return rocket::nullopt;
+      }
+      // Return a signed infinity.
+      return std::copysign(INFINITY, -rneg);
+    case 'n':
+    case 'N':
+      // Check for NaNs.
+      if(do_compare_lowercase(text, tpos + 1, "an", 2) != 0) {
+        return rocket::nullopt;
+      }
+      tpos += 3;
+      // Only spaces are allowed to follow the number.
+      if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
+        return rocket::nullopt;
+      }
+      // Return a signed NaN.
+      return std::copysign(NAN, -rneg);
+    default:
+      // Fail.
+      return rocket::nullopt;
     }
     rbegin = tpos;
     rend = tpos;
@@ -629,7 +658,7 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
     if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
       return rocket::nullopt;
     }
-    // The literal is a `real` if there is a decimal point.
+    // Convert the value.
     if(rbase == pbase) {
       // Contract floating operations to minimize rounding errors.
       pexp -= fcnt;
