@@ -405,10 +405,6 @@ namespace Asteria {
         if(!integer_as_real && (fcnt == 0)) {
           // The literal is an `integer` if there is no decimal point.
           std::int64_t value = 0;
-          // Negative exponents are not allowed, not even when the significant part is zero.
-          if(pexp < 0) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_exponent_negative);
-          }
           // Accumulate digits from left to right.
           for(auto ri = rbegin; ri != rend; ++ri) {
             auto dvalue = do_translate_digit(reader.peek(ri));
@@ -431,7 +427,11 @@ namespace Asteria {
               value += dvalue;
             }
           }
-          if((value != 0) && (pbase >= 2)) {
+          // Negative exponents are not allowed, not even when the significant part is zero.
+          if(pexp < 0) {
+            throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_exponent_negative);
+          }
+          if(value != 0) {
             // Raise the significant part to the power of `pbase`.
             for(std::int64_t i = 0; i < pexp; ++i) {
               if(rneg) {
