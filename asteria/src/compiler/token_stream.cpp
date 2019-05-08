@@ -235,6 +235,18 @@ namespace Asteria {
         reader.consume(tlen);
       }
 
+    inline bool do_accumulate_digit(std::int64_t& value, std::int64_t limit, std::uint8_t base, std::uint8_t dvalue) noexcept
+      {
+        auto sbtm = limit >> 63;
+        if(sbtm ? (value < (limit + dvalue) / base) : (value > (limit - dvalue) / base)) {
+          return false;
+        }
+        value *= base;
+        value += dvalue ^ sbtm;
+        value -= sbtm;
+        return true;
+      }
+
     inline void do_raise(double& value, std::uint8_t base, std::int64_t exp) noexcept
       {
         if(exp > 0) {
@@ -372,20 +384,8 @@ namespace Asteria {
             }
             tlen++;
             // Accept a digit.
-            if(pneg) {
-              std::int64_t bound = (-0x800000 + dvalue) / 10;
-              if(pexp < bound) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
-              }
-              pexp *= 10;
-              pexp -= dvalue;
-            } else {
-              std::int64_t bound = (+0x7FFFFF - dvalue) / 10;
-              if(pexp > bound) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
-              }
-              pexp *= 10;
-              pexp += dvalue;
+            if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
+              throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
             }
             // Is the next character a digit separator?
             if(reader.peek(tlen) == '`') {
@@ -411,41 +411,21 @@ namespace Asteria {
             if(dvalue >= rbase) {
               continue;
             }
-            if(rneg) {
-              std::int64_t bound = (INT64_MIN + dvalue) / rbase;
-              if(value < bound) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
-              }
-              value *= rbase;
-              value -= dvalue;
-            } else {
-              std::int64_t bound = (INT64_MAX - dvalue) / rbase;
-              if(value > bound) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
-              }
-              value *= rbase;
-              value += dvalue;
+            // Accept a digit.
+            if(!do_accumulate_digit(value, rneg ? INT64_MIN : INT64_MAX, rbase, dvalue)) {
+              throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
             }
           }
           // Negative exponents are not allowed, not even when the significant part is zero.
           if(pexp < 0) {
             throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_exponent_negative);
           }
+          // Raise the result.
           if(value != 0) {
-            // Raise the significant part to the power of `pbase`.
-            for(std::int64_t i = 0; i < pexp; ++i) {
-              if(rneg) {
-                std::int64_t bound = INT64_MIN / pbase;
-                if(value < bound) {
-                  throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
-                }
-                value *= pbase;
-              } else {
-                std::int64_t bound = INT64_MAX / pbase;
-                if(value > bound) {
-                  throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
-                }
-                value *= pbase;
+            for(auto i = pexp; i != 0; --i) {
+              // Append a digit zero.
+              if(!do_accumulate_digit(value, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
+                throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
               }
             }
           }
@@ -471,23 +451,12 @@ namespace Asteria {
           if(dvalue >= rbase) {
             continue;
           }
-          if(rneg) {
-            std::int64_t bound = (INT64_MIN + dvalue) / rbase;
-            if(tvalue < bound) {
-              break;
-            }
-            tvalue *= rbase;
-            tvalue -= dvalue;
-            tcnt--;
-          } else {
-            std::int64_t bound = (INT64_MAX - dvalue) / rbase;
-            if(tvalue > bound) {
-              break;
-            }
-            tvalue *= rbase;
-            tvalue += dvalue;
-            tcnt--;
+          // Accept a digit.
+          if(!do_accumulate_digit(tvalue, rneg ? INT64_MIN : INT64_MAX, rbase, dvalue)) {
+            break;
           }
+          // Nudge the decimal point to the right.
+          tcnt--;
         }
         // Raise the result.
         double value;
