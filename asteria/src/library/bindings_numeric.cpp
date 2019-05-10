@@ -185,60 +185,23 @@ G_integer std_numeric_itrunc(const G_real& value)
     return do_icast(std::trunc(value));
   }
 
-    namespace {
-
-    double do_random_ratio(const Global_Context& global) noexcept
-      {
-        // sqword <= [0,INT64_MAX]
-        std::int64_t sqword = global.get_random_uint32();
-        sqword <<= 31;
-        sqword ^= global.get_random_uint32();
-        // return <= [0,1)
-        return static_cast<double>(sqword) / 0x1p63;
+G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& limit)
+  {
+    if(limit) {
+      int fpcls = std::fpclassify(*limit);
+      if((fpcls == FP_INFINITE) || (fpcls == FP_NAN)) {
+        ASTERIA_THROW_RUNTIME_ERROR("The `limit` for random numbers shall be finite (got `", *limit, "`).");
       }
-
+      if(fpcls == FP_ZERO) {
+        ASTERIA_THROW_RUNTIME_ERROR("The `limit` for random numbers shall not be zero (got `", *limit, "`).");
+      }
     }
-
-G_integer std_numeric_random(const Global_Context& global, const G_integer& upper)
-  {
-    if(!(0 < upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `upper` bound must be greater than zero (got `", upper, "`).");
-    }
-    auto res = do_random_ratio(global);
-    res *= static_cast<double>(upper);
-    return static_cast<std::int64_t>(res);
-  }
-
-G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& upper)
-  {
-    if(upper && !std::isless(0, *upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `upper` bound must be greater than zero (got `", *upper, "`).");
-    }
-    auto res = do_random_ratio(global);
-    if(upper) {
-      res *= *upper;
-    }
-    return res;
-  }
-
-G_integer std_numeric_random(const Global_Context& global, const G_integer& lower, const G_integer& upper)
-  {
-    if(!(lower < upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than the `upper` bound (got `", lower, "` and `", upper, "`).");
-    }
-    auto res = do_random_ratio(global);
-    res *= static_cast<double>(upper - lower);
-    return lower + static_cast<std::int64_t>(res);
-  }
-
-G_real std_numeric_random(const Global_Context& global, const G_real& lower, const G_real& upper)
-  {
-    if(!std::isless(lower, upper)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than the `upper` bound (got `", lower, "` and `", upper, "`).");
-    }
-    auto res = do_random_ratio(global);
-    res *= upper - lower;
-    return lower + res;
+    // sqword <= [0,INT64_MAX]
+    std::int64_t sqword = global.get_random_uint32();
+    sqword <<= 31;
+    sqword ^= global.get_random_uint32();
+    // `sqword / 0x1p63` <= [0,1)
+    return static_cast<double>(sqword) / 0x1p63 * limit.value_or(1);
   }
 
 G_real std_numeric_sqrt(const G_real& x)
@@ -1539,30 +1502,15 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         rocket::sref
           (
             "\n"
-            "`std.numeric.random([upper])`\n"
+            "`std.numeric.random([limit])`\n"
             "  \n"
-            "  * Generates a random `integer` or `real` that is less than\n"
-            "    `upper`. If `upper` is absent, it has a default value of `1.0`\n"
-            "    which is a `real`.\n"
+            "  * Generates a random `real` value whose sign agrees with `limit`\n"
+            "    and whose absolute value is less than `limit`. If `limit` is\n"
+            "    absent, `1` is assumed.\n"
             "  \n"
-            "  * Returns a non-negative `integer` or `real` that is less than\n"
-            "    `upper`. The return value is of type `integer` if `upper` is of\n"
-            "    type `integer`; otherwise it is of type `real`.\n"
+            "  * Returns a random `real` value.\n"
             "  \n"
-            "  * Throws an exception if `upper` is negative or zero.\n"
-            "\n"
-            "`std.numeric.random(lower, upper)`\n"
-            "  \n"
-            "  * Generates a random `integer` or `real` that is not less than\n"
-            "    `lower` but is less than `upper`. `lower` and `upper` shall be\n"
-            "    of the same type.\n"
-            "  \n"
-            "  * Returns an `integer` or `real` that is not less than `lower`\n"
-            "    but is less than `upper`. The return value is of type `integer`\n"
-            "    if both arguments are of type `integer`; otherwise it is of\n"
-            "    type `real`.\n"
-            "  \n"
-            "  * Throws an exception if `lower` is not less than `upper`.\n"
+            "  * Throws an exception if `limit` is zero or non-finite.\n"
           ),
         // Opaque parameter
         G_null
@@ -1574,29 +1522,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.numeric.random"), args);
             // Parse arguments.
-            G_integer iupper;
-            if(reader.start().g(iupper).finish()) {
+            Opt<G_real> limit;
+            if(reader.start().g(limit).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(global, iupper) };
-              return rocket::move(xref);
-            }
-            Opt<G_real> kupper;
-            if(reader.start().g(kupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(global, kupper) };
-              return rocket::move(xref);
-            }
-            G_integer ilower;
-            if(reader.start().g(ilower).g(iupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(global, ilower, iupper) };
-              return rocket::move(xref);
-            }
-            G_real fupper;
-            G_real flower;
-            if(reader.start().g(flower).g(fupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_random(global, flower, fupper) };
+              Reference_Root::S_temporary xref = { std_numeric_random(global, limit) };
               return rocket::move(xref);
             }
             // Fail.

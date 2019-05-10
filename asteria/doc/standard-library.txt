@@ -1258,30 +1258,15 @@
 	* Throws an exception if the result cannot be represented as an
 	  `integer`.
 
-`std.numeric.random([upper])`
+`std.numeric.random([limit])`
 
-	* Generates a random `integer` or `real` that is less than
-	  `upper`. If `upper` is absent, it has a default value of `1.0`
-	  which is a `real`.
+	* Generates a random `real` value whose sign agrees with `limit`
+	  and whose absolute value is less than `limit`. If `limit` is
+	  absent, `1` is assumed.
 
-	* Returns a non-negative `integer` or `real` that is less than
-	  `upper`. The return value is of type `integer` if `upper` is of
-	  type `integer`; otherwise it is of type `real`.
+	* Returns a random `real` value.
 
-	* Throws an exception if `upper` is negative or zero.
-
-`std.numeric.random(lower, upper)`
-
-	* Generates a random `integer` or `real` that is not less than
-	  `lower` but is less than `upper`. `lower` and `upper` shall be
-	  of the same type.
-
-	* Returns an `integer` or `real` that is not less than `lower`
-	  but is less than `upper`. The return value is of type `integer`
-	  if both arguments are of type `integer`; otherwise it is of
-	  type `real`.
-
-	* Throws an exception if `lower` is not less than `upper`.
+	* Throws an exception if `limit` is zero or non-finite.
 
 `std.numeric.sqrt(x)`
 
