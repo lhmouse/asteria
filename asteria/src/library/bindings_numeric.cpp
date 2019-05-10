@@ -2112,7 +2112,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "    fails. If the result is outside the range of representable\n"
             "    values of type `integer`, this function fails.\n"
             "  \n"
-            "  * Returns the `integer` number converted from `text`. On failure,\n"
+            "  * Returns the `integer` value converted from `text`. On failure,\n"
             "    `null` is returned.\n"
           ),
         // Opaque parameter
@@ -2173,7 +2173,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "    is too large, if `saturating` is set to `true`, a signed\n"
             "    infinity is returned; otherwise this function fails.\n"
             "  \n"
-            "  * Returns the `real` number converted from `text`. On failure,\n"
+            "  * Returns the `real` value converted from `text`. On failure,\n"
             "    `null` is returned.\n"
           ),
         // Opaque parameter

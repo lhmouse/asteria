@@ -1429,7 +1429,7 @@
 	  fails. If the result is outside the range of representable
 	  values of type `integer`, this function fails.
 
-	* Returns the `integer` number converted from `text`. On failure,
+	* Returns the `integer` value converted from `text`. On failure,
 	  `null` is returned.
 
 `std.numeric.parse_real(text, [saturating])`
@@ -1457,7 +1457,7 @@
 	  is too large, if `saturating` is set to `true`, a signed
 	  infinity is returned; otherwise this function fails.
 
-	* Returns the `real` number converted from `text`. On failure,
+	* Returns the `real` value converted from `text`. On failure,
 	  `null` is returned.
 
 ### `std.math`
