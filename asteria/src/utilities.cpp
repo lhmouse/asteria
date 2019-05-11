@@ -420,6 +420,32 @@ rocket::cow_string quote(const rocket::cow_string& str)
     return output;
   }
 
+double power_u64(double base, std::uint64_t exp) noexcept
+  {
+    if(exp == 0) {
+      // Return `1` even when `base` is an infinity or a NaN.
+      return 1;
+    }
+    // Otherwise, if `base` is an infinity or a NaN, return it.
+    if(!std::isfinite(base)) {
+      return base;
+    }
+    // Calculate the product.
+    double reg = 1;
+    std::uint64_t mask = UINT64_C(1) << 63;
+    for(;;) {
+      if(exp & mask) {
+        reg *= base;
+      }
+      mask >>= 1;
+      if(mask == 0) {
+        break;
+      }
+      reg *= reg;
+    }
+    return reg;
+  }
+
 Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
   {
     ROCKET_ASSERT(size <= PTRDIFF_MAX);

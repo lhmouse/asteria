@@ -172,6 +172,8 @@ extern rocket::cow_string quote(const char* str, std::size_t len);
 extern rocket::cow_string quote(const char* str);
 extern rocket::cow_string quote(const rocket::cow_string& str);
 
+extern double power_u64(double base, std::uint64_t exp) noexcept;
+
 struct Wrapped_Index
   {
     std::uint64_t nprepend;  // number of elements to prepend
