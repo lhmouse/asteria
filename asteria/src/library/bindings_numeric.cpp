@@ -371,6 +371,9 @@ G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, c
 
     namespace {
 
+    constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
+    constexpr char s_spaces[] = " \f\n\r\t\v";
+
     }
 
 G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base)
@@ -387,13 +390,6 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
   {
     return { };
   }
-
-    namespace {
-
-    constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
-    constexpr char s_spaces[] = " \f\n\r\t\v";
-
-    }
 
 G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const G_integer& exp_base)
   {
