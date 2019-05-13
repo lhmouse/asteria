@@ -257,6 +257,28 @@ namespace Asteria {
         }
       }
 
+    bool do_may_infix_operators_follow(Cow_Vector<Token>& seq)
+      {
+        if(seq.empty()) {
+          // No previous token exists.
+          return false;
+        }
+        const auto& p = seq.back();
+        if(p.is_keyword()) {
+          // Infix operators may follow if the keyword denotes a value or reference.
+          return rocket::is_any_of(p.as_keyword(),{ Token::keyword_null, Token::keyword_true, Token::keyword_false,
+                                                    Token::keyword_nan, Token::keyword_infinity, Token::keyword_this });
+        }
+        if(p.is_punctuator()) {
+          // Infix operators may follow if the punctuator can terminate an expression.
+          return rocket::is_any_of(p.as_punctuator(), { Token::punctuator_inc, Token::punctuator_dec,
+                                                        Token::punctuator_parenth_cl, Token::punctuator_bracket_cl,
+                                                        Token::punctuator_brace_cl });
+        }
+        // Infix operators can follow.
+        return true;
+      }
+
     bool do_accept_numeric_literal(Cow_Vector<Token>& seq, Line_Reader& reader, bool integer_as_real)
       {
         // numeric-literal ::=
@@ -294,6 +316,9 @@ namespace Asteria {
           tlen++;
           rneg = true;
           break;
+        }
+        if((tlen != 0) && do_may_infix_operators_follow(seq)) {
+          return false;
         }
         if(!do_check_cctype(reader.peek(tlen), cctype_digit)) {
           return false;
