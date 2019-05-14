@@ -189,11 +189,11 @@ G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& limit
   {
     if(limit) {
       int fpcls = std::fpclassify(*limit);
-      if((fpcls == FP_INFINITE) || (fpcls == FP_NAN)) {
-        ASTERIA_THROW_RUNTIME_ERROR("The `limit` for random numbers shall be finite (got `", *limit, "`).");
-      }
       if(fpcls == FP_ZERO) {
         ASTERIA_THROW_RUNTIME_ERROR("The `limit` for random numbers shall not be zero (got `", *limit, "`).");
+      }
+      if((fpcls == FP_INFINITE) || (fpcls == FP_NAN)) {
+        ASTERIA_THROW_RUNTIME_ERROR("The `limit` for random numbers shall be finite (got `", *limit, "`).");
       }
     }
     // sqword <= [0,INT64_MAX]
