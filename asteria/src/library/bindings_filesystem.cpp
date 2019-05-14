@@ -16,7 +16,7 @@
 #  include <sys/stat.h>  // ::stat(), ::fstat(), ::lstat(), ::mkdir(), ::fchmod()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
-#  include <unistd.h>  // ::rmdir(), ::close(), ::pread(), ::pwrite(), ::unlink()
+#  include <unistd.h>  // ::rmdir(), ::close(), ::read(), ::write(), ::pread(), ::pwrite(), ::unlink()
 #  include <stdio.h>  // ::rename()
 #endif
 
