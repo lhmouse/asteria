@@ -65,7 +65,7 @@ G_real std_chrono_hires_now()
 #ifdef _WIN32
     // Read the performance counter.
     // The performance counter frequency has to be obtained only once.
-    static std::atomic<G_real> s_freq_recip;
+    static std::atomic<double> s_freq_recip;
     ::LARGE_INTEGER ti;
     auto freq_recip = s_freq_recip.load(std::memory_order_relaxed);
     if(ROCKET_UNEXPECT(!(freq_recip > 0))) {
