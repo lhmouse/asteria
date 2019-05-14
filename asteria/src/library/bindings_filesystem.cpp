@@ -16,7 +16,7 @@
 #  include <sys/stat.h>  // ::stat(), ::fstat(), ::lstat(), ::mkdir(), ::fchmod()
 #  include <dirent.h>  // ::opendir(), ::closedir()
 #  include <fcntl.h>  // ::open()
-#  include <unistd.h>  // ::rmdir(), ::close(), ::read(), ::write(), ::pread(), ::pwrite(), ::unlink()
+#  include <unistd.h>  // ::rmdir(), ::close(), ::read(), ::write(), ::unlink()
 #  include <stdio.h>  // ::rename()
 #endif
 
@@ -140,7 +140,7 @@ G_string std_filesystem_get_working_directory()
 #ifdef _WIN32
     // Get the current directory as UTF-16.
     rocket::cow_wstring ucwd(MAX_PATH, L'*');
-    auto nreq = ::GetCurrentDirectoryW(static_cast<::DWORD>(ucwd.size()), ucwd.mut_data());
+    auto nreq = ::GetCurrentDirectoryW(static_cast<std::uint32_t>(ucwd.size()), ucwd.mut_data());
     if(nreq > ucwd.size()) {
       // The buffer was too small.
       ucwd.append(nreq - ucwd.size(), L'*');
@@ -646,7 +646,8 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
     std::int64_t roffset = offset.value_or(0);
-    std::int64_t rlimit = rocket::clamp(limit.value_or(INT_MAX), 0, 65535);
+    std::int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 1048576);
+    G_string data;
     // Open the file for reading.
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
@@ -654,37 +655,36 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     if(!hf) {
       return rocket::nullopt;
     }
+    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    if(roffset != 0) {
+      ::LARGE_INTEGER fpos;
+      fpos.QuadPart = roffset;
+      if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
 #else
     File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
       return rocket::nullopt;
     }
+    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    if(roffset != 0) {
+      if(::lseek(hf, roffset, SEEK_SET) == 0) {
 #endif
-    G_string data;
+        return rocket::nullopt;
+      }
+    }
     // Don't read too many bytes at a time.
     data.resize(static_cast<std::size_t>(rlimit));
     // Read data from the offset specified.
 #ifdef _WIN32
-    ::OVERLAPPED ctx = { };
-    ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
-    ctx.Offset = static_cast<::DWORD>(roffset);
     ::DWORD nread;
-    if(::ReadFile(hf, data.mut_data(), static_cast<::DWORD>(data.size()), &nread, &ctx) == FALSE) {
-      auto err = ::GetLastError();
-      // This error can happen if `roffset` is past the end of the file.
-      if(err != ERROR_HANDLE_EOF) {
-        return rocket::nullopt;
-      }
-      nread = 0;
-    }
-    data.erase(nread);
+    if((::ReadFile(hf, data.mut_data(), static_cast<unsigned>(data.size()), &nread, nullptr) == FALSE) && (::GetLastError() != ERROR_HANDLE_EOF)) {
 #else
-    ::ssize_t nread = ::pread(hf, data.mut_data(), data.size(), roffset);
+    ::ssize_t nread = ::read(hf, data.mut_data(), data.size());
     if(nread < 0) {
+#endif
       return rocket::nullopt;
     }
     data.erase(static_cast<std::size_t>(nread));
-#endif
     return rocket::move(data);
   }
 
@@ -716,8 +716,9 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
     std::int64_t roffset = offset.value_or(0);
+    std::int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 1048576);
     std::int64_t nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
-    std::int64_t rlimit = rocket::clamp(limit.value_or(INT_MAX), 0, 65535);
+    G_string data;
     // Open the file for reading.
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
@@ -725,44 +726,46 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     if(!hf) {
       return false;
     }
+    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    if(roffset != 0) {
+      ::LARGE_INTEGER fpos;
+      fpos.QuadPart = roffset;
+      if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
 #else
     File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
       return false;
     }
+    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    if(roffset != 0) {
+      if(::lseek(hf, roffset, SEEK_SET) == 0) {
 #endif
-    G_string data;
-    while(nremaining > 0) {
+        return false;
+      }
+    }
+    for(;;) {
+      // Has the read limit been reached?
+      if(nremaining <= 0) {
+        break;
+      }
       // Don't read too many bytes at a time.
       data.resize(static_cast<std::size_t>(rlimit));
       // Read data from the offset specified.
 #ifdef _WIN32
-      ::OVERLAPPED ctx = { };
-      ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
-      ctx.Offset = static_cast<::DWORD>(roffset);
       ::DWORD nread;
-      if(::ReadFile(hf, data.mut_data(), static_cast<::DWORD>(data.size()), &nread, &ctx) == FALSE) {
-        auto err = ::GetLastError();
-        // This error can happen if `roffset` is past the end of the file.
-        if(err != ERROR_HANDLE_EOF) {
-          return false;
-        }
-        nread = 0;
-      }
-      data.erase(nread);
+      if((::ReadFile(hf, data.mut_data(), static_cast<unsigned>(data.size()), &nread, nullptr) == FALSE) && (::GetLastError() != ERROR_HANDLE_EOF)) {
 #else
-      ::ssize_t nread = ::pread(hf, data.mut_data(), data.size(), roffset);
+      ::ssize_t nread = ::read(hf, data.mut_data(), data.size());
       if(nread < 0) {
+#endif
         return false;
       }
-      data.erase(static_cast<std::size_t>(nread));
-#endif
-      if(data.empty()) {
-        // EOF
+      if(nread == 0) {
         break;
       }
+      data.erase(static_cast<std::size_t>(nread));
       do_process_block(global, callback, roffset, data);
-      // Seek the next block.
+      // Read the next block.
       nremaining -= nread;
       roffset += nread;
     }
@@ -790,6 +793,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     if(!hf) {
       return false;
     }
+    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
     if(roffset != 0) {
       // If `roffset` is not zero, truncate the file there.
       // Otherwise, the file will have been truncate at creation.
@@ -803,7 +807,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
     // This saves us two syscalls to truncate the file below.
-    int flags = O_WRONLY | O_CREAT;
+    int flags = O_WRONLY | O_CREAT | O_APPEND;
     if(roffset == 0) {
       flags |= O_TRUNC;
     }
@@ -812,6 +816,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     if(!hf) {
       return false;
     }
+    // Data will be appended to the end. There is no need to set the file pointer.
     if(roffset != 0) {
       // If `roffset` is not zero, truncate the file there.
       // Otherwise, the file will have been truncate at creation.
@@ -820,58 +825,40 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
         return false;
       }
     }
-    // Write data in a loop.
-    while(nremaining > 0) {
-      // Write data to the offset specified.
+    for(;;) {
+      // Have all data been written successfully?
+      if(nremaining <= 0) {
+        break;
+      }
+      // Write data to the end.
 #ifdef _WIN32
-      ::OVERLAPPED ctx = { };
-      ctx.OffsetHigh = static_cast<::DWORD>(roffset >> 32);
-      ctx.Offset = static_cast<::DWORD>(roffset);
-      // Write data to the offset specified.
       ::DWORD nwritten;
-      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<::DWORD>(rocket::min(nremaining, INT_MAX)), &nwritten, &ctx) == FALSE) {
+      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<std::uint32_t>(rocket::min(nremaining, INT32_MAX)), &nwritten, nullptr) == FALSE) {
 #else
-      ::ssize_t nwritten = ::pwrite(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining), roffset);
+      ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining));
       if(nwritten < 0) {
 #endif
         return false;
       }
       nremaining -= nwritten;
-      roffset += nwritten;
     }
     return true;
   }
 
 bool std_filesystem_file_append(const G_string& path, const G_string& data, const Opt<G_boolean>& exclusive)
   {
-    // This is a signed integer.
-    auto nremaining = data.ssize();
+    std::int64_t nremaining = static_cast<std::int64_t>(data.size());
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Calculate the `dwCreationDisposition` argument.
-    // If `exclusive` is set to `true`, fail if the file exists.
+    // If we are to write from the beginning, truncate the file at creation.
+    // This saves us two syscalls to truncate the file below.
     ::DWORD create_disposition = OPEN_ALWAYS;
     if(exclusive == true) {
       create_disposition = CREATE_NEW;
     }
     // Open the file for writing.
     File hf(::CreateFileW(wpath.c_str(), FILE_APPEND_DATA, 0, nullptr, create_disposition, FILE_ATTRIBUTE_NORMAL, NULL));
-    if(!hf) {
-      return false;
-    }
-    // Write data in a loop.
-    while(nremaining > 0) {
-      // Set the write position.
-      ::OVERLAPPED ctx = { };
-      ctx.OffsetHigh = UINT32_MAX;
-      ctx.Offset = UINT32_MAX;
-      // Write data to the offset specified.
-      ::DWORD nwritten;
-      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<::DWORD>(rocket::min(nremaining, INT_MAX)), &nwritten, &ctx) == FALSE) {
-        return false;
-      }
-      nremaining -= static_cast<int>(nwritten);
-    }
 #else
     // Calculate the `flags` argument.
     // If we are to write from the beginning, truncate the file at creation.
@@ -882,19 +869,27 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
     }
     // Open the file for writing.
     File hf(::open(path.c_str(), flags, 0666));
+#endif
     if(!hf) {
       return false;
     }
-    // Write data in a loop.
-    while(nremaining > 0) {
-      // Write data to the offset specified.
+    for(;;) {
+      // Have all data been written successfully?
+      if(nremaining <= 0) {
+        break;
+      }
+      // Write data to the end.
+#ifdef _WIN32
+      ::DWORD nwritten;
+      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<std::uint32_t>(rocket::min(nremaining, INT32_MAX)), &nwritten, nullptr) == FALSE) {
+#else
       ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining));
       if(nwritten < 0) {
+#endif
         return false;
       }
       nremaining -= nwritten;
     }
-#endif
     return true;
   }
 
@@ -919,7 +914,7 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
     File hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200));
     if(!hf_new) {
       // If the file cannot be opened, unlink it and try again.
-      if(::unlink(path_new.c_str()) != 0) {
+      if((errno == EISDIR) || (::unlink(path_new.c_str()) != 0)) {
         return false;
       }
       hf_new.reset(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200));
@@ -930,22 +925,24 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
     // Allocate the I/O buffer.
     std::vector<char> buff;
     buff.resize(static_cast<std::size_t>(rocket::min(rocket::max(512, stb_old.st_blksize), stb_old.st_size)));
-    // Copy the contents in a loop.
-    ::off_t offset = 0;
     for(;;) {
-      ::ssize_t nread = ::pread(hf_old, buff.data(), buff.size(), offset);
+      // Read some bytes.
+      ::ssize_t nread = ::read(hf_old, buff.data(), buff.size());
       if(nread < 0) {
         return false;
       }
       if(nread == 0) {
-        // EOF
         break;
       }
-      ::ssize_t nwritten = ::write(hf_new, buff.data(), static_cast<std::size_t>(nread));
-      if(nwritten < 0) {
-        return false;
-      }
-      offset += nwritten;
+      // Write them all.
+      ::ssize_t ntotal = 0;
+      do {
+        ::ssize_t nwritten = ::write(hf_new, buff.data() + ntotal, static_cast<std::size_t>(nread - ntotal));
+        if(nwritten < 0) {
+          return false;
+        }
+        ntotal += nwritten;
+      } while(ntotal < nread);
     }
     // Set the file mode. This must be at the last.
     if(::fchmod(hf_new, stb_old.st_mode) != 0) {
