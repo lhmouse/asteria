@@ -65,18 +65,18 @@ G_real std_chrono_hires_now()
 #ifdef _WIN32
     // Read the performance counter.
     // The performance counter frequency has to be obtained only once.
-    static std::atomic<double> s_freq_recip;
+    static std::atomic<std::int64_t> s_freq;
     ::LARGE_INTEGER ti;
-    auto freq_recip = s_freq_recip.load(std::memory_order_relaxed);
-    if(ROCKET_UNEXPECT(!(freq_recip > 0))) {
+    auto freq = s_freq.load(std::memory_order_relaxed);
+    if(ROCKET_UNEXPECT(freq == 0)) {
       ::QueryPerformanceFrequency(&ti);
-      freq_recip = 1000 / static_cast<double>(ti.QuadPart);
-      s_freq_recip.store(freq_recip, std::memory_order_relaxed);
+      freq = ti.QuadPart;
+      s_freq.store(freq, std::memory_order_relaxed);
     }
     ::QueryPerformanceCounter(&ti);
     // Convert it to the number of milliseconds.
     // Add a random offset to the result to help debugging.
-    return static_cast<double>(ti.QuadPart) * freq_recip + 0x987654321;
+    return static_cast<double>(ti.QuadPart) / static_cast<double>(freq) + 0x987654321;
 #else
     // Get the time since the system was started.
     ::timespec ts;
