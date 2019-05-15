@@ -566,7 +566,6 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
         if(::lstat(child.c_str(), &stb) != 0) {
           return rocket::nullopt;
         }
-        // Get the file type if it is available immediately.
         entry.insert_or_assign(rocket::sref("b_dir"),
           G_boolean(
             S_ISDIR(stb.st_mode)
