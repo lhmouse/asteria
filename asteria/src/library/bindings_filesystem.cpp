@@ -655,7 +655,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     if(!hf) {
       return rocket::nullopt;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
       ::LARGE_INTEGER fpos;
       fpos.QuadPart = roffset;
@@ -665,7 +665,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     if(!hf) {
       return rocket::nullopt;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
       if(::lseek(hf, roffset, SEEK_SET) == 0) {
 #endif
@@ -726,7 +726,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     if(!hf) {
       return false;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
       ::LARGE_INTEGER fpos;
       fpos.QuadPart = roffset;
@@ -736,7 +736,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     if(!hf) {
       return false;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
       if(::lseek(hf, roffset, SEEK_SET) == 0) {
 #endif
@@ -793,7 +793,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     if(!hf) {
       return false;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful for reading pipes.
+    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
       // If `roffset` is not zero, truncate the file there.
       // Otherwise, the file will have been truncate at creation.
