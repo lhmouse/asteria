@@ -58,11 +58,8 @@ extern G_real std_numeric_subs(const G_real& x, const G_real& y);
 extern G_integer std_numeric_muls(const G_integer& x, const G_integer& y);
 extern G_real std_numeric_muls(const G_real& x, const G_real& y);
 
-extern G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base = rocket::nullopt);
-extern G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base = rocket::nullopt);
-extern G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const G_integer& exp_base);
-extern G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const G_integer& exp_base);
-
+extern G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base = rocket::nullopt, const Opt<G_integer>& ebase = rocket::nullopt);
+extern G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base = rocket::nullopt, const Opt<G_integer>& ebase = rocket::nullopt);
 extern Opt<G_integer> std_numeric_parse_integer(const G_string& text);
 extern Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating = rocket::nullopt);
 

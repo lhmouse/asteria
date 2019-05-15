@@ -1327,22 +1327,25 @@
 
 	* Returns the saturated product of `x` and `y`.
 
-`std.numeric.format(value, [base], [exp_base])`
+`std.numeric.format(value, [base], [ebase])`
 
 	* Converts an `integer` or `real` to a `string` in `base`. This
 	  function writes as many digits as possible to ensure precision.
-	  No plus sign appears in the result. If `base` is not specified,
-	  `10` is assumed. When `exp_base` is specified, if `value` is of
-	  type `integer`, the significant figure part is kept as short as
-	  possible without a decimal point, followed by an exponent part;
+	  No plus sign precedes the significant figures. If `base` is
+	  absent, `10` is assumed. If `ebase` is specified, an exponent
+	  is appended to the significand as follows: If `value` is of
+	  type `integer`, the significand is kept as short as possible;
 	  otherwise (when `value` is of type `real`), it is written in
-	  scientific notation which always contains a decimal point.
+	  scientific notation, whose significand always contains a
+	  decimal point. In both cases, the exponent comprises a plus or
+	  minus sign and at least two digits. If `ebase` is absent, no
+	  exponent appears.
 
 	* Returns a `string` converted from `value`.
 
 	* Throws an exception if `base` is neither `2` nor `10` nor `16`,
-	  or if `exp_base` is neither `2` nor `10`, or if `base` is `16`
-	  and `exp_base` is `10`.
+	  or if `ebase` is neither `2` nor `10`, or if `base` is `16` and
+	  `ebase` is `10`.
 
 `std.numeric.parse_integer(text)`
 

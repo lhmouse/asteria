@@ -344,24 +344,168 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
+    void do_format_significand(G_string& text, G_integer value, std::uint8_t rbase)
+      {
+        auto reg = value;
+        auto sbtm = reg >> 63;
+        // Write characters backwards.
+        std::array<char, 72> temp;
+        auto bp = temp.end();
+        while(reg != 0) {
+          auto off = reg % rbase;
+          reg /= rbase;
+          // Get the absolute value of this digit.
+          off ^= sbtm;
+          off -= sbtm;
+          // Locate the digit in uppercase.
+          off *= 2;
+          off += 1;
+          // Write this digit.
+          *--bp = s_xdigits[off];
+        }
+        // Ensure there is at least a zero digit.
+        if(bp == temp.end()) {
+          *--bp = s_xdigits[0];
+        }
+        // Prepend the base prefix.
+        switch(rbase) {
+        case  2:
+          *--bp = 'b';
+          *--bp = '0';
+          break;
+        case 10:
+          break;
+        case 16:
+          *--bp = 'x';
+          *--bp = '0';
+          break;
+        default:
+          ROCKET_ASSERT(false);
+        }
+        // If the number is negative, prepend a minus sign.
+        if(sbtm) {
+          *--bp = '-';
+        }
+        // Append the result to `text` without clobbering existent contents.
+        text.append(bp, temp.end());
+      }
+
+    void do_format_exponent(G_string& text, std::int32_t value, std::uint8_t pbase)
+      {
+        auto reg = value;
+        auto sbtm = reg >> 31;
+        // Write characters backwards.
+        std::array<char, 16> temp;
+        auto bp = temp.end();
+        while(reg != 0) {
+          auto off = reg % 10;
+          reg /= 10;
+          // Get the absolute value of this digit.
+          off ^= sbtm;
+          off -= sbtm;
+          // Locate the digit in uppercase.
+          off *= 2;
+          off += 1;
+          // Write this digit.
+          *--bp = s_xdigits[off];
+        }
+        // Ensure there are least two digits.
+        while(temp.end() - bp < 2) {
+          *--bp = s_xdigits[0];
+        }
+        // Prepend a plus or minus sign.
+        if(sbtm) {
+          *--bp = '-';
+        } else {
+          *--bp = '+';
+        }
+        // Prepend the base prefix.
+        switch(pbase) {
+        case  2:
+          *--bp = 'p';
+          break;
+        case 10:
+          *--bp = 'e';
+          break;
+        default:
+          ROCKET_ASSERT(false);
+        }
+        // Append the result to `text` without clobbering existent contents.
+        text.append(bp, temp.end());
+      }
+
+    G_string do_format_integer(const G_integer& value, std::uint8_t rbase)
+      {
+        G_string text;
+        do_format_significand(text, value, rbase);
+        return text;
+      }
+
+    G_string do_format_integer_with_exponent(const G_integer& value, std::uint8_t rbase, std::uint8_t pbase)
+      {
+        auto reg = value;
+        int exp = 0;
+        for(;;) {
+          auto next = reg / pbase;
+          if(next * pbase != reg) {
+            break;
+          }
+          reg = next;
+          exp++;
+        }
+        G_string text;
+        do_format_significand(text, reg, rbase);
+        do_format_exponent(text, exp, pbase);
+        return text;
+      }
+
     }
 
-G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base)
+G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
   {
-    return { };
+    switch(base.value_or(10)) {
+    case  2:
+      {
+        if(!ebase) {
+          return do_format_integer(value,  2);
+        }
+        if(*ebase ==  2) {
+          return do_format_integer_with_exponent(value,  2,  2);
+        }
+        if(*ebase == 10) {
+          return do_format_integer_with_exponent(value,  2, 10);
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be either `2` or `10` (got `", *ebase, "`).");
+      }
+    case 10:
+      {
+        if(!ebase) {
+          return do_format_integer(value, 10);
+        }
+        if(*ebase ==  2) {
+          return do_format_integer_with_exponent(value, 10,  2);
+        }
+        if(*ebase == 10) {
+          return do_format_integer_with_exponent(value, 10, 10);
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
+      }
+    case 16:
+      {
+        if(!ebase) {
+          return do_format_integer(value, 16);
+        }
+        if(*ebase ==  2) {
+          return do_format_integer_with_exponent(value, 16,  2);
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
+      }
+    default:
+      ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
+    }
   }
 
-G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base)
-  {
-    return { };
-  }
-
-G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const G_integer& exp_base)
-  {
-    return { };
-  }
-
-G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const G_integer& exp_base)
+G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
   {
     return { };
   }
@@ -447,7 +591,7 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
       case 'b':
       case 'B':
         tpos++;
-        rbase = 2;
+        rbase =  2;
         break;
       case 'x':
       case 'X':
@@ -489,15 +633,15 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
     }
     // Check for the exponent part.
     switch(text[tpos]) {
+    case 'p':
+    case 'P':
+      tpos++;
+      pbase =  2;
+      break;
     case 'e':
     case 'E':
       tpos++;
       pbase = 10;
-      break;
-    case 'p':
-    case 'P':
-      tpos++;
-      pbase = 2;
       break;
     }
     if(pbase != 0) {
@@ -1849,18 +1993,21 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "  \n"
             "  * Converts an `integer` or `real` to a `string` in `base`. This\n"
             "    function writes as many digits as possible to ensure precision.\n"
-            "    No plus sign appears in the result. If `base` is not specified,\n"
-            "    `10` is assumed. When `exp_base` is specified, if `value` is of\n"
-            "    type `integer`, the significant figure part is kept as short as\n"
-            "    possible without a decimal point, followed by an exponent part;\n"
+            "    No plus sign precedes the significant figures. If `base` is\n"
+            "    absent, `10` is assumed. If `ebase` is specified, an exponent\n"
+            "    is appended to the significand as follows: If `value` is of\n"
+            "    type `integer`, the significand is kept as short as possible;\n"
             "    otherwise (when `value` is of type `real`), it is written in\n"
-            "    scientific notation which always contains a decimal point.\n"
+            "    scientific notation, whose significand always contains a\n"
+            "    decimal point. In both cases, the exponent comprises a plus or\n"
+            "    minus sign and at least two digits. If `ebase` is absent, no\n"
+            "    exponent appears.\n"
             "  \n"
             "  * Returns a `string` converted from `value`.\n"
             "  \n"
             "  * Throws an exception if `base` is neither `2` nor `10` nor `16`,\n"
-            "    or if `exp_base` is neither `2` nor `10`, or if `base` is `16`\n"
-            "    and `exp_base` is `10`.\n"
+            "    or if `ebase` is neither `2` nor `10`, or if `base` is `16` and\n"
+            "    `ebase` is `10`.\n"
           ),
         // Opaque parameter
         G_null
@@ -1871,30 +2018,19 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.format"), args);
-            Argument_Reader::State istate, fstate;
             // Parse arguments.
             G_integer ivalue;
             Opt<G_integer> base;
-            if(reader.start().g(ivalue).g(base).save(istate).finish()) {
+            Opt<G_integer> ebase;
+            if(reader.start().g(ivalue).g(base).g(ebase).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_format(ivalue, base) };
+              Reference_Root::S_temporary xref = { std_numeric_format(ivalue, base, ebase) };
               return rocket::move(xref);
             }
             G_real fvalue;
-            if(reader.start().g(fvalue).g(base).save(fstate).finish()) {
+            if(reader.start().g(fvalue).g(base).g(ebase).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_format(fvalue, base) };
-              return rocket::move(xref);
-            }
-            G_integer exp_base;
-            if(reader.load(istate).g(exp_base).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_format(ivalue, base, exp_base) };
-              return rocket::move(xref);
-            }
-            if(reader.load(fstate).g(exp_base).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_format(fvalue, base, exp_base) };
+              Reference_Root::S_temporary xref = { std_numeric_format(fvalue, base, ebase) };
               return rocket::move(xref);
             }
             // Fail.
