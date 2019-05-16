@@ -46,6 +46,9 @@ int main(int argc, char** argv)
               << "---" << std::endl;;
     Simple_Source_File code(iss, rocket::sref("my_file"));
 #endif
+    std::cerr << std::endl
+              << "---" << std::endl
+              << "Running..." << std::endl;
     Global_Context global;
     // run it and measure the time.
     auto t1 = std_chrono_hires_now();
