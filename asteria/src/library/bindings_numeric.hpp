@@ -53,16 +53,10 @@ extern G_integer std_numeric_mulm(const G_integer& x, const G_integer& y);
 
 extern G_integer std_numeric_adds(const G_integer& x, const G_integer& y);
 extern G_real std_numeric_adds(const G_real& x, const G_real& y);
-extern G_integer std_numeric_adds(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper);
-extern G_real std_numeric_adds(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper);
 extern G_integer std_numeric_subs(const G_integer& x, const G_integer& y);
 extern G_real std_numeric_subs(const G_real& x, const G_real& y);
-extern G_integer std_numeric_subs(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper);
-extern G_real std_numeric_subs(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper);
 extern G_integer std_numeric_muls(const G_integer& x, const G_integer& y);
 extern G_real std_numeric_muls(const G_real& x, const G_real& y);
-extern G_integer std_numeric_muls(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper);
-extern G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper);
 
 extern G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base = rocket::nullopt);
 extern G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base = rocket::nullopt);

@@ -251,9 +251,6 @@ int main()
         assert std.numeric.adds(-3, std.numeric.integer_min) == std.numeric.integer_min;
         assert std.numeric.adds(std.numeric.integer_max, std.numeric.integer_max) == std.numeric.integer_max;
         assert std.numeric.adds(std.numeric.integer_min, std.numeric.integer_min) == std.numeric.integer_min;
-        assert std.numeric.adds(+2, +3, +4, +8) == +5;
-        assert std.numeric.adds(+2, -3, +4, +8) == +4;
-        assert std.numeric.adds(+2, +9, +4, +8) == +8;
         assert std.numeric.adds(+2.5, +3.75) == +6.25;
         assert std.numeric.adds(+2.5, -3.75) == -1.25;
         assert std.numeric.adds(+infinity, +infinity) == +infinity;
@@ -262,15 +259,6 @@ int main()
         assert std.numeric.adds(-infinity, -infinity) == -infinity;
         assert __isnan std.numeric.adds(nan, 42);
         assert __isnan std.numeric.adds(42, nan);
-        assert std.numeric.adds(+2.5, +3.75, -1, +7.5) == +6.25;
-        assert std.numeric.adds(+2.5, -3.75, -1, +7.5) == -1.00;
-        assert std.numeric.adds(+2.5, +9.75, -1, +7.5) == +7.50;
-        assert std.numeric.adds(+infinity, +infinity, 3, 9) == 9;
-        assert __isnan std.numeric.adds(+infinity, -infinity, 3, 9);
-        assert __isnan std.numeric.adds(-infinity, +infinity, 3, 9);
-        assert std.numeric.adds(-infinity, -infinity, 3, 9) == 3;
-        assert __isnan std.numeric.adds(nan, 42, 3, 9);
-        assert __isnan std.numeric.adds(42, nan, 3, 9);
 
         assert std.numeric.subs(+2, +3) == -1;
         assert std.numeric.subs(+2, -3) == +5;
@@ -280,9 +268,6 @@ int main()
         assert std.numeric.subs(+3, std.numeric.integer_min) == std.numeric.integer_max;
         assert std.numeric.subs(std.numeric.integer_max, std.numeric.integer_min) == std.numeric.integer_max;
         assert std.numeric.subs(std.numeric.integer_min, std.numeric.integer_max) == std.numeric.integer_min;
-        assert std.numeric.subs(+2, +3, +4, +8) == +4;
-        assert std.numeric.subs(+2, -3, +4, +8) == +5;
-        assert std.numeric.subs(+9, -2, +4, +8) == +8;
         assert std.numeric.subs(+2.5, +3.75) == -1.25;
         assert std.numeric.subs(+2.5, -3.75) == +6.25;
         assert __isnan std.numeric.subs(+infinity, +infinity);
@@ -291,15 +276,6 @@ int main()
         assert __isnan std.numeric.subs(-infinity, -infinity);
         assert __isnan std.numeric.subs(nan, 42);
         assert __isnan std.numeric.subs(42, nan);
-        assert std.numeric.subs(+2.5, +3.75, -1, +7.5) == -1.00;
-        assert std.numeric.subs(+2.5, -3.75, -1, +7.5) == +6.25;
-        assert std.numeric.subs(+7.0, -2.25, -1, +7.5) == +7.50;
-        assert __isnan std.numeric.subs(+infinity, +infinity, 3, 9);
-        assert std.numeric.subs(+infinity, -infinity, 3, 9) == 9;
-        assert std.numeric.subs(-infinity, +infinity, 3, 9) == 3;
-        assert __isnan std.numeric.subs(-infinity, -infinity, 3, 9);
-        assert __isnan std.numeric.subs(nan, 42, 3, 9);
-        assert __isnan std.numeric.subs(42, nan, 3, 9);
 
         assert std.numeric.muls(+2, +3) == +6;
         assert std.numeric.muls(+2, -3) == -6;
@@ -323,9 +299,6 @@ int main()
         assert std.numeric.muls(std.numeric.integer_max, std.numeric.integer_min) == std.numeric.integer_min;
         assert std.numeric.muls(std.numeric.integer_min, std.numeric.integer_max) == std.numeric.integer_min;
         assert std.numeric.muls(std.numeric.integer_min, std.numeric.integer_min) == std.numeric.integer_max;
-        assert std.numeric.muls(+2, +3, +4, +8) == +6;
-        assert std.numeric.muls(+2, -3, +4, +8) == +4;
-        assert std.numeric.muls(+2, +9, +4, +8) == +8;
         assert std.numeric.muls(+2.5, +3.75) == +9.375;
         assert std.numeric.muls(+2.5, -3.75) == -9.375;
         assert std.numeric.muls(+infinity, +infinity) == +infinity;
@@ -334,15 +307,6 @@ int main()
         assert std.numeric.muls(-infinity, -infinity) == +infinity;
         assert __isnan std.numeric.muls(nan, 42);
         assert __isnan std.numeric.muls(42, nan);
-        assert std.numeric.muls(+2.5, +3.75, -1, +9.5) == +9.375;
-        assert std.numeric.muls(+2.5, -3.75, -1, +9.5) == -1.000;
-        assert std.numeric.muls(+2.5, +9.75, -1, +9.5) == +9.500;
-        assert std.numeric.muls(+infinity, +infinity, 3, 9) == 9;
-        assert std.numeric.muls(+infinity, -infinity, 3, 9) == 3;
-        assert std.numeric.muls(-infinity, +infinity, 3, 9) == 3;
-        assert std.numeric.muls(-infinity, -infinity, 3, 9) == 9;
-        assert __isnan std.numeric.muls(nan, 42, 3, 9);
-        assert __isnan std.numeric.muls(42, nan, 3, 9);
 
 //        assert std.numeric.format(+1234) == "1234";
 //        assert std.numeric.format(+0) == "0";

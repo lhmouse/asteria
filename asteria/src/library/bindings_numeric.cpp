@@ -319,16 +319,6 @@ G_real std_numeric_adds(const G_real& x, const G_real& y)
     return do_saturing_add(x, y);
   }
 
-G_integer std_numeric_adds(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
-  {
-    return rocket::clamp(do_saturing_add(x, y), lower, do_verify_bounds(lower, upper));
-  }
-
-G_real std_numeric_adds(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
-  {
-    return rocket::clamp(do_saturing_add(x, y), lower, do_verify_bounds(lower, upper));
-  }
-
 G_integer std_numeric_subs(const G_integer& x, const G_integer& y)
   {
     return do_saturing_sub(x, y);
@@ -339,16 +329,6 @@ G_real std_numeric_subs(const G_real& x, const G_real& y)
     return do_saturing_sub(x, y);
   }
 
-G_integer std_numeric_subs(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
-  {
-    return rocket::clamp(do_saturing_sub(x, y), lower, do_verify_bounds(lower, upper));
-  }
-
-G_real std_numeric_subs(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
-  {
-    return rocket::clamp(do_saturing_sub(x, y), lower, do_verify_bounds(lower, upper));
-  }
-
 G_integer std_numeric_muls(const G_integer& x, const G_integer& y)
   {
     return do_saturing_mul(x, y);
@@ -357,16 +337,6 @@ G_integer std_numeric_muls(const G_integer& x, const G_integer& y)
 G_real std_numeric_muls(const G_real& x, const G_real& y)
   {
     return do_saturing_mul(x, y);
-  }
-
-G_integer std_numeric_muls(const G_integer& x, const G_integer& y, const G_integer& lower, const G_integer& upper)
-  {
-    return rocket::clamp(do_saturing_mul(x, y), lower, do_verify_bounds(lower, upper));
-  }
-
-G_real std_numeric_muls(const G_real& x, const G_real& y, const G_real& lower, const G_real& upper)
-  {
-    return rocket::clamp(do_saturing_mul(x, y), lower, do_verify_bounds(lower, upper));
   }
 
     namespace {
@@ -1741,17 +1711,6 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "    equivalent to the built-in addition operator.\n"
             "  \n"
             "  * Returns the saturated sum of `x` and `y`.\n"
-            "\n"
-            "`std.numeric.adds(x, y, lower, upper)`\n"
-            "  \n"
-            "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
-            "    `integer` or `real` values. The result is limited between\n"
-            "    `lower` and `upper`, hence will not cause overflow exceptions\n"
-            "    to be thrown.\n"
-            "  \n"
-            "  * Returns the saturated sum of `x` and `y`. The result is of type\n"
-            "    `integer` if all arguments are of type `integer`; otherwise it\n"
-            "    is of type `real`.\n"
           ),
         // Opaque parameter
         G_null
@@ -1762,34 +1721,19 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.adds"), args);
-            Argument_Reader::State istate, fstate;
             // Parse arguments.
             G_integer ix;
             G_integer iy;
-            if(reader.start().g(ix).g(iy).save(istate).finish()) {
+            if(reader.start().g(ix).g(iy).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_adds(ix, iy) };
               return rocket::move(xref);
             }
             G_real fx;
             G_real fy;
-            if(reader.start().g(fx).g(fy).save(fstate).finish()) {
+            if(reader.start().g(fx).g(fy).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_adds(fx, fy) };
-              return rocket::move(xref);
-            }
-            G_integer ilower;
-            G_integer iupper;
-            if(reader.load(istate).g(ilower).g(iupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_adds(ix, iy, ilower, iupper) };
-              return rocket::move(xref);
-            }
-            G_real flower;
-            G_real fupper;
-            if(reader.load(fstate).g(flower).g(fupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_adds(fx, fy, flower, fupper) };
               return rocket::move(xref);
             }
             // Fail.
@@ -1815,17 +1759,6 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "    equivalent to the built-in subtraction operator.\n"
             "  \n"
             "  * Returns the saturated difference of `x` and `y`.\n"
-            "\n"
-            "`std.numeric.subs(x, y, lower, upper)`\n"
-            "  \n"
-            "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
-            "    may be `integer` or `real` values. The result is limited\n"
-            "    between `lower` and `upper`, hence will not cause overflow\n"
-            "    exceptions to be thrown.\n"
-            "  \n"
-            "  * Returns the saturated difference of `x` and `y`. The result is\n"
-            "    of type `integer` if all arguments are of type `integer`;\n"
-            "    otherwise it is of type `real`.\n"
           ),
         // Opaque parameter
         G_null
@@ -1836,34 +1769,19 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.subs"), args);
-            Argument_Reader::State istate, fstate;
             // Parse arguments.
             G_integer ix;
             G_integer iy;
-            if(reader.start().g(ix).g(iy).save(istate).finish()) {
+            if(reader.start().g(ix).g(iy).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_subs(ix, iy) };
               return rocket::move(xref);
             }
             G_real fx;
             G_real fy;
-            if(reader.start().g(fx).g(fy).save(fstate).finish()) {
+            if(reader.start().g(fx).g(fy).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_subs(fx, fy) };
-              return rocket::move(xref);
-            }
-            G_integer ilower;
-            G_integer iupper;
-            if(reader.load(istate).g(ilower).g(iupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_subs(ix, iy, ilower, iupper) };
-              return rocket::move(xref);
-            }
-            G_real flower;
-            G_real fupper;
-            if(reader.load(fstate).g(flower).g(fupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_subs(fx, fy, flower, fupper) };
               return rocket::move(xref);
             }
             // Fail.
@@ -1889,17 +1807,6 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "    equivalent to the built-in multiplication operator.\n"
             "  \n"
             "  * Returns the saturated product of `x` and `y`.\n"
-            "\n"
-            "`std.numeric.muls(x, y, lower, upper)`\n"
-            "  \n"
-            "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
-            "    may be `integer` or `real` values. The result is limited\n"
-            "    between `lower` and `upper`, hence will not cause overflow\n"
-            "    exceptions to be thrown.\n"
-            "  \n"
-            "  * Returns the saturated product of `x` and `y`. The result is of\n"
-            "    type `integer` if all arguments are of type `integer`;\n"
-            "    otherwise it is of type `real`.\n"
           ),
         // Opaque parameter
         G_null
@@ -1910,34 +1817,19 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.muls"), args);
-            Argument_Reader::State istate, fstate;
             // Parse arguments.
             G_integer ix;
             G_integer iy;
-            if(reader.start().g(ix).g(iy).save(istate).finish()) {
+            if(reader.start().g(ix).g(iy).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_muls(ix, iy) };
               return rocket::move(xref);
             }
             G_real fx;
             G_real fy;
-            if(reader.start().g(fx).g(fy).save(fstate).finish()) {
+            if(reader.start().g(fx).g(fy).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy) };
-              return rocket::move(xref);
-            }
-            G_integer ilower;
-            G_integer iupper;
-            if(reader.load(istate).g(ilower).g(iupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_muls(ix, iy, ilower, iupper) };
-              return rocket::move(xref);
-            }
-            G_real flower;
-            G_real fupper;
-            if(reader.load(fstate).g(flower).g(fupper).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy, flower, fupper) };
               return rocket::move(xref);
             }
             // Fail.
