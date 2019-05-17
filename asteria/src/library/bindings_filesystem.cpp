@@ -923,7 +923,7 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
     }
     // Allocate the I/O buffer.
     std::vector<char> buff;
-    buff.resize(static_cast<std::size_t>(rocket::min(rocket::max(512, stb_old.st_blksize), stb_old.st_size)));
+    buff.resize(static_cast<std::size_t>(stb_old.st_blksize));
     for(;;) {
       // Read some bytes.
       ::ssize_t nread = ::read(hf_old, buff.data(), buff.size());
