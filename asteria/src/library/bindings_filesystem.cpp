@@ -666,7 +666,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     }
     // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
-      if(::lseek(hf, roffset, SEEK_SET) == 0) {
+      if(::lseek(hf, roffset, SEEK_SET) == -1) {
 #endif
         return rocket::nullopt;
       }
@@ -680,7 +680,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 #else
     ::ssize_t nread = ::read(hf, data.mut_data(), data.size());
     if(nread < 0) {
-#endif
+#endif\
       return rocket::nullopt;
     }
     data.erase(static_cast<std::size_t>(nread));
@@ -737,7 +737,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     }
     // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
-      if(::lseek(hf, roffset, SEEK_SET) == 0) {
+      if(::lseek(hf, roffset, SEEK_SET) == -1) {
 #endif
         return false;
       }
