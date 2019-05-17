@@ -165,7 +165,7 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
     return time_utc;
   }
 
-G_string std_chrono_datetime_format(const G_integer& time_point, const Opt<G_boolean>& with_ms)
+G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>& with_ms)
   {
     // Return strings that are allocated statically for special time point values.
     static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
@@ -183,7 +183,7 @@ G_string std_chrono_datetime_format(const G_integer& time_point, const Opt<G_boo
     }
     // Notice that the length of the result string is fixed.
     G_string time_str(rocket::sref(s_min_str[pms]));
-    // Characters are written backwards, unlike `datetime_parse()`.
+    // Characters are written backwards, unlike `utc_parse()`.
     auto wpos = time_str.mut_rbegin();
     // Define functions to write each field.
     // Be advised that these functions modify `wpos`.
@@ -257,19 +257,9 @@ G_string std_chrono_datetime_format(const G_integer& time_point, const Opt<G_boo
     return time_str;
   }
 
-G_string std_chrono_datetime_min(const Opt<G_boolean>& with_ms)
+Opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
   {
-    return std_chrono_datetime_format(INT64_MIN, with_ms);
-  }
-
-G_string std_chrono_datetime_max(const Opt<G_boolean>& with_ms)
-  {
-    return std_chrono_datetime_format(INT64_MAX, with_ms);
-  }
-
-Opt<G_integer> std_chrono_datetime_parse(const G_string& time_str)
-  {
-    // Characters are read forwards, unlike `datetime_format()`.
+    // Characters are read forwards, unlike `utc_format()`.
     auto rpos = time_str.begin();
     // Define functions to read each field.
     // Be advised that these functions modify `rpos`.
@@ -629,15 +619,15 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.chrono.datetime_format()`
+    // `std.chrono.utc_format()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("datetime_format"),
+    result.insert_or_assign(rocket::sref("utc_format"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.chrono.datetime_format(time_point, [with_ms])`\n"
+            "`std.chrono.utc_format(time_point, [with_ms])`\n"
             "  \n"
             "  * Converts `time_point`, which represents the number of\n"
             "    milliseconds since `1970-01-01 00:00:00`, to an ASCII string in\n"
@@ -653,13 +643,13 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.chrono.datetime_format"), args);
+            Argument_Reader reader(rocket::sref("std.chrono.utc_format"), args);
             // Parse arguments.
             G_integer time_point;
             Opt<G_boolean> with_ms;
             if(reader.start().g(time_point).g(with_ms).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_datetime_format(time_point, with_ms) };
+              Reference_Root::S_temporary xref = { std_chrono_utc_format(time_point, with_ms) };
               return rocket::move(xref);
             }
             // Fail.
@@ -667,91 +657,15 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.chrono.datetime_min()`
+    // `std.chrono.utc_parse()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("datetime_min"),
+    result.insert_or_assign(rocket::sref("utc_parse"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.chrono.datetime_min([with_ms])`\n"
-            "  \n"
-            "  * Gets the special string that denotes the negative infinity time\n"
-            "    point. Calling this function has the same effect as calling\n"
-            "    `datetime_format(-0x8000000000000000, with_ms)`.\n"
-            "  \n"
-            "  * Returns `'1601-01-01 00:00:00'` or `'1601-01-01 00:00:00.000'`\n"
-            "    according to `with_ms`.\n"
-          ),
-        // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.datetime_min"), args);
-            // Parse arguments.
-            Opt<G_boolean> with_ms;
-            if(reader.start().g(with_ms).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_datetime_min(with_ms) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          }
-      )));
-    //===================================================================
-    // `std.chrono.datetime_max()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("datetime_max"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.datetime_max([with_ms])`\n"
-            "  \n"
-            "  * Gets the special string that denotes the positive infinity time\n"
-            "    point. Calling this function has the same effect as calling\n"
-            "    `datetime_format(0x7FFFFFFFFFFFFFFF, with_ms)`.\n"
-            "  \n"
-            "  * Returns `'9999-01-01 00:00:00'` or `'9999-01-01 00:00:00.000'`\n"
-            "    according to `with_ms`.\n"
-          ),
-        // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.datetime_max"), args);
-            // Parse arguments.
-            Opt<G_boolean> with_ms;
-            if(reader.start().g(with_ms).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_datetime_max(with_ms) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          }
-      )));
-    //===================================================================
-    // `std.chrono.datetime_parse()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("datetime_parse"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.datetime_parse(time_str)`\n"
+            "`std.chrono.utc_parse(time_str)`\n"
             "  \n"
             "  * Parses `time_str`, which is an ASCII string representing a time\n"
             "    point in the format `1970-01-01 00:00:00.000`, according to the\n"
@@ -771,12 +685,12 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.chrono.datetime_parse"), args);
+            Argument_Reader reader(rocket::sref("std.chrono.utc_parse"), args);
             // Parse arguments.
             G_string time_str;
             if(reader.start().g(time_str).finish()) {
               // Call the binding function.
-              auto qres = std_chrono_datetime_parse(time_str);
+              auto qres = std_chrono_utc_parse(time_str);
               if(!qres) {
                 return Reference_Root::S_null();
               }

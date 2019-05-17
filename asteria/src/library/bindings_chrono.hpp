@@ -15,11 +15,8 @@ extern G_integer std_chrono_steady_now();
 
 extern G_integer std_chrono_local_from_utc(const G_integer& time_utc);
 extern G_integer std_chrono_utc_from_local(const G_integer& time_local);
-
-extern G_string std_chrono_datetime_format(const G_integer& time_point, const Opt<G_boolean>& with_ms = rocket::nullopt);
-extern G_string std_chrono_datetime_min(const Opt<G_boolean>& with_ms = rocket::nullopt);
-extern G_string std_chrono_datetime_max(const Opt<G_boolean>& with_ms = rocket::nullopt);
-extern Opt<G_integer> std_chrono_datetime_parse(const G_string& time_str);
+extern G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>& with_ms = rocket::nullopt);
+extern Opt<G_integer> std_chrono_utc_parse(const G_string& time_str);
 
 // Initialize an object that is to be referenced as `std.chrono`.
 extern void create_bindings_chrono(G_object& result, API_Version version);
