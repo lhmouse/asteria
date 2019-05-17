@@ -680,7 +680,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 #else
     ::ssize_t nread = ::read(hf, data.mut_data(), data.size());
     if(nread < 0) {
-#endif\
+#endif
       return rocket::nullopt;
     }
     data.erase(static_cast<std::size_t>(nread));
