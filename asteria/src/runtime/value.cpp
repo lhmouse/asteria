@@ -210,7 +210,7 @@ void Value::print(std::ostream& os, bool quote_strings) const
     case gtype_real:
       {
         // 123.456
-        os << std::defaultfloat << std::nouppercase << std::setprecision(18) << this->m_stor.as<gtype_real>();
+        os << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<gtype_real>();
         return;
       }
     case gtype_string:
@@ -305,7 +305,7 @@ void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t ind
     case gtype_real:
       {
         // real 123.456
-        os << "real " << std::defaultfloat << std::nouppercase << std::setprecision(18) << this->m_stor.as<gtype_real>();
+        os << "real " << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<gtype_real>();
         return;
       }
     case gtype_string:
