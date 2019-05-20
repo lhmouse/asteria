@@ -344,7 +344,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
-    void do_format_significand(G_string& text, G_integer value, std::uint8_t rbase)
+    void do_format_significand_integer(G_string& text, G_integer value, std::uint8_t rbase)
       {
         auto reg = value;
         auto sbtm = reg >> 63;
@@ -398,7 +398,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         std::array<char, 16> temp;
         auto bp = temp.end();
         while(reg != 0) {
-          auto off = reg % 10;
+          auto off = static_cast<int>(reg % 10);
           reg /= 10;
           // Get the absolute value of this digit.
           off ^= sbtm;
@@ -437,7 +437,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     G_string do_format_integer(const G_integer& value, std::uint8_t rbase)
       {
         G_string text;
-        do_format_significand(text, value, rbase);
+        do_format_significand_integer(text, value, rbase);
         return text;
       }
 
@@ -454,7 +454,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
           exp++;
         }
         G_string text;
-        do_format_significand(text, reg, rbase);
+        do_format_significand_integer(text, reg, rbase);
         do_format_exponent(text, exp, pbase);
         return text;
       }
