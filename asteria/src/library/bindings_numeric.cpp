@@ -867,7 +867,6 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
     }
     if(pbase != 0) {
       // Get the sign of the exponent if any.
-      bool pneg = false;
       switch(text[tpos]) {
       case '+':
         tpos++;
