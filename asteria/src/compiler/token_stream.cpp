@@ -304,7 +304,9 @@ namespace Asteria {
         std::int64_t icnt = 0;  // number of integral digits (always non-negative)
         std::int64_t fcnt = 0;  // number of fractional digits (always non-negative)
         std::uint8_t pbase = 0;  // the base of the exponent.
+        bool pneg = false;  // is the exponent negative?
         std::int64_t pexp = 0;  // `pbase`'d exponent
+        std::int64_t pcnt = 0;  // number of exponent digits (always non-negative)
         // Get the sign of the number if any.
         std::size_t tlen = 0;
         switch(reader.peek(tlen)) {
@@ -397,8 +399,6 @@ namespace Asteria {
         }
         if(pbase != 0) {
           // Parse the exponent part.
-          bool pneg = false;  // is the exponent negative?
-          std::int64_t ecnt = 0;  // number of exponent digits (always non-negative)
           // Get the sign of the exponent if any.
           switch(reader.peek(tlen)) {
           case '+':
@@ -421,14 +421,14 @@ namespace Asteria {
             if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
               throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
             }
-            ecnt++;
+            pcnt++;
             // Is the next character a digit separator?
             if(reader.peek(tlen) == '`') {
               tlen++;
             }
           }
           // There shall be at least one digit.
-          if(ecnt == 0) {
+          if(pcnt == 0) {
             throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_incomplete);
           }
         }
