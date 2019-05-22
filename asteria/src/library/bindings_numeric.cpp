@@ -570,8 +570,11 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
     std::size_t rbegin = 0;  // beginning of significant figures
     std::size_t rend = 0;  // end of significant figures
     std::uint8_t rbase = 10;  // the base of the integral and fractional parts.
+    std::int64_t icnt = 0;  // number of integral digits (always non-negative)
     std::uint8_t pbase = 0;  // the base of the exponent.
+    bool pneg = false;  // is the exponent negative?
     std::int64_t pexp = 0;  // `pbase`'d exponent
+    std::int64_t pcnt = 0;  // number of exponent digits (always non-negative)
     // Get the sign of the number if any.
     switch(text[tpos]) {
     case '+':
@@ -586,16 +589,15 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
     switch(text[tpos]) {
     case '0':
       // Check for the base prefix.
-      tpos++;
-      switch(text[tpos]) {
+      switch(text[tpos + 1]) {
       case 'b':
       case 'B':
-        tpos++;
+        tpos += 2;
         rbase =  2;
         break;
       case 'x':
       case 'X':
-        tpos++;
+        tpos += 2;
         rbase = 16;
         break;
       }
@@ -626,10 +628,15 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
       tpos++;
       // Accept a digit.
       rend = tpos;
+      icnt++;
       // Is the next character a digit separator?
       if(text[tpos] == '`') {
         tpos++;
       }
+    }
+    // There shall be at least one digit.
+    if(icnt == 0) {
+      return rocket::nullopt;
     }
     // Check for the exponent part.
     switch(text[tpos]) {
@@ -646,7 +653,6 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
     }
     if(pbase != 0) {
       // Get the sign of the exponent if any.
-      bool pneg = false;
       switch(text[tpos]) {
       case '+':
         tpos++;
@@ -668,10 +674,15 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
         if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
           return rocket::nullopt;
         }
+        pcnt++;
         // Is the next character a digit separator?
         if(text[tpos] == '`') {
           tpos++;
         }
+      }
+      // There shall be at least one digit.
+      if(pcnt == 0) {
+        return rocket::nullopt;
       }
     }
     // Only spaces are allowed to follow the number.
@@ -722,7 +733,9 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
     std::int64_t icnt = 0;  // number of integral digits (always non-negative)
     std::int64_t fcnt = 0;  // number of fractional digits (always non-negative)
     std::uint8_t pbase = 0;  // the base of the exponent.
+    bool pneg = false;  // is the exponent negative?
     std::int64_t pexp = 0;  // `pbase`'d exponent
+    std::int64_t pcnt = 0;  // number of exponent digits (always non-negative)
     // Get the sign of the number if any.
     switch(text[tpos]) {
     case '+':
@@ -737,16 +750,15 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
     switch(text[tpos]) {
     case '0':
       // Check for the base prefix.
-      tpos++;
-      switch(text[tpos]) {
+      switch(text[tpos + 1]) {
       case 'b':
       case 'B':
-        tpos++;
+        tpos += 2;
         rbase = 2;
         break;
       case 'x':
       case 'X':
-        tpos++;
+        tpos += 2;
         rbase = 16;
         break;
       }
@@ -764,30 +776,34 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
       break;
     case 'i':
     case 'I':
-      // Check for infinities.
-      if(do_compare_lowercase(text, tpos + 1, "nfinity", 7) != 0) {
-        return rocket::nullopt;
+      {
+        // Check for infinities.
+        if(do_compare_lowercase(text, tpos + 1, "nfinity", 7) != 0) {
+          return rocket::nullopt;
+        }
+        tpos += 8;
+        // Only spaces are allowed to follow the number.
+        if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
+          return rocket::nullopt;
+        }
+        // Return a signed infinity.
+        return std::copysign(INFINITY, -rneg);
       }
-      tpos += 8;
-      // Only spaces are allowed to follow the number.
-      if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-        return rocket::nullopt;
-      }
-      // Return a signed infinity.
-      return std::copysign(INFINITY, -rneg);
     case 'n':
     case 'N':
-      // Check for NaNs.
-      if(do_compare_lowercase(text, tpos + 1, "an", 2) != 0) {
-        return rocket::nullopt;
+      {
+        // Check for NaNs.
+        if(do_compare_lowercase(text, tpos + 1, "an", 2) != 0) {
+          return rocket::nullopt;
+        }
+        tpos += 3;
+        // Only spaces are allowed to follow the number.
+        if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
+          return rocket::nullopt;
+        }
+        // Return a signed NaN.
+        return std::copysign(NAN, -rneg);
       }
-      tpos += 3;
-      // Only spaces are allowed to follow the number.
-      if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-        return rocket::nullopt;
-      }
-      // Return a signed NaN.
-      return std::copysign(NAN, -rneg);
     default:
       // Fail.
       return rocket::nullopt;
@@ -809,6 +825,10 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
         tpos++;
       }
     }
+    // There shall be at least one digit.
+    if(icnt == 0) {
+      return rocket::nullopt;
+    }
     // Check for the fractional part.
     if(text[tpos] == '.') {
       tpos++;
@@ -826,6 +846,10 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
         if(text[tpos] == '`') {
           tpos++;
         }
+      }
+      // There shall be at least one digit.
+      if(fcnt == 0) {
+        return rocket::nullopt;
       }
     }
     // Check for the exponent part.
@@ -865,10 +889,15 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
         if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
           return rocket::nullopt;
         }
+        pcnt++;
         // Is the next character a digit separator?
         if(text[tpos] == '`') {
           tpos++;
         }
+      }
+      // There shall be at least one digit.
+      if(pcnt == 0) {
+        return rocket::nullopt;
       }
     }
     // Only spaces are allowed to follow the number.
