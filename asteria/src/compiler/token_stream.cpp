@@ -325,16 +325,15 @@ namespace Asteria {
         }
         // Check for the base prefix.
         if(reader.peek(tlen) == '0') {
-          tlen++;
-          switch(reader.peek(tlen)) {
+          switch(reader.peek(tlen + 1)) {
           case 'b':
           case 'B':
-            tlen++;
+            tlen += 2;
             rbase = 2;
             break;
           case 'x':
           case 'X':
-            tlen++;
+            tlen += 2;
             rbase = 16;
             break;
           }
@@ -356,6 +355,10 @@ namespace Asteria {
             tlen++;
           }
         }
+        // There shall be at least one digit.
+        if(icnt == 0) {
+          throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_incomplete);
+        }
         // Check for the fractional part.
         if(reader.peek(tlen) == '.') {
           tlen++;
@@ -374,6 +377,10 @@ namespace Asteria {
               tlen++;
             }
           }
+          // There shall be at least one digit.
+          if(fcnt == 0) {
+            throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_incomplete);
+          }
         }
         // Check for the exponent part.
         switch(reader.peek(tlen)) {
@@ -389,8 +396,10 @@ namespace Asteria {
           break;
         }
         if(pbase != 0) {
+          // Parse the exponent part.
+          bool pneg = false;  // is the exponent negative?
+          std::int64_t ecnt = 0;  // number of exponent digits (always non-negative)
           // Get the sign of the exponent if any.
-          bool pneg = false;
           switch(reader.peek(tlen)) {
           case '+':
             tlen++;
@@ -412,10 +421,15 @@ namespace Asteria {
             if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
               throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
             }
+            ecnt++;
             // Is the next character a digit separator?
             if(reader.peek(tlen) == '`') {
               tlen++;
             }
+          }
+          // There shall be at least one digit.
+          if(ecnt == 0) {
+            throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_incomplete);
           }
         }
         if(reader.peek(tlen) == '`') {
