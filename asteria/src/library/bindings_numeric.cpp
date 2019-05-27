@@ -344,7 +344,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
-    void do_format_significand_integer(G_string& text, G_integer value, std::uint8_t rbase)
+    void do_format_significand_integer(G_string& text, const G_integer& value, std::uint8_t rbase)
       {
         auto reg = value;
         auto sbtm = reg >> 63;
