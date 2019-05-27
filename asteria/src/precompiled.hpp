@@ -29,6 +29,7 @@
 #include <cstdint>
 #include <climits>
 #include <cfloat>
+#include <cfenv>
 #include <cmath>
 
 #include "rocket/compiler.h"
