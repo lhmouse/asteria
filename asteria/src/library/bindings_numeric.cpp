@@ -547,7 +547,7 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
         return true;
       }
 
-    inline void do_raise(double& value, std::uint8_t base, std::int64_t exp) noexcept
+    inline void do_raise_real(double& value, std::uint8_t base, std::int64_t exp) noexcept
       {
         if(exp > 0) {
           value *= power_u64(base, +static_cast<std::uint64_t>(exp));
@@ -933,8 +933,8 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
       value = std::copysign(0.0, -rneg);
     } else {
       value = static_cast<double>(tvalue);
-      do_raise(value, rbase, tcnt);
-      do_raise(value, pbase, pexp);
+      do_raise_real(value, rbase, tcnt);
+      do_raise_real(value, pbase, pexp);
     }
     // Check for overflow or underflow.
     int fpcls = std::fpclassify(value);
