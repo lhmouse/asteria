@@ -352,6 +352,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         std::array<char, 72> temp;
         auto bp = temp.end();
         while(reg != 0) {
+          // Shift a digit out.
           auto off = reg % rbase;
           reg /= rbase;
           // Get the absolute value of this digit.
@@ -398,6 +399,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         std::array<char, 16> temp;
         auto bp = temp.end();
         while(reg != 0) {
+          // Shift a digit out.
           auto off = static_cast<int>(reg % 10);
           reg /= 10;
           // Get the absolute value of this digit.
@@ -436,6 +438,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
 
     G_string do_format_integer(const G_integer& value, std::uint8_t rbase)
       {
+        // No exponent appears.
         G_string text;
         do_format_significand_integer(text, value, rbase);
         return text;
@@ -444,6 +447,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     G_string do_format_integer_with_exponent(const G_integer& value, std::uint8_t rbase, std::uint8_t pbase)
       {
         auto reg = value;
+        // Remove as many trailing zeroes as possible.
         int exp = 0;
         for(;;) {
           auto next = reg / pbase;
@@ -453,6 +457,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
           reg = next;
           exp++;
         }
+        // Write the significand followed by the exponent.
         G_string text;
         do_format_significand_integer(text, reg, rbase);
         do_format_exponent(text, exp, pbase);
