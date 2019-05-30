@@ -343,7 +343,6 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
 
     constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
     constexpr char s_spaces[] = " \f\n\r\t\v";
-    constexpr int s_exp2p1[] = { 2, 4, 8, 16, 32, 64, 128, 256 };
 
     void do_prepend(char*& bp, const char* s)
       {
@@ -515,6 +514,8 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
 
     namespace {
 
+    constexpr int s_exp2p1[] = { 2, 4, 8, 16, 32, 64, 128, 256 };
+
     bool do_preformat_real(G_string& text, const G_real& value, std::uint8_t rbase)
       {
         auto sbtm = std::signbit(value) ? std::intptr_t(-1) : 0;
@@ -579,7 +580,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         return p;
       }
 
-    void do_extract_digit_real(G_string& text, S_real_parts& p, std::uint8_t rbase)
+    void do_extract_digit_real_exact(G_string& text, S_real_parts& p, std::uint8_t rbase)
       {
         // Shift a digit out.
         auto off = static_cast<int>(p.reg);
@@ -607,7 +608,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         }
         // Write all significant figures.
         while(p.reg != 0) {
-          do_extract_digit_real(text, p, rbase);
+          do_extract_digit_real_exact(text, p, rbase);
           // Move all digits remaining to the left.
           p.exp--;
           // If it was the last one of the integral part, append a decimal point.
@@ -637,12 +638,12 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         // Rewrite the value in scientific notation.
         auto p = do_decompose_real_exact(value, pbase);
         // Write the first significant figure that precedes the decimal point.
-        do_extract_digit_real(text, p, rbase);
+        do_extract_digit_real_exact(text, p, rbase);
         // Write the decimal point.
         text.push_back('.');
         // Write all significant figures that follow the decimal point.
         while(p.reg != 0) {
-          do_extract_digit_real(text, p, rbase);
+          do_extract_digit_real_exact(text, p, rbase);
         }
         // The string will always contain a decimal point.
         // Append a zero digit if there is no fractional part.
