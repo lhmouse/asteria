@@ -608,8 +608,10 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         // Write all significant figures.
         while(p.reg != 0) {
           do_extract_digit_real(text, p, rbase);
-          // Insert a decimal point after the last digit of the integral part.
-          if(--(p.exp) == -1) {
+          // Move all digits remaining to the left.
+          p.exp--;
+          // If it was the last one of the integral part, append a decimal point.
+          if(p.exp == -1) {
             text.push_back('.');
           }
         }
