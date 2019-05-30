@@ -345,6 +345,13 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     constexpr char s_spaces[] = " \f\n\r\t\v";
     constexpr int s_exp2p1[] = { 2, 4, 8, 16, 32, 64, 128, 256 };
 
+    void do_prepend(char*& bp, const char* s)
+      {
+        auto n = std::strlen(s);
+        bp -= n;
+        std::memcpy(bp, s, n);
+      }
+
     void do_format_significand_integer(G_string& text, const G_integer& value, std::uint8_t rbase)
       {
         auto reg = value;
@@ -367,15 +374,15 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         }
         // Ensure there is at least a zero digit.
         if(bp == temp.end()) {
-          *--bp = s_xdigits[0];
+          *--bp = '0';
         }
         // Prepend the base prefix.
         switch(rbase) {
         case  2:
-          std::memcpy(bp -= 2, "0b", 2);
+          do_prepend(bp, "0b");
           break;
         case 16:
-          std::memcpy(bp -= 2, "0x", 2);
+          do_prepend(bp, "0x");
           break;
         case 10:
           break;
@@ -412,7 +419,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         }
         // Ensure there are least two digits.
         while(temp.end() - bp < 2) {
-          *--bp = s_xdigits[0];
+          *--bp = '0';
         }
         // Prepend a plus or minus sign.
         if(sbtm) {
