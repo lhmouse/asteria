@@ -343,6 +343,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
 
     constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
     constexpr char s_spaces[] = " \f\n\r\t\v";
+    constexpr int s_exp2p1[] = { 2, 4, 8, 16, 32, 64, 128, 256 };
 
     void do_format_significand_integer(G_string& text, const G_integer& value, std::uint8_t rbase)
       {
@@ -510,9 +511,207 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
     }
   }
 
+    namespace {
+
+    bool do_preformat_real(G_string& text, const G_real& value, std::uint8_t rbase)
+      {
+        auto sbtm = std::signbit(value) ? std::intptr_t(-1) : 0;
+        // Return early in case of non-finite values.
+        int fpcls = std::fpclassify(value);
+        if(fpcls == FP_INFINITE) {
+          text = rocket::sref("-infinity" + 1 + sbtm);
+          return false;
+        }
+        if(fpcls == FP_NAN) {
+          text = rocket::sref("-nan" + 1 + sbtm);
+          return false;
+        }
+        // Although positive and negative zeroes are special, we don't treat them specially.
+        // If the number is negative, prepend a minus sign.
+        if(sbtm) {
+          text.push_back('-');
+        }
+        // Prepend the base prefix.
+        switch(rbase) {
+        case  2:
+          text.append("0b");
+          break;
+        case 10:
+          break;
+        case 16:
+          text.append("0x");
+          break;
+        default:
+          ROCKET_ASSERT(false);
+        }
+        // Digits are ready to be appended to `text`.
+        return true;
+      }
+
+    struct S_real_parts
+      {
+        double reg;
+        int exp;
+      };
+
+    S_real_parts do_decompose_real_exact(const G_real& value, std::uint8_t pbase)
+      {
+        // Break the number down into the significand and exponent parts.
+        // The result has to be exact.
+        S_real_parts p;
+        p.reg = std::frexp(std::fabs(value), std::addressof(p.exp));
+        // Normalize the number.
+        switch(pbase) {
+        case  2:
+          p.reg *= 2;
+          p.exp -= 1;
+          break;
+        case 16:
+          p.exp -= 1;
+          p.reg *= s_exp2p1[p.exp & 3];
+          p.exp >>= 2;
+          break;
+        default:
+          ROCKET_ASSERT(false);
+        }
+        return p;
+      }
+
+    void do_extract_digit_real(G_string& text, S_real_parts& p, std::uint8_t rbase)
+      {
+        // Shift a digit out.
+        auto off = static_cast<int>(p.reg);
+        p.reg -= off;
+        p.reg *= rbase;
+        // Locate the digit in uppercase.
+        off *= 2;
+        off += 1;
+        // Write this digit.
+        text.push_back(s_xdigits[off]);
+      }
+
+    G_string do_format_real_exact(const G_real& value, std::uint8_t rbase)
+      {
+        G_string text;
+        if(!do_preformat_real(text, value, rbase)) {
+          return text;
+        }
+        // Rewrite the value in scientific notation.
+        auto p = do_decompose_real_exact(value, rbase);
+        // If the value is less than one, write it after a `0.` prefix and prepend zeroes as needed.
+        if(p.exp <= -1) {
+          text.append("0.");
+          text.append(static_cast<std::size_t>(-1 - p.exp), '0');
+        }
+        // Write all significant figures.
+        while(p.reg != 0) {
+          do_extract_digit_real(text, p, rbase);
+          // Insert a decimal point after the last digit of the integral part.
+          if(--(p.exp) == -1) {
+            text.push_back('.');
+          }
+        }
+        // Fill zeroes until the end of the integral part has been reached.
+        if(p.exp > -1) {
+          text.append(static_cast<std::size_t>(p.exp - -1), '0');
+          text.push_back('.');
+        }
+        // The string will always contain a decimal point.
+        // Append a zero digit if there is no fractional part.
+        if(text.back() == '.') {
+          text.push_back('0');
+        }
+        return text;
+      }
+
+    G_string do_format_real_exact_scientific(const G_real& value, std::uint8_t rbase, std::uint8_t pbase)
+      {
+        G_string text;
+        if(!do_preformat_real(text, value, rbase)) {
+          return text;
+        }
+        // Rewrite the value in scientific notation.
+        auto p = do_decompose_real_exact(value, pbase);
+        // Write the first significant figure that precedes the decimal point.
+        do_extract_digit_real(text, p, rbase);
+        // Write the decimal point.
+        text.push_back('.');
+        // Write all significant figures that follow the decimal point.
+        while(p.reg != 0) {
+          do_extract_digit_real(text, p, rbase);
+        }
+        // The string will always contain a decimal point.
+        // Append a zero digit if there is no fractional part.
+        if(text.back() == '.') {
+          text.push_back('0');
+        }
+        // Write the exponent.
+        do_format_exponent(text, p.exp, pbase);
+        return text;
+      }
+
+    G_string do_format_real_decimal(const G_real& value, std::uint8_t rbase)
+      {
+        G_string text;
+        if(!do_preformat_real(text, value, 10)) {
+          return text;
+        }
+        return text;
+      }
+
+    G_string do_format_real_decimal_scientific(const G_real& value, std::uint8_t rbase, std::uint8_t pbase)
+      {
+        G_string text;
+        if(!do_preformat_real(text, value, 10)) {
+          return text;
+        }
+        return text;
+      }
+
+    }
+
 G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
   {
-    return { };
+    switch(base.value_or(10)) {
+    case  2:
+      {
+        if(!ebase) {
+          return do_format_real_exact(value,  2);
+        }
+        if(*ebase ==  2) {
+          return do_format_real_exact_scientific(value,  2,  2);
+        }
+        if(*ebase == 10) {
+          return do_format_real_exact_scientific(value,  2, 10);
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be either `2` or `10` (got `", *ebase, "`).");
+      }
+    case 10:
+      {
+        if(!ebase) {
+          return do_format_real_decimal(value, 10);
+        }
+        if(*ebase ==  2) {
+          return do_format_real_decimal_scientific(value, 10,  2);
+        }
+        if(*ebase == 10) {
+          return do_format_real_decimal_scientific(value, 10, 10);
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
+      }
+    case 16:
+      {
+        if(!ebase) {
+          return do_format_real_exact(value, 16);
+        }
+        if(*ebase ==  2) {
+          return do_format_real_exact_scientific(value, 16,  2);
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
+      }
+    default:
+      ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
+    }
   }
 
     namespace {
