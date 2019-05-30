@@ -478,10 +478,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         if(*ebase ==  2) {
           return do_format_integer_with_exponent(value,  2,  2);
         }
-        if(*ebase == 10) {
-          return do_format_integer_with_exponent(value,  2, 10);
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be either `2` or `10` (got `", *ebase, "`).");
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
       }
     case 10:
       {
@@ -681,10 +678,7 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
         if(*ebase ==  2) {
           return do_format_real_exact_scientific(value,  2,  2);
         }
-        if(*ebase == 10) {
-          return do_format_real_exact_scientific(value,  2, 10);
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be either `2` or `10` (got `", *ebase, "`).");
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
       }
     case 10:
       {
@@ -2238,8 +2232,8 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "  * Returns a `string` converted from `value`.\n"
             "  \n"
             "  * Throws an exception if `base` is neither `2` nor `10` nor `16`,\n"
-            "    or if `ebase` is neither `2` nor `10`, or if `base` is `16` and\n"
-            "    `ebase` is `10`.\n"
+            "    or if `ebase` is neither `2` nor `10`, or if `base` is not `10`\n"
+            "    but `ebase` is `10`.\n"
           ),
         // Opaque parameter
         G_null

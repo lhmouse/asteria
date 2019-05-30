@@ -1344,8 +1344,8 @@
 	* Returns a `string` converted from `value`.
 
 	* Throws an exception if `base` is neither `2` nor `10` nor `16`,
-	  or if `ebase` is neither `2` nor `10`, or if `base` is `16` and
-	  `ebase` is `10`.
+	  or if `ebase` is neither `2` nor `10`, or if `base` is not `10`
+	  but `ebase` is `10`.
 
 `std.numeric.parse_integer(text)`
 

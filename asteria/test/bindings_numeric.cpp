@@ -326,8 +326,6 @@ int main()
         assert std.numeric.format(-0x1234, 10,  2) == "-1165p+02";
         assert std.numeric.format(+0x1234, 16,  2) == "0x48Dp+02";
         assert std.numeric.format(-0x1234, 16,  2) == "-0x48Dp+02";
-        assert std.numeric.format(+0x1234,  2, 10) == "0b111010010e+01";
-        assert std.numeric.format(-0x1234,  2, 10) == "-0b111010010e+01";
         assert std.numeric.format(+0x1234, 10, 10) == "466e+01";
         assert std.numeric.format(-0x1234, 10, 10) == "-466e+01";
 //        assert std.numeric.format(+123.75) == "123.75";
