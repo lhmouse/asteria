@@ -1339,7 +1339,8 @@
 	  scientific notation, whose significand always contains a
 	  decimal point. In both cases, the exponent comprises a plus or
 	  minus sign and at least two digits. If `ebase` is absent, no
-	  exponent appears.
+	  exponent appears. The result is exact as long as `base` is a
+	  power of two.
 
 	* Returns a `string` converted from `value`.
 
