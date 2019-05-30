@@ -372,14 +372,12 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         // Prepend the base prefix.
         switch(rbase) {
         case  2:
-          *--bp = 'b';
-          *--bp = '0';
-          break;
-        case 10:
+          std::memcpy(bp -= 2, "0b", 2);
           break;
         case 16:
-          *--bp = 'x';
-          *--bp = '0';
+          std::memcpy(bp -= 2, "0x", 2);
+          break;
+        case 10:
           break;
         default:
           ROCKET_ASSERT(false);
@@ -480,6 +478,16 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         }
         ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
       }
+    case 16:
+      {
+        if(!ebase) {
+          return do_format_integer(value, 16);
+        }
+        if(*ebase ==  2) {
+          return do_format_integer_with_exponent(value, 16,  2);
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
+      }
     case 10:
       {
         if(!ebase) {
@@ -492,16 +500,6 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
           return do_format_integer_with_exponent(value, 10, 10);
         }
         ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
-      }
-    case 16:
-      {
-        if(!ebase) {
-          return do_format_integer(value, 16);
-        }
-        if(*ebase ==  2) {
-          return do_format_integer_with_exponent(value, 16,  2);
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
       }
     default:
       ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
@@ -533,10 +531,10 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         case  2:
           text.append("0b");
           break;
-        case 10:
-          break;
         case 16:
           text.append("0x");
+          break;
+        case 10:
           break;
         default:
           ROCKET_ASSERT(false);
