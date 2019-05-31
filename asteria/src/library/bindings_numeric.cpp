@@ -405,7 +405,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         auto bp = temp.end();
         while(reg != 0) {
           // Shift a digit out.
-          auto off = static_cast<int>(reg % 10);
+          auto off = reg % 10;
           reg /= 10;
           // Get the absolute value of this digit.
           off ^= sbtm;
