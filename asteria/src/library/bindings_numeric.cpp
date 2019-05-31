@@ -586,6 +586,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         auto off = static_cast<int>(p.reg);
         p.reg -= off;
         p.reg *= rbase;
+        p.exp--;
         // Locate the digit in uppercase.
         off *= 2;
         off += 1;
@@ -609,8 +610,6 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         // Write all significant figures.
         while(p.reg != 0) {
           do_extract_digit_real_exact(text, p, rbase);
-          // Move all digits remaining to the left.
-          p.exp--;
           // If it was the last one of the integral part, append a decimal point.
           if(p.exp == -1) {
             text.push_back('.');
@@ -637,6 +636,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         }
         // Rewrite the value in scientific notation.
         auto p = do_decompose_real_exact(value, pbase);
+        auto exp = p.exp;
         // Write the first significant figure that precedes the decimal point.
         do_extract_digit_real_exact(text, p, rbase);
         // Write the decimal point.
@@ -651,7 +651,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
           text.push_back('0');
         }
         // Write the exponent.
-        do_format_exponent(text, p.exp, pbase);
+        do_format_exponent(text, exp, pbase);
         return text;
       }
 
