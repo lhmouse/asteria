@@ -555,11 +555,6 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         int exp;
       };
 
-    constexpr int s_exp2p1[] =
-      {
-        2, 4, 8, 16, 32, 64, 128, 256
-      };
-
     S_real_parts do_decompose_real_exact(const G_real& value, std::uint8_t pbase)
       {
         // Break the number down into the significand and exponent parts.
@@ -574,7 +569,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
           break;
         case 16:
           p.exp -= 1;
-          p.reg *= s_exp2p1[p.exp & 3];
+          p.reg *= 2 << (p.exp & 3);
           p.exp >>= 2;
           break;
         default:
