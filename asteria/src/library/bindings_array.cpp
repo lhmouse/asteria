@@ -349,11 +349,10 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
       {
         auto bpos = rocket::move(begin);
         auto epos = rocket::move(end);
-        bool found = false;
-        for(;;) {
+        do {
           auto dist = epos - bpos;
           if(dist <= 0) {
-            break;
+            return std::make_pair(rocket::move(bpos), false);
           }
           auto mpos = bpos + dist / 2;
           // Compare `target` with the element in the middle.
@@ -362,17 +361,14 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
             ASTERIA_THROW_RUNTIME_ERROR("The elements `", target, "` and `", *mpos, "` are unordered.");
           }
           if(cmp == Value::compare_equal) {
-            bpos = mpos;
-            found = true;
-            break;
+            return std::make_pair(rocket::move(mpos), true);
           }
           if(cmp == Value::compare_less) {
             epos = mpos;
-            continue;
+          } else {
+            bpos = mpos + 1;
           }
-          bpos = mpos + 1;
-        }
-        return std::make_pair(rocket::move(bpos), found);
+        } while(true);
       }
 
     template<typename IteratorT, typename PredT> IteratorT do_bound(const Global_Context& global, IteratorT begin, IteratorT end,
@@ -380,10 +376,10 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
       {
         auto bpos = rocket::move(begin);
         auto epos = rocket::move(end);
-        for(;;) {
+        do {
           auto dist = epos - bpos;
           if(dist <= 0) {
-            break;
+            return rocket::move(bpos);
           }
           auto mpos = bpos + dist / 2;
           // Compare `target` with the element in the middle.
@@ -393,11 +389,10 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           }
           if(rocket::forward<PredT>(pred)(cmp)) {
             epos = mpos;
-            continue;
+          } else {
+            bpos = mpos + 1;
           }
-          bpos = mpos + 1;
-        }
-        return rocket::move(bpos);
+        } while(true);
       }
 
     }
