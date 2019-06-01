@@ -344,13 +344,6 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
-    void do_prepend(char*& bp, const char* s)
-      {
-        auto n = std::strlen(s);
-        bp -= n;
-        std::memcpy(bp, s, n);
-      }
-
     void do_format_significand_integer(G_string& text, const G_integer& value, std::uint8_t rbase)
       {
         auto reg = value;
@@ -378,10 +371,12 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         // Prepend the base prefix.
         switch(rbase) {
         case  2:
-          do_prepend(bp, "0b");
+          *--bp = 'b';
+          *--bp = '0';
           break;
         case 16:
-          do_prepend(bp, "0x");
+          *--bp = 'x';
+          *--bp = '0';
           break;
         case 10:
           break;
@@ -535,10 +530,12 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         // Prepend the base prefix.
         switch(rbase) {
         case  2:
-          text.append("0b");
+          text.push_back('0');
+          text.push_back('b');
           break;
         case 16:
-          text.append("0x");
+          text.push_back('0');
+          text.push_back('x');
           break;
         case 10:
           break;
