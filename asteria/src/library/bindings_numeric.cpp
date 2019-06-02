@@ -231,7 +231,7 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
 
     namespace {
 
-    ROCKET_PURE_FUNCTION G_integer do_saturing_add(const G_integer& lhs, const G_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_saturating_add(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs >= 0) {
           if(lhs > INT64_MAX - rhs) {
@@ -245,7 +245,7 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION G_integer do_saturing_sub(const G_integer& lhs, const G_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_saturating_sub(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs >= 0) {
           if(lhs < INT64_MIN + rhs) {
@@ -259,7 +259,7 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION G_integer do_saturing_mul(const G_integer& lhs, const G_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_saturating_mul(const G_integer& lhs, const G_integer& rhs)
       {
         if((lhs == 0) || (rhs == 0)) {
           return 0;
@@ -292,17 +292,17 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
         return slhs * arhs;
       }
 
-    ROCKET_PURE_FUNCTION G_real do_saturing_add(const G_real& lhs, const G_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_saturating_add(const G_real& lhs, const G_real& rhs)
       {
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION G_real do_saturing_sub(const G_real& lhs, const G_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_saturating_sub(const G_real& lhs, const G_real& rhs)
       {
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION G_real do_saturing_mul(const G_real& lhs, const G_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_saturating_mul(const G_real& lhs, const G_real& rhs)
       {
         return lhs * rhs;
       }
@@ -311,32 +311,32 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
 
 G_integer std_numeric_adds(const G_integer& x, const G_integer& y)
   {
-    return do_saturing_add(x, y);
+    return do_saturating_add(x, y);
   }
 
 G_real std_numeric_adds(const G_real& x, const G_real& y)
   {
-    return do_saturing_add(x, y);
+    return do_saturating_add(x, y);
   }
 
 G_integer std_numeric_subs(const G_integer& x, const G_integer& y)
   {
-    return do_saturing_sub(x, y);
+    return do_saturating_sub(x, y);
   }
 
 G_real std_numeric_subs(const G_real& x, const G_real& y)
   {
-    return do_saturing_sub(x, y);
+    return do_saturating_sub(x, y);
   }
 
 G_integer std_numeric_muls(const G_integer& x, const G_integer& y)
   {
-    return do_saturing_mul(x, y);
+    return do_saturating_mul(x, y);
   }
 
 G_real std_numeric_muls(const G_real& x, const G_real& y)
   {
-    return do_saturing_mul(x, y);
+    return do_saturating_mul(x, y);
   }
 
     namespace {
