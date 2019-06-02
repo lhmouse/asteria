@@ -344,10 +344,15 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
+    template<typename XintT> constexpr typename std::make_unsigned<XintT>::type do_uabs(const XintT& x) noexcept
+      {
+        return (x >= 0) ? +static_cast<typename std::make_unsigned<XintT>::type>(x)
+                        : -static_cast<typename std::make_unsigned<XintT>::type>(x);
+      }
+
     void do_format_significand_integer(G_string& text, const G_integer& value, std::uint8_t rbase)
       {
-        auto reg = value;
-        auto sbtm = reg >> 63;
+        auto reg = do_uabs(value);
         // Write characters backwards.
         std::array<char, 72> temp;
         auto bp = temp.end();
@@ -355,9 +360,6 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
           // Shift a digit out.
           auto off = reg % rbase;
           reg /= rbase;
-          // Get the absolute value of this digit.
-          off ^= sbtm;
-          off -= sbtm;
           // Locate the digit in uppercase.
           off *= 2;
           off += 1;
@@ -384,17 +386,16 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
           ROCKET_ASSERT(false);
         }
         // If the number is negative, prepend a minus sign.
-        if(sbtm) {
+        if(value < 0) {
           *--bp = '-';
         }
         // Append the result to `text` without clobbering existent contents.
         text.append(bp, temp.end());
       }
 
-    void do_format_exponent(G_string& text, std::int32_t value, std::uint8_t pbase)
+    void do_format_exponent(G_string& text, std::int32_t exp, std::uint8_t pbase)
       {
-        auto reg = value;
-        auto sbtm = reg >> 31;
+        auto reg = do_uabs(exp);
         // Write characters backwards.
         std::array<char, 16> temp;
         auto bp = temp.end();
@@ -402,9 +403,6 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
           // Shift a digit out.
           auto off = reg % 10;
           reg /= 10;
-          // Get the absolute value of this digit.
-          off ^= sbtm;
-          off -= sbtm;
           // Locate the digit in uppercase.
           off *= 2;
           off += 1;
@@ -416,7 +414,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
           *--bp = '0';
         }
         // Prepend a plus or minus sign.
-        if(sbtm) {
+        if(exp < 0) {
           *--bp = '-';
         } else {
           *--bp = '+';
@@ -511,20 +509,19 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
 
     bool do_preformat_real(G_string& text, const G_real& value, std::uint8_t rbase)
       {
-        auto sbtm = std::signbit(value) ? std::intptr_t(-1) : 0;
         // Return early in case of non-finite values.
         int fpcls = std::fpclassify(value);
         if(fpcls == FP_INFINITE) {
-          text = rocket::sref("-infinity" + 1 + sbtm);
+          text = rocket::sref("-infinity" + !std::signbit(value));
           return false;
         }
         if(fpcls == FP_NAN) {
-          text = rocket::sref("-nan" + 1 + sbtm);
+          text = rocket::sref("-nan" + !std::signbit(value));
           return false;
         }
         // Although positive and negative zeroes are special, we don't treat them specially.
         // If the number is negative, prepend a minus sign.
-        if(sbtm) {
+        if(std::signbit(value)) {
           text.push_back('-');
         }
         // Prepend the base prefix.
@@ -1499,13 +1496,21 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
 
     inline bool do_accumulate_digit(std::int64_t& value, std::int64_t limit, std::uint8_t base, std::uint8_t dvalue) noexcept
       {
-        auto sbtm = limit >> 63;
-        if(sbtm ? (value < (limit + dvalue) / base) : (value > (limit - dvalue) / base)) {
-          return false;
+        if(limit >= 0) {
+          // Accumulate the digit towards positive infinity.
+          if(value > (limit - dvalue) / base) {
+            return false;
+          }
+          value *= base;
+          value += dvalue;
+        } else {
+          // Accumulate the digit towards negative infinity.
+          if(value < (limit + dvalue) / base) {
+            return false;
+          }
+          value *= base;
+          value -= dvalue;
         }
-        value *= base;
-        value += dvalue ^ sbtm;
-        value -= sbtm;
         return true;
       }
 

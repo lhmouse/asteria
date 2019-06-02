@@ -237,13 +237,21 @@ namespace Asteria {
 
     inline bool do_accumulate_digit(std::int64_t& value, std::int64_t limit, std::uint8_t base, std::uint8_t dvalue) noexcept
       {
-        auto sbtm = limit >> 63;
-        if(sbtm ? (value < (limit + dvalue) / base) : (value > (limit - dvalue) / base)) {
-          return false;
+        if(limit >= 0) {
+          // Accumulate the digit towards positive infinity.
+          if(value > (limit - dvalue) / base) {
+            return false;
+          }
+          value *= base;
+          value += dvalue;
+        } else {
+          // Accumulate the digit towards negative infinity.
+          if(value < (limit + dvalue) / base) {
+            return false;
+          }
+          value *= base;
+          value -= dvalue;
         }
-        value *= base;
-        value += dvalue ^ sbtm;
-        value -= sbtm;
         return true;
       }
 
