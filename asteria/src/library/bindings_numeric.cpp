@@ -274,12 +274,10 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
           return (lhs ^ rhs) + 1;
         }
         // signed lhs and absolute rhs
-        auto slhs = lhs;
-        auto arhs = rhs;
-        if(rhs < 0) {
-          slhs = -lhs;
-          arhs = -rhs;
-        }
+        auto m = rhs >> 63;
+        auto slhs = (lhs ^ m) - m;
+        auto arhs = (rhs ^ m) - m;
+        // `arhs` will only be positive here.
         if(slhs >= 0) {
           if(slhs > INT64_MAX / arhs) {
             return INT64_MAX;

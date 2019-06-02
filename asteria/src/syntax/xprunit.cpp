@@ -261,18 +261,35 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         return rhs >> 63;
       }
 
+    [[noreturn]] void do_throw_integral_overflow(const char* op, const G_integer& lhs, const G_integer& rhs)
+      {
+        ASTERIA_THROW_RUNTIME_ERROR("Integral ", op, " of `", lhs, "` and `", rhs, "` would result in overflow.");
+      }
+
     ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_integer& rhs)
       {
-        if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
-          ASTERIA_THROW_RUNTIME_ERROR("Integral addition of `", lhs, "` and `", rhs, "` would result in overflow.");
+        if(rhs >= 0) {
+          if(lhs > INT64_MAX - rhs) {
+            do_throw_integral_overflow("addition", lhs, rhs);
+          }
+        } else {
+          if(lhs < INT64_MIN - rhs) {
+            do_throw_integral_overflow("addition", lhs, rhs);
+          }
         }
         return lhs + rhs;
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_sub(const G_integer& lhs, const G_integer& rhs)
       {
-        if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
-          ASTERIA_THROW_RUNTIME_ERROR("Integral subtraction of `", lhs, "` and `", rhs, "` would result in overflow.");
+        if(rhs >= 0) {
+          if(lhs < INT64_MIN + rhs) {
+            do_throw_integral_overflow("subtraction", lhs, rhs);
+          }
+        } else {
+          if(lhs > INT64_MAX + rhs) {
+            do_throw_integral_overflow("subtraction", lhs, rhs);
+          }
         }
         return lhs - rhs;
       }
@@ -286,20 +303,24 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           return (lhs ^ rhs) ^ 1;
         }
         if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
-          ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
+          do_throw_integral_overflow("multiplication", lhs, rhs);
         }
         if((lhs == -1) || (rhs == -1)) {
           return (lhs ^ rhs) + 1;
         }
         // signed lhs and absolute rhs
-        auto slhs = lhs;
-        auto arhs = rhs;
-        if(rhs < 0) {
-          slhs = -lhs;
-          arhs = -rhs;
-        }
-        if((slhs >= 0) ? (slhs > INT64_MAX / arhs) : (slhs < INT64_MIN / arhs)) {
-          ASTERIA_THROW_RUNTIME_ERROR("Integral multiplication of `", lhs, "` and `", rhs, "` would result in overflow.");
+        auto m = rhs >> 63;
+        auto slhs = (lhs ^ m) - m;
+        auto arhs = (rhs ^ m) - m;
+        // `arhs` will only be positive here.
+        if(slhs >= 0) {
+          if(slhs > INT64_MAX / arhs) {
+            do_throw_integral_overflow("multiplication", lhs, rhs);
+          }
+        } else {
+          if(slhs < INT64_MIN / arhs) {
+            do_throw_integral_overflow("multiplication", lhs, rhs);
+          }
         }
         return slhs * arhs;
       }
@@ -310,7 +331,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
         }
         if((lhs == INT64_MIN) && (rhs == -1)) {
-          ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
+          do_throw_integral_overflow("division", lhs, rhs);
         }
         return lhs / rhs;
       }
@@ -321,7 +342,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
         }
         if((lhs == INT64_MIN) && (rhs == -1)) {
-          ASTERIA_THROW_RUNTIME_ERROR("Integral division of `", lhs, "` and `", rhs, "` would result in overflow.");
+          do_throw_integral_overflow("division", lhs, rhs);
         }
         return lhs % rhs;
       }
