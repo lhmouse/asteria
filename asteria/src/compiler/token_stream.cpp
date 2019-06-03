@@ -258,10 +258,10 @@ namespace Asteria {
     inline void do_raise(double& value, std::uint8_t base, std::int64_t exp) noexcept
       {
         if(exp > 0) {
-          value *= power_u64(base, +static_cast<std::uint64_t>(exp));
+          value *= std::pow(base, +exp);
         }
         if(exp < 0) {
-          value /= power_u64(base, -static_cast<std::uint64_t>(exp));
+          value /= std::pow(base, -exp);
         }
       }
 
