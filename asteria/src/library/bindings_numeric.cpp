@@ -342,121 +342,124 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
-    template<typename XintT> constexpr typename std::make_unsigned<XintT>::type do_uabs(const XintT& x) noexcept
+    struct Parts
       {
-        return (x >= 0) ? +static_cast<typename std::make_unsigned<XintT>::type>(x)
-                        : -static_cast<typename std::make_unsigned<XintT>::type>(x);
-      }
+        bool sbt;  // sign bit
+        char rsv;  // (do not use)
+        std::uint8_t bsf;  // beginning of significant figures
+        std::uint8_t esf;  // end of significant figures
+        std::array<char, 64> sfs;  // significant figures
+        int exp;  // normalized exponent (a.k.a. exponent of the first significant digit)
+      };
 
-    void do_format_significand_integer(G_string& text, const G_integer& value, std::uint8_t rbase)
+    Parts do_decompose(std::uint8_t rbase, const G_integer& value)
       {
-        auto reg = do_uabs(value);
-        // Write characters backwards.
-        std::array<char, 72> temp;
-        auto bp = temp.end();
+        Parts p;
+        // Get the absolute value of `value` without causing overflow.
+        auto m = static_cast<std::uint64_t>(value >> 63);
+        p.sbt = m;
+        auto reg = (static_cast<std::uint64_t>(value) ^ m) - m;
+        // Extract digits from right to left.
+        p.bsf = 64;
+        p.esf = 64;
+        // Note that if `value` is zero then `exp` is set to `-1`.
+        p.exp = -1;
         while(reg != 0) {
           // Shift a digit out.
-          auto off = reg % rbase;
+          auto dvalue = static_cast<std::uint8_t>(reg % rbase);
           reg /= rbase;
           // Locate the digit in uppercase.
-          off *= 2;
-          off += 1;
-          // Write this digit.
-          *--bp = s_xdigits[off];
+          auto doff = dvalue * 2 + 1;
+          p.sfs[--p.bsf] = s_xdigits[doff];
+          p.exp++;
         }
-        // Ensure there is at least a zero digit.
-        if(bp == temp.end()) {
-          *--bp = '0';
+        return p;
+      }
+
+    G_string& do_prefix(G_string& text, std::uint8_t rbase, const Parts& p)
+      {
+        // Prepend a minus sign if the numebr is negative.
+        if(p.sbt) {
+          text.push_back('-');
         }
-        // Prepend the base prefix.
+        // Prepend the radix prefix.
         switch(rbase) {
         case  2:
-          *--bp = 'b';
-          *--bp = '0';
+          text.append("0b");
           break;
         case 16:
-          *--bp = 'x';
-          *--bp = '0';
+          text.append("0x");
           break;
         case 10:
           break;
         default:
           ROCKET_ASSERT(false);
         }
-        // If the number is negative, prepend a minus sign.
-        if(value < 0) {
-          *--bp = '-';
-        }
-        // Append the result to `text` without clobbering existent contents.
-        text.append(bp, temp.end());
-      }
-
-    void do_format_exponent(G_string& text, std::int32_t exp, std::uint8_t pbase)
-      {
-        auto reg = do_uabs(exp);
-        // Write characters backwards.
-        std::array<char, 16> temp;
-        auto bp = temp.end();
-        while(reg != 0) {
-          // Shift a digit out.
-          auto off = reg % 10;
-          reg /= 10;
-          // Locate the digit in uppercase.
-          off *= 2;
-          off += 1;
-          // Write this digit.
-          *--bp = s_xdigits[off];
-        }
-        // Ensure there are least two digits.
-        while(temp.end() - bp < 2) {
-          *--bp = '0';
-        }
-        // Prepend a plus or minus sign.
-        if(exp < 0) {
-          *--bp = '-';
-        } else {
-          *--bp = '+';
-        }
-        // Prepend the base prefix.
-        switch(pbase) {
-        case  2:
-          *--bp = 'p';
-          break;
-        case 10:
-          *--bp = 'e';
-          break;
-        default:
-          ROCKET_ASSERT(false);
-        }
-        // Append the result to `text` without clobbering existent contents.
-        text.append(bp, temp.end());
-      }
-
-    G_string do_format_integer(const G_integer& value, std::uint8_t rbase)
-      {
-        // No exponent appears.
-        G_string text;
-        do_format_significand_integer(text, value, rbase);
         return text;
       }
 
-    G_string do_format_integer_with_exponent(const G_integer& value, std::uint8_t rbase, std::uint8_t pbase)
+    G_string& do_format_no_exponent(G_string& text, std::uint8_t rbase, const G_integer& value)
       {
-        auto reg = value;
-        // Remove as many trailing zeroes as possible.
-        int exp = 0;
+        // Write prefixes.
+        auto p = do_decompose(rbase, value);
+        do_prefix(text, rbase, p);
+        // Ensure there is at least a zero.
+        if(p.bsf == p.esf) {
+          text.push_back('0');
+        }
+        // Write significant figures.
+        text.append(p.sfs.data() + p.bsf, p.sfs.data() + p.esf);
+        return text;
+      }
+
+    G_integer do_biexp(int* exp, std::uint8_t pbase, const G_integer& value)
+      {
+        auto ireg = value;
+        int iexp = 0;
         for(;;) {
-          auto next = reg / pbase;
-          if(next * pbase != reg) {
+          if(ireg == 0) {
             break;
           }
-          reg = next;
-          exp++;
+          auto next = ireg / pbase;
+          if(ireg % pbase != 0) {
+            break;
+          }
+          ireg = next;
+          iexp++;
         }
-        // Write the significand followed by the exponent.
-        G_string text;
-        do_format_significand_integer(text, reg, rbase);
-        do_format_exponent(text, exp, pbase);
+        *exp = iexp;
+        return ireg;
+      }
+
+    G_string& do_format_exponent(G_string& text, std::uint8_t pbase, int exp)
+      {
+        // Write the exponent prefix.
+        switch(pbase) {
+        case  2:
+          text.push_back('p');
+          break;
+        case 10:
+          text.push_back('e');
+          break;
+        default:
+          ROCKET_ASSERT(false);
+        }
+        // Write the sign.
+        auto p = do_decompose(10, exp);
+        if(p.sbt) {
+          text.push_back('-');
+        } else {
+          text.push_back('+');
+        }
+        // Ensure there are at least two digits.
+        if(p.esf - p.bsf < 2) {
+          text.push_back('0');
+        }
+        if(p.bsf == p.esf) {
+          text.push_back('0');
+        }
+        // Write significant figures.
+        text.append(p.sfs.data() + p.bsf, p.sfs.data() + p.esf);
         return text;
       }
 
@@ -464,45 +467,60 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
 
 G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
   {
+    G_string text;
+    int exp;
+    // By default, the number is written in decimal with no exponent part.
     switch(base.value_or(10)) {
     case  2:
       {
         if(!ebase) {
-          return do_format_integer(value,  2);
+          do_format_no_exponent(text,  2, value);
+          break;
         }
         if(*ebase ==  2) {
-          return do_format_integer_with_exponent(value,  2,  2);
+          do_format_no_exponent(text,  2, do_biexp(&exp,  2, value));
+          do_format_exponent(text,  2, exp);
+          break;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
       }
     case 16:
       {
         if(!ebase) {
-          return do_format_integer(value, 16);
+          do_format_no_exponent(text, 16, value);
+          break;
         }
         if(*ebase ==  2) {
-          return do_format_integer_with_exponent(value, 16,  2);
+          do_format_no_exponent(text, 16, do_biexp(&exp,  2, value));
+          do_format_exponent(text,  2, exp);
+          break;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
       }
     case 10:
       {
         if(!ebase) {
-          return do_format_integer(value, 10);
+          do_format_no_exponent(text, 10, value);
+          break;
         }
         if(*ebase ==  2) {
-          return do_format_integer_with_exponent(value, 10,  2);
+          do_format_no_exponent(text, 10, do_biexp(&exp,  2, value));
+          do_format_exponent(text,  2, exp);
+          break;
         }
         if(*ebase == 10) {
-          return do_format_integer_with_exponent(value, 10, 10);
+          do_format_no_exponent(text, 10, do_biexp(&exp, 10, value));
+          do_format_exponent(text, 10, exp);
+          break;
         }
         ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
       }
     default:
       ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
     }
+    return text;
   }
-
+/*
     namespace {
 
     bool do_preformat_real(G_string& text, const G_real& value, std::uint8_t rbase)
@@ -1425,10 +1443,10 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
       }
 
     }
-
+*/
 G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
   {
-    switch(base.value_or(10)) {
+/*    switch(base.value_or(10)) {
     case  2:
       {
         if(!ebase) {
@@ -1465,6 +1483,8 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
     default:
       ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
     }
+*/
+    return { };
   }
 
     namespace {
