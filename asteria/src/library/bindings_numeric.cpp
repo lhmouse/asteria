@@ -137,7 +137,7 @@ G_real std_numeric_trunc(const G_real& value)
 
     G_integer do_icast(const G_real& value)
       {
-        if(!std::islessequal(INT64_MIN, value) || !std::islessequal(value, INT64_MAX)) {
+        if(!(std::islessequal(-0x1p63, value) && std::isless(value, +0x1p63))) {
           ASTERIA_THROW_RUNTIME_ERROR("The `real` number `", value, "` cannot be represented as an `integer`.");
         }
         return G_integer(value);
