@@ -214,6 +214,11 @@ G_real std_numeric_fma(const G_real& x, const G_real& y, const G_real& z)
     return std::fma(x, y, z);
   }
 
+G_real std_numeric_remainder(const G_real& x, const G_real& y)
+  {
+    return std::remainder(x, y);
+  }
+
 G_integer std_numeric_addm(const G_integer& x, const G_integer& y)
   {
     return G_integer(static_cast<std::uint64_t>(x) + static_cast<std::uint64_t>(y));
@@ -2656,6 +2661,44 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             if(reader.start().g(x).g(y).g(z).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_fma(x, y, z) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.remainder()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("remainder"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.remainder(x, y)`\n"
+            "  \n"
+            "  * Calculates the IEEE floating-point remainder of division of `x`\n"
+            "    by `y`. The remainder is defined to be `x - q * y` where `q` is\n"
+            "    the quotient of division of `x` by `y` rounding to nearest.\n"
+            "  \n"
+            "  * Returns the remainder as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.remainder"), args);
+            // Parse arguments.
+            G_real x;
+            G_real y;
+            if(reader.start().g(x).g(y).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_remainder(x, y) };
               return rocket::move(xref);
             }
             // Fail.

@@ -1265,6 +1265,14 @@
 
 	* Returns the value of `x * y + z` as a `real`.
 
+`std.numeric.remainder(x, y)`
+
+	* Calculates the IEEE floating-point remainder of division of `x`
+	  by `y`. The remainder is defined to be `x - q * y` where `q` is
+	  the quotient of division of `x` by `y` rounding to nearest.
+
+	* Returns the remainder as a `real`.
+
 `std.numeric.addm(x, y)`
 
 	* Adds `y` to `x` using modular arithmetic. `x` and `y` must be

@@ -216,6 +216,11 @@ int main()
         assert __isnan std.numeric.fma(5, nan, 7);
         assert __isnan std.numeric.fma(5, 6, nan);
 
+        assert std.numeric.remainder(+6.0, +3.5) == -1.0;
+        assert std.numeric.remainder(-6.0, +3.5) == +1.0;
+        assert std.numeric.remainder(+6.0, -3.5) == -1.0;
+        assert std.numeric.remainder(-6.0, -3.5) == +1.0;
+
         assert std.numeric.addm(+1, +2) == +3;
         assert std.numeric.addm(+1, -2) == -1;
         assert std.numeric.addm(std.numeric.integer_max, +2) == std.numeric.integer_min + 1;
