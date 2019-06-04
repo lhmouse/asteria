@@ -997,9 +997,9 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         p.sbt = m;
         auto reg = (static_cast<std::uint64_t>(value) ^ m) - m;
         // Extract digits from right to left.
+        // Note that if `value` is zero then `exp` is set to `-1`.
         p.bsf = 64;
         p.esf = 64;
-        // Note that if `value` is zero then `exp` is set to `-1`.
         p.exp = -1;
         while(reg != 0) {
           // Shift a digit out.
@@ -1183,14 +1183,18 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         p.sbt = std::signbit(value);
         auto reg = std::fabs(value);
         // Extract digits from left to right.
+        // Note that if `value` is zero then `exp` is set to `-1`.
         p.bsf = 0;
         p.esf = 0;
-        // Note that if `value` is zero then `exp` is set to `-1`.
+        p.exp = -1;
         switch(rbase) {
         case  2:
           {
             // Break the value into fractional and exponential parts. Be advised, unlike scientific notation,
             // `frexp()` returns a fraction in `[0.5,1.0)`, so the exponent has to be normalized by hand.
+            if(reg == 0) {
+              break;
+            }
             int doff;
             reg = std::frexp(reg, &doff);
             p.exp = doff - 1;
@@ -1210,6 +1214,9 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
           {
             // Break the value into fractional and exponential parts. Be advised, unlike scientific notation,
             // `frexp()` returns a fraction in `[0.5,1.0)`, so the exponent has to be normalized by hand.
+            if(reg == 0) {
+              break;
+            }
             int doff;
             reg = std::frexp(reg, &doff);
             p.exp = doff - 1;
@@ -1235,8 +1242,6 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
             // Calculate the exponent using binary search. Note that the first two elements of `s_decbounds` are zeroes.
             auto qdigit = std::upper_bound(s_decbounds, s_decbounds + 5697, reg) - 1;
             if(qdigit < s_decbounds + 2) {
-              // `value` is zero.
-              p.exp = -1;
               break;
             }
             int doff = static_cast<int>(qdigit - s_decbounds) / 9;
