@@ -990,7 +990,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         char rsv;  // (do not use)
         std::uint8_t bsf;  // beginning of significant figures
         std::uint8_t esf;  // end of significant figures
-        char s[64];  // significant figures
+        char sfs[64];  // significant figures
         int exp;  // normalized exponent (a.k.a. exponent of the first significant digit)
       };
 
@@ -1012,7 +1012,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
           reg /= rbase;
           // Locate the digit in uppercase.
           int doff = dvalue * 2 + 1;
-          p.s[--p.bsf] = s_xdigits[doff];
+          p.sfs[--p.bsf] = s_xdigits[doff];
           p.exp++;
         }
         return p;
@@ -1046,7 +1046,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         // Write prefixes.
         do_prefix(text, rbase, p);
         // Write significant figures.
-        text.append(p.s + p.bsf, p.s + p.esf);
+        text.append(p.sfs + p.bsf, p.sfs + p.esf);
         // Ensure there is at least a zero.
         if(p.bsf == p.esf) {
           text.push_back('0');
@@ -1100,7 +1100,7 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
           text.push_back('0');
         }
         // Write significant figures.
-        text.append(p.s + p.bsf, p.s + p.esf);
+        text.append(p.sfs + p.bsf, p.sfs + p.esf);
         return text;
       }
 
@@ -1211,7 +1211,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
               reg -= dvalue;
               // Locate the digit in uppercase.
               doff = dvalue * 2 + 1;
-              p.s[p.esf++] = s_xdigits[doff];
+              p.sfs[p.esf++] = s_xdigits[doff];
             }
             break;
           }
@@ -1237,7 +1237,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
               reg -= dvalue;
               // Locate the digit in uppercase.
               doff = dvalue * 2 + 1;
-              p.s[p.esf++] = s_xdigits[doff];
+              p.sfs[p.esf++] = s_xdigits[doff];
             }
             break;
           }
@@ -1261,7 +1261,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
               }
               // Locate the digit in uppercase.
               doff = dvalue * 2 + 1;
-              p.s[p.esf++] = s_xdigits[doff];
+              p.sfs[p.esf++] = s_xdigits[doff];
               // Only the first 17 significant figures are output.
               if(p.esf - p.bsf >= 17) {
                 break;
@@ -1278,11 +1278,10 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
               if(p.bsf == p.esf) {
                 break;
               }
-              auto r = p.esf - 1;
-              if(p.s[r] != '0') {
+              if(p.sfs[p.esf-1] != '0') {
                 break;
               }
-              p.esf = static_cast<std::uint8_t>(r);
+              p.esf--;
             }
             break;
           }
@@ -1303,21 +1302,21 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         if(diff <= 0) {
           text.append("0.");
           text.append(static_cast<unsigned>(-diff), '0');
-          text.append(p.s + p.bsf, p.s + p.esf);
+          text.append(p.sfs + p.bsf, p.sfs + p.esf);
           goto z;
         }
         // If the decimal point appears in the middle of significant figures, write digits as
         // two parts.
         diff -= p.esf - p.bsf;
         if(diff <= 0) {
-          text.append(p.s + p.bsf, p.s + p.esf + diff);
+          text.append(p.sfs + p.bsf, p.sfs + p.esf + diff);
           text.push_back('.');
-          text.append(p.s + p.esf + diff, p.s + p.esf);
+          text.append(p.sfs + p.esf + diff, p.sfs + p.esf);
           goto z;
         }
         // If all significant figures are from the integral part, write all significant figures,
         // append zeroes when necesssary, then terminate the string with a decimal point.
-        text.append(p.s + p.bsf, p.s + p.esf);
+        text.append(p.sfs + p.bsf, p.sfs + p.esf);
         text.append(static_cast<unsigned>(diff), '0');
         text.push_back('.');
       z:
@@ -1367,9 +1366,9 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
           goto z;
         }
         // Write the first significant figure, followed by a decimal point, followed by all the other digits.
-        text.push_back(p.s[p.bsf]);
+        text.push_back(p.sfs[p.bsf]);
         text.push_back('.');
-        text.append(p.s + p.bsf + 1, p.s + p.esf);
+        text.append(p.sfs + p.bsf + 1, p.sfs + p.esf);
       z:
         // The string will always contain a decimal point.
         // Append a zero digit if there is no fractional part.
