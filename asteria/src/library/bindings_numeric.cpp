@@ -1046,10 +1046,13 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         // Write prefixes.
         do_prefix(text, rbase, p);
         // Write significant figures.
-        text.append(p.sfs + p.bsf, p.sfs + p.esf);
-        // Ensure there is at least a zero.
-        if(p.bsf == p.esf) {
+        switch(p.esf - p.bsf) {
+        case 0:
           text.push_back('0');
+          break;
+        default:
+          text.append(p.sfs + p.bsf, p.sfs + p.esf);
+          break;
         }
         return text;
       }
@@ -1092,15 +1095,19 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
         } else {
           text.push_back('+');
         }
-        // Ensure there are at least two digits.
-        if(p.esf - p.bsf < 2) {
-          text.push_back('0');
-        }
-        if(p.bsf == p.esf) {
-          text.push_back('0');
-        }
         // Write significant figures.
-        text.append(p.sfs + p.bsf, p.sfs + p.esf);
+        switch(p.esf - p.bsf) {
+        case 0:
+          text.append("00");
+          break;
+        case 1:
+          text.push_back('0');
+          text.push_back(p.sfs[p.bsf]);
+          break;
+        default:
+          text.append(p.sfs + p.bsf, p.sfs + p.esf);
+          break;
+        }
         return text;
       }
 
