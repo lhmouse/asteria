@@ -857,7 +857,7 @@ G_array std_string_unpack8(const G_string& text)
     return do_unpack<std::int8_t, false>(text);
   }
 
-G_string std_string_pack16be(const G_integer& value)
+G_string std_string_pack_16be(const G_integer& value)
   {
     G_string text;
     text.reserve(2);
@@ -865,7 +865,7 @@ G_string std_string_pack16be(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack16be(const G_array& values)
+G_string std_string_pack_16be(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 2);
@@ -875,12 +875,12 @@ G_string std_string_pack16be(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack16be(const G_string& text)
+G_array std_string_unpack_16be(const G_string& text)
   {
     return do_unpack<std::int16_t, true>(text);
   }
 
-G_string std_string_pack16le(const G_integer& value)
+G_string std_string_pack_16le(const G_integer& value)
   {
     G_string text;
     text.reserve(2);
@@ -888,7 +888,7 @@ G_string std_string_pack16le(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack16le(const G_array& values)
+G_string std_string_pack_16le(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 2);
@@ -898,12 +898,12 @@ G_string std_string_pack16le(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack16le(const G_string& text)
+G_array std_string_unpack_16le(const G_string& text)
   {
     return do_unpack<std::int16_t, false>(text);
   }
 
-G_string std_string_pack32be(const G_integer& value)
+G_string std_string_pack_32be(const G_integer& value)
   {
     G_string text;
     text.reserve(4);
@@ -911,7 +911,7 @@ G_string std_string_pack32be(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack32be(const G_array& values)
+G_string std_string_pack_32be(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 4);
@@ -921,12 +921,12 @@ G_string std_string_pack32be(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack32be(const G_string& text)
+G_array std_string_unpack_32be(const G_string& text)
   {
     return do_unpack<std::int32_t, true>(text);
   }
 
-G_string std_string_pack32le(const G_integer& value)
+G_string std_string_pack_32le(const G_integer& value)
   {
     G_string text;
     text.reserve(4);
@@ -934,7 +934,7 @@ G_string std_string_pack32le(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack32le(const G_array& values)
+G_string std_string_pack_32le(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 4);
@@ -944,12 +944,12 @@ G_string std_string_pack32le(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack32le(const G_string& text)
+G_array std_string_unpack_32le(const G_string& text)
   {
     return do_unpack<std::int32_t, false>(text);
   }
 
-G_string std_string_pack64be(const G_integer& value)
+G_string std_string_pack_64be(const G_integer& value)
   {
     G_string text;
     text.reserve(8);
@@ -957,7 +957,7 @@ G_string std_string_pack64be(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack64be(const G_array& values)
+G_string std_string_pack_64be(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 8);
@@ -967,12 +967,12 @@ G_string std_string_pack64be(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack64be(const G_string& text)
+G_array std_string_unpack_64be(const G_string& text)
   {
     return do_unpack<std::int64_t, true>(text);
   }
 
-G_string std_string_pack64le(const G_integer& value)
+G_string std_string_pack_64le(const G_integer& value)
   {
     G_string text;
     text.reserve(8);
@@ -980,7 +980,7 @@ G_string std_string_pack64le(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack64le(const G_array& values)
+G_string std_string_pack_64le(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 8);
@@ -990,7 +990,7 @@ G_string std_string_pack64le(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack64le(const G_string& text)
+G_array std_string_unpack_64le(const G_string& text)
   {
     return do_unpack<std::int64_t, false>(text);
   }
@@ -2487,15 +2487,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.pack16be()`
+    // `std.string.pack_16be()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("pack16be"),
+    result.insert_or_assign(rocket::sref("pack_16be"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.pack16be(values)`\n"
+            "`std.string.pack_16be(values)`\n"
             "  \n"
             "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
@@ -2512,12 +2512,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.pack16be"), args);
+            Argument_Reader reader(rocket::sref("std.string.pack_16be"), args);
             // Parse arguments.
             G_integer value;
             if(reader.start().g(value).finish()) {
               // Call the binding function.
-              auto text = std_string_pack16be(value);
+              auto text = std_string_pack_16be(value);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2525,7 +2525,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             G_array values;
             if(reader.start().g(values).finish()) {
               // Call the binding function.
-              auto text = std_string_pack16be(values);
+              auto text = std_string_pack_16be(values);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2535,15 +2535,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.unpack16be()`
+    // `std.string.unpack_16be()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("unpack16be"),
+    result.insert_or_assign(rocket::sref("unpack_16be"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.unpack16be(text)`\n"
+            "`std.string.unpack_16be(text)`\n"
             "  \n"
             "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 16-bit integers in the\n"
@@ -2563,12 +2563,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.unpack16be"), args);
+            Argument_Reader reader(rocket::sref("std.string.unpack_16be"), args);
             // Parse arguments.
             G_string text;
             if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto values = std_string_unpack16be(text);
+              auto values = std_string_unpack_16be(text);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(values) };
               return rocket::move(xref);
@@ -2578,15 +2578,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.pack16le()`
+    // `std.string.pack_16le()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("pack16le"),
+    result.insert_or_assign(rocket::sref("pack_16le"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.pack16le(values)`\n"
+            "`std.string.pack_16le(values)`\n"
             "  \n"
             "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
@@ -2603,12 +2603,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.pack16le"), args);
+            Argument_Reader reader(rocket::sref("std.string.pack_16le"), args);
             // Parse arguments.
             G_integer value;
             if(reader.start().g(value).finish()) {
               // Call the binding function.
-              auto text = std_string_pack16le(value);
+              auto text = std_string_pack_16le(value);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2616,7 +2616,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             G_array values;
             if(reader.start().g(values).finish()) {
               // Call the binding function.
-              auto text = std_string_pack16le(values);
+              auto text = std_string_pack_16le(values);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2626,15 +2626,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.unpack16le()`
+    // `std.string.unpack_16le()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("unpack16le"),
+    result.insert_or_assign(rocket::sref("unpack_16le"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.unpack16le(text)`\n"
+            "`std.string.unpack_16le(text)`\n"
             "  \n"
             "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 16-bit integers in the\n"
@@ -2654,12 +2654,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.unpack16le"), args);
+            Argument_Reader reader(rocket::sref("std.string.unpack_16le"), args);
             // Parse arguments.
             G_string text;
             if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto values = std_string_unpack16le(text);
+              auto values = std_string_unpack_16le(text);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(values) };
               return rocket::move(xref);
@@ -2669,15 +2669,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.pack32be()`
+    // `std.string.pack_32be()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("pack32be"),
+    result.insert_or_assign(rocket::sref("pack_32be"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.pack32be(values)`\n"
+            "`std.string.pack_32be(values)`\n"
             "  \n"
             "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
@@ -2694,12 +2694,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.pack32be"), args);
+            Argument_Reader reader(rocket::sref("std.string.pack_32be"), args);
             // Parse arguments.
             G_integer value;
             if(reader.start().g(value).finish()) {
               // Call the binding function.
-              auto text = std_string_pack32be(value);
+              auto text = std_string_pack_32be(value);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2707,7 +2707,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             G_array values;
             if(reader.start().g(values).finish()) {
               // Call the binding function.
-              auto text = std_string_pack32be(values);
+              auto text = std_string_pack_32be(values);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2717,15 +2717,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.unpack32be()`
+    // `std.string.unpack_32be()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("unpack32be"),
+    result.insert_or_assign(rocket::sref("unpack_32be"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.unpack32be(text)`\n"
+            "`std.string.unpack_32be(text)`\n"
             "  \n"
             "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 32-bit integers in the\n"
@@ -2745,12 +2745,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.unpack32be"), args);
+            Argument_Reader reader(rocket::sref("std.string.unpack_32be"), args);
             // Parse arguments.
             G_string text;
             if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto values = std_string_unpack32be(text);
+              auto values = std_string_unpack_32be(text);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(values) };
               return rocket::move(xref);
@@ -2760,15 +2760,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.pack32le()`
+    // `std.string.pack_32le()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("pack32le"),
+    result.insert_or_assign(rocket::sref("pack_32le"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.pack32le(values)`\n"
+            "`std.string.pack_32le(values)`\n"
             "  \n"
             "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
@@ -2785,12 +2785,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.pack32le"), args);
+            Argument_Reader reader(rocket::sref("std.string.pack_32le"), args);
             // Parse arguments.
             G_integer value;
             if(reader.start().g(value).finish()) {
               // Call the binding function.
-              auto text = std_string_pack32le(value);
+              auto text = std_string_pack_32le(value);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2798,7 +2798,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             G_array values;
             if(reader.start().g(values).finish()) {
               // Call the binding function.
-              auto text = std_string_pack32le(values);
+              auto text = std_string_pack_32le(values);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2808,15 +2808,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.unpack32le()`
+    // `std.string.unpack_32le()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("unpack32le"),
+    result.insert_or_assign(rocket::sref("unpack_32le"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.unpack32le(text)`\n"
+            "`std.string.unpack_32le(text)`\n"
             "  \n"
             "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 32-bit integers in the\n"
@@ -2836,12 +2836,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.unpack32le"), args);
+            Argument_Reader reader(rocket::sref("std.string.unpack_32le"), args);
             // Parse arguments.
             G_string text;
             if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto values = std_string_unpack32le(text);
+              auto values = std_string_unpack_32le(text);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(values) };
               return rocket::move(xref);
@@ -2851,15 +2851,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.pack64be()`
+    // `std.string.pack_64be()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("pack64be"),
+    result.insert_or_assign(rocket::sref("pack_64be"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.pack64be(values)`\n"
+            "`std.string.pack_64be(values)`\n"
             "  \n"
             "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
@@ -2875,12 +2875,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.pack64be"), args);
+            Argument_Reader reader(rocket::sref("std.string.pack_64be"), args);
             // Parse arguments.
             G_integer value;
             if(reader.start().g(value).finish()) {
               // Call the binding function.
-              auto text = std_string_pack64be(value);
+              auto text = std_string_pack_64be(value);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2888,7 +2888,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             G_array values;
             if(reader.start().g(values).finish()) {
               // Call the binding function.
-              auto text = std_string_pack64be(values);
+              auto text = std_string_pack_64be(values);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2898,15 +2898,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.unpack64be()`
+    // `std.string.unpack_64be()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("unpack64be"),
+    result.insert_or_assign(rocket::sref("unpack_64be"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.unpack64be(text)`\n"
+            "`std.string.unpack_64be(text)`\n"
             "  \n"
             "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 64-bit integers in the\n"
@@ -2925,12 +2925,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.unpack64be"), args);
+            Argument_Reader reader(rocket::sref("std.string.unpack_64be"), args);
             // Parse arguments.
             G_string text;
             if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto values = std_string_unpack64be(text);
+              auto values = std_string_unpack_64be(text);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(values) };
               return rocket::move(xref);
@@ -2940,15 +2940,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.pack64le()`
+    // `std.string.pack_64le()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("pack64le"),
+    result.insert_or_assign(rocket::sref("pack_64le"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.pack64le(values)`\n"
+            "`std.string.pack_64le(values)`\n"
             "  \n"
             "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
             "    be either an `integer` or an `array` of `integers`, all of\n"
@@ -2965,12 +2965,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.pack64le"), args);
+            Argument_Reader reader(rocket::sref("std.string.pack_64le"), args);
             // Parse arguments.
             G_integer value;
             if(reader.start().g(value).finish()) {
               // Call the binding function.
-              auto text = std_string_pack64le(value);
+              auto text = std_string_pack_64le(value);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2978,7 +2978,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             G_array values;
             if(reader.start().g(values).finish()) {
               // Call the binding function.
-              auto text = std_string_pack64le(values);
+              auto text = std_string_pack_64le(values);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(text) };
               return rocket::move(xref);
@@ -2988,15 +2988,15 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.string.unpack64le()`
+    // `std.string.unpack_64le()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("unpack64le"),
+    result.insert_or_assign(rocket::sref("unpack_64le"),
       G_function(make_simple_binding(
         // Description
         rocket::sref
           (
             "\n"
-            "`std.string.unpack64le(text)`\n"
+            "`std.string.unpack_64le(text)`\n"
             "  \n"
             "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
             "    are re-interpreted as contiguous signed 64-bit integers in the\n"
@@ -3016,12 +3016,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.string.unpack64le"), args);
+            Argument_Reader reader(rocket::sref("std.string.unpack_64le"), args);
             // Parse arguments.
             G_string text;
             if(reader.start().g(text).finish()) {
               // Call the binding function.
-              auto values = std_string_unpack64le(text);
+              auto values = std_string_unpack_64le(text);
               // Forward the result.
               Reference_Root::S_temporary xref = { rocket::move(values) };
               return rocket::move(xref);

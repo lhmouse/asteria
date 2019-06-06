@@ -64,29 +64,29 @@ extern G_string std_string_pack8(const G_integer& value);
 extern G_string std_string_pack8(const G_array& values);
 extern G_array std_string_unpack8(const G_string& text);
 
-extern G_string std_string_pack16be(const G_integer& value);
-extern G_string std_string_pack16be(const G_array& values);
-extern G_array std_string_unpack16be(const G_string& text);
+extern G_string std_string_pack_16be(const G_integer& value);
+extern G_string std_string_pack_16be(const G_array& values);
+extern G_array std_string_unpack_16be(const G_string& text);
 
-extern G_string std_string_pack16le(const G_integer& value);
-extern G_string std_string_pack16le(const G_array& values);
-extern G_array std_string_unpack16le(const G_string& text);
+extern G_string std_string_pack_16le(const G_integer& value);
+extern G_string std_string_pack_16le(const G_array& values);
+extern G_array std_string_unpack_16le(const G_string& text);
 
-extern G_string std_string_pack32be(const G_integer& value);
-extern G_string std_string_pack32be(const G_array& values);
-extern G_array std_string_unpack32be(const G_string& text);
+extern G_string std_string_pack_32be(const G_integer& value);
+extern G_string std_string_pack_32be(const G_array& values);
+extern G_array std_string_unpack_32be(const G_string& text);
 
-extern G_string std_string_pack32le(const G_integer& value);
-extern G_string std_string_pack32le(const G_array& values);
-extern G_array std_string_unpack32le(const G_string& text);
+extern G_string std_string_pack_32le(const G_integer& value);
+extern G_string std_string_pack_32le(const G_array& values);
+extern G_array std_string_unpack_32le(const G_string& text);
 
-extern G_string std_string_pack64be(const G_integer& value);
-extern G_string std_string_pack64be(const G_array& values);
-extern G_array std_string_unpack64be(const G_string& text);
+extern G_string std_string_pack_64be(const G_integer& value);
+extern G_string std_string_pack_64be(const G_array& values);
+extern G_array std_string_unpack_64be(const G_string& text);
 
-extern G_string std_string_pack64le(const G_integer& value);
-extern G_string std_string_pack64le(const G_array& values);
-extern G_array std_string_unpack64le(const G_string& text);
+extern G_string std_string_pack_64le(const G_integer& value);
+extern G_string std_string_pack_64le(const G_array& values);
+extern G_array std_string_unpack_64le(const G_string& text);
 
 // Create an object that is to be referenced as `std.string`.
 extern void create_bindings_string(G_object& result, API_Version version);
