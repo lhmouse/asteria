@@ -40,7 +40,7 @@ int main(int argc, char** argv)
         return fib(30);
       )_____";
     rocket::insertable_istream iss(rocket::sref(src));
-    std::cerr << "Source code:" << std::endl
+    std::cerr << "# Source code:" << std::endl
               << "---" << std::endl
               << src << std::endl
               << "---" << std::endl;;
@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 #endif
     std::cerr << std::endl
               << "---" << std::endl
-              << "Running..." << std::endl;
+              << "# Running..." << std::endl;
     Global_Context global;
     // run it and measure the time.
     auto t1 = std_chrono_hires_now();
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     // print the time elapsed and the result.
     std::cerr << std::endl
               << "---" << std::endl
-              << "Finished in " << std::fixed << std::setprecision(3) << (t2 - t1) << " ms:" << std::endl
+              << "# Finished in " << std::fixed << std::setprecision(3) << (t2 - t1) << " ms:" << std::endl
               << "---" << std::endl;
     std::cout << res.read() << std::endl;
     // finish.
