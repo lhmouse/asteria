@@ -4,7 +4,7 @@ platform:
   - MSYS2
 
 environment:
-  PATH: C:\msys64\usr\bin;C:\msys64\mingw64\bin
+  PATH: C:\msys64\mingw64\bin;C:\msys64\usr\bin
   CXX: g++
 
   matrix:
