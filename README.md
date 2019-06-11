@@ -1,7 +1,7 @@
-|CI            |Category                   |Build on OS   |Host OS             |Build Status     |
-|:-------------|:--------------------------|:-------------|:-------------------|:----------------|
-|**Travis CI** |:1st_place_medal:Primary   |Ubuntu Xenial |Ubuntu Xenial       |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |
-|**AppVeyor**  |:2nd_place_medal:Secondary |Windows       |Windows             |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria) |
+|CI            |Category                   |Build on OS  |Host OS  |Build Status     |
+|:-------------|:--------------------------|:------------|:--------|:----------------|
+|**Travis CI** |:1st_place_medal:Primary   |Ubuntu       |Ubuntu   |[![Build Status](https://travis-ci.org/lhmouse/asteria.svg?branch=master)](https://travis-ci.org/lhmouse/asteria) |
+|**AppVeyor**  |:2nd_place_medal:Secondary |Windows      |Windows  |[![Build Status](https://ci.appveyor.com/api/projects/status/github/lhmouse/asteria?branch=master&svg=true)](https://ci.appveyor.com/project/lhmouse/asteria) |
 
 |Compiler    |Category                   |Comments                                                    |
 |:-----------|:--------------------------|:-----------------------------------------------------------|
