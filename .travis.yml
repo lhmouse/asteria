@@ -4,12 +4,6 @@ os: linux
 dist: xenial
 sudo: required
 
-addons:
-  apt:
-    update: true
-    packages:
-      - checkinstall
-
 env:
   - _options=""
   - _options="--enable-debug-logs --enable-debug-checks"
