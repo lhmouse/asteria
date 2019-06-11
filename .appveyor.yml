@@ -4,20 +4,23 @@ platform:
   - MSYS2
 
 environment:
+  PATH: C:\msys64\usr\bin;C:\msys64\mingw64\bin
+  CXX: g++
+
   matrix:
     - _options: ""
     - _options: "--enable-debug-logs --enable-debug-checks"
 
 build_script:
-  - ${CXX} --version
-  - ./check_includes.sh
-  - mkdir -p m4
-  - autoreconf -ifv
-  - ./configure --disable-silent-rules ${_options}
-  - make -j$(nproc)
+  - bash -c "${CXX} --version"
+  - bash -c "./check_includes.sh"
+  - bash -c "mkdir -p m4"
+  - bash -c "autoreconf -ifv"
+  - bash -c "./configure --disable-silent-rules ${_options}"
+  - bash -c "make -j$(nproc)"
 
 test_script:
-  - make -j$(nproc) check || (cat ./test-suite.log; false)
+  - bash -c "make -j$(nproc) check || (cat ./test-suite.log; false)"
 
 notifications:
 
