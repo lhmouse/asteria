@@ -9,15 +9,15 @@ environment:
     - _options: "--enable-debug-logs --enable-debug-checks"
 
 build_script:
-  - sh: ${CXX} --version
-  - sh: ./check_includes.sh
-  - sh: mkdir -p m4
-  - sh: autoreconf -ifv
-  - sh: ./configure --disable-silent-rules ${_options}
-  - sh: make -j$(nproc)
+  - ${CXX} --version
+  - ./check_includes.sh
+  - mkdir -p m4
+  - autoreconf -ifv
+  - ./configure --disable-silent-rules ${_options}
+  - make -j$(nproc)
 
 test_script:
-  - sh: make -j$(nproc) check || (cat ./test-suite.log; false)
+  - make -j$(nproc) check || (cat ./test-suite.log; false)
 
 notifications:
 
