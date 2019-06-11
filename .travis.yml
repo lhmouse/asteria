@@ -19,15 +19,7 @@ compiler:
   - clang
 
 install:
-  - ${CXX} --version
-  - ./check_includes.sh
-  - mkdir -p m4
-  - autoreconf -ifv
-  - ./configure --disable-silent-rules ${_options}
-  - make -j$(nproc)
-
-script:
-  - make -j$(nproc) check || (cat ./test-suite.log; false)
+  - ./ci.sh
 
 notifications:
   irc:

@@ -12,15 +12,7 @@ environment:
     - _options: "--enable-debug-logs --enable-debug-checks"
 
 build_script:
-  - bash -c "${CXX} --version"
-  - bash -c "./check_includes.sh"
-  - bash -c "mkdir -p m4"
-  - bash -c "autoreconf -ifv"
-  - bash -c "./configure --disable-silent-rules ${_options}"
-  - bash -c "make -j$(nproc)"
-
-test_script:
-  - bash -c "make -j$(nproc) check || (cat ./test-suite.log; false)"
+  - bash ci.sh
 
 notifications:
 
