@@ -166,6 +166,7 @@ if __name__ == '__main__':
                     irc_sock.send('PRIVMSG #{} :{}\r\n'.format(channel, msg).encode('utf_8'))
                 # leave the channel
                 irc_sock.send('PART #{}\r\n'.format(channel).encode('utf_8'))
+                time.sleep(5)
                 sys.exit()
     except:
         e = sys.exc_info()[0]
