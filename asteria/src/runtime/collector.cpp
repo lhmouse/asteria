@@ -135,7 +135,7 @@ Collector* Collector::collect_single_opt()
                   return false;
                 }
                 // Initialize the gcref counter.
-                // N.B. If this variable is encountered later from `m_tracked`, the gcref counter will be overwritten to 1.
+                // N.B. If this variable is encountered later from `m_tracked`, the gcref counter will be overwritten with 1.
                 child->reset_gcref(0);
                 // Decend into grandchildren.
                 return true;
