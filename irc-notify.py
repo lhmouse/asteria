@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 From: https://raw.githubusercontent.com/nexB/scancode-toolkit/48aeaf76ce9f53d02223c41c1b2ad1d1ad73b851/etc/scripts/irc-notify.py
 
@@ -58,7 +60,7 @@ in Appveyor's YAML:
 
 """
 
-import os, random, socket, ssl, sys, time
+import os, socket, ssl, sys, time
 
 
 def appveyor_vars():
@@ -133,8 +135,8 @@ if __name__ == '__main__':
     messages = messages.split(',')
     messages = [msg.format(**apvy_vars).strip() for msg in messages]
 
-    irc_username = 'Appveyor'
-    irc_nick = irc_username + str(random.randint(1, 9999))
+    irc_username = 'appveyor-ci_'
+    irc_nick = irc_username
 
     try:
         # establish connection
