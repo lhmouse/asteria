@@ -135,7 +135,7 @@ if __name__ == '__main__':
     messages = messages.split(',')
     messages = [msg.format(**apvy_vars).strip() for msg in messages]
 
-    irc_username = 'appveyor-ci_'
+    irc_username = 'appveyor-ci'
     irc_nick = irc_username
 
     try:
@@ -157,14 +157,13 @@ if __name__ == '__main__':
                 irc_sock.send('NICK {}\r\n'.format(irc_nick).encode('utf_8'))
 
             elif response[1] == '001':
-                time.sleep(5)
+                time.sleep(1)
                 # join the channel
                 irc_sock.send('JOIN #{}\r\n'.format(channel).encode('utf_8'))
                 # send messages
                 for msg in messages:
                     print('PRIVMSG #{} :{}'.format(channel, msg))
                     irc_sock.send('PRIVMSG #{} :{}\r\n'.format(channel, msg).encode('utf_8'))
-                time.sleep(5)
                 # leave the channel
                 irc_sock.send('PART #{}\r\n'.format(channel).encode('utf_8'))
                 sys.exit()
