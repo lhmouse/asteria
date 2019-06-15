@@ -331,10 +331,14 @@ int main()
         assert __isnan std.numeric.muls(42, nan);
 
         assert std.numeric.lzcnt(0) == 64;
-        assert std.numeric.lzcnt(0x1234567898765434) == 3;
+        assert std.numeric.lzcnt(0x1234567898765434) ==  3;
+        assert std.numeric.lzcnt(0x0000000038765434) == 34;
+        assert std.numeric.lzcnt(0x1234567800000000) ==  3;
 
         assert std.numeric.tzcnt(0) == 64;
-        assert std.numeric.tzcnt(0x1234567898765434) == 2;
+        assert std.numeric.tzcnt(0x1234567898765434) ==  2;
+        assert std.numeric.tzcnt(0x0000000038765434) ==  2;
+        assert std.numeric.tzcnt(0x1234567800000000) == 35;
 
         assert std.numeric.popcnt(0) == 0;
         assert std.numeric.popcnt(0b10101) == 3;

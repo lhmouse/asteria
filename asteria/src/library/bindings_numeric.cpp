@@ -8,6 +8,9 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/collector.hpp"
 #include "../utilities.hpp"
+#ifdef _WIN32
+#  include <intrin.h>
+#endif
 
 namespace Asteria {
 
