@@ -221,6 +221,23 @@ int main()
         assert std.numeric.remainder(+6.0, -3.5) == -1.0;
         assert std.numeric.remainder(-6.0, -3.5) == +1.0;
 
+        assert std.numeric.frexp(0) == [0.0,0];
+        assert std.numeric.frexp(1) == [0.5,1];
+        assert std.numeric.frexp(1.5) == [0.75,1];
+        assert std.numeric.frexp(2.0) == [0.50,2];
+        assert std.numeric.frexp(+infinity)[0] == +infinity;
+        assert std.numeric.frexp(-infinity)[0] == -infinity;
+        assert __isnan std.numeric.frexp(nan)[0];
+
+        assert std.numeric.ldexp(0, 0) == 0;
+        assert std.numeric.ldexp(1, +1) == 2;
+        assert std.numeric.ldexp(1, -1) == 0.5;
+        assert std.numeric.ldexp(0, +0x1p40) == 0;
+        assert std.numeric.ldexp(1, +0x1p40) == infinity;
+        assert std.numeric.ldexp(1, -0x1p40) == 0;
+        assert std.numeric.ldexp(infinity, -1) == infinity;
+        assert __isnan std.numeric.ldexp(nan, -1);
+
         assert std.numeric.addm(+1, +2) == +3;
         assert std.numeric.addm(+1, -2) == -1;
         assert std.numeric.addm(std.numeric.integer_max, +2) == std.numeric.integer_min + 1;

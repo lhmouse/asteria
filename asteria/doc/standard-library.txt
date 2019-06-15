@@ -1273,6 +1273,26 @@
 
 	* Returns the remainder as a `real`.
 
+`std.numeric.frexp(x)`
+
+	* Decomposes `x` into normalized fractional and exponent parts
+	  such that `x = frac * pow(2,exp)` where `frac` and `exp` denote
+	  the fraction and the exponent respectively and `frac` is always
+	  within the range `[0.5,1.0)`. If `x` is non-finite, `exp` is
+	  unspecified.
+
+	* Returns an `array` having two elements, whose first element is
+	  `frac` that is of type `real` and whose second element is `exp`
+	  that is of type `integer`.
+
+`std.numeric.ldexp(frac, exp)`
+
+	* Composes `frac` and `exp` to make a `real` number `x`, as if by
+	  multiplying `frac` with `pow(2,exp)`. `exp` shall be of type
+	  `integer`. This function is the inverse of `frexp()`.
+
+	* Returns the product as a `real`.
+
 `std.numeric.addm(x, y)`
 
 	* Adds `y` to `x` using modular arithmetic. `x` and `y` must be

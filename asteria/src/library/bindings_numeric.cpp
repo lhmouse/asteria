@@ -218,6 +218,23 @@ G_real std_numeric_remainder(const G_real& x, const G_real& y)
     return std::remainder(x, y);
   }
 
+G_array std_numeric_frexp(const G_real& x)
+  {
+    int rexp;
+    auto frac = std::frexp(x, &rexp);
+    // Return an array of two elements.
+    G_array res(2);
+    res.mut(0) = G_real(frac);
+    res.mut(1) = G_integer(rexp);
+    return res;
+  }
+
+G_real std_numeric_ldexp(const G_real& frac, const G_integer& exp)
+  {
+    int rexp = static_cast<int>(rocket::clamp(exp, INT_MIN, INT_MAX));
+    return std::ldexp(frac, rexp);
+  }
+
 G_integer std_numeric_addm(const G_integer& x, const G_integer& y)
   {
     return G_integer(static_cast<std::uint64_t>(x) + static_cast<std::uint64_t>(y));
@@ -2704,6 +2721,85 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             if(reader.start().g(x).g(y).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_remainder(x, y) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.frexp()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("frexp"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.frexp(x)`\n"
+            "  \n"
+            "  * Decomposes `x` into normalized fractional and exponent parts\n"
+            "    such that `x = frac * pow(2,exp)` where `frac` and `exp` denote\n"
+            "    the fraction and the exponent respectively and `frac` is always\n"
+            "    within the range `[0.5,1.0)`. If `x` is non-finite, `exp` is\n"
+            "    unspecified.\n"
+            "  \n"
+            "  * Returns an `array` having two elements, whose first element is\n"
+            "    `frac` that is of type `real` and whose second element is `exp`\n"
+            "    that is of type `integer`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.frexp"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_frexp(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.ldexp()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("ldexp"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.ldexp(frac, exp)`\n"
+            "  \n"
+            "  * Composes `frac` and `exp` to make a `real` number `x`, as if by\n"
+            "    multiplying `frac` with `pow(2,exp)`. `exp` shall be of type\n"
+            "    `integer`. This function is the inverse of `frexp()`.\n"
+            "  \n"
+            "  * Returns the product as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.ldexp"), args);
+            // Parse arguments.
+            G_real frac;
+            G_integer exp;
+            if(reader.start().g(frac).g(exp).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_ldexp(frac, exp) };
               return rocket::move(xref);
             }
             // Fail.
