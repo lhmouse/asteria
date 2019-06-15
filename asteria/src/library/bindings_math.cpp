@@ -54,7 +54,7 @@ G_real std_math_log(const G_real& x, const Opt<G_real>& base)
     if(*base == 10) {
       return std::log10(x);
     }
-    if(*base <= 1) {
+    if((*base == 1) || (*base <= 0)) {
       return NAN;
     }
     return std::log2(x) / std::log2(*base);
@@ -63,6 +63,67 @@ G_real std_math_log(const G_real& x, const Opt<G_real>& base)
 G_real std_math_log1p(const G_real& x)
   {
     return std::log1p(x);
+  }
+
+G_real std_math_sin(const G_real& x)
+  {
+    return std::sin(x);
+  }
+
+G_real std_math_cos(const G_real& x)
+  {
+    return std::cos(x);
+  }
+
+G_real std_math_tan(const G_real& x)
+  {
+    return std::tan(x);
+  }
+
+G_real std_math_asin(const G_real& x)
+  {
+    return std::asin(x);
+  }
+
+G_real std_math_acos(const G_real& x)
+  {
+    return std::acos(x);
+  }
+
+G_real std_math_atan(const G_real& x)
+  {
+    return std::atan(x);
+  }
+
+G_real std_math_atan2(const G_real& y, const G_real& x)
+  {
+    return std::atan2(y, x);
+  }
+
+G_real std_math_hypot(const Cow_Vector<Value>& values)
+  {
+    switch(values.size()) {
+    case 0:
+      {
+        // Return zero if no argument is provided.
+        return 0;
+      }
+    case 1:
+      {
+        // Return the absolute value of the only argument.
+        return std::fabs(values[0].convert_to_real());
+      }
+    default:
+      {
+        // Call the C `hypot()` function.
+        auto result = std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
+        // Sum up all the other values.
+        for(std::size_t i = 2; i != values.size(); ++i) {
+          result = std::hypot(result, values[i].convert_to_real());
+        }
+        return result;
+      }
+    }
   }
 
 void create_bindings_math(G_object& result, API_Version /*version*/)
@@ -269,6 +330,291 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
             if(reader.start().g(y).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_math_log1p(y) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.sin()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sin"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.sin(x)`\n"
+            "  \n"
+            "  * Calculates the sine of `x` in radians.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.sin"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_sin(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.cos()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("cos"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.cos(x)`\n"
+            "  \n"
+            "  * Calculates the cosine of `x` in radians.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.cos"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_cos(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.tan()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("tan"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.tan(x)`\n"
+            "  \n"
+            "  * Calculates the tangent of `x` in radians.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.tan"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_tan(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.asin()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("asin"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.asin(x)`\n"
+            "  \n"
+            "  * Calculates the inverse sine of `x` in radians.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.asin"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_asin(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.acos()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("acos"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.acos(x)`\n"
+            "  \n"
+            "  * Calculates the inverse cosine of `x` in radians.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.acos"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_acos(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.atan()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("atan"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.atan(x)`\n"
+            "  \n"
+            "  * Calculates the inverse tangent of `x` in radians.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.atan"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_atan(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.atan2()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("atan2"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.atan2(y, x)`\n"
+            "  \n"
+            "  * Calculates the angle of the vector `<x,y>` in radians.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.atan2"), args);
+            // Parse arguments.
+            G_real y;
+            G_real x;
+            if(reader.start().g(y).g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_atan2(y, x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.hypot()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("hypot"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.hypot(...)`\n"
+            "  \n"
+            "  * Calculates the length of the n-dimension vector defined by all\n"
+            "    arguments. If no argument is provided, this function returns\n"
+            "    zero. If any argument is an infinity, this function returns a\n"
+            "    positive infinity; otherwise, if any argument is a NaN, this\n"
+            "    function returns a NaN.\n"
+            "  \n"
+            "  * Returns the length as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.hypot"), args);
+            // Parse variadic arguments.
+            Cow_Vector<Value> values;
+            if(reader.start().finish(values)) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_hypot(values) };
               return rocket::move(xref);
             }
             // Fail.
