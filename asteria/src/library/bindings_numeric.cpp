@@ -420,7 +420,7 @@ G_integer std_numeric_tzcnt(const G_integer& x)
 G_integer std_numeric_popcnt(const G_integer& x)
   {
 #if defined(_WIN64) || defined(_M_ARM)
-    return __popcnt64(static_cast<std::uint64_t>(x));
+    return static_cast<long long>(__popcnt64(static_cast<std::uint64_t>(x)));
 #elif defined(_WIN32)
     return __popcnt(static_cast<std::uint32_t>(x >> 32)) + __popcnt(static_cast<std::uint32_t>(x));
 #elif defined(__GNUC__)
