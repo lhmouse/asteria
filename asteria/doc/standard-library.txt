@@ -1502,6 +1502,58 @@
 
 	* Returns the result as a `real`.
 
+`std.math.sin(x)`
+
+	* Calculates the sine of `x` in radians.
+
+	* Returns the result as a `real`.
+
+`std.math.cos(x)`
+
+	* Calculates the cosine of `x` in radians.
+
+	* Returns the result as a `real`.
+
+`std.math.tan(x)`
+
+	* Calculates the tangent of `x` in radians.
+
+	* Returns the result as a `real`.
+
+`std.math.asin(x)`
+
+	* Calculates the inverse sine of `x` in radians.
+
+	* Returns the result as a `real`.
+
+`std.math.acos(x)`
+
+	* Calculates the inverse cosine of `x` in radians.
+
+	* Returns the result as a `real`.
+
+`std.math.atan(x)`
+
+	* Calculates the inverse tangent of `x` in radians.
+
+	* Returns the result as a `real`.
+
+`std.math.atan2(y, x)`
+
+	* Calculates the angle of the vector `<x,y>` in radians.
+
+	* Returns the result as a `real`.
+
+`std.math.hypot(...)`
+
+	* Calculates the length of the n-dimension vector defined by all
+	  arguments. If no argument is provided, this function returns
+	  zero. If any argument is an infinity, this function returns a
+	  positive infinity; otherwise, if any argument is a NaN, this
+	  function returns a NaN.
+
+	* Returns the length as a `real`.
+
 ### `std.filesystem`
 
 `std.filesystem.get_working_directory()`
