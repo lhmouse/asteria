@@ -358,6 +358,75 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
     return do_saturating_mul(x, y);
   }
 
+G_integer std_numeric_lzcnt(const G_integer& x)
+  {
+#if defined(_WIN64) || defined(_M_ARM)
+    unsigned long index;
+    if(!::_BitScanReverse64(&index, static_cast<std::uint64_t>(x))) {
+      return 64;
+    }
+    return 63 - index;
+#elif defined(_WIN32)
+    unsigned long index;
+    if(!::_BitScanReverse(&index, static_cast<std::uint32_t>(x >> 32))) {
+      // Scan the lower half.
+      if(!::_BitScanReverse(&index, static_cast<std::uint32_t>(x))) {
+        return 64;
+      }
+      return 63 - index;
+    }
+    return 31 - index;
+#elif defined(__GNUC__)
+    if(x == 0) {
+      return 64;
+    }
+    return static_cast<unsigned>(__builtin_clzll(static_cast<std::uint64_t>(x)));
+#else
+#  error Please implement `lzcnt` for this platform.
+#endif
+  }
+
+G_integer std_numeric_tzcnt(const G_integer& x)
+  {
+#if defined(_WIN64) || defined(_M_ARM)
+    unsigned long index;
+    if(!::_BitScanForward64(&index, static_cast<std::uint64_t>(x))) {
+      return 64;
+    }
+    return index;
+#elif defined(_WIN32)
+    unsigned long index;
+    if(!::_BitScanForward(&index, static_cast<std::uint32_t>(x))) {
+      // Scan the higher half.
+      if(!::_BitScanForward(&index, static_cast<std::uint32_t>(x >> 32))) {
+        return 64;
+      }
+      return 32 + index;
+    }
+    return index;
+#elif defined(__GNUC__)
+    if(x == 0) {
+      return 64;
+    }
+    return static_cast<unsigned>(__builtin_ctzll(static_cast<std::uint64_t>(x)));
+#else
+#  error Please implement `lzcnt` for this platform.
+#endif
+  }
+
+G_integer std_numeric_popcnt(const G_integer& x)
+  {
+#if defined(_WIN64) || defined(_M_ARM)
+    return __popcnt64(static_cast<std::uint64_t>(x));
+#elif defined(_WIN32)
+    return __popcnt(static_cast<std::uint32_t>(x >> 32)) + __popcnt(static_cast<std::uint32_t>(x));
+#elif defined(__GNUC__)
+    return static_cast<unsigned>(__builtin_popcountll(static_cast<std::uint64_t>(x)));
+#else
+#  error Please implement `lzcnt` for this platform.
+#endif
+  }
+
     namespace {
 
     constexpr double s_decbounds[]
@@ -3063,6 +3132,116 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             if(reader.start().g(fx).g(fy).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_numeric_muls(fx, fy) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.lzcnt()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("lzcnt"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.lzcnt(x)`\n"
+            "  \n"
+            "  * Counts the number of leading zero bits in `x`, which shall be\n"
+            "    of type `integer`.\n"
+            "  \n"
+            "  * Returns the bit count as an `integer`. If `x` is zero, `64` is\n"
+            "    returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.lzcnt"), args);
+            // Parse arguments.
+            G_integer x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_lzcnt(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.tzcnt()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("tzcnt"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.tzcnt(x)`\n"
+            "  \n"
+            "  * Counts the number of trailing zero bits in `x`, which shall be\n"
+            "    of type `integer`.\n"
+            "  \n"
+            "  * Returns the bit count as an `integer`. If `x` is zero, `64` is\n"
+            "    returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.tzcnt"), args);
+            // Parse arguments.
+            G_integer x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_tzcnt(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.numeric.popcnt()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("popcnt"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.numeric.popcnt(x)`\n"
+            "  \n"
+            "  * Counts the number of one bits in `x`, which shall be of type\n"
+            "    `integer`.\n"
+            "  \n"
+            "  * Returns the bit count as an `integer`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.numeric.popcnt"), args);
+            // Parse arguments.
+            G_integer x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_numeric_popcnt(x) };
               return rocket::move(xref);
             }
             // Fail.
