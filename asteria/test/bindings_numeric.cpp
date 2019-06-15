@@ -330,6 +330,16 @@ int main()
         assert __isnan std.numeric.muls(nan, 42);
         assert __isnan std.numeric.muls(42, nan);
 
+        assert std.numeric.lzcnt(0) == 64;
+        assert std.numeric.lzcnt(0x1234567898765434) == 3;
+
+        assert std.numeric.tzcnt(0) == 64;
+        assert std.numeric.tzcnt(0x1234567898765434) == 2;
+
+        assert std.numeric.popcnt(0) == 0;
+        assert std.numeric.popcnt(0b10101) == 3;
+        assert std.numeric.popcnt(-1) == 64;
+
         assert std.numeric.format(+1234) == "1234";
         assert std.numeric.format(+0) == "0";
         assert std.numeric.format(-0) == "0";
