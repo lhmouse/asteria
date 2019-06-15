@@ -139,6 +139,7 @@ pkginclude_library_HEADERS =  \
   asteria/src/library/bindings_string.hpp  \
   asteria/src/library/bindings_array.hpp  \
   asteria/src/library/bindings_numeric.hpp  \
+  asteria/src/library/bindings_math.hpp  \
   asteria/src/library/bindings_filesystem.hpp
 
 lib_libasteria_la_SOURCES =  \
@@ -186,6 +187,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/library/bindings_string.cpp  \
   asteria/src/library/bindings_array.cpp  \
   asteria/src/library/bindings_numeric.cpp  \
+  asteria/src/library/bindings_math.cpp  \
   asteria/src/library/bindings_filesystem.cpp
 
 lib_libasteria_la_CXXFLAGS =  \
@@ -226,6 +228,7 @@ check_PROGRAMS =  \
   asteria/test/bindings_string.test  \
   asteria/test/bindings_array.test  \
   asteria/test/bindings_numeric.test  \
+  asteria/test/bindings_math.test  \
   asteria/test/bindings_filesystem.test
 
 TESTS = ${check_PROGRAMS}

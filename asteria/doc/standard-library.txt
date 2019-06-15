@@ -1466,6 +1466,42 @@
 	* Denotes the binary logarithm of the integer ten; that is,
 	  `3.3219280948873623478703194294893901758648313930246`.
 
+`std.math.exp(y, [base])`
+
+	* Calculates `base` raised to the power `y`. If `base` is absent,
+	  `e` is assumed. This function is equivalent to `pow(base, y)`.
+
+	* Returns the power as a `real`.
+
+`std.math.expm1(y)`
+
+	* Calculates `exp(y) - 1` without losing precision when `y` is
+	  close to zero.
+
+	* Returns the result as a `real`.
+
+`std.math.pow(x, y)`
+
+	* Calculates `x` raised to the power `y`. According to C99, when
+	  `x` is `1` or `y` is `0`, the result is always `1`, even when
+	  the other argument is an infinity or NaN.
+
+	* Returns the power as a `real`.
+
+`std.math.log(x, [base])`
+
+	* Calculates the logarithm of `x` to `base`. If `base` is absent,
+	  `e` is assumed.
+
+	* Returns the logarithm as a `real`.
+
+`std.math.log1p(x)`
+
+	* Calculates `log(1 + x)` without losing precision when `x` is
+	  close to zero.
+
+	* Returns the result as a `real`.
+
 ### `std.filesystem`
 
 `std.filesystem.get_working_directory()`
