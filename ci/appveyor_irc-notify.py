@@ -135,7 +135,7 @@ if __name__ == '__main__':
     messages = messages.split(',')
     messages = [msg.format(**apvy_vars).strip() for msg in messages]
 
-    irc_username = 'appveyor-ci'
+    irc_username = 'appveyor'
     irc_nick = irc_username
 
     try:
