@@ -20,9 +20,16 @@ extern G_real std_math_tan(const G_real& x);
 extern G_real std_math_asin(const G_real& x);
 extern G_real std_math_acos(const G_real& x);
 extern G_real std_math_atan(const G_real& x);
-
 extern G_real std_math_atan2(const G_real& y, const G_real& x);
+
 extern G_real std_math_hypot(const Cow_Vector<Value>& values);
+
+extern G_real std_math_sinh(const G_real& x);
+extern G_real std_math_cosh(const G_real& x);
+extern G_real std_math_tanh(const G_real& x);
+extern G_real std_math_asinh(const G_real& x);
+extern G_real std_math_acosh(const G_real& x);
+extern G_real std_math_atanh(const G_real& x);
 
 // Create an object that is to be referenced as `std.math`.
 extern void create_bindings_math(G_object& result, API_Version version);

@@ -1554,6 +1554,42 @@
 
 	* Returns the length as a `real`.
 
+`std.math.sinh(x)`
+
+	* Calculates the hyperbolic sine of `x`.
+
+	* Returns the result as a `real`.
+
+`std.math.cosh(x)`
+
+	* Calculates the hyperbolic cosine of `x`.
+
+	* Returns the result as a `real`.
+
+`std.math.tanh(x)`
+
+	* Calculates the hyperbolic tangent of `x`.
+
+	* Returns the result as a `real`.
+
+`std.math.asinh(x)`
+
+	* Calculates the inverse hyperbolic sine of `x`.
+
+	* Returns the result as a `real`.
+
+`std.math.acosh(x)`
+
+	* Calculates the inverse hyperbolic cosine of `x`.
+
+	* Returns the result as a `real`.
+
+`std.math.atanh(x)`
+
+	* Calculates the inverse hyperbolic tangent of `x`.
+
+	* Returns the result as a `real`.
+
 ### `std.filesystem`
 
 `std.filesystem.get_working_directory()`

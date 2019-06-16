@@ -126,6 +126,36 @@ G_real std_math_hypot(const Cow_Vector<Value>& values)
     }
   }
 
+G_real std_math_sinh(const G_real& x)
+  {
+    return std::sinh(x);
+  }
+
+G_real std_math_cosh(const G_real& x)
+  {
+    return std::cosh(x);
+  }
+
+G_real std_math_tanh(const G_real& x)
+  {
+    return std::tanh(x);
+  }
+
+G_real std_math_asinh(const G_real& x)
+  {
+    return std::asinh(x);
+  }
+
+G_real std_math_acosh(const G_real& x)
+  {
+    return std::acosh(x);
+  }
+
+G_real std_math_atanh(const G_real& x)
+  {
+    return std::atanh(x);
+  }
+
 void create_bindings_math(G_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -615,6 +645,216 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
             if(reader.start().finish(values)) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_math_hypot(values) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.sinh()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sinh"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.sinh(x)`\n"
+            "  \n"
+            "  * Calculates the hyperbolic sine of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.sinh"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_sinh(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.cosh()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("cosh"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.cosh(x)`\n"
+            "  \n"
+            "  * Calculates the hyperbolic cosine of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.cosh"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_cosh(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.tanh()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("tanh"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.tanh(x)`\n"
+            "  \n"
+            "  * Calculates the hyperbolic tangent of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.tanh"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_tanh(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.asinh()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("asinh"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.asinh(x)`\n"
+            "  \n"
+            "  * Calculates the inverse hyperbolic sine of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.asinh"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_asinh(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.acosh()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("acosh"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.acosh(x)`\n"
+            "  \n"
+            "  * Calculates the inverse hyperbolic cosine of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.acosh"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_acosh(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.atanh()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("atanh"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.atanh(x)`\n"
+            "  \n"
+            "  * Calculates the inverse hyperbolic tangent of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.atanh"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_atanh(x) };
               return rocket::move(xref);
             }
             // Fail.
