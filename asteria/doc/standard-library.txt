@@ -1590,6 +1590,31 @@
 
 	* Returns the result as a `real`.
 
+`std.math.erf(x)`
+
+	* Calculates the error function of `x`.
+
+	* Returns the result as a `real`.
+
+`std.math.cerf(x)`
+
+	* Calculates the complementary error function of `x`.
+
+	* Returns the result as a `real`.
+
+`std.math.gamma(x)`
+
+	* Calculates the Gamma function of `x`.
+
+	* Returns the result as a `real`.
+
+`std.math.lgamma(x)`
+
+	* Calculates the natural logarithm of the absolute value of the
+	  Gamma function of `x`.
+
+	* Returns the result as a `real`.
+
 ### `std.filesystem`
 
 `std.filesystem.get_working_directory()`

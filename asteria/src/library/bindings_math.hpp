@@ -31,6 +31,11 @@ extern G_real std_math_asinh(const G_real& x);
 extern G_real std_math_acosh(const G_real& x);
 extern G_real std_math_atanh(const G_real& x);
 
+extern G_real std_math_erf(const G_real& x);
+extern G_real std_math_cerf(const G_real& x);
+extern G_real std_math_gamma(const G_real& x);
+extern G_real std_math_lgamma(const G_real& x);
+
 // Create an object that is to be referenced as `std.math`.
 extern void create_bindings_math(G_object& result, API_Version version);
 

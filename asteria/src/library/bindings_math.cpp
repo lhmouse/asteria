@@ -156,6 +156,26 @@ G_real std_math_atanh(const G_real& x)
     return std::atanh(x);
   }
 
+G_real std_math_erf(const G_real& x)
+  {
+    return std::erf(x);
+  }
+
+G_real std_math_cerf(const G_real& x)
+  {
+    return std::erfc(x);
+  }
+
+G_real std_math_gamma(const G_real& x)
+  {
+    return std::tgamma(x);
+  }
+
+G_real std_math_lgamma(const G_real& x)
+  {
+    return std::lgamma(x);
+  }
+
 void create_bindings_math(G_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -855,6 +875,147 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
             if(reader.start().g(x).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_math_atanh(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.erf()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("erf"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.erf(x)`\n"
+            "  \n"
+            "  * Calculates the error function of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.erf"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_erf(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.cerf()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("cerf"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.cerf(x)`\n"
+            "  \n"
+            "  * Calculates the complementary error function of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.cerf"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_cerf(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.gamma()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("gamma"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.gamma(x)`\n"
+            "  \n"
+            "  * Calculates the Gamma function of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.gamma"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_gamma(x) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.math.lgamma()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("lgamma"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.math.lgamma(x)`\n"
+            "  \n"
+            "  * Calculates the natural logarithm of the absolute value of the\n"
+            "    Gamma function of `x`.\n"
+            "  \n"
+            "  * Returns the result as a `real`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.math.lgamma"), args);
+            // Parse arguments.
+            G_real x;
+            if(reader.start().g(x).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_math_lgamma(x) };
               return rocket::move(xref);
             }
             // Fail.
