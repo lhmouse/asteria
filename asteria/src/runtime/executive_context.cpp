@@ -52,9 +52,9 @@ void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>&
     if(elps_pos) {
       if(args.size() > *elps_pos) {
         // Erase named arguments as well as the ellipsis.
-        Rcobj<Variadic_Arguer> varg(zvarg.get(), rocket::move(args.erase(0, *elps_pos)));
+        args.erase(0, *elps_pos);
         // Create a new argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(rocket::move(varg));
+        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(Rcobj<Variadic_Arguer>(zvarg.get(), rocket::move(args)));
       } else {
         // Reference the pre-allocated zero-ary argument getter.
         this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(zvarg);
