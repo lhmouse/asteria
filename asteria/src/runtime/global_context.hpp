@@ -19,7 +19,7 @@ class Global_Context : public Abstract_Context
     // This is the global garbage collector.
     Rcptr<Rcbase> m_gcoll;
     // This is the variable holding an object referenced as `std` in this context.
-    Rcptr<Rcbase> m_yvar;
+    Rcptr<Rcbase> m_vstd;
 
   public:
     // A global context does not have a parent context.
