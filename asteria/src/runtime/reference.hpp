@@ -37,11 +37,11 @@ class Reference
       }
 
   private:
-    [[noreturn]] void do_throw_unset_no_modifier() const;
+    [[noreturn]] Value do_throw_unset_no_modifier() const;
 
-    const Value& do_read_with_modifiers() const;
-    Value& do_open_with_modifiers() const;
-    Value do_unset_with_modifiers() const;
+    const Value& do_read(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const;
+    Value& do_open(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const;
+    Value do_unset(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const;
 
   public:
     bool is_constant() const noexcept
@@ -83,24 +83,36 @@ class Reference
 
     const Value& read() const
       {
-        if(ROCKET_EXPECT(this->m_mods.empty())) {
+        if(this->m_mods.empty()) {
           return this->m_root.dereference_const();
         }
-        return this->do_read_with_modifiers();
+        return this->do_read(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
+      }
+    const Value& read(const Reference_Modifier& last) const
+      {
+        return this->do_read(this->m_mods.data(), this->m_mods.size(), last);
       }
     Value& open() const
       {
-        if(ROCKET_EXPECT(this->m_mods.empty())) {
+        if(this->m_mods.empty()) {
           return this->m_root.dereference_mutable();
         }
-        return this->do_open_with_modifiers();
+        return this->do_open(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
+      }
+    Value& open(const Reference_Modifier& last) const
+      {
+        return this->do_open(this->m_mods.data(), this->m_mods.size(), last);
       }
     Value unset() const
       {
-        if(ROCKET_UNEXPECT(this->m_mods.empty())) {
-          this->do_throw_unset_no_modifier();
+        if(this->m_mods.empty()) {
+          return this->do_throw_unset_no_modifier();
         }
-        return this->do_unset_with_modifiers();
+        return this->do_unset(this->m_mods.data(), this->m_mods.size() - 1, this->m_mods.back());
+      }
+    Value unset(const Reference_Modifier& last) const
+      {
+        return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
     void enumerate_variables(const Abstract_Variable_Callback& callback) const

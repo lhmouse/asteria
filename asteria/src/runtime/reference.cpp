@@ -7,57 +7,51 @@
 
 namespace Asteria {
 
-void Reference::do_throw_unset_no_modifier() const
+Value Reference::do_throw_unset_no_modifier() const
   {
     ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
   }
 
-const Value& Reference::do_read_with_modifiers() const
+const Value& Reference::do_read(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const
   {
-    // Dereference the root.
-    auto cur = std::ref(this->m_root.dereference_const());
-    // Apply modifiers.
-    auto epos = this->m_mods.size();
-    for(std::size_t i = 0; i != epos; ++i) {
-      auto qnext = this->m_mods.at(i).apply_const_opt(cur);
-      if(!qnext) {
+    auto qref = std::addressof(this->m_root.dereference_const());
+    for(std::size_t i = 0; i != nmod; ++i) {
+      // Apply a modifier.
+      qref = mods[i].apply_const_opt(*qref);
+      if(!qref) {
         return Value::get_null();
       }
-      cur = std::ref(*qnext);
     }
-    return cur;
+    // Apply the last modifier.
+    return (qref = last.apply_const_opt(*qref)) ? *qref : Value::get_null();
   }
 
-Value& Reference::do_open_with_modifiers() const
+Value& Reference::do_open(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const
   {
-    // Dereference the root.
-    auto cur = std::ref(this->m_root.dereference_mutable());
-    // Apply modifiers.
-    auto epos = this->m_mods.size();
-    for(std::size_t i = 0; i != epos; ++i) {
-      auto qnext = this->m_mods.at(i).apply_mutable_opt(cur, true);
-      if(!qnext) {
+    auto qref = std::addressof(this->m_root.dereference_mutable());
+    for(std::size_t i = 0; i != nmod; ++i) {
+      // Apply a modifier.
+      qref = mods[i].apply_mutable_opt(*qref, true);  // create new
+      if(!qref) {
         ROCKET_ASSERT(false);
       }
-      cur = std::ref(*qnext);
     }
-    return cur;
+    // Apply the last modifier.
+    return (qref = last.apply_mutable_opt(*qref, true)), ROCKET_ASSERT(qref), *qref;
   }
 
-Value Reference::do_unset_with_modifiers() const
+Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const
   {
-    // Dereference the root.
-    auto cur = std::ref(this->m_root.dereference_mutable());
-    // Apply modifiers.
-    auto epos = this->m_mods.size() - 1;
-    for(std::size_t i = 0; i != epos; ++i) {
-      auto qnext = this->m_mods.at(i).apply_mutable_opt(cur, false);
-      if(!qnext) {
-        return G_null();
+    auto qref = std::addressof(this->m_root.dereference_mutable());
+    for(std::size_t i = 0; i != nmod; ++i) {
+      // Apply a modifier.
+      qref = mods[i].apply_mutable_opt(*qref, false);  // no create
+      if(!qref) {
+        return Value::get_null();
       }
-      cur = std::ref(*qnext);
     }
-    return this->m_mods.at(epos).apply_and_erase(cur);
+    // Apply the last modifier.
+    return last.apply_and_erase(*qref);
   }
 
 }  // namespace Asteria
