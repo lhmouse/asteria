@@ -80,14 +80,12 @@ namespace Asteria {
         return code;
       }
 
-    void do_evaluate_expression(Evaluation_Stack& stack, Executive_Context& ctx,
-                                const Cow_Vector<Air_Node>& code, const Cow_String& func, const Global_Context& global)
+    void do_evaluate_expression_nonempty(Evaluation_Stack& stack, Executive_Context& ctx,
+                                         const Cow_Vector<Air_Node>& code, const Cow_String& func, const Global_Context& global)
       {
-        // We push a null reference in case of empty expressions.
         stack.clear_references();
-        stack.push_reference(Reference_Root::S_null());
-        // Evaluate the expression.
-        // If it is empty, the result will be pushed on `stack`; otherwise the aforementioned null reference will be on the top.
+        // Evaluate the expression. The result will be pushed on `stack`.
+        ROCKET_ASSERT(!code.empty());
         rocket::for_each(code, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
       }
 
@@ -231,7 +229,7 @@ namespace Asteria {
           }
           // This is a `case` clause.
           // Evaluate the operand and check whether it equals `ctrl_value`.
-          do_evaluate_expression(stack, ctx, code_cond, func, global);
+          do_evaluate_expression_nonempty(stack, ctx, code_cond, func, global);
           if(stack.get_top_reference().read().compare(ctrl_value) == Value::compare_equal) {
             // Found a `case` label. Stop.
             qtarget = it;
@@ -287,7 +285,7 @@ namespace Asteria {
             return status;
           }
           // Check the condition.
-          do_evaluate_expression(stack, ctx, code_cond, func, global);
+          do_evaluate_expression_nonempty(stack, ctx, code_cond, func, global);
           if(stack.get_top_reference().read().test() == negative) {
             break;
           }
@@ -305,7 +303,7 @@ namespace Asteria {
         // This is the same as a `while` loop in C.
         for(;;) {
           // Check the condition.
-          do_evaluate_expression(stack, ctx, code_cond, func, global);
+          do_evaluate_expression_nonempty(stack, ctx, code_cond, func, global);
           if(stack.get_top_reference().read().test() == negative) {
             break;
           }
@@ -334,7 +332,7 @@ namespace Asteria {
         auto key_var = do_safe_create_variable(nullptr, ctx_for, "key variable", key_name, global);
         do_set_user_declared_reference(nullptr, ctx_for, "mapped reference", mapped_name, Reference_Root::S_null());
         // Evaluate the range initializer.
-        do_evaluate_expression(stack, ctx_for, code_init, func, global);
+        do_evaluate_expression_nonempty(stack, ctx_for, code_init, func, global);
         auto range_ref = rocket::move(stack.open_top_reference());
         auto range_value = range_ref.read();
         // Iterate over the range.
@@ -404,7 +402,7 @@ namespace Asteria {
           // Treat an empty condition as being always true.
           if(!code_cond.empty()) {
             // Check the condition.
-            do_evaluate_expression(stack, ctx_for, code_cond, func, global);
+            do_evaluate_expression_nonempty(stack, ctx_for, code_cond, func, global);
             if(stack.get_top_reference().read().test() == false) {
               break;
             }
@@ -419,7 +417,7 @@ namespace Asteria {
           }
           // Evaluate the step expression and discard its value.
           if(!code_step.empty()) {
-            do_evaluate_expression(stack, ctx_for, code_step, func, global);
+            do_evaluate_expression_nonempty(stack, ctx_for, code_step, func, global);
           }
         }
         return Air_Node::status_next;
