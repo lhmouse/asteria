@@ -13,7 +13,7 @@ namespace Asteria {
 class Simple_Binding_Wrapper : public Abstract_Function
   {
   public:
-    using Prototype = Reference (const Value& opaque, const Global_Context& global, Cow_Vector<Reference>&& args);
+    using Prototype = Reference (const Value& opaque, const Global_Context& global, Reference&& self, Cow_Vector<Reference>&& args);
 
   private:
     Cow_String m_desc;

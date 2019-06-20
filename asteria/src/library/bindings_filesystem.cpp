@@ -988,7 +988,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.get_working_directory"), args);
             // Parse arguments.
@@ -1039,7 +1039,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.get_information"), args);
             // Parse arguments.
@@ -1080,7 +1080,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.remove_recursive"), args);
             // Parse arguments.
@@ -1120,7 +1120,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.move_from"), args);
             // Parse arguments.
@@ -1169,7 +1169,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.directory_list"), args);
             // Parse arguments.
@@ -1212,7 +1212,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.directory_create"), args);
             // Parse arguments.
@@ -1253,7 +1253,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.directory_remove"), args);
             // Parse arguments.
@@ -1299,7 +1299,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.file_read"), args);
             // Parse arguments.
@@ -1354,7 +1354,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.file_stream"), args);
             // Parse arguments.
@@ -1403,7 +1403,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.file_write"), args);
             // Parse arguments.
@@ -1448,7 +1448,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.file_append"), args);
             // Parse arguments.
@@ -1491,7 +1491,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.file_copy_from"), args);
             // Parse arguments.
@@ -1532,7 +1532,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.filesystem.file_remove"), args);
             // Parse arguments.

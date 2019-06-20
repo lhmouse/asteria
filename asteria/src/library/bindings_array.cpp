@@ -687,7 +687,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.slice"), args);
             // Parse arguments.
@@ -739,7 +739,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.replace"), args);
             Argument_Reader::State state;
@@ -805,7 +805,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.find"), args);
             Argument_Reader::State state;
@@ -888,7 +888,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.rfind"), args);
             Argument_Reader::State state;
@@ -971,7 +971,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.find_if"), args);
             Argument_Reader::State state;
@@ -1054,7 +1054,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.find_if_not"), args);
             Argument_Reader::State state;
@@ -1137,7 +1137,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.rfind_if"), args);
             Argument_Reader::State state;
@@ -1220,7 +1220,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.rfind_if_not"), args);
             Argument_Reader::State state;
@@ -1292,7 +1292,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.is_sorted"), args);
             // Parse arguments.
@@ -1337,7 +1337,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.binary_search"), args);
             // Parse arguments.
@@ -1389,7 +1389,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
             // Parse arguments.
@@ -1437,7 +1437,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.upper_bound"), args);
             // Parse arguments.
@@ -1484,7 +1484,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
             // Parse arguments.
@@ -1529,7 +1529,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.sort"), args);
             // Parse arguments.
@@ -1574,7 +1574,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.sortu"), args);
             // Parse arguments.
@@ -1614,7 +1614,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.max_of"), args);
             // Parse arguments.
@@ -1654,7 +1654,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.min_of"), args);
             // Parse arguments.
@@ -1691,7 +1691,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.reverse"), args);
             // Parse arguments.
@@ -1732,7 +1732,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.generate"), args);
             // Parse arguments.
@@ -1773,7 +1773,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.shuffle"), args);
             // Parse arguments.
@@ -1811,7 +1811,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.copy_keys"), args);
             // Parse arguments.
@@ -1852,7 +1852,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.array.copy_values"), args);
             // Parse arguments.

@@ -2039,7 +2039,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.abs"), args);
             // Parse arguments.
@@ -2082,7 +2082,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.sign"), args);
             // Parse arguments.
@@ -2127,7 +2127,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.is_finite"), args);
             // Parse arguments.
@@ -2172,7 +2172,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.is_infinity"), args);
             // Parse arguments.
@@ -2216,7 +2216,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.is_nan"), args);
             // Parse arguments.
@@ -2263,7 +2263,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.clamp"), args);
             // Parse arguments.
@@ -2310,7 +2310,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.round"), args);
             // Parse arguments.
@@ -2353,7 +2353,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.floor"), args);
             // Parse arguments.
@@ -2396,7 +2396,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.ceil"), args);
             // Parse arguments.
@@ -2439,7 +2439,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.trunc"), args);
             // Parse arguments.
@@ -2486,7 +2486,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.iround"), args);
             // Parse arguments.
@@ -2533,7 +2533,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.ifloor"), args);
             // Parse arguments.
@@ -2580,7 +2580,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.iceil"), args);
             // Parse arguments.
@@ -2627,7 +2627,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.itrunc"), args);
             // Parse arguments.
@@ -2672,7 +2672,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.random"), args);
             // Parse arguments.
@@ -2708,7 +2708,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.sqrt"), args);
             // Parse arguments.
@@ -2745,7 +2745,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.fma"), args);
             // Parse arguments.
@@ -2784,7 +2784,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.remainder"), args);
             // Parse arguments.
@@ -2826,7 +2826,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.frexp"), args);
             // Parse arguments.
@@ -2863,7 +2863,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.ldexp"), args);
             // Parse arguments.
@@ -2902,7 +2902,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.addm"), args);
             // Parse arguments.
@@ -2942,7 +2942,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.subm"), args);
             // Parse arguments.
@@ -2982,7 +2982,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.mulm"), args);
             // Parse arguments.
@@ -3023,7 +3023,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.adds"), args);
             // Parse arguments.
@@ -3071,7 +3071,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.subs"), args);
             // Parse arguments.
@@ -3119,7 +3119,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.muls"), args);
             // Parse arguments.
@@ -3164,7 +3164,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.lzcnt"), args);
             // Parse arguments.
@@ -3201,7 +3201,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.tzcnt"), args);
             // Parse arguments.
@@ -3237,7 +3237,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.popcnt"), args);
             // Parse arguments.
@@ -3287,7 +3287,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.format"), args);
             // Parse arguments.
@@ -3346,7 +3346,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.parse_integer"), args);
             // Parse arguments.
@@ -3407,7 +3407,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             nullptr
           ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) -> Reference
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
             Argument_Reader reader(rocket::sref("std.numeric.parse_real"), args);
             // Parse arguments.
