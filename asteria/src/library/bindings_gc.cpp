@@ -81,11 +81,11 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.gc.count_tracked(generation)`\n"
-            "  \n"
+            "\n"
             "  * Gets the number of variables that are being tracked by the\n"
             "    the collector for `generation`. Valid values for `generation`\n"
             "    are `0`, `1` and `2`. This value is only informative.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of variables being tracked. If `generation`\n"
             "    is not valid, `null` is returned.\n"
           ),
@@ -123,10 +123,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.gc.get_threshold(generation)`\n"
-            "  \n"
+            "\n"
             "  * Gets the threshold of the collector for `generation`. Valid\n"
             "    values for `generation` are `0`, `1` and `2`.\n"
-            "  \n"
+            "\n"
             "  * Returns the threshold. If `generation` is not valid, `null` is\n"
             "    returned.\n"
           ),
@@ -164,7 +164,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.gc.set_threshold(generation, threshold)`\n"
-            "  \n"
+            "\n"
             "  * Sets the threshold of the collector for `generation` to\n"
             "    `threshold`. Valid values for `generation` are `0`, `1` and\n"
             "    `2`. Valid values for `threshould` range from `0` to an\n"
@@ -172,7 +172,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
             "    silently without failure. A larger `threshold` makes garbage\n"
             "    collection run less often but slower. Setting `threshold` to\n"
             "    `0` ensures all unreachable variables be collected immediately.\n"
-            "  \n"
+            "\n"
             "  * Returns the threshold before the call. If `generation` is not\n"
             "    valid, `null` is returned.\n"
           ),
@@ -211,11 +211,11 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.gc.collect([generation_limit])`\n"
-            "  \n"
+            "\n"
             "  * Performs garbage collection on all generations including and\n"
             "    up to `generation_limit`. If it is absent, all generations are\n"
             "    collected.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of variables that have been collected in\n"
             "    total.\n"
           ),

@@ -212,10 +212,10 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.exp(y, [base])`\n"
-            "  \n"
+            "\n"
             "  * Calculates `base` raised to the power `y`. If `base` is absent,\n"
             "    `e` is assumed. This function is equivalent to `pow(base, y)`.\n"
-            "  \n"
+            "\n"
             "  * Returns the power as a `real`.\n"
           ),
         // Opaque parameter
@@ -249,10 +249,10 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.expm1(y)`\n"
-            "  \n"
+            "\n"
             "  * Calculates `exp(y) - 1` without losing precision when `y` is\n"
             "    close to zero.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -285,11 +285,11 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.pow(x, y)`\n"
-            "  \n"
+            "\n"
             "  * Calculates `x` raised to the power `y`. According to C99, when\n"
             "    `x` is `1` or `y` is `0`, the result is always `1`, even when\n"
             "    the other argument is an infinity or NaN.\n"
-            "  \n"
+            "\n"
             "  * Returns the power as a `real`.\n"
           ),
         // Opaque parameter
@@ -323,10 +323,10 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.log(x, [base])`\n"
-            "  \n"
+            "\n"
             "  * Calculates the logarithm of `x` to `base`. If `base` is absent,\n"
             "    `e` is assumed.\n"
-            "  \n"
+            "\n"
             "  * Returns the logarithm as a `real`.\n"
           ),
         // Opaque parameter
@@ -360,10 +360,10 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.log1p(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates `log(1 + x)` without losing precision when `x` is\n"
             "    close to zero.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -396,9 +396,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.sin(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the sine of `x` in radians.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -431,9 +431,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.cos(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the cosine of `x` in radians.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -466,9 +466,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.tan(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the tangent of `x` in radians.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -501,9 +501,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.asin(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the inverse sine of `x` in radians.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -536,9 +536,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.acos(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the inverse cosine of `x` in radians.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -571,9 +571,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.atan(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the inverse tangent of `x` in radians.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -606,9 +606,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.atan2(y, x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the angle of the vector `<x,y>` in radians.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -642,13 +642,13 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.hypot(...)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the length of the n-dimension vector defined by all\n"
             "    arguments. If no argument is provided, this function returns\n"
             "    zero. If any argument is an infinity, this function returns a\n"
             "    positive infinity; otherwise, if any argument is a NaN, this\n"
             "    function returns a NaN.\n"
-            "  \n"
+            "\n"
             "  * Returns the length as a `real`.\n"
           ),
         // Opaque parameter
@@ -681,9 +681,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.sinh(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the hyperbolic sine of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -716,9 +716,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.cosh(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the hyperbolic cosine of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -751,9 +751,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.tanh(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the hyperbolic tangent of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -786,9 +786,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.asinh(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the inverse hyperbolic sine of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -821,9 +821,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.acosh(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the inverse hyperbolic cosine of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -856,9 +856,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.atanh(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the inverse hyperbolic tangent of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -891,9 +891,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.erf(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the error function of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -926,9 +926,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.cerf(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the complementary error function of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -961,9 +961,9 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.gamma(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the Gamma function of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter
@@ -996,10 +996,10 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.math.lgamma(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the natural logarithm of the absolute value of the\n"
             "    Gamma function of `x`.\n"
-            "  \n"
+            "\n"
             "  * Returns the result as a `real`.\n"
           ),
         // Opaque parameter

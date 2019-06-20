@@ -37,10 +37,10 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.debug.print(...)`\n"
-            "  \n"
+            "\n"
             "  * Prints all arguments to the standard error stream. A line break\n"
             "    is appended to terminate the line.\n"
-            "  \n"
+            "\n"
             "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
           ),
         // Opaque parameter
@@ -76,14 +76,14 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.debug.dump(value, [indent])`\n"
-            "  \n"
+            "\n"
             "  * Prints the value to the standard error stream with detailed\n"
             "    information. `indent` specifies the number of spaces to use as\n"
             "    a single level of indent. Its value is clamped between `0` and\n"
             "    `10` inclusively. If it is set to `0`, no line break is\n"
             "    inserted and output lines are not indented. It has a default\n"
             "    value of `2`.\n"
-            "  \n"
+            "\n"
             "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
           ),
         // Opaque parameter

@@ -407,9 +407,9 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.chrono.utc_now()`\n"
-            "  \n"
+            "\n"
             "  * Retrieves the wall clock time in UTC.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of milliseconds since the Unix epoch,\n"
             "    represented as an `integer`.\n"
           ),
@@ -442,9 +442,9 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.chrono.local_now()`\n"
-            "  \n"
+            "\n"
             "  * Retrieves the wall clock time in the local time zone.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
             "    in the local time zone, represented as an `integer`.\n"
           ),
@@ -477,12 +477,12 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.chrono.hires_now()`\n"
-            "  \n"
+            "\n"
             "  * Retrieves a time point from a high resolution clock. The clock\n"
             "    goes monotonically and cannot be adjusted, being suitable for\n"
             "    time measurement. This function provides accuracy and might be\n"
             "    quite heavyweight.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of milliseconds since an unspecified time\n"
             "    point, represented as a `real`.\n"
           ),
@@ -515,12 +515,12 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.chrono.steady_now()`\n"
-            "  \n"
+            "\n"
             "  * Retrieves a time point from a steady clock. The clock goes\n"
             "    monotonically and cannot be adjusted, being suitable for time\n"
             "    measurement. This function is supposed to be fast and might\n"
             "    have poor accuracy.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of milliseconds since an unspecified time\n"
             "    point, represented as an `integer`.\n"
           ),
@@ -553,10 +553,10 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.chrono.local_from_utc(time_utc)`\n"
-            "  \n"
+            "\n"
             "  * Converts a UTC time point to a local one. `time_utc` shall be\n"
             "    the number of milliseconds since the Unix epoch.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
             "    in the local time zone, represented as an `integer`.\n"
           ),
@@ -590,11 +590,11 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.chrono.utc_from_local(time_local)`\n"
-            "  \n"
+            "\n"
             "  * Converts a local time point to a UTC one. `time_local` shall\n"
             "    be the number of milliseconds since `1970-01-01 00:00:00` in\n"
             "    the local time zone.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of milliseconds since the Unix epoch,\n"
             "    represented as an `integer`.\n"
           ),
@@ -628,7 +628,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.chrono.utc_format(time_point, [with_ms])`\n"
-            "  \n"
+            "\n"
             "  * Converts `time_point`, which represents the number of\n"
             "    milliseconds since `1970-01-01 00:00:00`, to an ASCII string in\n"
             "    the aforementioned format, according to the ISO 8601 standard.\n"
@@ -666,13 +666,13 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.chrono.utc_parse(time_str)`\n"
-            "  \n"
+            "\n"
             "  * Parses `time_str`, which is an ASCII string representing a time\n"
             "    point in the format `1970-01-01 00:00:00.000`, according to the\n"
             "    ISO 8601 standard; the subsecond part is optional and may have\n"
             "    fewer or more digits. There shall be no leading or trailing\n"
             "    spaces.\n"
-            "  \n"
+            "\n"
             "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
             "    if the time string has been parsed successfully, or `null`\n"
             "    otherwise.\n"

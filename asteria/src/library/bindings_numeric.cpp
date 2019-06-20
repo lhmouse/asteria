@@ -2022,15 +2022,15 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.abs(value)`\n"
-            "  \n"
+            "\n"
             "  * Gets the absolute value of `value`, which may be an `integer`\n"
             "    or `real`. Negative `integer`s are negated, which might cause\n"
             "    an exception to be thrown due to overflow. Sign bits of `real`s\n"
             "    are removed, which works on infinities and NaNs and does not\n"
             "    result in exceptions.\n"
-            "  \n"
+            "\n"
             "  * Return the absolute value.\n"
-            "  \n"
+            "\n"
             "  * Throws an exception if `value` is the `integer` `-0x1p63`.\n"
           ),
         // Opaque parameter
@@ -2069,11 +2069,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.sign(value)`\n"
-            "  \n"
+            "\n"
             "  * Propagates the sign bit of the number `value`, which may be an\n"
             "    `integer` or `real`, to all bits of an `integer`. Be advised\n"
             "    that `-0.0` is distinct from `0.0` despite the equality.\n"
-            "  \n"
+            "\n"
             "  * Returns `-1` if `value` is negative, or `0` otherwise.\n"
           ),
         // Opaque parameter
@@ -2112,12 +2112,12 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.is_finite(value)`\n"
-            "  \n"
+            "\n"
             "  * Checks whether `value` is a finite number. `value` may be an\n"
             "    `integer` or `real`. Be adviced that this functions returns\n"
             "    `true` for `integer`s for consistency; `integer`s do not\n"
             "    support infinities or NaNs.\n"
-            "  \n"
+            "\n"
             "  * Returns `true` if `value` is an `integer` or is a `real` that\n"
             "    is neither an infinity or a NaN, or `false` otherwise.\n"
           ),
@@ -2157,12 +2157,12 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.is_infinity(value)`\n"
-            "  \n"
+            "\n"
             "  * Checks whether `value` is an infinity. `value` may be an\n"
             "    `integer` or `real`. Be adviced that this functions returns\n"
             "    `false` for `integer`s for consistency; `integer`s do not\n"
             "    support infinities.\n"
-            "  \n"
+            "\n"
             "  * Returns `true` if `value` is a `real` that denotes an infinity;\n"
             "    or `false` otherwise.\n"
           ),
@@ -2202,11 +2202,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.is_nan(value)`\n"
-            "  \n"
+            "\n"
             "  * Checks whether `value` is a NaN. `value` may be an `integer` or\n"
             "    `real`. Be adviced that this functions returns `false` for\n"
             "    `integer`s for consistency; `integer`s do not support NaNs.\n"
-            "  \n"
+            "\n"
             "  * Returns `true` if `value` is a `real` denoting a NaN, or\n"
             "    `false` otherwise.\n"
           ),
@@ -2246,14 +2246,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.clamp(value, lower, upper)`\n"
-            "  \n"
+            "\n"
             "  * Limits `value` between `lower` and `upper`.\n"
-            "  \n"
+            "\n"
             "  * Returns `lower` if `value < lower`, `upper` if `value > upper`,\n"
             "    or `value` otherwise, including when `value` is a NaN. The\n"
             "    returned value is of type `integer` if all arguments are of\n"
             "    type `integer`; otherwise it is of type `real`.\n"
-            "  \n"
+            "\n"
             "  * Throws an exception if `lower` is not less than or equal to\n"
             "    `upper`.\n"
           ),
@@ -2297,11 +2297,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.round(value)`\n"
-            "  \n"
+            "\n"
             "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
             "    nearest integer; halfway values are rounded away from zero. If\n"
             "    `value` is an `integer`, it is returned intact.\n"
-            "  \n"
+            "\n"
             "  * Returns the rounded value.\n"
           ),
         // Opaque parameter
@@ -2340,11 +2340,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.floor(value)`\n"
-            "  \n"
+            "\n"
             "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
             "    nearest integer towards negative infinity. If `value` is an\n"
             "    `integer`, it is returned intact.\n"
-            "  \n"
+            "\n"
             "  * Returns the rounded value.\n"
           ),
         // Opaque parameter
@@ -2383,11 +2383,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.ceil(value)`\n"
-            "  \n"
+            "\n"
             "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
             "    nearest integer towards positive infinity. If `value` is an\n"
             "    `integer`, it is returned intact.\n"
-            "  \n"
+            "\n"
             "  * Returns the rounded value.\n"
           ),
         // Opaque parameter
@@ -2426,11 +2426,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.trunc(value)`\n"
-            "  \n"
+            "\n"
             "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
             "    nearest integer towards zero. If `value` is an `integer`, it is\n"
             "    returned intact.\n"
-            "  \n"
+            "\n"
             "  * Returns the rounded value.\n"
           ),
         // Opaque parameter
@@ -2469,14 +2469,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.iround(value)`\n"
-            "  \n"
+            "\n"
             "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
             "    nearest integer; halfway values are rounded away from zero. If\n"
             "    `value` is an `integer`, it is returned intact. If `value` is a\n"
             "    `real`, it is converted to an `integer`.\n"
-            "  \n"
+            "\n"
             "  * Returns the rounded value as an `integer`.\n"
-            "  \n"
+            "\n"
             "  * Throws an exception if the result cannot be represented as an\n"
             "    `integer`.\n"
           ),
@@ -2516,14 +2516,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.ifloor(value)`\n"
-            "  \n"
+            "\n"
             "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
             "    nearest integer towards negative infinity. If `value` is an\n"
             "    `integer`, it is returned intact. If `value` is a `real`, it is\n"
             "    converted to an `integer`.\n"
-            "  \n"
+            "\n"
             "  * Returns the rounded value as an `integer`.\n"
-            "  \n"
+            "\n"
             "  * Throws an exception if the result cannot be represented as an\n"
             "    `integer`.\n"
           ),
@@ -2563,14 +2563,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.iceil(value)`\n"
-            "  \n"
+            "\n"
             "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
             "    nearest integer towards positive infinity. If `value` is an\n"
             "    `integer`, it is returned intact. If `value` is a `real`, it is\n"
             "    converted to an `integer`.\n"
-            "  \n"
+            "\n"
             "  * Returns the rounded value as an `integer`.\n"
-            "  \n"
+            "\n"
             "  * Throws an exception if the result cannot be represented as an\n"
             "    `integer`.\n"
           ),
@@ -2610,14 +2610,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.itrunc(value)`\n"
-            "  \n"
+            "\n"
             "  * Rounds `value`, which may be an `integer` or `real`, to the\n"
             "    nearest integer towards zero. If `value` is an `integer`, it is\n"
             "    returned intact. If `value` is a `real`, it is converted to an\n"
             "    `integer`.\n"
-            "  \n"
+            "\n"
             "  * Returns the rounded value as an `integer`.\n"
-            "  \n"
+            "\n"
             "  * Throws an exception if the result cannot be represented as an\n"
             "    `integer`.\n"
           ),
@@ -2657,13 +2657,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.random([limit])`\n"
-            "  \n"
+            "\n"
             "  * Generates a random `real` value whose sign agrees with `limit`\n"
             "    and whose absolute value is less than `limit`. If `limit` is\n"
             "    absent, `1` is assumed.\n"
-            "  \n"
+            "\n"
             "  * Returns a random `real` value.\n"
-            "  \n"
+            "\n"
             "  * Throws an exception if `limit` is zero or non-finite.\n"
           ),
         // Opaque parameter
@@ -2696,10 +2696,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.sqrt(x)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the square root of `x` which may be of either the\n"
             "    `integer` or the `real` type. The result is always exact.\n"
-            "  \n"
+            "\n"
             "  * Returns the square root of `x` as a `real`.\n"
           ),
         // Opaque parameter
@@ -2732,11 +2732,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.fma(x, y, z)`\n"
-            "  \n"
+            "\n"
             "  * Performs fused multiply-add operation on `x`, `y` and `z`. This\n"
             "    functions calculates `x * y + z` without intermediate rounding\n"
             "    operations. The result is always exact.\n"
-            "  \n"
+            "\n"
             "  * Returns the value of `x * y + z` as a `real`.\n"
           ),
         // Opaque parameter
@@ -2771,11 +2771,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.remainder(x, y)`\n"
-            "  \n"
+            "\n"
             "  * Calculates the IEEE floating-point remainder of division of `x`\n"
             "    by `y`. The remainder is defined to be `x - q * y` where `q` is\n"
             "    the quotient of division of `x` by `y` rounding to nearest.\n"
-            "  \n"
+            "\n"
             "  * Returns the remainder as a `real`.\n"
           ),
         // Opaque parameter
@@ -2809,13 +2809,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.frexp(x)`\n"
-            "  \n"
+            "\n"
             "  * Decomposes `x` into normalized fractional and exponent parts\n"
             "    such that `x = frac * pow(2,exp)` where `frac` and `exp` denote\n"
             "    the fraction and the exponent respectively and `frac` is always\n"
             "    within the range `[0.5,1.0)`. If `x` is non-finite, `exp` is\n"
             "    unspecified.\n"
-            "  \n"
+            "\n"
             "  * Returns an `array` having two elements, whose first element is\n"
             "    `frac` that is of type `real` and whose second element is `exp`\n"
             "    that is of type `integer`.\n"
@@ -2850,11 +2850,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.ldexp(frac, exp)`\n"
-            "  \n"
+            "\n"
             "  * Composes `frac` and `exp` to make a `real` number `x`, as if by\n"
             "    multiplying `frac` with `pow(2,exp)`. `exp` shall be of type\n"
             "    `integer`. This function is the inverse of `frexp()`.\n"
-            "  \n"
+            "\n"
             "  * Returns the product as a `real`.\n"
           ),
         // Opaque parameter
@@ -2888,12 +2888,12 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.addm(x, y)`\n"
-            "  \n"
+            "\n"
             "  * Adds `y` to `x` using modular arithmetic. `x` and `y` must be\n"
             "    of the `integer` type. The result is reduced to be congruent to\n"
             "    the sum of `x` and `y` modulo `0x1p64` in infinite precision.\n"
             "    This function will not cause overflow exceptions to be thrown.\n"
-            "  \n"
+            "\n"
             "  * Returns the reduced sum of `x` and `y`.\n"
           ),
         // Opaque parameter
@@ -2927,13 +2927,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.subm(x, y)`\n"
-            "  \n"
+            "\n"
             "  * Subtracts `y` from `x` using modular arithmetic. `x` and `y`\n"
             "    must be of the `integer` type. The result is reduced to be\n"
             "    congruent to the difference of `x` and `y` modulo `0x1p64` in\n"
             "    infinite precision. This function will not cause overflow\n"
             "    exceptions to be thrown.\n"
-            "  \n"
+            "\n"
             "  * Returns the reduced difference of `x` and `y`.\n"
           ),
         // Opaque parameter
@@ -2967,13 +2967,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.mulm(x, y)`\n"
-            "  \n"
+            "\n"
             "  * Multiplies `x` by `y` using modular arithmetic. `x` and `y`\n"
             "    must be of the `integer` type. The result is reduced to be\n"
             "    congruent to the product of `x` and `y` modulo `0x1p64` in\n"
             "    infinite precision. This function will not cause overflow\n"
             "    exceptions to be thrown.\n"
-            "  \n"
+            "\n"
             "  * Returns the reduced product of `x` and `y`.\n"
           ),
         // Opaque parameter
@@ -3007,14 +3007,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.adds(x, y)`\n"
-            "  \n"
+            "\n"
             "  * Adds `y` to `x` using saturating arithmetic. `x` and `y` may be\n"
             "    `integer` or `real` values. The result is limited within the\n"
             "    range of representable values of its type, hence will not cause\n"
             "    overflow exceptions to be thrown. When either argument is of\n"
             "    type `real` which supports infinities, this function is\n"
             "    equivalent to the built-in addition operator.\n"
-            "  \n"
+            "\n"
             "  * Returns the saturated sum of `x` and `y`.\n"
           ),
         // Opaque parameter
@@ -3055,14 +3055,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.subs(x, y)`\n"
-            "  \n"
+            "\n"
             "  * Subtracts `y` from `x` using saturating arithmetic. `x` and `y`\n"
             "    may be `integer` or `real` values. The result is limited within\n"
             "    the range of representable values of its type, hence will not\n"
             "    cause overflow exceptions to be thrown. When either argument is\n"
             "    of type `real` which supports infinities, this function is\n"
             "    equivalent to the built-in subtraction operator.\n"
-            "  \n"
+            "\n"
             "  * Returns the saturated difference of `x` and `y`.\n"
           ),
         // Opaque parameter
@@ -3103,14 +3103,14 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.muls(x, y)`\n"
-            "  \n"
+            "\n"
             "  * Multiplies `x` by `y` using saturating arithmetic. `x` and `y`\n"
             "    may be `integer` or `real` values. The result is limited within\n"
             "    the range of representable values of its type, hence will not\n"
             "    cause overflow exceptions to be thrown. When either argument is\n"
             "    of type `real` which supports infinities, this function is\n"
             "    equivalent to the built-in multiplication operator.\n"
-            "  \n"
+            "\n"
             "  * Returns the saturated product of `x` and `y`.\n"
           ),
         // Opaque parameter
@@ -3151,10 +3151,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.lzcnt(x)`\n"
-            "  \n"
+            "\n"
             "  * Counts the number of leading zero bits in `x`, which shall be\n"
             "    of type `integer`.\n"
-            "  \n"
+            "\n"
             "  * Returns the bit count as an `integer`. If `x` is zero, `64` is\n"
             "    returned.\n"
           ),
@@ -3188,10 +3188,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.tzcnt(x)`\n"
-            "  \n"
+            "\n"
             "  * Counts the number of trailing zero bits in `x`, which shall be\n"
             "    of type `integer`.\n"
-            "  \n"
+            "\n"
             "  * Returns the bit count as an `integer`. If `x` is zero, `64` is\n"
             "    returned.\n"
           ),
@@ -3225,10 +3225,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.popcnt(x)`\n"
-            "  \n"
+            "\n"
             "  * Counts the number of one bits in `x`, which shall be of type\n"
             "    `integer`.\n"
-            "  \n"
+            "\n"
             "  * Returns the bit count as an `integer`.\n"
           ),
         // Opaque parameter
@@ -3261,7 +3261,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.format(value, [base], [exp_base])`\n"
-            "  \n"
+            "\n"
             "  * Converts an `integer` or `real` to a `string` in `base`. This\n"
             "    function writes as many digits as possible to ensure precision.\n"
             "    No plus sign precedes the significant figures. If `base` is\n"
@@ -3274,9 +3274,9 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "    minus sign and at least two digits. If `ebase` is absent, no\n"
             "    exponent appears. The result is exact as long as `base` is a\n"
             "    power of two.\n"
-            "  \n"
+            "\n"
             "  * Returns a `string` converted from `value`.\n"
-            "  \n"
+            "\n"
             "  * Throws an exception if `base` is neither `2` nor `10` nor `16`,\n"
             "    or if `ebase` is neither `2` nor `10`, or if `base` is not `10`\n"
             "    but `ebase` is `10`.\n"
@@ -3319,24 +3319,24 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.parse_integer(text)`\n"
-            "  \n"
+            "\n"
             "  * Parses `text` for an `integer`. `text` shall be a `string`. All\n"
             "    leading and trailing blank characters are stripped from `text`.\n"
             "    If it becomes empty, this function fails; otherwise, it shall\n"
             "    match one of the following Perl regular expressions, ignoring\n"
             "    case of characters:\n"
-            "    \n"
+            "\n"
             "    * Binary (base-2):\n"
             "      `[+-]?0b([01]`?)+[ep][+]?([0-9]`?)+`\n"
             "    * Hexadecimal (base-16):\n"
             "      `[+-]?0x([0-9a-f]`?)+[ep][+]?([0-9]`?)+`\n"
             "    * Decimal (base-10):\n"
             "      `[+-]?([0-9]`?)+[ep][+]?([0-9]`?)+`\n"
-            "    \n"
+            "\n"
             "    If the string does not match any of the above, this function\n"
             "    fails. If the result is outside the range of representable\n"
             "    values of type `integer`, this function fails.\n"
-            "  \n"
+            "\n"
             "  * Returns the `integer` value converted from `text`. On failure,\n"
             "    `null` is returned.\n"
           ),
@@ -3374,13 +3374,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           (
             "\n"
             "`std.numeric.parse_real(text, [saturating])`\n"
-            "  \n"
+            "\n"
             "  * Parses `text` for a `real`. `text` shall be a `string`. All\n"
             "    leading and trailing blank characters are stripped from `text`.\n"
             "    If it becomes empty, this function fails; otherwise, it shall\n"
             "    match any of the following Perl regular expressions, ignoring\n"
             "    case of characters:\n"
-            "    \n"
+            "\n"
             "    * Infinities:\n"
             "      `[+-]?infinity`\n"
             "    * NaNs:\n"
@@ -3391,13 +3391,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
             "      `[+-]?0x([0-9a-f]`?)+(\\.([0-9a-f]`?))?[ep][-+]?([0-9]`?)+`\n"
             "    * Decimal (base-10):\n"
             "      `[+-]?([0-9]`?)+(\\.([0-9]`?))?[ep][-+]?([0-9]`?)+`\n"
-            "    \n"
+            "\n"
             "    If the string does not match any of the above, this function\n"
             "    fails. If the absolute value of the result is too small to fit\n"
             "    in a `real`, a signed zero is returned. When the absolute value\n"
             "    is too large, if `saturating` is set to `true`, a signed\n"
             "    infinity is returned; otherwise this function fails.\n"
-            "  \n"
+            "\n"
             "  * Returns the `real` value converted from `text`. On failure,\n"
             "    `null` is returned.\n"
           ),
