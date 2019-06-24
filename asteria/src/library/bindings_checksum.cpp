@@ -22,7 +22,7 @@ namespace Asteria {
       };
     template<std::uint32_t divisorT, std::size_t... indicesT> constexpr std::array<std::uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
       {
-        return {{ Generator<static_cast<std::uint8_t>(indicesT), divisorT, 0>::value... }};
+        return {{ Generator<std::uint8_t(indicesT), divisorT, 0>::value... }};
       }
     template<std::uint32_t divisorT> constexpr std::array<std::uint32_t, 256> do_generate_table() noexcept
       {
