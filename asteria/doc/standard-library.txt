@@ -1809,3 +1809,39 @@
 
 	* Returns the CRC-32 checksum as an `integer`. The high-order 32
 	  bits are always zeroes.
+
+`std.checksum.md5_new()`
+
+	* Creates an MD5 hasher.
+
+	* Returns the hasher as an `object` consisting of the following
+	  members:
+
+	  * `write(data)`
+	  * `finish()`
+
+	  The function `write()` is used to put data into the hasher,
+	  which shall be of type `string`. After all data have been put,
+	  the function `finish()` extracts the checksum as a `string` of
+	  32 hexadecimal digits in uppercase, then resets the hasher,
+	  making it suitable for further data as if it had just been
+	  created.
+
+`std.checksum.md5(data)`
+
+	* Calculates the MD5 checksum of `data` which must be of type
+	  `string`, as if this function was defined as
+
+	  ```
+	    std.checksum.md5 = func(data) {
+	      var h = this.md5_new();
+	      h.write(data);
+	      return h.finish();
+	    };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the MD5 checksum as a `string` of 32 hexadecimal digits
+	  in uppercase.
