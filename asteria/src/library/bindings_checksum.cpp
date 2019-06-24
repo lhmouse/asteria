@@ -14,29 +14,26 @@ namespace Asteria {
     namespace {
     namespace CRC32 {
 
-    using U32 = std::uint32_t;
-    using TABLE = std::array<std::uint32_t, 256>;
-
-    template<U32 valueT, U32 divisorT, int roundT> struct Generator : Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
+    template<std::uint32_t valueT, std::uint32_t divisorT, int roundT> struct Generator : Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
       {
       };
-    template<U32 valueT, U32 divisorT> struct Generator<valueT, divisorT, 8> : std::integral_constant<U32, valueT>
+    template<std::uint32_t valueT, std::uint32_t divisorT> struct Generator<valueT, divisorT, 8> : std::integral_constant<std::uint32_t, valueT>
       {
       };
-
-    template<U32 divisorT, U32... indicesT> constexpr TABLE do_generate_table_impl(const std::integer_sequence<U32, indicesT...>&) noexcept
+    template<std::uint32_t divisorT, std::size_t... indicesT> constexpr std::array<std::uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
       {
-        return {{ Generator<indicesT, divisorT, 0>::value... }};
+        return {{ Generator<static_cast<std::uint8_t>(indicesT), divisorT, 0>::value... }};
       }
-    template<U32 divisorT> constexpr TABLE do_generate_table() noexcept
+    template<std::uint32_t divisorT> constexpr std::array<std::uint32_t, 256> do_generate_table() noexcept
       {
-        return do_generate_table_impl<divisorT>(std::make_integer_sequence<U32, 256>());
+        return do_generate_table_impl<divisorT>(std::make_index_sequence<256>());
       }
+    constexpr auto s_iso3309_table = do_generate_table<0xEDB88320>();
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        U32 m_reg;
+        std::uint32_t m_reg;
 
       public:
         Hasher() noexcept
@@ -56,11 +53,10 @@ namespace Asteria {
 
         void write(const G_string& data) noexcept
           {
-            static constexpr auto s_table = do_generate_table<0xEDB88320>();
             // Hash bytes one by one.
             auto r = this->m_reg;
             for(std::size_t i = 0; i < data.size(); ++i) {
-              r = (r >> 8) ^ s_table[(r ^ static_cast<std::uint8_t>(data[i])) & 0xFF];
+              r = (r >> 8) ^ s_iso3309_table[(r ^ static_cast<std::uint8_t>(data[i])) & 0xFF];
             }
             this->m_reg = r;
           }
@@ -139,7 +135,7 @@ G_integer std_checksum_crc32(const G_string& data)
   {
     CRC32::Hasher h;
     h.write(data);
-    return G_integer(h.finish());
+    return h.finish();
   }
 
 void create_bindings_checksum(G_object& result, API_Version /*version*/)
