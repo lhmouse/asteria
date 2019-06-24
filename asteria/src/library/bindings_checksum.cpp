@@ -2,7 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "bindings_hash.hpp"
+#include "bindings_checksum.hpp"
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../runtime/global_context.hpp"
@@ -76,7 +76,7 @@ namespace Asteria {
     }
     }
 
-G_object std_hash_crc32_new()
+G_object std_checksum_crc32_new()
   {
     G_object r;
     r.insert_or_assign(rocket::sref("!h"),  // details
@@ -87,13 +87,13 @@ G_object std_hash_crc32_new()
       G_function(
         make_simple_binding(
           // Description
-          rocket::sref("<std.hash.crc32_new()>.write"),
+          rocket::sref("<std.checksum.crc32_new()>.write"),
           // Opaque parameter
           G_null(),
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.hash.crc32_new()>.write"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.write"), args);
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -112,13 +112,13 @@ G_object std_hash_crc32_new()
       G_function(
         make_simple_binding(
           // Description
-          rocket::sref("<std.hash.crc32_new()>.finish"),
+          rocket::sref("<std.checksum.crc32_new()>.finish"),
           // Opaque parameter
           G_null(),
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.hash.crc32_new()>.finish"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.finish"), args);
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -135,17 +135,17 @@ G_object std_hash_crc32_new()
     return r;
   }
 
-G_integer std_hash_crc32(const G_string& data)
+G_integer std_checksum_crc32(const G_string& data)
   {
     CRC32::Hasher h;
     h.write(data);
     return G_integer(h.finish());
   }
 
-void create_bindings_hash(G_object& result, API_Version /*version*/)
+void create_bindings_checksum(G_object& result, API_Version /*version*/)
   {
     //===================================================================
-    // `std.hash.crc32_new()`
+    // `std.checksum.crc32_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("crc32_new"),
       G_function(make_simple_binding(
@@ -153,7 +153,7 @@ void create_bindings_hash(G_object& result, API_Version /*version*/)
         rocket::sref
           (
             "\n"
-            "`std.hash.crc32_new()`\n"
+            "`std.checksum.crc32_new()`\n"
             "\n"
             "  * Creates a CRC-32 hasher according to ISO/IEC 3309. The divisor\n"
             "    is `0x04C11DB7` (or `0xEDB88320` in reverse form).\n"
@@ -179,11 +179,11 @@ void create_bindings_hash(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.hash.crc32_new"), args);
+            Argument_Reader reader(rocket::sref("std.checksum.crc32_new"), args);
             // Parse arguments.
             if(reader.start().finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_hash_crc32_new() };
+              Reference_Root::S_temporary xref = { std_checksum_crc32_new() };
               return rocket::move(xref);
             }
             // Fail.
@@ -191,7 +191,7 @@ void create_bindings_hash(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.hash.crc32()`
+    // `std.checksum.crc32()`
     //===================================================================
     result.insert_or_assign(rocket::sref("crc32"),
       G_function(make_simple_binding(
@@ -199,13 +199,13 @@ void create_bindings_hash(G_object& result, API_Version /*version*/)
         rocket::sref
           (
             "\n"
-            "`std.hash.crc32(data)`\n"
+            "`std.checksum.crc32(data)`\n"
             "\n"
             "  * Calculates the CRC-32 checksum of `data` which must be of type\n"
             "    `string`, as if this function was defined as\n"
             "\n"
             "    ```\n"
-            "      std.hash.crc32 = func(data) {\n"
+            "      std.checksum.crc32 = func(data) {\n"
             "        var h = this.crc32_new();\n"
             "        h.write(data);\n"
             "        return h.finish();\n"
@@ -226,12 +226,12 @@ void create_bindings_hash(G_object& result, API_Version /*version*/)
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
           {
-            Argument_Reader reader(rocket::sref("std.hash.crc32"), args);
+            Argument_Reader reader(rocket::sref("std.checksum.crc32"), args);
             // Parse arguments.
             G_string data;
             if(reader.start().g(data).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_hash_crc32(data) };
+              Reference_Root::S_temporary xref = { std_checksum_crc32(data) };
               return rocket::move(xref);
             }
             // Fail.
@@ -239,7 +239,7 @@ void create_bindings_hash(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // End of `std.hash`
+    // End of `std.checksum`
     //===================================================================
   }
 

@@ -17,7 +17,7 @@
 #include "../library/bindings_numeric.hpp"
 #include "../library/bindings_math.hpp"
 #include "../library/bindings_filesystem.hpp"
-#include "../library/bindings_hash.hpp"
+#include "../library/bindings_checksum.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -46,7 +46,7 @@ Global_Context::~Global_Context()
         { api_version_0001_0000,  "numeric",     create_bindings_numeric     },
         { api_version_0001_0000,  "math",        create_bindings_math        },
         { api_version_0001_0000,  "filesystem",  create_bindings_filesystem  },
-        { api_version_0001_0000,  "hash",        create_bindings_hash        },
+        { api_version_0001_0000,  "checksum",    create_bindings_checksum    },
       };
 
     struct Module_Comparator

@@ -31,7 +31,7 @@ int main()
           0x0C6E9FD3, 0xF76153B2, 0xCD2F0DB0, 0x231B22C2, 0x9DFE06FD, 0x2B26CEE4, 0x4FFBBEEC, 0x4144EBAE,
           0xD9987447, 0x00D6F204, 0xEFDAACA8, 0x30554F35, 0xBE342F2F, 0x43D8B735, 0xBE47A2D7, 0xF0BEBE96,
         ];
-        var h = std.hash.crc32_new();
+        var h = std.checksum.crc32_new();
         for(each k, v : crc32_results) {
           // split
           for(var i = 0; i < k; ++i) {
@@ -39,7 +39,7 @@ int main()
           }
           assert h.finish() == v;
           // simple
-          assert std.hash.crc32("a" * k) == v;
+          assert std.checksum.crc32("a" * k) == v;
         }
 
         

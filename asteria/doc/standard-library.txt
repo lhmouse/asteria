@@ -1771,9 +1771,9 @@
 	* Returns `true` if the file has been removed successfully, or
 	  `null` on failure.
 
-### `std.hash`
+### `std.checksum`
 
-`std.hash.crc32_new()`
+`std.checksum.crc32_new()`
 
 	* Creates a CRC-32 hasher according to ISO/IEC 3309. The divisor
 	  is `0x04C11DB7` (or `0xEDB88320` in reverse form).
@@ -1791,13 +1791,13 @@
 	  hasher, making it suitable for further data as if it had just
 	  been created.
 
-`std.hash.crc32(data)`
+`std.checksum.crc32(data)`
 
 	* Calculates the CRC-32 checksum of `data` which must be of type
 	  `string`, as if this function was defined as
 
 	  ```
-	    std.hash.crc32 = func(data) {
+	    std.checksum.crc32 = func(data) {
 	      var h = this.crc32_new();
 	      h.write(data);
 	      return h.finish();
