@@ -780,10 +780,10 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
 
     namespace {
 
-    template<typename IntegerT, bool bigendT> bool do_pack_one(G_string& text, const G_integer& value)
+    template<typename WordT, bool bigendT> bool do_pack_one(G_string& text, const G_integer& value)
       {
         // Define temporary storage.
-        std::array<char, sizeof(IntegerT)> stor_le;
+        std::array<char, sizeof(WordT)> stor_le;
         std::uint64_t word = 0;
         // Read an integer.
         word = static_cast<std::uint64_t>(value);
@@ -801,11 +801,11 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
         return true;
       }
 
-    template<typename IntegerT, bool bigendT> G_array do_unpack(const G_string& text)
+    template<typename WordT, bool bigendT> G_array do_unpack(const G_string& text)
       {
         G_array values;
         // Define temporary storage.
-        std::array<char, sizeof(IntegerT)> stor_be;
+        std::array<char, sizeof(WordT)> stor_be;
         std::uint64_t word = 0;
         // How many words will the result have?
         auto nwords = text.size() / stor_be.size();
@@ -827,7 +827,7 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
             word |= static_cast<unsigned char>(byte);
           }
           // Append the word.
-          values.emplace_back(G_integer(static_cast<IntegerT>(word)));
+          values.emplace_back(G_integer(static_cast<WordT>(word)));
         }
         return values;
       }
