@@ -53,19 +53,24 @@ namespace Asteria {
 
         void write(const G_string& data) noexcept
           {
-            // Hash bytes one by one.
+            const auto p = reinterpret_cast<const std::uint8_t*>(data.data());
+            const auto n = data.size();
             auto r = this->m_reg;
-            for(std::size_t i = 0; i < data.size(); ++i) {
-              r = (r >> 8) ^ s_iso3309_table[(r ^ static_cast<std::uint8_t>(data[i])) & 0xFF];
+            // Hash bytes one by one.
+            for(std::size_t i = 0; i != n; ++i) {
+              std::size_t b = (r ^ p[i]) & 0xFF;
+              r >>= 8;
+              r ^= s_iso3309_table[b];
             }
             this->m_reg = r;
           }
         G_integer finish() noexcept
           {
-            // Swap internal states out.
-            auto r = this->m_reg;
+            // Get the checksum.
+            auto ck = ~this->m_reg;
+            // Reset internal states.
             this->m_reg = UINT32_MAX;
-            return ~r;
+            return ck;
           }
       };
 
