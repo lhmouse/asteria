@@ -784,9 +784,7 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
       {
         // Define temporary storage.
         std::array<char, sizeof(WordT)> stor_le;
-        std::uint64_t word = 0;
-        // Read an integer.
-        word = static_cast<std::uint64_t>(value);
+        std::uint64_t word = static_cast<std::uint64_t>(value);
         // Write it in little-endian order.
         for(auto& byte : stor_le) {
           byte = static_cast<char>(word);
