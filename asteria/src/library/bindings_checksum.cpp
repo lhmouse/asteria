@@ -147,6 +147,124 @@ G_integer std_checksum_crc32(const G_string& data)
   }
 
     namespace {
+    namespace FNV1a32 {
+
+    constexpr std::uint32_t s_prime = 16777619;
+    constexpr std::uint32_t s_offset = 2166136261;
+
+    class Hasher : public Abstract_Opaque
+      {
+      private:
+        std::uint32_t m_reg;
+
+      public:
+        Hasher() noexcept
+          : m_reg(s_offset)
+          {
+          }
+
+      public:
+        void describe(std::ostream& os) const override
+          {
+            os << "FNV-1a hasher (32-bit)";
+          }
+        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+          {
+            // There is nothing to do.
+          }
+
+        void write(const G_string& data) noexcept
+          {
+            const auto p = reinterpret_cast<const std::uint8_t*>(data.data());
+            const auto n = data.size();
+            auto r = this->m_reg;
+            // Hash bytes one by one.
+            for(std::size_t i = 0; i != n; ++i) {
+              std::uint8_t b = p[i] & 0xFF;
+              r = (b ^ r) * s_prime;
+            }
+            this->m_reg = r;
+          }
+        G_integer finish() noexcept
+          {
+            // Get the checksum.
+            auto ck = this->m_reg;
+            // Reset internal states.
+            this->m_reg = s_offset;
+            return ck;
+          }
+      };
+
+    }
+    }
+
+G_object std_checksum_fnv1a32_new()
+  {
+    G_object r;
+    r.insert_or_assign(rocket::sref("!h"),  // details
+      G_opaque(
+        rocket::make_refcnt<FNV1a32::Hasher>()
+      ));
+    r.insert_or_assign(rocket::sref("write"),
+      G_function(
+        make_simple_binding(
+          // Description
+          rocket::sref("<std.checksum.fnv1a32_new()>.write"),
+          // Opaque parameter
+          G_null(),
+          // Definition
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+            {
+              Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.write"), args);
+              // Get the hasher.
+              Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
+              self.zoom_in(rocket::move(xmod));
+              auto& h = dynamic_cast<FNV1a32::Hasher&>(self.open().mut_opaque().mut());
+              // Parse arguments.
+              G_string data;
+              if(reader.start().g(data).finish()) {
+                h.write(data);
+                return Reference_Root::S_null();
+              }
+              reader.throw_no_matching_function_call();
+            }
+        )
+      ));
+    r.insert_or_assign(rocket::sref("finish"),
+      G_function(
+        make_simple_binding(
+          // Description
+          rocket::sref("<std.checksum.fnv1a32_new()>.finish"),
+          // Opaque parameter
+          G_null(),
+          // Definition
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+            {
+              Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.finish"), args);
+              // Get the hasher.
+              Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
+              self.zoom_in(rocket::move(xmod));
+              auto& h = dynamic_cast<FNV1a32::Hasher&>(self.open().mut_opaque().mut());
+              // Parse arguments.
+              if(reader.start().finish()) {
+                Reference_Root::S_temporary xref = { h.finish() };
+                return rocket::move(xref);
+              }
+              reader.throw_no_matching_function_call();
+            }
+        )
+      ));
+    return r;
+  }
+
+G_integer std_checksum_fnv1a32(const G_string& data)
+  {
+    FNV1a32::Hasher h;
+    h.write(data);
+    return h.finish();
+  }
+
+    namespace {
 
     template<std::uint8_t valueT> struct Hexdigit : std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
       {
@@ -615,6 +733,101 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
             if(reader.start().g(data).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_checksum_crc32(data) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.checksum.fnv1a32_new()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("fnv1a32_new"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.checksum.fnv1a32_new()`\n"
+            "\n"
+            "  * Creates a 32-bit Fowler-Noll-Vo (a.k.a. FNV) hasher of the\n"
+            "    32-bit FNV-1a variant. The FNV prime is `16777619` and the FNV\n"
+            "    offset basis is `2166136261`.\n"
+            "\n"
+            "  * Returns the hasher as an `object` consisting of the following\n"
+            "    members:\n"
+            "\n"
+            "    * `write(data)`\n"
+            "    * `finish()`\n"
+            "\n"
+            "    The function `write()` is used to put data into the hasher,\n"
+            "    which shall be of type `string`. After all data have been put,\n"
+            "    the function `finish()` extracts the checksum as an `integer`\n"
+            "    (whose high-order 32 bits are always zeroes), then resets the\n"
+            "    hasher, making it suitable for further data as if it had just\n"
+            "    been created.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.checksum.fnv1a32_new"), args);
+            // Parse arguments.
+            if(reader.start().finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_checksum_fnv1a32_new() };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.checksum.fnv1a32()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("fnv1a32"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.checksum.fnv1a32(data)`\n"
+            "\n"
+            "  * Calculates the 32-bit FNV-1a checksum of `data` which must be\n"
+            "    of type `string`, as if this function was defined as\n"
+            "\n"
+            "    ```\n"
+            "      std.checksum.fnv1a32 = func(data) {\n"
+            "        var h = this.fnv1a32_new();\n"
+            "        h.write(data);\n"
+            "        return h.finish();\n"
+            "      };\n"
+            "    ```\n"
+            "\n"
+            "    This function is expected to be both more efficient and easier\n"
+            "    to use.\n"
+            "\n"
+            "  * Returns the 32-bit FNV-1a checksum as an `integer`. The\n"
+            "    high-order 32 bits are always zeroes.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.checksum.fnv1a32"), args);
+            // Parse arguments.
+            G_string data;
+            if(reader.start().g(data).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_checksum_fnv1a32(data) };
               return rocket::move(xref);
             }
             // Fail.

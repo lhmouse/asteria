@@ -1810,6 +1810,44 @@
 	* Returns the CRC-32 checksum as an `integer`. The high-order 32
 	  bits are always zeroes.
 
+`std.checksum.fnv1a32_new()`
+
+	* Creates a 32-bit Fowler-Noll-Vo (a.k.a. FNV) hasher of the
+	  32-bit FNV-1a variant. The FNV prime is `16777619` and the FNV
+	  offset basis is `2166136261`.
+
+	* Returns the hasher as an `object` consisting of the following
+	  members:
+
+	  * `write(data)`
+	  * `finish()`
+
+	  The function `write()` is used to put data into the hasher,
+	  which shall be of type `string`. After all data have been put,
+	  the function `finish()` extracts the checksum as an `integer`
+	  (whose high-order 32 bits are always zeroes), then resets the
+	  hasher, making it suitable for further data as if it had just
+	  been created.
+
+`std.checksum.fnv1a32(data)`
+
+	* Calculates the 32-bit FNV-1a checksum of `data` which must be
+	  of type `string`, as if this function was defined as
+
+	  ```
+	    std.checksum.fnv1a32 = func(data) {
+	      var h = this.fnv1a32_new();
+	      h.write(data);
+	      return h.finish();
+	    };
+	  ```
+
+	  This function is expected to be both more efficient and easier
+	  to use.
+
+	* Returns the 32-bit FNV-1a checksum as an `integer`. The
+	  high-order 32 bits are always zeroes.
+
 `std.checksum.md5_new()`
 
 	* Creates an MD5 hasher.
