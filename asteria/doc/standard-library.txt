@@ -499,13 +499,14 @@
 	* Returns the encoded `string`. If `text` is empty, an empty
 	  `string` is returned.
 
-`std.string.hex_decode(hstr)`
+`std.string.hex_decode(dstr)`
 
-	* Decodes all hexadecimal digits from `hstr` and converts them to
-	  bytes. Whitespaces are ignored. Characters that are neither
-	  hexadecimal digits nor whitespaces will cause parse errors.
+	* Decodes all hexadecimal digits from `dstr` and converts them to
+	  bytes. Whitespaces can be used to delimit bytes. Characters
+	  that are neither hexadecimal digits nor whitespaces will cause
+	  parse errors.
 
-	* Returns a `string` containing decoded bytes. If `hstr` is empty
+	* Returns a `string` containing decoded bytes. If `dstr` is empty
 	  or consists only whitespaces, an empty `string` is returned. In
 	  the case of parse errors, `null` is returned.
 

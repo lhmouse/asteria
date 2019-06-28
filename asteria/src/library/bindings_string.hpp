@@ -54,7 +54,7 @@ extern G_array std_string_explode(const G_string& text, const Opt<G_string>& del
 extern G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim = rocket::nullopt);
 
 extern G_string std_string_hex_encode(const G_string& text, const Opt<G_string>& delim = rocket::nullopt, const Opt<G_boolean>& uppercase = rocket::nullopt);
-extern Opt<G_string> std_string_hex_decode(const G_string& hstr);
+extern Opt<G_string> std_string_hex_decode(const G_string& dstr);
 
 extern Opt<G_string> std_string_utf8_encode(const G_integer& code_point, const Opt<G_boolean>& permissive = rocket::nullopt);
 extern Opt<G_string> std_string_utf8_encode(const G_array& code_points, const Opt<G_boolean>& permissive = rocket::nullopt);

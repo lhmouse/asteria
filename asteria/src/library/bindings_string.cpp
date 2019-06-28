@@ -653,37 +653,37 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 
 G_string std_string_hex_encode(const G_string& text, const Opt<G_string>& delim, const Opt<G_boolean>& uppercase)
   {
-    G_string hstr;
+    G_string dstr;
     auto rpos = text.begin();
     if(rpos == text.end()) {
       // Return an empty string; no delimiter is added.
-      return hstr;
+      return dstr;
     }
     std::size_t ndcs = delim ? delim->size() : 0;
     bool upc = uppercase.value_or(false);
     // Reserve storage for digits.
-    hstr.reserve(2 + (ndcs + 2) * (text.size() - 1));
+    dstr.reserve(2 + (ndcs + 2) * (text.size() - 1));
     for(;;) {
       // Encode a byte.
-      hstr += s_xdigits_and_spaces[(*rpos & 0xF0) / 8 + upc];
-      hstr += s_xdigits_and_spaces[(*rpos & 0x0F) * 2 + upc];
+      dstr += s_xdigits_and_spaces[(*rpos / 8 & 0x1E) + upc];
+      dstr += s_xdigits_and_spaces[(*rpos * 2 & 0x1E) + upc];
       if(++rpos == text.end()) {
         break;
       }
       if(!delim) {
         continue;
       }
-      hstr += *delim;
+      dstr += *delim;
     }
-    return hstr;
+    return dstr;
   }
 
-Opt<G_string> std_string_hex_decode(const G_string& hstr)
+Opt<G_string> std_string_hex_decode(const G_string& dstr)
   {
     G_string text;
     // Remember the value of a previous digit. `-1` means no such digit exists.
     int dprev = -1;
-    for(char ch : hstr) {
+    for(char ch : dstr) {
       // Identify this character.
       auto pos = std::find(std::begin(s_xdigits_and_spaces), std::end(s_xdigits_and_spaces) - 1, ch);
       if(*pos == 0) {
@@ -2279,13 +2279,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         rocket::sref
           (
             "\n"
-            "`std.string.hex_decode(hstr)`\n"
+            "`std.string.hex_decode(dstr)`\n"
             "\n"
-            "  * Decodes all hexadecimal digits from `hstr` and converts them to\n"
-            "    bytes. Whitespaces are ignored. Characters that are neither\n"
-            "    hexadecimal digits nor whitespaces will cause parse errors.\n"
+            "  * Decodes all hexadecimal digits from `dstr` and converts them to\n"
+            "    bytes. Whitespaces can be used to delimit bytes. Characters\n"
+            "    that are neither hexadecimal digits nor whitespaces will cause\n"
+            "    parse errors.\n"
             "\n"
-            "  * Returns a `string` containing decoded bytes. If `hstr` is empty\n"
+            "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
             "    or consists only whitespaces, an empty `string` is returned. In\n"
             "    the case of parse errors, `null` is returned.\n"
           ),
@@ -2299,10 +2300,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.string.hex_decode"), args);
             // Parse arguments.
-            G_string hstr;
-            if(reader.start().g(hstr).finish()) {
+            G_string dstr;
+            if(reader.start().g(dstr).finish()) {
               // Call the binding function.
-              auto qtext = std_string_hex_decode(hstr);
+              auto qtext = std_string_hex_decode(dstr);
               if(!qtext) {
                 return Reference_Root::S_null();
               }
