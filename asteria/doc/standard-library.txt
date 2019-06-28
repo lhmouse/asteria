@@ -488,25 +488,25 @@
 	* Returns a `string` containing all segments. If `segments` is
 	  empty, an empty `string` is returned.
 
-`std.string.hex_encode(text, [uppercase], [delim])`
+`std.string.hex_encode(data, [uppercase], [delim])`
 
-	* Encodes all bytes in `text` as 2-digit hexadecimal numbers and
+	* Encodes all bytes in `data` as 2-digit hexadecimal numbers and
 	  concatenates them. If `uppercase` is set to `true`, hexadecimal
 	  digits above `9` are encoded as `ABCDEF`; otherwise they are
 	  encoded as `abcdef`. If `delim` is specified, it is inserted
 	  between adjacent bytes.
 
-	* Returns the encoded `string`. If `text` is empty, an empty
+	* Returns the encoded `string`. If `data` is empty, an empty
 	  `string` is returned.
 
-`std.string.hex_decode(dstr)`
+`std.string.hex_decode(text)`
 
-	* Decodes all hexadecimal digits from `dstr` and converts them to
+	* Decodes all hexadecimal digits from `text` and converts them to
 	  bytes. Whitespaces can be used to delimit bytes. Characters
 	  that are neither hexadecimal digits nor whitespaces will cause
 	  parse errors.
 
-	* Returns a `string` containing decoded bytes. If `dstr` is empty
+	* Returns a `string` containing decoded bytes. If `text` is empty
 	  or consists of only whitespaces, an empty `string` is returned.
 	  In the case of parse errors, `null` is returned.
 
