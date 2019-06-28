@@ -15,6 +15,7 @@ int main()
         const s = "abcdefg";
         var h;
 
+        // CRC-32
         const crc32_results = [
           0x00000000, 0x312A6AA6, 0x7FD808AF, 0xE643CF1E, 0x0A321D29, 0x601B0C2E, 0xF57CB98C, 0xCEC343C6,
           0x2F0CB3EB, 0x9172ABF9, 0x35F9C1EF, 0x9CA74BF6, 0x668A8270, 0x6B210FB2, 0x6710F04C, 0x6102348A,
@@ -44,7 +45,7 @@ int main()
           assert std.checksum.crc32(s * k) == v;
         }
 
-        // These are MD5 checksums of "", "a", "aa", "aaa", "aaaa", and so on.
+        // MD5
         const md5_results = [
           "D41D8CD98F00B204E9800998ECF8427E", "7AC66C0F148DE9519B8BD264312C4D64",
           "B7B68FCE5078A4C8EEC0362E78AB9E18", "24D1FB65E396E77C6A95889B02EDCDEA",

@@ -30,6 +30,8 @@ namespace Asteria {
       }
     constexpr auto s_iso3309_table = do_generate_table<0xEDB88320>();
 
+    constexpr std::uint32_t s_init = UINT32_MAX;
+
     class Hasher : public Abstract_Opaque
       {
       private:
@@ -37,7 +39,7 @@ namespace Asteria {
 
       public:
         Hasher() noexcept
-          : m_reg(UINT32_MAX)
+          : m_reg(s_init)
           {
           }
 
@@ -58,7 +60,8 @@ namespace Asteria {
             auto r = this->m_reg;
             // Hash bytes one by one.
             for(std::size_t i = 0; i != n; ++i) {
-              std::size_t b = (r ^ p[i]) & 0xFF;
+              std::uint8_t b = p[i];
+              b ^= static_cast<std::uint8_t>(r);
               r >>= 8;
               r ^= s_iso3309_table[b];
             }
@@ -69,7 +72,7 @@ namespace Asteria {
             // Get the checksum.
             auto ck = ~this->m_reg;
             // Reset internal states.
-            this->m_reg = UINT32_MAX;
+            this->m_reg = s_init;
             return ck;
           }
       };
@@ -236,7 +239,7 @@ G_integer std_checksum_crc32(const G_string& data)
     namespace {
     namespace MD5 {
 
-    constexpr std::array<std::uint32_t, 4> s_md5_init = {{
+    constexpr std::array<std::uint32_t, 4> s_init = {{
       0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476
     }};
 
@@ -249,7 +252,7 @@ G_integer std_checksum_crc32(const G_string& data)
 
       public:
         Hasher() noexcept
-          : m_regs(s_md5_init),
+          : m_regs(s_init),
             m_size(0)
           {
           }
@@ -447,7 +450,7 @@ G_integer std_checksum_crc32(const G_string& data)
             ck.reserve(32);
             rocket::for_each(this->m_regs, [&](std::uint32_t w) { do_pdigits_le(ck, w);  });
             // Reset internal states.
-            this->m_regs = s_md5_init;
+            this->m_regs = s_init;
             this->m_size = 0;
             return ck;
           }
