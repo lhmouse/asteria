@@ -502,9 +502,53 @@
 `std.string.hex_decode(text)`
 
 	* Decodes all hexadecimal digits from `text` and converts them to
-	  bytes. Whitespaces can be used to delimit bytes. Characters
-	  that are neither hexadecimal digits nor whitespaces will cause
-	  parse errors.
+	  bytes. Whitespaces can be used to delimit bytes; they shall not
+	  occur between digits in the same byte. Consequently, the total
+	  number of non-whitespace characters must be a multiple of two.
+	  Invalid characters cause parse errors.
+
+	* Returns a `string` containing decoded bytes. If `text` is empty
+	  or consists of only whitespaces, an empty `string` is returned.
+	  In the case of parse errors, `null` is returned.
+
+`std.string.base32_encode(data, [uppercase])`
+
+	* Encodes all bytes in `data` according to the base32 encoding
+	  specified by IETF RFC 4648. If `uppercase` is set to `true`,
+	  uppercase letters are used to represent values through `0` to
+	  `25`; otherwise, lowercase letters are used. The length of
+	  encoded data is always a multiple of 8; padding characters
+	  are mandatory.
+
+	* Returns the encoded `string`.
+
+`std.string.base32_decode(text)`
+
+	* Decodes data encoded in base32, as specified by IETF RFC 4648.
+	  Whitespaces can be used to delimit encoding units; they shall
+	  not occur between characters in the same unit. Consequently,
+	  the number of non-whitespace characters must be a multiple of
+	  eight. Invalid characters cause parse errors.
+
+	* Returns a `string` containing decoded bytes. If `text` is empty
+	  or consists of only whitespaces, an empty `string` is returned.
+	  In the case of parse errors, `null` is returned.
+
+`std.string.base64_encode(data)`
+
+	* Encodes all bytes in `data` according to the base64 encoding
+	  specified by IETF RFC 4648. The length of encoded data is
+	  always a multiple of 4; padding characters are mandatory.
+
+	* Returns the encoded `string`.
+
+`std.string.base64_decode(text)`
+
+	* Decodes data encoded in base64, as specified by IETF RFC 4648.
+	  Whitespaces can be used to delimit encoding units; they shall
+	  not occur between characters in the same unit. Consequently,
+	  the number of non-whitespace characters must be a multiple of
+	  four. Invalid characters cause parse errors.
 
 	* Returns a `string` containing decoded bytes. If `text` is empty
 	  or consists of only whitespaces, an empty `string` is returned.

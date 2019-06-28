@@ -696,7 +696,10 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 
     namespace {
 
-    constexpr char s_base16_table[] = "00112233445566778899AaBbCcDdEeFf \f\n\r\t\v";
+    constexpr char s_base16_table[] = "00112233445566778899AaBbCcDdEeFf";
+    constexpr char s_base32_table[] = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz223344556677==";
+    constexpr char s_base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/==";
+    constexpr char s_spaces[] = " \f\n\r\t\v";
 
     template<std::size_t sizeT> constexpr const char* do_slitchr(const char (&str)[sizeT], char ch) noexcept
       {
@@ -708,23 +711,26 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lowercase, const Opt<G_string>& delim)
   {
     G_string text;
-    if(data.empty()) {
-      return text;
-    }
-    Array<char, 2> unit;
-    text.reserve(data.size() * unit.size() + (delim ? ((data.size() - 1) * delim->size()) : 0));
+    auto rdelim = delim ? rocket::sref(*delim) : rocket::sref("");
     bool rlowerc = lowercase == true;
+    text.reserve(data.size() * (2 + rdelim.length()));
+    // These shall be operated in big-endian order.
+    std::uint32_t reg;
+    Array<char, 2> unit;
     // Encode source data.
     std::size_t nread = 0;
     while(nread != data.size()) {
-      // Read a byte in big-endian order.
-      std::uint32_t reg = static_cast<std::uint32_t>(data[nread++] & 0xFF) << 24;
+      // Read a byte.
+      reg = data[nread++] & 0xFF;
+      reg <<= 24;
       // Encode it.
       for(std::size_t i = 0; i != 2; ++i) {
-        unit[i] = s_base16_table[((reg >> (27 - i * 4)) & 0x1E) + rlowerc];
+        std::size_t b = ((reg >> 28) * 2 + rlowerc) & 0xFF;
+        reg <<= 4;
+        unit[i] = s_base16_table[b];
       }
-      if(!text.empty() && delim) {
-        text.append(*delim);
+      if(!text.empty()) {
+        text.append(rdelim);
       }
       text.append(unit.data(), unit.size());
     }
@@ -734,44 +740,227 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
 Opt<G_string> std_string_hex_decode(const G_string& text)
   {
     G_string data;
-    // Remember the value of a previous digit. `-1` means no such digit exists.
-    int dprev = -1;
-    auto flush = [&]()
-      {
-        if(dprev == -1) {
-          return;
+    // These shall be operated in big-endian order.
+    std::uint32_t reg;
+    Static_Vector<char, 2> unit;
+    // Decode source data.
+    std::size_t nread = 0;
+    while(nread != text.size()) {
+      // Read and identify a character.
+      auto ch = text[nread++];
+      auto pos = do_slitchr(s_spaces, ch);
+      if(*pos) {
+        // The character is a whitespace.
+        if(unit.size() != 0) {
+          // Fail if it occurs in the middle of a encoding unit.
+          return rocket::nullopt;
         }
-        data.push_back(static_cast<char>(dprev));
-        dprev = -1;
-      };
-    // Decode characters one by one.
-    for(char ch : text) {
-      // Identify this character.
-      auto pos = do_slitchr(s_base16_table, ch);
-      if(*pos == 0) {
-        // Fail due to an invalid character.
+        // Ignore it.
+        continue;
+      }
+      unit.emplace_back(ch);
+      if(unit.size() != 2) {
+        // Await remaining digits.
+        continue;
+      }
+      // Decode the current encoding unit if it has been filled up.
+      for(std::size_t i = 0; i != 2; ++i) {
+        pos = do_slitchr(s_base16_table, unit[i]);
+        if(!*pos) {
+          // The character is invalid.
+          return rocket::nullopt;
+        }
+        auto off = static_cast<std::size_t>(pos - s_base16_table) / 2;
+        ROCKET_ASSERT(off < 16);
+        // Accept a digit.
+        std::uint32_t b = off & 0xFF;
+        reg <<= 4;
+        reg |= b;
+      }
+      reg <<= 24;
+      // Write the unit.
+      data.push_back(static_cast<char>(reg >> 24));
+      unit.clear();
+    }
+    if(unit.size() != 0) {
+      // Fail in case of excess digits.
+      return rocket::nullopt;
+    }
+    return rocket::move(data);
+  }
+
+G_string std_string_base32_encode(const G_string& data, const Opt<G_boolean>& lowercase)
+  {
+    G_string text;
+    bool rlowerc = lowercase == true;
+    text.reserve((data.size() + 4) / 5 * 8);
+    // These shall be operated in big-endian order.
+    std::uint64_t reg;
+    Array<char, 8> unit;
+    // Encode source data.
+    std::size_t nread = 0;
+    while(data.size() - nread >= 5) {
+      // Read 5 consecutive bytes.
+      for(std::size_t i = 0; i != 5; ++i) {
+        std::uint64_t b = data[nread++] & 0xFF;
+        reg <<= 8;
+        reg |= b;
+      }
+      reg <<= 24;
+      // Encode them.
+      for(std::size_t i = 0; i != 8; ++i) {
+        std::size_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
+        reg <<= 5;
+        unit[i] = s_base32_table[b];
+      }
+      text.append(unit.data(), unit.size());
+    }
+    if(nread != data.size()) {
+      // Get the start of padding characters.
+      auto m = data.size() - nread;
+      auto p = (m * 8 + 4) / 5;
+      // Read all remaining bytes that cannot fill up a unit.
+      for(std::size_t i = 0; i != m; ++i) {
+        std::uint64_t b = data[nread++] & 0xFF;
+        reg <<= 8;
+        reg |= b;
+      }
+      reg <<= 64 - m * 8;
+      // Encode them.
+      for(std::size_t i = 0; i != p; ++i) {
+        std::size_t b = ((reg >> 59) * 2 + rlowerc) & 0xFF;
+        reg <<= 5;
+        unit[i] = s_base32_table[b];
+      }
+      for(std::size_t i = p; i != 8; ++i) {
+        unit[i] = s_base32_table[64];
+      }
+      text.append(unit.data(), unit.size());
+    }
+    return text;
+  }
+
+Opt<G_string> std_string_base32_decode(const G_string& text)
+  {
+    G_string data;
+    // These shall be operated in big-endian order.
+    std::uint64_t reg;
+    Static_Vector<char, 8> unit;
+    // Decode source data.
+    std::size_t nread = 0;
+    while(nread != text.size()) {
+      // Read and identify a character.
+      auto ch = text[nread++];
+      auto pos = do_slitchr(s_spaces, ch);
+      if(*pos) {
+        // The character is a whitespace.
+        if(unit.size() != 0) {
+          // Fail if it occurs in the middle of a encoding unit.
+          return rocket::nullopt;
+        }
+        // Ignore it.
+        continue;
+      }
+      unit.emplace_back(ch);
+      if(unit.size() != 8) {
+        // Await remaining digits.
+        continue;
+      }
+      // Get the start of padding characters.
+      pos = std::find(unit.data(), unit.data() + 8, s_base32_table[64]);
+      if(std::any_of(pos, unit.data() + 8, [&](char cx) { return cx != s_base32_table[64];  })) {
+        // Fail if a non-padding character follows a padding character.
         return rocket::nullopt;
       }
-      // The first 32 characters are hex digits. The others are spaces.
-      auto dcur = static_cast<std::uint8_t>((pos - s_base16_table) / 2);
-      if(dcur >= 16) {
-        // Ignore space characters. But if we have had a digit, flush it.
-        flush();
-        continue;
+      auto p = static_cast<std::size_t>(pos - unit.data());
+      // How many bytes are there in this unit?
+      auto m = p * 5 / 8;
+      if((m == 0) || ((m * 8 + 4) / 5 != p)) {
+        // Fail due to invalid number of non-padding characters.
+        return rocket::nullopt;
       }
-      if(dprev == -1) {
-        // Save this digit.
-        dprev = dcur;
-        continue;
+      // Decode the current encoding unit.
+      for(std::size_t i = 0; i != p; ++i) {
+        pos = do_slitchr(s_base32_table, unit[i]);
+        if(!*pos) {
+          // The character is invalid.
+          return rocket::nullopt;
+        }
+        auto off = static_cast<std::size_t>(pos - s_base32_table) / 2;
+        ROCKET_ASSERT(off < 32);
+        // Accept a digit.
+        std::uint64_t b = off & 0xFF;
+        reg <<= 5;
+        reg |= b;
       }
-      // We have got two digits now.
-      // Make a byte and write it.
-      data.push_back(static_cast<char>(dprev * 16 + dcur));
-      dprev = -1;
+      reg <<= 64 - p * 5;
+      // Write the unit.
+      for(std::size_t i = 0; i != m; ++i) {
+        data.push_back(static_cast<char>(reg >> 56));
+        reg <<= 8;
+      }
+      unit.clear();
     }
-    // If we have had a digit, flush it.
-    flush();
+    if(unit.size() != 0) {
+      // Fail in case of excess digits.
+      return rocket::nullopt;
+    }
     return rocket::move(data);
+  }
+
+G_string std_string_base64_encode(const G_string& data)
+  {
+    G_string text;
+    text.reserve((data.size() + 2) / 3 * 4);
+    // These shall be operated in big-endian order.
+    std::uint32_t reg;
+    Array<char, 4> unit;
+    // Encode source data.
+    std::size_t nread = 0;
+    while(data.size() - nread >= 3) {
+      // Read 3 consecutive bytes.
+      for(std::size_t i = 0; i != 3; ++i) {
+        std::uint32_t b = data[nread++] & 0xFF;
+        reg <<= 8;
+        reg |= b;
+      }
+      reg <<= 8;
+      // Encode them.
+      for(std::size_t i = 0; i != 4; ++i) {
+        std::size_t b = (reg >> 26) & 0xFF;
+        reg <<= 6;
+        unit[i] = s_base64_table[b];
+      }
+      text.append(unit.data(), unit.size());
+    }
+    if(nread != data.size()) {
+      // Get the start of padding characters.
+      auto m = data.size() - nread;
+      auto p = (m * 8 + 5) / 6;
+      // Read all remaining bytes that cannot fill up a unit.
+      for(std::size_t i = 0; i != m; ++i) {
+        std::uint32_t b = data[nread++] & 0xFF;
+        reg <<= 8;
+        reg |= b;
+      }
+      reg <<= 32 - m * 8;
+      // Encode them.
+      for(std::size_t i = 0; i != p; ++i) {
+        std::size_t b = (reg >> 26) & 0xFF;
+        reg <<= 6;
+        unit[i] = s_base64_table[b];
+      }
+      for(std::size_t i = p; i != 4; ++i) {
+        unit[i] = s_base64_table[64];
+      }
+      text.append(unit.data(), unit.size());
+    }
+    return text;
+  }
+
+Opt<G_string> std_string_base64_decode(const G_string& text)
+  {
+    return { };
   }
 
 Opt<G_string> std_string_utf8_encode(const G_integer& code_point, const Opt<G_boolean>& permissive)
@@ -2338,9 +2527,10 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             "`std.string.hex_decode(text)`\n"
             "\n"
             "  * Decodes all hexadecimal digits from `text` and converts them to\n"
-            "    bytes. Whitespaces can be used to delimit bytes. Characters\n"
-            "    that are neither hexadecimal digits nor whitespaces will cause\n"
-            "    parse errors.\n"
+            "    bytes. Whitespaces can be used to delimit bytes; they shall not\n"
+            "    occur between digits in the same byte. Consequently, the total\n"
+            "    number of non-whitespace characters must be a multiple of two.\n"
+            "    Invalid characters cause parse errors.\n"
             "\n"
             "  * Returns a `string` containing decoded bytes. If `text` is empty\n"
             "    or consists of only whitespaces, an empty `string` is returned.\n"
@@ -2360,6 +2550,175 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             if(reader.start().g(text).finish()) {
               // Call the binding function.
               auto qdata = std_string_hex_decode(text);
+              if(!qdata) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qdata) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.string.base32_encode()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("base32_encode"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.string.base32_encode(text, [uppercase])`\n"
+            "\n"
+            "  * Encodes all bytes in `text` according to the base32 encoding\n"
+            "    specified by IETF RFC 4648. If `uppercase` is set to `true`,\n"
+            "    uppercase letters are used to represent values through `0` to\n"
+            "    `25`; otherwise, lowercase letters are used. The length of\n"
+            "    encoded data is always a multiple of 8; padding characters\n"
+            "    are mandatory.\n"
+            "\n"
+            "  * Returns the encoded `string`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.base32_encode"), args);
+            // Parse arguments.
+            G_string data;
+            Opt<G_boolean> lowercase;
+            if(reader.start().g(data).g(lowercase).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_base32_encode(data, lowercase) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.string.base32_decode()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("base32_decode"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.string.base32_decode(dstr)`\n"
+            "\n"
+            "  * Decodes data encoded in base32, as specified by IETF RFC 4648.\n"
+            "    Whitespaces can be used to delimit encoding units; they shall\n"
+            "    not occur between characters in the same unit. Consequently,\n"
+            "    the number of non-whitespace characters must be a multiple of\n"
+            "    eight. Invalid characters cause parse errors.\n"
+            "\n"
+            "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
+            "    or consists of only whitespaces, an empty `string` is returned.\n"
+            "    In the case of parse errors, `null` is returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.base32_decode"), args);
+            // Parse arguments.
+            G_string text;
+            if(reader.start().g(text).finish()) {
+              // Call the binding function.
+              auto qdata = std_string_base32_decode(text);
+              if(!qdata) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qdata) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.string.base64_encode()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("base64_encode"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.string.base64_encode(text)`\n"
+            "\n"
+            "  * Encodes all bytes in `text` according to the base64 encoding\n"
+            "    specified by IETF RFC 4648. The length of encoded data is\n"
+            "    always a multiple of 4; padding characters are mandatory.\n"
+            "\n"
+            "  * Returns the encoded `string`.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.base64_encode"), args);
+            // Parse arguments.
+            G_string data;
+            if(reader.start().g(data).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_string_base64_encode(data) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.string.base64_decode()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("base64_decode"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.string.base64_decode(dstr)`\n"
+            "\n"
+            "  * Decodes data encoded in base64, as specified by IETF RFC 4648.\n"
+            "    Whitespaces can be used to delimit encoding units; they shall\n"
+            "    not occur between characters in the same unit. Consequently,\n"
+            "    the number of non-whitespace characters must be a multiple of\n"
+            "    four. Invalid characters cause parse errors.\n"
+            "    Decodes base64-encoded data. Whitespaces can be used to\n"
+            "\n"
+            "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
+            "    or consists of only whitespaces, an empty `string` is returned.\n"
+            "    In the case of parse errors, `null` is returned.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.string.base64_decode"), args);
+            // Parse arguments.
+            G_string text;
+            if(reader.start().g(text).finish()) {
+              // Call the binding function.
+              auto qdata = std_string_base64_decode(text);
               if(!qdata) {
                 return Reference_Root::S_null();
               }
