@@ -946,6 +946,286 @@ G_string std_checksum_sha1(const G_string& data)
     return h.finish();
   }
 
+    namespace {
+    namespace SHA256 {
+
+    constexpr std::array<std::uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
+
+    class Hasher : public Abstract_Opaque
+      {
+      private:
+        std::array<std::uint32_t, 8> m_regs;
+        std::uint64_t m_size;
+        std::array<std::uint8_t, 64> m_chunk;
+
+      public:
+        Hasher() noexcept
+          : m_regs(s_init),
+            m_size(0)
+          {
+          }
+
+      private:
+        void do_consume_chunk(const std::uint8_t* p) noexcept
+          {
+            std::array<std::uint32_t, 64> w;
+            std::uint32_t s0, maj, t2, s1, ch, t1;
+            // https://en.wikipedia.org/wiki/SHA-2
+            for(std::size_t i =  0; i < 16; ++i) {
+              do_load_be(w[i], p + i * 4);
+            }
+            for(std::size_t i = 16; i < 64; ++i) {
+              t1 = w[i - 15];
+              s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >> 3);
+              t2 = w[i - 2];
+              s1 = do_rotl(t2, 13) ^ do_rotl(t2, 15) ^ (t2 >> 10);
+              w[i] = w[i - 16] + w[i - 7] + s0 + s1;
+            }
+            auto update = [&](std::uint32_t i, auto& a, auto& b, auto& c, auto& d, auto& e, auto& f, auto& g, auto& h, std::uint32_t k)
+              {
+                s0 = do_rotl(a, 10) ^ do_rotl(a, 19) ^ do_rotl(a, 30);
+                maj = (a & b) | (c & (a ^ b));
+                t2 = s0 + maj;
+                s1 = do_rotl(e,  7) ^ do_rotl(e, 21) ^ do_rotl(e, 26);
+                ch = g ^ (e & (f ^ g));
+                t1 = h + s1 + ch + k + w[i];
+                d += t1;
+                h = t1 + t2;
+              };
+            // Unroll loops by hand.
+            auto r = this->m_regs;
+            // 0 * 16
+            update( 0, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x428A2F98);
+            update( 1, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x71374491);
+            update( 2, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB5C0FBCF);
+            update( 3, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xE9B5DBA5);
+            update( 4, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x3956C25B);
+            update( 5, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x59F111F1);
+            update( 6, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x923F82A4);
+            update( 7, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xAB1C5ED5);
+            update( 8, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xD807AA98);
+            update( 9, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x12835B01);
+            update(10, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x243185BE);
+            update(11, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x550C7DC3);
+            update(12, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x72BE5D74);
+            update(13, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x80DEB1FE);
+            update(14, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x9BDC06A7);
+            update(15, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC19BF174);
+            // 1 * 16
+            update(16, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xE49B69C1);
+            update(17, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xEFBE4786);
+            update(18, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x0FC19DC6);
+            update(19, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x240CA1CC);
+            update(20, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x2DE92C6F);
+            update(21, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4A7484AA);
+            update(22, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5CB0A9DC);
+            update(23, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x76F988DA);
+            update(24, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x983E5152);
+            update(25, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA831C66D);
+            update(26, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xB00327C8);
+            update(27, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xBF597FC7);
+            update(28, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xC6E00BF3);
+            update(29, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD5A79147);
+            update(30, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x06CA6351);
+            update(31, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x14292967);
+            // 2 * 16
+            update(32, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x27B70A85);
+            update(33, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x2E1B2138);
+            update(34, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x4D2C6DFC);
+            update(35, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x53380D13);
+            update(36, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x650A7354);
+            update(37, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x766A0ABB);
+            update(38, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x81C2C92E);
+            update(39, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x92722C85);
+            update(40, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0xA2BFE8A1);
+            update(41, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0xA81A664B);
+            update(42, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0xC24B8B70);
+            update(43, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0xC76C51A3);
+            update(44, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0xD192E819);
+            update(45, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xD6990624);
+            update(46, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xF40E3585);
+            update(47, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x106AA070);
+            // 3 * 16
+            update(48, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x19A4C116);
+            update(49, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x1E376C08);
+            update(50, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x2748774C);
+            update(51, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x34B0BCB5);
+            update(52, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x391C0CB3);
+            update(53, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0x4ED8AA4A);
+            update(54, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0x5B9CCA4F);
+            update(55, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0x682E6FF3);
+            update(56, r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], 0x748F82EE);
+            update(57, r[7], r[0], r[1], r[2], r[3], r[4], r[5], r[6], 0x78A5636F);
+            update(58, r[6], r[7], r[0], r[1], r[2], r[3], r[4], r[5], 0x84C87814);
+            update(59, r[5], r[6], r[7], r[0], r[1], r[2], r[3], r[4], 0x8CC70208);
+            update(60, r[4], r[5], r[6], r[7], r[0], r[1], r[2], r[3], 0x90BEFFFA);
+            update(61, r[3], r[4], r[5], r[6], r[7], r[0], r[1], r[2], 0xA4506CEB);
+            update(62, r[2], r[3], r[4], r[5], r[6], r[7], r[0], r[1], 0xBEF9A3F7);
+            update(63, r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[0], 0xC67178F2);
+            // Accumulate the result.
+            do_padd(this->m_regs, r);
+          }
+
+      public:
+        void describe(std::ostream& os) const override
+          {
+            os << "SHA-256 hasher";
+          }
+        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+          {
+            // There is nothing to do.
+          }
+
+        void write(const G_string& data) noexcept
+          {
+            auto bp = reinterpret_cast<const std::uint8_t*>(data.data());
+            auto ep = bp + data.size();
+            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto ec = this->m_chunk.end();
+            std::ptrdiff_t n;
+            // If the last chunk was not empty, ...
+            if(bc != this->m_chunk.begin()) {
+              // ... append data to the last chunk, ...
+              n = rocket::min(ep - bp, ec - bc);
+              std::copy_n(bp, n, bc);
+              this->m_size += static_cast<std::uint64_t>(n);
+              bp += n;
+              bc += n;
+              // ... and if is still not full, there aren't going to be any more data.
+              if(bc != ec) {
+                ROCKET_ASSERT(bp == ep);
+                return;
+              }
+              // Consume the last chunk.
+              ROCKET_ASSERT(this->m_size % 64 == 0);
+              this->do_consume_chunk(this->m_chunk.data());
+              bc = this->m_chunk.begin();
+            }
+            // Consume as many chunks as possible; don't bother copying them.
+            while(ep - bp >= 64) {
+              this->do_consume_chunk(bp);
+              bp += 64;
+              this->m_size += 64;
+            }
+            // Append any bytes remaining to the last chunk.
+            n = ep - bp;
+            if(n != 0) {
+              std::copy_n(bp, n, bc);
+              this->m_size += static_cast<std::uint64_t>(n);
+              bp += n;
+              bc += n;
+            }
+            ROCKET_ASSERT(bp == ep);
+          }
+        G_string finish() noexcept
+          {
+            // Finalize the hasher.
+            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto ec = this->m_chunk.end();
+            std::ptrdiff_t n;
+            // Append a `0x80` byte followed by zeroes.
+            *(bc++) = 0x80;
+            n = ec - bc;
+            if(n < 8) {
+              // Wrap.
+              std::fill_n(bc, n, 0);
+              this->do_consume_chunk(this->m_chunk.data());
+              bc = this->m_chunk.begin();
+            }
+            n = ec - bc - 8;
+            if(n > 0) {
+              // Fill zeroes.
+              std::fill_n(bc, n, 0);
+              bc += n;
+            }
+            ROCKET_ASSERT(ec - bc == 8);
+            // Write the number of bits in big-endian order.
+            auto bits = this->m_size * 8;
+            for(std::ptrdiff_t i = 7; i != -1; --i) {
+              bc[i] = bits & 0xFF;
+              bits >>= 8;
+            }
+            this->do_consume_chunk(this->m_chunk.data());
+            // Get the checksum.
+            G_string ck;
+            ck.reserve(this->m_regs.size() * 8);
+            rocket::for_each(this->m_regs, [&](std::uint32_t w) { do_pdigits_be(ck, w);  });
+            // Reset internal states.
+            this->m_regs = s_init;
+            this->m_size = 0;
+            return ck;
+          }
+      };
+
+    }
+    }
+
+G_object std_checksum_sha256_new()
+  {
+    G_object r;
+    r.insert_or_assign(rocket::sref("!h"),  // details
+      G_opaque(
+        rocket::make_refcnt<SHA256::Hasher>()
+      ));
+    r.insert_or_assign(rocket::sref("write"),
+      G_function(
+        make_simple_binding(
+          // Description
+          rocket::sref("<std.checksum.sha256_new()>.write"),
+          // Opaque parameter
+          G_null(),
+          // Definition
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+            {
+              Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.write"), args);
+              // Get the hasher.
+              Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
+              self.zoom_in(rocket::move(xmod));
+              auto& h = dynamic_cast<SHA256::Hasher&>(self.open().mut_opaque().mut());
+              // Parse arguments.
+              G_string data;
+              if(reader.start().g(data).finish()) {
+                h.write(data);
+                return Reference_Root::S_null();
+              }
+              reader.throw_no_matching_function_call();
+            }
+        )
+      ));
+    r.insert_or_assign(rocket::sref("finish"),
+      G_function(
+        make_simple_binding(
+          // Description
+          rocket::sref("<std.checksum.sha256_new()>.finish"),
+          // Opaque parameter
+          G_null(),
+          // Definition
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+            {
+              Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.finish"), args);
+              // Get the hasher.
+              Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
+              self.zoom_in(rocket::move(xmod));
+              auto& h = dynamic_cast<SHA256::Hasher&>(self.open().mut_opaque().mut());
+              // Parse arguments.
+              if(reader.start().finish()) {
+                Reference_Root::S_temporary xref = { h.finish() };
+                return rocket::move(xref);
+              }
+              reader.throw_no_matching_function_call();
+            }
+        )
+      ));
+    return r;
+  }
+
+G_string std_checksum_sha256(const G_string& data)
+  {
+    SHA256::Hasher h;
+    h.write(data);
+    return h.finish();
+  }
+
 void create_bindings_checksum(G_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -1317,6 +1597,99 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
             if(reader.start().g(data).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_checksum_sha1(data) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.checksum.sha256_new()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sha256_new"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.checksum.sha256_new()`\n"
+            "\n"
+            "  * Creates an SHA-256 hasher.\n"
+            "\n"
+            "  * Returns the hasher as an `object` consisting of the following\n"
+            "    members:\n"
+            "\n"
+            "    * `write(data)`\n"
+            "    * `finish()`\n"
+            "\n"
+            "    The function `write()` is used to put data into the hasher,\n"
+            "    which shall be of type `string`. After all data have been put,\n"
+            "    the function `finish()` extracts the checksum as a `string` of\n"
+            "    64 hexadecimal digits in uppercase, then resets the hasher,\n"
+            "    making it suitable for further data as if it had just been\n"
+            "    created.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.checksum.sha256_new"), args);
+            // Parse arguments.
+            if(reader.start().finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_checksum_sha256_new() };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.checksum.sha256()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sha256"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.checksum.sha256(data)`\n"
+            "\n"
+            "  * Calculates the SHA-256 checksum of `data` which must be of type\n"
+            "    `string`, as if this function was defined as\n"
+            "\n"
+            "    ```\n"
+            "      std.checksum.sha256 = func(data) {\n"
+            "        var h = this.sha256_new();\n"
+            "        h.write(data);\n"
+            "        return h.finish();\n"
+            "      };\n"
+            "    ```\n"
+            "\n"
+            "    This function is expected to be both more efficient and easier\n"
+            "    to use.\n"
+            "\n"
+            "  * Returns the SHA-256 checksum as a `string` of 64 hexadecimal\n"
+            "    digits in uppercase.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.checksum.sha256"), args);
+            // Parse arguments.
+            G_string data;
+            if(reader.start().g(data).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_checksum_sha256(data) };
               return rocket::move(xref);
             }
             // Fail.
