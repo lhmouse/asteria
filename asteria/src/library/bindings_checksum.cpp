@@ -372,7 +372,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
       private:
         void do_consume_chunk(const std::uint8_t* p) noexcept
           {
-            std::uint32_t f, g, w;
+            std::uint32_t w;
+            std::uint32_t f, g;
             // https://en.wikipedia.org/wiki/MD5
             auto update = [&](std::uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, std::uint32_t k, std::uint8_t r)
               {
@@ -657,8 +658,8 @@ G_string std_checksum_md5(const G_string& data)
       private:
         void do_consume_chunk(const std::uint8_t* p) noexcept
           {
-            std::uint32_t f, k;
             std::array<std::uint32_t, 80> w;
+            std::uint32_t f, k;
             // https://en.wikipedia.org/wiki/SHA-1
             for(std::size_t i =  0; i < 16; ++i) {
               do_load_be(w[i], p + i * 4);
