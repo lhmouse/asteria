@@ -131,6 +131,27 @@ namespace Asteria {
         return rocket::nullopt;
       }
 
+    Value do_generate_null()
+      {
+        return G_null();
+      }
+    Value do_generate_false()
+      {
+        return G_boolean(false);
+      }
+    Value do_generate_true()
+      {
+        return G_boolean(true);
+      }
+    Value do_generate_nan()
+      {
+        return G_real(NAN);
+      }
+    Value do_generate_infinity()
+      {
+        return G_real(INFINITY);
+      }
+
     Opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
       {
         // literal ::=
@@ -157,11 +178,11 @@ namespace Asteria {
             }
           static const s_table[] =
             {
-              { Token::keyword_null,      []() -> Value { return G_null();  }          },
-              { Token::keyword_false,     []() -> Value { return G_boolean(false);  }  },
-              { Token::keyword_true,      []() -> Value { return G_boolean(true);  }   },
-              { Token::keyword_nan,       []() -> Value { return G_real(NAN);  }       },
-              { Token::keyword_infinity,  []() -> Value { return G_real(INFINITY);  }  },
+              { Token::keyword_null,      do_generate_null      },
+              { Token::keyword_false,     do_generate_false     },
+              { Token::keyword_true,      do_generate_true      },
+              { Token::keyword_nan,       do_generate_nan       },
+              { Token::keyword_infinity,  do_generate_infinity  },
             };
           auto keyword = qtok->as_keyword();
           auto qconf = std::find_if(std::begin(s_table), std::end(s_table), [&](const Keyword_Table& r) { return keyword == r.keyword;  });
