@@ -507,8 +507,8 @@
 	  parse errors.
 
 	* Returns a `string` containing decoded bytes. If `dstr` is empty
-	  or consists only whitespaces, an empty `string` is returned. In
-	  the case of parse errors, `null` is returned.
+	  or consists of only whitespaces, an empty `string` is returned.
+	  In the case of parse errors, `null` is returned.
 
 `std.string.translate(text, inputs, [outputs])`
 

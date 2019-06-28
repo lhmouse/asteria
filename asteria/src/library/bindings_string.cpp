@@ -2287,8 +2287,8 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             "    parse errors.\n"
             "\n"
             "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
-            "    or consists only whitespaces, an empty `string` is returned. In\n"
-            "    the case of parse errors, `null` is returned.\n"
+            "    or consists of only whitespaces, an empty `string` is returned.\n"
+            "    In the case of parse errors, `null` is returned.\n"
           ),
         // Opaque parameter
         G_null
