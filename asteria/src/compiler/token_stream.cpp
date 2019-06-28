@@ -638,6 +638,8 @@ namespace Asteria {
     bool do_accept_string_literal(Cow_Vector<Token>& seq, Line_Reader& reader, char head, bool escapable)
       {
         // string-literal ::=
+        //   escape-string-literal | noescape-string-literal
+        // escape-string-literal ::=
         //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
         // noescape-string-literal ::=
         //   PCRE('[^']*?')

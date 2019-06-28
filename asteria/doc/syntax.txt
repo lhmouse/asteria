@@ -5,13 +5,14 @@ document ::=
 identifier ::=
 	PCRE([A-Za-z_][A-Za-z_0-9]*)
 literal ::=
-	null-literal | boolean-literal | string-literal | noescape-string-literal |
-	numeric-literal | nan-literal | infinity-literal
+	null-literal | boolean-literal | string-literal | numeric-literal | nan-literal | infinity-literal
 null-literal ::=
 	"null"
 boolean-litearl ::=
 	"false" | "true"
 string-literal ::=
+	escape-string-literal | noescape-string-literal
+escape-string-literal ::=
 	PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
 noescape-string-literal ::=
 	PCRE('[^']*?')

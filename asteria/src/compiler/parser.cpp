@@ -155,8 +155,7 @@ namespace Asteria {
     Opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
       {
         // literal ::=
-        //   null-literal | boolean-literal | string-literal | noescape-string-literal |
-        //   numeric-literal | nan-literal | infinity-literal
+        //   null-literal | boolean-literal | string-literal | numeric-literal | nan-literal | infinity-literal
         // null-literal ::=
         //   "null"
         // boolean-litearl ::=
