@@ -649,6 +649,11 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 
     constexpr char s_xdigits_and_spaces[] = "00112233445566778899aAbBcCdDeEfF \f\n\r\t\v";
 
+    template<std::size_t sizeT> constexpr const char* do_slitchr(const char (&str)[sizeT], char ch) noexcept
+      {
+        return std::find(str, str + sizeT - 1, ch);
+      }
+
     }
 
 G_string std_string_hex_encode(const G_string& text, const Opt<G_string>& delim, const Opt<G_boolean>& uppercase)
@@ -685,7 +690,7 @@ Opt<G_string> std_string_hex_decode(const G_string& dstr)
     int dprev = -1;
     for(char ch : dstr) {
       // Identify this character.
-      auto pos = std::find(std::begin(s_xdigits_and_spaces), std::end(s_xdigits_and_spaces) - 1, ch);
+      auto pos = do_slitchr(s_xdigits_and_spaces, ch);
       if(*pos == 0) {
         // Fail due to an invalid character.
         return rocket::nullopt;
