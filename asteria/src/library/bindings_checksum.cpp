@@ -60,10 +60,7 @@ namespace Asteria {
             auto r = this->m_reg;
             // Hash bytes one by one.
             for(std::size_t i = 0; i != n; ++i) {
-              std::uint8_t b = p[i];
-              b ^= static_cast<std::uint8_t>(r);
-              r >>= 8;
-              r ^= s_iso3309_table[b];
+              r = s_iso3309_table[(r ^ p[i]) & 0xFF] ^ (r >> 8);
             }
             this->m_reg = r;
           }
@@ -180,8 +177,7 @@ G_integer std_checksum_crc32(const G_string& data)
             auto r = this->m_reg;
             // Hash bytes one by one.
             for(std::size_t i = 0; i != n; ++i) {
-              std::uint8_t b = p[i] & 0xFF;
-              r = (b ^ r) * s_prime;
+              r = (r ^ p[i]) * s_prime;
             }
             this->m_reg = r;
           }
