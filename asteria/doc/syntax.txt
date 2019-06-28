@@ -11,11 +11,13 @@ null-literal ::=
 boolean-litearl ::=
 	"false" | "true"
 string-literal ::=
-	escape-string-literal | noescape-string-literal
+	( escape-string-literal | noescape-string-literal ) string-literal-add-opt
 escape-string-literal ::=
 	PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
 noescape-string-literal ::=
 	PCRE('[^']*?')
+string-literal-add-opt ::=
+	string-literal | ""
 numeric-literal ::=
 	number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
 number-sign-opt ::=

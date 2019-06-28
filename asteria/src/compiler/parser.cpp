@@ -87,6 +87,24 @@ namespace Asteria {
         return name;
       }
 
+    Cow_String& do_concatenate_string_literal_sequence(Cow_String& value, Token_Stream& tstrm)
+      {
+        for(;;) {
+          auto qtok = tstrm.peek_opt();
+          if(!qtok) {
+            break;
+          }
+          // See whether it is a string literal.
+          if(!qtok->is_string_literal()) {
+            break;
+          }
+          value += qtok->as_string_literal();
+          // Append the string literal and discard this token.
+          tstrm.shift();
+        }
+        return value;
+      }
+
     Opt<Cow_String> do_accept_string_literal_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
@@ -100,6 +118,7 @@ namespace Asteria {
         auto value = qtok->as_string_literal();
         // Return the string literal and discard this token.
         tstrm.shift();
+        do_concatenate_string_literal_sequence(value, tstrm);
         return value;
       }
 
@@ -126,6 +145,7 @@ namespace Asteria {
           auto value = qtok->as_string_literal();
           // Return the string literal and discard this token.
           tstrm.shift();
+          do_concatenate_string_literal_sequence(value, tstrm);
           return value;
         }
         return rocket::nullopt;
@@ -209,6 +229,7 @@ namespace Asteria {
           auto value = G_string(qtok->as_string_literal());
           // Copy the value and discard this token.
           tstrm.shift();
+          do_concatenate_string_literal_sequence(value, tstrm);
           return value;
         }
         return rocket::nullopt;
