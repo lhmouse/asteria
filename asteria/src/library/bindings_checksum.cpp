@@ -357,9 +357,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     namespace {
     namespace MD5 {
 
-    constexpr std::array<std::uint32_t, 4> s_init = {{
-      0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476
-    }};
+    constexpr std::array<std::uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
 
     class Hasher : public Abstract_Opaque
       {
@@ -380,31 +378,29 @@ G_integer std_checksum_fnv1a32(const G_string& data)
           {
             std::uint32_t f, g, w;
             // https://en.wikipedia.org/wiki/MD5
-            auto update = [&](std::uint32_t i, auto&& specx,
-                              std::uint32_t& a, std::uint32_t& b, std::uint32_t& c, std::uint32_t& d,
-                              std::uint32_t k, std::uint8_t r)
+            auto update = [&](std::uint32_t i, auto&& specx, std::uint32_t k, std::uint8_t r, auto& a, auto& b, auto& c, auto& d)
               {
                 specx(i, b, c, d);
                 do_load_le(w, p + g * 4);
                 w = a + f + k + w;
                 a = b + do_rotl(w, r);
               };
-            auto spec0 = [&](std::uint32_t i, std::uint32_t& b, std::uint32_t& c, std::uint32_t& d)
+            auto spec0 = [&](std::uint32_t i, auto& b, auto& c, auto& d)
               {
                 f = d ^ (b & (c ^ d));
                 g = i;
               };
-            auto spec1 = [&](std::uint32_t i, std::uint32_t& b, std::uint32_t& c, std::uint32_t& d)
+            auto spec1 = [&](std::uint32_t i, auto& b, auto& c, auto& d)
               {
                 f = c ^ (d & (b ^ c));
                 g = (5 * i + 1) % 16;
               };
-            auto spec2 = [&](std::uint32_t i, std::uint32_t& b, std::uint32_t& c, std::uint32_t& d)
+            auto spec2 = [&](std::uint32_t i, auto& b, auto& c, auto& d)
               {
                 f = b ^ c ^ d;
                 g = (3 * i + 5) % 16;
               };
-            auto spec3 = [&](std::uint32_t i, std::uint32_t& b, std::uint32_t& c, std::uint32_t& d)
+            auto spec3 = [&](std::uint32_t i, auto& b, auto& c, auto& d)
               {
                 f = c ^ (b | ~d);
                 g = (7 * i) % 16;
@@ -412,73 +408,73 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             // Unroll loops by hand.
             auto r = this->m_regs;
             //  0
-            update(0x00, spec0, r[0], r[1], r[2], r[3], 0xD76AA478,  7);
-            update(0x01, spec0, r[3], r[0], r[1], r[2], 0xE8C7B756, 12);
-            update(0x02, spec0, r[2], r[3], r[0], r[1], 0x242070DB, 17);
-            update(0x03, spec0, r[1], r[2], r[3], r[0], 0xC1BDCEEE, 22);
-            update(0x04, spec0, r[0], r[1], r[2], r[3], 0xF57C0FAF,  7);
-            update(0x05, spec0, r[3], r[0], r[1], r[2], 0x4787C62A, 12);
-            update(0x06, spec0, r[2], r[3], r[0], r[1], 0xA8304613, 17);
-            update(0x07, spec0, r[1], r[2], r[3], r[0], 0xFD469501, 22);
-            update(0x08, spec0, r[0], r[1], r[2], r[3], 0x698098D8,  7);
-            update(0x09, spec0, r[3], r[0], r[1], r[2], 0x8B44F7AF, 12);
-            update(0x0A, spec0, r[2], r[3], r[0], r[1], 0xFFFF5BB1, 17);
-            update(0x0B, spec0, r[1], r[2], r[3], r[0], 0x895CD7BE, 22);
-            update(0x0C, spec0, r[0], r[1], r[2], r[3], 0x6B901122,  7);
-            update(0x0D, spec0, r[3], r[0], r[1], r[2], 0xFD987193, 12);
-            update(0x0E, spec0, r[2], r[3], r[0], r[1], 0xA679438E, 17);
-            update(0x0F, spec0, r[1], r[2], r[3], r[0], 0x49B40821, 22);
+            update(0x00, spec0, 0xD76AA478,  7, r[0], r[1], r[2], r[3]);
+            update(0x01, spec0, 0xE8C7B756, 12, r[3], r[0], r[1], r[2]);
+            update(0x02, spec0, 0x242070DB, 17, r[2], r[3], r[0], r[1]);
+            update(0x03, spec0, 0xC1BDCEEE, 22, r[1], r[2], r[3], r[0]);
+            update(0x04, spec0, 0xF57C0FAF,  7, r[0], r[1], r[2], r[3]);
+            update(0x05, spec0, 0x4787C62A, 12, r[3], r[0], r[1], r[2]);
+            update(0x06, spec0, 0xA8304613, 17, r[2], r[3], r[0], r[1]);
+            update(0x07, spec0, 0xFD469501, 22, r[1], r[2], r[3], r[0]);
+            update(0x08, spec0, 0x698098D8,  7, r[0], r[1], r[2], r[3]);
+            update(0x09, spec0, 0x8B44F7AF, 12, r[3], r[0], r[1], r[2]);
+            update(0x0A, spec0, 0xFFFF5BB1, 17, r[2], r[3], r[0], r[1]);
+            update(0x0B, spec0, 0x895CD7BE, 22, r[1], r[2], r[3], r[0]);
+            update(0x0C, spec0, 0x6B901122,  7, r[0], r[1], r[2], r[3]);
+            update(0x0D, spec0, 0xFD987193, 12, r[3], r[0], r[1], r[2]);
+            update(0x0E, spec0, 0xA679438E, 17, r[2], r[3], r[0], r[1]);
+            update(0x0F, spec0, 0x49B40821, 22, r[1], r[2], r[3], r[0]);
             // 1
-            update(0x10, spec1, r[0], r[1], r[2], r[3], 0xF61E2562,  5);
-            update(0x11, spec1, r[3], r[0], r[1], r[2], 0xC040B340,  9);
-            update(0x12, spec1, r[2], r[3], r[0], r[1], 0x265E5A51, 14);
-            update(0x13, spec1, r[1], r[2], r[3], r[0], 0xE9B6C7AA, 20);
-            update(0x14, spec1, r[0], r[1], r[2], r[3], 0xD62F105D,  5);
-            update(0x15, spec1, r[3], r[0], r[1], r[2], 0x02441453,  9);
-            update(0x16, spec1, r[2], r[3], r[0], r[1], 0xD8A1E681, 14);
-            update(0x17, spec1, r[1], r[2], r[3], r[0], 0xE7D3FBC8, 20);
-            update(0x18, spec1, r[0], r[1], r[2], r[3], 0x21E1CDE6,  5);
-            update(0x19, spec1, r[3], r[0], r[1], r[2], 0xC33707D6,  9);
-            update(0x1A, spec1, r[2], r[3], r[0], r[1], 0xF4D50D87, 14);
-            update(0x1B, spec1, r[1], r[2], r[3], r[0], 0x455A14ED, 20);
-            update(0x1C, spec1, r[0], r[1], r[2], r[3], 0xA9E3E905,  5);
-            update(0x1D, spec1, r[3], r[0], r[1], r[2], 0xFCEFA3F8,  9);
-            update(0x1E, spec1, r[2], r[3], r[0], r[1], 0x676F02D9, 14);
-            update(0x1F, spec1, r[1], r[2], r[3], r[0], 0x8D2A4C8A, 20);
+            update(0x10, spec1, 0xF61E2562,  5, r[0], r[1], r[2], r[3]);
+            update(0x11, spec1, 0xC040B340,  9, r[3], r[0], r[1], r[2]);
+            update(0x12, spec1, 0x265E5A51, 14, r[2], r[3], r[0], r[1]);
+            update(0x13, spec1, 0xE9B6C7AA, 20, r[1], r[2], r[3], r[0]);
+            update(0x14, spec1, 0xD62F105D,  5, r[0], r[1], r[2], r[3]);
+            update(0x15, spec1, 0x02441453,  9, r[3], r[0], r[1], r[2]);
+            update(0x16, spec1, 0xD8A1E681, 14, r[2], r[3], r[0], r[1]);
+            update(0x17, spec1, 0xE7D3FBC8, 20, r[1], r[2], r[3], r[0]);
+            update(0x18, spec1, 0x21E1CDE6,  5, r[0], r[1], r[2], r[3]);
+            update(0x19, spec1, 0xC33707D6,  9, r[3], r[0], r[1], r[2]);
+            update(0x1A, spec1, 0xF4D50D87, 14, r[2], r[3], r[0], r[1]);
+            update(0x1B, spec1, 0x455A14ED, 20, r[1], r[2], r[3], r[0]);
+            update(0x1C, spec1, 0xA9E3E905,  5, r[0], r[1], r[2], r[3]);
+            update(0x1D, spec1, 0xFCEFA3F8,  9, r[3], r[0], r[1], r[2]);
+            update(0x1E, spec1, 0x676F02D9, 14, r[2], r[3], r[0], r[1]);
+            update(0x1F, spec1, 0x8D2A4C8A, 20, r[1], r[2], r[3], r[0]);
             // 2
-            update(0x20, spec2, r[0], r[1], r[2], r[3], 0xFFFA3942,  4);
-            update(0x21, spec2, r[3], r[0], r[1], r[2], 0x8771F681, 11);
-            update(0x22, spec2, r[2], r[3], r[0], r[1], 0x6D9D6122, 16);
-            update(0x23, spec2, r[1], r[2], r[3], r[0], 0xFDE5380C, 23);
-            update(0x24, spec2, r[0], r[1], r[2], r[3], 0xA4BEEA44,  4);
-            update(0x25, spec2, r[3], r[0], r[1], r[2], 0x4BDECFA9, 11);
-            update(0x26, spec2, r[2], r[3], r[0], r[1], 0xF6BB4B60, 16);
-            update(0x27, spec2, r[1], r[2], r[3], r[0], 0xBEBFBC70, 23);
-            update(0x28, spec2, r[0], r[1], r[2], r[3], 0x289B7EC6,  4);
-            update(0x29, spec2, r[3], r[0], r[1], r[2], 0xEAA127FA, 11);
-            update(0x2A, spec2, r[2], r[3], r[0], r[1], 0xD4EF3085, 16);
-            update(0x2B, spec2, r[1], r[2], r[3], r[0], 0x04881D05, 23);
-            update(0x2C, spec2, r[0], r[1], r[2], r[3], 0xD9D4D039,  4);
-            update(0x2D, spec2, r[3], r[0], r[1], r[2], 0xE6DB99E5, 11);
-            update(0x2E, spec2, r[2], r[3], r[0], r[1], 0x1FA27CF8, 16);
-            update(0x2F, spec2, r[1], r[2], r[3], r[0], 0xC4AC5665, 23);
+            update(0x20, spec2, 0xFFFA3942,  4, r[0], r[1], r[2], r[3]);
+            update(0x21, spec2, 0x8771F681, 11, r[3], r[0], r[1], r[2]);
+            update(0x22, spec2, 0x6D9D6122, 16, r[2], r[3], r[0], r[1]);
+            update(0x23, spec2, 0xFDE5380C, 23, r[1], r[2], r[3], r[0]);
+            update(0x24, spec2, 0xA4BEEA44,  4, r[0], r[1], r[2], r[3]);
+            update(0x25, spec2, 0x4BDECFA9, 11, r[3], r[0], r[1], r[2]);
+            update(0x26, spec2, 0xF6BB4B60, 16, r[2], r[3], r[0], r[1]);
+            update(0x27, spec2, 0xBEBFBC70, 23, r[1], r[2], r[3], r[0]);
+            update(0x28, spec2, 0x289B7EC6,  4, r[0], r[1], r[2], r[3]);
+            update(0x29, spec2, 0xEAA127FA, 11, r[3], r[0], r[1], r[2]);
+            update(0x2A, spec2, 0xD4EF3085, 16, r[2], r[3], r[0], r[1]);
+            update(0x2B, spec2, 0x04881D05, 23, r[1], r[2], r[3], r[0]);
+            update(0x2C, spec2, 0xD9D4D039,  4, r[0], r[1], r[2], r[3]);
+            update(0x2D, spec2, 0xE6DB99E5, 11, r[3], r[0], r[1], r[2]);
+            update(0x2E, spec2, 0x1FA27CF8, 16, r[2], r[3], r[0], r[1]);
+            update(0x2F, spec2, 0xC4AC5665, 23, r[1], r[2], r[3], r[0]);
             // 3
-            update(0x30, spec3, r[0], r[1], r[2], r[3], 0xF4292244,  6);
-            update(0x31, spec3, r[3], r[0], r[1], r[2], 0x432AFF97, 10);
-            update(0x32, spec3, r[2], r[3], r[0], r[1], 0xAB9423A7, 15);
-            update(0x33, spec3, r[1], r[2], r[3], r[0], 0xFC93A039, 21);
-            update(0x34, spec3, r[0], r[1], r[2], r[3], 0x655B59C3,  6);
-            update(0x35, spec3, r[3], r[0], r[1], r[2], 0x8F0CCC92, 10);
-            update(0x36, spec3, r[2], r[3], r[0], r[1], 0xFFEFF47D, 15);
-            update(0x37, spec3, r[1], r[2], r[3], r[0], 0x85845DD1, 21);
-            update(0x38, spec3, r[0], r[1], r[2], r[3], 0x6FA87E4F,  6);
-            update(0x39, spec3, r[3], r[0], r[1], r[2], 0xFE2CE6E0, 10);
-            update(0x3A, spec3, r[2], r[3], r[0], r[1], 0xA3014314, 15);
-            update(0x3B, spec3, r[1], r[2], r[3], r[0], 0x4E0811A1, 21);
-            update(0x3C, spec3, r[0], r[1], r[2], r[3], 0xF7537E82,  6);
-            update(0x3D, spec3, r[3], r[0], r[1], r[2], 0xBD3AF235, 10);
-            update(0x3E, spec3, r[2], r[3], r[0], r[1], 0x2AD7D2BB, 15);
-            update(0x3F, spec3, r[1], r[2], r[3], r[0], 0xEB86D391, 21);
+            update(0x30, spec3, 0xF4292244,  6, r[0], r[1], r[2], r[3]);
+            update(0x31, spec3, 0x432AFF97, 10, r[3], r[0], r[1], r[2]);
+            update(0x32, spec3, 0xAB9423A7, 15, r[2], r[3], r[0], r[1]);
+            update(0x33, spec3, 0xFC93A039, 21, r[1], r[2], r[3], r[0]);
+            update(0x34, spec3, 0x655B59C3,  6, r[0], r[1], r[2], r[3]);
+            update(0x35, spec3, 0x8F0CCC92, 10, r[3], r[0], r[1], r[2]);
+            update(0x36, spec3, 0xFFEFF47D, 15, r[2], r[3], r[0], r[1]);
+            update(0x37, spec3, 0x85845DD1, 21, r[1], r[2], r[3], r[0]);
+            update(0x38, spec3, 0x6FA87E4F,  6, r[0], r[1], r[2], r[3]);
+            update(0x39, spec3, 0xFE2CE6E0, 10, r[3], r[0], r[1], r[2]);
+            update(0x3A, spec3, 0xA3014314, 15, r[2], r[3], r[0], r[1]);
+            update(0x3B, spec3, 0x4E0811A1, 21, r[1], r[2], r[3], r[0]);
+            update(0x3C, spec3, 0xF7537E82,  6, r[0], r[1], r[2], r[3]);
+            update(0x3D, spec3, 0xBD3AF235, 10, r[3], r[0], r[1], r[2]);
+            update(0x3E, spec3, 0x2AD7D2BB, 15, r[2], r[3], r[0], r[1]);
+            update(0x3F, spec3, 0xEB86D391, 21, r[1], r[2], r[3], r[0]);
             // Accumulate the result.
             do_padd(this->m_regs, r);
           }
