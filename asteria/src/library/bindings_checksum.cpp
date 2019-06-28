@@ -501,7 +501,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
               // ... append data to the last chunk, ...
               n = rocket::min(ep - bp, ec - bc);
               std::copy_n(bp, n, bc);
-              this->m_size += n & 0xFF;
+              this->m_size += static_cast<std::uint64_t>(n);
               bp += n;
               bc += n;
               // ... and if is still not full, there aren't going to be any more data.
@@ -524,7 +524,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             n = ep - bp;
             if(n != 0) {
               std::copy_n(bp, n, bc);
-              this->m_size += n & 0xFF;
+              this->m_size += static_cast<std::uint64_t>(n);
               bp += n;
               bc += n;
             }
@@ -561,7 +561,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             this->do_consume_chunk(this->m_chunk.data());
             // Get the checksum.
             G_string ck;
-            ck.reserve(32);
+            ck.reserve(this->m_regs.size() * 8);
             rocket::for_each(this->m_regs, [&](std::uint32_t w) { do_pdigits_le(ck, w);  });
             // Reset internal states.
             this->m_regs = s_init;
@@ -635,6 +635,316 @@ G_object std_checksum_md5_new()
 G_string std_checksum_md5(const G_string& data)
   {
     MD5::Hasher h;
+    h.write(data);
+    return h.finish();
+  }
+
+    namespace {
+    namespace SHA1 {
+
+    constexpr std::array<std::uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
+
+    class Hasher : public Abstract_Opaque
+      {
+      private:
+        std::array<std::uint32_t, 5> m_regs;
+        std::uint64_t m_size;
+        std::array<std::uint8_t, 64> m_chunk;
+
+      public:
+        Hasher() noexcept
+          : m_regs(s_init),
+            m_size(0)
+          {
+          }
+
+      private:
+        void do_consume_chunk(const std::uint8_t* p) noexcept
+          {
+            std::uint32_t f, k;
+            std::array<std::uint32_t, 80> w;
+            // https://en.wikipedia.org/wiki/SHA-1
+            for(std::size_t i =  0; i < 16; ++i) {
+              do_load_be(w[i], p + i * 4);
+            }
+            for(std::size_t i = 16; i < 32; ++i) {
+              w[i] = do_rotl(w[i - 3] ^ w[i -  8] ^ w[i - 14] ^ w[i - 16], 1);
+            }
+            for(std::size_t i = 32; i < 80; ++i) {
+              w[i] = do_rotl(w[i - 6] ^ w[i - 16] ^ w[i - 28] ^ w[i - 32], 2);
+            }
+            auto update = [&](std::uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, auto& e)
+              {
+                specx(b, c, d);
+                e += do_rotl(a, 5) + f + k + w[i];
+                b = do_rotl(b, 30);
+              };
+            auto spec0 = [&](auto& b, auto& c, auto& d)
+              {
+                f = d ^ (b & (c ^ d));
+                k = 0x5A827999;
+              };
+            auto spec1 = [&](auto& b, auto& c, auto& d)
+              {
+                f = b ^ c ^ d;
+                k = 0x6ED9EBA1;
+              };
+            auto spec2 = [&](auto& b, auto& c, auto& d)
+              {
+                f = (b & (c | d)) | (c & d);
+                k = 0x8F1BBCDC;
+              };
+            auto spec3 = [&](auto& b, auto& c, auto& d)
+              {
+                f = b ^ c ^ d;
+                k = 0xCA62C1D6;
+              };
+            // Unroll loops by hand.
+            auto r = this->m_regs;
+            // 0 * 20
+            update( 0, spec0, r[0], r[1], r[2], r[3], r[4]);
+            update( 1, spec0, r[4], r[0], r[1], r[2], r[3]);
+            update( 2, spec0, r[3], r[4], r[0], r[1], r[2]);
+            update( 3, spec0, r[2], r[3], r[4], r[0], r[1]);
+            update( 4, spec0, r[1], r[2], r[3], r[4], r[0]);
+            update( 5, spec0, r[0], r[1], r[2], r[3], r[4]);
+            update( 6, spec0, r[4], r[0], r[1], r[2], r[3]);
+            update( 7, spec0, r[3], r[4], r[0], r[1], r[2]);
+            update( 8, spec0, r[2], r[3], r[4], r[0], r[1]);
+            update( 9, spec0, r[1], r[2], r[3], r[4], r[0]);
+            update(10, spec0, r[0], r[1], r[2], r[3], r[4]);
+            update(11, spec0, r[4], r[0], r[1], r[2], r[3]);
+            update(12, spec0, r[3], r[4], r[0], r[1], r[2]);
+            update(13, spec0, r[2], r[3], r[4], r[0], r[1]);
+            update(14, spec0, r[1], r[2], r[3], r[4], r[0]);
+            update(15, spec0, r[0], r[1], r[2], r[3], r[4]);
+            update(16, spec0, r[4], r[0], r[1], r[2], r[3]);
+            update(17, spec0, r[3], r[4], r[0], r[1], r[2]);
+            update(18, spec0, r[2], r[3], r[4], r[0], r[1]);
+            update(19, spec0, r[1], r[2], r[3], r[4], r[0]);
+            // 1
+            update(20, spec1, r[0], r[1], r[2], r[3], r[4]);
+            update(21, spec1, r[4], r[0], r[1], r[2], r[3]);
+            update(22, spec1, r[3], r[4], r[0], r[1], r[2]);
+            update(23, spec1, r[2], r[3], r[4], r[0], r[1]);
+            update(24, spec1, r[1], r[2], r[3], r[4], r[0]);
+            update(25, spec1, r[0], r[1], r[2], r[3], r[4]);
+            update(26, spec1, r[4], r[0], r[1], r[2], r[3]);
+            update(27, spec1, r[3], r[4], r[0], r[1], r[2]);
+            update(28, spec1, r[2], r[3], r[4], r[0], r[1]);
+            update(29, spec1, r[1], r[2], r[3], r[4], r[0]);
+            update(30, spec1, r[0], r[1], r[2], r[3], r[4]);
+            update(31, spec1, r[4], r[0], r[1], r[2], r[3]);
+            update(32, spec1, r[3], r[4], r[0], r[1], r[2]);
+            update(33, spec1, r[2], r[3], r[4], r[0], r[1]);
+            update(34, spec1, r[1], r[2], r[3], r[4], r[0]);
+            update(35, spec1, r[0], r[1], r[2], r[3], r[4]);
+            update(36, spec1, r[4], r[0], r[1], r[2], r[3]);
+            update(37, spec1, r[3], r[4], r[0], r[1], r[2]);
+            update(38, spec1, r[2], r[3], r[4], r[0], r[1]);
+            update(39, spec1, r[1], r[2], r[3], r[4], r[0]);
+            // 2
+            update(40, spec2, r[0], r[1], r[2], r[3], r[4]);
+            update(41, spec2, r[4], r[0], r[1], r[2], r[3]);
+            update(42, spec2, r[3], r[4], r[0], r[1], r[2]);
+            update(43, spec2, r[2], r[3], r[4], r[0], r[1]);
+            update(44, spec2, r[1], r[2], r[3], r[4], r[0]);
+            update(45, spec2, r[0], r[1], r[2], r[3], r[4]);
+            update(46, spec2, r[4], r[0], r[1], r[2], r[3]);
+            update(47, spec2, r[3], r[4], r[0], r[1], r[2]);
+            update(48, spec2, r[2], r[3], r[4], r[0], r[1]);
+            update(49, spec2, r[1], r[2], r[3], r[4], r[0]);
+            update(50, spec2, r[0], r[1], r[2], r[3], r[4]);
+            update(51, spec2, r[4], r[0], r[1], r[2], r[3]);
+            update(52, spec2, r[3], r[4], r[0], r[1], r[2]);
+            update(53, spec2, r[2], r[3], r[4], r[0], r[1]);
+            update(54, spec2, r[1], r[2], r[3], r[4], r[0]);
+            update(55, spec2, r[0], r[1], r[2], r[3], r[4]);
+            update(56, spec2, r[4], r[0], r[1], r[2], r[3]);
+            update(57, spec2, r[3], r[4], r[0], r[1], r[2]);
+            update(58, spec2, r[2], r[3], r[4], r[0], r[1]);
+            update(59, spec2, r[1], r[2], r[3], r[4], r[0]);
+            // 3
+            update(60, spec3, r[0], r[1], r[2], r[3], r[4]);
+            update(61, spec3, r[4], r[0], r[1], r[2], r[3]);
+            update(62, spec3, r[3], r[4], r[0], r[1], r[2]);
+            update(63, spec3, r[2], r[3], r[4], r[0], r[1]);
+            update(64, spec3, r[1], r[2], r[3], r[4], r[0]);
+            update(65, spec3, r[0], r[1], r[2], r[3], r[4]);
+            update(66, spec3, r[4], r[0], r[1], r[2], r[3]);
+            update(67, spec3, r[3], r[4], r[0], r[1], r[2]);
+            update(68, spec3, r[2], r[3], r[4], r[0], r[1]);
+            update(69, spec3, r[1], r[2], r[3], r[4], r[0]);
+            update(70, spec3, r[0], r[1], r[2], r[3], r[4]);
+            update(71, spec3, r[4], r[0], r[1], r[2], r[3]);
+            update(72, spec3, r[3], r[4], r[0], r[1], r[2]);
+            update(73, spec3, r[2], r[3], r[4], r[0], r[1]);
+            update(74, spec3, r[1], r[2], r[3], r[4], r[0]);
+            update(75, spec3, r[0], r[1], r[2], r[3], r[4]);
+            update(76, spec3, r[4], r[0], r[1], r[2], r[3]);
+            update(77, spec3, r[3], r[4], r[0], r[1], r[2]);
+            update(78, spec3, r[2], r[3], r[4], r[0], r[1]);
+            update(79, spec3, r[1], r[2], r[3], r[4], r[0]);
+            // Accumulate the result.
+            do_padd(this->m_regs, r);
+          }
+
+      public:
+        void describe(std::ostream& os) const override
+          {
+            os << "SHA-1 hasher";
+          }
+        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+          {
+            // There is nothing to do.
+          }
+
+        void write(const G_string& data) noexcept
+          {
+            auto bp = reinterpret_cast<const std::uint8_t*>(data.data());
+            auto ep = bp + data.size();
+            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto ec = this->m_chunk.end();
+            std::ptrdiff_t n;
+            // If the last chunk was not empty, ...
+            if(bc != this->m_chunk.begin()) {
+              // ... append data to the last chunk, ...
+              n = rocket::min(ep - bp, ec - bc);
+              std::copy_n(bp, n, bc);
+              this->m_size += static_cast<std::uint64_t>(n);
+              bp += n;
+              bc += n;
+              // ... and if is still not full, there aren't going to be any more data.
+              if(bc != ec) {
+                ROCKET_ASSERT(bp == ep);
+                return;
+              }
+              // Consume the last chunk.
+              ROCKET_ASSERT(this->m_size % 64 == 0);
+              this->do_consume_chunk(this->m_chunk.data());
+              bc = this->m_chunk.begin();
+            }
+            // Consume as many chunks as possible; don't bother copying them.
+            while(ep - bp >= 64) {
+              this->do_consume_chunk(bp);
+              bp += 64;
+              this->m_size += 64;
+            }
+            // Append any bytes remaining to the last chunk.
+            n = ep - bp;
+            if(n != 0) {
+              std::copy_n(bp, n, bc);
+              this->m_size += static_cast<std::uint64_t>(n);
+              bp += n;
+              bc += n;
+            }
+            ROCKET_ASSERT(bp == ep);
+          }
+        G_string finish() noexcept
+          {
+            // Finalize the hasher.
+            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto ec = this->m_chunk.end();
+            std::ptrdiff_t n;
+            // Append a `0x80` byte followed by zeroes.
+            *(bc++) = 0x80;
+            n = ec - bc;
+            if(n < 8) {
+              // Wrap.
+              std::fill_n(bc, n, 0);
+              this->do_consume_chunk(this->m_chunk.data());
+              bc = this->m_chunk.begin();
+            }
+            n = ec - bc - 8;
+            if(n > 0) {
+              // Fill zeroes.
+              std::fill_n(bc, n, 0);
+              bc += n;
+            }
+            ROCKET_ASSERT(ec - bc == 8);
+            // Write the number of bits in big-endian order.
+            auto bits = this->m_size * 8;
+            for(std::ptrdiff_t i = 7; i != -1; --i) {
+              bc[i] = bits & 0xFF;
+              bits >>= 8;
+            }
+            this->do_consume_chunk(this->m_chunk.data());
+            // Get the checksum.
+            G_string ck;
+            ck.reserve(this->m_regs.size() * 8);
+            rocket::for_each(this->m_regs, [&](std::uint32_t w) { do_pdigits_be(ck, w);  });
+            // Reset internal states.
+            this->m_regs = s_init;
+            this->m_size = 0;
+            return ck;
+          }
+      };
+
+    }
+    }
+
+G_object std_checksum_sha1_new()
+  {
+    G_object r;
+    r.insert_or_assign(rocket::sref("!h"),  // details
+      G_opaque(
+        rocket::make_refcnt<SHA1::Hasher>()
+      ));
+    r.insert_or_assign(rocket::sref("write"),
+      G_function(
+        make_simple_binding(
+          // Description
+          rocket::sref("<std.checksum.sha1_new()>.write"),
+          // Opaque parameter
+          G_null(),
+          // Definition
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+            {
+              Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.write"), args);
+              // Get the hasher.
+              Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
+              self.zoom_in(rocket::move(xmod));
+              auto& h = dynamic_cast<SHA1::Hasher&>(self.open().mut_opaque().mut());
+              // Parse arguments.
+              G_string data;
+              if(reader.start().g(data).finish()) {
+                h.write(data);
+                return Reference_Root::S_null();
+              }
+              reader.throw_no_matching_function_call();
+            }
+        )
+      ));
+    r.insert_or_assign(rocket::sref("finish"),
+      G_function(
+        make_simple_binding(
+          // Description
+          rocket::sref("<std.checksum.sha1_new()>.finish"),
+          // Opaque parameter
+          G_null(),
+          // Definition
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+            {
+              Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.finish"), args);
+              // Get the hasher.
+              Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
+              self.zoom_in(rocket::move(xmod));
+              auto& h = dynamic_cast<SHA1::Hasher&>(self.open().mut_opaque().mut());
+              // Parse arguments.
+              if(reader.start().finish()) {
+                Reference_Root::S_temporary xref = { h.finish() };
+                return rocket::move(xref);
+              }
+              reader.throw_no_matching_function_call();
+            }
+        )
+      ));
+    return r;
+  }
+
+G_string std_checksum_sha1(const G_string& data)
+  {
+    SHA1::Hasher h;
     h.write(data);
     return h.finish();
   }
@@ -917,6 +1227,99 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
             if(reader.start().g(data).finish()) {
               // Call the binding function.
               Reference_Root::S_temporary xref = { std_checksum_md5(data) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.checksum.sha1_new()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sha1_new"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.checksum.sha1_new()`\n"
+            "\n"
+            "  * Creates an SHA-1 hasher.\n"
+            "\n"
+            "  * Returns the hasher as an `object` consisting of the following\n"
+            "    members:\n"
+            "\n"
+            "    * `write(data)`\n"
+            "    * `finish()`\n"
+            "\n"
+            "    The function `write()` is used to put data into the hasher,\n"
+            "    which shall be of type `string`. After all data have been put,\n"
+            "    the function `finish()` extracts the checksum as a `string` of\n"
+            "    40 hexadecimal digits in uppercase, then resets the hasher,\n"
+            "    making it suitable for further data as if it had just been\n"
+            "    created.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.checksum.sha1_new"), args);
+            // Parse arguments.
+            if(reader.start().finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_checksum_sha1_new() };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.checksum.sha1()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("sha1"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.checksum.sha1(data)`\n"
+            "\n"
+            "  * Calculates the SHA-1 checksum of `data` which must be of type\n"
+            "    `string`, as if this function was defined as\n"
+            "\n"
+            "    ```\n"
+            "      std.checksum.sha1 = func(data) {\n"
+            "        var h = this.sha1_new();\n"
+            "        h.write(data);\n"
+            "        return h.finish();\n"
+            "      };\n"
+            "    ```\n"
+            "\n"
+            "    This function is expected to be both more efficient and easier\n"
+            "    to use.\n"
+            "\n"
+            "  * Returns the SHA-1 checksum as a `string` of 40 hexadecimal\n"
+            "    digits in uppercase.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.checksum.sha1"), args);
+            // Parse arguments.
+            G_string data;
+            if(reader.start().g(data).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_checksum_sha1(data) };
               return rocket::move(xref);
             }
             // Fail.
