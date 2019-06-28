@@ -656,7 +656,7 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 
     }
 
-G_string std_string_hex_encode(const G_string& text, const Opt<G_string>& delim, const Opt<G_boolean>& uppercase)
+G_string std_string_hex_encode(const G_string& text, const Opt<G_boolean>& uppercase, const Opt<G_string>& delim)
   {
     G_string dstr;
     auto rpos = text.begin();
@@ -664,8 +664,8 @@ G_string std_string_hex_encode(const G_string& text, const Opt<G_string>& delim,
       // Return an empty string; no delimiter is added.
       return dstr;
     }
-    std::size_t ndcs = delim ? delim->size() : 0;
     bool upc = uppercase.value_or(false);
+    auto ndcs = delim ? delim->size() : 0;
     // Reserve storage for digits.
     dstr.reserve(2 + (ndcs + 2) * (text.size() - 1));
     for(;;) {
@@ -2242,13 +2242,13 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         rocket::sref
           (
             "\n"
-            "`std.string.hex_encode(text, [delim], [uppercase])`\n"
+            "`std.string.hex_encode(text, [uppercase], [delim])`\n"
             "\n"
             "  * Encodes all bytes in `text` as 2-digit hexadecimal numbers and\n"
-            "    concatenates them. If `delim` is specified, it is inserted\n"
-            "    between adjacent bytes. If `uppercase` is set to `true`,\n"
-            "    hexadecimal digits above `9` are encoded as `ABCDEF`; otherwise\n"
-            "    they are encoded as `abcdef`.\n"
+            "    concatenates them. If `uppercase` is set to `true`, hexadecimal\n"
+            "    digits above `9` are encoded as `ABCDEF`; otherwise they are\n"
+            "    encoded as `abcdef`. If `delim` is specified, it is inserted\n"
+            "    between adjacent bytes.\n"
             "\n"
             "  * Returns the encoded `string`. If `text` is empty, an empty\n"
             "    `string` is returned.\n"
@@ -2264,11 +2264,11 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             Argument_Reader reader(rocket::sref("std.string.hex_encode"), args);
             // Parse arguments.
             G_string text;
-            Opt<G_string> delim;
             Opt<G_boolean> uppercase;
-            if(reader.start().g(text).g(delim).g(uppercase).finish()) {
+            Opt<G_string> delim;
+            if(reader.start().g(text).g(uppercase).g(delim).finish()) {
               // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_hex_encode(text, delim, uppercase) };
+              Reference_Root::S_temporary xref = { std_string_hex_encode(text, uppercase, delim) };
               return rocket::move(xref);
             }
             // Fail.

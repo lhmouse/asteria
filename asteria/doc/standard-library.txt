@@ -488,13 +488,13 @@
 	* Returns a `string` containing all segments. If `segments` is
 	  empty, an empty `string` is returned.
 
-`std.string.hex_encode(text, [delim], [uppercase])`
+`std.string.hex_encode(text, [uppercase], [delim])`
 
 	* Encodes all bytes in `text` as 2-digit hexadecimal numbers and
-	  concatenates them. If `delim` is specified, it is inserted
-	  between adjacent bytes. If `uppercase` is set to `true`,
-	  hexadecimal digits above `9` are encoded as `ABCDEF`; otherwise
-	  they are encoded as `abcdef`.
+	  concatenates them. If `uppercase` is set to `true`, hexadecimal
+	  digits above `9` are encoded as `ABCDEF`; otherwise they are
+	  encoded as `abcdef`. If `delim` is specified, it is inserted
+	  between adjacent bytes.
 
 	* Returns the encoded `string`. If `text` is empty, an empty
 	  `string` is returned.
