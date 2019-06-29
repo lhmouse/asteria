@@ -647,7 +647,7 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 
     namespace {
 
-    constexpr char s_xdigits_and_spaces[] = "00112233445566778899aAbBcCdDeEfF \f\n\r\t\v";
+    constexpr char s_base16_table[] = "00112233445566778899AaBbCcDdEeFf \f\n\r\t\v";
 
     template<std::size_t sizeT> constexpr const char* do_slitchr(const char (&str)[sizeT], char ch) noexcept
       {
@@ -664,14 +664,14 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
       // Return an empty string; no delimiter is added.
       return text;
     }
-    bool upc = lowercase != true;
+    bool coff = lowercase == true;
     auto ndcs = delim ? delim->size() : 0;
     // Reserve storage for digits.
     text.reserve(2 + (ndcs + 2) * (data.size() - 1));
     for(;;) {
       // Encode a byte.
-      text += s_xdigits_and_spaces[(*rpos / 8 & 0x1E) + upc];
-      text += s_xdigits_and_spaces[(*rpos * 2 & 0x1E) + upc];
+      text += s_base16_table[(*rpos / 8 & 0x1E) + coff];
+      text += s_base16_table[(*rpos * 2 & 0x1E) + coff];
       if(++rpos == data.end()) {
         break;
       }
@@ -690,13 +690,13 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
     int dprev = -1;
     for(char ch : text) {
       // Identify this character.
-      auto pos = do_slitchr(s_xdigits_and_spaces, ch);
+      auto pos = do_slitchr(s_base16_table, ch);
       if(*pos == 0) {
         // Fail due to an invalid character.
         return rocket::nullopt;
       }
       // The first 32 characters are hex digits. The others are spaces.
-      auto dcur = static_cast<std::uint8_t>((pos - s_xdigits_and_spaces) / 2);
+      auto dcur = static_cast<std::uint8_t>((pos - s_base16_table) / 2);
       if(dcur >= 16) {
         // Ignore space characters. But if we have had a digit, flush it.
         if(dprev != -1) {
