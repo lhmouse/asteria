@@ -669,15 +669,15 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
       return text;
     }
     bool rlowerc = lowercase == true;
+    std::array<char, 2> unit;
     // Reserve storage for digits.
     text.reserve(2 + (ntotal - 1) * ((delim ? delim->size() : 0) + 2));
     // Encode the first byte.
     auto encode_byte = [&](char ch)
       {
-        char bstr[2];
-        bstr[0] = s_base16_table[((ch >> 3) & 0x1E) + rlowerc];
-        bstr[1] = s_base16_table[((ch << 1) & 0x1E) + rlowerc];
-        text.append(bstr, 2);
+        unit[0] = s_base16_table[((ch >> 3) & 0x1E) + rlowerc];
+        unit[1] = s_base16_table[((ch << 1) & 0x1E) + rlowerc];
+        text.append(unit.data(), unit.size());
       };
     encode_byte(data.front());
     // Any byte other than the first one follows a delimiter.
@@ -695,6 +695,7 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
     G_string data;
     // Remember the value of a previous digit. `-1` means no such digit exists.
     int dprev = -1;
+    // Decode characters one by one.
     for(char ch : text) {
       // Identify this character.
       auto pos = do_slitchr(s_base16_table, ch);
