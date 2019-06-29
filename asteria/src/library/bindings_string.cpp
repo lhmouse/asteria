@@ -12,7 +12,7 @@ namespace Asteria {
 
     namespace {
 
-    std::pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, G_string::const_iterator tbegin, const Opt<G_integer>& length)
+    Pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, G_string::const_iterator tbegin, const Opt<G_integer>& length)
       {
         if(!length || (*length >= text.end() - tbegin)) {
           // Get the subrange from `tbegin` to the end.
@@ -26,7 +26,7 @@ namespace Asteria {
         return std::make_pair(tbegin, tbegin + static_cast<std::ptrdiff_t>(*length));
       }
 
-    std::pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, const G_integer& from, const Opt<G_integer>& length)
+    Pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, const G_integer& from, const Opt<G_integer>& length)
       {
         auto slen = static_cast<std::int64_t>(text.size());
         if(from >= 0) {
@@ -120,7 +120,7 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
           return tbegin;
         }
         // Build a table according to the Bad Character Rule.
-        std::array<std::ptrdiff_t, 0x100> bcr_table;
+        Array<std::ptrdiff_t, 0x100> bcr_table;
         for(std::size_t i = 0; i != 0x100; ++i) {
           bcr_table[i] = plen;
         }
@@ -669,7 +669,7 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
       return text;
     }
     bool rlowerc = lowercase == true;
-    std::array<char, 2> unit;
+    Array<char, 2> unit;
     // Reserve storage for digits.
     text.reserve(2 + (ntotal - 1) * ((delim ? delim->size() : 0) + 2));
     // Encode the first byte.
@@ -798,7 +798,7 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
     template<bool bigendT, typename WordT> bool do_pack_one_impl(G_string& text, const G_integer& value)
       {
         // Define temporary storage.
-        std::array<char, sizeof(WordT)> stor_le;
+        Array<char, sizeof(WordT)> stor_le;
         std::uint64_t word = static_cast<std::uint64_t>(value);
         // Write it in little-endian order.
         for(auto& byte : stor_le) {
@@ -826,7 +826,7 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
       {
         G_array values;
         // Define temporary storage.
-        std::array<char, sizeof(WordT)> stor_be;
+        Array<char, sizeof(WordT)> stor_be;
         std::uint64_t word = 0;
         // How many words will the result have?
         auto nwords = text.size() / stor_be.size();

@@ -18,7 +18,7 @@ class Variable : public virtual Rcbase
     Value m_value;
     bool m_immutable;
     // Garbage collection support.
-    mutable std::pair<long, double> m_gcref;
+    mutable Pair<long, double> m_gcref;
 
   public:
     explicit Variable(const Source_Location& sloc) noexcept

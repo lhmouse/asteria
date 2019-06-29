@@ -12,7 +12,7 @@
 #  error Please turn off `-ffast-math`.
 #endif
 
-#include <utility>  // std::pair<>, rocket::move(), rocket::forward()
+#include <utility>  // Pair<>, rocket::move(), rocket::forward()
 #include <cstddef>  // std::nullptr_t
 #include <cstdint>  // std::uint8_t, std::int64_t
 #include <climits>
@@ -95,6 +95,8 @@ template<typename K, typename V, typename H> using Cow_HashMap = rocket::cow_has
 template<typename E, std::size_t k> using Static_Vector = rocket::static_vector<E, k>;
 template<typename... P> using Variant = rocket::variant<P...>;
 template<typename T> using Opt = rocket::optional<T>;
+template<typename F, typename S> using Pair = std::pair<F, S>;
+template<typename E, std::size_t k> using Array = std::array<E, k>;
 
 // Fundamental Types
 using G_null      = std::nullptr_t;

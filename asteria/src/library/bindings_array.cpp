@@ -13,7 +13,7 @@ namespace Asteria {
 
     namespace {
 
-    std::pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, G_array::const_iterator tbegin, const Opt<G_integer>& length)
+    Pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, G_array::const_iterator tbegin, const Opt<G_integer>& length)
       {
         if(!length || (*length >= text.end() - tbegin)) {
           // Get the subrange from `tbegin` to the end.
@@ -27,7 +27,7 @@ namespace Asteria {
         return std::make_pair(tbegin, tbegin + static_cast<std::ptrdiff_t>(*length));
       }
 
-    std::pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, const G_integer& from, const Opt<G_integer>& length)
+    Pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, const G_integer& from, const Opt<G_integer>& length)
       {
         auto slen = static_cast<std::int64_t>(text.size());
         if(from >= 0) {
@@ -344,7 +344,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
 
     namespace {
 
-    template<typename IteratorT> std::pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
+    template<typename IteratorT> Pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
                                                                        const Opt<G_function>& comparator, const Value& target)
       {
         auto bpos = rocket::move(begin);

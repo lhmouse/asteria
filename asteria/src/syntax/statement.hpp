@@ -32,7 +32,7 @@ class Statement
       {
         Source_Location sloc;
         bool immutable;
-        Cow_Vector<std::pair<PreHashed_String,  // name
+        Cow_Vector<Pair<PreHashed_String,  // name
                              Cow_Vector<Xprunit>  // initializer
                              >> vars;
       };
@@ -53,7 +53,7 @@ class Statement
     struct S_switch
       {
         Cow_Vector<Xprunit> ctrl;
-        Cow_Vector<std::pair<Cow_Vector<Xprunit>,  // condition (empty for `default` and non-empty for `case`)
+        Cow_Vector<Pair<Cow_Vector<Xprunit>,  // condition (empty for `default` and non-empty for `case`)
                              Cow_Vector<Statement>  // body
                              >> clauses;
       };

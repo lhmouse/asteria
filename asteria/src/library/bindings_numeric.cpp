@@ -1145,7 +1145,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return text;
       }
 
-    std::pair<G_integer, int> do_decompose_integer(std::uint8_t pbase, const G_integer& value)
+    Pair<G_integer, int> do_decompose_integer(std::uint8_t pbase, const G_integer& value)
       {
         auto ireg = value;
         int iexp = 0;

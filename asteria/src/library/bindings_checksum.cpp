@@ -20,11 +20,11 @@ namespace Asteria {
     template<std::uint32_t valueT, std::uint32_t divisorT> struct Generator<valueT, divisorT, 8> : std::integral_constant<std::uint32_t, valueT>
       {
       };
-    template<std::uint32_t divisorT, std::size_t... indicesT> constexpr std::array<std::uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
+    template<std::uint32_t divisorT, std::size_t... indicesT> constexpr Array<std::uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
       {
         return {{ Generator<std::uint8_t(indicesT), divisorT, 0>::value... }};
       }
-    template<std::uint32_t divisorT> constexpr std::array<std::uint32_t, 256> do_generate_table() noexcept
+    template<std::uint32_t divisorT> constexpr Array<std::uint32_t, 256> do_generate_table() noexcept
       {
         return do_generate_table_impl<divisorT>(std::make_index_sequence<256>());
       }
@@ -265,11 +265,11 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     template<std::uint8_t valueT> struct Hexdigit : std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
       {
       };
-    template<std::uint8_t valueT> constexpr std::array<char, 2> do_generate_hex_digits_for_byte() noexcept
+    template<std::uint8_t valueT> constexpr Array<char, 2> do_generate_hex_digits_for_byte() noexcept
       {
         return {{ Hexdigit<std::uint8_t(valueT / 16)>::value, Hexdigit<std::uint8_t(valueT % 16)>::value }};
       };
-    template<std::size_t... indicesT> constexpr std::array<std::array<char, 2>, 256> do_generate_hexdigits_impl(const std::index_sequence<indicesT...>&) noexcept
+    template<std::size_t... indicesT> constexpr Array<Array<char, 2>, 256> do_generate_hexdigits_impl(const std::index_sequence<indicesT...>&) noexcept
       {
         return {{ do_generate_hex_digits_for_byte<std::uint8_t(indicesT)>()... }};
       }
@@ -278,7 +278,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     template<bool bigendT, typename WordT> G_string& do_pdigits_impl(G_string& str, const WordT& ref)
       {
         static_assert(std::is_unsigned<WordT>::value, "??");
-        std::array<std::uint8_t, sizeof(WordT)> stor_le;
+        Array<std::uint8_t, sizeof(WordT)> stor_le;
         std::uint64_t word = static_cast<std::uint64_t>(ref);
         // Write the word in little-endian order.
         for(auto& byte : stor_le) {
@@ -305,7 +305,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const std::uint8_t* ptr)
       {
         static_assert(std::is_unsigned<WordT>::value, "??");
-        std::array<std::uint8_t, sizeof(WordT)> stor_be;
+        Array<std::uint8_t, sizeof(WordT)> stor_be;
         std::uint64_t word = 0;
         // Re-arrange bytes.
         if(bigendT) {
@@ -338,7 +338,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         return static_cast<WordT>(sum);
       }
 
-    template<typename WordT, std::size_t sizeT> inline std::array<WordT, sizeT>& do_padd(std::array<WordT, sizeT>& lhs, const std::array<WordT, sizeT>& rhs)
+    template<typename WordT, std::size_t sizeT> inline Array<WordT, sizeT>& do_padd(Array<WordT, sizeT>& lhs, const Array<WordT, sizeT>& rhs)
       {
         static_assert(std::is_unsigned<WordT>::value, "??");
         // Accumulate each element in parallel.
@@ -353,14 +353,14 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     namespace {
     namespace MD5 {
 
-    constexpr std::array<std::uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
+    constexpr Array<std::uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        std::array<std::uint32_t, 4> m_regs;
+        Array<std::uint32_t, 4> m_regs;
         std::uint64_t m_size;
-        std::array<std::uint8_t, 64> m_chunk;
+        Array<std::uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -639,14 +639,14 @@ G_string std_checksum_md5(const G_string& data)
     namespace {
     namespace SHA1 {
 
-    constexpr std::array<std::uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
+    constexpr Array<std::uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        std::array<std::uint32_t, 5> m_regs;
+        Array<std::uint32_t, 5> m_regs;
         std::uint64_t m_size;
-        std::array<std::uint8_t, 64> m_chunk;
+        Array<std::uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -658,7 +658,7 @@ G_string std_checksum_md5(const G_string& data)
       private:
         void do_consume_chunk(const std::uint8_t* p) noexcept
           {
-            std::array<std::uint32_t, 80> w;
+            Array<std::uint32_t, 80> w;
             std::uint32_t f, k;
             // https://en.wikipedia.org/wiki/SHA-1
             for(std::size_t i =  0; i < 16; ++i) {
@@ -949,14 +949,14 @@ G_string std_checksum_sha1(const G_string& data)
     namespace {
     namespace SHA256 {
 
-    constexpr std::array<std::uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
+    constexpr Array<std::uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        std::array<std::uint32_t, 8> m_regs;
+        Array<std::uint32_t, 8> m_regs;
         std::uint64_t m_size;
-        std::array<std::uint8_t, 64> m_chunk;
+        Array<std::uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -968,7 +968,7 @@ G_string std_checksum_sha1(const G_string& data)
       private:
         void do_consume_chunk(const std::uint8_t* p) noexcept
           {
-            std::array<std::uint32_t, 64> w;
+            Array<std::uint32_t, 64> w;
             std::uint32_t s0, maj, t2, s1, ch, t1;
             // https://en.wikipedia.org/wiki/SHA-2
             for(std::size_t i =  0; i < 16; ++i) {
