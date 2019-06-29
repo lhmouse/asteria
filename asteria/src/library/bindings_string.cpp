@@ -592,8 +592,12 @@ G_string std_string_translate(const G_string& text, const G_string& inputs, cons
 
 G_array std_string_explode(const G_string& text, const Opt<G_string>& delim, const Opt<G_integer>& limit)
   {
-    if(limit && (*limit <= 0)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The limit of number of segments must be greater than zero (got `", *limit, "`).");
+    std::uint64_t rlimit = UINT64_MAX;
+    if(limit) {
+      if(*limit <= 0) {
+        ASTERIA_THROW_RUNTIME_ERROR("The limit of number of segments must be greater than zero (got `", *limit, "`).");
+      }
+      rlimit = static_cast<std::uint64_t>(*limit);
     }
     G_array segments;
     if(text.empty()) {
@@ -610,7 +614,7 @@ G_array std_string_explode(const G_string& text, const Opt<G_string>& delim, con
     std::size_t bpos = 0;
     std::size_t epos;
     for(;;) {
-      if(limit && (segments.size() >= static_cast<std::uint64_t>(*limit - 1))) {
+      if(segments.size() + 1 >= rlimit) {
         segments.emplace_back(text.substr(bpos));
         break;
       }
@@ -628,19 +632,19 @@ G_array std_string_explode(const G_string& text, const Opt<G_string>& delim, con
 G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
   {
     G_string text;
-    // Deal with nasty separators.
-    auto rpos = segments.begin();
-    if(rpos != segments.end()) {
-      for(;;) {
-        text += rpos->as_string();
-        if(++rpos == segments.end()) {
-          break;
-        }
-        if(!delim) {
-          continue;
-        }
+    auto nsegs = segments.size();
+    if(nsegs == 0) {
+      // Return an empty string.
+      return text;
+    }
+    // Append the first string.
+    text = segments.front().as_string();
+    // Any segment other than the first one follows a delimiter.
+    for(std::size_t i = 1; i != nsegs; ++i) {
+      if(delim) {
         text += *delim;
       }
+      text += segments[i].as_string();
     }
     return text;
   }
@@ -659,26 +663,30 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lowercase, const Opt<G_string>& delim)
   {
     G_string text;
-    auto rpos = data.begin();
-    if(rpos == data.end()) {
+    auto nbytes = data.size();
+    if(nbytes == 0) {
       // Return an empty string; no delimiter is added.
       return text;
     }
-    bool coff = lowercase == true;
-    auto ndcs = delim ? delim->size() : 0;
+    bool rlowerc = lowercase == true;
     // Reserve storage for digits.
-    text.reserve(2 + (ndcs + 2) * (data.size() - 1));
-    for(;;) {
-      // Encode a byte.
-      text += s_base16_table[(*rpos / 8 & 0x1E) + coff];
-      text += s_base16_table[(*rpos * 2 & 0x1E) + coff];
-      if(++rpos == data.end()) {
-        break;
+    auto ndelims = delim ? delim->size() : 0;
+    text.reserve(2 + (nbytes - 1) * (ndelims + 2));
+    // Encode the first byte.
+    auto encode_byte = [&](char ch)
+      {
+        char bstr[2];
+        bstr[0] = s_base16_table[((ch >> 3) & 0x1E) + rlowerc];
+        bstr[1] = s_base16_table[((ch << 1) & 0x1E) + rlowerc];
+        text.append(bstr, 2);
+      };
+    encode_byte(data.front());
+    // Any byte other than the first one follows a delimiter.
+    for(std::size_t i = 1; i != nbytes; ++i) {
+      if(delim) {
+        text += *delim;
       }
-      if(!delim) {
-        continue;
-      }
-      text += *delim;
+      encode_byte(data[i]);
     }
     return text;
   }
