@@ -1069,7 +1069,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         1.0e+308,  HUGE_VAL,  HUGE_VAL,  HUGE_VAL,  HUGE_VAL,  HUGE_VAL,  HUGE_VAL,  HUGE_VAL,  HUGE_VAL,
       };
 
-    constexpr char s_xdigits[] = "00112233445566778899aAbBcCdDeEfF";
+    constexpr char s_xdigits[] = "00112233445566778899AaBbCcDdEeFf";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
     struct Parts
@@ -1099,7 +1099,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
           auto dvalue = static_cast<std::uint8_t>(reg % rbase);
           reg /= rbase;
           // Locate the digit in uppercase.
-          int doff = dvalue * 2 + 1;
+          int doff = dvalue * 2;
           p.sfs[--p.bsf] = s_xdigits[doff];
           p.exp++;
         }
@@ -1305,7 +1305,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
               auto dvalue = static_cast<std::uint8_t>(reg);
               reg -= dvalue;
               // Locate the digit in uppercase.
-              doff = dvalue * 2 + 1;
+              doff = dvalue * 2;
               p.sfs[p.esf++] = s_xdigits[doff];
             }
             break;
@@ -1331,7 +1331,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
               auto dvalue = static_cast<std::uint8_t>(reg);
               reg -= dvalue;
               // Locate the digit in uppercase.
-              doff = dvalue * 2 + 1;
+              doff = dvalue * 2;
               p.sfs[p.esf++] = s_xdigits[doff];
             }
             break;
@@ -1355,7 +1355,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
                 reg -= *qdigit;
               }
               // Locate the digit in uppercase.
-              doff = dvalue * 2 + 1;
+              doff = dvalue * 2;
               p.sfs[p.esf++] = s_xdigits[doff];
               // Only the first 17 significant figures are output.
               if(p.esf - p.bsf >= 17) {
