@@ -695,6 +695,14 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
     G_string data;
     // Remember the value of a previous digit. `-1` means no such digit exists.
     int dprev = -1;
+    auto flush = [&]()
+      {
+        if(dprev == -1) {
+          return;
+        }
+        data.push_back(static_cast<char>(dprev));
+        dprev = -1;
+      };
     // Decode characters one by one.
     for(char ch : text) {
       // Identify this character.
@@ -707,10 +715,7 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
       auto dcur = static_cast<std::uint8_t>((pos - s_base16_table) / 2);
       if(dcur >= 16) {
         // Ignore space characters. But if we have had a digit, flush it.
-        if(dprev != -1) {
-          data.push_back(static_cast<char>(dprev));
-          dprev = -1;
-        }
+        flush();
         continue;
       }
       if(dprev == -1) {
@@ -724,10 +729,7 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
       dprev = -1;
     }
     // If we have had a digit, flush it.
-    if(dprev != -1) {
-      data.push_back(static_cast<char>(dprev));
-      dprev = -1;
-    }
+    flush();
     return rocket::move(data);
   }
 
