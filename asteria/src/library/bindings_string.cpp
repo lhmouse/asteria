@@ -663,14 +663,14 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lowercase, const Opt<G_string>& delim)
   {
     G_string text;
-    auto nbytes = data.size();
-    if(nbytes == 0) {
+    auto ntotal = data.size();
+    if(ntotal == 0) {
       // Return an empty string; no delimiter is added.
       return text;
     }
     bool rlowerc = lowercase == true;
     // Reserve storage for digits.
-    text.reserve(2 + (nbytes - 1) * ((delim ? delim->size() : 0) + 2));
+    text.reserve(2 + (ntotal - 1) * ((delim ? delim->size() : 0) + 2));
     // Encode the first byte.
     auto encode_byte = [&](char ch)
       {
@@ -681,7 +681,7 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
       };
     encode_byte(data.front());
     // Any byte other than the first one follows a delimiter.
-    for(std::size_t i = 1; i != nbytes; ++i) {
+    for(std::size_t i = 1; i != ntotal; ++i) {
       if(delim) {
         text += *delim;
       }
