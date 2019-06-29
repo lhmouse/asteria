@@ -670,8 +670,7 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
     }
     bool rlowerc = lowercase == true;
     // Reserve storage for digits.
-    auto ndelims = delim ? delim->size() : 0;
-    text.reserve(2 + (nbytes - 1) * (ndelims + 2));
+    text.reserve(2 + (nbytes - 1) * ((delim ? delim->size() : 0) + 2));
     // Encode the first byte.
     auto encode_byte = [&](char ch)
       {
