@@ -708,17 +708,15 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
 G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lowercase, const Opt<G_string>& delim)
   {
     G_string text;
-    auto ntotal = data.size();
-    if(ntotal == 0) {
-      // Return an empty string.
+    if(data.empty()) {
       return text;
     }
-    bool rlowerc = lowercase == true;
     Array<char, 2> unit;
-    // Reserve storage for alphabets.
-    text.reserve(ntotal * unit.size());
+    text.reserve(data.size() * unit.size() + (delim ? ((data.size() - 1) * delim->size()) : 0));
+    bool rlowerc = lowercase == true;
+    // Encode source data.
     std::size_t nread = 0;
-    while(nread != ntotal) {
+    while(nread != data.size()) {
       // Read a byte in big-endian order.
       std::uint32_t reg = static_cast<std::uint32_t>(data[nread++] & 0xFF) << 24;
       // Encode it.
