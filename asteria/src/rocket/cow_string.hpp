@@ -44,6 +44,10 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
           : m_ptr(ptr), m_len(traitsT::length(ptr))
           {
           }
+        constexpr shallow(const charT* ptr, std::size_t len) noexcept
+          : m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))
+          {
+          }
         template<typename allocatorT> explicit shallow(const basic_cow_string<charT, traitsT, allocatorT>& str) noexcept
           : m_ptr(str.c_str()), m_len(str.length())
           {
@@ -618,9 +622,13 @@ template<typename charT, typename traitsT = char_traits<charT>, typename allocat
 
     }  // namespace details_cow_string
 
-template<typename charT> constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT* str) noexcept
+template<typename charT> constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT* ptr) noexcept
   {
-    return details_cow_string::shallow<charT, char_traits<charT>>(str);
+    return details_cow_string::shallow<charT, char_traits<charT>>(ptr);
+  }
+template<typename charT> constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT* ptr, std::size_t len) noexcept
+  {
+    return details_cow_string::shallow<charT, char_traits<charT>>(ptr, len);
   }
 template<typename charT, typename traitsT, typename allocatorT> inline details_cow_string::shallow<charT, traitsT> sref(const basic_cow_string<charT, traitsT, allocatorT>& str) noexcept
   {
