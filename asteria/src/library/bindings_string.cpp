@@ -707,27 +707,25 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
     G_string text;
     auto ntotal = data.size();
     if(ntotal == 0) {
-      // Return an empty string; no delimiter is added.
+      // Return an empty string.
       return text;
     }
     bool rlowerc = lowercase == true;
     Array<char, 2> unit;
-    // Reserve storage for digits.
-    text.reserve(2 + (ntotal - 1) * ((delim ? delim->size() : 0) + 2));
-    // Encode the first byte.
-    auto encode_byte = [&](char ch)
-      {
-        unit[0] = s_base16_table[((ch >> 3) & 0x1E) + rlowerc];
-        unit[1] = s_base16_table[((ch << 1) & 0x1E) + rlowerc];
-        text.append(unit.data(), unit.size());
-      };
-    encode_byte(data.front());
-    // Any byte other than the first one follows a delimiter.
-    for(std::size_t i = 1; i != ntotal; ++i) {
-      if(delim) {
-        text += *delim;
+    // Reserve storage for alphabets.
+    text.reserve(ntotal * unit.size());
+    std::size_t nread = 0;
+    while(nread != ntotal) {
+      // Read a byte in big-endian order.
+      std::uint32_t reg = static_cast<std::uint32_t>(data[nread++] & 0xFF) << 24;
+      // Encode it.
+      for(std::size_t i = 0; i != 2; ++i) {
+        unit[i] = s_base16_table[((reg >> (27 - i * 4)) & 0x1E) + rlowerc];
       }
-      encode_byte(data[i]);
+      if(!text.empty() && delim) {
+        text.append(*delim);
+      }
+      text.append(unit.data(), unit.size());
     }
     return text;
   }
