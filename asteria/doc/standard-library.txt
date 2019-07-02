@@ -2000,3 +2000,44 @@
 
 	* Returns the SHA-256 checksum as a `string` of 64 hexadecimal
 	  digits in uppercase.
+
+### `std.json`
+
+`std.json.format(value, [indent])`
+
+	* Converts a value to a `string` in the JSON format, according to
+	  IETF RFC 7159. This function generates text that conforms to
+	  JSON strictly; values whose types cannot be represented in JSON
+	  are discarded if they are found in an `object` and censored to
+	  `null` otherwise. If `indent` is set to a `string`, it is used
+	  as each level of indention following a line break, unless it is
+	  empty, in which case no line break is inserted. If `indent` is
+	  set to an `integer`, it is clamped between `0` and `10`
+	  inclusively and this function behaves as if a `string`
+	  consisting of this number of spaces was set. Its default value
+	  is an empty `string`.
+
+	* Returns the formatted text as a `string`.
+
+`std.json.parse(text)`
+
+	* Parses a `string` containing data encoded in the JSON format
+	  and converts it to a value. This function reuses the tokenizer
+	  of Asteria and allows quite a few extensions, some of which
+	  are also supported by JSON5:
+
+	  * Single-line and multiple-line comments are allowed.
+	  * Binary and hexadecimal numbers are allowed.
+	  * Numbers can have binary exponents.
+	  * Infinities and NaNs are allowed.
+	  * Numbers can start with plus signs.
+	  * Strings and object keys may be single-quoted.
+	  * Escape sequences (including UTF-32) are allowed in strings.
+	  * Element lists of arrays and objects may end in commas.
+	  * Object keys may be unquoted if they are valid identifiers.
+
+	  Be advised that numbers are always parsed as `real`s.
+
+	* Returns the parsed value. If `text` is empty or is not a valid
+	  JSON string, `null` is returned. There is no way to tell empty
+	  or explicit `"null"` inputs from failures.

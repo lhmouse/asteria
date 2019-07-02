@@ -18,6 +18,7 @@
 #include "../library/bindings_math.hpp"
 #include "../library/bindings_filesystem.hpp"
 #include "../library/bindings_checksum.hpp"
+#include "../library/bindings_json.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -47,6 +48,7 @@ Global_Context::~Global_Context()
         { api_version_0001_0000,  "math",        create_bindings_math        },
         { api_version_0001_0000,  "filesystem",  create_bindings_filesystem  },
         { api_version_0001_0000,  "checksum",    create_bindings_checksum    },
+        { api_version_0001_0000,  "json",        create_bindings_json        },
       };
 
     struct Module_Comparator
