@@ -759,7 +759,7 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
         continue;
       }
       unit.emplace_back(ch);
-      if(unit.size() != 2) {
+      if(unit.size() != unit.capacity()) {
         // Await remaining digits.
         continue;
       }
@@ -862,17 +862,17 @@ Opt<G_string> std_string_base32_decode(const G_string& text)
         continue;
       }
       unit.emplace_back(ch);
-      if(unit.size() != 8) {
+      if(unit.size() != unit.capacity()) {
         // Await remaining digits.
         continue;
       }
       // Get the start of padding characters.
-      pos = std::find(unit.data(), unit.data() + 8, s_base32_table[64]);
-      if(std::any_of(pos, unit.data() + 8, [&](char cx) { return cx != s_base32_table[64];  })) {
+      auto pt = std::find(unit.begin(), unit.end(), s_base32_table[64]);
+      if(std::any_of(pt, unit.end(), [&](char cx) { return cx != s_base32_table[64];  })) {
         // Fail if a non-padding character follows a padding character.
         return rocket::nullopt;
       }
-      auto p = static_cast<std::size_t>(pos - unit.data());
+      auto p = static_cast<std::size_t>(pt - unit.begin());
       // How many bytes are there in this unit?
       auto m = p * 5 / 8;
       if((m == 0) || ((m * 8 + 4) / 5 != p)) {
@@ -960,7 +960,70 @@ G_string std_string_base64_encode(const G_string& data)
 
 Opt<G_string> std_string_base64_decode(const G_string& text)
   {
-    return { };
+    G_string data;
+    // These shall be operated in big-endian order.
+    std::uint32_t reg;
+    Static_Vector<char, 4> unit;
+    // Decode source data.
+    std::size_t nread = 0;
+    while(nread != text.size()) {
+      // Read and identify a character.
+      auto ch = text[nread++];
+      auto pos = do_slitchr(s_spaces, ch);
+      if(*pos) {
+        // The character is a whitespace.
+        if(unit.size() != 0) {
+          // Fail if it occurs in the middle of a encoding unit.
+          return rocket::nullopt;
+        }
+        // Ignore it.
+        continue;
+      }
+      unit.emplace_back(ch);
+      if(unit.size() != unit.capacity()) {
+        // Await remaining digits.
+        continue;
+      }
+      // Get the start of padding characters.
+      auto pt = std::find(unit.begin(), unit.end(), s_base64_table[64]);
+      if(std::any_of(pt, unit.end(), [&](char cx) { return cx != s_base64_table[64];  })) {
+        // Fail if a non-padding character follows a padding character.
+        return rocket::nullopt;
+      }
+      auto p = static_cast<std::size_t>(pt - unit.begin());
+      // How many bytes are there in this unit?
+      auto m = p * 3 / 4;
+      if((m == 0) || ((m * 8 + 5) / 6 != p)) {
+        // Fail due to invalid number of non-padding characters.
+        return rocket::nullopt;
+      }
+      // Decode the current encoding unit.
+      for(std::size_t i = 0; i != p; ++i) {
+        pos = do_slitchr(s_base64_table, unit[i]);
+        if(!*pos) {
+          // The character is invalid.
+          return rocket::nullopt;
+        }
+        auto off = static_cast<std::size_t>(pos - s_base64_table);
+        ROCKET_ASSERT(off < 64);
+        // Accept a digit.
+        std::uint32_t b = off & 0xFF;
+        reg <<= 6;
+        reg |= b;
+      }
+      reg <<= 32 - p * 6;
+      // Write the unit.
+      for(std::size_t i = 0; i != m; ++i) {
+        data.push_back(static_cast<char>(reg >> 24));
+        reg <<= 8;
+      }
+      unit.clear();
+    }
+    if(unit.size() != 0) {
+      // Fail in case of excess digits.
+      return rocket::nullopt;
+    }
+    return rocket::move(data);
   }
 
 Opt<G_string> std_string_utf8_encode(const G_integer& code_point, const Opt<G_boolean>& permissive)

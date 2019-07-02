@@ -214,6 +214,7 @@ int main()
         assert std.string.base32_decode("nbSWy3DpIA7SC===") == "hello@?!";
         assert std.string.base32_decode("nbSWy3DpENAD6I==") == null;
         assert std.string.base32_decode("nbSWy3DpENAD6II=") == "hello#@?!";
+        assert std.string.base32_decode("nbSWy3Dp   ENAD6II=") == "hello#@?!";
         assert std.string.base32_decode("NBSWY3D") == null;
         assert std.string.base32_decode("NBSWY3DP!invalid") == null;
         assert std.string.base32_decode("") == "";
@@ -223,12 +224,14 @@ int main()
         assert std.string.base64_encode("hello?!") == "aGVsbG8/IQ==";
         assert std.string.base64_encode("") == "";
 
-//        assert std.string.base64_decode("aGVsbG8=") == "hello";
-//        assert std.string.base64_decode("aGVsbG8h") == "hello!";
-//        assert std.string.base64_decode("aGVsbG8/I===") == null;
-//        assert std.string.base64_decode("aGVsbG8/IQ==") == "hello?!";
-//        assert std.string.base64_decode("aGVsbG8=!invalid") == null;
-//        assert std.string.base64_decode("") == "";
+        assert std.string.base64_decode("aGVsbG8=") == "hello";
+        assert std.string.base64_decode("aGVsbG8h") == "hello!";
+        assert std.string.base64_decode("aGVsbG8/I===") == null;
+        assert std.string.base64_decode("aGVsbG8/IQ==") == "hello?!";
+        assert std.string.base64_decode("aGVs  bG8/IQ==") == "hello?!";
+        assert std.string.base64_decode("aGVs  bG8/  IQ==") == "hello?!";
+        assert std.string.base64_decode("aGVsbG8=!invalid") == null;
+        assert std.string.base64_decode("") == "";
 
         assert std.string.translate("hello", "el") == "ho";
         assert std.string.translate("hello", "el", "a") == "hao";
