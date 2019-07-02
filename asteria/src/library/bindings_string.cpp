@@ -136,7 +136,7 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
           if(std::equal(pbegin, pend, tpos)) {
             break;
           }
-          tpos += bcr_table[tpos[plen - 1] & 0xFF];
+          tpos += bcr_table[tpos[~-plen] & 0xFF];
         }
         return rocket::move(tpos);
       }
