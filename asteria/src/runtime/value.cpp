@@ -51,13 +51,18 @@ const char* Value::get_gtype_name(Gtype gtype) noexcept
     }
   }
 
+    namespace {
+
+    // These bytes should make up a `Value` that equals `null` and shall never be destroyed.
+    // Don't play with this at home.
+    constexpr std::aligned_union<0, Value>::type s_null[1] = { };
+
+    }
+
 const Value& Value::get_null() noexcept
   {
-    // Don't play with this at home.
-    static constexpr std::aligned_union<0, Value>::type s_null = { };
-    // This two-step conversion is necessary to eliminate warnings when strict aliasing is in effect.
-    const void* pv = std::addressof(s_null);
-    return *(static_cast<const Value*>(pv));
+    // This two-step cast is necessary to eliminate warnings when strict aliasing is in effect.
+    return static_cast<const Value*>(static_cast<const void*>(s_null))[0];
   }
 
 bool Value::test() const noexcept

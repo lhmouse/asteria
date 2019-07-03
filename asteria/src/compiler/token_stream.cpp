@@ -544,73 +544,72 @@ namespace Asteria {
           }
       };
 
+    struct Punctuator_Element
+      {
+        char first[6];
+        Token::Punctuator second;
+      }
+    constexpr s_punctuators[] =
+      {
+        { "!",     Token::punctuator_notl        },
+        { "!=",    Token::punctuator_cmp_ne      },
+        { "%",     Token::punctuator_mod         },
+        { "%=",    Token::punctuator_mod_eq      },
+        { "&",     Token::punctuator_andb        },
+        { "&&",    Token::punctuator_andl        },
+        { "&&=",   Token::punctuator_andl_eq     },
+        { "&=",    Token::punctuator_andb_eq     },
+        { "(",     Token::punctuator_parenth_op  },
+        { ")",     Token::punctuator_parenth_cl  },
+        { "*",     Token::punctuator_mul         },
+        { "*=",    Token::punctuator_mul_eq      },
+        { "+",     Token::punctuator_add         },
+        { "++",    Token::punctuator_inc         },
+        { "+=",    Token::punctuator_add_eq      },
+        { ",",     Token::punctuator_comma       },
+        { "-",     Token::punctuator_sub         },
+        { "--",    Token::punctuator_dec         },
+        { "-=",    Token::punctuator_sub_eq      },
+        { ".",     Token::punctuator_dot         },
+        { "...",   Token::punctuator_ellipsis    },
+        { "/",     Token::punctuator_div         },
+        { "/=",    Token::punctuator_div_eq      },
+        { ":",     Token::punctuator_colon       },
+        { ";",     Token::punctuator_semicol     },
+        { "<",     Token::punctuator_cmp_lt      },
+        { "<<",    Token::punctuator_sla         },
+        { "<<<",   Token::punctuator_sll         },
+        { "<<<=",  Token::punctuator_sll_eq      },
+        { "<<=",   Token::punctuator_sla_eq      },
+        { "<=",    Token::punctuator_cmp_lte     },
+        { "<=>",   Token::punctuator_spaceship   },
+        { "=",     Token::punctuator_assign      },
+        { "==",    Token::punctuator_cmp_eq      },
+        { ">",     Token::punctuator_cmp_gt      },
+        { ">=",    Token::punctuator_cmp_gte     },
+        { ">>",    Token::punctuator_sra         },
+        { ">>=",   Token::punctuator_sra_eq      },
+        { ">>>",   Token::punctuator_srl         },
+        { ">>>=",  Token::punctuator_srl_eq      },
+        { "?",     Token::punctuator_quest       },
+        { "?=",    Token::punctuator_quest_eq    },
+        { "?\?",   Token::punctuator_coales      },
+        { "?\?=",  Token::punctuator_coales_eq   },
+        { "[",     Token::punctuator_bracket_op  },
+        { "]",     Token::punctuator_bracket_cl  },
+        { "^",     Token::punctuator_xorb        },
+        { "^=",    Token::punctuator_xorb_eq     },
+        { "{",     Token::punctuator_brace_op    },
+        { "|",     Token::punctuator_orb         },
+        { "|=",    Token::punctuator_orb_eq      },
+        { "||",    Token::punctuator_orl         },
+        { "||=",   Token::punctuator_orl_eq      },
+        { "}",     Token::punctuator_brace_cl    },
+        { "~",     Token::punctuator_notb        },
+      };
+
     bool do_accept_punctuator(Cow_Vector<Token>& seq, Line_Reader& reader)
       {
-        // Get a punctuator.
-        struct Punctuator_Element
-          {
-            char first[6];
-            Token::Punctuator second;
-            std::uintptr_t : 0;
-          }
-        static constexpr s_punctuators[] =
-          {
-            { "!",     Token::punctuator_notl        },
-            { "!=",    Token::punctuator_cmp_ne      },
-            { "%",     Token::punctuator_mod         },
-            { "%=",    Token::punctuator_mod_eq      },
-            { "&",     Token::punctuator_andb        },
-            { "&&",    Token::punctuator_andl        },
-            { "&&=",   Token::punctuator_andl_eq     },
-            { "&=",    Token::punctuator_andb_eq     },
-            { "(",     Token::punctuator_parenth_op  },
-            { ")",     Token::punctuator_parenth_cl  },
-            { "*",     Token::punctuator_mul         },
-            { "*=",    Token::punctuator_mul_eq      },
-            { "+",     Token::punctuator_add         },
-            { "++",    Token::punctuator_inc         },
-            { "+=",    Token::punctuator_add_eq      },
-            { ",",     Token::punctuator_comma       },
-            { "-",     Token::punctuator_sub         },
-            { "--",    Token::punctuator_dec         },
-            { "-=",    Token::punctuator_sub_eq      },
-            { ".",     Token::punctuator_dot         },
-            { "...",   Token::punctuator_ellipsis    },
-            { "/",     Token::punctuator_div         },
-            { "/=",    Token::punctuator_div_eq      },
-            { ":",     Token::punctuator_colon       },
-            { ";",     Token::punctuator_semicol     },
-            { "<",     Token::punctuator_cmp_lt      },
-            { "<<",    Token::punctuator_sla         },
-            { "<<<",   Token::punctuator_sll         },
-            { "<<<=",  Token::punctuator_sll_eq      },
-            { "<<=",   Token::punctuator_sla_eq      },
-            { "<=",    Token::punctuator_cmp_lte     },
-            { "<=>",   Token::punctuator_spaceship   },
-            { "=",     Token::punctuator_assign      },
-            { "==",    Token::punctuator_cmp_eq      },
-            { ">",     Token::punctuator_cmp_gt      },
-            { ">=",    Token::punctuator_cmp_gte     },
-            { ">>",    Token::punctuator_sra         },
-            { ">>=",   Token::punctuator_sra_eq      },
-            { ">>>",   Token::punctuator_srl         },
-            { ">>>=",  Token::punctuator_srl_eq      },
-            { "?",     Token::punctuator_quest       },
-            { "?=",    Token::punctuator_quest_eq    },
-            { "?\?",   Token::punctuator_coales      },
-            { "?\?=",  Token::punctuator_coales_eq   },
-            { "[",     Token::punctuator_bracket_op  },
-            { "]",     Token::punctuator_bracket_cl  },
-            { "^",     Token::punctuator_xorb        },
-            { "^=",    Token::punctuator_xorb_eq     },
-            { "{",     Token::punctuator_brace_op    },
-            { "|",     Token::punctuator_orb         },
-            { "|=",    Token::punctuator_orb_eq      },
-            { "||",    Token::punctuator_orl         },
-            { "||=",   Token::punctuator_orl_eq      },
-            { "}",     Token::punctuator_brace_cl    },
-            { "~",     Token::punctuator_notb        },
-          };
 #ifdef ROCKET_DEBUG
         ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_Comparator()));
 #endif
@@ -776,6 +775,61 @@ namespace Asteria {
         return true;
       }
 
+    struct Keyword_Element
+      {
+        char first[10];
+        Token::Keyword second;
+      }
+    constexpr s_keywords[] =
+      {
+        { "__abs",     Token::keyword_abs       },
+        { "__ceil",    Token::keyword_ceil      },
+        { "__floor",   Token::keyword_floor     },
+        { "__fma",     Token::keyword_fma       },
+        { "__iceil",   Token::keyword_iceil     },
+        { "__ifloor",  Token::keyword_ifloor    },
+        { "__iround",  Token::keyword_iround    },
+        { "__isinf",   Token::keyword_isinf     },
+        { "__isnan",   Token::keyword_isnan     },
+        { "__itrunc",  Token::keyword_itrunc    },
+        { "__round",   Token::keyword_round     },
+        { "__signb",   Token::keyword_signb     },
+        { "__sqrt",    Token::keyword_sqrt      },
+        { "__trunc",   Token::keyword_trunc     },
+        { "and",       Token::keyword_and       },
+        { "assert",    Token::keyword_assert    },
+        { "break",     Token::keyword_break     },
+        { "case",      Token::keyword_case      },
+        { "catch",     Token::keyword_catch     },
+        { "const",     Token::keyword_const     },
+        { "continue",  Token::keyword_continue  },
+        { "default",   Token::keyword_default   },
+        { "defer",     Token::keyword_defer     },
+        { "do",        Token::keyword_do        },
+        { "each",      Token::keyword_each      },
+        { "else",      Token::keyword_else      },
+        { "false",     Token::keyword_false     },
+        { "for",       Token::keyword_for       },
+        { "func",      Token::keyword_func      },
+        { "if",        Token::keyword_if        },
+        { "infinity",  Token::keyword_infinity  },
+        { "lengthof",  Token::keyword_lengthof  },
+        { "nan",       Token::keyword_nan       },
+        { "not",       Token::keyword_not       },
+        { "null",      Token::keyword_null      },
+        { "or",        Token::keyword_or        },
+        { "return",    Token::keyword_return    },
+        { "switch",    Token::keyword_switch    },
+        { "this",      Token::keyword_this      },
+        { "throw",     Token::keyword_throw     },
+        { "true",      Token::keyword_true      },
+        { "try",       Token::keyword_try       },
+        { "typeof",    Token::keyword_typeof    },
+        { "unset",     Token::keyword_unset     },
+        { "var",       Token::keyword_var       },
+        { "while",     Token::keyword_while     },
+      };
+
     bool do_accept_identifier_or_keyword(Cow_Vector<Token>& seq, Line_Reader& reader, bool keyword_as_identifier)
       {
         // identifier ::=
@@ -801,62 +855,6 @@ namespace Asteria {
           do_push_token(seq, reader, tlen, rocket::move(xtoken));
           return true;
         }
-        // Check whether this identifier matches a keyword.
-        struct Keyword_Element
-          {
-            char first[12];
-            Token::Keyword second;
-            std::uintptr_t : 0;
-          }
-        static constexpr s_keywords[] =
-          {
-            { "__abs",     Token::keyword_abs       },
-            { "__ceil",    Token::keyword_ceil      },
-            { "__floor",   Token::keyword_floor     },
-            { "__fma",     Token::keyword_fma       },
-            { "__iceil",   Token::keyword_iceil     },
-            { "__ifloor",  Token::keyword_ifloor    },
-            { "__iround",  Token::keyword_iround    },
-            { "__isinf",   Token::keyword_isinf     },
-            { "__isnan",   Token::keyword_isnan     },
-            { "__itrunc",  Token::keyword_itrunc    },
-            { "__round",   Token::keyword_round     },
-            { "__signb",   Token::keyword_signb     },
-            { "__sqrt",    Token::keyword_sqrt      },
-            { "__trunc",   Token::keyword_trunc     },
-            { "and",       Token::keyword_and       },
-            { "assert",    Token::keyword_assert    },
-            { "break",     Token::keyword_break     },
-            { "case",      Token::keyword_case      },
-            { "catch",     Token::keyword_catch     },
-            { "const",     Token::keyword_const     },
-            { "continue",  Token::keyword_continue  },
-            { "default",   Token::keyword_default   },
-            { "defer",     Token::keyword_defer     },
-            { "do",        Token::keyword_do        },
-            { "each",      Token::keyword_each      },
-            { "else",      Token::keyword_else      },
-            { "false",     Token::keyword_false     },
-            { "for",       Token::keyword_for       },
-            { "func",      Token::keyword_func      },
-            { "if",        Token::keyword_if        },
-            { "infinity",  Token::keyword_infinity  },
-            { "lengthof",  Token::keyword_lengthof  },
-            { "nan",       Token::keyword_nan       },
-            { "not",       Token::keyword_not       },
-            { "null",      Token::keyword_null      },
-            { "or",        Token::keyword_or        },
-            { "return",    Token::keyword_return    },
-            { "switch",    Token::keyword_switch    },
-            { "this",      Token::keyword_this      },
-            { "throw",     Token::keyword_throw     },
-            { "true",      Token::keyword_true      },
-            { "try",       Token::keyword_try       },
-            { "typeof",    Token::keyword_typeof    },
-            { "unset",     Token::keyword_unset     },
-            { "var",       Token::keyword_var       },
-            { "while",     Token::keyword_while     },
-          };
 #ifdef ROCKET_DEBUG
         ROCKET_ASSERT(std::is_sorted(std::begin(s_keywords), std::end(s_keywords), Prefix_Comparator()));
 #endif

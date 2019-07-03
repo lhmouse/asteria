@@ -14,10 +14,16 @@
 
 namespace Asteria {
 
+    namespace {
+
+    static_assert(std::is_trivially_destructible<Parser_Options>::value, "??");
+    // This object is never destroyed.
+    constexpr Parser_Options s_default_options = { };
+
+    }
+
 Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const Cow_String& filename)
   {
-    // Use default options.
-    static constexpr Parser_Options s_default_options = { };
     // Tokenize the character stream.
     Token_Stream tstrm;
     if(!tstrm.load(cbuf, filename, s_default_options)) {

@@ -56,16 +56,20 @@ class Traceable_Exception : public virtual std::exception
 
 template<typename ExceptionT> Traceable_Exception trace_exception(ExceptionT&& except)
   {
-    // Is `except` an lvalue reference or a const reference (i.e. it isn't a non-const rvalue reference)?
-    static constexpr bool copy_or_move = std::is_lvalue_reference<ExceptionT&&>::value || std::is_const<typename std::remove_reference<ExceptionT&&>::type>::value;
-    // Is `except` derived from `Traceable_Exception`?
-    auto traceable = dynamic_cast<typename std::conditional<copy_or_move, const Traceable_Exception*, Traceable_Exception*>::type>(std::addressof(except));
-    if(!traceable) {
+    // Should `except` be copied or moved?
+    using Source = typename std::conditional<(std::is_lvalue_reference<ExceptionT>::value || std::is_const<ExceptionT>::value),
+                                             const Traceable_Exception&,    // lvalue or const rvalue
+                                             Traceable_Exception&&>::type;  // non-const rvalue
+    // Is the dynamic type of `except` derived from `Traceable_Exception`?
+    auto qsource = dynamic_cast<typename std::remove_reference<Source>::type*>(std::addressof(except));
+    if(!qsource) {
       // Say the exception was thrown from native code.
-      return Traceable_Exception(G_string(except.what()), Source_Location(rocket::sref("<native code>"), 0), rocket::sref("<native code>"));
+      return Traceable_Exception(G_string(except.what()),
+                                 Source_Location(rocket::sref("<native code>"), 0),
+                                 rocket::sref("<native code>"));
     }
-    // Copy or move it.
-    return static_cast<typename std::conditional<copy_or_move, const Traceable_Exception&, Traceable_Exception&&>::type>(*traceable);
+    // Forward `except`.
+    return static_cast<Source>(*qsource);
   }
 
 }  // namespace Asteria

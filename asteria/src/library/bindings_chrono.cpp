@@ -165,13 +165,16 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
     return time_utc;
   }
 
+    namespace {
+
+    // Define strings that are allocated statically for special time point values.
+    constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000" };
+    constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
+
+    }
+
 G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>& with_ms)
   {
-    // Return strings that are allocated statically for special time point values.
-    static constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00",
-                                               "1601-01-01 00:00:00.000" };
-    static constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00",
-                                               "9999-01-01 00:00:00.000" };
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
     // Deal with special time points.
