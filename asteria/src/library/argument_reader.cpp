@@ -67,7 +67,7 @@ void Argument_Reader::do_record_parameter(Gtype gtype, bool required)
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; no argument could be extracted any further.");
     }
-    Mparam pinfo;
+    Mparam pinfo = { };
     pinfo.tag = required ? Mparam::tag_required : Mparam::tag_optional;
     pinfo.gtype = gtype;
     this->m_state.prototype.emplace_back(pinfo);
@@ -78,7 +78,7 @@ void Argument_Reader::do_record_parameter_generic()
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; no argument could be extracted any further.");
     }
-    Mparam pinfo;
+    Mparam pinfo = { };
     pinfo.tag = Mparam::tag_generic;
     this->m_state.prototype.emplace_back(pinfo);
   }
@@ -88,7 +88,7 @@ void Argument_Reader::do_record_parameter_finish(bool variadic)
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; it cannot be finished a second time.");
     }
-    Mparam pinfo;
+    Mparam pinfo = { };
     if(variadic) {
       pinfo.tag = Mparam::tag_variadic;
       this->m_state.prototype.emplace_back(pinfo);

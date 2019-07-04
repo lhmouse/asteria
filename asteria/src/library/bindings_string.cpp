@@ -715,7 +715,7 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
     bool rlowerc = lowercase == true;
     text.reserve(data.size() * (2 + rdelim.length()));
     // These shall be operated in big-endian order.
-    std::uint32_t reg;
+    std::uint32_t reg = 0;
     Array<char, 2> unit;
     // Encode source data.
     std::size_t nread = 0;
@@ -741,7 +741,7 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
   {
     G_string data;
     // These shall be operated in big-endian order.
-    std::uint32_t reg;
+    std::uint32_t reg = 0;
     Static_Vector<char, 2> unit;
     // Decode source data.
     std::size_t nread = 0;
@@ -795,7 +795,7 @@ G_string std_string_base32_encode(const G_string& data, const Opt<G_boolean>& lo
     bool rlowerc = lowercase == true;
     text.reserve((data.size() + 4) / 5 * 8);
     // These shall be operated in big-endian order.
-    std::uint64_t reg;
+    std::uint64_t reg = 0;
     Array<char, 8> unit;
     // Encode source data.
     std::size_t nread = 0;
@@ -844,7 +844,7 @@ Opt<G_string> std_string_base32_decode(const G_string& text)
   {
     G_string data;
     // These shall be operated in big-endian order.
-    std::uint64_t reg;
+    std::uint64_t reg = 0;
     Static_Vector<char, 8> unit;
     // Decode source data.
     std::size_t nread = 0;
@@ -913,7 +913,7 @@ G_string std_string_base64_encode(const G_string& data)
     G_string text;
     text.reserve((data.size() + 2) / 3 * 4);
     // These shall be operated in big-endian order.
-    std::uint32_t reg;
+    std::uint32_t reg = 0;
     Array<char, 4> unit;
     // Encode source data.
     std::size_t nread = 0;
@@ -962,7 +962,7 @@ Opt<G_string> std_string_base64_decode(const G_string& text)
   {
     G_string data;
     // These shall be operated in big-endian order.
-    std::uint32_t reg;
+    std::uint32_t reg = 0;
     Static_Vector<char, 4> unit;
     // Decode source data.
     std::size_t nread = 0;
