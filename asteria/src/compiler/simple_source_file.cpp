@@ -46,7 +46,7 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const C
     rocket::for_each(parser.get_statements(), [&](const Statement& stmt) { stmt.generate_code(code, nullptr, ctx);  });
     // Accept the code.
     this->m_inst.clear();
-    this->m_inst.emplace_back(sloc, rocket::sref("<file scope"), params, rocket::move(code));
+    this->m_inst.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
     return Parser_Error(0, 0, 0, Parser_Error::code_success);
   }
 
