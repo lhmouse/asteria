@@ -89,7 +89,7 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
       return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_badbit_set));
     }
     // `qerr` shall always have a value here.
-    // If the exceptional path above was taken, `cstrm.bad()` would have been set.
+    // If the exceptional path above has been taken, `cstrm.bad()` will have been set.
     return this->do_throw_or_return(rocket::move(*qerr));
   }
 
