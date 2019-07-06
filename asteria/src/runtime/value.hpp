@@ -207,7 +207,7 @@ class Value
     ROCKET_PURE_FUNCTION bool test() const noexcept;
     ROCKET_PURE_FUNCTION Compare compare(const Value& other) const noexcept;
     void print(std::ostream& os, bool quote_strings = false) const;
-    void dump(std::ostream& os, std::size_t indent_increment = 2, std::size_t indent_next = 0) const;
+    void dump(std::ostream& os, int indent_increment = 2, int indent_next = 0) const;
 
     ROCKET_PURE_FUNCTION bool unique() const noexcept;
     ROCKET_PURE_FUNCTION long use_count() const noexcept;

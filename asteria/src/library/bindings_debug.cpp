@@ -20,7 +20,7 @@ bool std_debug_print(const Cow_Vector<Value>& values)
 bool std_debug_dump(const Value& value, const Opt<G_integer>& indent)
   {
     rocket::insertable_ostream mos;
-    value.dump(mos, static_cast<std::size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
+    value.dump(mos, static_cast<int>(rocket::clamp(indent.value_or(2), 0, 10)));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, mos.extract_string());
     return succ;
   }

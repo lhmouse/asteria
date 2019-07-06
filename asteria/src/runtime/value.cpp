@@ -272,21 +272,19 @@ void Value::print(std::ostream& os, bool quote_strings) const
 
     namespace {
 
-    std::ostream& do_auto_indent(std::ostream& os, std::size_t indent_increment, std::size_t indent_next)
+    std::ostream& do_auto_indent(std::ostream& os, int indent_increment, int indent_next)
       {
         if(indent_increment == 0) {
           // Output everything in a single line. Characters are separated by spaces.
           return os << ' ';
         }
         // Terminate the current line and indent it accordingly.
-        os << std::endl;
-        os.width(static_cast<std::streamsize>(indent_next));
-        return os << "";
+        return os << std::endl << std::setw(indent_next) << "";
       }
 
     }
 
-void Value::dump(std::ostream& os, std::size_t indent_increment, std::size_t indent_next) const
+void Value::dump(std::ostream& os, int indent_increment, int indent_next) const
   {
     switch(static_cast<Gtype>(this->m_stor.index())) {
     case gtype_null:
