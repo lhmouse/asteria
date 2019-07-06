@@ -579,8 +579,7 @@ bool Argument_Reader::finish(Cow_Vector<Reference>& vargs)
     // Copy variadic arguments as is.
     vargs.clear();
     if(*qoff < this->m_args.get().ssize()) {
-      std::for_each(this->m_args.get().begin() + *qoff, this->m_args.get().end(),
-                    [&](const Reference& arg) { vargs.emplace_back(arg);  });
+      std::for_each(this->m_args.get().begin() + *qoff, this->m_args.get().end(), [&](const Reference& arg) { vargs.emplace_back(arg);  });
     }
     return true;
   }
@@ -596,8 +595,7 @@ bool Argument_Reader::finish(Cow_Vector<Value>& vargs)
     // Copy variadic arguments as is.
     vargs.clear();
     if(*qoff < this->m_args.get().ssize()) {
-      std::for_each(this->m_args.get().begin() + *qoff, this->m_args.get().end(),
-                    [&](const Reference& arg) { vargs.emplace_back(arg.read());  });
+      std::for_each(this->m_args.get().begin() + *qoff, this->m_args.get().end(), [&](const Reference& arg) { vargs.emplace_back(arg.read());  });
     }
     return true;
   }
@@ -610,8 +608,8 @@ void Argument_Reader::throw_no_matching_function_call() const
     rocket::insertable_ostream mos;
     mos << "There was no matching overload for function call `" << name << "(";
     if(!args.empty()) {
-      std::for_each(args.begin(), args.end() - 1, [&](const Reference& arg) { mos << arg.read().gtype_name() <<", ";  });
-      mos << args.back().read().gtype_name();
+      mos << args.front().read().gtype_name();
+      std::for_each(args.begin() + 1, args.end(), [&](const Reference& arg) { mos <<", " << arg.read().gtype_name();  });
     }
     mos << ")`.";
     // If overload information is available, append the list of overloads.
@@ -624,8 +622,8 @@ void Argument_Reader::throw_no_matching_function_call() const
         // Append this overload.
         mos << "`" << name << "(";
         if(bpos != epos) {
-          std::for_each(bpos, epos - 1, [&](const Mparam& pinfo) { pinfo.print(mos), mos << ", ";  });
-          epos[-1].print(mos);
+          bpos->print(mos);
+          std::for_each(bpos + 1, epos, [&](const Mparam& pinfo) { pinfo.print(mos << ", ");  });
         }
         mos << ")`";
         // Are there more overloads?
