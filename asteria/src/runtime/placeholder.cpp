@@ -11,9 +11,9 @@ Placeholder::~Placeholder()
   {
   }
 
-void Placeholder::describe(std::ostream& os) const
+std::ostream& Placeholder::describe(std::ostream& os) const
   {
-    os << "<placeholder for uninitialized values>";
+    return os << "<placeholder for uninitialized values>";
   }
 
 Reference& Placeholder::invoke(Reference& /*self*/, const Global_Context& /*global*/, Cow_Vector<Reference>&& /*args*/) const

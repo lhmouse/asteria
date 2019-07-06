@@ -44,9 +44,9 @@ namespace Asteria {
           }
 
       public:
-        void describe(std::ostream& os) const override
+        std::ostream& describe(std::ostream& os) const override
           {
-            os << "CRC-32 hasher";
+            return os << "CRC-32 hasher";
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {
@@ -161,9 +161,9 @@ G_integer std_checksum_crc32(const G_string& data)
           }
 
       public:
-        void describe(std::ostream& os) const override
+        std::ostream& describe(std::ostream& os) const override
           {
-            os << "FNV-1a hasher (32-bit)";
+            return os << "FNV-1a hasher (32-bit)";
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {
@@ -477,9 +477,9 @@ G_integer std_checksum_fnv1a32(const G_string& data)
           }
 
       public:
-        void describe(std::ostream& os) const override
+        std::ostream& describe(std::ostream& os) const override
           {
-            os << "MD5 hasher";
+            return os << "MD5 hasher";
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {
@@ -787,9 +787,9 @@ G_string std_checksum_md5(const G_string& data)
           }
 
       public:
-        void describe(std::ostream& os) const override
+        std::ostream& describe(std::ostream& os) const override
           {
-            os << "SHA-1 hasher";
+            return os << "SHA-1 hasher";
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {
@@ -1067,9 +1067,9 @@ G_string std_checksum_sha1(const G_string& data)
           }
 
       public:
-        void describe(std::ostream& os) const override
+        std::ostream& describe(std::ostream& os) const override
           {
-            os << "SHA-256 hasher";
+            return os << "SHA-256 hasher";
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {

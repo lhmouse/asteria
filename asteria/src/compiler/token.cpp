@@ -427,50 +427,38 @@ const char* Token::get_punctuator(Punctuator punct) noexcept
     }
   }
 
-void Token::print(std::ostream& os) const
+std::ostream& Token::print(std::ostream& os) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_keyword:
       {
-        const auto& altr = this->m_stor.as<index_keyword>();
         // keyword `if`
-        os << "keyword `" << Token::get_keyword(altr.keyword) << "`";
-        return;
+        return os << "keyword `" << Token::get_keyword(this->m_stor.as<index_keyword>().keyword) << "`";
       }
     case index_punctuator:
       {
-        const auto& altr = this->m_stor.as<index_punctuator>();
         // punctuator `;`
-        os << "punctuator `" << Token::get_punctuator(altr.punct) << "`";
-        return;
+        return os << "punctuator `" << Token::get_punctuator(this->m_stor.as<index_punctuator>().punct) << "`";
       }
     case index_identifier:
       {
-        const auto& altr = this->m_stor.as<index_identifier>();
         // identifier `meow`
-        os << "identifier `" << altr.name << "`";
-        return;
+        return os << "identifier `" << this->m_stor.as<index_identifier>().name << "`";
       }
     case index_integer_literal:
       {
-        const auto& altr = this->m_stor.as<index_integer_literal>();
         // integer-literal `42`
-        os << "integer-literal `" << std::dec << altr.value << "`";
-        return;
+        return os << "integer-literal `" << std::dec << this->m_stor.as<index_integer_literal>().value << "`";
       }
     case index_real_literal:
       {
-        const auto& altr = this->m_stor.as<index_real_literal>();
         // real-number-literal `123.456`
-        os << "real-number-literal `" << std::defaultfloat << std::nouppercase << std::setprecision(17) << altr.value << "`";
-        return;
+        return os << "real-number-literal `" << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<index_real_literal>().value << "`";
       }
     case index_string_literal:
       {
-        const auto& altr = this->m_stor.as<index_string_literal>();
         // string-literal "hello world"
-        os << "string-literal `" << quote(altr.value) << "`";
-        return;
+        return os << "string-literal `" << quote(this->m_stor.as<index_string_literal>().value) << "`";
       }
     default:
       ASTERIA_TERMINATE("An unknown token type enumeration `", this->m_stor.index(), "` has been encountered.");

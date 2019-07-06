@@ -14,9 +14,9 @@ Instantiated_Function::~Instantiated_Function()
   {
   }
 
-void Instantiated_Function::describe(std::ostream& os) const
+std::ostream& Instantiated_Function::describe(std::ostream& os) const
   {
-    os << this->m_zvarg->get_function_signature() << " @ " << this->m_zvarg->get_source_location();
+    return os << this->m_zvarg->get_function_signature() << " @ " << this->m_zvarg->get_source_location();
   }
 
 Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const

@@ -30,13 +30,12 @@ class Source_Location
         return this->m_line;
       }
 
-    void print(std::ostream& os) const;
+    std::ostream& print(std::ostream& os) const;
   };
 
 inline std::ostream& operator<<(std::ostream& os, const Source_Location& sloc)
   {
-    sloc.print(os);
-    return os;
+    return sloc.print(os);
   }
 
 }  // namespace Asteria

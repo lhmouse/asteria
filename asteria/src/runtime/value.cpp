@@ -191,55 +191,47 @@ Value::Compare Value::compare(const Value& other) const noexcept
     }
   }
 
-void Value::print(std::ostream& os, bool quote_strings) const
+std::ostream& Value::print(std::ostream& os, bool quote_strings) const
   {
     switch(static_cast<Gtype>(this->m_stor.index())) {
     case gtype_null:
       {
         // null
-        os << "null";
-        return;
+        return os << "null";
       }
     case gtype_boolean:
       {
         // true
-        os << std::boolalpha << std::nouppercase << this->m_stor.as<gtype_boolean>();
-        return;
+        return os << std::boolalpha << std::nouppercase << this->m_stor.as<gtype_boolean>();
       }
     case gtype_integer:
       {
         // 42
-        os << std::dec << this->m_stor.as<gtype_integer>();
-        return;
+        return os << std::dec << this->m_stor.as<gtype_integer>();
       }
     case gtype_real:
       {
         // 123.456
-        os << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<gtype_real>();
-        return;
+        return os << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<gtype_real>();
       }
     case gtype_string:
       {
         if(!quote_strings) {
           // hello
-          os << this->m_stor.as<gtype_string>();
-          return;
+          return os << this->m_stor.as<gtype_string>();
         }
         // "hello"
-        os << quote(this->m_stor.as<gtype_string>());
-        return;
+        return os << quote(this->m_stor.as<gtype_string>());
       }
     case gtype_opaque:
       {
         // <opaque> [[`my opaque`]]
-        os << "<opaque> [[`" << this->m_stor.as<gtype_opaque>() << "`]]";
-        return;
+        return os << "<opaque> [[`" << this->m_stor.as<gtype_opaque>() << "`]]";
       }
     case gtype_function:
       {
         // <function> [[`my function`]]
-        os << "<function> [[`" << this->m_stor.as<gtype_function>() << "`]]";
-        return;
+        return os << "<function> [[`" << this->m_stor.as<gtype_function>() << "`]]";
       }
     case gtype_array:
       {
@@ -251,7 +243,7 @@ void Value::print(std::ostream& os, bool quote_strings) const
           os << ',';
         }
         os << ' ' << ']';
-        return;
+        return os;
       }
     case gtype_object:
       {
@@ -263,7 +255,7 @@ void Value::print(std::ostream& os, bool quote_strings) const
           os << ',';
         }
         os << ' ' << '}';
-        return;
+        return os;
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -284,53 +276,49 @@ void Value::print(std::ostream& os, bool quote_strings) const
 
     }
 
-void Value::dump(std::ostream& os, int indent_increment, int indent_next) const
+std::ostream& Value::dump(std::ostream& os, int indent_increment, int indent_next) const
   {
     switch(static_cast<Gtype>(this->m_stor.index())) {
     case gtype_null:
       {
         // null
-        os << "null";
-        return;
+        return os << "null";
       }
     case gtype_boolean:
       {
         // boolean true
-        os << "boolean " << std::boolalpha << std::nouppercase << this->m_stor.as<gtype_boolean>();
-        return;
+        return os << "boolean " << std::boolalpha << std::nouppercase << this->m_stor.as<gtype_boolean>();
       }
     case gtype_integer:
       {
         // integer 42
-        os << "integer " << std::dec << this->m_stor.as<gtype_integer>();
-        return;
+        return os << "integer " << std::dec << this->m_stor.as<gtype_integer>();
       }
     case gtype_real:
       {
         // real 123.456
-        os << "real " << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<gtype_real>();
-        return;
+        return os << "real " << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<gtype_real>();
       }
     case gtype_string:
       {
         // string(5) "hello"
         const auto& altr = this->m_stor.as<gtype_string>();
         os << "string(" << std::dec << altr.size() << ") " << quote(altr);
-        return;
+        return os;
       }
     case gtype_opaque:
       {
         // opaque("typeid") [[`my opaque`]]
         const auto& altr = this->m_stor.as<gtype_opaque>();
-        os << "opaque(" << quote(typeid(altr.get()).name()) << ") [[`" << altr << "`]]";
-        return;
+        os << "opaque(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
+        return os;
       }
     case gtype_function:
       {
         // function("typeid") [[`my function`]]
         const auto& altr = this->m_stor.as<gtype_function>();
-        os << "function(" << quote(typeid(altr.get()).name()) << ") [[`" << altr << "`]]";
-        return;
+        os << "function(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
+        return os;
       }
     case gtype_array:
       {
@@ -352,7 +340,7 @@ void Value::dump(std::ostream& os, int indent_increment, int indent_next) const
         }
         do_auto_indent(os, indent_increment, indent_next + 1);
         os << ']';
-        return;
+        return os;
       }
     case gtype_object:
       {
@@ -374,7 +362,7 @@ void Value::dump(std::ostream& os, int indent_increment, int indent_next) const
         }
         do_auto_indent(os, indent_increment, indent_next + 1);
         os << '}';
-        return;
+        return os;
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");

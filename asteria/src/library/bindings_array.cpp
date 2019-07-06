@@ -977,7 +977,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             Argument_Reader::State state;
             // Parse arguments.
             G_array data;
-            G_function predictor = global.get_placeholder_function();
+            G_function predictor = global.placeholder_function();
             if(reader.start().g(data).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if(global, data, predictor);
@@ -1060,7 +1060,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             Argument_Reader::State state;
             // Parse arguments.
             G_array data;
-            G_function predictor = global.get_placeholder_function();
+            G_function predictor = global.placeholder_function();
             if(reader.start().g(data).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if_not(global, data, predictor);
@@ -1143,7 +1143,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             Argument_Reader::State state;
             // Parse arguments.
             G_array data;
-            G_function predictor = global.get_placeholder_function();
+            G_function predictor = global.placeholder_function();
             if(reader.start().g(data).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if(global, data, predictor);
@@ -1226,7 +1226,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             Argument_Reader::State state;
             // Parse arguments.
             G_array data;
-            G_function predictor = global.get_placeholder_function();
+            G_function predictor = global.placeholder_function();
             if(reader.start().g(data).save(state).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_rfind_if_not(global, data, predictor);
@@ -1736,7 +1736,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           {
             Argument_Reader reader(rocket::sref("std.array.generate"), args);
             // Parse arguments.
-            G_function generator = global.get_placeholder_function();
+            G_function generator = global.placeholder_function();
             G_integer length;
             if(reader.start().g(generator).g(length).finish()) {
               // Call the binding function.

@@ -122,21 +122,21 @@ void Global_Context::initialize(API_Version version)
     this->m_vstd = vstd;
   }
 
-Rcobj<Placeholder> Global_Context::get_placeholder() const noexcept
+Rcobj<Placeholder> Global_Context::placeholder() const noexcept
   {
     auto placeholder = rocket::dynamic_pointer_cast<Placeholder>(this->m_placeholder);
     ROCKET_ASSERT(placeholder);
     return rocket::move(placeholder);
   }
 
-Rcobj<Abstract_Opaque> Global_Context::get_placeholder_opaque() const noexcept
+Rcobj<Abstract_Opaque> Global_Context::placeholder_opaque() const noexcept
   {
     auto placeholder = rocket::dynamic_pointer_cast<Abstract_Opaque>(this->m_placeholder);
     ROCKET_ASSERT(placeholder);
     return rocket::move(placeholder);
   }
 
-Rcobj<Abstract_Function> Global_Context::get_placeholder_function() const noexcept
+Rcobj<Abstract_Function> Global_Context::placeholder_function() const noexcept
   {
     auto placeholder = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_placeholder);
     ROCKET_ASSERT(placeholder);

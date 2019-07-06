@@ -43,9 +43,9 @@ class Global_Context : public Abstract_Context
     void initialize(API_Version version = api_version_latest);
 
     // These are interfaces of the placeholder.
-    Rcobj<Placeholder> get_placeholder() const noexcept;
-    Rcobj<Abstract_Opaque> get_placeholder_opaque() const noexcept;
-    Rcobj<Abstract_Function> get_placeholder_function() const noexcept;
+    Rcobj<Placeholder> placeholder() const noexcept;
+    Rcobj<Abstract_Opaque> placeholder_opaque() const noexcept;
+    Rcobj<Abstract_Function> placeholder_function() const noexcept;
 
     // These are interfaces of the PRNG.
     std::uint32_t get_random_uint32() const noexcept;

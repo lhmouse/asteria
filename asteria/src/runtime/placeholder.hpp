@@ -19,7 +19,7 @@ class Placeholder : public Abstract_Opaque, public Abstract_Function
     ~Placeholder() override;
 
   public:
-    void describe(std::ostream& os) const override;
+    std::ostream& describe(std::ostream& os) const override;
     [[noreturn]] Reference& invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const override;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const override;
   };
