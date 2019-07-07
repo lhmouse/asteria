@@ -1963,10 +1963,8 @@ bool Parser::load(Token_Stream& tstrm, const Parser_Options& /*options*/)
       if(!tstrm.empty()) {
         throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
       }
-    } catch(Parser_Error& err) {  // Don't play with this at home.
-      ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
-                        "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
-                        "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
+    } catch(Parser_Error& err) {  // `Parser_Error` is not derived from `std::exception`. Don't play with this at home.
+      ASTERIA_DEBUG_LOG("Caught `Parser_Error`: ", err);
       this->m_stor = rocket::move(err);
       return false;
     }

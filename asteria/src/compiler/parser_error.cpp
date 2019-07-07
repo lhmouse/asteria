@@ -225,19 +225,22 @@ const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcep
     }
   }
 
-void Parser_Error::convert_to_runtime_error_and_throw(const Parser_Error& err)
+std::ostream& Parser_Error::print(std::ostream& os) const
+  {
+    os << std::dec << "error " << this->m_code << " at ";
+    if(this->m_line == UINT32_MAX) {
+      os << "the end of input data";
+    } else {
+      os << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
+    }
+    os << ": " << Parser_Error::get_code_description(this->m_code);
+    return os;
+  }
+
+void Parser_Error::convert_to_runtime_error_and_throw() const
   {
     rocket::insertable_ostream mos;
-    mos << "An error was encountered while parsing source data: " << Parser_Error::get_code_description(err.code());
-    // Append error location information.
-    mos << "\n[parser error " << err.code() << " encountered at ";
-    if(err.line() == UINT32_MAX) {
-      mos << "the end of stream";
-    } else {
-      mos << "line " << err.line() << ", offset " << err.offset() << ", length " << err.length();
-    }
-    mos << "]";
-    // Throw it now.
+    this->print(mos);
     throw_runtime_error(__func__, mos.extract_string());
   }
 

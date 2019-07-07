@@ -72,7 +72,6 @@ class Parser_Error
 
   public:
     ROCKET_PURE_FUNCTION static const char* get_code_description(Code xcode) noexcept;
-    [[noreturn]] static void convert_to_runtime_error_and_throw(const Parser_Error& err);
 
   private:
     std::uint32_t m_line;
@@ -103,6 +102,9 @@ class Parser_Error
       {
         return this->m_code;
       }
+
+    std::ostream& print(std::ostream& os) const;
+    [[noreturn]] void convert_to_runtime_error_and_throw() const;
   };
 
 constexpr bool operator==(const Parser_Error& lhs, Parser_Error::Code rhs) noexcept
@@ -121,6 +123,11 @@ constexpr bool operator==(Parser_Error::Code lhs, const Parser_Error& rhs) noexc
 constexpr bool operator!=(Parser_Error::Code lhs, const Parser_Error& rhs) noexcept
   {
     return lhs != rhs.code();
+  }
+
+inline std::ostream& operator<<(std::ostream& os, const Parser_Error& error)
+  {
+    return error.print(os);
   }
 
 }  // namespace Asteria

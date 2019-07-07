@@ -963,10 +963,8 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Pars
         // A block comment may straddle multiple lines. We just mark the first line here.
         throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_Error::code_block_comment_unclosed);
       }
-    } catch(Parser_Error& err) {  // Don't play with this at home.
-      ASTERIA_DEBUG_LOG("Caught `Parser_Error`:\n",
-                        "line = ", err.line(), ", offset = ", err.offset(), ", length = ", err.length(), "\n",
-                        "code = ", err.code(), ": ", Parser_Error::get_code_description(err.code()));
+    } catch(Parser_Error& err) {  // `Parser_Error` is not derived from `std::exception`. Don't play with this at home.
+      ASTERIA_DEBUG_LOG("Caught `Parser_Error`: ", err);
       this->m_stor = rocket::move(err);
       return false;
     }

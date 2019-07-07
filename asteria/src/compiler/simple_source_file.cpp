@@ -52,8 +52,8 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const C
 
 Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
   {
-    if((err != Parser_Error::code_success) && this->m_throw_on_failure) {
-      Parser_Error::convert_to_runtime_error_and_throw(err);
+    if(this->m_throw_on_failure && (err != Parser_Error::code_success)) {
+      err.convert_to_runtime_error_and_throw();
     }
     return rocket::move(err);
   }
