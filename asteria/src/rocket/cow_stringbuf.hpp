@@ -1,17 +1,17 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_INSERTABLE_STREAMBUF_HPP_
-#define ROCKET_INSERTABLE_STREAMBUF_HPP_
+#ifndef ROCKET_COW_STRINGBUF_HPP_
+#define ROCKET_COW_STRINGBUF_HPP_
 
 #include "cow_string.hpp"
 #include <streambuf>  // std::ios_base, std::basic_streambuf<>, std::streamsize
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>> class basic_insertable_streambuf;
+template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>> class basic_cow_stringbuf;
 
-template<typename charT, typename traitsT, typename allocatorT> class basic_insertable_streambuf : public basic_streambuf<charT, traitsT>
+template<typename charT, typename traitsT, typename allocatorT> class basic_cow_stringbuf : public basic_streambuf<charT, traitsT>
   {
   public:
     using char_type       = charT;
@@ -35,19 +35,19 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
     ios_base::openmode m_which;
 
   public:
-    explicit basic_insertable_streambuf(string_type str, size_type caret = npos, ios_base::openmode which = ios_base::in | ios_base::out)
+    explicit basic_cow_stringbuf(string_type str, size_type caret = npos, ios_base::openmode which = ios_base::in | ios_base::out)
       : m_str(noadl::move(str)), m_caret(caret), m_which(which)
       {
       }
-    basic_insertable_streambuf()
-      : basic_insertable_streambuf(string_type())
+    basic_cow_stringbuf()
+      : basic_cow_stringbuf(string_type())
       {
       }
-    basic_insertable_streambuf(ios_base::openmode which)
-      : basic_insertable_streambuf(string_type(), npos, which)
+    basic_cow_stringbuf(ios_base::openmode which)
+      : basic_cow_stringbuf(string_type(), npos, which)
       {
       }
-    ~basic_insertable_streambuf() override;
+    ~basic_cow_stringbuf() override;
 
   protected:
     int sync() override
@@ -193,17 +193,17 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_inse
   };
 
 #if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
-template<typename charT, typename traitsT, typename allocatorT> constexpr typename basic_insertable_streambuf<charT, traitsT, allocatorT>::size_type basic_insertable_streambuf<charT, traitsT, allocatorT>::npos;
+template<typename charT, typename traitsT, typename allocatorT> constexpr typename basic_cow_stringbuf<charT, traitsT, allocatorT>::size_type basic_cow_stringbuf<charT, traitsT, allocatorT>::npos;
 #endif
 
-template<typename charT, typename traitsT, typename allocatorT> basic_insertable_streambuf<charT, traitsT, allocatorT>::~basic_insertable_streambuf()
+template<typename charT, typename traitsT, typename allocatorT> basic_cow_stringbuf<charT, traitsT, allocatorT>::~basic_cow_stringbuf()
   = default;
 
-extern template class basic_insertable_streambuf<char>;
-extern template class basic_insertable_streambuf<wchar_t>;
+extern template class basic_cow_stringbuf<char>;
+extern template class basic_cow_stringbuf<wchar_t>;
 
-using insertable_streambuf  = basic_insertable_streambuf<char>;
-using insertable_wstreambuf = basic_insertable_streambuf<wchar_t>;
+using cow_stringbuf = basic_cow_stringbuf<char>;
+using cow_wstringbuf = basic_cow_stringbuf<wchar_t>;
 
 }  // namespace rocket
 

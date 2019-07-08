@@ -374,7 +374,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
-        std::vector<Pair<Rmlist, rocket::cow_string>> stack;
+        std::vector<Pair<Rmlist, Cow_String>> stack;
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.

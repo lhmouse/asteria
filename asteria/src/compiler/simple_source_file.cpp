@@ -95,8 +95,8 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
 
 Parser_Error Simple_Source_File::reload(const Cow_String& cstr, const Cow_String& filename)
   {
-    // Create a `streambuf` from `cstr`.
-    rocket::insertable_streambuf cbuf;
+    // Use a `streambuf` in place of an `istream` to minimize overheads.
+    Cow_stringbuf cbuf;
     cbuf.set_string(cstr);
     return this->reload(cbuf, filename);
   }

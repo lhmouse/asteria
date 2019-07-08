@@ -169,7 +169,7 @@ namespace Asteria {
         ctx_func.prepare_function_parameters(params);
         rocket::for_each(body, [&](const Statement& stmt) { stmt.generate_code(code_func, nullptr, ctx_func);  });
         // Format the prototype string.
-        rocket::insertable_ostream nos;
+        Cow_osstream nos;
         nos << name << "(";
         if(!params.empty()) {
           std::for_each(params.begin(), params.end() - 1, [&](const PreHashed_String& param) { nos << param << ", ";  });
@@ -496,7 +496,7 @@ namespace Asteria {
           return Air_Node::status_next;
         }
         // Throw a `Runtime_Error` if the assertion fails.
-        rocket::insertable_ostream mos;
+        Cow_osstream mos;
         mos << "Assertion failed at \'" << sloc << "\'";
         if(msg.empty()) {
           mos << "!";

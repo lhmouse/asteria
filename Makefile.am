@@ -41,16 +41,16 @@ pkginclude_rocket_HEADERS =  \
   asteria/src/rocket/utilities.hpp  \
   asteria/src/rocket/allocator_utilities.hpp  \
   asteria/src/rocket/hash_table_utilities.hpp  \
-  asteria/src/rocket/insertable_streambuf.hpp  \
-  asteria/src/rocket/insertable_istream.hpp  \
-  asteria/src/rocket/insertable_ostream.hpp  \
-  asteria/src/rocket/insertable_stream.hpp  \
   asteria/src/rocket/variant.hpp  \
   asteria/src/rocket/fill_iterator.hpp  \
   asteria/src/rocket/transparent_comparators.hpp  \
   asteria/src/rocket/unique_handle.hpp  \
   asteria/src/rocket/reference_counter.hpp  \
   asteria/src/rocket/cow_string.hpp  \
+  asteria/src/rocket/cow_stringbuf.hpp  \
+  asteria/src/rocket/cow_istringstream.hpp  \
+  asteria/src/rocket/cow_ostringstream.hpp  \
+  asteria/src/rocket/cow_stringstream.hpp  \
   asteria/src/rocket/cow_vector.hpp  \
   asteria/src/rocket/cow_hashmap.hpp  \
   asteria/src/rocket/unique_ptr.hpp  \
@@ -69,11 +69,11 @@ pkginclude_rocket_platform_HEADERS =  \
 lib_librocket_la_SOURCES =  \
   asteria/src/rocket/assert.cpp  \
   asteria/src/rocket/throw.cpp  \
-  asteria/src/rocket/insertable_streambuf.cpp  \
-  asteria/src/rocket/insertable_istream.cpp  \
-  asteria/src/rocket/insertable_ostream.cpp  \
-  asteria/src/rocket/insertable_stream.cpp  \
-  asteria/src/rocket/cow_string.cpp
+  asteria/src/rocket/cow_string.cpp  \
+  asteria/src/rocket/cow_stringbuf.cpp  \
+  asteria/src/rocket/cow_istringstream.cpp  \
+  asteria/src/rocket/cow_ostringstream.cpp  \
+  asteria/src/rocket/cow_stringstream.cpp
 
 lib_librocket_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp
