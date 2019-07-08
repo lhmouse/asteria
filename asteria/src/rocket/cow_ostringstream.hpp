@@ -9,9 +9,11 @@
 
 namespace rocket {
 
-template<typename charT, typename traitsT = char_traits<charT>, typename allocatorT = allocator<charT>> class basic_cow_ostringstream;
+template<typename charT, typename traitsT = char_traits<charT>,
+         typename allocatorT = allocator<charT>> class basic_cow_ostringstream;
 
-template<typename charT, typename traitsT, typename allocatorT> class basic_cow_ostringstream : public basic_ostream<charT, traitsT>
+template<typename charT, typename traitsT,
+         typename allocatorT> class basic_cow_ostringstream : public basic_ostream<charT, traitsT>
   {
   public:
     using char_type       = charT;
@@ -92,14 +94,19 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
   };
 
 #if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
-template<typename charT, typename traitsT, typename allocatorT> constexpr typename basic_cow_ostringstream<charT, traitsT, allocatorT>::size_type basic_cow_ostringstream<charT, traitsT, allocatorT>::npos;
+template<typename charT, typename traitsT,
+         typename allocatorT> constexpr typename basic_cow_ostringstream<charT, traitsT,
+                                                                         allocatorT>::size_type basic_cow_ostringstream<charT, traitsT,
+                                                                                                                        allocatorT>::npos;
 #endif
 
-template<typename charT, typename traitsT, typename allocatorT> basic_cow_ostringstream<charT, traitsT, allocatorT>::~basic_cow_ostringstream()
+template<typename charT, typename traitsT,
+         typename allocatorT> basic_cow_ostringstream<charT, traitsT, allocatorT>::~basic_cow_ostringstream()
   = default;
 
-template<typename charT, typename traitsT, typename allocatorT> void swap(basic_cow_ostringstream<charT, traitsT, allocatorT>& lhs,
-                                                                          basic_cow_ostringstream<charT, traitsT, allocatorT>& rhs)
+template<typename charT, typename traitsT,
+         typename allocatorT> void swap(basic_cow_ostringstream<charT, traitsT, allocatorT>& lhs,
+                                        basic_cow_ostringstream<charT, traitsT, allocatorT>& rhs)
   {
     lhs.swap(rhs);
   }
