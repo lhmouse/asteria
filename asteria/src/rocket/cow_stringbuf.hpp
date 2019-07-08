@@ -126,31 +126,31 @@ template<typename charT, typename traitsT,
       }
     pos_type seekpos(pos_type pos, ios_base::openmode which) override
       {
-        auto rpos = pos_type(off_type(-1));
-        auto roff = static_cast<streamoff>(pos);
+        auto res = pos_type(off_type(-1));
+        auto absoff = static_cast<streamoff>(pos);
         // Validate arguments.
-        if((roff < 0) || (roff >= this->m_stor.str.ssize())) {
-          return rpos;
+        if((absoff < 0) || (absoff >= this->m_stor.str.ssize())) {
+          return res;
         }
         if(which & ~(ios_base::in | ios_base::out)) {
-          return rpos;
+          return res;
         }
         // Set the position only when the specified mode is requested by the user and is enabled in this buffer.
         if(which & this->m_which & ios_base::in) {
           // Invalidate the get area.
           this->setg(nullptr, nullptr, nullptr);
           // Set the new get offset.
-          this->m_stor.goff = static_cast<size_type>(roff);
-          rpos = roff;
+          this->m_stor.goff = static_cast<size_type>(absoff);
+          res = absoff;
         }
         if(which & this->m_which & ios_base::out) {
           // Invalidate the put area.
           this->setp(nullptr, nullptr);
           // Set the new put offset.
-          this->m_stor.poff = static_cast<size_type>(roff);
-          rpos = roff;
+          this->m_stor.poff = static_cast<size_type>(absoff);
+          res = absoff;
         }
-        return rpos;
+        return res;
       }
 
     streamsize showmanyc() override
