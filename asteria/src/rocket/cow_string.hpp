@@ -626,7 +626,7 @@ template<typename charT> constexpr details_cow_string::shallow<charT, char_trait
   {
     return details_cow_string::shallow<charT, char_traits<charT>>(ptr);
   }
-template<typename charT> constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT* ptr, std::size_t len) noexcept
+template<typename charT> constexpr details_cow_string::shallow<charT, char_traits<charT>> sref(const charT* ptr, ::std::size_t len) noexcept
   {
     return details_cow_string::shallow<charT, char_traits<charT>>(ptr, len);
   }
