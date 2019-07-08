@@ -23,8 +23,10 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     using off_type   = typename traits_type::off_type;
 
     // N.B. These are non-standard extensions.
-    using streambuf_type   = basic_cow_stringbuf<char_type, traits_type, allocator_type>;
-    using string_type      = basic_cow_string<char_type, traits_type, allocator_type>;
+    using streambuf_type   = basic_cow_stringbuf<charT, traitsT, allocatorT>;
+    using string_type      = basic_cow_string<charT, traitsT, allocatorT>;
+    using stream_type      = basic_iostream<charT, traitsT>;
+
     using size_type        = typename string_type::size_type;
     using difference_type  = typename string_type::difference_type;
 
@@ -34,18 +36,32 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
     mutable streambuf_type m_sb;
 
   public:
-    explicit basic_cow_stringstream(string_type str, size_type caret = npos, ios_base::openmode which = ios_base::in | ios_base::out)
-      : basic_iostream<char_type, traits_type>(&(this->m_sb)),
-        m_sb(noadl::move(str), caret, which)
-      {
-      }
     basic_cow_stringstream()
-      : basic_cow_stringstream(string_type())
+      : stream_type(&(this->m_sb)),
+        m_sb()
       {
       }
-    basic_cow_stringstream(ios_base::openmode which)
-      : basic_cow_stringstream(string_type(), npos, which)
+    explicit basic_cow_stringstream(ios_base::openmode which)
+      : stream_type(&(this->m_sb)),
+        m_sb(which)
       {
+      }
+    explicit basic_cow_stringstream(string_type str, ios_base::openmode which = ios_base::in | ios_base::out)
+      : stream_type(&(this->m_sb)),
+        m_sb(noadl::move(str), which)
+      {
+      }
+    basic_cow_stringstream(basic_cow_stringstream&& other) noexcept
+      : stream_type(static_cast<stream_type&&>(other)),
+        m_sb(noadl::move(other.m_sb))
+      {
+        this->stream_type::set_rdbuf(&(this->m_sb));
+      }
+    basic_cow_stringstream& operator=(basic_cow_stringstream&& other) noexcept
+      {
+        this->stream_type::operator=(static_cast<stream_type&&>(other));
+        this->m_sb = noadl::move(other.m_sb);
+        return *this;
       }
     ~basic_cow_stringstream() override;
 
@@ -67,6 +83,12 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       {
         return this->rdbuf()->extract_string();
       }
+
+    void swap(basic_cow_stringstream& other)
+      {
+        this->stream_type::swap(other);
+        this->m_sb.swap(other.m_sb);
+      }
   };
 
 #if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
@@ -75,6 +97,12 @@ template<typename charT, typename traitsT, typename allocatorT> constexpr typena
 
 template<typename charT, typename traitsT, typename allocatorT> basic_cow_stringstream<charT, traitsT, allocatorT>::~basic_cow_stringstream()
   = default;
+
+template<typename charT, typename traitsT, typename allocatorT> void swap(basic_cow_stringstream<charT, traitsT, allocatorT>& lhs,
+                                                                          basic_cow_stringstream<charT, traitsT, allocatorT>& rhs)
+  {
+    lhs.swap(rhs);
+  }
 
 extern template class basic_cow_stringstream<char>;
 extern template class basic_cow_stringstream<wchar_t>;

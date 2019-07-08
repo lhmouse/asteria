@@ -47,6 +47,8 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
       : basic_cow_stringbuf(string_type(), npos, which)
       {
       }
+    basic_cow_stringbuf(basic_cow_stringbuf&&){}
+    basic_cow_stringbuf&operator=(basic_cow_stringbuf&&){return *this;}
     ~basic_cow_stringbuf() override;
 
   protected:
@@ -168,18 +170,10 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         this->sync();
         return this->m_str;
       }
-    size_type get_caret() const noexcept
-      {
-        return this->m_caret;
-      }
     void set_string(string_type str, size_type caret = npos)
       {
         this->sync();
         this->m_str = noadl::move(str);
-        this->m_caret = caret;
-      }
-    void set_caret(size_type caret) noexcept
-      {
         this->m_caret = caret;
       }
     string_type extract_string()
@@ -190,6 +184,10 @@ template<typename charT, typename traitsT, typename allocatorT> class basic_cow_
         this->m_caret = npos;
         return str;
       }
+
+    void swap(basic_cow_stringbuf& other)
+      {
+      }
   };
 
 #if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
@@ -198,6 +196,12 @@ template<typename charT, typename traitsT, typename allocatorT> constexpr typena
 
 template<typename charT, typename traitsT, typename allocatorT> basic_cow_stringbuf<charT, traitsT, allocatorT>::~basic_cow_stringbuf()
   = default;
+
+template<typename charT, typename traitsT, typename allocatorT> void swap(basic_cow_stringbuf<charT, traitsT, allocatorT>& lhs,
+                                                                          basic_cow_stringbuf<charT, traitsT, allocatorT>& rhs)
+  {
+    lhs.swap(rhs);
+  }
 
 extern template class basic_cow_stringbuf<char>;
 extern template class basic_cow_stringbuf<wchar_t>;
