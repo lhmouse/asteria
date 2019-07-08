@@ -79,11 +79,14 @@ template<typename charT, typename traitsT,
       }
     void set_string(string_type str)
       {
-        return this->rdbuf()->set_string(noadl::move(str));
+        this->rdbuf()->set_string(noadl::move(str));
+        this->clear();
       }
     string_type extract_string()
       {
-        return this->rdbuf()->extract_string();
+        auto str = this->rdbuf()->extract_string();
+        this->clear();
+        return str;
       }
 
     void swap(basic_cow_istringstream& other) noexcept
