@@ -129,7 +129,7 @@ template<typename charT, typename traitsT,
         auto res = pos_type(off_type(-1));
         auto absoff = static_cast<streamoff>(pos);
         // Validate arguments.
-        if((absoff < 0) || (absoff >= this->m_stor.str.ssize())) {
+        if((absoff < 0) || (absoff > static_cast<streamsize>(this->m_stor.str.size()))) {
           return res;
         }
         if(which & ~(ios_base::in | ios_base::out)) {
