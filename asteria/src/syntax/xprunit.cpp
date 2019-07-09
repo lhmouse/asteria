@@ -702,7 +702,7 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         ctx_func.prepare_function_parameters(params);
         rocket::for_each(body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func);  });
         // Format the prototype string.
-        rocket::insertable_ostream nos;
+        Cow_osstream nos;
         nos << "<closure> (";
         if(!params.empty()) {
           std::for_each(params.begin(), params.end() - 1, [&](const PreHashed_String& param) { nos << param << ", ";  });

@@ -18,6 +18,8 @@
 #include <climits>
 #include "rocket/preprocessor_utilities.h"
 #include "rocket/cow_string.hpp"
+#include "rocket/cow_istringstream.hpp"
+#include "rocket/cow_ostringstream.hpp"
 #include "rocket/cow_vector.hpp"
 #include "rocket/cow_hashmap.hpp"
 #include "rocket/static_vector.hpp"
@@ -85,6 +87,9 @@ class Simple_Binding_Wrapper;
 // Type Aliases
 using Cow_String = rocket::cow_string;
 using PreHashed_String = rocket::prehashed_string;
+using Cow_stringbuf = rocket::cow_stringbuf;
+using Cow_isstream = rocket::cow_istringstream;
+using Cow_osstream = rocket::cow_ostringstream;
 
 // Template Aliases
 template<typename E, typename D = std::default_delete<const E>> using Uptr = rocket::unique_ptr<E, D>;

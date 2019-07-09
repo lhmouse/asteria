@@ -6,7 +6,7 @@
 
 #include "rocket/compiler.h"
 #include "rocket/utilities.hpp"
-#include "rocket/insertable_ostream.hpp"
+#include "rocket/cow_ostringstream.hpp"
 #include "rocket/unique_ptr.hpp"
 #include <iomanip>
 #include <exception>
@@ -21,7 +21,7 @@ namespace Asteria {
 class Formatter
   {
   private:
-    rocket::unique_ptr<rocket::insertable_ostream> m_strm_opt;
+    rocket::unique_ptr<rocket::cow_ostringstream> m_strm_opt;
 
   public:
     Formatter() noexcept

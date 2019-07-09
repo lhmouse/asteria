@@ -239,7 +239,7 @@ std::ostream& Parser_Error::print(std::ostream& os) const
 
 void Parser_Error::convert_to_runtime_error_and_throw() const
   {
-    rocket::insertable_ostream mos;
+    Cow_osstream mos;
     this->print(mos);
     throw_runtime_error(__func__, mos.extract_string());
   }

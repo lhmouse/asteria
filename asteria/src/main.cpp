@@ -5,7 +5,7 @@
 #include "runtime/global_context.hpp"
 #include "runtime/traceable_exception.hpp"
 #include "library/bindings_chrono.hpp"
-#include "rocket/insertable_istream.hpp"
+#include "rocket/cow_istringstream.hpp"
 #include <iostream>
 #include <iomanip>
 
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
         }
         return fib(30);
       )_____";
-    rocket::insertable_istream iss(rocket::sref(src));
+    Cow_isstream iss(rocket::sref(src));
     std::cerr << "# Source code:" << std::endl
               << "---" << std::endl
               << src << std::endl

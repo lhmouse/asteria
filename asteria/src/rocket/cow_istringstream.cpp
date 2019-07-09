@@ -1,11 +1,11 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#include "insertable_istream.hpp"
+#include "cow_istringstream.hpp"
 
 namespace rocket {
 
-template class basic_insertable_istream<char>;
-template class basic_insertable_istream<wchar_t>;
+template class basic_cow_istringstream<char>;
+template class basic_cow_istringstream<wchar_t>;
 
 }  // namespace rocket

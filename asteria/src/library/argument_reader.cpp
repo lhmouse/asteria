@@ -605,7 +605,7 @@ void Argument_Reader::throw_no_matching_function_call() const
     const auto& name = this->m_name;
     const auto& args = this->m_args.get();
     // Create a message containing arguments.
-    rocket::insertable_ostream mos;
+    Cow_osstream mos;
     mos << "There was no matching overload for function call `" << name << "(";
     if(!args.empty()) {
       mos << args.front().read().gtype_name();

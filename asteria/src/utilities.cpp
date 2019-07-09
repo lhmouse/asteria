@@ -20,7 +20,7 @@ std::ostream& Formatter::do_open_stream()
   {
     auto& strm = this->m_strm_opt;
     if(!strm) {
-      strm = rocket::make_unique<rocket::insertable_ostream>();
+      strm = rocket::make_unique<rocket::cow_ostringstream>();
     }
     return *strm;
   }

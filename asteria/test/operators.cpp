@@ -354,7 +354,7 @@ int main()
         assert null ?? null ?? 1 ?? null ?? 2 == 1;
       )__";
 
-    std::istringstream iss(s_source);
+    Cow_isstream iss(rocket::sref(s_source));
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global, { });

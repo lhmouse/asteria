@@ -10,7 +10,7 @@ using namespace Asteria;
 
 int main()
   {
-    std::istringstream iss(
+    static constexpr char s_source[] =
       R"__(
         func binary(a, b, ...) {
           var narg = __varg();
@@ -24,8 +24,9 @@ int main()
           binary(1,2,3,4),     // [ 2, 4 ]
           binary(1,2,3,4,5),   // [ 3, 4 ]
         ];
-      )__");
+      )__";
 
+    Cow_isstream iss(rocket::sref(s_source));
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     auto res = code.execute(global, { });
@@ -43,7 +44,7 @@ int main()
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(1).as_integer() == 4);
 
     iss.clear();
-    iss.str("return __varg('meow', 42, true);");
+    iss.set_string(rocket::sref("return __varg('meow', 42, true);"));
     code.reload(iss, rocket::sref("erroneous_file"));
     ASTERIA_TEST_CHECK_CATCH(code.execute(global, { }));
   }
