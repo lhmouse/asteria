@@ -228,12 +228,12 @@ template<typename charT, typename traitsT,
           // The offset is out of range.
           return res;
         }
-        if(this->m_which & which & ios_base::in) {
+        if(seekg) {
           // Abandon the get area, then set the new get offset.
           this->m_stor.goff = static_cast<size_type>(absoff);
           res = absoff;
         }
-        if(this->m_which & which & ios_base::out) {
+        if(seekp) {
           // Abandon the put area, then set the new put offset.
           this->m_stor.poff = static_cast<size_type>(absoff);
           res = absoff;
