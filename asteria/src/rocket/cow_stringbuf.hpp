@@ -32,17 +32,19 @@ template<typename charT, typename traitsT = char_traits<charT>,
           {
           }
 
-        void init(::std::ios_base::openmode which)
+        ::std::ios_base::openmode rewind(::std::ios_base::openmode which) noexcept
           {
+            // Reset get and put positions.
+            this->goff = 0;
+            this->poff = 0;
+            // Handle versatile stream modes.
+            if(which & ios_base::trunc) {
+              this->str.clear();
+            }
             if(which & ios_base::ate) {
-              // Seek to end upon open.
               this->poff = this->str.size();
             }
-            if(which & ios_base::trunc) {
-              // Clear the string. Why do you want to use it?
-              this->str.clear();
-              this->poff = 0;
-            }
+            return which;
           }
 
         void swap(storage& other) noexcept(is_nothrow_swappable<string_type>::value)
@@ -88,69 +90,160 @@ template<typename charT, typename traitsT,
     explicit basic_cow_stringbuf(ios_base::openmode which)
       : m_which(which), m_stor()
       {
-        this->m_stor.init(which);
+        this->m_stor.rewind(which);
       }
     explicit basic_cow_stringbuf(string_type str, ios_base::openmode which = ios_base::in | ios_base::out)
       : m_which(which), m_stor(noadl::move(str))
       {
-        this->m_stor.init(which);
+        this->m_stor.rewind(which);
       }
     basic_cow_stringbuf(basic_cow_stringbuf&& other)
       : m_which(other.m_which), m_stor(noadl::move(other.m_stor))
       {
-        other.do_invalidate();
+        other.do_abandon();
         this->imbue(other.getloc());
       }
     basic_cow_stringbuf& operator=(basic_cow_stringbuf&& other)
       {
         this->m_which = other.m_which;
         this->m_stor = noadl::move(other.m_stor);
-        other.do_invalidate();
+        other.do_abandon();
         this->imbue(other.getloc());
         return *this;
       }
     ~basic_cow_stringbuf() override;
 
   private:
-    void do_invalidate()
+    void do_abandon() noexcept
       {
-        // Invalidate the get and put areas.
+        // Abandon the get and put areas.
         this->setg(nullptr, nullptr, nullptr);
         this->setp(nullptr, nullptr);
+      }
+    void do_syncg() noexcept
+      {
+        ROCKET_ASSERT(this->m_which & ios_base::in);
+        // `goff` designates the past-the-end position of the get area.
+        auto goff = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
+        // This cannot invalidate the put area, because if a put area exists it will have made the string unique.
+        auto qbase = const_cast<char_type*>(this->m_stor.str.data());
+        auto ntotal = this->m_stor.str.size();
+        // Reset the get area.
+        this->setg(qbase, qbase + goff, qbase + ntotal);
+        this->m_stor.goff = ntotal;
+      }
+    void do_freeg() noexcept
+      {
+        ROCKET_ASSERT(this->m_which & ios_base::in);
+        // `goff` designates the past-the-end position of the get area.
+        auto goff = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
+        // Invalidate the get area.
+        this->setg(nullptr, nullptr, nullptr);
+        this->m_stor.goff = goff;
+      }
+    void do_syncp() noexcept
+      {
+        ROCKET_ASSERT(this->m_which & ios_base::out);
+        // `poff` designates the beginning of the put area.
+        auto poff = this->m_stor.poff + static_cast<size_type>(this->pptr() - this->pbase());
+        // `goff` designates the past-the-end position of the get area.
+        auto goff = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
+        // This may invalidate the get area, since the string uses reference counting.
+        auto qbase = this->m_stor.str.mut_data();
+        auto ntotal = this->m_stor.str.size();
+        // Reset the put area.
+        this->setp(qbase + poff, qbase + ntotal);
+        this->m_stor.poff = poff;
+        // Invalidate the get area.
+        this->setg(nullptr, nullptr, nullptr);
+        this->m_stor.goff = goff;
+      }
+    void do_freep() noexcept
+      {
+        ROCKET_ASSERT(this->m_which & ios_base::out);
+        // `poff` designates the beginning of the put area.
+        auto poff = this->m_stor.poff + static_cast<size_type>(this->pptr() - this->pbase());
+        // `goff` designates the past-the-end position of the get area.
+        auto goff = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
+        // Invalidate the put area.
+        this->setp(nullptr, nullptr);
+        this->m_stor.poff = poff;
+        // Invalidate the get area.
+        this->setg(nullptr, nullptr, nullptr);
+        this->m_stor.goff = goff;
+      }
+    void do_syncpg() noexcept
+      {
+        ROCKET_ASSERT(this->m_which & ios_base::in);
+        ROCKET_ASSERT(this->m_which & ios_base::out);
+        // `poff` designates the beginning of the put area.
+        auto poff = this->m_stor.poff + static_cast<size_type>(this->pptr() - this->pbase());
+        // `goff` designates the past-the-end position of the get area.
+        auto goff = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
+        // This may invalidate the get area, since the string uses reference counting.
+        auto qbase = this->m_stor.str.mut_data();
+        auto ntotal = this->m_stor.str.size();
+        // Reset the put area.
+        this->setp(qbase + poff, qbase + ntotal);
+        this->m_stor.poff = poff;
+        // Reset the get area.
+        this->setg(qbase, qbase + goff, qbase + ntotal);
+        this->m_stor.goff = ntotal;
       }
 
   protected:
     pos_type seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which) override
       {
-        return -1;
-      }
-    pos_type seekpos(pos_type pos, ios_base::openmode which) override
-      {
-        auto res = pos_type(off_type(-1));
-        auto absoff = static_cast<streamoff>(pos);
+        pos_type res = off_type(-1);
         // Validate arguments.
-        if((absoff < 0) || (absoff > static_cast<streamsize>(this->m_stor.str.size()))) {
-          return res;
-        }
         if(which & ~(ios_base::in | ios_base::out)) {
+          // Seek mode is invalid.
           return res;
         }
-        // Set the position only when the specified mode is requested by the user and is enabled in this buffer.
-        if(which & this->m_which & ios_base::in) {
-          // Invalidate the get area.
-          this->setg(nullptr, nullptr, nullptr);
-          // Set the new get offset.
+        this->do_freep();
+        // Get the seek reference offset.
+        bool seekg = this->m_which & which & ios_base::in;
+        bool seekp = this->m_which & which & ios_base::out;
+        auto absoff = static_cast<streamsize>(off);
+        auto refoff = static_cast<streamsize>(-1);
+        auto ntotal = static_cast<streamsize>(this->m_stor.str.size());
+        // XXX This code looks terrible.
+        if(dir == ios_base::beg) {
+          // The offset is from the beginning of the string.
+          refoff = 0;
+        } else if(dir == ios_base::end) {
+          // The offset is from the end of the string.
+          refoff = ntotal;
+        } else if(!seekp) {
+          // The offset is from the get position.
+          refoff = static_cast<streamsize>(this->m_stor.goff);
+        } else if(!seekg) {
+          // The offset is from the put position.
+          refoff = static_cast<streamsize>(this->m_stor.poff);
+        } else {
+          // XXX: If you move both get and put positions, the target must be absolute.
+          return res;
+        }
+        if((absoff < -refoff) || (absoff > ntotal - refoff)) {
+          // The offset is out of range.
+          return res;
+        }
+        if(this->m_which & which & ios_base::in) {
+          // Abandon the get area, then set the new get offset.
           this->m_stor.goff = static_cast<size_type>(absoff);
           res = absoff;
         }
-        if(which & this->m_which & ios_base::out) {
-          // Invalidate the put area.
-          this->setp(nullptr, nullptr);
-          // Set the new put offset.
+        if(this->m_which & which & ios_base::out) {
+          // Abandon the put area, then set the new put offset.
           this->m_stor.poff = static_cast<size_type>(absoff);
           res = absoff;
         }
         return res;
+      }
+    pos_type seekpos(pos_type pos, ios_base::openmode which) override
+      {
+        // The state in `pos` is ignored.
+        return this->seekoff(static_cast<streamsize>(pos), ios_base::beg, which);
       }
 
     streamsize showmanyc() override
@@ -160,35 +253,34 @@ template<typename charT, typename traitsT,
           return -1;
         }
         // Get the number of bytes available in and after the get area.
-        auto navail = static_cast<streamsize>(this->egptr() - this->gptr());
-        auto nafter = static_cast<streamsize>(this->m_stor.str.size() - this->m_stor.goff);
-        return navail + nafter;
+        return static_cast<streamsize>(this->egptr() - this->gptr())
+               + static_cast<streamsize>(this->m_stor.str.size() - this->m_stor.goff);
       }
-
     int_type underflow() override
       {
         if(!(this->m_which & ios_base::in)) {
           // Nothing can be read.
           return traits_type::eof();
         }
-        if(this->m_stor.goff >= this->m_stor.str.size()) {
+        this->do_syncg();
+        if(this->gptr() == this->egptr()) {
           // No more data are available.
           return traits_type::eof();
         }
-        // Set the get area to the entire string.
-        auto qbase = const_cast<char_type*>(this->m_stor.str.data());
-        this->setg(qbase, qbase + this->m_stor.goff, qbase + this->m_stor.str.size());
-        this->m_stor.goff = this->m_stor.str.size();
         // Return the character at the get pointer.
         return traits_type::to_int_type(this->gptr()[0]);
       }
     int_type uflow() override
       {
-        // ... What is the purpose of this function?
-        auto c = this->basic_cow_stringbuf::underflow();
-        if(!traits_type::eq_int_type(c, traits_type::eof())) {
-          this->gbump(1);
+        // What was the origin of this function?
+        int_type c = this->basic_cow_stringbuf::underflow();
+        if(traits_type::eq_int_type(c, traits_type::eof())) {
+          // No more data are available.
+          return traits_type::eof();
         }
+        // Increment the get pointer.
+        this->gbump(1);
+        // Return the character preceding the get pointer.
         return c;
       }
     streamsize xsgetn(char_type* s, streamsize n) override
@@ -200,37 +292,53 @@ template<typename charT, typename traitsT,
         if(n <= 0) {
           return 0;
         }
-        auto nread = noadl::min(n, 0x7FFFFFFF);
-        auto navail = static_cast<streamsize>(this->egptr() - this->gptr());
-        if(nread <= navail) {
-          // If the get area has enough data, read from the get area only.
-          traits_type::copy(s, this->gptr(), static_cast<size_type>(nread));
-          this->gbump(static_cast<int>(nread));
-          return nread;
-        }
-        // Get the number of characters available after the get area.
-        auto nafter = static_cast<streamsize>(this->m_stor.str.size() - this->m_stor.goff);
-        nread = noadl::min(n, navail + nafter);
-        // Copy and skip the block.
-        traits_type::copy(s, this->m_stor.str.data() + this->m_stor.goff - static_cast<size_type>(navail), static_cast<size_type>(nread));
-        this->m_stor.goff += static_cast<size_type>(nread - navail);
-        // The get area has been exhausted, so invalidate it now.
-        this->setg(nullptr, nullptr, nullptr);
-        return nread;
+        this->do_freeg();
+        // Copy some characters and advance the get offset.
+        auto nlimit = static_cast<size_type>(noadl::min(n, static_cast<streamsize>(this->m_stor.str.max_size())));
+        auto nread = this->m_stor.str.copy(s, this->m_stor.goff, nlimit);
+        this->m_stor.goff += nread;
+        // Return the number of characters that have been copied.
+        return static_cast<streamsize>(nread);
       }
-
+    int_type pbackfail(int_type c) override
+      {
+        if(!(this->m_which & ios_base::in)) {
+          // Nothing can be read.
+          return traits_type::eof();
+        }
+        if(traits_type::eq_int_type(c, traits_type::eof())) {
+          // A put-back position is requested.
+          this->do_syncg();
+          if(this->gptr() == this->eback()) {
+            // If the get pointer is at the beginning of the string, no character exists before it, so fail.
+            return traits_type::eof();
+          }
+        } else {
+          // A different character is to be put back.
+          if(!(this->m_which & ios_base::out)) {
+            // Nothing can be written.
+            return traits_type::eof();
+          }
+          this->do_syncpg();
+          if(this->gptr() == this->eback()) {
+            // If the get pointer is at the beginning of the string, no character can be written, so fail.
+            return traits_type::eof();
+          }
+          // Modify the get area to reflect the change.
+          traits_type::assign(this->gptr()[-1], traits_type::to_char_type(c));
+        }
+        // Decrement the get pointer.
+        this->gbump(-1);
+        // Return the character at the get pointer.
+        return traits_type::to_int_type(this->gptr()[0]);
+      }
     int_type overflow(int_type c) override
       {
         if(!(this->m_which & ios_base::out)) {
           // Nothing can be written.
           return traits_type::eof();
         }
-        if(this->pptr() != this->pbase()) {
-          // Skip characters that have been written so far.
-          this->m_stor.poff += static_cast<size_type>(this->pptr() - this->pbase());
-          // Invalidate the put area.
-          this->setp(nullptr, nullptr);
-        }
+        this->do_freep();
         if(!traits_type::eq_int_type(c, traits_type::eof())) {
           // Add this character to the string.
           if(this->m_stor.poff < this->m_stor.str.size()) {
@@ -241,49 +349,12 @@ template<typename charT, typename traitsT,
           this->m_stor.poff += 1;
         }
         if(this->m_stor.poff < this->m_stor.str.size()) {
-          // Get the number of characters before the get pointer.
-          auto nbefore = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
           // Set up the put area for efficiency.
           // N.B. This would be unnecessary if we were using unbuffered I/O.
-          auto qbase = this->m_stor.str.mut_data();
-          this->setp(qbase + this->m_stor.poff, qbase + this->m_stor.str.size());
-          // The get area (if any) is invalidated as well due to reference counting.
-          this->setg(qbase, qbase + nbefore, qbase + this->m_stor.str.size());
-          this->m_stor.goff = this->m_stor.str.size();
+          this->do_syncp();
         }
+        // Return the character that has just been written.
         return traits_type::not_eof(c);
-      }
-    int_type pbackfail(int_type c) override
-      {
-        // If the get area refers to the beginning of the string, there is no character before the string, so fail.
-        auto nbefore = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
-        if(nbefore == 0) {
-          return traits_type::eof();
-        }
-        // This function is called in two situations: ...
-        if(traits_type::eq_int_type(c, traits_type::eof())) {
-          // ... when a putback position is unavailable, or ...
-          // Set the get area to the entire string.
-          auto qbase = const_cast<char_type*>(this->m_stor.str.data());
-          this->setg(qbase, qbase + nbefore, qbase + this->m_stor.str.size());
-          this->m_stor.goff = this->m_stor.str.size();
-          // Return something not an EOF.
-          return traits_type::not_eof(c);
-        }
-        // ... when a different character is to be put.
-        if(!(this->m_which & ios_base::out)) {
-          // Nothing can be written.
-          return traits_type::eof();
-        }
-        // Set the get area to the entire string.
-        // Note that the get area shall be mutable now.
-        auto qbase = this->m_stor.str.mut_data();
-        this->setg(qbase, qbase + nbefore, qbase + this->m_stor.str.size());
-        this->m_stor.goff = this->m_stor.str.size();
-        // Rewind the get pointer by a character.
-        this->gbump(-1);
-        traits_type::assign(this->gptr()[0], traits_type::to_char_type(c));
-        return c;
       }
     streamsize xsputn(const char_type* s, streamsize n) override
       {
@@ -294,21 +365,13 @@ template<typename charT, typename traitsT,
         if(n <= 0) {
           return 0;
         }
-        if(this->pptr() != this->pbase()) {
-          // Skip characters that have been written so far.
-          this->m_stor.poff += static_cast<size_type>(this->pptr() - this->pbase());
-          // Invalidate the put area.
-          this->setp(nullptr, nullptr);
-        }
-        // Get the number of characters to write.
-        auto nwritten = noadl::min(n, 0x7FFFFFFF);
-        // Write the string at the put offset, overwriting existent contents if any.
-        if(this->m_stor.poff < this->m_stor.str.size()) {
-          this->m_stor.str.replace(this->m_stor.poff, static_cast<size_type>(nwritten), s, static_cast<size_type>(nwritten));
-        } else {
-          this->m_stor.str.append(s, static_cast<size_type>(nwritten));
-        }
-        return nwritten;
+        this->do_freep();
+        // Copy some characters and advance the put offset.
+        auto nlimit = static_cast<size_type>(noadl::min(n, static_cast<streamsize>(this->m_stor.str.max_size())));
+        this->m_stor.str.replace(this->m_stor.poff, nlimit, s, nlimit);
+        this->m_stor.poff += nlimit;
+        // Return the number of characters that have been copied.
+        return static_cast<streamsize>(nlimit);
       }
 
   public:
@@ -318,15 +381,15 @@ template<typename charT, typename traitsT,
       }
     void set_string(string_type str)
       {
+        this->do_abandon();
         this->m_stor.str = noadl::move(str);
-        this->m_stor.init(this->m_which);
-        this->do_invalidate();
+        this->m_stor.rewind(this->m_which);
       }
     string_type extract_string()
       {
-        auto str = rocket::move(this->m_stor.str);
-        this->m_stor.init(this->m_which);
-        this->do_invalidate();
+        this->do_abandon();
+        auto str = noadl::move(this->m_stor.str);
+        this->m_stor.rewind(this->m_which);
         return str;
       }
 
@@ -334,8 +397,6 @@ template<typename charT, typename traitsT,
       {
         ::std::swap(this->m_which, other.m_which);
         this->m_stor.swap(other.m_stor);
-        this->do_invalidate();
-        other.do_invalidate();
         this->imbue(other.pubimbue(this->getloc()));
       }
   };
