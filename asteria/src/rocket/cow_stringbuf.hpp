@@ -207,7 +207,7 @@ template<typename charT, typename traitsT,
         auto absoff = static_cast<streamsize>(off);
         auto refoff = static_cast<streamsize>(-1);
         auto ntotal = static_cast<streamsize>(this->m_stor.str.size());
-        // XXX This code looks terrible.
+        // XXX: This code looks terrible.
         if(dir == ios_base::beg) {
           // The offset is from the beginning of the string.
           refoff = 0;
