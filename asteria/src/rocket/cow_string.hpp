@@ -2093,7 +2093,7 @@ template<typename charT, typename traitsT,
           break;
         }
         auto enough = (width > 0) ? (static_cast<streamsize>(str.size()) >= width)
-                                        : (str.size() >= str.max_size());
+                                  : (str.size() >= str.max_size());
         if(enough) {
           break;
         }
@@ -2145,7 +2145,7 @@ template<typename charT, typename traitsT,
           break;
         }
         auto written = ((0 <= off) && (off < len)) ? os.rdbuf()->sputn(str.data() + off, len - off)
-                                                         : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
+                                                   : !(traitsT::eq_int_type(os.rdbuf()->sputc(fill), traitsT::eof()));
         if(written == 0) {
           state |= ios_base::failbit;
           break;

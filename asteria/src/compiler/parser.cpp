@@ -1982,7 +1982,7 @@ Parser_Error Parser::get_parser_error() const noexcept
     switch(this->state()) {
     case state_empty:
       {
-        return Parser_Error(0, 0, 0, Parser_Error::code_no_data_loaded);
+        return Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_no_data_loaded);
       }
     case state_error:
       {
@@ -1990,7 +1990,7 @@ Parser_Error Parser::get_parser_error() const noexcept
       }
     case state_success:
       {
-        return Parser_Error(0, 0, 0, Parser_Error::code_success);
+        return Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_success);
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");

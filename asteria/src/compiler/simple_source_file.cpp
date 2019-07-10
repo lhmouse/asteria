@@ -14,24 +14,18 @@
 
 namespace Asteria {
 
-    namespace {
-
-    static_assert(std::is_trivially_destructible<Parser_Options>::value, "??");
-    // This object is never destroyed.
-    constexpr Parser_Options s_default_options = { };
-
-    }
-
 Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const Cow_String& filename)
   {
+    // Use default options.
+    Parser_Options options = { };
     // Tokenize the character stream.
     Token_Stream tstrm;
-    if(!tstrm.load(cbuf, filename, s_default_options)) {
+    if(!tstrm.load(cbuf, filename, options)) {
       return tstrm.get_parser_error();
     }
     // Parse tokens.
     Parser parser;
-    if(!parser.load(tstrm, s_default_options)) {
+    if(!parser.load(tstrm, options)) {
       return parser.get_parser_error();
     }
     // Initialize parameters of the top scope.
@@ -47,7 +41,7 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const C
     // Accept the code.
     this->m_inst.clear();
     this->m_inst.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
-    return Parser_Error(0, 0, 0, Parser_Error::code_success);
+    return Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_success);
   }
 
 Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
@@ -69,19 +63,21 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
     if(!sentry) {
       return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
+    // Extract characters from the stream buffer directly.
     Opt<Parser_Error> qerr;
-    auto state = std::ios_base::badbit;
-    auto qbuf = cstrm.rdbuf();
-    if(qbuf) {
-      // Extract characters from `*qbuf` directly.
-      try {
-        qerr = this->do_reload_nothrow(*qbuf, filename);
-        // N.B. `reload()` will have consumed all data, so `eofbit` is always set.
-        state = std::ios_base::eofbit;
-      } catch(...) {
-        rocket::handle_ios_exception(cstrm, state);
+    std::ios_base::iostate state = std::ios_base::goodbit;
+    try {
+      qerr = this->do_reload_nothrow(*(cstrm.rdbuf()), filename);
+      // N.B. `do_reload_nothrow()` shall have consumed all data, so `eofbit` is always set.
+      state |= std::ios_base::eofbit;
+      // If the source code contains errors, fail.
+      if(*qerr != Parser_Error::code_success) {
+        state |= std::ios_base::failbit;
       }
+    } catch(...) {
+      rocket::handle_ios_exception(cstrm, state);
     }
+    // If `eofbit` or `failbit` would cause an exception, throw it here.
     if(state) {
       cstrm.setstate(state);
     }

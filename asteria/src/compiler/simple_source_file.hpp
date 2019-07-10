@@ -65,6 +65,11 @@ class Simple_Source_File
     Reference execute(const Global_Context& global, Cow_Vector<Reference>&& args) const;
   };
 
+inline std::istream& operator>>(std::istream& is, Simple_Source_File& file)
+  {
+    return file.reload(is, rocket::sref("<anonymous>")), is;
+  }
+
 }  // namespace Asteria
 
 #endif
