@@ -141,7 +141,7 @@ template<typename charT, typename traitsT,
         this->setg(nullptr, nullptr, nullptr);
         this->m_stor.goff = goff;
       }
-    void do_syncp() noexcept
+    void do_syncp()
       {
         ROCKET_ASSERT(this->m_which & ios_base::out);
         // `poff` designates the beginning of the put area.
@@ -158,7 +158,7 @@ template<typename charT, typename traitsT,
         this->setg(nullptr, nullptr, nullptr);
         this->m_stor.goff = goff;
       }
-    void do_syncgp() noexcept
+    void do_syncgp()
       {
         ROCKET_ASSERT(this->m_which & ios_base::in);
         ROCKET_ASSERT(this->m_which & ios_base::out);
