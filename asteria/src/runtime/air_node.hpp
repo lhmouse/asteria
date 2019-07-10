@@ -38,7 +38,7 @@ class Air_Node
         index_reference         = 6,
         index_vector_air_node   = 7,
       };
-    using Param = Variant<
+    using Parameter = Variant<
       ROCKET_CDR(
         , std::int64_t                  // 0,
         , PreHashed_String              // 1,
@@ -49,14 +49,18 @@ class Air_Node
         , Reference                     // 6,
         , Cow_Vector<Air_Node>          // 7,
       )>;
-    using Executor = Status (Evaluation_Stack& stack, Executive_Context& ctx, const Cow_Vector<Param>& params, const Cow_String& func, const Global_Context& global);
+    using Executor = Status (Evaluation_Stack& stack, Executive_Context& ctx,
+                             const Cow_Vector<Parameter>& params, const Cow_String& func, const Global_Context& global);
+
+  public:
+    static void enumerate_variables_of(const Abstract_Variable_Callback& callback, const Parameter& param);
 
   private:
     Executor* m_fptr;
-    Cow_Vector<Param> m_params;
+    Cow_Vector<Parameter> m_params;
 
   public:
-    Air_Node(Executor* fptr, Cow_Vector<Param>&& params) noexcept
+    Air_Node(Executor* fptr, Cow_Vector<Parameter>&& params) noexcept
       : m_fptr(fptr), m_params(rocket::move(params))
       {
       }
