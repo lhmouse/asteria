@@ -24,7 +24,7 @@ Reference& Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context&
 
 void Simple_Binding_Wrapper::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    this->m_opaque.enumerate_variables(callback);
+    return this->m_opaque.enumerate_variables(callback);
   }
 
 }  // namespace Asteria

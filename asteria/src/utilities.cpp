@@ -354,7 +354,7 @@ bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& 
 
     namespace {
 
-    constexpr char s_quote_table[][256] =
+    constexpr char s_quote_table[][5] =
       {
         "\\0",    "\\x01",  "\\x02",  "\\x03",  "\\x04",  "\\x05",  "\\x06",  "\\a",
         "\\b",    "\\t",    "\\n",    "\\v",    "\\f",    "\\r",    "\\x0E",  "\\x0F",
@@ -390,38 +390,49 @@ bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& 
         "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
       };
 
-    }
+    rocket::cow_string do_quote(const char* s, std::size_t n)
+      {
+        rocket::cow_string str;
+        str.reserve(n * 2);
+        // Enclose the string with double quotes, escaping characters as needed.
+        str += '\"';
+        std::for_each(s, s + n, [&](char ch) { str += s_quote_table[(ch & 0xFF)];  });
+        str += '\"';
+        return str;
+      }
 
-void quote(rocket::cow_string& output, const char* data, std::size_t size)
-  {
-    do_append_str(output, '\"');
-    // Append characters in `[data,data+size)`
-    for(std::size_t i = 0; i != size; ++i) {
-      std::size_t uch = data[i] & 0xFF;
-      do_append_str(output, s_quote_table[uch]);
     }
-    do_append_str(output, '\"');
-  }
 
 rocket::cow_string quote(const char* str, std::size_t len)
   {
-    rocket::cow_string output;
-    quote(output, str, len);
-    return output;
+    return do_quote(str, len);
   }
 
 rocket::cow_string quote(const char* str)
   {
-    rocket::cow_string output;
-    quote(output, str, std::strlen(str));
-    return output;
+    return do_quote(str, std::strlen(str));
   }
 
 rocket::cow_string quote(const rocket::cow_string& str)
   {
-    rocket::cow_string output;
-    quote(output, str.data(), str.size());
-    return output;
+    return do_quote(str.data(), str.size());
+  }
+
+rocket::cow_string pwrapln(std::size_t indent, std::size_t hanging)
+  {
+    rocket::cow_string str;
+    if(indent != 0) {
+      // Terminate the current line.
+      str = rocket::sref("\n");
+      if(hanging != 0) {
+        // Indent the next line accordingly.
+        str.append(hanging, ' ');
+      }
+    } else {
+      // Write everything in a single line, separated by spaces.
+      str = rocket::sref(" ");
+    }
+    return str;
   }
 
 Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept

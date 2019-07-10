@@ -60,7 +60,7 @@ namespace Asteria {
             auto r = this->m_reg;
             // Hash bytes one by one.
             for(std::size_t i = 0; i != n; ++i) {
-              r = s_iso3309_table[(r ^ p[i]) & 0xFF] ^ (r >> 8);
+              r = s_iso3309_table[((r ^ p[i]) & 0xFF)] ^ (r >> 8);
             }
             this->m_reg = r;
           }

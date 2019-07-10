@@ -23,7 +23,6 @@ Reference& Placeholder::invoke(Reference& /*self*/, const Global_Context& /*glob
 
 void Placeholder::enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const
   {
-    // There is nothing to do.
   }
 
 }  // namespace Asteria

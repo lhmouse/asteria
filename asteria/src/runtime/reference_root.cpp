@@ -80,28 +80,20 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callb
       }
     case index_constant:
       {
-        const auto& altr = this->m_stor.as<index_constant>();
-        altr.source.enumerate_variables(callback);
-        return;
+        return this->m_stor.as<index_constant>().source.enumerate_variables(callback);
       }
     case index_temporary:
       {
-        const auto& altr = this->m_stor.as<index_temporary>();
-        altr.value.enumerate_variables(callback);
-        return;
+        return this->m_stor.as<index_temporary>().value.enumerate_variables(callback);
       }
     case index_variable:
       {
         const auto& altr = this->m_stor.as<index_variable>();
-        if(!altr.var_opt) {
-          return;
-        }
-        if(!callback(altr.var_opt)) {
+        if(!altr.var_opt || !callback(altr.var_opt)) {
           return;
         }
         // Descend into this variable recursively when the callback returns `true`.
-        altr.var_opt->enumerate_variables(callback);
-        return;
+        return altr.var_opt->enumerate_variables(callback);
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");

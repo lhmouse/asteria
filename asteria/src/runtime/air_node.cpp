@@ -24,18 +24,15 @@ void Air_Node::enumerate_variables(const Abstract_Variable_Callback& callback) c
             }
           case index_value:
             {
-              param.as<Value>().enumerate_variables(callback);
-              return;
+              return param.as<Value>().enumerate_variables(callback);
             }
           case index_reference:
             {
-              param.as<Reference>().enumerate_variables(callback);
-              return;
+              return param.as<Reference>().enumerate_variables(callback);
             }
           case index_vector_air_node:
             {
-              rocket::for_each(param.as<Cow_Vector<Air_Node>>(), [&](const Air_Node& node) { node.enumerate_variables(callback);  });
-              return;
+              return rocket::for_each(param.as<Cow_Vector<Air_Node>>(), [&](const Air_Node& node) { node.enumerate_variables(callback);  });
             }
           default:
             ASTERIA_TERMINATE("An unknown AIR node argument enumeration `", param.index(), "` has been encountered.");

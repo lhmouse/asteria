@@ -370,25 +370,6 @@ std::ostream& Value::print(std::ostream& os, bool escape) const
     }
   }
 
-    namespace {
-
-    std::ostream& do_break_line(std::ostream& os, std::size_t indent, std::size_t hanging)
-      {
-        if(indent == 0) {
-          // Output everything in a single line. Characters are separated by spaces.
-          return os << ' ';
-        }
-        // Terminate the current line.
-        os << std::endl;
-        // Indent ir accordingly.
-        if(hanging != 0) {
-          os << std::setfill(' ') << std::setw(static_cast<int>(std::min<std::size_t>(hanging, INT_MAX))) << ' ';
-        }
-        return os;
-      }
-
-    }
-
 std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hanging) const
   {
     switch(static_cast<Gtype>(this->m_stor.index())) {
@@ -443,16 +424,12 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
         //  ]
         const auto& altr = this->m_stor.as<gtype_array>();
         os << "array(" << std::dec << altr.size() << ")";
-        do_break_line(os, indent, hanging + 1);
-        os << '[';
+        os << pwrapln(indent, hanging + 1) << '[';
         for(const auto& elem : altr) {
-          do_break_line(os, indent, hanging + indent);
-          os << std::dec << (std::addressof(elem) - altr.data()) << " = ";
-          elem.dump(os, indent, hanging + indent);
-          os << ';';
+          os << pwrapln(indent, hanging + indent) << std::dec << (std::addressof(elem) - altr.data()) << " = ";
+          elem.dump(os, indent, hanging + indent) << ';';
         }
-        do_break_line(os, indent, hanging + 1);
-        os << ']';
+        os << pwrapln(indent, hanging + 1) << ']';
         return os;
       }
     case gtype_object:
@@ -465,16 +442,12 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
         //  }
         const auto& altr = this->m_stor.as<gtype_object>();
         os << "object(" << std::dec << altr.size() << ")";
-        do_break_line(os, indent, hanging + 1);
-        os << '{';
+        os << pwrapln(indent, hanging + 1) << '{';
         for(const auto& pair : altr) {
-          do_break_line(os, indent, hanging + indent);
-          os << quote(pair.first) << " = ";
-          pair.second.dump(os, indent, hanging + indent);
-          os << ';';
+          os << pwrapln(indent, hanging + indent) << quote(pair.first) << " = ";
+          pair.second.dump(os, indent, hanging + indent) << ';';
         }
-        do_break_line(os, indent, hanging + 1);
-        os << '}';
+        os << pwrapln(indent, hanging + 1) << '}';
         return os;
       }
     default:
@@ -495,23 +468,19 @@ void Value::enumerate_variables(const Abstract_Variable_Callback& callback) cons
       }
     case gtype_opaque:
       {
-        this->m_stor.as<gtype_opaque>()->enumerate_variables(callback);
-        return;
+        return this->m_stor.as<gtype_opaque>()->enumerate_variables(callback);
       }
     case gtype_function:
       {
-        this->m_stor.as<gtype_function>()->enumerate_variables(callback);
-        return;
+        return this->m_stor.as<gtype_function>()->enumerate_variables(callback);
       }
     case gtype_array:
       {
-        rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  });
-        return;
+        return rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  });
       }
     case gtype_object:
       {
-        rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
-        return;
+        return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");

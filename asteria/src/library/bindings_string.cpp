@@ -125,7 +125,7 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
           bcr_table[i] = plen;
         }
         for(std::ptrdiff_t i = plen - 1; i != 0; --i) {
-          bcr_table[pend[~i] & 0xFF] = i;
+          bcr_table[(pend[~i] & 0xFF)] = i;
         }
         // Search for the pattern.
         auto tpos = tbegin;
@@ -136,7 +136,7 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
           if(std::equal(pbegin, pend, tpos)) {
             break;
           }
-          tpos += bcr_table[tpos[~-plen] & 0xFF];
+          tpos += bcr_table[(tpos[(plen - 1)] & 0xFF)];
         }
         return rocket::move(tpos);
       }
