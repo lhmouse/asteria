@@ -639,7 +639,7 @@ namespace Asteria {
         // string-literal ::=
         //   escape-string-literal | noescape-string-literal
         // escape-string-literal ::=
-        //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
+        //   PCRE("([^\\]|(\\([abfnrtveZ0'"?\\/]|(x[0-9A-Fa-f]{2})|(u[0-9A-Fa-f]{4})|(U[0-9A-Fa-f]{6}))))*?")
         // noescape-string-literal ::=
         //   PCRE('[^']*?')
         if(reader.peek() != head) {
@@ -678,6 +678,7 @@ namespace Asteria {
           case '\"':
           case '\\':
           case '?':
+          case '/':
             {
               value.push_back(next);
               break;
