@@ -239,9 +239,10 @@ std::ostream& Parser_Error::print(std::ostream& os) const
 
 void Parser_Error::convert_to_runtime_error_and_throw() const
   {
-    Cow_osstream mos;
-    this->print(mos);
-    throw_runtime_error(__func__, mos.extract_string());
+    Cow_osstream fmtss;
+    fmtss.imbue(std::locale::classic());
+    this->print(fmtss);
+    throw_runtime_error(__func__, fmtss.extract_string());
   }
 
 }  // namespace Asteria

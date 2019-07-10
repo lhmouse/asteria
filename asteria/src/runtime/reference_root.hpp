@@ -91,7 +91,7 @@ class Reference_Root
 
 inline void swap(Reference_Root& lhs, Reference_Root& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 }  // namespace Asteria

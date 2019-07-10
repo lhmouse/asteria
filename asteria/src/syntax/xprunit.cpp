@@ -702,15 +702,16 @@ const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
         ctx_func.prepare_function_parameters(params);
         rocket::for_each(body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func);  });
         // Format the prototype string.
-        Cow_osstream nos;
-        nos << "<closure> (";
+        Cow_osstream fmtss;
+        fmtss.imbue(std::locale::classic());
+        fmtss << "<closure> (";
         if(!params.empty()) {
-          std::for_each(params.begin(), params.end() - 1, [&](const PreHashed_String& param) { nos << param << ", ";  });
-          nos << params.back();
+          std::for_each(params.begin(), params.end() - 1, [&](const PreHashed_String& param) { fmtss << param << ", ";  });
+          fmtss << params.back();
         }
-        nos <<")";
+        fmtss <<")";
         // Instantiate the function.
-        Rcobj<Instantiated_Function> closure(sloc, nos.extract_string(), params, rocket::move(code_body));
+        Rcobj<Instantiated_Function> closure(sloc, fmtss.extract_string(), params, rocket::move(code_body));
         ASTERIA_DEBUG_LOG("New closure function: ", closure);
         // Push the function object.
         Reference_Root::S_temporary xref = { G_function(rocket::move(closure)) };

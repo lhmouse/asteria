@@ -2065,7 +2065,7 @@ template<typename charT, typename traitsT,
          typename allocatorT> inline void swap(basic_cow_string<charT, traitsT, allocatorT>& lhs,
                                                basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,

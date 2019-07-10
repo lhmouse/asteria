@@ -61,7 +61,7 @@ class Reference_Modifier
 
 inline void swap(Reference_Modifier& lhs, Reference_Modifier& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 }  // namespace Asteria

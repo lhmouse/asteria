@@ -500,9 +500,10 @@ template<typename... alternativesT> class variant
 template<typename... alternativesT> constexpr size_t variant<alternativesT...>::type_size;
 #endif
 
-template<typename... alternativesT> void swap(variant<alternativesT...>& lhs, variant<alternativesT...>& other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)
+template<typename... alternativesT> void swap(variant<alternativesT...>& lhs,
+                                              variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    lhs.swap(other);
+    return lhs.swap(rhs);
   }
 
 }  // namespace rocket

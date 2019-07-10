@@ -459,7 +459,7 @@ template<typename charT, typename traitsT,
          typename allocatorT> void swap(basic_cow_stringbuf<charT, traitsT, allocatorT>& lhs,
                                         basic_cow_stringbuf<charT, traitsT, allocatorT>& rhs)
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 extern template class basic_cow_stringbuf<char>;

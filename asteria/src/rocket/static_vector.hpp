@@ -24,7 +24,8 @@
 
 namespace rocket {
 
-template<typename valueT, size_t capacityT, typename allocatorT = allocator<valueT>> class static_vector;
+template<typename valueT, size_t capacityT,
+         typename allocatorT = allocator<valueT>> class static_vector;
 
     namespace details_static_vector {
 
@@ -376,7 +377,8 @@ template<typename valueT, size_t capacityT, typename allocatorT = allocator<valu
 
     }  // namespace details_static_vector
 
-template<typename valueT, size_t capacityT, typename allocatorT> class static_vector
+template<typename valueT, size_t capacityT,
+         typename allocatorT> class static_vector
   {
     static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
     static_assert(capacityT > 0, "`static_vector`s of zero elements are not allowed.");
@@ -905,10 +907,11 @@ template<typename valueT, size_t capacityT, typename allocatorT> class static_ve
       }
   };
 
-template<typename valueT, size_t capacityT, typename allocatorT> inline void swap(static_vector<valueT, capacityT, allocatorT>& lhs,
-                                                                                  static_vector<valueT, capacityT, allocatorT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename valueT, size_t capacityT,
+         typename allocatorT> inline void swap(static_vector<valueT, capacityT, allocatorT>& lhs,
+                                               static_vector<valueT, capacityT, allocatorT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 }  // namespace rocket

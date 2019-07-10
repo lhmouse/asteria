@@ -437,7 +437,7 @@ template<typename elementT> constexpr bool operator!=(nullptr_t, const refcnt_pt
 template<typename elementT> inline void swap(refcnt_ptr<elementT>& lhs,
                                              refcnt_ptr<elementT>& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,

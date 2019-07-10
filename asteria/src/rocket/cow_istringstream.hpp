@@ -111,7 +111,7 @@ template<typename charT, typename traitsT,
          typename allocatorT> void swap(basic_cow_istringstream<charT, traitsT, allocatorT>& lhs,
                                         basic_cow_istringstream<charT, traitsT, allocatorT>& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 extern template class basic_cow_istringstream<char>;

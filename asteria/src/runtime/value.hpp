@@ -206,18 +206,19 @@ class Value
 
     ROCKET_PURE_FUNCTION bool test() const noexcept;
     ROCKET_PURE_FUNCTION Compare compare(const Value& other) const noexcept;
-    std::ostream& print(std::ostream& os, bool quote_strings = false) const;
-    std::ostream& dump(std::ostream& os, int indent_increment = 2, int indent_next = 0) const;
 
     ROCKET_PURE_FUNCTION bool unique() const noexcept;
     ROCKET_PURE_FUNCTION long use_count() const noexcept;
     ROCKET_PURE_FUNCTION long gcref_split() const noexcept;
+
+    std::ostream& print(std::ostream& os, bool escape = false) const;
+    std::ostream& dump(std::ostream& os, std::size_t indent = 2, std::size_t hanging = 0) const;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
 inline void swap(Value& lhs, Value& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 inline std::ostream& operator<<(std::ostream& os, const Value& value)

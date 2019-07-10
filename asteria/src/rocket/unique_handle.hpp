@@ -228,7 +228,7 @@ template<typename handleT, typename closerT> inline bool operator>=(const unique
 template<typename handleT, typename closerT> inline void swap(unique_handle<handleT, closerT>& lhs,
                                                               unique_handle<handleT, closerT>& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,

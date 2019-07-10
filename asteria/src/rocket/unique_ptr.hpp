@@ -335,7 +335,7 @@ template<typename elementT, typename deleterT> constexpr bool operator!=(nullptr
 template<typename elementT, typename deleterT> inline void swap(unique_ptr<elementT, deleterT>& lhs,
                                                                 unique_ptr<elementT, deleterT>& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,

@@ -1258,7 +1258,7 @@ template<typename valueT, typename allocatorT> class cow_vector
 template<typename valueT, typename allocatorT> inline void swap(cow_vector<valueT, allocatorT>& lhs,
                                                                 cow_vector<valueT, allocatorT>& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 }  // namespace rocket

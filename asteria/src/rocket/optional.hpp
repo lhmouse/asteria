@@ -224,7 +224,7 @@ template<typename valueT> class optional
 template<typename valueT> void swap(optional<valueT>& lhs,
                                     optional<valueT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 template<typename valueT> constexpr bool operator==(const optional<valueT>& lhs,

@@ -21,28 +21,24 @@ struct Argument_Reader::Mparam
     Tag tag;
     Gtype gtype;
 
-    void print(std::ostream& os) const
+    std::ostream& print(std::ostream& os) const
       {
         switch(this->tag) {
         case tag_optional:
           {
-            os << '[' << Value::get_gtype_name(this->gtype) << ']';
-            return;
+            return os << '[' << Value::get_gtype_name(this->gtype) << ']';
           }
         case tag_required:
           {
-            os << Value::get_gtype_name(this->gtype);
-            return;
+            return os << Value::get_gtype_name(this->gtype);
           }
         case tag_generic:
           {
-            os << "<generic>";
-            return;
+            return os << "<generic>";
           }
         case tag_variadic:
           {
-            os << "...";
-            return;
+            return os << "...";
           }
         case tag_finish:
           {
@@ -605,39 +601,40 @@ void Argument_Reader::throw_no_matching_function_call() const
     const auto& name = this->m_name;
     const auto& args = this->m_args.get();
     // Create a message containing arguments.
-    Cow_osstream mos;
-    mos << "There was no matching overload for function call `" << name << "(";
+    Cow_osstream fmtss;
+    fmtss.imbue(std::locale::classic());
+    fmtss << "There was no matching overload for function call `" << name << "(";
     if(!args.empty()) {
-      mos << args.front().read().gtype_name();
-      std::for_each(args.begin() + 1, args.end(), [&](const Reference& arg) { mos <<", " << arg.read().gtype_name();  });
+      fmtss << args.front().read().gtype_name();
+      std::for_each(args.begin() + 1, args.end(), [&](const Reference& arg) { fmtss <<", " << arg.read().gtype_name();  });
     }
-    mos << ")`.";
+    fmtss << ")`.";
     // If overload information is available, append the list of overloads.
     if(!this->m_overloads.empty()) {
-      mos << "\n[list of overloads: ";
+      fmtss << "\n[list of overloads: ";
       // Decode overloads one by one.
       auto bpos = this->m_overloads.begin();
       for(;;) {
         auto epos = std::find_if(bpos, this->m_overloads.end(), [&](const Mparam& pinfo) { return pinfo.tag == Mparam::tag_finish;  });
         // Append this overload.
-        mos << "`" << name << "(";
+        fmtss << "`" << name << "(";
         if(bpos != epos) {
-          bpos->print(mos);
-          std::for_each(bpos + 1, epos, [&](const Mparam& pinfo) { pinfo.print(mos << ", ");  });
+          bpos->print(fmtss);
+          std::for_each(bpos + 1, epos, [&](const Mparam& pinfo) { pinfo.print(fmtss << ", ");  });
         }
-        mos << ")`";
+        fmtss << ")`";
         // Are there more overloads?
         if(this->m_overloads.end() - epos <= 1) {
           break;
         }
         // Read the next overload.
         bpos = epos + 1;
-        mos << ", ";
+        fmtss << ", ";
       }
-      mos << "]";
+      fmtss << "]";
     }
     // Throw it now.
-    throw_runtime_error(__func__, mos.extract_string());
+    throw_runtime_error(__func__, fmtss.extract_string());
   }
 
 }  // namespace Asteria

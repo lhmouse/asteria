@@ -354,7 +354,7 @@ template<typename stringT, typename hashT, typename otherT, ROCKET_ENABLE_IF(siz
 template<typename stringT, typename hashT> inline void swap(basic_prehashed_string<stringT, hashT>& lhs,
                                                             basic_prehashed_string<stringT, hashT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,

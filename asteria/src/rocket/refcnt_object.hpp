@@ -125,7 +125,7 @@ template<typename elementT> class refcnt_object
 template<typename elementT> inline void swap(refcnt_object<elementT>& lhs,
                                              refcnt_object<elementT>& rhs) noexcept
   {
-    lhs.swap(rhs);
+    return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,
