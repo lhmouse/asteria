@@ -324,45 +324,55 @@ std::ostream& Value::print(std::ostream& os, bool escape) const
       }
     case gtype_string:
       {
+        const auto& altr = this->m_stor.as<gtype_string>();
         if(!escape) {
           // hello
-          return os << this->m_stor.as<gtype_string>();
+          os << altr;
+        } else {
+          // "hello"
+          os << quote(altr);
         }
-        // "hello"
-        return os << quote(this->m_stor.as<gtype_string>());
+        return os;
       }
     case gtype_opaque:
       {
+        const auto& altr = this->m_stor.as<gtype_opaque>();
         // <opaque> [[`my opaque`]]
-        return os << "<opaque> [[`" << this->m_stor.as<gtype_opaque>() << "`]]";
+        os << "<opaque> [[`" << altr << "`]]";
+        return os;
       }
     case gtype_function:
       {
+        const auto& altr = this->m_stor.as<gtype_function>();
         // <function> [[`my function`]]
-        return os << "<function> [[`" << this->m_stor.as<gtype_function>() << "`]]";
+        os << "<function> [[`" << altr << "`]]";
+        return os;
       }
     case gtype_array:
       {
-        // [ 1; 2; 3; ]
+        const auto& altr = this->m_stor.as<gtype_array>();
+        // [ 1, 2, 3, ]
         os << '[';
-        for(const auto& elem : this->m_stor.as<gtype_array>()) {
+        for(std::size_t i = 0; i != altr.size(); ++i) {
           os << ' ';
-          elem.print(os, true);
+          altr[i].print(os, true);
           os << ',';
         }
-        os << ' ' << ']';
+        os << " ]";
         return os;
       }
     case gtype_object:
       {
-        // { "one" = 1; "two" = 2; "three" = 3; }
+        const auto& altr = this->m_stor.as<gtype_object>();
+        G_string kbuf;
+        // { "one" = 1, "two" = 2, "three" = 3, }
         os << '{';
-        for(const auto& pair : this->m_stor.as<gtype_object>()) {
-          os << ' ' << quote(pair.first) << " = ";
-          pair.second.print(os, true);
+        for(auto q = altr.begin(); q != altr.end(); ++q) {
+          os << ' ' << quote(kbuf, q->first) << " = ";
+          q->second.print(os, true);
           os << ',';
         }
-        os << ' ' << '}';
+        os << " }";
         return os;
       }
     default:
@@ -395,59 +405,61 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
       }
     case gtype_string:
       {
-        // string(5) "hello"
         const auto& altr = this->m_stor.as<gtype_string>();
+        // string(5) "hello"
         os << "string(" << std::dec << altr.size() << ") " << quote(altr);
         return os;
       }
     case gtype_opaque:
       {
-        // opaque("typeid") [[`my opaque`]]
         const auto& altr = this->m_stor.as<gtype_opaque>();
+        // opaque("typeid") [[`my opaque`]]
         os << "opaque(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
         return os;
       }
     case gtype_function:
       {
-        // function("typeid") [[`my function`]]
         const auto& altr = this->m_stor.as<gtype_function>();
+        // function("typeid") [[`my function`]]
         os << "function(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
         return os;
       }
     case gtype_array:
       {
+        const auto& altr = this->m_stor.as<gtype_array>();
+        G_string sbuf;
         // array(3) =
         //  [
         //   0 = integer 1;
         //   1 = integer 2;
         //   2 = integer 3;
         //  ]
-        const auto& altr = this->m_stor.as<gtype_array>();
         os << "array(" << std::dec << altr.size() << ")";
-        os << pwrapln(indent, hanging + 1) << '[';
-        for(const auto& elem : altr) {
-          os << pwrapln(indent, hanging + indent) << std::dec << (std::addressof(elem) - altr.data()) << " = ";
-          elem.dump(os, indent, hanging + indent) << ';';
+        os << pwrapln(sbuf, indent, hanging + 1) << '[';
+        for(std::size_t i = 0; i != altr.size(); ++i) {
+          os << pwrapln(sbuf, indent, hanging + indent) << std::dec << i << " = ";
+          altr[i].dump(os, indent, hanging + indent) << ';';
         }
-        os << pwrapln(indent, hanging + 1) << ']';
+        os << pwrapln(sbuf, indent, hanging + 1) << ']';
         return os;
       }
     case gtype_object:
       {
+        const auto& altr = this->m_stor.as<gtype_object>();
+        G_string sbuf, kbuf;
         // object(3) =
         //  {
         //   "one" = integer 1;
         //   "two" = integer 2;
         //   "three" = integer 3;
         //  }
-        const auto& altr = this->m_stor.as<gtype_object>();
         os << "object(" << std::dec << altr.size() << ")";
-        os << pwrapln(indent, hanging + 1) << '{';
-        for(const auto& pair : altr) {
-          os << pwrapln(indent, hanging + indent) << quote(pair.first) << " = ";
-          pair.second.dump(os, indent, hanging + indent) << ';';
+        os << pwrapln(sbuf, indent, hanging + 1) << '{';
+        for(auto q = altr.begin(); q != altr.end(); ++q) {
+          os << pwrapln(sbuf, indent, hanging + indent) << quote(kbuf, q->first) << " = ";
+          q->second.dump(os, indent, hanging + indent) << ';';
         }
-        os << pwrapln(indent, hanging + 1) << '}';
+        os << pwrapln(sbuf, indent, hanging + 1) << '}';
         return os;
       }
     default:

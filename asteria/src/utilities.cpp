@@ -390,49 +390,67 @@ bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& 
         "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
       };
 
-    rocket::cow_string do_quote(const char* s, std::size_t n)
-      {
-        rocket::cow_string str;
-        str.reserve(n * 2);
-        // Enclose the string with double quotes, escaping characters as needed.
-        str += '\"';
-        std::for_each(s, s + n, [&](char ch) { str += s_quote_table[(ch & 0xFF)];  });
-        str += '\"';
-        return str;
-      }
-
     }
+
+rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, std::size_t len)
+  {
+    sbuf.clear();
+    // Enclose the string with double quotes, escaping characters as needed.
+    sbuf += '\"';
+    std::for_each(str, str + len, [&](char ch) { sbuf += s_quote_table[(ch & 0xFF)];  });
+    sbuf += '\"';
+    return sbuf;
+  }
 
 rocket::cow_string quote(const char* str, std::size_t len)
   {
-    return do_quote(str, len);
+    rocket::cow_string sbuf;
+    quote(sbuf, str, len);
+    return sbuf;
+  }
+
+rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str)
+  {
+    return quote(sbuf, str, std::strlen(str));
   }
 
 rocket::cow_string quote(const char* str)
   {
-    return do_quote(str, std::strlen(str));
+    return quote(str, std::strlen(str));
+  }
+
+rocket::cow_string& quote(rocket::cow_string& sbuf, const rocket::cow_string& str)
+  {
+    return quote(sbuf, str.data(), str.size());
   }
 
 rocket::cow_string quote(const rocket::cow_string& str)
   {
-    return do_quote(str.data(), str.size());
+    return quote(str.data(), str.size());
+  }
+
+rocket::cow_string& pwrapln(rocket::cow_string& sbuf, std::size_t indent, std::size_t hanging)
+  {
+    sbuf.clear();
+    if(indent != 0) {
+      // Terminate the current line.
+      sbuf = rocket::sref("\n");
+      if(hanging != 0) {
+        // Indent the next line accordingly.
+        sbuf.append(hanging, ' ');
+      }
+    } else {
+      // Write everything in a single line, separated by spaces.
+      sbuf = rocket::sref(" ");
+    }
+    return sbuf;
   }
 
 rocket::cow_string pwrapln(std::size_t indent, std::size_t hanging)
   {
-    rocket::cow_string str;
-    if(indent != 0) {
-      // Terminate the current line.
-      str = rocket::sref("\n");
-      if(hanging != 0) {
-        // Indent the next line accordingly.
-        str.append(hanging, ' ');
-      }
-    } else {
-      // Write everything in a single line, separated by spaces.
-      str = rocket::sref(" ");
-    }
-    return str;
+    rocket::cow_string sbuf;
+    pwrapln(sbuf, indent, hanging);
+    return sbuf;
   }
 
 Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
