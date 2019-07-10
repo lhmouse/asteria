@@ -37,6 +37,30 @@ int main()
         assert std.json.format([[1,2],[3,4]], 0) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], -1) == "[[1,2],[3,4]]";
         assert std.json.format([[1,2],[3,4]], 2) == "[\n  [\n    1,\n    2\n  ],\n  [\n    3,\n    4\n  ]\n]";
+
+        assert std.json.parse("") == null;
+        assert std.json.parse("null") == null;
+        assert std.json.parse("true  ") == true;
+        assert std.json.parse("  false") == false;
+        assert std.json.parse("  42  ") == 42;
+        assert std.json.parse("  76.5") == 76.5;
+        assert std.json.parse("2 1") == null;
+        assert std.json.parse("\'hello\'") == "hello";
+        assert std.json.parse("\"\u55B5\"") == "喵";
+        assert std.json.parse("\"\u55b5\"") == "喵";
+        assert std.json.parse("\"\\u0007\\b\\u000B\\f\\n\\r\\t\"") == "\a\b\v\f\n\r\t";
+
+        assert std.json.parse("[]") == [];
+        assert std.json.parse("[0]") == [0];
+        assert std.json.parse("[0,1]") == [0,1];
+        assert std.json.parse("[0,null,2]") == [0,null,2];
+
+        assert lengthof std.json.parse("{}") == 0;
+        assert std.json.parse("{\"a\":1}").a == 1;
+        assert std.json.parse("{b:Infinity}").b == infinity;
+        assert __isnan std.json.parse("{b:NaN}").b;
+        assert std.json.parse("{c:1,d:2,}").c == 1;
+        assert std.json.parse("{c:1,d:2,}").d == 2;
       )__";
 
     std::istringstream iss(s_source);
