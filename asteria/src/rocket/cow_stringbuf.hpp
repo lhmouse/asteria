@@ -340,13 +340,19 @@ template<typename charT, typename traitsT,
           // There is nothing to write, so succeed.
           return traits_type::not_eof(char_type());
         }
-        // Write the character and bump the put position.
-        this->m_stor.str.replace(this->m_stor.poff, 1, 1, traits_type::to_char_type(ch));
-        this->m_stor.poff += 1;
-        // Set up the put area for efficiency.
-        // N.B. This would be unnecessary if we were using unbuffered I/O.
-        if(ROCKET_UNEXPECT(this->m_stor.poff != this->m_stor.str.size())) {
-          this->do_syncp();
+        if(this->m_which & ios_base::app) {
+          // Always append to the string, ignoring the value of `poff`.
+          this->m_stor.str.push_back(traits_type::to_char_type(ch));
+          this->m_stor.poff = this->m_stor.str.size();
+        } else {
+          // Write the character and bump the put position.
+          this->m_stor.str.replace(this->m_stor.poff, 1, 1, traits_type::to_char_type(ch));
+          this->m_stor.poff += 1;
+          // Set up the put area for efficiency.
+          // N.B. This would be unnecessary if we were using unbuffered I/O.
+          if(ROCKET_UNEXPECT(this->m_stor.poff != this->m_stor.str.size())) {
+            this->do_syncp();
+          }
         }
         // Return the character that has just been written.
         return ch;
@@ -359,9 +365,15 @@ template<typename charT, typename traitsT,
         }
         // Invalidate the get and put areas for direct access to the string.
         this->do_freegp();
-        // Copy some characters and advance the put position.
-        this->m_stor.str.replace(this->m_stor.poff, n, s, n);
-        this->m_stor.poff += n;
+        if(this->m_which & ios_base::app) {
+          // Always append to the string, ignoring the value of `poff`.
+          this->m_stor.str.append(s, n);
+          this->m_stor.poff = this->m_stor.str.size();
+        } else {
+          // Copy some characters and advance the put position.
+          this->m_stor.str.replace(this->m_stor.poff, n, s, n);
+          this->m_stor.poff += n;
+        }
         // Return the number of characters that have been copied.
         return n;
       }
