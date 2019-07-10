@@ -427,7 +427,7 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
     case gtype_array:
       {
         const auto& altr = this->m_stor.as<gtype_array>();
-        G_string sbuf;
+        G_string ibuf;
         // array(3) =
         //  [
         //   0 = integer 1;
@@ -435,18 +435,18 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
         //   2 = integer 3;
         //  ]
         os << "array(" << std::dec << altr.size() << ")";
-        os << pwrapln(sbuf, indent, hanging + 1) << '[';
+        os << pwrapln(ibuf, indent, hanging + 1) << '[';
         for(std::size_t i = 0; i != altr.size(); ++i) {
-          os << pwrapln(sbuf, indent, hanging + indent) << std::dec << i << " = ";
+          os << pwrapln(ibuf, indent, hanging + indent) << std::dec << i << " = ";
           altr[i].dump(os, indent, hanging + indent) << ';';
         }
-        os << pwrapln(sbuf, indent, hanging + 1) << ']';
+        os << pwrapln(ibuf, indent, hanging + 1) << ']';
         return os;
       }
     case gtype_object:
       {
         const auto& altr = this->m_stor.as<gtype_object>();
-        G_string sbuf, kbuf;
+        G_string ibuf, kbuf;
         // object(3) =
         //  {
         //   "one" = integer 1;
@@ -454,12 +454,12 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
         //   "three" = integer 3;
         //  }
         os << "object(" << std::dec << altr.size() << ")";
-        os << pwrapln(sbuf, indent, hanging + 1) << '{';
+        os << pwrapln(ibuf, indent, hanging + 1) << '{';
         for(auto q = altr.begin(); q != altr.end(); ++q) {
-          os << pwrapln(sbuf, indent, hanging + indent) << quote(kbuf, q->first) << " = ";
+          os << pwrapln(ibuf, indent, hanging + indent) << quote(kbuf, q->first) << " = ";
           q->second.dump(os, indent, hanging + indent) << ';';
         }
-        os << pwrapln(sbuf, indent, hanging + 1) << '}';
+        os << pwrapln(ibuf, indent, hanging + 1) << '}';
         return os;
       }
     default:
