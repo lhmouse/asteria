@@ -2473,7 +2473,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             "  * Returns an `array` containing the broken-down segments. If\n"
             "    `text` is empty, an empty `array` is returned.\n"
             "\n"
-            "  * Throws an exception if `limit` is zero or negative.\n"
+            "  * Throws an exception if `limit` is negative or zero.\n"
           ),
         // Opaque parameter
         G_null

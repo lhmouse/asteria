@@ -477,7 +477,7 @@
 	* Returns an `array` containing the broken-down segments. If
 	  `text` is empty, an empty `array` is returned.
 
-	* Throws an exception if `limit` is zero or negative.
+	* Throws an exception if `limit` is negative or zero.
 
 `std.string.implode(segments, [delim])`
 
