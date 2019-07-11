@@ -428,9 +428,11 @@ namespace Asteria {
                                     const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& code_try = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto& except_name = p.at(1).as<PreHashed_String>();
-        const auto& code_catch = p.at(2).as<Cow_Vector<Air_Node>>();
+        // TODO: trace nested exceptions:
+        //   const auto& sloc = p.at(0).as<Source_Location>();
+        const auto& code_try = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto& except_name = p.at(2).as<PreHashed_String>();
+        const auto& code_catch = p.at(3).as<Cow_Vector<Air_Node>>();
         // This is the same as a `try...catch` block in C++.
         try {
           // Execute the `try` clause. If no exception is thrown, this will have little cost.
@@ -681,9 +683,10 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         ctx_catch.open_named_reference(rocket::sref("__backtrace")) /*= Reference_Root::S_null()*/;
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
-        p.emplace_back(do_generate_code_block(ctx, altr.body_try));  // 0
-        p.emplace_back(altr.except_name);  // 1
-        p.emplace_back(do_generate_code_statement_list(nullptr, ctx_catch, altr.body_catch));  // 2
+        p.emplace_back(altr.sloc);  // 0
+        p.emplace_back(do_generate_code_block(ctx, altr.body_try));  // 1
+        p.emplace_back(altr.except_name);  // 2
+        p.emplace_back(do_generate_code_statement_list(nullptr, ctx_catch, altr.body_catch));  // 3
         code.emplace_back(do_execute_try, rocket::move(p));
         return;
       }
