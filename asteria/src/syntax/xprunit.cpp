@@ -15,7 +15,7 @@
 
 namespace Asteria {
 
-const char* Xprunit::get_operator_name(Xprunit::Xop xop) noexcept
+const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
   {
     switch(xop) {
     case xop_postfix_inc:

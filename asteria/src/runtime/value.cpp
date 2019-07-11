@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-const char* Value::get_gtype_name(Gtype gtype) noexcept
+const char* Value::gtype_name_of(Gtype gtype) noexcept
   {
     switch(gtype) {
     case gtype_null:
@@ -59,7 +59,7 @@ const char* Value::get_gtype_name(Gtype gtype) noexcept
 
     }
 
-const Value& Value::get_null() noexcept
+const Value& Value::null() noexcept
   {
     // This two-step cast is necessary to eliminate warnings when strict aliasing is in effect.
     return static_cast<const Value*>(static_cast<const void*>(s_null))[0];

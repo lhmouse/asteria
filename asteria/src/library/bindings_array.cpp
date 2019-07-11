@@ -598,7 +598,7 @@ G_array std_array_generate(const Global_Context& global, const G_function& gener
       // Set up arguments for the user-defined generator.
       Cow_Vector<Reference> args;
       do_push_argument(args, G_integer(i));
-      do_push_argument(args, res.empty() ? Value::get_null() : res.back());
+      do_push_argument(args, res.empty() ? Value::null() : res.back());
       // Call it.
       Reference self;
       generator.get().invoke(self, global, rocket::move(args));

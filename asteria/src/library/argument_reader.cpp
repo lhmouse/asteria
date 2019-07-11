@@ -26,11 +26,11 @@ struct Argument_Reader::Mparam
         switch(this->tag) {
         case tag_optional:
           {
-            return os << '[' << Value::get_gtype_name(this->gtype) << ']';
+            return os << '[' << Value::gtype_name_of(this->gtype) << ']';
           }
         case tag_required:
           {
-            return os << Value::get_gtype_name(this->gtype);
+            return os << Value::gtype_name_of(this->gtype);
           }
         case tag_generic:
           {

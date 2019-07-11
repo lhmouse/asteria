@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-const char* Parser_Error::get_code_description(Parser_Error::Code xcode) noexcept
+const char* Parser_Error::describe_code(Parser_Error::Code xcode) noexcept
   {
     switch(xcode) {
     ///////////////////////////////////////////////////////////////////////////
@@ -233,7 +233,7 @@ std::ostream& Parser_Error::print(std::ostream& os) const
     } else {
       os << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
     }
-    os << ": " << Parser_Error::get_code_description(this->m_code);
+    os << ": " << Parser_Error::describe_code(this->m_code);
     return os;
   }
 

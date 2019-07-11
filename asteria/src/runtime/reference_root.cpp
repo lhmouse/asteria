@@ -13,7 +13,7 @@ const Value& Reference_Root::dereference_const() const
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_null:
       {
-        return Value::get_null();
+        return Value::null();
       }
     case index_constant:
       {
@@ -29,7 +29,7 @@ const Value& Reference_Root::dereference_const() const
       {
         const auto& altr = this->m_stor.as<index_variable>();
         if(!altr.var_opt) {
-          return Value::get_null();
+          return Value::null();
         }
         return altr.var_opt->get_value();
       }

@@ -150,7 +150,7 @@ class Xprunit
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   public:
-    ROCKET_PURE_FUNCTION static const char* get_operator_name(Xop xop) noexcept;
+    ROCKET_PURE_FUNCTION static const char* describe_operator(Xop xop) noexcept;
 
   private:
     Xvariant m_stor;

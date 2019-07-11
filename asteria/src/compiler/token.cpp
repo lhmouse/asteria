@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-const char* Token::get_keyword(Keyword keyword) noexcept
+const char* Token::stringify_keyword(Keyword keyword) noexcept
   {
     switch(keyword) {
     case keyword_var:
@@ -199,7 +199,7 @@ const char* Token::get_keyword(Keyword keyword) noexcept
     }
   }
 
-const char* Token::get_punctuator(Punctuator punct) noexcept
+const char* Token::stringify_punctuator(Punctuator punct) noexcept
   {
     switch(punct) {
     case punctuator_add:
@@ -433,12 +433,12 @@ std::ostream& Token::print(std::ostream& os) const
     case index_keyword:
       {
         // keyword `if`
-        return os << "keyword `" << Token::get_keyword(this->m_stor.as<index_keyword>().keyword) << "`";
+        return os << "keyword `" << Token::stringify_keyword(this->m_stor.as<index_keyword>().keyword) << "`";
       }
     case index_punctuator:
       {
         // punctuator `;`
-        return os << "punctuator `" << Token::get_punctuator(this->m_stor.as<index_punctuator>().punct) << "`";
+        return os << "punctuator `" << Token::stringify_punctuator(this->m_stor.as<index_punctuator>().punct) << "`";
       }
     case index_identifier:
       {

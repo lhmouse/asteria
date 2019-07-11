@@ -19,11 +19,11 @@ const Value& Reference::do_read(const Reference_Modifier* mods, std::size_t nmod
       // Apply a modifier.
       qref = mods[i].apply_const_opt(*qref);
       if(!qref) {
-        return Value::get_null();
+        return Value::null();
       }
     }
     // Apply the last modifier.
-    return (qref = last.apply_const_opt(*qref)) ? *qref : Value::get_null();
+    return (qref = last.apply_const_opt(*qref)) ? *qref : Value::null();
   }
 
 Value& Reference::do_open(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const
@@ -47,7 +47,7 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, false);  // no create
       if(!qref) {
-        return Value::get_null();
+        return Value::null();
       }
     }
     // Apply the last modifier.

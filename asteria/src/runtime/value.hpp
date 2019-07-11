@@ -37,8 +37,8 @@ class Value
 
   public:
     // The objects returned by these functions are allocated statically and exist throughout the program.
-    ROCKET_PURE_FUNCTION static const char* get_gtype_name(Gtype gtype) noexcept;
-    ROCKET_PURE_FUNCTION static const Value& get_null() noexcept;
+    ROCKET_PURE_FUNCTION static const char* gtype_name_of(Gtype gtype) noexcept;
+    ROCKET_PURE_FUNCTION static const Value& null() noexcept;
 
   private:
     Xvariant m_stor;
@@ -65,7 +65,7 @@ class Value
       }
     const char* gtype_name() const noexcept
       {
-        return Value::get_gtype_name(static_cast<Gtype>(this->m_stor.index()));
+        return Value::gtype_name_of(static_cast<Gtype>(this->m_stor.index()));
       }
 
     bool is_null() const noexcept

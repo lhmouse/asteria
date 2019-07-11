@@ -166,8 +166,8 @@ class Token
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
   public:
-    ROCKET_PURE_FUNCTION static const char* get_keyword(Keyword keyword) noexcept;
-    ROCKET_PURE_FUNCTION static const char* get_punctuator(Punctuator punct) noexcept;
+    ROCKET_PURE_FUNCTION static const char* stringify_keyword(Keyword keyword) noexcept;
+    ROCKET_PURE_FUNCTION static const char* stringify_punctuator(Punctuator punct) noexcept;
 
   private:
     // Metadata

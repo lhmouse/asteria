@@ -133,7 +133,7 @@ namespace Asteria {
           auto keyword = qtok->as_keyword();
           // Treat the keyword as a plain identifier and discard this token.
           tstrm.shift();
-          return rocket::sref(Token::get_keyword(keyword));
+          return rocket::sref(Token::stringify_keyword(keyword));
         }
         if(qtok->is_identifier()) {
           auto name = qtok->as_identifier();

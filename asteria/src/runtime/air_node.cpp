@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-void Air_Node::enumerate_variables_of(const Abstract_Variable_Callback& callback, const Air_Node::Parameter& param)
+void Air_Node::do_enumerate_variables_of(const Abstract_Variable_Callback& callback, const Air_Node::Parameter& param)
   {
     switch(static_cast<Index>(param.index())) {
     case index_int64:
@@ -38,7 +38,7 @@ void Air_Node::enumerate_variables_of(const Abstract_Variable_Callback& callback
 
 void Air_Node::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    rocket::for_each(this->m_params, [&](const Parameter& param) { Air_Node::enumerate_variables_of(callback, param);  });
+    rocket::for_each(this->m_params, [&](const Parameter& param) { Air_Node::do_enumerate_variables_of(callback, param);  });
   }
 
 }  // namespace Asteria
