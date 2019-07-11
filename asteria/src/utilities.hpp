@@ -4,6 +4,7 @@
 #ifndef ASTERIA_UTILITIES_HPP_
 #define ASTERIA_UTILITIES_HPP_
 
+#include "fwd.hpp"
 #include "rocket/compiler.h"
 #include "rocket/utilities.hpp"
 #include "rocket/cow_ostringstream.hpp"
@@ -13,10 +14,6 @@
 #include <cstdint>
 
 namespace Asteria {
-
-#define ASTERIA_AND_(x_, y_)             (bool(x_) && bool(y_))
-#define ASTERIA_OR_(x_, y_)              (bool(x_) || bool(y_))
-#define ASTERIA_COMMA_(x_, y_)           (void(x_) ,      (y_))
 
 class Formatter
   {

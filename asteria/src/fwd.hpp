@@ -32,6 +32,16 @@
 #include "rocket/variant.hpp"
 #include "rocket/optional.hpp"
 
+// Macros
+#define ASTERIA_SFINAE_CONSTRUCT(...)    ROCKET_ENABLE_IF(::std::is_constructible<ROCKET_CAR(__VA_ARGS__),  \
+                                                                                  ROCKET_CDR(__VA_ARGS__)>::value)
+#define ASTERIA_SFINAE_ASSIGN(...)       ROCKET_ENABLE_IF(::std::is_assignable<ROCKET_CAR(__VA_ARGS__),  \
+                                                                               ROCKET_CDR(__VA_ARGS__)>::value)
+
+#define ASTERIA_AND_(x_, y_)             (bool(x_) && bool(y_))
+#define ASTERIA_OR_(x_, y_)              (bool(x_) || bool(y_))
+#define ASTERIA_COMMA_(x_, y_)           (void(x_) ,      (y_))
+
 namespace Asteria {
 
 // Utilities

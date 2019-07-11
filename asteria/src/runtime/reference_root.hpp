@@ -53,15 +53,13 @@ class Reference_Root
       : m_stor()  // Initialize to a null reference.
       {
       }
-    // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Reference_Root(AltT&& altr) noexcept
-      : m_stor(rocket::forward<AltT>(altr))
+    template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XrootT&&)> Reference_Root(XrootT&& root) noexcept
+      : m_stor(rocket::forward<XrootT>(root))
       {
       }
-    // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Reference_Root& operator=(AltT&& altr) noexcept
+    template<typename XrootT, ASTERIA_SFINAE_ASSIGN(Xvariant, XrootT&&)> Reference_Root& operator=(XrootT&& root) noexcept
       {
-        this->m_stor = rocket::forward<AltT>(altr);
+        this->m_stor = rocket::forward<XrootT>(root);
         return *this;
       }
 

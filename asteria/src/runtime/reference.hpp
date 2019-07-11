@@ -22,14 +22,12 @@ class Reference
         m_mods()
       {
       }
-    // This constructor does not accept lvalues.
-    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Xvariant::index_of<XrootT>::value)> Reference(XrootT&& xroot) noexcept
+    template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Reference_Root, XrootT&&)> Reference(XrootT&& xroot) noexcept
       : m_root(rocket::forward<XrootT>(xroot)),
         m_mods()
       {
       }
-    // This assignment operator does not accept lvalues.
-    template<typename XrootT, ROCKET_ENABLE_IF_HAS_VALUE(Reference_Root::Xvariant::index_of<XrootT>::value)> Reference& operator=(XrootT&& xroot) noexcept
+    template<typename XrootT, ASTERIA_SFINAE_ASSIGN(Reference_Root, XrootT&&)> Reference& operator=(XrootT&& xroot) noexcept
       {
         this->m_root = rocket::forward<XrootT>(xroot);
         this->m_mods.clear();

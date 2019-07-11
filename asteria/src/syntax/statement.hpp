@@ -159,15 +159,13 @@ class Statement
     Xvariant m_stor;
 
   public:
-    // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Statement(AltT&& altr)
-      : m_stor(rocket::forward<AltT>(altr))
+    template<typename XstmtT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XstmtT&&)> Statement(XstmtT&& stmt) noexcept
+      : m_stor(rocket::forward<XstmtT>(stmt))
       {
       }
-    // This assignment operator does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)> Statement& operator=(AltT&& altr)
+    template<typename XstmtT, ASTERIA_SFINAE_ASSIGN(Xvariant, XstmtT&&)> Statement& operator=(XstmtT&& stmt) noexcept
       {
-        this->m_stor = rocket::forward<AltT>(altr);
+        this->m_stor = rocket::forward<XstmtT>(stmt);
         return *this;
       }
 

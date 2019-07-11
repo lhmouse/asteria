@@ -170,20 +170,17 @@ class Token
     ROCKET_PURE_FUNCTION static const char* stringify_punctuator(Punctuator punct) noexcept;
 
   private:
-    // Metadata
     Cow_String m_file;
     std::uint32_t m_line;
     std::size_t m_offset;
     std::size_t m_length;
-    // Data
     Xvariant m_stor;
 
   public:
-    // This constructor does not accept lvalues.
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<AltT>::value)
-             > Token(const Cow_String& xfile, std::uint32_t xline, std::size_t xoffset, std::size_t xlength, AltT&& altr)
+    template<typename XtokT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XtokT&&)> Token(const Cow_String& xfile, std::uint32_t xline,
+                                                                                std::size_t xoffset, std::size_t xlength, XtokT&& xtok)
       : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
-        m_stor(rocket::forward<AltT>(altr))
+        m_stor(rocket::forward<XtokT>(xtok))
       {
       }
 

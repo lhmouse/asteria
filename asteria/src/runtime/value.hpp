@@ -48,13 +48,13 @@ class Value
       : m_stor()  // Initialize to `null`.
       {
       }
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<typename std::decay<AltT>::type>::value)> Value(AltT&& altr) noexcept
-      : m_stor(rocket::forward<AltT>(altr))
+    template<typename XvalueT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XvalueT&&)> Value(XvalueT&& xvalue) noexcept
+      : m_stor(rocket::forward<XvalueT>(xvalue))
       {
       }
-    template<typename AltT, ROCKET_ENABLE_IF_HAS_VALUE(Xvariant::index_of<typename std::decay<AltT>::type>::value)> Value& operator=(AltT&& altr) noexcept
+    template<typename XvalueT, ASTERIA_SFINAE_ASSIGN(Xvariant, XvalueT&&)> Value& operator=(XvalueT&& xvalue) noexcept
       {
-        this->m_stor = rocket::forward<AltT>(altr);
+        this->m_stor = rocket::forward<XvalueT>(xvalue);
         return *this;
       }
 
