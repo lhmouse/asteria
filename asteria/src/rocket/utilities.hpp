@@ -6,7 +6,7 @@
 
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>
-#include <utility>  // std::swap(), std::forward()
+#include <utility>  // std::swap()
 #include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>

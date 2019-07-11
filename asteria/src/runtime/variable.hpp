@@ -17,7 +17,7 @@ class Variable : public virtual Rcbase
     Source_Location m_sloc;
     Value m_value;
     bool m_immutable;
-    // Garbage collection support.
+    // garbage collection support
     mutable Pair<long, double> m_gcref;
 
   public:

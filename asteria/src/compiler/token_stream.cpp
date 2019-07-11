@@ -967,9 +967,9 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Pars
         throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_Error::code_block_comment_unclosed);
       }
     }
-    catch(Parser_Error& err) {  // `Parser_Error` is not derived from `std::exception`. Don't play with this at home.
-      ASTERIA_DEBUG_LOG("Caught `Parser_Error`: ", err);
-      this->m_stor = rocket::move(err);
+    catch(const Parser_Error& error) {  // `Parser_Error` is not derived from `std::exception`. Don't play with this at home.
+      ASTERIA_DEBUG_LOG("Caught `Parser_Error`: ", error);
+      this->m_stor = error;
       return false;
     }
     std::reverse(seq.mut_begin(), seq.mut_end());
