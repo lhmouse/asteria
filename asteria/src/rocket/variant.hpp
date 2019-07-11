@@ -271,7 +271,8 @@ template<typename... alternativesT> class variant
           // Copy-construct the alternative in place.
           noadl::construct_at(static_cast<typename type_at<index_new>::type*>(this->m_stor), param);
           this->m_index = index_new;
-        } catch(...) {
+        }
+        catch(...) {
           // Move the backup back in case of exceptions.
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           details_variant::rethrow_current_exception();
@@ -320,7 +321,8 @@ template<typename... alternativesT> class variant
           // Copy-construct the alternative in place.
           variant::do_dispatch_copy_construct(index_new, this->m_stor, other.m_stor);
           this->m_index = index_new;
-        } catch(...) {
+        }
+        catch(...) {
           // Move the backup back in case of exceptions.
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           details_variant::rethrow_current_exception();
@@ -459,7 +461,8 @@ template<typename... alternativesT> class variant
           // Construct the alternative in place.
           noadl::construct_at(static_cast<typename type_at<index_new>::type*>(this->m_stor), noadl::forward<paramsT>(params)...);
           this->m_index = index_new;
-        } catch(...) {
+        }
+        catch(...) {
           // Move the backup back in case of exceptions.
           variant::do_dispatch_move_construct_then_destroy(index_old, this->m_stor, backup);
           details_variant::rethrow_current_exception();

@@ -328,7 +328,8 @@ std::ostream& Value::print(std::ostream& os, bool escape) const
         if(!escape) {
           // hello
           os << altr;
-        } else {
+        }
+        else {
           // "hello"
           os << quote(altr);
         }

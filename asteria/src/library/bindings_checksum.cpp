@@ -288,7 +288,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         // Append hexadecimal digits.
         if(bigendT) {
           std::for_each(stor_le.rbegin(), stor_le.rend(), [&](std::uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
-        } else {
+        }
+        else {
           std::for_each(stor_le.begin(), stor_le.end(), [&](std::uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
         }
         return str;
@@ -310,7 +311,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         // Re-arrange bytes.
         if(bigendT) {
           std::copy_n(ptr, stor_be.size(), stor_be.begin());
-        } else {
+        }
+        else {
           std::copy_n(ptr, stor_be.size(), stor_be.rbegin());
         }
         // Assemble the word.

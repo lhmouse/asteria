@@ -214,16 +214,20 @@ template<typename charT, typename traitsT,
         if(dir == ios_base::beg) {
           // The offset is from the beginning of the string.
           refoff = 0;
-        } else if(dir == ios_base::end) {
+        }
+        else if(dir == ios_base::end) {
           // The offset is from the end of the string.
           refoff = ntotal;
-        } else if(!seekp) {
+        }
+        else if(!seekp) {
           // The offset is from the get position.
           refoff = static_cast<streamsize>(this->m_stor.goff);
-        } else if(!seekg) {
+        }
+        else if(!seekg) {
           // The offset is from the put position.
           refoff = static_cast<streamsize>(this->m_stor.poff);
-        } else {
+        }
+        else {
           // XXX: If you move both get and put positions, the target must be absolute.
           return -1;
         }
@@ -344,7 +348,8 @@ template<typename charT, typename traitsT,
           // Always append to the string, ignoring the value of `poff`.
           this->m_stor.str.push_back(traits_type::to_char_type(ch));
           this->m_stor.poff = this->m_stor.str.size();
-        } else {
+        }
+        else {
           // Write the character and bump the put position.
           this->m_stor.str.replace(this->m_stor.poff, 1, 1, traits_type::to_char_type(ch));
           this->m_stor.poff += 1;
@@ -369,7 +374,8 @@ template<typename charT, typename traitsT,
           // Always append to the string, ignoring the value of `poff`.
           this->m_stor.str.append(s, n);
           this->m_stor.poff = this->m_stor.str.size();
-        } else {
+        }
+        else {
           // Copy some characters and advance the put position.
           this->m_stor.str.replace(this->m_stor.poff, n, s, n);
           this->m_stor.poff += n;

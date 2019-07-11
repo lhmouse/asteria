@@ -106,7 +106,8 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
             ASTERIA_DEBUG_LOG("Object member was not found: key = ", altr.key, ", parent = ", parent);
             return nullptr;
           }
-        } else {
+        }
+        else {
           rit = object.try_emplace(altr.key).first;
         }
         return std::addressof(rit->second);

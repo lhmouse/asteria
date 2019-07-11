@@ -340,11 +340,13 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
                 if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
                   move_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old,       0, cnt_one);
                   move_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
-                } else {
+                }
+                else {
                   copy_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old,       0, cnt_one);
                   copy_storage_helper<storage_pointer, allocator_type>()(ptr, ptr_old, off_two, cnt_two);
                 }
-              } catch(...) {
+              }
+              catch(...) {
                 // If an exception is thrown, deallocate the new block, then rethrow the exception.
                 noadl::destroy_at(noadl::unfancy(ptr));
                 allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
@@ -925,7 +927,8 @@ template<typename valueT, typename allocatorT> class cow_vector
         }
         if(cnt_old < n) {
           this->append(n - cnt_old, params...);
-        } else {
+        }
+        else {
           this->pop_back(cnt_old - n);
         }
         ROCKET_ASSERT(this->size() == n);

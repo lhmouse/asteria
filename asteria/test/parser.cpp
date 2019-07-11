@@ -28,7 +28,8 @@ int main()
       }
       try {
         first();
-      } catch(e) {
+      }
+      catch(e) {
         return typeof(e) + ":" + e;
       }
     )__");

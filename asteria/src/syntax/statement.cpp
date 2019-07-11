@@ -440,7 +440,8 @@ namespace Asteria {
           if(rocket::is_none_of(status, { Air_Node::status_next })) {
             return status;
           }
-        } catch(std::exception& stdex) {
+        }
+        catch(std::exception& stdex) {
           // Translate the exception.
           // The exception object shall not outlast the `catch` body.
           Executive_Context ctx_catch(&ctx);
@@ -504,7 +505,8 @@ namespace Asteria {
         fmtss << "Assertion failed at \'" << sloc << "\'";
         if(msg.empty()) {
           fmtss << "!";
-        } else {
+        }
+        else {
           fmtss << ": " << msg;
         }
         throw_runtime_error(__func__, fmtss.extract_string());

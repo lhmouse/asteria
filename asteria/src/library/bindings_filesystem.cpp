@@ -421,7 +421,8 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
             if(next->d_type != DT_UNKNOWN) {
               // Get the file type if it is available immediately.
               is_dir = next->d_type == DT_DIR;
-            } else
+            }
+            else
 #  endif
             {
               // If the file type is unknown, ask for it.
@@ -555,7 +556,8 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
           G_boolean(
             next->d_type == DT_LNK
           ));
-      } else
+      }
+      else
 #  endif
       {
         // If the file type is unknown, ask for it.

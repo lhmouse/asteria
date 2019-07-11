@@ -74,7 +74,8 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
       if(*qerr != Parser_Error::code_success) {
         state |= std::ios_base::failbit;
       }
-    } catch(...) {
+    }
+    catch(...) {
       rocket::handle_ios_exception(cstrm, state);
     }
     // If `eofbit` or `failbit` would cause an exception, throw it here.

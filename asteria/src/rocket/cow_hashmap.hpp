@@ -130,7 +130,8 @@ template<typename keyT, typename mappedT,
             if(is_trivially_default_constructible<bucket_type>::value) {
               // Zero-initialize everything.
               ::std::memset(static_cast<void*>(this->data), 0, sizeof(bucket_type) * nbkt);
-            } else {
+            }
+            else {
               // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
               for(size_type i = 0; i < nbkt; ++i) {
                 noadl::construct_at(this->data + i);
@@ -186,7 +187,8 @@ template<typename keyT, typename mappedT,
               auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
               try {
                 allocator_traits<allocatorT>::construct(ptr->alloc, noadl::unfancy(eptr), *eptr_old);
-              } catch(...) {
+              }
+              catch(...) {
                 allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, size_t(1));
                 throw;
               }
@@ -460,11 +462,13 @@ template<typename keyT, typename mappedT,
                 if((ptr_old->alloc == ptr->alloc) && ptr_old->nref.unique()) {
                   move_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
                   move_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
-                } else {
+                }
+                else {
                   copy_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old,       0, cnt_one);
                   copy_storage_helper<storage_pointer, hasher, allocator_type>()(ptr, this->as_hasher(), ptr_old, off_two, cnt_two);
                 }
-              } catch(...) {
+              }
+              catch(...) {
                 // If an exception is thrown, deallocate the new block, then rethrow the exception.
                 noadl::destroy_at(noadl::unfancy(ptr));
                 allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
@@ -567,7 +571,8 @@ template<typename keyT, typename mappedT,
             auto eptr = allocator_traits<allocator_type>::allocate(ptr->alloc, size_t(1));
             try {
               allocator_traits<allocator_type>::construct(ptr->alloc, noadl::unfancy(eptr), noadl::forward<paramsT>(params)...);
-            } catch(...) {
+            }
+            catch(...) {
               allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, size_t(1));
               throw;
             }

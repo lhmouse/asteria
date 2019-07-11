@@ -261,7 +261,8 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
           if(lhs > INT64_MAX - rhs) {
             return INT64_MAX;
           }
-        } else {
+        }
+        else {
           if(lhs < INT64_MIN - rhs) {
             return INT64_MIN;
           }
@@ -275,7 +276,8 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
           if(lhs < INT64_MIN + rhs) {
             return INT64_MIN;
           }
-        } else {
+        }
+        else {
           if(lhs > INT64_MAX + rhs) {
             return INT64_MAX;
           }
@@ -306,7 +308,8 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
           if(slhs > INT64_MAX / arhs) {
             return INT64_MAX;
           }
-        } else {
+        }
+        else {
           if(slhs < INT64_MIN / arhs) {
             return INT64_MIN;
           }
@@ -1180,7 +1183,8 @@ G_integer std_numeric_popcnt(const G_integer& x)
         auto p = do_format_partial(10, exp);
         if(p.sbt) {
           text.push_back('-');
-        } else {
+        }
+        else {
           text.push_back('+');
         }
         // Write significant figures.
@@ -1552,7 +1556,8 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
           }
           value *= base;
           value += dvalue;
-        } else {
+        }
+        else {
           // Accumulate the digit towards negative infinity.
           if(value < (limit + dvalue) / base) {
             return false;
@@ -1947,7 +1952,8 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
     double value;
     if(tvalue == 0) {
       value = std::copysign(0.0, -rneg);
-    } else {
+    }
+    else {
       value = static_cast<double>(tvalue);
       do_raise_real(value, rbase, tcnt);
       do_raise_real(value, pbase, pexp);

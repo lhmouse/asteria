@@ -29,18 +29,21 @@
       try {  \
         static_cast<void>(expr_);  \
         /* failure */  \
-      } catch(::Asteria::Traceable_Exception& e) {  \
+      }  \
+      catch(::Asteria::Traceable_Exception& e) {  \
         /* success */  \
         ASTERIA_DEBUG_LOG("Caught `Asteria::Traceable_Exception`: ", e.value());  \
         for(::std::size_t i = 0; i < e.frame_count(); ++i) {  \
           ASTERIA_DEBUG_LOG("\t* thrown from `", e.frame(i).function_signature(), "` at '", e.frame(i).source_location(), "']");  \
         }  \
         break;  \
-      } catch(::Asteria::Runtime_Error& e) {  \
+      }  \
+      catch(::Asteria::Runtime_Error& e) {  \
         /* success */  \
         ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error`: ", e.what());  \
         break;  \
-      } catch(::std::exception& e) {  \
+      }  \
+      catch(::std::exception& e) {  \
         /* success */  \
         ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());  \
         break;  \

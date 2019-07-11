@@ -43,7 +43,8 @@ void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>&
       }
       if(ROCKET_EXPECT(i < args.size())) {
         this->open_named_reference(param) = rocket::move(args.mut(i));
-      } else {
+      }
+      else {
         this->open_named_reference(param) = Reference_Root::S_null();
       }
     }
@@ -55,16 +56,19 @@ void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>&
         args.erase(0, *elps_pos);
         // Create a new argument getter.
         this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(Rcobj<Variadic_Arguer>(zvarg.get(), rocket::move(args)));
-      } else {
+      }
+      else {
         // Reference the pre-allocated zero-ary argument getter.
         this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(zvarg);
       }
-    } else {
+    }
+    else {
       if(args.size() > params.size()) {
         // Disallow exceess arguments if the function is not variadic.
         ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", params.size(), "`, "
                                     "but got `", args.size(), "`).");
-      } else {
+      }
+      else {
         // Reference the pre-allocated zero-ary argument getter.
         this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(zvarg);
       }

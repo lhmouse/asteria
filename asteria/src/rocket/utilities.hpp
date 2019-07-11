@@ -205,7 +205,8 @@ template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<c
     // Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
     try {
       ios.setstate(ios_base::badbit);
-    } catch(...) {
+    }
+    catch(...) {
       // Ignore this exception.
     }
     // Rethrow the **original** exception, if `ios_base::badbit` has been turned on in `os.exceptions()`.

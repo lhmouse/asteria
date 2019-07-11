@@ -263,7 +263,8 @@ G_string std_json_format(const Value& value, const Opt<G_string>& indent)
     cstrm.imbue(std::locale::classic());
     if(!indent || indent->empty()) {
       do_format(cstrm, value, Indenter_none());
-    } else {
+    }
+    else {
       do_format(cstrm, value, Indenter_string(*indent));
     }
     return cstrm.extract_string();
@@ -276,7 +277,8 @@ G_string std_json_format(const Value& value, const G_integer& indent)
     cstrm.imbue(std::locale::classic());
     if(indent <= 0) {
       do_format(cstrm, value, Indenter_none());
-    } else {
+    }
+    else {
       do_format(cstrm, value, Indenter_spaces(static_cast<std::size_t>(rocket::min(indent, 10))));
     }
     return cstrm.extract_string();
@@ -528,7 +530,8 @@ Value std_json_parse(const G_string& text)
       if(!qvalue) {
         return G_null();
       }
-    } catch(int pos) {  // Don't play with this at home.
+    }
+    catch(int pos) {  // Don't play with this at home.
       ASTERIA_DEBUG_LOG("Caught an exception from `do_accept_value()`: ", pos);
       return G_null();
     }

@@ -365,7 +365,8 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           }
           if(cmp == Value::compare_less) {
             epos = mpos;
-          } else {
+          }
+          else {
             bpos = mpos + 1;
           }
         } while(true);
@@ -389,7 +390,8 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           }
           if(rocket::forward<PredT>(pred)(cmp)) {
             epos = mpos;
-          } else {
+          }
+          else {
             bpos = mpos + 1;
           }
         } while(true);

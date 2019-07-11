@@ -62,7 +62,8 @@ int main(int argc, char** argv)
     std::cout << res.read() << std::endl;
     // finish.
     return 0;
-  } catch(Traceable_Exception& e) {
+  }
+  catch(Traceable_Exception& e) {
     // print the exception.
     std::cerr << std::endl
               << "---" << std::endl
@@ -73,7 +74,8 @@ int main(int argc, char** argv)
                 << "at '" << e.frame(i).source_location() << "']" << std::endl;
     }
     return 1;
-  } catch(std::exception& e) {
+  }
+  catch(std::exception& e) {
     // print the exception.
     std::cerr << std::endl
               << "---" << std::endl

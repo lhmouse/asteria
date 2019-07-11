@@ -598,7 +598,8 @@ template<typename valueT, size_t capacityT,
         }
         if(cnt_old < n) {
           this->append(n - cnt_old, params...);
-        } else {
+        }
+        else {
           this->pop_back(cnt_old - n);
         }
         ROCKET_ASSERT(this->size() == n);
@@ -806,7 +807,8 @@ template<typename valueT, size_t capacityT,
           for(auto i = sl; i < sr; ++i) {
             this->m_sth.emplace_back_unchecked(other.m_sth.data()[i]);
           }
-        } else {
+        }
+        else {
           for(size_type i = 0; i < sr; ++i) {
             this->m_sth.mut_data()[i] = other.m_sth.data()[i];
           }
@@ -827,7 +829,8 @@ template<typename valueT, size_t capacityT,
           for(auto i = sl; i < sr; ++i) {
             this->m_sth.emplace_back_unchecked(noadl::move(other.m_sth.mut_data()[i]));
           }
-        } else {
+        }
+        else {
           for(size_type i = 0; i < sr; ++i) {
             this->m_sth.mut_data()[i] = noadl::move(other.m_sth.mut_data()[i]);
           }
@@ -871,7 +874,8 @@ template<typename valueT, size_t capacityT,
             this->m_sth.emplace_back_unchecked(noadl::move(other.m_sth.mut_data()[i]));
           }
           other.m_sth.pop_back_n_unchecked(sr - sl);
-        } else {
+        }
+        else {
           for(size_type i = 0; i < sr; ++i) {
             noadl::adl_swap(this->m_sth.mut_data()[i], other.m_sth.mut_data()[i]);
           }

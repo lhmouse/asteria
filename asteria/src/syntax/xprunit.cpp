@@ -272,7 +272,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           if(lhs > INT64_MAX - rhs) {
             do_throw_integral_overflow("addition", lhs, rhs);
           }
-        } else {
+        }
+        else {
           if(lhs < INT64_MIN - rhs) {
             do_throw_integral_overflow("addition", lhs, rhs);
           }
@@ -286,7 +287,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           if(lhs < INT64_MIN + rhs) {
             do_throw_integral_overflow("subtraction", lhs, rhs);
           }
-        } else {
+        }
+        else {
           if(lhs > INT64_MAX + rhs) {
             do_throw_integral_overflow("subtraction", lhs, rhs);
           }
@@ -317,7 +319,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           if(slhs > INT64_MAX / arhs) {
             do_throw_integral_overflow("multiplication", lhs, rhs);
           }
-        } else {
+        }
+        else {
           if(slhs < INT64_MIN / arhs) {
             do_throw_integral_overflow("multiplication", lhs, rhs);
           }
@@ -768,7 +771,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", this = ", self_result.read());
         try {
           target.invoke(self_result, global, rocket::move(args));
-        } catch(std::exception& stdex) {
+        }
+        catch(std::exception& stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: what = ", stdex.what());
           // Translate the exception.
           auto traceable = trace_exception(rocket::move(stdex));

@@ -57,7 +57,8 @@ class Reference_Stack
         if(ROCKET_EXPECT(btop != this->m_stor.data() + this->m_stor.size())) {
           // Overwrite an existent element.
           *btop = rocket::forward<ParamT>(param);
-        } else {
+        }
+        else {
           // Construct a new element.
           btop = std::addressof(this->m_stor.emplace_back(rocket::forward<ParamT>(param)));
         }

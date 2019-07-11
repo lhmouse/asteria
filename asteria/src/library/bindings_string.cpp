@@ -1101,7 +1101,8 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
         // Append this word.
         if(bigendT) {
           text.append(stor_le.rbegin(), stor_le.rend());
-        } else {
+        }
+        else {
           text.append(stor_le.begin(), stor_le.end());
         }
         return true;
@@ -1132,7 +1133,8 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
           // Read some bytes in big-endian order.
           if(bigendT) {
             std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.begin());
-          } else {
+          }
+          else {
             std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.rbegin());
           }
           // Assemble the word.

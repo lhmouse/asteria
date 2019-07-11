@@ -230,7 +230,8 @@ std::ostream& Parser_Error::print(std::ostream& os) const
     os << std::dec << "error " << this->m_code << " at ";
     if(this->m_line == UINT32_MAX) {
       os << "the end of input data";
-    } else {
+    }
+    else {
       os << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
     }
     os << ": " << Parser_Error::describe_code(this->m_code);

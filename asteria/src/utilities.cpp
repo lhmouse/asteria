@@ -439,7 +439,8 @@ rocket::cow_string& pwrapln(rocket::cow_string& sbuf, std::size_t indent, std::s
         // Indent the next line accordingly.
         sbuf.append(hanging, ' ');
       }
-    } else {
+    }
+    else {
       // Write everything in a single line, separated by spaces.
       sbuf = rocket::sref(" ");
     }
@@ -466,7 +467,8 @@ Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
       w.nappend = static_cast<std::uint64_t>(nappend);
       // `index` is truncated if it does not fit in `size_t`, but in this case it shouldn't be used.
       w.rindex = static_cast<std::size_t>(index);
-    } else {
+    }
+    else {
       // Prepend elements as needed.
       auto nprepend = rocket::max(index - 1, ~ssize) - (index - 1);
       w.nprepend = static_cast<std::uint64_t>(nprepend);

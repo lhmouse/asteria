@@ -244,7 +244,8 @@ namespace Asteria {
           }
           value *= base;
           value += dvalue;
-        } else {
+        }
+        else {
           // Accumulate the digit towards negative infinity.
           if(value < (limit + dvalue) / base) {
             return false;
@@ -509,7 +510,8 @@ namespace Asteria {
         double value;
         if(tvalue == 0) {
           value = std::copysign(0.0, -rneg);
-        } else {
+        }
+        else {
           value = static_cast<double>(tvalue);
           do_raise(value, rbase, tcnt);
           do_raise(value, pbase, pexp);
@@ -964,7 +966,8 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Pars
         // A block comment may straddle multiple lines. We just mark the first line here.
         throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_Error::code_block_comment_unclosed);
       }
-    } catch(Parser_Error& err) {  // `Parser_Error` is not derived from `std::exception`. Don't play with this at home.
+    }
+    catch(Parser_Error& err) {  // `Parser_Error` is not derived from `std::exception`. Don't play with this at home.
       ASTERIA_DEBUG_LOG("Caught `Parser_Error`: ", err);
       this->m_stor = rocket::move(err);
       return false;

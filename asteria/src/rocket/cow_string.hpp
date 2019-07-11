@@ -1005,7 +1005,8 @@ template<typename charT, typename traitsT,
         }
         if(len_old < n) {
           this->append(n - len_old, ch);
-        } else {
+        }
+        else {
           this->pop_back(len_old - n);
         }
         ROCKET_ASSERT(this->size() == n);
@@ -2107,7 +2108,8 @@ template<typename charT, typename traitsT,
       if(str.empty()) {
         state |= ios_base::failbit;
       }
-    } catch(...) {
+    }
+    catch(...) {
       noadl::handle_ios_exception(is, state);
     }
     if(state) {
@@ -2153,7 +2155,8 @@ template<typename charT, typename traitsT,
         rem -= written;
         off += written;
       }
-    } catch(...) {
+    }
+    catch(...) {
       noadl::handle_ios_exception(os, state);
     }
     if(state) {
@@ -2202,7 +2205,8 @@ template<typename charT, typename traitsT,
       if(str.empty() && traitsT::eq_int_type(ich, traitsT::eof())) {
         state |= ios_base::failbit;
       }
-    } catch(...) {
+    }
+    catch(...) {
       noadl::handle_ios_exception(is, state);
     }
     if(state) {
