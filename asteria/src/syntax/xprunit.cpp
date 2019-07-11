@@ -10,7 +10,7 @@
 #include "../runtime/executive_context.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/instantiated_function.hpp"
-#include "../runtime/traceable_exception.hpp"
+#include "../runtime/exception.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -766,21 +766,21 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         }
         const auto& target = target_value.as_function().get();
         // Make the `this` reference. On the function's return it is reused to store the result of the function.
-        auto& self_result = stack.open_top_reference().zoom_out();
-        // Call the function now.
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", this = ", self_result.read());
+        auto& self = stack.open_top_reference().zoom_out();
         try {
-          target.invoke(self_result, global, rocket::move(args));
+          ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", this = ", self.read());
+          // Call the function now.
+          target.invoke(self, global, rocket::move(args));
+          // The result will have been stored into `self`.
+          ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", result = ", self.read());
         }
-        catch(std::exception& stdex) {
+        catch(const std::exception& stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: what = ", stdex.what());
-          // Translate the exception.
-          auto traceable = trace_exception(rocket::move(stdex));
-          traceable.append_frame(sloc, func);
-          throw traceable;
+          // Append the current frame and rethrow the exception.
+          Exception except(stdex);
+          except.push_frame(sloc, Backtrace_Frame::ftype_func, G_string(func));
+          throw except;
         }
-        // The result will have been written to `self_result`.
-        ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", result = ", self_result.read());
         return Air_Node::status_next;
       }
 

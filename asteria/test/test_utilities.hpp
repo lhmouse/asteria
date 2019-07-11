@@ -5,7 +5,7 @@
 #define ASTERIA_TEST_UTILITIES_HPP_
 
 #include "../src/fwd.hpp"
-#include "../src/runtime/traceable_exception.hpp"
+#include "../src/runtime/exception.hpp"
 #include "../src/utilities.hpp"
 #include <iostream>  // std::cerr, operator<< ()
 
@@ -30,11 +30,12 @@
         static_cast<void>(expr_);  \
         /* failure */  \
       }  \
-      catch(::Asteria::Traceable_Exception& e) {  \
+      catch(::Asteria::Exception& e) {  \
         /* success */  \
-        ASTERIA_DEBUG_LOG("Caught `Asteria::Traceable_Exception`: ", e.value());  \
-        for(::std::size_t i = 0; i < e.frame_count(); ++i) {  \
-          ASTERIA_DEBUG_LOG("\t* thrown from `", e.frame(i).function_signature(), "` at '", e.frame(i).source_location(), "']");  \
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_value());  \
+        for(::std::size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {  \
+          const auto& f = e.get_frame(i);  \
+          ASTERIA_DEBUG_LOG("\t* thrown from \'", f.sloc(), "\' <", ::Asteria::Backtrace_Frame::stringify_ftype(f.ftype()), ">: ", f.value());  \
         }  \
         break;  \
       }  \

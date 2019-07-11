@@ -103,7 +103,8 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/variable_hashset.hpp  \
   asteria/src/runtime/abstract_variable_callback.hpp  \
   asteria/src/runtime/collector.hpp  \
-  asteria/src/runtime/traceable_exception.hpp  \
+  asteria/src/runtime/backtrace_frame.hpp  \
+  asteria/src/runtime/exception.hpp  \
   asteria/src/runtime/abstract_context.hpp  \
   asteria/src/runtime/analytic_context.hpp  \
   asteria/src/runtime/executive_context.hpp  \
@@ -115,7 +116,6 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/reference_dictionary.hpp  \
   asteria/src/runtime/evaluation_stack.hpp  \
   asteria/src/runtime/instantiated_function.hpp  \
-  asteria/src/runtime/backtrace_frame.hpp  \
   asteria/src/runtime/air_node.hpp
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
@@ -161,7 +161,8 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/variable_hashset.cpp  \
   asteria/src/runtime/abstract_variable_callback.cpp  \
   asteria/src/runtime/collector.cpp  \
-  asteria/src/runtime/traceable_exception.cpp  \
+  asteria/src/runtime/backtrace_frame.cpp  \
+  asteria/src/runtime/exception.cpp  \
   asteria/src/runtime/abstract_context.cpp  \
   asteria/src/runtime/analytic_context.cpp  \
   asteria/src/runtime/executive_context.cpp  \
@@ -219,7 +220,7 @@ check_PROGRAMS =  \
   asteria/test/reference.test  \
   asteria/test/xprunit.test  \
   asteria/test/statement.test  \
-  asteria/test/traceable_exception.test  \
+  asteria/test/exception.test  \
   asteria/test/executive_context.test  \
   asteria/test/token_stream.test  \
   asteria/test/parser.test  \

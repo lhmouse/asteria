@@ -3,7 +3,7 @@
 
 #include "compiler/simple_source_file.hpp"
 #include "runtime/global_context.hpp"
-#include "runtime/traceable_exception.hpp"
+#include "runtime/exception.hpp"
 #include "library/bindings_chrono.hpp"
 #include "rocket/cow_istringstream.hpp"
 #include <iostream>
@@ -63,15 +63,15 @@ int main(int argc, char** argv)
     // finish.
     return 0;
   }
-  catch(Traceable_Exception& e) {
+  catch(Exception& e) {
     // print the exception.
     std::cerr << std::endl
               << "---" << std::endl
-              << "# Caught `Traceable_Exception`:" << std::endl
-              << e.value() << std::endl;
-    for(std::size_t i = 0; i < e.frame_count(); ++i) {
-      std::cerr << "[thrown from `" << e.frame(i).function_signature() << "` "
-                << "at '" << e.frame(i).source_location() << "']" << std::endl;
+              << "# Caught `Exception`:" << std::endl
+              << e << std::endl;
+    for(std::size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {
+      const auto& f = e.get_frame(i);
+      std::cerr << "  thrown from \'" << f.sloc() << "\' <" << Backtrace_Frame::stringify_ftype(f.ftype()) << ">: " << f.value() << std::endl;
     }
     return 1;
   }

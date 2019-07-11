@@ -647,7 +647,7 @@ G_array std_string_explode(const G_string& text, const Opt<G_string>& delim, con
     if(!delim || delim->empty()) {
       // Split every byte.
       segments.reserve(text.size());
-      for(std::size_t i = 0; i != text.size(); ++i) {
+      for(std::size_t i = 0; i < text.size(); ++i) {
         std::size_t b = text[i] & 0xFF;
         // Store a reference to the null-terminated string allocated statically.
         // Don't bother allocating a new buffer of only two characters.

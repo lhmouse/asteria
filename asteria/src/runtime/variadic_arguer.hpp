@@ -49,7 +49,7 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_func;
       }
-    std::size_t get_argument_count() const noexcept
+    std::size_t count_arguments() const noexcept
       {
         return this->m_vargs.size();
       }

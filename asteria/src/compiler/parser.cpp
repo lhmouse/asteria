@@ -1056,8 +1056,6 @@ namespace Asteria {
 
     Opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
       {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
         // try-statement ::=
         //   "try" statement "catch" "(" identifier ")" statement
         auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_try });
@@ -1068,6 +1066,8 @@ namespace Asteria {
         if(!qbtry) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
+        // Note that this is the location of the `catch` block.
+        auto sloc = do_tell_source_location(tstrm);
         qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_catch });
         if(!qkwrd) {
           throw do_make_parser_error(tstrm, Parser_Error::code_keyword_catch_expected);
@@ -1088,7 +1088,7 @@ namespace Asteria {
         if(!qbcatch) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        Statement::S_try xstmt = { rocket::move(sloc), rocket::move(*qbtry), rocket::move(*kexcept), rocket::move(*qbcatch) };
+        Statement::S_try xstmt = { rocket::move(*qbtry), rocket::move(sloc), rocket::move(*kexcept), rocket::move(*qbcatch) };
         return rocket::move(xstmt);
       }
 

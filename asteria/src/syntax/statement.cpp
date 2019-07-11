@@ -10,7 +10,7 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/evaluation_stack.hpp"
 #include "../runtime/instantiated_function.hpp"
-#include "../runtime/traceable_exception.hpp"
+#include "../runtime/exception.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -428,9 +428,8 @@ namespace Asteria {
                                     const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        // TODO: trace nested exceptions:
-        //   const auto& sloc = p.at(0).as<Source_Location>();
-        const auto& code_try = p.at(1).as<Cow_Vector<Air_Node>>();
+        const auto& code_try = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto& sloc = p.at(1).as<Source_Location>();
         const auto& except_name = p.at(2).as<PreHashed_String>();
         const auto& code_catch = p.at(3).as<Cow_Vector<Air_Node>>();
         // This is the same as a `try...catch` block in C++.
@@ -440,34 +439,39 @@ namespace Asteria {
           if(rocket::is_none_of(status, { Air_Node::status_next })) {
             return status;
           }
+          return Air_Node::status_next;
         }
-        catch(std::exception& stdex) {
+        catch(const std::exception& stdex) {
           // Translate the exception.
-          // The exception object shall not outlast the `catch` body.
+          Exception except(stdex);
+          except.push_frame(sloc, Backtrace_Frame::ftype_catch, G_null());
+          // The exception reference shall not outlast the `catch` body.
           Executive_Context ctx_catch(&ctx);
-          auto traceable = trace_exception(rocket::move(stdex));
-          Reference_Root::S_temporary xeref = { rocket::move(traceable.mut_value()) };
-          do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xeref));
-          // Provide backtrace information.
+          Reference_Root::S_temporary xref = { except.get_value() };
+          do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xref));
+          // Initialize backtrace information.
           G_array backtrace;
-          for(std::size_t i = 0; i < traceable.frame_count(); ++i) {
-            const auto& frame = traceable.frame(i);
+          for(std::size_t i = 0; i < except.count_frames(); ++i) {
+            const auto& frame = except.get_frame(i);
             G_object elem;
-            elem.try_emplace(rocket::sref("file"), G_string(frame.source_file()));
-            elem.try_emplace(rocket::sref("line"), G_integer(frame.source_line()));
-            elem.try_emplace(rocket::sref("func"), G_string(frame.function_signature()));
+            // Translate the frame.
+            elem.try_emplace(rocket::sref("file"), G_string(frame.file()));
+            elem.try_emplace(rocket::sref("line"), G_integer(frame.line()));
+            elem.try_emplace(rocket::sref("ftype"), G_string(rocket::sref(Backtrace_Frame::stringify_ftype(frame.ftype()))));
+            elem.try_emplace(rocket::sref("value"), frame.value());
+            // Append the frame.
             backtrace.emplace_back(rocket::move(elem));
           }
-          ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
-          Reference_Root::S_temporary xbtref = { rocket::move(backtrace) };
-          ctx_catch.open_named_reference(rocket::sref("__backtrace")) = rocket::move(xbtref);
+          xref.value = rocket::move(backtrace);
+          ASTERIA_DEBUG_LOG("Exception backtrace:\n", xref.value);
+          ctx_catch.open_named_reference(rocket::sref("__backtrace")) = rocket::move(xref);
           // Execute the `catch` body.
           auto status = do_execute_statement_list(stack, ctx_catch, code_catch, func, global);
           if(rocket::is_none_of(status, { Air_Node::status_next })) {
             return status;
           }
+          return Air_Node::status_next;
         }
-        return Air_Node::status_next;
       }
 
     Air_Node::Status do_return_status_simple(Evaluation_Stack& /*stack*/, Executive_Context& /*ctx*/,
@@ -480,12 +484,30 @@ namespace Asteria {
       }
 
     [[noreturn]] Air_Node::Status do_execute_throw(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
-                                                   const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& /*global*/)
+                                                   const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
-        // Throw the value; we don't throw by reference.
-        throw Traceable_Exception(stack.get_top_reference().read(), sloc, func);
+        // Store the nested exception here, if any.
+        Exception except;
+        auto qnested = std::current_exception();
+        if(qnested) {
+          // Rethrow it to get its effective type.
+          try {
+            std::rethrow_exception(qnested);
+          }
+          catch(const std::exception& stdex) {
+            except.dynamic_copy(stdex);
+          }
+          catch(...) {
+            // Fallthrough.
+          }
+        }
+        // Save the previous exception.
+        except.push_frame(sloc, Backtrace_Frame::ftype_throw, rocket::move(except.open_value()));
+        // Coyp and throw the value at the top of the stack, as we don't throw by reference.
+        except.open_value() = stack.get_top_reference().read();
+        throw except;
       }
 
     Air_Node::Status do_execute_assert(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
@@ -685,8 +707,8 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         ctx_catch.open_named_reference(rocket::sref("__backtrace")) /*= Reference_Root::S_null()*/;
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
-        p.emplace_back(altr.sloc);  // 0
-        p.emplace_back(do_generate_code_block(ctx, altr.body_try));  // 1
+        p.emplace_back(do_generate_code_block(ctx, altr.body_try));  // 0
+        p.emplace_back(altr.sloc);  // 1
         p.emplace_back(altr.except_name);  // 2
         p.emplace_back(do_generate_code_statement_list(nullptr, ctx_catch, altr.body_catch));  // 3
         code.emplace_back(do_execute_try, rocket::move(p));

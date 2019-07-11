@@ -47,7 +47,6 @@ namespace Asteria {
 // Utilities
 class Formatter;
 class Runtime_Error;
-class Traceable_Exception;
 
 // Syntax
 class Source_Location;
@@ -79,8 +78,9 @@ class Random_Number_Generator;
 class Generational_Collector;
 class Variadic_Arguer;
 class Instantiated_Function;
-class Backtrace_Frame;
 class Air_Node;
+class Backtrace_Frame;
+class Exception;
 
 // Compiler
 class Parser_Error;

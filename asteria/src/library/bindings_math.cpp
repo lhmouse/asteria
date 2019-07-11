@@ -118,7 +118,7 @@ G_real std_math_hypot(const Cow_Vector<Value>& values)
         // Call the C `hypot()` function.
         auto result = std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
         // Sum up all the other values.
-        for(std::size_t i = 2; i != values.size(); ++i) {
+        for(std::size_t i = 2; i < values.size(); ++i) {
           result = std::hypot(result, values[i].convert_to_real());
         }
         return result;

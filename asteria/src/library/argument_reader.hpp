@@ -62,7 +62,7 @@ class Argument_Reader
       {
         return this->m_name;
       }
-    std::size_t get_argument_count() const noexcept
+    std::size_t count_arguments() const noexcept
       {
         return this->m_args.get().size();
       }

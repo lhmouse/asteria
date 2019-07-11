@@ -85,8 +85,8 @@ class Statement
       };
     struct S_try
       {
-        Source_Location sloc;
         Cow_Vector<Statement> body_try;
+        Source_Location sloc;
         PreHashed_String except_name;
         Cow_Vector<Statement> body_catch;
       };
