@@ -57,7 +57,7 @@ class Traceable_Exception : public virtual std::exception
 template<typename ExceptionT> Traceable_Exception trace_exception(ExceptionT&& except)
   {
     // Should `except` be copied or moved?
-    using Source = typename std::conditional<(std::is_lvalue_reference<ExceptionT>::value || std::is_const<ExceptionT>::value),
+    using Source = typename std::conditional<std::is_lvalue_reference<ExceptionT>::value || std::is_const<ExceptionT>::value,
                                              const Traceable_Exception&,    // lvalue or const rvalue
                                              Traceable_Exception&&>::type;  // non-const rvalue
     // Is the dynamic type of `except` derived from `Traceable_Exception`?
