@@ -1022,7 +1022,7 @@ bool Token_Stream::empty() const noexcept
     }
   }
 
-const Token* Token_Stream::peek_opt() const
+const Token* Token_Stream::peek_opt(std::size_t ahead) const
   {
     switch(this->state()) {
     case state_empty:
@@ -1036,17 +1036,17 @@ const Token* Token_Stream::peek_opt() const
     case state_success:
       {
         auto& altr = this->m_stor.as<Cow_Vector<Token>>();
-        if(altr.empty()) {
+        if(ahead >= altr.size()) {
           return nullptr;
         }
-        return &(altr.back());
+        return altr.data() + (altr.size() - 1 - ahead);
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
     }
   }
 
-void Token_Stream::shift()
+void Token_Stream::shift(std::size_t count)
   {
     switch(this->state()) {
     case state_empty:
@@ -1060,10 +1060,10 @@ void Token_Stream::shift()
     case state_success:
       {
         auto& altr = this->m_stor.as<Cow_Vector<Token>>();
-        if(altr.empty()) {
+        if(count > altr.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
         }
-        altr.pop_back();
+        altr.pop_back(count);
         return;
       }
     default:

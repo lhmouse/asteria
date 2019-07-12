@@ -44,8 +44,8 @@ class Token_Stream
 
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
-    const Token* peek_opt() const;
-    void shift();
+    const Token* peek_opt(std::size_t ahead = 0) const;
+    void shift(std::size_t count = 1);
   };
 
 }  // namespace Asteria
