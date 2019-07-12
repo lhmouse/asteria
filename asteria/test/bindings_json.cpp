@@ -61,6 +61,12 @@ int main()
         assert __isnan std.json.parse("{b:NaN}").b;
         assert std.json.parse("{c:1,d:2,}").c == 1;
         assert std.json.parse("{c:1,d:2,}").d == 2;
+
+        var r = std.json.parse("[{a:1,b:2},{c:3,d:4}]");
+        assert r[0].a == 1;
+        assert r[0].b == 2;
+        assert r[1].c == 3;
+        assert r[1].d == 4;
       )__";
 
     std::istringstream iss(s_source);
