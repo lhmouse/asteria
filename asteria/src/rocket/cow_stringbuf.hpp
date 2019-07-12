@@ -191,7 +191,7 @@ template<typename charT, typename traitsT,
         this->m_stor.goff = goff;
       }
 
-    off_type do_seekoff(streamsize off, ios_base::seekdir dir, ios_base::openmode which)
+    off_type do_seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
       {
         // Validate arguments.
         if(which & ~(ios_base::in | ios_base::out)) {
@@ -207,9 +207,8 @@ template<typename charT, typename traitsT,
           // There is nothing to do.
           return -1;
         }
-        auto absoff = static_cast<streamsize>(off);
-        auto refoff = static_cast<streamsize>(-1);
-        auto ntotal = static_cast<streamsize>(this->m_stor.str.size());
+        off_type absoff = off, refoff = -1;
+        auto ntotal = static_cast<off_type>(this->m_stor.str.size());
         // XXX: This code looks terrible.
         if(dir == ios_base::beg) {
           // The offset is from the beginning of the string.
@@ -221,11 +220,11 @@ template<typename charT, typename traitsT,
         }
         else if(!seekp) {
           // The offset is from the get position.
-          refoff = static_cast<streamsize>(this->m_stor.goff);
+          refoff = static_cast<off_type>(this->m_stor.goff);
         }
         else if(!seekg) {
           // The offset is from the put position.
-          refoff = static_cast<streamsize>(this->m_stor.poff);
+          refoff = static_cast<off_type>(this->m_stor.poff);
         }
         else {
           // XXX: If you move both get and put positions, the target must be absolute.
@@ -252,7 +251,8 @@ template<typename charT, typename traitsT,
           return -1;
         }
         // Get the number of bytes available in and after the get area.
-        return static_cast<streamsize>(this->egptr() - this->gptr()) + static_cast<streamsize>(this->m_stor.str.size() - this->m_stor.goff);
+        auto goff = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
+        return static_cast<streamsize>(this->m_stor.str.size() - goff);
       }
 
     int_type do_underflow(bool bump)
@@ -391,7 +391,7 @@ template<typename charT, typename traitsT,
       }
     pos_type seekpos(pos_type pos, ios_base::openmode which) override
       {
-        return this->do_seekoff(static_cast<streamsize>(pos), ios_base::beg, which);
+        return this->do_seekoff(static_cast<off_type>(pos), ios_base::beg, which);
       }
     streamsize showmanyc() override
       {
