@@ -7,8 +7,8 @@
 #include "simple_binding_wrapper.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/collector.hpp"
-#include "../utilities.hpp"
 #include "../compiler/token_stream.hpp"
+#include "../utilities.hpp"
 
 namespace Asteria {
 
@@ -520,7 +520,7 @@ Value std_json_parse(const G_string& text)
     Cow_stringbuf cbuf(text, std::ios_base::in);
     Token_Stream tstrm;
     if(!tstrm.load(cbuf, rocket::sref("<JSON text>"), options)) {
-      ASTERIA_DEBUG_LOG("Could not tokenize source text: ", tstrm.get_parser_error());
+      ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", tstrm.get_parser_error());
       return G_null();
     }
     Opt<Value> qvalue;
