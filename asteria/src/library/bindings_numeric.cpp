@@ -1542,9 +1542,9 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
         return 0;
       }
 
-    inline std::uint8_t do_translate_digit(char ch) noexcept
+    inline std::uint8_t do_translate_digit(char c) noexcept
       {
-        return static_cast<std::size_t>(std::find(s_xdigits, s_xdigits + 32, ch) - s_xdigits) / 2 & 0xFF;
+        return static_cast<std::size_t>(std::find(s_xdigits, s_xdigits + 32, c) - s_xdigits) / 2 & 0xFF;
       }
 
     inline bool do_accumulate_digit(std::int64_t& value, std::int64_t limit, std::uint8_t base, std::uint8_t dvalue) noexcept

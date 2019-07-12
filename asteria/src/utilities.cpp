@@ -67,9 +67,9 @@ bool are_debug_logs_enabled() noexcept
       {
         str.append(rocket::forward<ParamT>(param));
       }
-    inline void do_append_str(rocket::cow_string& str, char ch)
+    inline void do_append_str(rocket::cow_string& str, char c)
       {
-        str.push_back(ch);
+        str.push_back(c);
       }
 
     }  // namespace
@@ -124,9 +124,9 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     // Start a new line for the user-defined message.
     do_append_str(str, "\n\t");
     // Neutralize control characters and indent paragraphs.
-    for(char ch : msg) {
+    for(char c : msg) {
       // Control characters are ['\x00','\x1F'] and '\x7F'.
-      std::size_t uch = ch & 0xFF;
+      std::size_t uch = c & 0xFF;
       if(uch == 0x7F) {
         do_append_str(str, "[DEL\\x7F]");
         continue;
@@ -135,7 +135,7 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
         do_append_str(str, s_cntrl_reps[uch]);
         continue;
       }
-      do_append_str(str, ch);
+      do_append_str(str, c);
     };
     // Terminate the message with a line feed.
     do_append_str(str, '\n');
@@ -397,7 +397,7 @@ rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, std::size_t
     sbuf.clear();
     // Enclose the string with double quotes, escaping characters as needed.
     sbuf += '\"';
-    std::for_each(str, str + len, [&](char ch) { sbuf += s_quote_table[(ch & 0xFF)];  });
+    std::for_each(str, str + len, [&](char c) { sbuf += s_quote_table[(c & 0xFF)];  });
     sbuf += '\"';
     return sbuf;
   }

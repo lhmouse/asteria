@@ -40,10 +40,10 @@ namespace Asteria {
         0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00,
       };
 
-    inline bool do_check_cctype(char ch, std::uint8_t mask) noexcept
+    inline bool do_check_cctype(char c, std::uint8_t mask) noexcept
       {
-        int index = ch & 0x7F;
-        if(index != ch) {
+        int index = c & 0x7F;
+        if(index != c) {
           return false;
         }
         return s_cctypes[index] & mask;
@@ -69,10 +69,10 @@ namespace Asteria {
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
       };
 
-    inline std::uint8_t do_translate_digit(char ch) noexcept
+    inline std::uint8_t do_translate_digit(char c) noexcept
       {
-        int index = ch & 0x7F;
-        if(index != ch) {
+        int index = c & 0x7F;
+        if(index != c) {
           return 0xFF;
         }
         return s_digits[index];
@@ -121,8 +121,8 @@ namespace Asteria {
             this->m_offset = 0;
             // Buffer a line.
             for(;;) {
-              auto ich = this->m_cbuf.get().sbumpc();
-              if(ich == std::istream::traits_type::eof()) {
+              auto ch = this->m_cbuf.get().sbumpc();
+              if(ch == std::istream::traits_type::eof()) {
                 if(this->m_str.empty()) {
                   // Return `false` to indicate that there are no more data, when nothing has been read so far.
                   return false;
@@ -130,11 +130,11 @@ namespace Asteria {
                 // If the last line doesn't end with an LF, accept it anyway.
                 break;
               }
-              if(ich == '\n') {
+              if(ch == '\n') {
                 // Accept a line.
                 break;
               }
-              this->m_str.push_back(static_cast<char>(ich));
+              this->m_str.push_back(static_cast<char>(ch));
             }
             // Increment the line number if a line has been read successfully.
             this->m_line++;

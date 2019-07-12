@@ -2087,9 +2087,9 @@ template<typename charT, typename traitsT,
     auto state = ios_base::goodbit;
     try {
       // Extract characters and append them to `str`.
-      auto ich = is.rdbuf()->sgetc();
+      auto ch = is.rdbuf()->sgetc();
       for(;;) {
-        if(traitsT::eq_int_type(ich, traitsT::eof())) {
+        if(traitsT::eq_int_type(ch, traitsT::eof())) {
           state |= ios_base::eofbit;
           break;
         }
@@ -2098,12 +2098,13 @@ template<typename charT, typename traitsT,
         if(enough) {
           break;
         }
-        auto ch = traitsT::to_char_type(ich);
-        if(::std::isspace<charT>(ch, sloc)) {
+        auto c = traitsT::to_char_type(ch);
+        if(::std::isspace<charT>(c, sloc)) {
           break;
         }
-        str.push_back(ch);
-        ich = is.rdbuf()->snextc();
+        str.push_back(c);
+        // Read the next character.
+        ch = is.rdbuf()->snextc();
       }
       if(str.empty()) {
         state |= ios_base::failbit;
@@ -2184,14 +2185,14 @@ template<typename charT, typename traitsT,
     auto state = ios_base::goodbit;
     try {
       // Extract characters and append them to `str`.
-      auto ich = is.rdbuf()->sgetc();
+      auto ch = is.rdbuf()->sgetc();
       for(;;) {
-        if(traitsT::eq_int_type(ich, traitsT::eof())) {
+        if(traitsT::eq_int_type(ch, traitsT::eof())) {
           state |= ios_base::eofbit;
           break;
         }
-        auto ch = traitsT::to_char_type(ich);
-        if(traitsT::eq(ch, delim)) {
+        auto c = traitsT::to_char_type(ch);
+        if(traitsT::eq(c, delim)) {
           is.rdbuf()->sbumpc();
           break;
         }
@@ -2199,10 +2200,11 @@ template<typename charT, typename traitsT,
           state |= ios_base::failbit;
           break;
         }
-        str.push_back(ch);
-        ich = is.rdbuf()->snextc();
+        str.push_back(c);
+        // Read the next character.
+        ch = is.rdbuf()->snextc();
       }
-      if(str.empty() && traitsT::eq_int_type(ich, traitsT::eof())) {
+      if(str.empty() && (state & ios_base::eofbit)) {
         state |= ios_base::failbit;
       }
     }

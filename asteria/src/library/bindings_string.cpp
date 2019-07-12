@@ -530,15 +530,15 @@ G_string std_string_to_upper(const G_string& text)
     char* wptr = nullptr;
     // Translate each character.
     for(std::size_t i = 0; i < res.size(); ++i) {
-      char ch = res[i];
-      if((ch < 'a') || ('z' < ch)) {
+      char c = res[i];
+      if((c < 'a') || ('z' < c)) {
         continue;
       }
       // Fork the string as needed.
       if(ROCKET_UNEXPECT(!wptr)) {
         wptr = res.mut_data();
       }
-      wptr[i] = static_cast<char>(ch - 'a' + 'A');
+      wptr[i] = static_cast<char>(c - 'a' + 'A');
     }
     return res;
   }
@@ -550,15 +550,15 @@ G_string std_string_to_lower(const G_string& text)
     char* wptr = nullptr;
     // Translate each character.
     for(std::size_t i = 0; i < res.size(); ++i) {
-      char ch = res[i];
-      if((ch < 'A') || ('Z' < ch)) {
+      char c = res[i];
+      if((c < 'A') || ('Z' < c)) {
         continue;
       }
       // Fork the string as needed.
       if(ROCKET_UNEXPECT(!wptr)) {
         wptr = res.mut_data();
       }
-      wptr[i] = static_cast<char>(ch - 'A' + 'a');
+      wptr[i] = static_cast<char>(c - 'A' + 'a');
     }
     return res;
   }
@@ -570,8 +570,8 @@ G_string std_string_translate(const G_string& text, const G_string& inputs, cons
     char* wptr = nullptr;
     // Translate each character.
     for(std::size_t i = 0; i < res.size(); ++i) {
-      char ch = res[i];
-      auto ipos = inputs.find(ch);
+      char c = res[i];
+      auto ipos = inputs.find(c);
       if(ipos == G_string::npos) {
         continue;
       }
@@ -701,9 +701,9 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
     constexpr char s_base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/==";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
-    template<std::size_t sizeT> constexpr const char* do_slitchr(const char (&str)[sizeT], char ch) noexcept
+    template<std::size_t sizeT> constexpr const char* do_slitchr(const char (&str)[sizeT], char c) noexcept
       {
-        return std::find(str, str + sizeT - 1, ch);
+        return std::find(str, str + sizeT - 1, c);
       }
 
     }
@@ -747,8 +747,8 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
     std::size_t nread = 0;
     while(nread != text.size()) {
       // Read and identify a character.
-      auto ch = text[nread++];
-      auto pos = do_slitchr(s_spaces, ch);
+      char c = text[nread++];
+      auto pos = do_slitchr(s_spaces, c);
       if(*pos) {
         // The character is a whitespace.
         if(unit.size() != 0) {
@@ -758,7 +758,7 @@ Opt<G_string> std_string_hex_decode(const G_string& text)
         // Ignore it.
         continue;
       }
-      unit.emplace_back(ch);
+      unit.emplace_back(c);
       if(unit.size() != unit.capacity()) {
         // Await remaining digits.
         continue;
@@ -850,8 +850,8 @@ Opt<G_string> std_string_base32_decode(const G_string& text)
     std::size_t nread = 0;
     while(nread != text.size()) {
       // Read and identify a character.
-      auto ch = text[nread++];
-      auto pos = do_slitchr(s_spaces, ch);
+      char c = text[nread++];
+      auto pos = do_slitchr(s_spaces, c);
       if(*pos) {
         // The character is a whitespace.
         if(unit.size() != 0) {
@@ -861,7 +861,7 @@ Opt<G_string> std_string_base32_decode(const G_string& text)
         // Ignore it.
         continue;
       }
-      unit.emplace_back(ch);
+      unit.emplace_back(c);
       if(unit.size() != unit.capacity()) {
         // Await remaining digits.
         continue;
@@ -968,8 +968,8 @@ Opt<G_string> std_string_base64_decode(const G_string& text)
     std::size_t nread = 0;
     while(nread != text.size()) {
       // Read and identify a character.
-      auto ch = text[nread++];
-      auto pos = do_slitchr(s_spaces, ch);
+      char c = text[nread++];
+      auto pos = do_slitchr(s_spaces, c);
       if(*pos) {
         // The character is a whitespace.
         if(unit.size() != 0) {
@@ -979,7 +979,7 @@ Opt<G_string> std_string_base64_decode(const G_string& text)
         // Ignore it.
         continue;
       }
-      unit.emplace_back(ch);
+      unit.emplace_back(c);
       if(unit.size() != unit.capacity()) {
         // Await remaining digits.
         continue;
