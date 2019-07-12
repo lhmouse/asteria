@@ -516,8 +516,8 @@ Value std_json_parse(const G_string& text)
     options.escapable_single_quote_string = true;
     options.keyword_as_identifier = true;
     options.integer_as_real = true;
-    // Use a `streambuf` rather than an `istream` to minimize overloads.
-    Cow_stringbuf cbuf(text, std::istream::in);
+    // Use a `streambuf` rather than an `istream` to minimize overheads.
+    Cow_stringbuf cbuf(text, std::ios_base::in);
     Token_Stream tstrm;
     if(!tstrm.load(cbuf, rocket::sref("<JSON text>"), options)) {
       ASTERIA_DEBUG_LOG("Could not tokenize source text: ", tstrm.get_parser_error());
