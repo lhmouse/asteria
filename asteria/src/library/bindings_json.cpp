@@ -9,6 +9,7 @@
 #include "../runtime/collector.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../utilities.hpp"
+#include <vector>
 
 namespace Asteria {
 
@@ -356,28 +357,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    Opt<G_string> do_accept_key_opt(Token_Stream& tstrm)
-      {
-        auto qtok = tstrm.peek_opt();
-        if(!qtok) {
-          return rocket::nullopt;
-        }
-        if(qtok->is_identifier()) {
-          auto name = qtok->as_identifier();
-          tstrm.shift();
-          // Identifiers are allowed unquoted in JSON5.
-          return G_string(rocket::move(name));
-        }
-        if(qtok->is_string_literal()) {
-          auto value = qtok->as_string_literal();
-          tstrm.shift();
-          // This string literal can be copied as is in UTF-8.
-          return G_string(rocket::move(value));
-        }
-        return rocket::nullopt;
-      }
-
-    Opt<Value> do_accept_value_opt(Token_Stream& tstrm)
+    Opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
       {
         auto qname = do_accept_identifier_opt(tstrm, { "null", "true", "false", "Infinity", "NaN" });
         if(qname) {
@@ -412,98 +392,165 @@ G_string std_json_format(const Value& value, const G_integer& indent)
           // Accept a `String`.
           return G_string(rocket::move(*qstr));
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_add, Token::punctuator_sub, Token::punctuator_bracket_op, Token::punctuator_brace_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_add, Token::punctuator_sub });
         if(kpunct) {
-          // What is it?
-          switch(rocket::weaken_enum(*kpunct)) {
-          case Token::punctuator_add:
-          case Token::punctuator_sub:
-            {
-              // Only `Infinity` and `NaN` are allowed. Please note that the tokenizer will have merged sign symbols into adjacent number literals.
-              qname = do_accept_identifier_opt(tstrm, { "Infinity", "NaN" });
-              if(!qname) {
-                return rocket::nullopt;
-              }
-              bool rneg = *kpunct == Token::punctuator_sub;
-              switch(qname->front()) {
-              case 'I':
-                // Accept a signed `Infinity`.
-                return G_real(std::copysign(INFINITY, -rneg));
-              case 'N':
-                // Accept a signed `NaN`.
-                return G_real(std::copysign(NAN, -rneg));
-              default:
-                ROCKET_ASSERT(false);
-              }
-            }
-          case Token::punctuator_bracket_op:
-            {
-              // Get an `array`.
-              G_array array;
-              for(;;) {
-                // Get an element.
-                auto qvalue = do_accept_value_opt(tstrm);
-                if(!qvalue) {
-                  break;
-                }
-                array.emplace_back(rocket::move(*qvalue));
-                // Trailing commas are allowed in JSON5.
-                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
-                if(!kpunct) {
-                  break;
-                }
-              }
-              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
-              if(!kpunct) {
-                // The exception will be caught below, but its value is out of interest.
-                // Again, don't play with this at home.
-                throw 105;
-              }
-              return rocket::move(array);
-            }
-          case Token::punctuator_brace_op:
-            {
-              // Get an `object`.
-              G_object object;
-              for(;;) {
-                // Get a key.
-                qstr = do_accept_key_opt(tstrm);
-                if(!qstr) {
-                  break;
-                }
-                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
-                if(!kpunct) {
-                  // The exception will be caught below, but its value is out of interest.
-                  // Again, don't play with this at home.
-                  throw 201;
-                }
-                // Get the value.
-                auto qvalue = do_accept_value_opt(tstrm);
-                if(!qvalue) {
-                  // The exception will be caught below, but its value is out of interest.
-                  // Again, don't play with this at home.
-                  throw 202;
-                }
-                object.insert_or_assign(rocket::move(*qstr), rocket::move(*qvalue));
-                // Trailing commas are allowed in JSON5.
-                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
-                if(!kpunct) {
-                  break;
-                }
-              }
-              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
-              if(!kpunct) {
-                // The exception will be caught below, but its value is out of interest.
-                // Again, don't play with this at home.
-                throw 205;
-              }
-              return rocket::move(object);
-            }
+          // Only `Infinity` and `NaN` are allowed. Please note that the tokenizer will have merged sign symbols into adjacent number literals.
+          qname = do_accept_identifier_opt(tstrm, { "Infinity", "NaN" });
+          if(!qname) {
+            return rocket::nullopt;
+          }
+          bool rneg = *kpunct == Token::punctuator_sub;
+          switch(qname->front()) {
+          case 'I':
+            // Accept a signed `Infinity`.
+            return G_real(std::copysign(INFINITY, -rneg));
+          case 'N':
+            // Accept a signed `NaN`.
+            return G_real(std::copysign(NAN, -rneg));
           default:
             ROCKET_ASSERT(false);
           }
         }
         return rocket::nullopt;
+      }
+
+    Opt<G_string> do_accept_key_opt(Token_Stream& tstrm)
+      {
+        auto qtok = tstrm.peek_opt();
+        if(!qtok) {
+          return rocket::nullopt;
+        }
+        if(qtok->is_identifier()) {
+          auto name = qtok->as_identifier();
+          tstrm.shift();
+          // Identifiers are allowed unquoted in JSON5.
+          return G_string(rocket::move(name));
+        }
+        if(qtok->is_string_literal()) {
+          auto value = qtok->as_string_literal();
+          tstrm.shift();
+          // This string literal can be copied as is in UTF-8.
+          return G_string(rocket::move(value));
+        }
+        return rocket::nullopt;
+      }
+
+    struct S_context_array
+      {
+        G_array array;
+      };
+    struct S_context_object
+      {
+        G_object object;
+        G_string key;
+      };
+    using Context = Variant<S_context_array, S_context_object>;
+
+    Opt<Value> do_accept_value_opt(Token_Stream& tstrm)
+      {
+        Opt<Value> qvalue;
+        std::vector<Context> stack;
+        // Implement a recursive descent parser without recursion.
+        do {
+          // The invariant is that a value is expected here. No other things such as closed brackets are allowed.
+          auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op, Token::punctuator_brace_op });
+          if(kpunct) {
+            if(*kpunct == Token::punctuator_bracket_op) {
+              // An open bracket has been accepted.
+              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+              if(!kpunct) {
+                // Descend into a new array.
+                S_context_array ctxa = { rocket::clear };
+                stack.emplace_back(rocket::move(ctxa));
+                continue;
+              }
+              // Accept an empty array.
+              qvalue = G_array();
+            }
+            else {
+              // An open brace has been accepted.
+              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+              if(!kpunct) {
+                // A key followed by a colon is expected.
+                auto qkey = do_accept_key_opt(tstrm);
+                if(!qkey) {
+                  return rocket::nullopt;
+                }
+                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+                if(!kpunct) {
+                  return rocket::nullopt;
+                }
+                // Descend into a new object.
+                S_context_object ctxo = { rocket::clear, rocket::move(*qkey) };
+                stack.emplace_back(rocket::move(ctxo));
+                continue;
+              }
+              // Accept an empty object.
+              qvalue = G_object();
+            }
+          }
+          else {
+            qvalue = do_accept_scalar_opt(tstrm);
+            if(!qvalue) {
+              return rocket::nullopt;
+            }
+          }
+          for(;;) {
+            if(stack.empty()) {
+              // If the value is not inside any array or object, we are done.
+              return rocket::move(*qvalue);
+            }
+            if(stack.back().index() == 0) {
+              auto& ctxa = stack.back().as<0>();
+              // Append the value to its parent array.
+              ctxa.array.emplace_back(rocket::move(*qvalue));
+              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
+              if(!kpunct) {
+                return rocket::nullopt;
+              }
+              if(*kpunct == Token::punctuator_comma) {
+                // An extra comma is allowed in JSON5.
+                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+                if(!kpunct) {
+                  // The next element is expected to follow the comma.
+                  break;
+                }
+              }
+              // Pop the array.
+              *qvalue = rocket::move(ctxa.array);
+            }
+            else {
+              auto& ctxo = stack.back().as<1>();
+              // Insert the value into its parent object.
+              ctxo.object.insert_or_assign(rocket::move(ctxo.key), rocket::move(*qvalue));
+              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });
+              if(!kpunct) {
+                return rocket::nullopt;
+              }
+              if(*kpunct == Token::punctuator_comma) {
+                // An extra comma is allowed in JSON5.
+                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+                if(!kpunct) {
+                  // The next key is expected to follow the comma.
+                  auto qkey = do_accept_key_opt(tstrm);
+                  if(!qkey) {
+                    return rocket::nullopt;
+                  }
+                  kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+                  if(!kpunct) {
+                    return rocket::nullopt;
+                  }
+                  ctxo.key = rocket::move(*qkey);
+                  // The next value is expected to follow the colon.
+                  break;
+                }
+              }
+              // Pop the object.
+              *qvalue = rocket::move(ctxo.object);
+            }
+            stack.pop_back();
+          }
+        } while(true);
       }
 
     }
@@ -520,23 +567,16 @@ Value std_json_parse(const G_string& text)
     Cow_stringbuf cbuf(text, std::ios_base::in);
     Token_Stream tstrm;
     if(!tstrm.load(cbuf, rocket::sref("<JSON text>"), options)) {
-      ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", tstrm.get_parser_error());
+      ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", text);
       return G_null();
     }
-    Opt<Value> qvalue;
-    try {
-      // Extract a value from the stream.
-      qvalue = do_accept_value_opt(tstrm);
-      if(!qvalue) {
-        return G_null();
-      }
-    }
-    catch(int pos) {  // Don't play with this at home.
-      ASTERIA_DEBUG_LOG("Caught an exception from `do_accept_value()`: ", pos);
+    auto qvalue = do_accept_value_opt(tstrm);
+    if(!qvalue) {
+      ASTERIA_DEBUG_LOG("Empty or invalid JSON text: ", text);
       return G_null();
     }
     if(!tstrm.empty()) {
-      ASTERIA_DEBUG_LOG("Excess token: ", *(tstrm.peek_opt()));
+      ASTERIA_DEBUG_LOG("Excess token: ", text);
       return G_null();
     }
     return rocket::move(*qvalue);
