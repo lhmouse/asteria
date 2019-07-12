@@ -39,8 +39,8 @@ int main()
         assert __isnan std.math.pow(2, nan);
 
         assert std.math.log(std.math.e) == 1;
-        assert std.math.log(9, 3) == 2;
-        assert std.math.log(3, 9) == 0.5;
+        assert lt_1ups(std.math.log(9, 3), 2.0);
+        assert lt_1ups(std.math.log(3, 9), 0.5);
         assert std.math.log(0, 10) == -infinity;
         assert __isnan std.math.log(-1, 10);
         assert __isnan std.math.log(10,  0);

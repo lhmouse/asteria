@@ -236,10 +236,10 @@ G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>
     // Write fields backwards.
     // Get the second and millisecond parts.
     // Note that the number of seconds shall be rounded towards negative infinity.
-    ::time_t ms = (time_point % 1000) + ((time_point >> 63) & 1000);
-    ::time_t tp = (time_point - ms) / 1000;
+    int ms = static_cast<int>((static_cast<std::uint64_t>(time_point) + 9223372036854775000) % 1000);
+    ::time_t tp = static_cast<::time_t>((time_point - ms) / 1000);
     if(pms) {
-      write_int(static_cast<int>(ms), 3);
+      write_int(ms, 3);
       write_sep('.');
     }
     ::tm tr;

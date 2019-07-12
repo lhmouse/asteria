@@ -668,7 +668,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     }
     // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
-      if(::lseek(hf, roffset, SEEK_SET) == -1) {
+      if(::lseek64(hf, roffset, SEEK_SET) == -1) {
 #endif
         return rocket::nullopt;
       }
@@ -739,7 +739,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     }
     // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
     if(roffset != 0) {
-      if(::lseek(hf, roffset, SEEK_SET) == -1) {
+      if(::lseek64(hf, roffset, SEEK_SET) == -1) {
 #endif
         return false;
       }
@@ -821,7 +821,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     if(roffset != 0) {
       // If `roffset` is not zero, truncate the file there.
       // Otherwise, the file will have been truncate at creation.
-      if(::ftruncate(hf, roffset) != 0) {
+      if(::ftruncate64(hf, roffset) != 0) {
 #endif
         return false;
       }
