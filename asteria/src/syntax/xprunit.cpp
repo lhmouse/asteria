@@ -774,11 +774,17 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           // The result will have been stored into `self`.
           ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", result = ", self.read());
         }
-        catch(const std::exception& stdex) {
-          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: what = ", stdex.what());
+        catch(Exception& except) {
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
           // Append the current frame and rethrow the exception.
+          except.push_frame_func(sloc, func);
+          throw;
+        }
+        catch(const std::exception& stdex) {
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
+          // Translate the exception, append the current frame, and throw the new exception.
           Exception except(stdex);
-          except.push_frame(sloc, Backtrace_Frame::ftype_func, G_string(func));
+          except.push_frame_func(sloc, func);
           throw except;
         }
         return Air_Node::status_next;

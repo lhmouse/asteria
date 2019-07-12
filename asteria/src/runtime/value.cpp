@@ -106,32 +106,35 @@ bool Value::test() const noexcept
     }
   }
 
+    namespace {
+
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_integral<XvalueT>::value)> constexpr Value::Compare do_3way_compare(const XvalueT& lhs,
+                                                                                                                            const XvalueT& rhs) noexcept
+      {
+        return (lhs < rhs) ? Value::compare_less
+                           : (lhs > rhs) ? Value::compare_greater
+                                         : Value::compare_equal;
+      }
+    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_floating_point<XvalueT>::value)> constexpr Value::Compare do_3way_compare(const XvalueT& lhs,
+                                                                                                                                  const XvalueT& rhs) noexcept
+      {
+        return std::isless(lhs, rhs) ? Value::compare_less
+                                     : std::isgreater(lhs, rhs) ? Value::compare_greater
+                                                                : std::isunordered(lhs, rhs) ? Value::compare_unordered
+                                                                                             : Value::compare_equal;
+      }
+
+    }
+
 Value::Compare Value::compare(const Value& other) const noexcept
   {
-    // Define a utility function with respect to partial ordering.
-    auto compare_arithmetic = [&](const auto& lhs, const auto& rhs)
-      {
-        static_assert(std::is_arithmetic<decltype(+lhs)>::value, "??");
-        // Floating-point numbers may be unordered.
-        if(std::is_floating_point<decltype(+lhs)>::value && std::isunordered(lhs, rhs)) {
-          return compare_unordered;
-        }
-        // Guarantee total ordering otherwise.
-        if(lhs < rhs) {
-          return compare_less;
-        }
-        if(lhs > rhs) {
-          return compare_greater;
-        }
-        return compare_equal;
-      };
     ///////////////////////////////////////////////////////////////////////////
     // Compare values of different types
     ///////////////////////////////////////////////////////////////////////////
     if(this->m_stor.index() != other.m_stor.index()) {
       // Compare operands that are both of arithmetic types.
       if(this->is_convertible_to_real() && other.is_convertible_to_real()) {
-        return compare_arithmetic(this->convert_to_real(), other.convert_to_real());
+        return do_3way_compare(this->convert_to_real(), other.convert_to_real());
       }
       // Otherwise, they are unordered.
       return compare_unordered;
@@ -146,20 +149,19 @@ Value::Compare Value::compare(const Value& other) const noexcept
       }
     case gtype_boolean:
       {
-        return compare_arithmetic(this->m_stor.as<gtype_boolean>(), other.m_stor.as<gtype_boolean>());
+        return do_3way_compare(this->m_stor.as<gtype_boolean>(), other.m_stor.as<gtype_boolean>());
       }
     case gtype_integer:
       {
-        return compare_arithmetic(this->m_stor.as<gtype_integer>(), other.m_stor.as<gtype_integer>());
+        return do_3way_compare(this->m_stor.as<gtype_integer>(), other.m_stor.as<gtype_integer>());
       }
     case gtype_real:
       {
-        return compare_arithmetic(this->m_stor.as<gtype_real>(), other.m_stor.as<gtype_real>());
+        return do_3way_compare(this->m_stor.as<gtype_real>(), other.m_stor.as<gtype_real>());
       }
     case gtype_string:
       {
-        int cmp = this->m_stor.as<gtype_string>().compare(other.m_stor.as<gtype_string>());
-        return compare_arithmetic(cmp, 0);
+        return do_3way_compare(this->m_stor.as<gtype_string>().compare(other.m_stor.as<gtype_string>()), 0);
       }
     case gtype_opaque:
     case gtype_function:
@@ -168,19 +170,17 @@ Value::Compare Value::compare(const Value& other) const noexcept
       }
     case gtype_array:
       {
-        // Perform lexicographical comparison of array elements.
         const auto& lhs = this->m_stor.as<gtype_array>();
         const auto& rhs = other.m_stor.as<gtype_array>();
-        // Compare the longest initial sequences.
-        // If they are equal, the longer array is greater than the shorter one.
-        auto rlen = rocket::min(lhs.size(), rhs.size());
-        for(std::size_t i = 0; i < rlen; ++i) {
-          auto cmp = lhs[i].compare(rhs[i]);
-          if(cmp != compare_equal) {
-            return cmp;
-          }
+        // Perform lexicographical comparison on the longest initial sequences of the same length.
+        auto cmp = compare_equal;
+        std::mismatch(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+                      [&](const Value& x, const Value& y) { return (cmp = x.compare(y)) == compare_equal;  });
+        if(cmp != compare_equal) {
+          return cmp;
         }
-        return compare_arithmetic(lhs.size(), rhs.size());
+        // If they are equal, the longer array is greater than the shorter one.
+        return do_3way_compare(lhs.size(), rhs.size());
       }
     case gtype_object:
       {

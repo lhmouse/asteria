@@ -73,6 +73,33 @@ namespace Asteria {
         return status;
       }
 
+    Air_Node::Status do_execute_catch(Evaluation_Stack& stack,
+                                      const Executive_Context& ctx, const Cow_Vector<Air_Node>& code, const Cow_String& func, const Global_Context& global,
+                                      const PreHashed_String& except_name, const Exception& except)
+      {
+        Executive_Context ctx_catch(&ctx);
+        Reference_Root::S_temporary xref = { except.get_value() };
+        do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xref));
+        // Initialize backtrace information.
+        G_array backtrace;
+        for(std::size_t i = 0; i < except.count_frames(); ++i) {
+          const auto& frame = except.get_frame(i);
+          G_object elem;
+          // Translate the frame.
+          elem.try_emplace(rocket::sref("ftype"), G_string(rocket::sref(Backtrace_Frame::stringify_ftype(frame.ftype()))));
+          elem.try_emplace(rocket::sref("file"), G_string(frame.file()));
+          elem.try_emplace(rocket::sref("line"), G_integer(frame.line()));
+          elem.try_emplace(rocket::sref("value"), frame.value());
+          // Append the frame. Note that frames are stored from bottom to top, in contrast to what you usually see in a debugger.
+          backtrace.emplace_back(rocket::move(elem));
+        }
+        xref.value = rocket::move(backtrace);
+         ASTERIA_DEBUG_LOG("Exception backtrace:\n", xref.value);
+        ctx_catch.open_named_reference(rocket::sref("__backtrace")) = rocket::move(xref);
+        // Execute the `catch` body.
+        return do_execute_statement_list(stack, ctx_catch, code, func, global);
+      }
+
     Cow_Vector<Air_Node> do_generate_code_expression(const Analytic_Context& ctx, const Cow_Vector<Xprunit>& expr)
       {
         Cow_Vector<Air_Node> code;
@@ -193,18 +220,10 @@ namespace Asteria {
         // Pick a branch basing on the condition.
         if(stack.get_top_reference().read().test() != negative) {
           // Execute the true branch. Forward any status codes unexpected to the caller.
-          auto status = do_execute_block(stack, ctx, code_true, func, global);
-          if(rocket::is_none_of(status, { Air_Node::status_next })) {
-            return status;
-          }
-          return Air_Node::status_next;
+          return do_execute_block(stack, ctx, code_true, func, global);
         }
         // Execute the false branch. Forward any status codes unexpected to the caller.
-        auto status = do_execute_block(stack, ctx, code_false, func, global);
-        if(rocket::is_none_of(status, { Air_Node::status_next })) {
-          return status;
-        }
-        return Air_Node::status_next;
+        return do_execute_block(stack, ctx, code_false, func, global);
       }
 
     Air_Node::Status do_execute_select(Evaluation_Stack& stack, Executive_Context& ctx,
@@ -261,7 +280,7 @@ namespace Asteria {
           if(rocket::is_any_of(status, { Air_Node::status_break_unspec, Air_Node::status_break_switch })) {
             break;
           }
-          if(rocket::is_none_of(status, { Air_Node::status_next })) {
+          if(status != Air_Node::status_next) {
             return status;
           }
         }
@@ -434,43 +453,21 @@ namespace Asteria {
         const auto& code_catch = p.at(3).as<Cow_Vector<Air_Node>>();
         // This is the same as a `try...catch` block in C++.
         try {
-          // Execute the `try` clause. If no exception is thrown, this will have little cost.
-          auto status = do_execute_block(stack, ctx, code_try, func, global);
-          if(rocket::is_none_of(status, { Air_Node::status_next })) {
-            return status;
-          }
-          return Air_Node::status_next;
+          // Execute the `try` clause. If no exception is thrown, this will have little overhead.
+          return do_execute_block(stack, ctx, code_try, func, global);
+        }
+        catch(Exception& except) {
+          // Reuse the exception object. Don't bother allocating a new one.
+          except.push_frame_catch(sloc);
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except);
+          return do_execute_catch(stack, ctx, code_catch, func, global, except_name, except);
         }
         catch(const std::exception& stdex) {
           // Translate the exception.
           Exception except(stdex);
-          except.push_frame(sloc, Backtrace_Frame::ftype_catch, G_null());
-          // The exception reference shall not outlast the `catch` body.
-          Executive_Context ctx_catch(&ctx);
-          Reference_Root::S_temporary xref = { except.get_value() };
-          do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xref));
-          // Initialize backtrace information.
-          G_array backtrace;
-          for(std::size_t i = 0; i < except.count_frames(); ++i) {
-            const auto& frame = except.get_frame(i);
-            G_object elem;
-            // Translate the frame.
-            elem.try_emplace(rocket::sref("file"), G_string(frame.file()));
-            elem.try_emplace(rocket::sref("line"), G_integer(frame.line()));
-            elem.try_emplace(rocket::sref("ftype"), G_string(rocket::sref(Backtrace_Frame::stringify_ftype(frame.ftype()))));
-            elem.try_emplace(rocket::sref("value"), frame.value());
-            // Append the frame.
-            backtrace.emplace_back(rocket::move(elem));
-          }
-          xref.value = rocket::move(backtrace);
-          ASTERIA_DEBUG_LOG("Exception backtrace:\n", xref.value);
-          ctx_catch.open_named_reference(rocket::sref("__backtrace")) = rocket::move(xref);
-          // Execute the `catch` body.
-          auto status = do_execute_statement_list(stack, ctx_catch, code_catch, func, global);
-          if(rocket::is_none_of(status, { Air_Node::status_next })) {
-            return status;
-          }
-          return Air_Node::status_next;
+          except.push_frame_catch(sloc);
+          ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except);
+          return do_execute_catch(stack, ctx, code_catch, func, global, except_name, except);
         }
       }
 
@@ -488,26 +485,31 @@ namespace Asteria {
       {
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
-        // Store the nested exception here, if any.
-        Exception except;
-        auto qnested = std::current_exception();
-        if(qnested) {
-          // Rethrow it to get its effective type.
-          try {
-            std::rethrow_exception(qnested);
-          }
-          catch(const std::exception& stdex) {
-            except.dynamic_copy(stdex);
-          }
-          catch(...) {
-            // Fallthrough.
+        // What to throw?
+        const auto& value = stack.get_top_reference().read();
+        // Unpack the nested exception, if any.
+        Opt<Exception> qnested;
+        try {
+          // Rethrow the current exception to get its effective type.
+          auto eptr = std::current_exception();
+          if(eptr) {
+            std::rethrow_exception(eptr);
           }
         }
-        // Save the previous exception.
-        except.push_frame(sloc, Backtrace_Frame::ftype_throw, rocket::move(except.open_value()));
-        // Coyp and throw the value at the top of the stack, as we don't throw by reference.
-        except.open_value() = stack.get_top_reference().read();
-        throw except;
+        catch(Exception& except) {
+          // Modify the excpetion in place. Don't bother allocating a new one.
+          except.push_frame_throw(sloc, value);
+          throw;
+        }
+        catch(const std::exception& stdex) {
+          // Translate the exception.
+          qnested.emplace(stdex);
+        }
+        if(!qnested) {
+          // If no nested exception exists, throw a fresh one.
+          qnested.emplace(sloc, value);
+        }
+        throw *qnested;
       }
 
     Air_Node::Status do_execute_assert(Evaluation_Stack& stack, Executive_Context& /*ctx*/,

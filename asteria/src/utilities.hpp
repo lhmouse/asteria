@@ -27,8 +27,6 @@ class Formatter
     ~Formatter();
 
   private:
-    std::ostream& do_open_stream();
-
     template<typename ValueT> void do_put(const ValueT& value)
       {
         this->do_open_stream() << value;
@@ -97,6 +95,7 @@ class Formatter
       {
         this->do_open_stream() << value;
       }
+    std::ostream& do_open_stream();
 
   public:
     template<typename ValueT> Formatter& operator,(const ValueT& value) noexcept

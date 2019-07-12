@@ -17,12 +17,15 @@ class Exception : public std::exception
     Cow_Vector<Backtrace_Frame> m_frames;
 
   public:
-    Exception() noexcept
+    template<typename XvalueT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalueT&&)> Exception(const Source_Location& sloc, XvalueT&& xvalue)
+      : m_value(rocket::forward<XvalueT>(xvalue)),
+        m_frames(1, Backtrace_Frame::ftype_throw, sloc, this->m_value)
       {
       }
-    explicit Exception(const std::exception& other)
+    explicit Exception(const std::exception& stdex)
+      : m_value(G_string(stdex.what())),
+        m_frames(1, Backtrace_Frame::ftype_native, Source_Location(rocket::sref("<native code>"), -1), this->m_value)
       {
-        this->dynamic_copy(other);
       }
     ~Exception() override;
 
@@ -48,14 +51,18 @@ class Exception : public std::exception
       {
         return this->m_frames.at(i);
       }
-    template<typename... ParamsT> Backtrace_Frame& push_frame(ParamsT&&... params)
+    template<typename XvalueT> Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XvalueT&& xvalue)
       {
-        return this->m_frames.emplace_back(rocket::forward<ParamsT>(params)...);
+        return this->m_frames.emplace_back(Backtrace_Frame::ftype_throw, sloc, this->m_value = rocket::forward<XvalueT>(xvalue));
       }
-
-    // Note that if `other` is not derived from `Exception`, this function copies `other.what()`,
-    // which is subjecjt to memory allocation failures.
-    Exception& dynamic_copy(const std::exception& other);
+    Backtrace_Frame& push_frame_catch(const Source_Location& sloc)
+      {
+        return this->m_frames.emplace_back(Backtrace_Frame::ftype_catch, sloc, this->m_value);
+      }
+    Backtrace_Frame& push_frame_func(const Source_Location& sloc, const G_string& func)
+      {
+        return this->m_frames.emplace_back(Backtrace_Frame::ftype_func, sloc, func);
+      }
   };
 
 inline std::ostream& operator<<(std::ostream& os, const Exception& except)

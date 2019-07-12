@@ -7,6 +7,7 @@
 #include "../fwd.hpp"
 #include "value.hpp"
 #include "../syntax/source_location.hpp"
+#include <exception>
 
 namespace Asteria {
 
@@ -25,22 +26,23 @@ class Backtrace_Frame
     ROCKET_PURE_FUNCTION static const char* stringify_ftype(Ftype xftype) noexcept;
 
   private:
-    Source_Location m_sloc;
     Ftype m_ftype;
+    Source_Location m_sloc;
     Value m_value;
 
   public:
-    template<typename XvalueT> Backtrace_Frame(const Source_Location& xsloc, Ftype xftype, XvalueT&& xvalue)
-      : m_sloc(xsloc), m_ftype(xftype), m_value(rocket::forward<XvalueT>(xvalue))
-      {
-      }
-    template<typename XvalueT> Backtrace_Frame(const Cow_String& xfile, std::int64_t xline, Ftype xftype, XvalueT&& xvalue)
-      : m_sloc(xfile, xline), m_ftype(xftype), m_value(rocket::forward<XvalueT>(xvalue))
+    template<typename XvalueT> Backtrace_Frame(Ftype xftype, const Source_Location& xsloc, XvalueT&& xvalue)
+      : m_ftype(xftype),
+        m_sloc(xsloc), m_value(rocket::forward<XvalueT>(xvalue))
       {
       }
     ~Backtrace_Frame();
 
   public:
+    Ftype ftype() const noexcept
+      {
+        return this->m_ftype;
+      }
     const Source_Location& location() const noexcept
       {
         return this->m_sloc;
@@ -52,10 +54,6 @@ class Backtrace_Frame
     std::int64_t line() const noexcept
       {
         return this->m_sloc.line();
-      }
-    Ftype ftype() const noexcept
-      {
-        return this->m_ftype;
       }
     const Value& value() const noexcept
       {

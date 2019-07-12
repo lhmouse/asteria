@@ -220,7 +220,6 @@ check_PROGRAMS =  \
   asteria/test/reference.test  \
   asteria/test/xprunit.test  \
   asteria/test/statement.test  \
-  asteria/test/exception.test  \
   asteria/test/executive_context.test  \
   asteria/test/token_stream.test  \
   asteria/test/parser.test  \
