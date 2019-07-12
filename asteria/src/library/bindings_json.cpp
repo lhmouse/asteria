@@ -339,6 +339,32 @@ G_string std_json_format(const Value& value, const G_integer& indent)
           // This real number can be copied as is.
           return G_real(value);
         }
+        if(qtok->is_punctuator()) {
+          auto punct = qtok->as_punctuator();
+          if(rocket::is_any_of(punct, { Token::punctuator_add, Token::punctuator_sub })) {
+            // Only `Infinity` and `NaN` are allowed.
+            // Please note that the tokenizer will have merged sign symbols into adjacent number literals.
+            qtok = tstrm.peek_opt(1);
+            if(!qtok) {
+              return rocket::nullopt;
+            }
+            if(!qtok->is_identifier()) {
+              return rocket::nullopt;
+            }
+            const auto& name = qtok->as_identifier();
+            bool rneg = punct == Token::punctuator_sub;
+            if(name == "Infinity") {
+              tstrm.shift(2);
+              // Accept a signed `Infinity`.
+              return G_real(std::copysign(INFINITY, -rneg));
+            }
+            if(name == "NaN") {
+              tstrm.shift(2);
+              // Accept a signed `NaN`.
+              return G_real(std::copysign(NAN, -rneg));
+            }
+          }
+        }
         return rocket::nullopt;
       }
 
@@ -384,32 +410,13 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         }
         auto qnum = do_accept_number_opt(tstrm);
         if(qnum) {
-          // Accept a finite `Number`.
+          // Accept a `Number`.
           return G_real(*qnum);
         }
         auto qstr = do_accept_string_opt(tstrm);
         if(qstr) {
           // Accept a `String`.
           return G_string(rocket::move(*qstr));
-        }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_add, Token::punctuator_sub });
-        if(kpunct) {
-          // Only `Infinity` and `NaN` are allowed. Please note that the tokenizer will have merged sign symbols into adjacent number literals.
-          qname = do_accept_identifier_opt(tstrm, { "Infinity", "NaN" });
-          if(!qname) {
-            return rocket::nullopt;
-          }
-          bool rneg = *kpunct == Token::punctuator_sub;
-          switch(qname->front()) {
-          case 'I':
-            // Accept a signed `Infinity`.
-            return G_real(std::copysign(INFINITY, -rneg));
-          case 'N':
-            // Accept a signed `NaN`.
-            return G_real(std::copysign(NAN, -rneg));
-          default:
-            ROCKET_ASSERT(false);
-          }
         }
         return rocket::nullopt;
       }
@@ -490,6 +497,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
             }
           }
           else {
+            // Just accept a scalar value which is never recursive.
             qvalue = do_accept_scalar_opt(tstrm);
             if(!qvalue) {
               return rocket::nullopt;
