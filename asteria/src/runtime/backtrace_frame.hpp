@@ -34,14 +34,14 @@ class Backtrace_Frame
       : m_sloc(xsloc), m_ftype(xftype), m_value(rocket::forward<XvalueT>(xvalue))
       {
       }
-    template<typename XvalueT> Backtrace_Frame(const Cow_String& xfile, std::uint32_t xline, Ftype xftype, XvalueT&& xvalue)
+    template<typename XvalueT> Backtrace_Frame(const Cow_String& xfile, std::int64_t xline, Ftype xftype, XvalueT&& xvalue)
       : m_sloc(xfile, xline), m_ftype(xftype), m_value(rocket::forward<XvalueT>(xvalue))
       {
       }
     ~Backtrace_Frame();
 
   public:
-    const Source_Location& sloc() const noexcept
+    const Source_Location& location() const noexcept
       {
         return this->m_sloc;
       }
@@ -49,7 +49,7 @@ class Backtrace_Frame
       {
         return this->m_sloc.file();
       }
-    std::uint32_t line() const noexcept
+    std::int64_t line() const noexcept
       {
         return this->m_sloc.line();
       }

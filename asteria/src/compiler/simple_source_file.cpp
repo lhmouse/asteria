@@ -41,7 +41,7 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const C
     // Accept the code.
     this->m_inst.clear();
     this->m_inst.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
-    return Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_success);
+    return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
   }
 
 Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
@@ -61,7 +61,7 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
   {
     std::istream::sentry sentry(cstrm, true);
     if(!sentry) {
-      return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
+      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
     // Extract characters from the stream buffer directly.
     Opt<Parser_Error> qerr;
@@ -83,7 +83,7 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
       cstrm.setstate(state);
     }
     if(cstrm.bad()) {
-      return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_badbit_set));
+      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_badbit_set));
     }
     // `qerr` shall always have a value here.
     // If the exceptional path above has been taken, `cstrm.bad()` will have been set.
@@ -103,7 +103,7 @@ Parser_Error Simple_Source_File::open(const Cow_String& filename)
     // Open the file designated by `filename`.
     std::filebuf cbuf;
     if(!cbuf.open(filename.c_str(), std::ios_base::in)) {
-      return this->do_throw_or_return(Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
+      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
     return this->reload(cbuf, filename);
   }

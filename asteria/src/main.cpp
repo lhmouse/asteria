@@ -71,7 +71,7 @@ int main(int argc, char** argv)
               << e << std::endl;
     for(std::size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {
       const auto& f = e.get_frame(i);
-      std::cerr << "  thrown from \'" << f.sloc() << "\' <" << Backtrace_Frame::stringify_ftype(f.ftype()) << ">: " << f.value() << std::endl;
+      std::cerr << "  thrown from \'" << f.location() << "\' <" << Backtrace_Frame::stringify_ftype(f.ftype()) << ">: " << f.value() << std::endl;
     }
     return 1;
   }

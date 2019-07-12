@@ -17,7 +17,7 @@ Exception& Exception::dynamic_copy(const std::exception& other)
     if(!qother) {
       // Say the exception was thrown native code.
       this->m_value = G_string(other.what());
-      this->m_frames.emplace_back(rocket::sref("<native code>"), UINT32_MAX, Backtrace_Frame::ftype_native, G_null());
+      this->m_frames.emplace_back(rocket::sref("<native code>"), -1, Backtrace_Frame::ftype_native, G_null());
       return *this;
     }
     // Copy frames from `other`.

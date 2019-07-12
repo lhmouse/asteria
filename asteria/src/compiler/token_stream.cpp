@@ -85,7 +85,7 @@ namespace Asteria {
         Cow_String m_file;
 
         Cow_String m_str;
-        std::uint32_t m_line;
+        std::int64_t m_line;
         std::size_t m_offset;
 
       public:
@@ -110,7 +110,7 @@ namespace Asteria {
             return this->m_file;
           }
 
-        std::uint32_t line() const noexcept
+        std::int64_t line() const noexcept
           {
             return this->m_line;
           }
@@ -188,7 +188,7 @@ namespace Asteria {
     class Tack
       {
       private:
-        std::uint32_t m_line;
+        std::int64_t m_line;
         std::size_t m_offset;
         std::size_t m_length;
 
@@ -199,7 +199,7 @@ namespace Asteria {
           }
 
       public:
-        constexpr std::uint32_t line() const noexcept
+        constexpr std::int64_t line() const noexcept
           {
             return this->m_line;
           }
@@ -987,7 +987,7 @@ Parser_Error Token_Stream::get_parser_error() const noexcept
     switch(this->state()) {
     case state_empty:
       {
-        return Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_no_data_loaded);
+        return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_no_data_loaded);
       }
     case state_error:
       {
@@ -995,7 +995,7 @@ Parser_Error Token_Stream::get_parser_error() const noexcept
       }
     case state_success:
       {
-        return Parser_Error(UINT32_MAX, SIZE_MAX, 0, Parser_Error::code_success);
+        return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");

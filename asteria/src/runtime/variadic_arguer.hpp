@@ -41,7 +41,7 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_sloc.file();
       }
-    std::uint32_t get_source_line() const noexcept
+    std::int64_t get_source_line() const noexcept
       {
         return this->m_sloc.line();
       }

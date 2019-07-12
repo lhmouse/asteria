@@ -171,13 +171,13 @@ class Token
 
   private:
     Cow_String m_file;
-    std::uint32_t m_line;
+    std::int64_t m_line;
     std::size_t m_offset;
     std::size_t m_length;
     Xvariant m_stor;
 
   public:
-    template<typename XtokT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XtokT&&)> Token(const Cow_String& xfile, std::uint32_t xline,
+    template<typename XtokT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XtokT&&)> Token(const Cow_String& xfile, std::int64_t xline,
                                                                                 std::size_t xoffset, std::size_t xlength, XtokT&& xtok)
       : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
         m_stor(rocket::forward<XtokT>(xtok))
@@ -189,7 +189,7 @@ class Token
       {
         return this->m_file;
       }
-    std::uint32_t line() const noexcept
+    std::int64_t line() const noexcept
       {
         return this->m_line;
       }
