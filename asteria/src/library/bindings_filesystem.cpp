@@ -24,10 +24,12 @@ namespace Asteria {
     namespace {
 
 #ifdef _WIN32
+    using Wide_String = rocket::cow_wstring;
+
     // UTF-16 is used on Windows.
-    rocket::cow_wstring do_translate_winnt_path(const G_string& path)
+    Wide_String do_translate_winnt_path(const G_string& path)
       {
-        rocket::cow_wstring wstr;
+        Wide_String wstr;
         wstr.reserve(path.size() + 8);
         // If `path` is an absolute path, translate it to an NT path for long filename support.
         if((path.size() >= 2) && (path[1] == L':')) {
@@ -138,7 +140,7 @@ G_string std_filesystem_get_working_directory()
     G_string cwd;
 #ifdef _WIN32
     // Get the current directory as UTF-16.
-    rocket::cow_wstring ucwd(MAX_PATH, L'*');
+    Wide_String ucwd(MAX_PATH, L'*');
     auto nreq = ::GetCurrentDirectoryW(static_cast<std::uint32_t>(ucwd.size()), ucwd.mut_data());
     if(nreq > ucwd.size()) {
       // The buffer was too small.
@@ -301,11 +303,11 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 
     // Remove the directory recursively.
 #ifdef _WIN32
-    Opt<G_integer> do_remove_directory_recursive(const rocket::cow_wstring& root)
+    Opt<G_integer> do_remove_directory_recursive(const Wide_String& root)
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
-        std::vector<Pair<Rmlist, rocket::cow_wstring>> stack;
+        Cow_Vector<Pair<Rmlist, Wide_String>> stack;
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.
