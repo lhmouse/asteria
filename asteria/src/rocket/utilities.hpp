@@ -494,7 +494,7 @@ template<typename elementT, size_t countT> constexpr size_t countof(const elemen
     template<typename integerT, integerT valueT,
              typename firstT, typename... remainingT> struct integer_selector<integerT, valueT,
                                                                               firstT, remainingT...> : conditional<static_cast<firstT>(valueT) == valueT,
-                                                                                                                   enable_if<true, firstT>,
+                                                                                                                   enable_if<1, firstT>,
                                                                                                                    integer_selector<integerT, valueT, remainingT...>>::type
       {
       };

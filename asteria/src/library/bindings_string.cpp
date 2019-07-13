@@ -119,7 +119,7 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
           return tbegin;
         }
         // Build a table according to the Bad Character Rule.
-        Array<std::ptrdiff_t, 0x100> bcr_table;
+        std::array<std::ptrdiff_t, 0x100> bcr_table;
         for(std::size_t i = 0; i != 0x100; ++i) {
           bcr_table[i] = plen;
         }
@@ -261,17 +261,15 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
     template<typename IteratorT> Opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const G_string& set, bool match)
       {
         // Make a lookup table.
-        Array<bool, 256> table = { };
-        for(auto it = set.begin(); it != set.end(); ++it) {
-          table[(*it & 0xFF)] = true;
-        }
+        std::array<bool, 256> table;
+        table.fill(false);
+        std::for_each(set.begin(), set.end(), [&](char c) { table[(c & 0xFF)] = true;  });
         // Search the range.
-        for(auto it = rocket::move(begin); it != end; ++it) {
-          if(table[(*it & 0xFF)] == match) {
-            return rocket::move(it);
-          }
+        auto pos = std::find_if(begin, end, [&](char c) { return table[(c & 0xFF)] == match;  });
+        if(pos == end) {
+          return rocket::nullopt;
         }
-        return rocket::nullopt;
+        return rocket::move(pos);
       }
 
     }
@@ -715,7 +713,7 @@ G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lower
     text.reserve(data.size() * (2 + rdelim.length()));
     // These shall be operated in big-endian order.
     std::uint32_t reg = 0;
-    Array<char, 2> unit;
+    std::array<char, 2> unit;
     // Encode source data.
     std::size_t nread = 0;
     while(nread != data.size()) {
@@ -795,7 +793,7 @@ G_string std_string_base32_encode(const G_string& data, const Opt<G_boolean>& lo
     text.reserve((data.size() + 4) / 5 * 8);
     // These shall be operated in big-endian order.
     std::uint64_t reg = 0;
-    Array<char, 8> unit;
+    std::array<char, 8> unit;
     // Encode source data.
     std::size_t nread = 0;
     while(data.size() - nread >= 5) {
@@ -913,7 +911,7 @@ G_string std_string_base64_encode(const G_string& data)
     text.reserve((data.size() + 2) / 3 * 4);
     // These shall be operated in big-endian order.
     std::uint32_t reg = 0;
-    Array<char, 4> unit;
+    std::array<char, 4> unit;
     // Encode source data.
     std::size_t nread = 0;
     while(data.size() - nread >= 3) {
@@ -1090,7 +1088,7 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
     template<bool bigendT, typename WordT> bool do_pack_one_impl(G_string& text, const G_integer& value)
       {
         // Define temporary storage.
-        Array<char, sizeof(WordT)> stor_le;
+        std::array<char, sizeof(WordT)> stor_le;
         std::uint64_t word = static_cast<std::uint64_t>(value);
         // Write it in little-endian order.
         for(auto& byte : stor_le) {
@@ -1119,7 +1117,7 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
       {
         G_array values;
         // Define temporary storage.
-        Array<char, sizeof(WordT)> stor_be;
+        std::array<char, sizeof(WordT)> stor_be;
         std::uint64_t word = 0;
         // How many words will the result have?
         auto nwords = text.size() / stor_be.size();

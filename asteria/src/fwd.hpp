@@ -31,6 +31,7 @@
 #include "rocket/refcnt_object.hpp"
 #include "rocket/variant.hpp"
 #include "rocket/optional.hpp"
+#include "rocket/array.hpp"
 
 // Macros
 #define ASTERIA_SFINAE_CONSTRUCT(...)    ROCKET_ENABLE_IF(::std::is_constructible<ROCKET_CAR(__VA_ARGS__),  \
@@ -111,7 +112,7 @@ template<typename E, std::size_t k> using Static_Vector = rocket::static_vector<
 template<typename... P> using Variant = rocket::variant<P...>;
 template<typename T> using Opt = rocket::optional<T>;
 template<typename F, typename S> using Pair = std::pair<F, S>;
-template<typename E, std::size_t k> using Array = std::array<E, k>;
+template<typename E, std::size_t ...k> using Array = rocket::array<E, k...>;
 
 // Fundamental Types
 using G_null      = std::nullptr_t;

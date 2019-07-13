@@ -269,7 +269,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
       {
         return {{ Hexdigit<std::uint8_t(valueT / 16)>::value, Hexdigit<std::uint8_t(valueT % 16)>::value }};
       };
-    template<std::size_t... indicesT> constexpr Array<Array<char, 2>, 256> do_generate_hexdigits_impl(const std::index_sequence<indicesT...>&) noexcept
+    template<std::size_t... indicesT> constexpr Array<char, 256, 2> do_generate_hexdigits_impl(const std::index_sequence<indicesT...>&) noexcept
       {
         return {{ do_generate_hex_digits_for_byte<std::uint8_t(indicesT)>()... }};
       }
@@ -278,7 +278,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     template<bool bigendT, typename WordT> G_string& do_pdigits_impl(G_string& str, const WordT& ref)
       {
         static_assert(std::is_unsigned<WordT>::value, "??");
-        Array<std::uint8_t, sizeof(WordT)> stor_le;
+        std::array<std::uint8_t, sizeof(WordT)> stor_le;
         std::uint64_t word = static_cast<std::uint64_t>(ref);
         // Write the word in little-endian order.
         for(auto& byte : stor_le) {
@@ -306,7 +306,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const std::uint8_t* ptr)
       {
         static_assert(std::is_unsigned<WordT>::value, "??");
-        Array<std::uint8_t, sizeof(WordT)> stor_be;
+        std::array<std::uint8_t, sizeof(WordT)> stor_be;
         std::uint64_t word = 0;
         // Re-arrange bytes.
         if(bigendT) {
@@ -333,21 +333,14 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
     template<typename WordT> constexpr WordT do_rotl(const WordT& ref, std::size_t bits)
       {
-        static_assert(std::is_unsigned<WordT>::value, "??");
-        // This is correct even when `bits` is zero.
         constexpr auto width = sizeof(WordT) * 8;
         auto sum = (ref << (+bits) % width) | (ref >> (-bits) % width);
         return static_cast<WordT>(sum);
       }
 
-    template<typename WordT, std::size_t sizeT> inline Array<WordT, sizeT>& do_padd(Array<WordT, sizeT>& lhs, const Array<WordT, sizeT>& rhs)
+    template<typename WordT, std::size_t sizeT> inline void do_padd(std::array<WordT, sizeT>& lhs, const std::array<WordT, sizeT>& rhs)
       {
-        static_assert(std::is_unsigned<WordT>::value, "??");
-        // Accumulate each element in parallel.
-        for(std::size_t i = 0; i != sizeT; ++i) {
-          lhs[i] += rhs[i];
-        }
-        return lhs;
+        rocket::ranged_for(std::size_t(0), sizeT, [&](std::size_t i) { lhs[i] += rhs[i];  });
       }
 
     }
@@ -355,14 +348,14 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     namespace {
     namespace MD5 {
 
-    constexpr Array<std::uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
+    constexpr std::array<std::uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        Array<std::uint32_t, 4> m_regs;
+        std::array<std::uint32_t, 4> m_regs;
         std::uint64_t m_size;
-        Array<std::uint8_t, 64> m_chunk;
+        std::array<std::uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -641,14 +634,14 @@ G_string std_checksum_md5(const G_string& data)
     namespace {
     namespace SHA1 {
 
-    constexpr Array<std::uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
+    constexpr std::array<std::uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        Array<std::uint32_t, 5> m_regs;
+        std::array<std::uint32_t, 5> m_regs;
         std::uint64_t m_size;
-        Array<std::uint8_t, 64> m_chunk;
+        std::array<std::uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -660,17 +653,17 @@ G_string std_checksum_md5(const G_string& data)
       private:
         void do_consume_chunk(const std::uint8_t* p) noexcept
           {
-            Array<std::uint32_t, 80> w;
+            std::array<std::uint32_t, 80> w;
             std::uint32_t f, k;
             // https://en.wikipedia.org/wiki/SHA-1
             for(std::size_t i =  0; i < 16; ++i) {
               do_load_be(w[i], p + i * 4);
             }
             for(std::size_t i = 16; i < 32; ++i) {
-              w[i] = do_rotl(w[i - 3] ^ w[i -  8] ^ w[i - 14] ^ w[i - 16], 1);
+              w[i] = do_rotl(w[i-3] ^ w[i- 8] ^ w[i-14] ^ w[i-16], 1);
             }
             for(std::size_t i = 32; i < 80; ++i) {
-              w[i] = do_rotl(w[i - 6] ^ w[i - 16] ^ w[i - 28] ^ w[i - 32], 2);
+              w[i] = do_rotl(w[i-6] ^ w[i-16] ^ w[i-28] ^ w[i-32], 2);
             }
             auto update = [&](std::uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, auto& e)
               {
@@ -951,14 +944,14 @@ G_string std_checksum_sha1(const G_string& data)
     namespace {
     namespace SHA256 {
 
-    constexpr Array<std::uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
+    constexpr std::array<std::uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        Array<std::uint32_t, 8> m_regs;
+        std::array<std::uint32_t, 8> m_regs;
         std::uint64_t m_size;
-        Array<std::uint8_t, 64> m_chunk;
+        std::array<std::uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -970,18 +963,18 @@ G_string std_checksum_sha1(const G_string& data)
       private:
         void do_consume_chunk(const std::uint8_t* p) noexcept
           {
-            Array<std::uint32_t, 64> w;
+            std::array<std::uint32_t, 64> w;
             std::uint32_t s0, maj, t2, s1, ch, t1;
             // https://en.wikipedia.org/wiki/SHA-2
             for(std::size_t i =  0; i < 16; ++i) {
               do_load_be(w[i], p + i * 4);
             }
             for(std::size_t i = 16; i < 64; ++i) {
-              t1 = w[i - 15];
-              s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >> 3);
-              t2 = w[i - 2];
+              t1 = w[i-15];
+              s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >>  3);
+              t2 = w[i- 2];
               s1 = do_rotl(t2, 13) ^ do_rotl(t2, 15) ^ (t2 >> 10);
-              w[i] = w[i - 16] + w[i - 7] + s0 + s1;
+              w[i] = w[i-16] + w[i-7] + s0 + s1;
             }
             auto update = [&](std::uint32_t i, auto& a, auto& b, auto& c, auto& d, auto& e, auto& f, auto& g, auto& h, std::uint32_t k)
               {

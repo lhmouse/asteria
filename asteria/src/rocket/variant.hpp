@@ -37,7 +37,7 @@ template<typename... alternativesT> class variant;
       {
       };
     template<typename firstT,
-             typename... restT> struct type_getter<0, firstT, restT...> : enable_if<true, firstT>
+             typename... restT> struct type_getter<0, firstT, restT...> : enable_if<1, firstT>
       {
       };
 
