@@ -4,7 +4,6 @@
 #include "test_utilities.hpp"
 #include "../src/compiler/simple_source_file.hpp"
 #include "../src/runtime/global_context.hpp"
-#include "../src/rocket/cow_istringstream.hpp"
 
 using namespace Asteria;
 

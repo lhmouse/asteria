@@ -5,7 +5,7 @@
 #include "runtime/global_context.hpp"
 #include "runtime/exception.hpp"
 #include "library/bindings_chrono.hpp"
-#include "rocket/cow_istringstream.hpp"
+#include "../rocket/cow_istringstream.hpp"
 #include <iostream>
 #include <iomanip>
 

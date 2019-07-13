@@ -34,47 +34,47 @@ lib_LTLIBRARIES =  \
 
 pkginclude_rocketdir = ${pkgincludedir}/rocket
 pkginclude_rocket_HEADERS =  \
-  asteria/src/rocket/compiler.h  \
-  asteria/src/rocket/preprocessor_utilities.h  \
-  asteria/src/rocket/assert.hpp  \
-  asteria/src/rocket/throw.hpp  \
-  asteria/src/rocket/utilities.hpp  \
-  asteria/src/rocket/allocator_utilities.hpp  \
-  asteria/src/rocket/hash_table_utilities.hpp  \
-  asteria/src/rocket/variant.hpp  \
-  asteria/src/rocket/fill_iterator.hpp  \
-  asteria/src/rocket/transparent_comparators.hpp  \
-  asteria/src/rocket/unique_handle.hpp  \
-  asteria/src/rocket/reference_counter.hpp  \
-  asteria/src/rocket/cow_string.hpp  \
-  asteria/src/rocket/cow_stringbuf.hpp  \
-  asteria/src/rocket/cow_istringstream.hpp  \
-  asteria/src/rocket/cow_ostringstream.hpp  \
-  asteria/src/rocket/cow_stringstream.hpp  \
-  asteria/src/rocket/cow_vector.hpp  \
-  asteria/src/rocket/cow_hashmap.hpp  \
-  asteria/src/rocket/unique_ptr.hpp  \
-  asteria/src/rocket/refcnt_ptr.hpp  \
-  asteria/src/rocket/refcnt_object.hpp  \
-  asteria/src/rocket/prehashed_string.hpp  \
-  asteria/src/rocket/static_vector.hpp  \
-  asteria/src/rocket/optional.hpp  \
-  asteria/src/rocket/array.hpp
+  asteria/rocket/compiler.h  \
+  asteria/rocket/preprocessor_utilities.h  \
+  asteria/rocket/assert.hpp  \
+  asteria/rocket/throw.hpp  \
+  asteria/rocket/utilities.hpp  \
+  asteria/rocket/allocator_utilities.hpp  \
+  asteria/rocket/hash_table_utilities.hpp  \
+  asteria/rocket/variant.hpp  \
+  asteria/rocket/fill_iterator.hpp  \
+  asteria/rocket/transparent_comparators.hpp  \
+  asteria/rocket/unique_handle.hpp  \
+  asteria/rocket/reference_counter.hpp  \
+  asteria/rocket/cow_string.hpp  \
+  asteria/rocket/cow_stringbuf.hpp  \
+  asteria/rocket/cow_istringstream.hpp  \
+  asteria/rocket/cow_ostringstream.hpp  \
+  asteria/rocket/cow_stringstream.hpp  \
+  asteria/rocket/cow_vector.hpp  \
+  asteria/rocket/cow_hashmap.hpp  \
+  asteria/rocket/unique_ptr.hpp  \
+  asteria/rocket/refcnt_ptr.hpp  \
+  asteria/rocket/refcnt_object.hpp  \
+  asteria/rocket/prehashed_string.hpp  \
+  asteria/rocket/static_vector.hpp  \
+  asteria/rocket/optional.hpp  \
+  asteria/rocket/array.hpp
 
 pkginclude_rocket_platformdir = ${pkgincludedir}/rocket/platform
 pkginclude_rocket_platform_HEADERS =  \
-  asteria/src/rocket/platform/compiler_clang.h  \
-  asteria/src/rocket/platform/compiler_gcc.h  \
-  asteria/src/rocket/platform/compiler_msvc.h
+  asteria/rocket/platform/compiler_clang.h  \
+  asteria/rocket/platform/compiler_gcc.h  \
+  asteria/rocket/platform/compiler_msvc.h
 
 lib_librocket_la_SOURCES =  \
-  asteria/src/rocket/assert.cpp  \
-  asteria/src/rocket/throw.cpp  \
-  asteria/src/rocket/cow_string.cpp  \
-  asteria/src/rocket/cow_stringbuf.cpp  \
-  asteria/src/rocket/cow_istringstream.cpp  \
-  asteria/src/rocket/cow_ostringstream.cpp  \
-  asteria/src/rocket/cow_stringstream.cpp
+  asteria/rocket/assert.cpp  \
+  asteria/rocket/throw.cpp  \
+  asteria/rocket/cow_string.cpp  \
+  asteria/rocket/cow_stringbuf.cpp  \
+  asteria/rocket/cow_istringstream.cpp  \
+  asteria/rocket/cow_ostringstream.cpp  \
+  asteria/rocket/cow_stringstream.cpp
 
 lib_librocket_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp
