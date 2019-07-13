@@ -6,7 +6,6 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
-#include <bitset>
 
 namespace Asteria {
 
@@ -262,13 +261,13 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
     template<typename IteratorT> Opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const G_string& set, bool match)
       {
         // Make a lookup table.
-        std::bitset<256> table;
+        Array<bool, 256> table = { };
         for(auto it = set.begin(); it != set.end(); ++it) {
-          table.set(*it & 0xFF);
+          table[(*it & 0xFF)] = true;
         }
         // Search the range.
         for(auto it = rocket::move(begin); it != end; ++it) {
-          if(table.test(*it & 0xFF) == match) {
+          if(table[(*it & 0xFF)] == match) {
             return rocket::move(it);
           }
         }
