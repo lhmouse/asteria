@@ -675,7 +675,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             "\n"
             "  * Parses `time_str`, which is an ASCII string representing a time\n"
             "    point in the format `1970-01-01 00:00:00.000`, according to the\n"
-            "    ISO 8601 standard; the subsecond part is optional and may have\n"
+            "    ISO 8601 standard. The subsecond part is optional and may have\n"
             "    fewer or more digits. There may be leading or trailing spaces.\n"
             "\n"
             "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
