@@ -167,9 +167,63 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
 
     namespace {
 
-    // Define strings that are allocated statically for special time point values.
     constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000" };
     constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
+    constexpr char s_spaces[] = " \f\n\r\t\v";
+
+    template<typename InputT> bool do_rput(char*& p, InputT in, std::size_t width)
+      {
+        std::uint32_t reg = 0;
+        // Load the value, ignoring any overflows.
+        reg = static_cast<std::uint32_t>(in);
+        // Write digits backwards.
+        for(std::size_t i = 0; i < width; ++i) {
+          char c = static_cast<char>('0' + reg % 10);
+          reg /= 10;
+          p[i] = c;
+        }
+        // Succeed.
+        p += width;
+        return true;
+      }
+    bool do_rput(char*& p, char c)
+      {
+        // Write a character.
+        p[0] = c;
+        // Succeed.
+        p += 1;
+        return true;
+      }
+
+    template<typename OutputT> bool do_getx(const char*& p, OutputT& out, std::size_t width)
+      {
+        std::uint32_t reg = 0;
+        // Read digits forwards.
+        for(std::size_t i = 0; i < width; ++i) {
+          char c = p[i];
+          if((c < '0') || ('9' < c)) {
+            return false;
+          }
+          reg *= 10;
+          reg += static_cast<std::uint32_t>(c - '0');
+        }
+        // Save the value, ignoring any overflows.
+        out = static_cast<OutputT>(reg);
+        // Succeed.
+        p += width;
+        return true;
+      }
+    bool do_getx(const char*& p, std::initializer_list<char> accept)
+      {
+        // Read a character.
+        char c = p[0];
+        if(rocket::is_none_of(c, accept)) {
+          return false;
+        }
+        // Succeed.
+        p += 1;
+        return true;
+      }
 
     }
 
@@ -184,28 +238,9 @@ G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>
     if(time_point >= 253370764800000) {
       return rocket::sref(s_max_str[pms]);
     }
-    // Notice that the length of the result string is fixed.
-    G_string time_str(rocket::sref(s_min_str[pms]));
-    // Characters are written backwards, unlike `utc_parse()`.
-    auto wpos = time_str.mut_rbegin();
-    // Define functions to write each field.
-    // Be advised that these functions modify `wpos`.
-    auto write_int = [&](int value, unsigned width)
-      {
-        int r = value;
-        for(unsigned i = 0; i < width; ++i) {
-          int d = r % 10;
-          r /= 10;
-          *(wpos++) = static_cast<char>('0' + d);
-        }
-        return true;
-      };
-    auto write_sep = [&](char sep)
-      {
-        *(wpos++) = sep;
-        return true;
-      };
-    // Break the time point down.
+    // Write the string backwards.
+    char wbuf[32];
+    char* qwt = wbuf;
 #ifdef _WIN32
     // Convert the time point to Windows NT time.
     // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
@@ -218,20 +253,20 @@ G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>
     ::FileTimeToSystemTime(&ft, &st);
     // Write fields backwards.
     if(pms) {
-      write_int(st.wMilliseconds, 3);
-      write_sep('.');
+      do_rput(qwt, st.wMilliseconds, 3);
+      do_rput(qwt, '.');
     }
-    write_int(st.wSecond, 2);
-    write_sep(':');
-    write_int(st.wMinute, 2);
-    write_sep(':');
-    write_int(st.wHour, 2);
-    write_sep(' ');
-    write_int(st.wDay, 2);
-    write_sep('-');
-    write_int(st.wMonth, 2);
-    write_sep('-');
-    write_int(st.wYear, 4);
+    do_rput(qwt, st.wSecond, 2);
+    do_rput(qwt, ':');
+    do_rput(qwt, st.wMinute, 2);
+    do_rput(qwt, ':');
+    do_rput(qwt, st.wHour, 2);
+    do_rput(qwt, ' ');
+    do_rput(qwt, st.wDay, 2);
+    do_rput(qwt, '-');
+    do_rput(qwt, st.wMonth, 2);
+    do_rput(qwt, '-');
+    do_rput(qwt, st.wYear, 4);
 #else
     // Write fields backwards.
     // Get the second and millisecond parts.
@@ -239,88 +274,57 @@ G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>
     int ms = static_cast<int>((static_cast<std::uint64_t>(time_point) + 9223372036854775000) % 1000);
     ::time_t tp = static_cast<::time_t>((time_point - ms) / 1000);
     if(pms) {
-      write_int(ms, 3);
-      write_sep('.');
+      do_rput(qwt, ms, 3);
+      do_rput(qwt, '.');
     }
     ::tm tr;
     ::gmtime_r(&tp, &tr);
-    write_int(tr.tm_sec, 2);
-    write_sep(':');
-    write_int(tr.tm_min, 2);
-    write_sep(':');
-    write_int(tr.tm_hour, 2);
-    write_sep(' ');
-    write_int(tr.tm_mday, 2);
-    write_sep('-');
-    write_int(tr.tm_mon + 1, 2);
-    write_sep('-');
-    write_int(tr.tm_year + 1900, 4);
+    do_rput(qwt, tr.tm_sec, 2);
+    do_rput(qwt, ':');
+    do_rput(qwt, tr.tm_min, 2);
+    do_rput(qwt, ':');
+    do_rput(qwt, tr.tm_hour, 2);
+    do_rput(qwt, ' ');
+    do_rput(qwt, tr.tm_mday, 2);
+    do_rput(qwt, '-');
+    do_rput(qwt, tr.tm_mon + 1, 2);
+    do_rput(qwt, '-');
+    do_rput(qwt, tr.tm_year + 1900, 4);
 #endif
-    ROCKET_ASSERT(wpos == time_str.rend());
-    return time_str;
+    return G_string(std::make_reverse_iterator(qwt), std::make_reverse_iterator(wbuf));
   }
 
 Opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
   {
-    // Characters are read forwards, unlike `utc_format()`.
-    auto rpos = time_str.begin();
-    // Define functions to read each field.
-    // Be advised that these functions modify `rpos`.
-    auto read_int = [&](auto& out, int width)
-      {
-        // The first digit is required.
-        if(rpos == time_str.end()) {
-          return false;
-        }
-        int d = *rpos - '0';
-        if((d < 0) || (9 < d)) {
-          return false;
-        }
-        ++rpos;
-        // Parse as many digits as possible.
-        int r = d;
-        for(int i = 1; i < width; ++i) {
-          if(rpos == time_str.end()) {
-            break;
-          }
-          d = *rpos - '0';
-          if((d < 0) || (9 < d)) {
-            break;
-          }
-          ++rpos;
-          r = r * 10 + d;
-        }
-        out = static_cast<typename std::decay<decltype(out)>::type>(r);
-        return true;
-      };
-    auto read_sep = [&](auto&&... seps)
-      {
-        if(rpos == time_str.end()) {
-          return false;
-        }
-        if(rocket::is_none_of(*rpos, { seps... })) {
-          return false;
-        }
-        ++rpos;
-        return true;
-      };
+    auto n = time_str.find_first_not_of(s_spaces);
+    if(n == G_string::npos) {
+      // `time_str` consists of only spaces. Fail.
+      return rocket::nullopt;
+    }
+    const char* qrd = time_str.data() + n;
+    n = time_str.find_last_not_of(s_spaces) + 1 - n;
+    if(n < std::strlen(s_min_str[0])) {
+      // `time_str` contains too few characters. Fail.
+      return rocket::nullopt;
+    }
+    const char* qend = qrd + n;
     // The millisecond part is optional so we have to declare some intermediate results here.
-    G_integer time_point;
     bool succ;
+    G_integer time_point;
 #ifdef _WIN32
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::SYSTEMTIME st;
-    succ = read_int(st.wYear, 4) &&
-           read_sep('-', '/') &&
-           read_int(st.wMonth, 2) &&
-           read_sep('-', '/') &&
-           read_int(st.wDay, 2) &&
-           read_sep(' ', 'T') &&
-           read_int(st.wHour, 2) &&
-           read_sep(':') &&
-           read_int(st.wMinute, 2) &&
-           read_sep(':') &&
-           read_int(st.wSecond, 2);
+    succ = do_getx(qrd, st.wYear, 4) &&
+           do_getx(qrd, { '-', '/' }) &&
+           do_getx(qrd, st.wMonth, 2) &&
+           do_getx(qrd, { '-', '/' }) &&
+           do_getx(qrd, st.wDay, 2) &&
+           do_getx(qrd, { ' ', 'T' }) &&
+           do_getx(qrd, st.wHour, 2) &&
+           do_getx(qrd, { ':' }) &&
+           do_getx(qrd, st.wMinute, 2) &&
+           do_getx(qrd, { ':' }) &&
+           do_getx(qrd, st.wSecond, 2);
     if(!succ) {
       return rocket::nullopt;
     }
@@ -345,17 +349,17 @@ Opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
 #else
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::tm tr;
-    succ = read_int(tr.tm_year, 4) &&
-           read_sep('-', '/') &&
-           read_int(tr.tm_mon, 2) &&
-           read_sep('-', '/') &&
-           read_int(tr.tm_mday, 2) &&
-           read_sep(' ', 'T') &&
-           read_int(tr.tm_hour, 2) &&
-           read_sep(':') &&
-           read_int(tr.tm_min, 2) &&
-           read_sep(':') &&
-           read_int(tr.tm_sec, 2);
+    succ = do_getx(qrd, tr.tm_year, 4) &&
+           do_getx(qrd, { '-', '/' }) &&
+           do_getx(qrd, tr.tm_mon, 2) &&
+           do_getx(qrd, { '-', '/' }) &&
+           do_getx(qrd, tr.tm_mday, 2) &&
+           do_getx(qrd, { ' ', 'T' }) &&
+           do_getx(qrd, tr.tm_hour, 2) &&
+           do_getx(qrd, { ':' }) &&
+           do_getx(qrd, tr.tm_min, 2) &&
+           do_getx(qrd, { ':' }) &&
+           do_getx(qrd, tr.tm_sec, 2);
     if(!succ) {
       return rocket::nullopt;
     }
@@ -377,22 +381,21 @@ Opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
     time_point = static_cast<std::int64_t>(tp) * 1000;
 #endif
     // Parse the subsecond part if any.
-    if(read_sep('.', ',')) {
-      // Parse digits backwards.
-      // Use `rpos` as the loop counter.
+    if(do_getx(qrd, { '.', ',' })) {
+      // Parse milliseconds backwards.
       double r = 0;
-      for(auto kpos = time_str.rbegin(); rpos != time_str.end(); ++kpos) {
-        int d = *kpos - '0';
-        if((d < 0) || (9 < d)) {
+      while(qend > qrd) {
+        char c = *--qend;
+        if((c < '0') || ('9' < c)) {
           return rocket::nullopt;
         }
-        ++rpos;
-        r = (r + d) / 10;
+        r += c - '0';
+        r /= 10;
       }
-      time_point += std::llround(r * 1000);
+      time_point += std::lround(r * 1000);
     }
-    // Reject invalid characters in the end of `time_str`.
-    if(rpos != time_str.end()) {
+    if(qrd != qend) {
+      // Reject invalid characters at the end of `time_str`.
       return rocket::nullopt;
     }
     return time_point;
@@ -673,8 +676,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
             "  * Parses `time_str`, which is an ASCII string representing a time\n"
             "    point in the format `1970-01-01 00:00:00.000`, according to the\n"
             "    ISO 8601 standard; the subsecond part is optional and may have\n"
-            "    fewer or more digits. There shall be no leading or trailing\n"
-            "    spaces.\n"
+            "    fewer or more digits. There may be leading or trailing spaces.\n"
             "\n"
             "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
             "    if the time string has been parsed successfully, or `null`\n"
