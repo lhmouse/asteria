@@ -7,7 +7,6 @@
 #include "simple_binding_wrapper.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
-#include <random>
 
 namespace Asteria {
 
@@ -616,24 +615,24 @@ G_array std_array_shuffle(const G_array& data, const Opt<G_integer>& seed)
       return data;
     }
     // Create a linear congruential generator.
-    // The template arguments are the same as glibc's `rand48_r()` function.
-    //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
-    std::linear_congruential_engine<std::uint64_t,
-                                    0x5DEECE66D, 0xB,
-                                    0x1000000000000> prng(seed ? static_cast<std::uint64_t>(*seed)
-                                                               : generate_random_seed());
-    // Define the range to be shuffled.
-    G_array res = data;
-    auto rbase = res.mut_begin();
+    auto lcgst = seed ? static_cast<std::uint64_t>(*seed) : generate_random_seed();
     // Shuffle elements.
-    for(auto it = rbase; it != res.end(); ++it) {
+    G_array res = data;
+    for(std::size_t i = 0; i < res.size(); ++i) {
+      // These arguments are the same as glibc's `drand48()` function.
+      //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
+      lcgst *= 0x5DEECE66D;     // a
+      lcgst += 0xB;             // c
+      lcgst &= 0xFFFFFFFFFFFF;  // m
       // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
       // ratio <= [0.0, 1.0)
-      auto ratio = static_cast<double>(static_cast<std::int64_t>(prng())) / 0x1p48;
-      // offset <= [0, res.size())
-      auto offset = static_cast<std::ptrdiff_t>(ratio * static_cast<double>(res.ssize()));
-      // Swap `*it` with the element at `offset`.
-      std::iter_swap(it, rbase + offset);
+      auto ratio = static_cast<double>(static_cast<std::int64_t>(lcgst)) / 0x1p48;
+      // k <= [0, res.size())
+      auto k = static_cast<std::size_t>(static_cast<std::int64_t>(ratio * static_cast<double>(data.ssize())));
+      if(k == i) {
+        continue;
+      }
+      swap(res.mut(k), res.mut(i));
     }
     return res;
   }

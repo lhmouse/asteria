@@ -9,7 +9,6 @@
 #include "../syntax/statement.hpp"
 #include "../syntax/xprunit.hpp"
 #include "../utilities.hpp"
-#include <vector>
 
 namespace Asteria {
 
@@ -1912,7 +1911,7 @@ namespace Asteria {
         if(!qelem) {
           return false;
         }
-        std::vector<Infix_Element> stack;
+        Cow_Vector<Infix_Element> stack;
         stack.emplace_back(rocket::move(*qelem));
         for(;;) {
           auto qnext = do_accept_infix_operator_opt(tstrm);
@@ -1928,19 +1927,19 @@ namespace Asteria {
             // Collapse elements that have no lower precedence and group from left to right.
             auto preced_next = qnext->tell_precedence();
             while((stack.size() >= 2) && (stack.back().tell_precedence() <= preced_next)) {
-              qelem = rocket::move(stack.back());
+              qelem = rocket::move(stack.mut_back());
               stack.pop_back();
-              qelem->extract(stack.back().open_junction());
+              qelem->extract(stack.mut_back().open_junction());
             }
           }
           stack.emplace_back(rocket::move(*qnext));
         }
         while(stack.size() >= 2) {
-          qelem = rocket::move(stack.back());
+          qelem = rocket::move(stack.mut_back());
           stack.pop_back();
-          qelem->extract(stack.back().open_junction());
+          qelem->extract(stack.mut_back().open_junction());
         }
-        stack.back().extract(units);
+        stack.mut_back().extract(units);
         return true;
       }
 

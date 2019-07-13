@@ -140,8 +140,7 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     // Terminate the message with a line feed.
     do_append_str(str, '\n');
     // Write the string now.
-    std::cerr << str << std::flush;
-    return !!std::cerr;
+    return !!std::cerr.write(str.data(), str.ssize()).fail();
   }
 
 Runtime_Error::~Runtime_Error()

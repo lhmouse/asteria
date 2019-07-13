@@ -9,7 +9,6 @@
 #include "../runtime/collector.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../utilities.hpp"
-#include <vector>
 
 namespace Asteria {
 
@@ -419,7 +418,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
       {
         Value value;
         // Implement a recursive descent parser without recursion.
-        std::vector<Context> stack;
+        Cow_Vector<Context> stack;
       z:
         for(;;) {
           // Loop 1: Accept a leaf value. No other things such as closed brackets are allowed.
@@ -505,7 +504,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
           // Loop 2: Insert the value into its parent array or object.
           if(stack.back().index() == 0) {
             // Append the value to its parent array.
-            auto& ctxa = stack.back().as<0>();
+            auto& ctxa = stack.mut_back().as<0>();
             ctxa.array.emplace_back(rocket::move(value));
             // Look for the next element.
             auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
@@ -526,7 +525,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
           }
           else {
             // Insert the value into its parent object.
-            auto& ctxo = stack.back().as<1>();
+            auto& ctxo = stack.mut_back().as<1>();
             ctxo.object.insert_or_assign(rocket::move(ctxo.key), rocket::move(value));
             // Look for the next element.
             auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });

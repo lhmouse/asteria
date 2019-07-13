@@ -7,7 +7,6 @@
 #include "simple_binding_wrapper.hpp"
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
-#include <vector>
 #ifdef _WIN32
 #  include <windows.h>  // ::CreateFile(), ::CloseHandle(), ::GetFileInformationByHandleEx(),
                         // ::FindFirstFile(), ::FindNextFile(), ::CreateDirectory(), ::RemoveDirectory(),
@@ -310,7 +309,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.
-          auto pair = rocket::move(stack.back());
+          auto pair = rocket::move(stack.mut_back());
           stack.pop_back();
           auto& wpath = pair.second;
           // Do something.
@@ -374,11 +373,11 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
-        std::vector<Pair<Rmlist, Cow_String>> stack;
+        Cow_Vector<Pair<Rmlist, Cow_String>> stack;
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.
-          auto pair = rocket::move(stack.back());
+          auto pair = rocket::move(stack.mut_back());
           stack.pop_back();
           auto& path = pair.second;
           // Do something.
@@ -924,11 +923,11 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
       }
     }
     // Allocate the I/O buffer.
-    std::vector<char> buff;
+    G_string buff;
     buff.resize(static_cast<std::size_t>(stb_old.st_blksize));
     for(;;) {
       // Read some bytes.
-      ::ssize_t nread = ::read(hf_old, buff.data(), buff.size());
+      ::ssize_t nread = ::read(hf_old, buff.mut_data(), buff.size());
       if(nread < 0) {
         return false;
       }
@@ -938,7 +937,7 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
       // Write them all.
       ::ssize_t ntotal = 0;
       do {
-        ::ssize_t nwritten = ::write(hf_new, buff.data() + ntotal, static_cast<std::size_t>(nread - ntotal));
+        ::ssize_t nwritten = ::write(hf_new, buff.mut_data() + ntotal, static_cast<std::size_t>(nread - ntotal));
         if(nwritten < 0) {
           return false;
         }
