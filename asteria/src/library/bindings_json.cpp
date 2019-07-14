@@ -403,22 +403,14 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    struct S_context_array
-      {
-        G_array array;
-      };
-    struct S_context_object
-      {
-        G_object object;
-        G_string key;
-      };
-    using Context = Variant<S_context_array, S_context_object>;
-
     Opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
       {
         Value value;
         // Implement a recursive descent parser without recursion.
-        Cow_Vector<Context> stack;
+        // Usage of `stack`:
+        // 1. If the top is an `array`, the accepted value shall be appended to it.
+        // 2. If the top is an `string`, it is the key of the accepted value which shall be inserted into the `object` beneath it.
+        Cow_Vector<Value> stack;
       z:
         for(;;) {
           // Loop 1: Accept a leaf value. No other things such as closed brackets are allowed.
@@ -475,8 +467,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
               break;
             }
             // Descend into the new array.
-            S_context_array ctxa = { rocket::clear };
-            stack.emplace_back(rocket::move(ctxa));
+            stack.emplace_back(G_array());
           }
           else {
             // An open brace has been accepted.
@@ -496,16 +487,16 @@ G_string std_json_format(const Value& value, const G_integer& indent)
               return rocket::nullopt;
             }
             // Descend into a new object.
-            S_context_object ctxo = { rocket::clear, rocket::move(*qkey) };
-            stack.emplace_back(rocket::move(ctxo));
+            stack.emplace_back(G_object());
+            stack.emplace_back(rocket::move(*qkey));
           }
         }
         while(!stack.empty()) {
           // Loop 2: Insert the value into its parent array or object.
-          if(stack.back().index() == 0) {
+          if(stack.back().is_array()) {
             // Append the value to its parent array.
-            auto& ctxa = stack.mut_back().as<0>();
-            ctxa.array.emplace_back(rocket::move(value));
+            auto& array = stack.mut_back().mut_array();
+            array.emplace_back(rocket::move(value));
             // Look for the next element.
             auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
             if(!kpunct) {
@@ -520,13 +511,14 @@ G_string std_json_format(const Value& value, const G_integer& indent)
               }
             }
             // Pop the array.
-            value = rocket::move(ctxa.array);
+            value = rocket::move(array);
             stack.pop_back();
           }
           else {
             // Insert the value into its parent object.
-            auto& ctxo = stack.mut_back().as<1>();
-            ctxo.object.insert_or_assign(rocket::move(ctxo.key), rocket::move(value));
+            auto& object = stack.mut_rbegin()[1].mut_object();
+            object.insert_or_assign(rocket::move(stack.mut_back().mut_string()), rocket::move(value));
+            stack.pop_back();
             // Look for the next element.
             auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });
             if(!kpunct) {
@@ -545,13 +537,13 @@ G_string std_json_format(const Value& value, const G_integer& indent)
                 if(!kpunct) {
                   return rocket::nullopt;
                 }
-                ctxo.key = rocket::move(*qkey);
+                stack.emplace_back(rocket::move(*qkey));
                 // The next value is expected to follow the colon.
                 goto z;
               }
             }
             // Pop the object.
-            value = rocket::move(ctxo.object);
+            value = rocket::move(object);
             stack.pop_back();
           }
         }
