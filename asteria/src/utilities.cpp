@@ -8,7 +8,7 @@
 #else
 #  include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #endif
-#include <cstdio>  // std::fputs()
+#include <cstdio>  // std::fwrite()
 
 namespace Asteria {
 
@@ -139,8 +139,8 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     };
     // Terminate the message with a line feed.
     do_append_str(str, '\n');
-    // Write the string now.
-    return std::fputs(str.c_str(), stderr) >= 0;
+    // Write the string now. Note that the string cannot be empty.
+    return std::fwrite(str.data(), str.size(), 1, stderr) == 1;
   }
 
 Runtime_Error::~Runtime_Error()
