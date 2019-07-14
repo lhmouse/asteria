@@ -3,12 +3,12 @@
 
 #include "precompiled.hpp"
 #include "utilities.hpp"
-#include <iostream>
 #ifdef _WIN32
 #  include <windows.h>  // ::SYSTEMTIME, ::GetSystemTime()
 #else
 #  include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #endif
+#include <cstdio>  // std::fputs()
 
 namespace Asteria {
 
@@ -36,13 +36,13 @@ bool are_debug_logs_enabled() noexcept
 
     namespace {
 
-    inline void do_ltoa_fixed(rocket::cow_string& str, long num, unsigned width)
+    void do_ltoa_fixed(rocket::cow_string& str, long num, std::size_t width)
       {
         std::array<char, 64> sbuf;
         auto spos = sbuf.end();
         // Write digits from the right to the left.
         long reg = num;
-        for(unsigned i = 0; i < width; ++i) {
+        for(std::size_t i = 0; i < width; ++i) {
           long d = reg % 10;
           reg /= 10;
           *--spos = static_cast<char>('0' + d);
@@ -140,7 +140,7 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     // Terminate the message with a line feed.
     do_append_str(str, '\n');
     // Write the string now.
-    return !!std::cerr.write(str.data(), str.ssize()).fail();
+    return std::fputs(str.c_str(), stderr) >= 0;
   }
 
 Runtime_Error::~Runtime_Error()
@@ -179,18 +179,18 @@ bool utf8_encode(char*& pos, char32_t cp)
     if(cp < 0x800) {
       encode_one( 6, 0x1F);
       encode_one( 0, 0x3F);
-      return true;
     }
-    if(cp < 0x10000) {
+    else if(cp < 0x10000) {
       encode_one(12, 0x0F);
       encode_one( 6, 0x3F);
       encode_one( 0, 0x3F);
-      return true;
     }
-    encode_one(18, 0x07);
-    encode_one(12, 0x3F);
-    encode_one( 6, 0x3F);
-    encode_one( 0, 0x3F);
+    else {
+      encode_one(18, 0x07);
+      encode_one(12, 0x3F);
+      encode_one( 6, 0x3F);
+      encode_one( 0, 0x3F);
+    }
     return true;
   }
 
