@@ -377,9 +377,8 @@ namespace Asteria {
               return status;
             }
           }
-          goto z;
         }
-        if(range_value.is_object()) {
+        else if(range_value.is_object()) {
           const auto& object = range_value.as_object();
           for(auto it = object.begin(); it != object.end(); ++it) {
             // Create a fresh context for the loop body.
@@ -400,10 +399,10 @@ namespace Asteria {
               return status;
             }
           }
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", range_value.gtype_name(), "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", range_value.gtype_name(), "`.");
+        }
         return Air_Node::status_next;
       }
 
