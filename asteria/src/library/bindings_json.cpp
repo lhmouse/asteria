@@ -65,8 +65,10 @@ namespace Asteria {
         std::ostream& break_line(std::ostream& cstrm) const override
           {
             cstrm << std::endl;
-            cstrm << this->m_cur;
-            return cstrm;
+            if(this->m_cur.empty()) {
+              return cstrm;
+            }
+            return cstrm << this->m_cur;
           }
         void increment_level() override
           {
@@ -81,11 +83,11 @@ namespace Asteria {
     class Indenter_spaces : public Indenter
       {
       private:
-        std::size_t m_add;
-        std::size_t m_cur;
+        G_integer m_add;
+        G_integer m_cur;
 
       public:
-        explicit Indenter_spaces(std::size_t add)
+        explicit Indenter_spaces(G_integer add)
           : m_add(add), m_cur()
           {
           }
@@ -94,10 +96,10 @@ namespace Asteria {
         std::ostream& break_line(std::ostream& cstrm) const override
           {
             cstrm << std::endl;
-            if(this->m_cur != 0) {
-              cstrm << std::setfill(' ') << std::setw(static_cast<int>(std::min<std::size_t>(this->m_cur, INT_MAX))) << ' ';
+            if(this->m_cur == 0) {
+              return cstrm;
             }
-            return cstrm;
+            return cstrm.fill(' '), cstrm.width(this->m_cur), cstrm << ' ';
           }
         void increment_level() override
           {
@@ -155,7 +157,7 @@ namespace Asteria {
             char16_t* pos = ustr;
             utf16_encode(pos, cp);
             cstrm << std::hex << std::uppercase << std::setfill('0');
-            std::for_each(ustr, pos, [&](unsigned uch) { cstrm << "\\u" << std::setw(4) << uch;  });
+            std::for_each(ustr, pos, [&](char16_t uch) { cstrm << "\\u" << std::setw(4) << uch;  });
             break;
           }
         }
@@ -279,7 +281,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
       do_format(cstrm, value, Indenter_none());
     }
     else {
-      do_format(cstrm, value, Indenter_spaces(static_cast<std::size_t>(rocket::min(indent, 10))));
+      do_format(cstrm, value, Indenter_spaces(rocket::min(indent, 10)));
     }
     return cstrm.extract_string();
   }
@@ -384,7 +386,6 @@ G_string std_json_format(const Value& value, const G_integer& indent)
 
     Opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
       {
-        // Just accept a scalar value which is never recursive.
         auto qnum = do_accept_number_opt(tstrm);
         if(qnum) {
           // Accept a `Number`.
@@ -500,11 +501,11 @@ G_string std_json_format(const Value& value, const G_integer& indent)
           }
           value = rocket::move(*qvalue);
         }
+        // Loop 2: Insert the value into its parent array or object.
         while(!stack.empty()) {
-          // Loop 2: Insert the value into its parent array or object.
           if(stack.back().index() == 0) {
-            // Append the value to its parent array.
             auto& ctxa = stack.mut_back().as<0>();
+            // Append the value to its parent array.
             ctxa.array.emplace_back(rocket::move(value));
             // Look for the next element.
             kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
@@ -521,11 +522,10 @@ G_string std_json_format(const Value& value, const G_integer& indent)
             }
             // Pop the array.
             value = rocket::move(ctxa.array);
-            stack.pop_back();
           }
           else {
-            // Insert the value into its parent object.
             auto& ctxo = stack.mut_back().as<1>();
+            // Insert the value into its parent object.
             ctxo.object.insert_or_assign(rocket::move(ctxo.key), rocket::move(value));
             // Look for the next element.
             kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });
@@ -552,8 +552,8 @@ G_string std_json_format(const Value& value, const G_integer& indent)
             }
             // Pop the object.
             value = rocket::move(ctxo.object);
-            stack.pop_back();
           }
+          stack.pop_back();
         }
         return rocket::move(value);
       }
