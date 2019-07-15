@@ -382,6 +382,43 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
+    Opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
+      {
+        // Just accept a scalar value which is never recursive.
+        auto qnum = do_accept_number_opt(tstrm);
+        if(qnum) {
+          // Accept a `Number`.
+          return G_real(*qnum);
+        }
+        auto qstr = do_accept_string_opt(tstrm);
+        if(qstr) {
+          // Accept a `String`.
+          return G_string(rocket::move(*qstr));
+        }
+        qstr = do_accept_identifier_opt(tstrm, { "true", "false", "Infinity", "NaN", "null" });
+        if(qstr) {
+          if(qstr->front() == 't') {
+            // Accept a `Boolean` of value `true`.
+            return G_boolean(true);
+          }
+          if(qstr->front() == 'f') {
+            // Accept a `Boolean` of value `false`.
+            return G_boolean(false);
+          }
+          if(qstr->front() == 'I') {
+            // Accept a `Number` of value `Infinity`.
+            return G_real(INFINITY);
+          }
+          if(qstr->front() == 'N') {
+            // Accept a `Number` of value `NaN`.
+            return G_real(NAN);
+          }
+          // Accept an explicit `null`.
+          return G_null();
+        }
+        return rocket::nullopt;
+      }
+
     Opt<G_string> do_accept_key_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
@@ -403,89 +440,41 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    struct S_context_array
+    struct S_xparse_array
       {
         G_array array;
       };
-    struct S_context_object
+    struct S_xparse_object
       {
         G_object object;
         G_string key;
       };
-    using Context = Variant<S_context_array, S_context_object>;
+    using Xparse = Variant<S_xparse_array, S_xparse_object>;
 
     Opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
       {
         Value value;
         // Implement a recursive descent parser without recursion.
-        Cow_Vector<Context> stack;
+        Cow_Vector<Xparse> stack;
       z:
-        for(;;) {
-          // Loop 1: Accept a leaf value. No other things such as closed brackets are allowed.
-          auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op, Token::punctuator_brace_op });
+        // Loop 1: Accept a leaf value. No other things such as closed brackets are allowed.
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op, Token::punctuator_brace_op });
+        if(kpunct == Token::punctuator_bracket_op) {
+          // An open bracket has been accepted.
+          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
           if(!kpunct) {
-            // Just accept a scalar value which is never recursive.
-            auto qnum = do_accept_number_opt(tstrm);
-            if(qnum) {
-              // Accept a `Number`.
-              value = G_real(*qnum);
-              break;
-            }
-            auto qstr = do_accept_string_opt(tstrm);
-            if(qstr) {
-              // Accept a `String`.
-              value = G_string(rocket::move(*qstr));
-              break;
-            }
-            qstr = do_accept_identifier_opt(tstrm, { "true", "false", "Infinity", "NaN", "null" });
-            if(!qstr) {
-              // Fail.
-              return rocket::nullopt;
-            }
-            if(qstr->front() == 't') {
-              // Accept a `Boolean` of value `true`.
-              value = G_boolean(true);
-              break;
-            }
-            if(qstr->front() == 'f') {
-              // Accept a `Boolean` of value `false`.
-              value = G_boolean(false);
-              break;
-            }
-            if(qstr->front() == 'I') {
-              // Accept a `Number` of value `Infinity`.
-              value = G_real(INFINITY);
-              break;
-            }
-            if(qstr->front() == 'N') {
-              // Accept a `Number` of value `NaN`.
-              value = G_real(NAN);
-              break;
-            }
-            // Accept an explicit `null`.
-            value = G_null();
-            break;
-          }
-          if(*kpunct == Token::punctuator_bracket_op) {
-            // An open bracket has been accepted.
-            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
-            if(kpunct) {
-              // Accept an empty array.
-              value = G_array();
-              break;
-            }
             // Descend into the new array.
-            S_context_array ctxa = { rocket::clear };
+            S_xparse_array ctxa = { rocket::clear };
             stack.emplace_back(rocket::move(ctxa));
+            goto z;
           }
-          else {
-            // An open brace has been accepted.
-            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
-            if(kpunct) {
-              // Accept an empty object.
-              value = G_object();
-              break;
-            }
+          // Accept an empty array.
+          value = G_array();
+        }
+        else if(kpunct == Token::punctuator_brace_op) {
+          // An open brace has been accepted.
+          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+          if(!kpunct) {
             // A key followed by a colon is expected.
             auto qkey = do_accept_key_opt(tstrm);
             if(!qkey) {
@@ -496,9 +485,20 @@ G_string std_json_format(const Value& value, const G_integer& indent)
               return rocket::nullopt;
             }
             // Descend into a new object.
-            S_context_object ctxo = { rocket::clear, rocket::move(*qkey) };
+            S_xparse_object ctxo = { rocket::clear, rocket::move(*qkey) };
             stack.emplace_back(rocket::move(ctxo));
+            goto z;
           }
+          // Accept an empty object.
+          value = G_object();
+        }
+        else {
+          // Just accept a scalar value which is never recursive.
+          auto qvalue = do_accept_scalar_opt(tstrm);
+          if(!qvalue) {
+            return rocket::nullopt;
+          }
+          value = rocket::move(*qvalue);
         }
         while(!stack.empty()) {
           // Loop 2: Insert the value into its parent array or object.
@@ -507,7 +507,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
             auto& ctxa = stack.mut_back().as<0>();
             ctxa.array.emplace_back(rocket::move(value));
             // Look for the next element.
-            auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
+            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
             if(!kpunct) {
               return rocket::nullopt;
             }
@@ -528,7 +528,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
             auto& ctxo = stack.mut_back().as<1>();
             ctxo.object.insert_or_assign(rocket::move(ctxo.key), rocket::move(value));
             // Look for the next element.
-            auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });
+            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });
             if(!kpunct) {
               return rocket::nullopt;
             }
