@@ -165,95 +165,149 @@ namespace Asteria {
         return cstrm;
       }
 
-    bool do_can_format_pair(const G_object::value_type& pair)
+    G_object::const_iterator do_find_uncensored(const G_object& object, G_object::const_iterator from)
       {
-        return pair.second.is_null() || pair.second.is_boolean() || pair.second.is_integer() || pair.second.is_real() ||
-               pair.second.is_string() || pair.second.is_array() || pair.second.is_object();
+        return std::find_if(from, object.end(),
+                            [](const auto& pair) { return pair.second.is_boolean() || pair.second.is_integer() || pair.second.is_real() ||
+                                                          pair.second.is_string() || pair.second.is_array() || pair.second.is_object() ||
+                                                          pair.second.is_null();  });
       }
 
-    std::ostream& do_format(std::ostream& cstrm, const Value& value, Indenter& indent)
+    std::ostream& do_format_scalar(std::ostream& cstrm, const Value& value)
       {
-        if(value.is_null()) {
-          // Write `"null"`.
-          return cstrm << "null";
-        }
-        if(value.is_boolean()) {
-          // Write `"true"` or `"false"`.
+        if(value.is_boolean()){
+          // Write `true` or `false`.
           return cstrm << std::boolalpha << std::nouppercase << value.as_boolean();
         }
         if(value.is_integer()) {
           // Write the integer in decimal.
           return cstrm << std::dec << value.as_integer();
         }
-        if(value.is_real()) {
-          // Infinities and NaNs are censored to null. All other values are safe.
-          if(!std::isfinite(value.as_real())) {
-            return cstrm << "null";
-          }
+        if(value.is_real() && std::isfinite(value.as_real())) {
+          // Write the real number in decimal.
           return cstrm << std::defaultfloat << std::nouppercase << std::setprecision(17) << value.as_real();
         }
         if(value.is_string()) {
-          // All values are safe.
+          // Write the quoted string.
           return do_quote_string(cstrm, value.as_string());
         }
-        if(value.is_array()) {
-          // All values are safe.
-          const auto& altr = value.as_array();
-          cstrm << '[';
-          auto qcur = altr.begin();
-          if(qcur != altr.end()) {
-            // Indent the body.
-            indent.increment_level();
-            indent.break_line(cstrm);
-            // Write elements.
-            for(;;) {
-              do_format(cstrm, *qcur, indent);
-              if(++qcur == altr.end()) {
-                break;
-              }
-              cstrm << ',';
-              indent.break_line(cstrm);
-            }
-            // Unindent the body.
-            indent.decrement_level();
-            indent.break_line(cstrm);
-          }
-          cstrm << ']';
-          return cstrm;
-        }
-        if(value.is_object()) {
-          // All values are safe.
-          const auto& altr = value.as_object();
-          cstrm << '{';
-          auto qcur = std::find_if(altr.begin(), altr.end(), do_can_format_pair);
-          if(qcur != altr.end()) {
-            // Indent the body.
-            indent.increment_level();
-            indent.break_line(cstrm);
-            // Write key-value pairs.
-            for(;;) {
-              do_quote_string(cstrm, qcur->first);
-              cstrm << ':';
-              do_format(cstrm, qcur->second, indent);
-              if((qcur = std::find_if(++qcur, altr.end(), do_can_format_pair)) == altr.end()) {
-                break;
-              }
-              cstrm << ',';
-              indent.break_line(cstrm);
-            }
-            // Unindent the body.
-            indent.decrement_level();
-            indent.break_line(cstrm);
-          }
-          cstrm << '}';
-          return cstrm;
-        }
-        // Functions and opaque values are discarded.
+        // Anything else is censored to `null`.
         return cstrm << "null";
       }
-    std::ostream& do_format(std::ostream& cstrm, const Value& value, Indenter&& indent)
+
+    struct S_xformat_array
       {
-        return do_format(cstrm, value, indent);
+        std::reference_wrapper<const G_array> array;
+        G_array::const_iterator cur;
+      };
+    struct S_xformat_object
+      {
+        std::reference_wrapper<const G_object> object;
+        G_object::const_iterator cur;
+      };
+    using Xformat = Variant<S_xformat_array, S_xformat_object>;
+
+    G_string do_format_nonrecursive(const Value& value, Indenter& indent)
+      {
+        Cow_osstream cstrm;
+        // Transform recursion to iteration using a handwritten stack.
+        auto qvalue = std::addressof(value);
+        Cow_Vector<Xformat> stack;
+      z:
+        // Loop 1: Find a leaf value. `qvalue` must always point to a valid value here.
+        if(qvalue->is_array()){
+          const auto& array = qvalue->as_array();
+          // Open an array.
+          cstrm << '[';
+          auto cur = array.begin();
+          if(cur != array.end()) {
+            // Indent the body.
+            indent.increment_level();
+            indent.break_line(cstrm);
+            // Decend into the array.
+            S_xformat_array ctxa = { std::ref(array), cur };
+            stack.emplace_back(rocket::move(ctxa));
+            qvalue = std::addressof(*cur);
+            goto z;
+          }
+          // Write an empty array.
+          cstrm << ']';
+        }
+        else if(qvalue->is_object()) {
+          const auto& object = qvalue->as_object();
+          // Open an object.
+          cstrm << '{';
+          auto cur = do_find_uncensored(object, object.begin());
+          if(cur != object.end()) {
+            // Indent the body.
+            indent.increment_level();
+            indent.break_line(cstrm);
+            // Write the key followed by a colon.
+            do_quote_string(cstrm, cur->first);
+            cstrm << ':';
+            // Decend into the object.
+            S_xformat_object ctxo = { std::ref(object), cur };
+            stack.emplace_back(rocket::move(ctxo));
+            qvalue = std::addressof(cur->second);
+            goto z;
+          }
+          // Write an empty object.
+          cstrm << '}';
+        }
+        else {
+          // Just write a scalar value which is never recursive.
+          do_format_scalar(cstrm, *qvalue);
+        }
+        // Loop 2: Advance to the next element if any.
+        while(!stack.empty()) {
+          if(stack.back().index() == 0) {
+            auto& ctxa = stack.mut_back().as<0>();
+            // Advance to the next element.
+            auto cur = ++(ctxa.cur);
+            if(cur != ctxa.array.get().end()) {
+              // Add a separator between elements.
+              cstrm << ',';
+              indent.break_line(cstrm);
+              // Format the next element.
+              ctxa.cur = cur;
+              qvalue = std::addressof(*cur);
+              goto z;
+            }
+            // Unindent the body.
+            indent.decrement_level();
+            indent.break_line(cstrm);
+            // Finish this array.
+            cstrm << ']';
+          }
+          else {
+            auto& ctxo = stack.mut_back().as<1>();
+            // Advance to the next key-value pair.
+            auto cur = do_find_uncensored(ctxo.object, ++(ctxo.cur));
+            if(cur != ctxo.object.get().end()) {
+              // Add a separator between elements.
+              cstrm << ',';
+              indent.break_line(cstrm);
+              // Write the key followed by a colon.
+              do_quote_string(cstrm, cur->first);
+              cstrm << ':';
+              // Format the next value.
+              ctxo.cur = cur;
+              qvalue = std::addressof(cur->second);
+              goto z;
+            }
+            // Unindent the body.
+            indent.decrement_level();
+            indent.break_line(cstrm);
+            // Finish this array.
+            cstrm << '}';
+          }
+          stack.pop_back();
+        }
+        return cstrm.extract_string();
+      }
+    G_string do_format_nonrecursive(const Value& value, Indenter&& indent)
+      {
+        return do_format_nonrecursive(value, indent);
       }
 
     }
@@ -261,29 +315,15 @@ namespace Asteria {
 G_string std_json_format(const Value& value, const Opt<G_string>& indent)
   {
     // No line break is inserted if `indent` is null or empty.
-    Cow_osstream cstrm;
-    cstrm.imbue(std::locale::classic());
-    if(!indent || indent->empty()) {
-      do_format(cstrm, value, Indenter_none());
-    }
-    else {
-      do_format(cstrm, value, Indenter_string(*indent));
-    }
-    return cstrm.extract_string();
+    return (!indent || indent->empty()) ? do_format_nonrecursive(value, Indenter_none())
+                                        : do_format_nonrecursive(value, Indenter_string(*indent));
   }
 
 G_string std_json_format(const Value& value, const G_integer& indent)
   {
     // No line break is inserted if `indent` is non-positive.
-    Cow_osstream cstrm;
-    cstrm.imbue(std::locale::classic());
-    if(indent <= 0) {
-      do_format(cstrm, value, Indenter_none());
-    }
-    else {
-      do_format(cstrm, value, Indenter_spaces(rocket::min(indent, 10)));
-    }
-    return cstrm.extract_string();
+    return (indent <= 0) ? do_format_nonrecursive(value, Indenter_none())
+                         : do_format_nonrecursive(value, Indenter_spaces(rocket::min(indent, 10)));
   }
 
     namespace {

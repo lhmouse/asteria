@@ -68,6 +68,13 @@ int main()
         assert typeof r[1].c == "object";
         assert lengthof r[1].c == 0;
         assert r[1].d == 4;
+
+        const depth = 100000;
+        var r = [];
+        for(var i = 1; i < depth; ++i) {
+          r = [r];
+        }
+        assert std.json.format(r) == '[' * depth + ']' * depth;
       )__";
 
     std::istringstream iss(s_source);
