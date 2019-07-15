@@ -5,7 +5,7 @@
 
 |Compiler    |Category                   |Comments                                                    |
 |:-----------|:--------------------------|:-----------------------------------------------------------|
-|**GCC 9**   |:1st_place_medal:Primary   |                                                            |
+|**GCC 9**   |:2nd_place_medal:Primary   |Wrong code generated for `rocket::variant` with `-O3`.      |
 |**GCC 8**   |:1st_place_medal:Primary   |                                                            |
 |**Clang 7** |:2nd_place_medal:Secondary |Unknown warning options. A number of meaningless warnings.  |
 |**GCC 7**   |:2nd_place_medal:Secondary |Faulty strict overflow warnings.                            |
