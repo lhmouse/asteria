@@ -1395,30 +1395,26 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         auto p = do_format_partial(rbase, value);
         // Write prefixes.
         do_prefix(text, rbase, p);
-        // If all significant figures are from the fractional part, write them after a `0.` prefix,
-        // prepend zeroes when necessary.
-        int diff = p.exp + 1;
-        if(diff <= 0) {
+        int diff;
+        if((diff = p.exp + 1) <= 0) {
+          // If all significant figures are from the fractional part, write them after a `0.` prefix, prepending zeroes when necessary.
           text.append("0.");
           text.append(static_cast<unsigned>(-diff), '0');
           text.append(p.sfs + p.bsf, p.sfs + p.esf);
-          goto z;
         }
-        // If the decimal point appears in the middle of significant figures, write digits as
-        // two parts.
-        diff -= p.esf - p.bsf;
-        if(diff <= 0) {
+        else if((diff -= p.esf - p.bsf) <= 0) {
+          // If the decimal point appears in the middle of significant figures, write digits as two parts.
           text.append(p.sfs + p.bsf, p.sfs + p.esf + diff);
           text.push_back('.');
           text.append(p.sfs + p.esf + diff, p.sfs + p.esf);
-          goto z;
         }
-        // If all significant figures are from the integral part, write all significant figures,
-        // append zeroes when necesssary, then terminate the string with a decimal point.
-        text.append(p.sfs + p.bsf, p.sfs + p.esf);
-        text.append(static_cast<unsigned>(diff), '0');
-        text.push_back('.');
-      z:
+        else {
+          // If all significant figures are from the integral part, write all significant figures,
+          // append zeroes when necesssary, then terminate the string with a decimal point.
+          text.append(p.sfs + p.bsf, p.sfs + p.esf);
+          text.append(static_cast<unsigned>(diff), '0');
+          text.push_back('.');
+        }
         // The string will always contain a decimal point.
         // Append a zero digit if there is no fractional part.
         if(text.back() == '.') {
@@ -1459,16 +1455,16 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         auto p = do_format_partial(10, value);
         // Write prefixes.
         do_prefix(text, 10, p);
-        // If the number is zero, write `0.` literally.
         if(p.bsf == p.esf) {
+          // If the number is zero, write `0.` literally.
           text.append("0.");
-          goto z;
         }
-        // Write the first significant figure, followed by a decimal point, followed by all the other digits.
-        text.push_back(p.sfs[p.bsf]);
-        text.push_back('.');
-        text.append(p.sfs + p.bsf + 1, p.sfs + p.esf);
-      z:
+        else {
+          // Write the first significant figure, followed by a decimal point, followed by all the other digits.
+          text.push_back(p.sfs[p.bsf]);
+          text.push_back('.');
+          text.append(p.sfs + p.bsf + 1, p.sfs + p.esf);
+        }
         // The string will always contain a decimal point.
         // Append a zero digit if there is no fractional part.
         if(text.back() == '.') {
