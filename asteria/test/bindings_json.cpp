@@ -69,7 +69,7 @@ int main()
         assert lengthof r[1].c == 0;
         assert r[1].d == 4;
 
-        const depth = 10000;
+        const depth = 1000;
         var r = [];
         for(var i = 1; i < depth; ++i) {
           r = [r];
