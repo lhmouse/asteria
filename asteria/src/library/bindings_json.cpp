@@ -213,97 +213,101 @@ namespace Asteria {
         // Transform recursion to iteration using a handwritten stack.
         auto qvalue = std::addressof(value);
         Cow_Vector<Xformat> stack;
-      z:
-        // Loop 1: Find a leaf value. `qvalue` must always point to a valid value here.
-        if(qvalue->is_array()){
-          const auto& array = qvalue->as_array();
-          // Open an array.
-          cstrm << '[';
-          auto cur = array.begin();
-          if(cur != array.end()) {
-            // Indent the body.
-            indent.increment_level();
-            indent.break_line(cstrm);
-            // Decend into the array.
-            S_xformat_array ctxa = { std::ref(array), cur };
-            stack.emplace_back(rocket::move(ctxa));
-            qvalue = std::addressof(*cur);
-            goto z;
-          }
-          // Write an empty array.
-          cstrm << ']';
-        }
-        else if(qvalue->is_object()) {
-          const auto& object = qvalue->as_object();
-          // Open an object.
-          cstrm << '{';
-          auto cur = do_find_uncensored(object, object.begin());
-          if(cur != object.end()) {
-            // Indent the body.
-            indent.increment_level();
-            indent.break_line(cstrm);
-            // Write the key followed by a colon.
-            do_quote_string(cstrm, cur->first);
-            cstrm << ':';
-            // Decend into the object.
-            S_xformat_object ctxo = { std::ref(object), cur };
-            stack.emplace_back(rocket::move(ctxo));
-            qvalue = std::addressof(cur->second);
-            goto z;
-          }
-          // Write an empty object.
-          cstrm << '}';
-        }
-        else {
-          // Just write a scalar value which is never recursive.
-          do_format_scalar(cstrm, *qvalue);
-        }
-        // Loop 2: Advance to the next element if any.
-        while(!stack.empty()) {
-          if(stack.back().index() == 0) {
-            auto& ctxa = stack.mut_back().as<0>();
-            // Advance to the next element.
-            auto cur = ++(ctxa.cur);
-            if(cur != ctxa.array.get().end()) {
-              // Add a separator between elements.
-              cstrm << ',';
+        do {
+          // Find a leaf value. `qvalue` must always point to a valid value here.
+          if(qvalue->is_array()){
+            const auto& array = qvalue->as_array();
+            // Open an array.
+            cstrm << '[';
+            auto cur = array.begin();
+            if(cur != array.end()) {
+              // Indent the body.
+              indent.increment_level();
               indent.break_line(cstrm);
-              // Format the next element.
-              ctxa.cur = cur;
+              // Decend into the array.
+              S_xformat_array ctxa = { std::ref(array), cur };
+              stack.emplace_back(rocket::move(ctxa));
               qvalue = std::addressof(*cur);
-              goto z;
+              continue;
             }
-            // Unindent the body.
-            indent.decrement_level();
-            indent.break_line(cstrm);
-            // Finish this array.
+            // Write an empty array.
             cstrm << ']';
           }
-          else {
-            auto& ctxo = stack.mut_back().as<1>();
-            // Advance to the next key-value pair.
-            auto cur = do_find_uncensored(ctxo.object, ++(ctxo.cur));
-            if(cur != ctxo.object.get().end()) {
-              // Add a separator between elements.
-              cstrm << ',';
+          else if(qvalue->is_object()) {
+            const auto& object = qvalue->as_object();
+            // Open an object.
+            cstrm << '{';
+            auto cur = do_find_uncensored(object, object.begin());
+            if(cur != object.end()) {
+              // Indent the body.
+              indent.increment_level();
               indent.break_line(cstrm);
               // Write the key followed by a colon.
               do_quote_string(cstrm, cur->first);
               cstrm << ':';
-              // Format the next value.
-              ctxo.cur = cur;
+              // Decend into the object.
+              S_xformat_object ctxo = { std::ref(object), cur };
+              stack.emplace_back(rocket::move(ctxo));
               qvalue = std::addressof(cur->second);
-              goto z;
+              continue;
             }
-            // Unindent the body.
-            indent.decrement_level();
-            indent.break_line(cstrm);
-            // Finish this array.
+            // Write an empty object.
             cstrm << '}';
           }
-          stack.pop_back();
-        }
-        return cstrm.extract_string();
+          else {
+            // Just write a scalar value which is never recursive.
+            do_format_scalar(cstrm, *qvalue);
+          }
+          for(;;) {
+            // Advance to the next element if any.
+            if(stack.empty()) {
+              // Finish the root value.
+              return cstrm.extract_string();
+            }
+            if(stack.back().index() == 0) {
+              auto& ctxa = stack.mut_back().as<0>();
+              // Advance to the next element.
+              auto cur = ++(ctxa.cur);
+              if(cur != ctxa.array.get().end()) {
+                // Add a separator between elements.
+                cstrm << ',';
+                indent.break_line(cstrm);
+                // Format the next element.
+                ctxa.cur = cur;
+                qvalue = std::addressof(*cur);
+                break;
+              }
+              // Unindent the body.
+              indent.decrement_level();
+              indent.break_line(cstrm);
+              // Finish this array.
+              cstrm << ']';
+            }
+            else {
+              auto& ctxo = stack.mut_back().as<1>();
+              // Advance to the next key-value pair.
+              auto cur = do_find_uncensored(ctxo.object, ++(ctxo.cur));
+              if(cur != ctxo.object.get().end()) {
+                // Add a separator between elements.
+                cstrm << ',';
+                indent.break_line(cstrm);
+                // Write the key followed by a colon.
+                do_quote_string(cstrm, cur->first);
+                cstrm << ':';
+                // Format the next value.
+                ctxo.cur = cur;
+                qvalue = std::addressof(cur->second);
+                break;
+              }
+              // Unindent the body.
+              indent.decrement_level();
+              indent.break_line(cstrm);
+              // Finish this array.
+              cstrm << '}';
+            }
+            stack.pop_back();
+          }
+        } while(true);
       }
     G_string do_format_nonrecursive(const Value& value, Indenter&& indent)
       {
@@ -497,105 +501,109 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         Value value;
         // Implement a recursive descent parser without recursion.
         Cow_Vector<Xparse> stack;
-      z:
-        // Loop 1: Accept a leaf value. No other things such as closed brackets are allowed.
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op, Token::punctuator_brace_op });
-        if(kpunct == Token::punctuator_bracket_op) {
-          // An open bracket has been accepted.
-          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
-          if(!kpunct) {
-            // Descend into the new array.
-            S_xparse_array ctxa = { rocket::clear };
-            stack.emplace_back(rocket::move(ctxa));
-            goto z;
-          }
-          // Accept an empty array.
-          value = G_array();
-        }
-        else if(kpunct == Token::punctuator_brace_op) {
-          // An open brace has been accepted.
-          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
-          if(!kpunct) {
-            // A key followed by a colon is expected.
-            auto qkey = do_accept_key_opt(tstrm);
-            if(!qkey) {
-              return rocket::nullopt;
-            }
-            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        do {
+          // Accept a leaf value. No other things such as closed brackets are allowed.
+          auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op, Token::punctuator_brace_op });
+          if(kpunct == Token::punctuator_bracket_op) {
+            // An open bracket has been accepted.
+            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
             if(!kpunct) {
-              return rocket::nullopt;
+              // Descend into the new array.
+              S_xparse_array ctxa = { rocket::clear };
+              stack.emplace_back(rocket::move(ctxa));
+              continue;
             }
-            // Descend into a new object.
-            S_xparse_object ctxo = { rocket::clear, rocket::move(*qkey) };
-            stack.emplace_back(rocket::move(ctxo));
-            goto z;
+            // Accept an empty array.
+            value = G_array();
           }
-          // Accept an empty object.
-          value = G_object();
-        }
-        else {
-          // Just accept a scalar value which is never recursive.
-          auto qvalue = do_accept_scalar_opt(tstrm);
-          if(!qvalue) {
-            return rocket::nullopt;
-          }
-          value = rocket::move(*qvalue);
-        }
-        // Loop 2: Insert the value into its parent array or object.
-        while(!stack.empty()) {
-          if(stack.back().index() == 0) {
-            auto& ctxa = stack.mut_back().as<0>();
-            // Append the value to its parent array.
-            ctxa.array.emplace_back(rocket::move(value));
-            // Look for the next element.
-            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
+          else if(kpunct == Token::punctuator_brace_op) {
+            // An open brace has been accepted.
+            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
             if(!kpunct) {
-              return rocket::nullopt;
-            }
-            if(*kpunct == Token::punctuator_comma) {
-              // An extra comma is allowed in JSON5.
-              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
-              if(!kpunct) {
-                // The next element is expected to follow the comma.
-                goto z;
+              // A key followed by a colon is expected.
+              auto qkey = do_accept_key_opt(tstrm);
+              if(!qkey) {
+                return rocket::nullopt;
               }
+              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+              if(!kpunct) {
+                return rocket::nullopt;
+              }
+              // Descend into a new object.
+              S_xparse_object ctxo = { rocket::clear, rocket::move(*qkey) };
+              stack.emplace_back(rocket::move(ctxo));
+              continue;
             }
-            // Pop the array.
-            value = rocket::move(ctxa.array);
+            // Accept an empty object.
+            value = G_object();
           }
           else {
-            auto& ctxo = stack.mut_back().as<1>();
-            // Insert the value into its parent object.
-            ctxo.object.insert_or_assign(rocket::move(ctxo.key), rocket::move(value));
-            // Look for the next element.
-            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });
-            if(!kpunct) {
+            // Just accept a scalar value which is never recursive.
+            auto qvalue = do_accept_scalar_opt(tstrm);
+            if(!qvalue) {
               return rocket::nullopt;
             }
-            if(*kpunct == Token::punctuator_comma) {
-              // An extra comma is allowed in JSON5.
-              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
-              if(!kpunct) {
-                // The next key is expected to follow the comma.
-                auto qkey = do_accept_key_opt(tstrm);
-                if(!qkey) {
-                  return rocket::nullopt;
-                }
-                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
-                if(!kpunct) {
-                  return rocket::nullopt;
-                }
-                ctxo.key = rocket::move(*qkey);
-                // The next value is expected to follow the colon.
-                goto z;
-              }
-            }
-            // Pop the object.
-            value = rocket::move(ctxo.object);
+            value = rocket::move(*qvalue);
           }
-          stack.pop_back();
-        }
-        return rocket::move(value);
+          // Insert the value into its parent array or object.
+          for(;;) {
+            if(stack.empty()) {
+              // Accept the root value.
+              return rocket::move(value);
+            }
+            if(stack.back().index() == 0) {
+              auto& ctxa = stack.mut_back().as<0>();
+              // Append the value to its parent array.
+              ctxa.array.emplace_back(rocket::move(value));
+              // Look for the next element.
+              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
+              if(!kpunct) {
+                return rocket::nullopt;
+              }
+              if(*kpunct == Token::punctuator_comma) {
+                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+                if(!kpunct) {
+                  // The next element is expected to follow the comma.
+                  break;
+                }
+                // An extra comma is allowed in JSON5.
+              }
+              // Pop the array.
+              value = rocket::move(ctxa.array);
+            }
+            else {
+              auto& ctxo = stack.mut_back().as<1>();
+              // Insert the value into its parent object.
+              ctxo.object.insert_or_assign(rocket::move(ctxo.key), rocket::move(value));
+              // Look for the next element.
+              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });
+              if(!kpunct) {
+                return rocket::nullopt;
+              }
+              if(*kpunct == Token::punctuator_comma) {
+                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+                if(!kpunct) {
+                  // The next key is expected to follow the comma.
+                  auto qkey = do_accept_key_opt(tstrm);
+                  if(!qkey) {
+                    return rocket::nullopt;
+                  }
+                  kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+                  if(!kpunct) {
+                    return rocket::nullopt;
+                  }
+                  ctxo.key = rocket::move(*qkey);
+                  // The next value is expected to follow the colon.
+                  break;
+                }
+                // An extra comma is allowed in JSON5.
+              }
+              // Pop the object.
+              value = rocket::move(ctxo.object);
+            }
+            stack.pop_back();
+          }
+        } while(true);
       }
 
     }
