@@ -804,70 +804,71 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     Air_Node::Status do_execute_operator_rpn_postfix_inc(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                          const Cow_Vector<Air_Node::Parameter>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
-        // Increment the operand and return the old value.
-        // `altr.assign` is ignored.
+        // This operator is unary.
         auto& lhs = stack.get_top_reference().open();
+        // Increment the operand and return the old value. `altr.assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.mut_integer();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_integer(1));
-          goto z;
         }
-        if(lhs.is_real()) {
+        else if(lhs.is_real()) {
           auto& reg = lhs.mut_real();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_real(1));
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Postfix increment is not defined for `", lhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Postfix increment is not defined for `", lhs, "`.");
+        }
+        // The operand has been modified in place. No further action needs to be taken.
         return Air_Node::status_next;
       }
 
     Air_Node::Status do_execute_operator_rpn_postfix_dec(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                          const Cow_Vector<Air_Node::Parameter>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
-        // Decrement the operand and return the old value.
-        // `altr.assign` is ignored.
+        // This operator is unary.
         auto& lhs = stack.get_top_reference().open();
+        // Decrement the operand and return the old value. `altr.assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.mut_integer();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_integer(1));
-          goto z;
         }
-        if(lhs.is_real()) {
+        else if(lhs.is_real()) {
           auto& reg = lhs.mut_real();
           stack.set_temporary_result(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_real(1));
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Postfix decrement is not defined for `", lhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Postfix decrement is not defined for `", lhs, "`.");
+        }
+        // The operand has been modified in place. No further action needs to be taken.
         return Air_Node::status_next;
       }
 
     Air_Node::Status do_execute_operator_rpn_postfix_at(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Parameter>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
-        // Append a reference modifier.
-        // `altr.assign` is ignored.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
+        auto& lref = stack.open_top_reference();
+        // Append a reference modifier. `altr.assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.mut_integer();
           Reference_Modifier::S_array_index xmod = { rocket::move(reg) };
-          stack.open_top_reference().zoom_in(rocket::move(xmod));
-          goto z;
+          lref.zoom_in(rocket::move(xmod));
         }
-        if(rhs.is_string()) {
+        else if(rhs.is_string()) {
           auto& reg = rhs.mut_string();
           Reference_Modifier::S_object_key xmod = { rocket::move(reg) };
-          stack.open_top_reference().zoom_in(rocket::move(xmod));
-          goto z;
+          lref.zoom_in(rocket::move(xmod));
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The value `", rhs, "` cannot be used as a subscript.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("The value `", rhs, "` cannot be used as a subscript.");
+        }
+        // The operand has been modified in place. No further action needs to be taken.
         return Air_Node::status_next;
       }
 
@@ -876,13 +877,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // This operator is unary.
+        auto& rref = stack.get_top_reference();
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        if(!stack.get_top_reference().is_variable()) {
-          // Do nothing.
+        if(!rref.is_variable()) {
+          // There is nothing to do.
           return Air_Node::status_next;
         }
-        auto rhs = stack.get_top_reference().read();
+        auto rhs = rref.read();
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -892,20 +895,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Get the opposite of the operand as a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Get the opposite of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.mut_integer();
           reg = do_operator_neg(reg);
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_neg(reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -915,20 +918,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         if(rhs.is_boolean()) {
           auto& reg = rhs.mut_boolean();
           reg = do_operator_not(reg);
-          goto z;
         }
-        if(rhs.is_integer()) {
+        else if(rhs.is_integer()) {
           auto& reg = rhs.mut_integer();
           reg = do_operator_not(reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -938,9 +941,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // This operator is unary.
+        const auto& rhs = stack.get_top_reference().read();
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        const auto& rhs = stack.get_top_reference().read();
         stack.set_temporary_result(assign, do_operator_not(rhs.test()));
         return Air_Node::status_next;
       }
@@ -948,41 +952,43 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     Air_Node::Status do_execute_operator_rpn_prefix_inc(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Parameter>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
-        // Increment the operand and return it.
-        // `altr.assign` is ignored.
+        // This operator is unary.
         auto& rhs = stack.get_top_reference().open();
+        // Increment the operand and return it. `altr.assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.mut_integer();
           reg = do_operator_add(reg, G_integer(1));
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_add(reg, G_real(1));
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
+        }
+        // The operand has been modified in place. No further action needs to be taken.
         return Air_Node::status_next;
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_dec(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
                                                         const Cow_Vector<Air_Node::Parameter>& /*p*/, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
-        // Decrement the operand and return it.
-        // `altr.assign` is ignored.
+        // This operator is unary.
         auto& rhs = stack.get_top_reference().open();
+        // Decrement the operand and return it. `altr.assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.mut_integer();
           reg = do_operator_sub(reg, G_integer(1));
-          return Air_Node::status_next;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_sub(reg, G_real(1));
-          return Air_Node::status_next;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix decrement is not defined for `", rhs, "`.");
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
+        }
+        // The operand has been modified in place. No further action needs to be taken.
+        return Air_Node::status_next;
       }
 
     Air_Node::Status do_execute_operator_rpn_prefix_unset(Evaluation_Stack& stack, Executive_Context& /*ctx*/,
@@ -990,8 +996,9 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Unset the reference and return the old value.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().unset();
+        // Unset the reference and return the old value.
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1001,26 +1008,24 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Return the number of elements in the operand.
+        // This operator is unary.
         const auto& rhs = stack.get_top_reference().read();
+        // Return the number of elements in the operand.
         if(rhs.is_null()) {
           stack.set_temporary_result(assign, G_integer(0));
-          goto z;
         }
-        if(rhs.is_string()) {
+        else if(rhs.is_string()) {
           stack.set_temporary_result(assign, G_integer(rhs.as_string().size()));
-          goto z;
         }
-        if(rhs.is_array()) {
+        else if(rhs.is_array()) {
           stack.set_temporary_result(assign, G_integer(rhs.as_array().size()));
-          goto z;
         }
-        if(rhs.is_object()) {
+        else if(rhs.is_object()) {
           stack.set_temporary_result(assign, G_integer(rhs.as_object().size()));
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
+        }
         return Air_Node::status_next;
       }
 
@@ -1029,9 +1034,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        // This operator is unary.
+        const auto& rhs = stack.get_top_reference().read();
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
-        const auto& rhs = stack.get_top_reference().read();
         stack.set_temporary_result(assign, G_string(rocket::sref(rhs.gtype_name())));
         return Air_Node::status_next;
       }
@@ -1041,20 +1047,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Get the square root of the operand as a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Get the square root of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_sqrt(rhs.as_integer());
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_sqrt(reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1064,20 +1070,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Check whether the operand is a NaN, store the result in a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Check whether the operand is a NaN, store the result in a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
           rhs = do_operator_isnan(rhs.as_integer());
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
           rhs = do_operator_isnan(rhs.as_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1087,20 +1093,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Check whether the operand is an infinity, store the result in a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Check whether the operand is an infinity, store the result in a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
           rhs = do_operator_isinf(rhs.as_integer());
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
           rhs = do_operator_isinf(rhs.as_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1110,20 +1116,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Get the absolute value of the operand as a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Get the absolute value of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.mut_integer();
           reg = do_operator_abs(reg);
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_abs(reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1133,20 +1139,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Get the sign bit of the operand as a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Get the sign bit of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.mut_integer();
           reg = do_operator_signb(reg);
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
           rhs = do_operator_signb(rhs.as_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1156,20 +1162,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Round the operand to the nearest integer as a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Round the operand to the nearest integer as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_round(reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1179,20 +1185,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Round the operand towards negative infinity as a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_floor(reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1202,20 +1208,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Round the operand towards negative infinity as a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_ceil(reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1225,20 +1231,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Round the operand towards negative infinity as a temporary value, then return it.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           auto& reg = rhs.mut_real();
           reg = do_operator_trunc(reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1248,20 +1254,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
           rhs = do_operator_iround(rhs.as_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1271,20 +1277,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
           rhs = do_operator_ifloor(rhs.as_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1294,20 +1300,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
           rhs = do_operator_iceil(rhs.as_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1317,20 +1323,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        // This operator is unary.
         auto rhs = stack.get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
           // Return `rhs` as is.
-          goto z;
         }
-        if(rhs.is_real()) {
+        else if(rhs.is_real()) {
           // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
           rhs = do_operator_itrunc(rhs.as_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1341,7 +1347,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         const auto& negative = static_cast<bool>(p.at(1).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
@@ -1360,7 +1366,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
         const auto& expect = static_cast<Value::Compare>(p.at(1).as<std::int64_t>());
         const auto& negative = static_cast<bool>(p.at(2).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
@@ -1380,7 +1386,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
@@ -1389,18 +1395,16 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         auto comp = lhs.compare(rhs);
         if(comp == Value::compare_unordered) {
           rhs = G_string(rocket::sref("<unordered>"));
-          goto z;
         }
-        if(comp == Value::compare_less) {
+        else if(comp == Value::compare_less) {
           rhs = G_integer(-1);
-          goto z;
         }
-        if(comp == Value::compare_greater) {
+        else if(comp == Value::compare_greater) {
           rhs = G_integer(+1);
-          goto z;
         }
-        rhs = G_integer(0);
-      z:
+        else {
+          rhs = G_integer(0);
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1410,35 +1414,32 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // For the `boolean` type, return the logical OR'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical OR'd result of both operands.
           auto& reg = rhs.mut_boolean();
           reg = do_operator_or(lhs.as_boolean(), reg);
-          goto z;
         }
-        // For the `integer` and `real` types, return the sum of both operands.
-        if(lhs.is_integer() && rhs.is_integer()) {
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the sum of both operands.
           auto& reg = rhs.mut_integer();
           reg = do_operator_add(lhs.as_integer(), reg);
-          goto z;
         }
-        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_add(lhs.convert_to_real(), rhs.convert_to_real());
-          goto z;
         }
-        // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
-        if(lhs.is_string() && rhs.is_string()) {
+        else if(lhs.is_string() && rhs.is_string()) {
+          // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
           auto& reg = rhs.mut_string();
           reg = do_operator_add(lhs.as_string(), reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1448,29 +1449,27 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // For the `boolean` type, return the logical XOR'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical XOR'd result of both operands.
           auto& reg = rhs.mut_boolean();
           reg = do_operator_xor(lhs.as_boolean(), reg);
-          goto z;
         }
-        // For the `integer` and `real` types, return the difference of both operands.
-        if(lhs.is_integer() && rhs.is_integer()) {
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the difference of both operands.
           auto& reg = rhs.mut_integer();
           reg = do_operator_sub(lhs.as_integer(), reg);
-          goto z;
         }
-        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_sub(lhs.convert_to_real(), rhs.convert_to_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1480,40 +1479,36 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // For the `boolean` type, return the logical AND'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical AND'd result of both operands.
           auto& reg = rhs.mut_boolean();
           reg = do_operator_and(lhs.as_boolean(), reg);
-          goto z;
         }
-        // For the `integer` and `real` types, return the product of both operands.
-        if(lhs.is_integer() && rhs.is_integer()) {
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the product of both operands.
           auto& reg = rhs.mut_integer();
           reg = do_operator_mul(lhs.as_integer(), reg);
-          goto z;
         }
-        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_mul(lhs.convert_to_real(), rhs.convert_to_real());
-          goto z;
         }
-        // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
-        if(lhs.is_string() && rhs.is_integer()) {
+        else if(lhs.is_string() && rhs.is_integer()) {
+          // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
           // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
           rhs = do_operator_mul(lhs.as_string(), rhs.as_integer());
-          goto z;
         }
-        if(lhs.is_integer() && rhs.is_string()) {
+        else if(lhs.is_integer() && rhs.is_string()) {
           auto& reg = rhs.mut_string();
           reg = do_operator_mul(lhs.as_integer(), reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1523,23 +1518,22 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // For the `integer` and `real` types, return the quotient of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the quotient of both operands.
           auto& reg = rhs.mut_integer();
           reg = do_operator_div(lhs.as_integer(), reg);
-          goto z;
         }
-        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_div(lhs.convert_to_real(), rhs.convert_to_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1549,23 +1543,22 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // For the `integer` and `real` types, return the remainder of both operands.
         if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the remainder of both operands.
           auto& reg = rhs.mut_integer();
           reg = do_operator_mod(lhs.as_integer(), reg);
-          goto z;
         }
-        if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = do_operator_mod(lhs.convert_to_real(), rhs.convert_to_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1575,29 +1568,25 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // The RHS operand shall be of type `integer`.
-        if(rhs.is_integer()) {
+        if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          if(lhs.is_integer()) {
-            auto& reg = rhs.mut_integer();
-            reg = do_operator_sll(lhs.as_integer(), reg);
-            goto z;
-          }
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_sll(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_string() && rhs.is_integer()) {
           // If the LHS operand has type `string`, fill space characters in the right and discard characters from the left.
           // The number of bytes in the LHS operand will be preserved.
-          if(lhs.is_string()) {
-            // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-            rhs = do_operator_sll(lhs.as_string(), rhs.as_integer());
-            goto z;
-          }
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_sll(lhs.as_string(), rhs.as_integer());
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1607,29 +1596,25 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // The RHS operand shall be of type `integer`.
-        if(rhs.is_integer()) {
+        if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          if(lhs.is_integer()) {
-            auto& reg = rhs.mut_integer();
-            reg = do_operator_srl(lhs.as_integer(), reg);
-            goto z;
-          }
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_srl(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_string() && rhs.is_integer()) {
           // If the LHS operand has type `string`, fill space characters in the left and discard characters from the right.
           // The number of bytes in the LHS operand will be preserved.
-          if(lhs.is_string()) {
-            // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-            rhs = do_operator_srl(lhs.as_string(), rhs.as_integer());
-            goto z;
-          }
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_srl(lhs.as_string(), rhs.as_integer());
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1639,29 +1624,25 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // The RHS operand shall be of type `integer`.
-        if(rhs.is_integer()) {
+        if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
           // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
-          if(lhs.is_integer()) {
-            auto& reg = rhs.mut_integer();
-            reg = do_operator_sla(lhs.as_integer(), reg);
-            goto z;
-          }
-          // If the LHS operand has type `string`, fill space characters in the right.
-          if(lhs.is_string()) {
-            // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-            rhs = do_operator_sla(lhs.as_string(), rhs.as_integer());
-            goto z;
-          }
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_sla(lhs.as_integer(), reg);
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else if(lhs.is_string() && rhs.is_integer()) {
+          // If the LHS operand has type `string`, fill space characters in the right.
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_sla(lhs.as_string(), rhs.as_integer());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1671,28 +1652,24 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // The RHS operand shall be of type `integer`.
-        if(rhs.is_integer()) {
+        if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
-          if(lhs.is_integer()) {
-            auto& reg = rhs.mut_integer();
-            reg = do_operator_sra(lhs.as_integer(), reg);
-            goto z;
-          }
-          // If the LHS operand has type `string`, discard characters from the right.
-          if(lhs.is_string()) {
-            // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-            rhs = do_operator_sra(lhs.as_string(), rhs.as_integer());
-            goto z;
-          }
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_sra(lhs.as_integer(), reg);
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else if(lhs.is_string() && rhs.is_integer()) {
+          // If the LHS operand has type `string`, discard characters from the right.
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_sra(lhs.as_string(), rhs.as_integer());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1702,24 +1679,23 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // For the `boolean` type, return the logical AND'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical AND'd result of both operands.
           auto& reg = rhs.mut_boolean();
           reg = do_operator_and(lhs.as_boolean(), reg);
-          goto z;
         }
-        // For the `integer` type, return bitwise AND'd result of both operands.
-        if(lhs.is_integer() && rhs.is_integer()) {
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` type, return bitwise AND'd result of both operands.
           auto& reg = rhs.mut_integer();
           reg = do_operator_and(lhs.as_integer(), reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1729,24 +1705,23 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // For the `boolean` type, return the logical OR'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical OR'd result of both operands.
           auto& reg = rhs.mut_boolean();
           reg = do_operator_or(lhs.as_boolean(), reg);
-          goto z;
         }
-        // For the `integer` type, return bitwise OR'd result of both operands.
-        if(lhs.is_integer() && rhs.is_integer()) {
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` type, return bitwise OR'd result of both operands.
           auto& reg = rhs.mut_integer();
           reg = do_operator_or(lhs.as_integer(), reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1756,24 +1731,23 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the RHS operand followed by the LHS operand.
+        // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // For the `boolean` type, return the logical XOR'd result of both operands.
         if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical XOR'd result of both operands.
           auto& reg = rhs.mut_boolean();
           reg = do_operator_xor(lhs.as_boolean(), reg);
-          goto z;
         }
-        // For the `integer` type, return bitwise XOR'd result of both operands.
-        if(lhs.is_integer() && rhs.is_integer()) {
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` type, return bitwise XOR'd result of both operands.
           auto& reg = rhs.mut_integer();
           reg = do_operator_xor(lhs.as_integer(), reg);
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1784,8 +1758,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Pop the RHS operand followed.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
-        // Copy the value to the LHS operand which is write-only.
-        // `altr.assign` is ignored.
+        // Copy the value to the LHS operand which is write-only. `altr.assign` is ignored.
         stack.set_temporary_result(true, rocket::move(rhs));
         return Air_Node::status_next;
       }
@@ -1850,20 +1823,20 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         // Decode arguments.
         const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        // Pop the third and second operands.
+        // This operator is ternary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
         auto mid = stack.get_top_reference().read();
         stack.pop_reference();
         const auto& lhs = stack.get_top_reference().read();
-        // We store the result in `rhs`.
         if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Calculate the fused multiply-add result of the operands.
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
           rhs = std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
-          goto z;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
-      z:
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
+        }
         stack.set_temporary_result(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
