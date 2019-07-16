@@ -108,6 +108,10 @@ template<typename elementT> class refcnt_object
         this->m_ptr.swap(other.m_ptr);
       }
 
+    constexpr operator const refcnt_ptr<element_type>& () const noexcept
+      {
+        return this->m_ptr;
+      }
     constexpr operator const element_type& () const noexcept
       {
         return this->get();
@@ -130,7 +134,7 @@ template<typename elementT> inline void swap(refcnt_object<elementT>& lhs,
 
 template<typename charT, typename traitsT,
          typename elementT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
-                                                                              const refcnt_object<elementT>& rhs)
+                                                                             const refcnt_object<elementT>& rhs)
   {
     return os << rhs.get();
   }

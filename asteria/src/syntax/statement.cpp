@@ -103,7 +103,7 @@ namespace Asteria {
     Cow_Vector<Air_Node> do_generate_code_expression(const Analytic_Context& ctx, const Cow_Vector<Xprunit>& expr)
       {
         Cow_Vector<Air_Node> code;
-        rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+        rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, false, ctx);  });
         return code;
       }
 
@@ -551,7 +551,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         Cow_Vector<Air_Node::Parameter> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the expression.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, false, ctx);  });
         return;
       }
     case index_block:
@@ -584,7 +584,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
           p.emplace_back(pair.first);  // 0
           code.emplace_back(do_declare_variable_and_clear_stack, rocket::move(p));
           // Generate inline code for the initializer.
-          rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+          rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, false, ctx);  });
           // Generate code to initialize the variable.
           p.clear();
           p.emplace_back(altr.sloc);  // 0
@@ -614,7 +614,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         Cow_Vector<Air_Node::Parameter> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the condition expression.
-        rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+        rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, false, ctx);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(static_cast<std::int64_t>(altr.negative));  // 0
@@ -630,7 +630,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         Cow_Vector<Air_Node::Parameter> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the condition expression.
-        rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+        rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, false, ctx);  });
         // Create a fresh context for the `switch` body.
         // Note that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_switch(&ctx);
@@ -785,7 +785,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         Cow_Vector<Air_Node::Parameter> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, false, ctx);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(altr.sloc);  // 0
@@ -799,7 +799,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         Cow_Vector<Air_Node::Parameter> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, &unit == &(altr.expr.back()), ctx);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(static_cast<std::int64_t>(Air_Node::status_return));  // 0
@@ -813,7 +813,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         Cow_Vector<Air_Node::Parameter> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, false, ctx);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(altr.sloc);  // 0

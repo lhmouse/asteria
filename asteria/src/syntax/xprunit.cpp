@@ -752,6 +752,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Decode arguments.
         const auto& sloc = p.at(0).as<Source_Location>();
         const auto& nargs = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
+        const auto& tco_aware = static_cast<bool>(p.at(2).as<std::int64_t>());
         // Allocate the argument vector.
         Cow_Vector<Reference> args;
         args.resize(nargs);
@@ -764,13 +765,26 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         if(!target_value.is_function()) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", target_value, "` which is not a function.");
         }
-        const auto& target = target_value.as_function().get();
+        const auto& target = target_value.as_function();
         // Make the `this` reference. On the function's return it is reused to store the result of the function.
         auto& self = stack.open_top_reference().zoom_out();
+        if(tco_aware) {
+          // Optimize the tail call.
+          args.emplace_back(rocket::move(self));
+          // Create a TCO wrapper.
+          Reference_Root::S_tail_call xref = { target, rocket::move(args) };
+          self = rocket::move(xref);
+          return Air_Node::status_next;
+        }
+        // For non-tail calls, evaluate it normally.
         try {
           ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", this = ", self.read());
           // Call the function now.
-          target.invoke(self, global, rocket::move(args));
+          target->invoke(self, global, rocket::move(args));
+          if(!tco_aware) {
+            // Unpack tail calls.
+            self.unwrap_tail_calls(global);
+          }
           // The result will have been stored into `self`.
           ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", result = ", self.read());
         }
@@ -1843,7 +1857,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }  // namespace
 
-void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& ctx) const
+void Xprunit::generate_code(Cow_Vector<Air_Node>& code, bool tco_aware, const Analytic_Context& ctx) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
@@ -1909,10 +1923,10 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(altr.branch_true, [&](const Xprunit& unit) { unit.generate_code(code_branch, ctx);  });
+        rocket::for_each(altr.branch_true, [&](const Xprunit& unit) { unit.generate_code(code_branch, false, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         code_branch.clear();
-        rocket::for_each(altr.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, ctx);  });
+        rocket::for_each(altr.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, false, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 1
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 2
         code.emplace_back(do_execute_branch, rocket::move(p));
@@ -1925,6 +1939,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         Cow_Vector<Air_Node::Parameter> p;
         p.emplace_back(altr.sloc);  // 0
         p.emplace_back(static_cast<std::int64_t>(altr.nargs));  // 1
+        p.emplace_back(static_cast<std::int64_t>(tco_aware));  // 2
         code.emplace_back(do_execute_function_call, rocket::move(p));
         return;
       }
@@ -2207,7 +2222,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Analytic_Context& 
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(altr.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, ctx);  });
+        rocket::for_each(altr.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, false, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 1
         code.emplace_back(do_execute_coalescence, rocket::move(p));

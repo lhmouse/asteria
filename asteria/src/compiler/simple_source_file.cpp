@@ -121,9 +121,10 @@ Reference Simple_Source_File::execute(const Global_Context& global, Cow_Vector<R
       return Reference_Root::S_null();
     }
     // Execute the code.
-    Reference result;
-    this->m_inst.front().invoke(result, global, rocket::move(args));
-    return result;
+    Reference self;
+    this->m_inst.front().invoke(self, global, rocket::move(args));
+    self.unwrap_tail_calls(global);
+    return self;
   }
 
 }  // namespace Asteria

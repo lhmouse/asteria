@@ -4,6 +4,7 @@
 #include "../precompiled.hpp"
 #include "reference_root.hpp"
 #include "abstract_variable_callback.hpp"
+#include "reference.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -30,6 +31,10 @@ const Value& Reference_Root::dereference_const() const
           return Value::null();
         }
         return var->get_value();
+      }
+    case index_tail_call:
+      {
+        ASTERIA_THROW_RUNTIME_ERROR("Tail call wrappers cannot be dereferenced directly.");
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -62,9 +67,27 @@ Value& Reference_Root::dereference_mutable() const
         }
         return var->open_value();
       }
+    case index_tail_call:
+      {
+        ASTERIA_THROW_RUNTIME_ERROR("Tail call wrappers cannot be dereferenced directly.");
+      }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
     }
+  }
+
+Rcptr<Abstract_Function> Reference_Root::unpack_tail_call_opt(Reference& self, Cow_Vector<Reference>& args)
+  {
+    if(this->m_stor.index() != index_tail_call) {
+      // This is not a tail call wrapper.
+      return nullptr;
+    }
+    // Unpack arguments.
+    auto& altr = this->m_stor.as<index_tail_call>();
+    self = rocket::move(altr.args.mut_back());
+    altr.args.pop_back();
+    args = rocket::move(altr.args);
+    return rocket::move(altr.target);
   }
 
 void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callback) const
@@ -90,6 +113,10 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callb
         }
         // Descend into this variable recursively when the callback returns `true`.
         return var->enumerate_variables(callback);
+      }
+    case index_tail_call:
+      {
+        return rocket::for_each(this->m_stor.as<index_tail_call>().args, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");

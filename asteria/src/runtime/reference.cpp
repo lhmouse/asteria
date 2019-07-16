@@ -54,6 +54,22 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
     return last.apply_and_erase(*qref);
   }
 
+Reference& Reference::do_unwrap_tail_calls(const Global_Context& global)
+  {
+    Reference self;
+    Cow_Vector<Reference> args;
+    for(;;) {
+      // Unpack all levels of tail calls.
+      auto target = this->m_root.unpack_tail_call_opt(self, args);
+      if(!target) {
+        break;
+      }
+      target->invoke(self, global, rocket::move(args));
+      *this = rocket::move(self);
+    }
+    return *this;
+  }
+
 void Reference::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     this->m_root.enumerate_variables(callback);

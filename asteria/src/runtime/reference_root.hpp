@@ -28,6 +28,11 @@ class Reference_Root
       {
         Rcptr<Variable> var_opt;
       };
+    struct S_tail_call
+      {
+        Rcptr<Abstract_Function> target;
+        Cow_Vector<Reference> args;  // The last element is the `this` reference.
+      };
 
     enum Index : std::uint8_t
       {
@@ -35,6 +40,7 @@ class Reference_Root
         index_constant   = 1,
         index_temporary  = 2,
         index_variable   = 3,
+        index_tail_call  = 4,
       };
     using Xvariant = Variant<
       ROCKET_CDR(
@@ -42,6 +48,7 @@ class Reference_Root
         , S_constant   // 1,
         , S_temporary  // 2,
         , S_variable   // 3,
+        , S_tail_call  // 4,
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 
@@ -76,6 +83,10 @@ class Reference_Root
       {
         return this->m_stor.index() == index_variable;
       }
+    bool is_tail_call() const noexcept
+      {
+        return this->m_stor.index() == index_tail_call;
+      }
 
     void swap(Reference_Root& other) noexcept
       {
@@ -84,6 +95,7 @@ class Reference_Root
 
     const Value& dereference_const() const;
     Value& dereference_mutable() const;
+    Rcptr<Abstract_Function> unpack_tail_call_opt(Reference& self, Cow_Vector<Reference>& args);
 
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
