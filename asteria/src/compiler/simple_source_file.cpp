@@ -116,10 +116,13 @@ void Simple_Source_File::clear() noexcept
 
 Reference Simple_Source_File::execute(const Global_Context& global, Cow_Vector<Reference>&& args) const
   {
-    Reference result;
-    if(ROCKET_EXPECT(!this->m_inst.empty())) {
-      this->m_inst.front().invoke(result, global, rocket::move(args));
+    if(ROCKET_UNEXPECT(this->m_inst.empty())) {
+      // Return a null reference if there is nothing to execute.
+      return Reference_Root::S_null();
     }
+    // Execute the code.
+    Reference result;
+    this->m_inst.front().invoke(result, global, rocket::move(args));
     return result;
   }
 
