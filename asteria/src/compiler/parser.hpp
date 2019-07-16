@@ -5,7 +5,7 @@
 #define ASTERIA_COMPILER_PARSER_HPP_
 
 #include "../fwd.hpp"
-#include "parser_options.hpp"
+#include "compiler_options.hpp"
 #include "parser_error.hpp"
 
 namespace Asteria {
@@ -38,7 +38,7 @@ class Parser
         return static_cast<State>(this->m_stor.index());
       }
 
-    bool load(Token_Stream& tstrm, const Parser_Options& options);
+    bool load(Token_Stream& tstrm, const Compiler_Options& options);
     void clear() noexcept;
 
     Parser_Error get_parser_error() const noexcept;

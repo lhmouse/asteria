@@ -882,7 +882,7 @@ namespace Asteria {
 
     }  // namespace
 
-bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Parser_Options& options)
+bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Compiler_Options& options)
   {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;

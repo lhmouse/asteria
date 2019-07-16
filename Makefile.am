@@ -125,7 +125,7 @@ pkginclude_compiler_HEADERS =  \
   asteria/src/compiler/token.hpp  \
   asteria/src/compiler/token_stream.hpp  \
   asteria/src/compiler/infix_element.hpp  \
-  asteria/src/compiler/parser_options.hpp  \
+  asteria/src/compiler/compiler_options.hpp  \
   asteria/src/compiler/parser.hpp  \
   asteria/src/compiler/simple_source_file.hpp
 

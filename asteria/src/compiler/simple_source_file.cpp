@@ -17,7 +17,7 @@ namespace Asteria {
 Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const Cow_String& filename)
   {
     // Use default options.
-    Parser_Options options = { };
+    Compiler_Options options = { };
     // Tokenize the character stream.
     Token_Stream tstrm;
     if(!tstrm.load(cbuf, filename, options)) {

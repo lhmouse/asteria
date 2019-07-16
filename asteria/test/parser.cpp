@@ -34,9 +34,9 @@ int main()
       }
     )__");
     Token_Stream tis;
-    ASTERIA_TEST_CHECK(tis.load(buf, rocket::sref("dummy file"), Parser_Options()));
+    ASTERIA_TEST_CHECK(tis.load(buf, rocket::sref("dummy file"), { }));
     Parser pr;
-    ASTERIA_TEST_CHECK(pr.load(tis, Parser_Options()));
+    ASTERIA_TEST_CHECK(pr.load(tis, { }));
     auto code = pr.get_statements();
     ASTERIA_TEST_CHECK(code.size() == 4);
   }

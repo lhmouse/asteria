@@ -612,7 +612,7 @@ Value std_json_parse(const G_string& text)
   {
     // Tokenize source data.
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric literals and comments.
-    Parser_Options options = { };
+    Compiler_Options options = { };
     options.escapable_single_quote_string = true;
     options.keyword_as_identifier = true;
     options.integer_as_real = true;

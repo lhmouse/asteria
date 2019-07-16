@@ -5,7 +5,7 @@
 #define ASTERIA_COMPILER_TOKEN_STREAM_HPP_
 
 #include "../fwd.hpp"
-#include "parser_options.hpp"
+#include "compiler_options.hpp"
 #include "parser_error.hpp"
 #include "token.hpp"
 
@@ -39,7 +39,7 @@ class Token_Stream
         return static_cast<State>(this->m_stor.index());
       }
 
-    bool load(std::streambuf& cbuf, const Cow_String& file, const Parser_Options& options);
+    bool load(std::streambuf& cbuf, const Cow_String& file, const Compiler_Options& options);
     void clear() noexcept;
 
     Parser_Error get_parser_error() const noexcept;
