@@ -64,7 +64,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
 void Instantiated_Function::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     // Enumerate all variables inside the function body.
-    return rocket::for_each(this->m_code, [&](const Air_Node& node) { node.enumerate_variables(callback);  });
+    rocket::for_each(this->m_code, [&](const Air_Node& node) { node.enumerate_variables(callback);  });
   }
 
 }  // namespace Asteria

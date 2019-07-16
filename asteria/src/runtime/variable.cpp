@@ -27,7 +27,7 @@ long Variable::increment_gcref(long split) const noexcept
 
 void Variable::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    return this->m_value.enumerate_variables(callback);
+    this->m_value.enumerate_variables(callback);
   }
 
 }  // namespace Asteria
