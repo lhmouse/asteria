@@ -54,4 +54,9 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
     return last.apply_and_erase(*qref);
   }
 
+void Reference::enumerate_variables(const Abstract_Variable_Callback& callback) const
+  {
+    return this->m_root.enumerate_variables(callback);
+  }
+
 }  // namespace Asteria

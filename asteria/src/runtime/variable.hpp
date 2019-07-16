@@ -65,34 +65,17 @@ class Variable : public virtual Rcbase
       {
         return this->m_value.gcref_split();
       }
-    void enumerate_variables(const Abstract_Variable_Callback& callback) const
-      {
-        this->m_value.enumerate_variables(callback);
-      }
-
     long get_gcref() const noexcept
       {
         return this->m_gcref.first;
       }
     void reset_gcref(long iref) const noexcept
       {
-        // Reset the integral part to the specified value.
         this->m_gcref = std::make_pair(iref, 1 / 0x1p26);
       }
-    void increment_gcref(long split) const noexcept
-      {
-        if(ROCKET_EXPECT(split <= 1)) {
-          // Update the integral part only.
-          this->m_gcref.first += 1;
-          return;
-        }
-        // Update the fractional part.
-        this->m_gcref.second += 1 / static_cast<double>(split);
-        // If the result is equal to or greater than one, accumulate the integral part separatedly.
-        auto carry = static_cast<long>(this->m_gcref.second);
-        this->m_gcref.first += carry;
-        this->m_gcref.second -= static_cast<double>(carry);
-      }
+    long increment_gcref(long split) const noexcept;
+
+    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
 }  // namespace Asteria

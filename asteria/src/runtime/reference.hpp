@@ -113,10 +113,7 @@ class Reference
         return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
-    void enumerate_variables(const Abstract_Variable_Callback& callback) const
-      {
-        this->m_root.enumerate_variables(callback);
-      }
+    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
 inline void swap(Reference& lhs, Reference& rhs) noexcept
