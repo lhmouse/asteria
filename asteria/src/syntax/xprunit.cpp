@@ -696,14 +696,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                  const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& sloc = p.at(0).as<Source_Location>();
-        const auto& params = p.at(1).as<Cow_Vector<PreHashed_String>>();
-        const auto& body = p.at(2).as<Cow_Vector<Statement>>();
+        const auto& options = p.at(0).as<Compiler_Options>();
+        const auto& sloc = p.at(1).as<Source_Location>();
+        const auto& params = p.at(2).as<Cow_Vector<PreHashed_String>>();
+        const auto& body = p.at(3).as<Cow_Vector<Statement>>();
         // Generate code of the function body.
         Cow_Vector<Air_Node> code_body;
         Analytic_Context ctx_func(&ctx);
         ctx_func.prepare_function_parameters(params);
-        rocket::for_each(body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func);  });
+        rocket::for_each(body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func, options);  });
         // Format the prototype string.
         Cow_osstream fmtss;
         fmtss.imbue(std::locale::classic());
@@ -1857,7 +1858,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }  // namespace
 
-void Xprunit::generate_code(Cow_Vector<Air_Node>& code, bool tco_aware, const Analytic_Context& ctx) const
+void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Compiler_Options& options, bool tco_aware, const Analytic_Context& ctx) const
   {
     switch(static_cast<Index>(this->m_stor.index())) {
     case index_literal:
@@ -1911,9 +1912,10 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, bool tco_aware, const An
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
-        p.emplace_back(altr.sloc);  // 0
-        p.emplace_back(altr.params);  // 1
-        p.emplace_back(altr.body);  // 2
+        p.emplace_back(options);  // 0
+        p.emplace_back(altr.sloc);  // 1
+        p.emplace_back(altr.params);  // 2
+        p.emplace_back(altr.body);  // 3
         code.emplace_back(do_execute_closure_function, rocket::move(p));
         return;
       }
@@ -1923,10 +1925,10 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, bool tco_aware, const An
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(altr.branch_true, [&](const Xprunit& unit) { unit.generate_code(code_branch, false, ctx);  });
+        rocket::for_each(altr.branch_true, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, false, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         code_branch.clear();
-        rocket::for_each(altr.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, false, ctx);  });
+        rocket::for_each(altr.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, false, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 1
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 2
         code.emplace_back(do_execute_branch, rocket::move(p));
@@ -2222,7 +2224,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, bool tco_aware, const An
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(altr.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, false, ctx);  });
+        rocket::for_each(altr.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, false, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 1
         code.emplace_back(do_execute_coalescence, rocket::move(p));

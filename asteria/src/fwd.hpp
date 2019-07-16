@@ -84,6 +84,7 @@ class Backtrace_Frame;
 class Exception;
 
 // Compiler
+class Compiler_Options;
 class Parser_Error;
 class Token;
 class Token_Stream;

@@ -166,7 +166,7 @@ class Statement
       }
 
   public:
-    void generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx) const;
+    void generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const;
   };
 
 }  // namespace Asteria

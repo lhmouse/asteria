@@ -37,7 +37,7 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const C
     Cow_Vector<Air_Node> code;
     Analytic_Context ctx(nullptr);
     ctx.prepare_function_parameters(params);
-    rocket::for_each(parser.get_statements(), [&](const Statement& stmt) { stmt.generate_code(code, nullptr, ctx);  });
+    rocket::for_each(parser.get_statements(), [&](const Statement& stmt) { stmt.generate_code(code, nullptr, ctx, options);  });
     // Accept the code.
     this->m_inst.clear();
     this->m_inst.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));

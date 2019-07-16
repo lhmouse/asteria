@@ -8,6 +8,7 @@
 #include "value.hpp"
 #include "reference.hpp"
 #include "../syntax/source_location.hpp"
+#include "../compiler/compiler_options.hpp"
 
 namespace Asteria {
 
@@ -37,6 +38,7 @@ class Air_Node
         index_value             = 5,
         index_reference         = 6,
         index_vector_air_node   = 7,
+        index_compiler_options  = 8,
       };
     using Parameter = Variant<
       ROCKET_CDR(
@@ -48,6 +50,7 @@ class Air_Node
         , Value                         // 5,
         , Reference                     // 6,
         , Cow_Vector<Air_Node>          // 7,
+        , Compiler_Options              // 8,
       )>;
     using Executor = Status (Evaluation_Stack& stack, Executive_Context& ctx,
                              const Cow_Vector<Parameter>& params, const Cow_String& func, const Global_Context& global);
@@ -62,14 +65,8 @@ class Air_Node
       {
       }
 
-  private:
-    static void do_enumerate_variables_of(const Abstract_Variable_Callback& callback, const Parameter& param);
-
   public:
-    Status execute(Evaluation_Stack& stack, Executive_Context& ctx, const Cow_String& func, const Global_Context& global) const
-      {
-        return (*(this->m_fptr))(stack, ctx, this->m_params, func, global);
-      }
+    Status execute(Evaluation_Stack& stack, Executive_Context& ctx, const Cow_String& func, const Global_Context& global) const;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
