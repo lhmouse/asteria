@@ -67,7 +67,7 @@ const Value& Value::null() noexcept
 
 bool Value::test() const noexcept
   {
-    switch(static_cast<Gtype>(this->m_stor.index())) {
+    switch(this->gtype()) {
     case gtype_null:
       {
         return false;
@@ -102,7 +102,7 @@ bool Value::test() const noexcept
         return true;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
     }
   }
 
@@ -131,7 +131,7 @@ Value::Compare Value::compare(const Value& other) const noexcept
     ///////////////////////////////////////////////////////////////////////////
     // Compare values of different types
     ///////////////////////////////////////////////////////////////////////////
-    if(this->m_stor.index() != other.m_stor.index()) {
+    if(this->gtype() != other.gtype()) {
       // Compare operands that are both of arithmetic types.
       if(this->is_convertible_to_real() && other.is_convertible_to_real()) {
         return do_3way_compare(this->convert_to_real(), other.convert_to_real());
@@ -142,7 +142,7 @@ Value::Compare Value::compare(const Value& other) const noexcept
     ///////////////////////////////////////////////////////////////////////////
     // Compare values of the same type
     ///////////////////////////////////////////////////////////////////////////
-    switch(static_cast<Gtype>(this->m_stor.index())) {
+    switch(this->gtype()) {
     case gtype_null:
       {
         return compare_equal;
@@ -187,13 +187,13 @@ Value::Compare Value::compare(const Value& other) const noexcept
         return compare_unordered;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
     }
   }
 
 bool Value::unique() const noexcept
   {
-    switch(static_cast<Gtype>(this->m_stor.index())) {
+    switch(this->gtype()) {
     case gtype_null:
       {
         return false;
@@ -225,13 +225,13 @@ bool Value::unique() const noexcept
         return this->m_stor.as<gtype_object>().unique();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
     }
   }
 
 long Value::use_count() const noexcept
   {
-    switch(static_cast<Gtype>(this->m_stor.index())) {
+    switch(this->gtype()) {
     case gtype_null:
       {
         return 0;
@@ -263,13 +263,13 @@ long Value::use_count() const noexcept
         return this->m_stor.as<gtype_object>().use_count();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
     }
   }
 
 long Value::gcref_split() const noexcept
   {
-    switch(static_cast<Gtype>(this->m_stor.index())) {
+    switch(this->gtype()) {
     case gtype_null:
     case gtype_boolean:
     case gtype_integer:
@@ -295,13 +295,13 @@ long Value::gcref_split() const noexcept
         return this->m_stor.as<gtype_object>().use_count();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
     }
   }
 
 std::ostream& Value::print(std::ostream& os, bool escape) const
   {
-    switch(static_cast<Gtype>(this->m_stor.index())) {
+    switch(this->gtype()) {
     case gtype_null:
       {
         // null
@@ -377,13 +377,13 @@ std::ostream& Value::print(std::ostream& os, bool escape) const
         return os;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
     }
   }
 
 std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hanging) const
   {
-    switch(static_cast<Gtype>(this->m_stor.index())) {
+    switch(this->gtype()) {
     case gtype_null:
       {
         // null
@@ -464,13 +464,13 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
         return os;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
     }
   }
 
 void Value::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    switch(static_cast<Gtype>(this->m_stor.index())) {
+    switch(this->gtype()) {
     case gtype_null:
     case gtype_boolean:
     case gtype_integer:
@@ -496,7 +496,7 @@ void Value::enumerate_variables(const Abstract_Variable_Callback& callback) cons
         return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
     }
   }
 

@@ -11,7 +11,7 @@ namespace Asteria {
 
 const Value& Reference_Root::dereference_const() const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_null:
       {
         return Value::null();
@@ -37,13 +37,13 @@ const Value& Reference_Root::dereference_const() const
         ASTERIA_THROW_RUNTIME_ERROR("Tail call wrappers cannot be dereferenced directly.");
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
     }
   }
 
 Value& Reference_Root::dereference_mutable() const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_null:
       {
         ASTERIA_THROW_RUNTIME_ERROR("The constant `null` cannot be modified.");
@@ -72,13 +72,13 @@ Value& Reference_Root::dereference_mutable() const
         ASTERIA_THROW_RUNTIME_ERROR("Tail call wrappers cannot be dereferenced directly.");
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
     }
   }
 
 Rcptr<Abstract_Function> Reference_Root::unpack_tail_call_opt(Reference& self, Cow_Vector<Reference>& args)
   {
-    if(this->m_stor.index() != index_tail_call) {
+    if(this->index() != index_tail_call) {
       // This is not a tail call wrapper.
       return nullptr;
     }
@@ -92,7 +92,7 @@ Rcptr<Abstract_Function> Reference_Root::unpack_tail_call_opt(Reference& self, C
 
 void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_null:
       {
         return;
@@ -119,7 +119,7 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callb
         return rocket::for_each(this->m_stor.as<index_tail_call>().args, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
     }
   }
 

@@ -71,21 +71,25 @@ class Reference_Root
       }
 
   public:
+    Index index() const noexcept
+      {
+        return static_cast<Index>(this->m_stor.index());
+      }
     bool is_constant() const noexcept
       {
-        return rocket::is_any_of(this->m_stor.index(), { index_null, index_constant });
+        return rocket::is_any_of(this->index(), { index_null, index_constant });
       }
     bool is_temporary() const noexcept
       {
-        return rocket::is_any_of(this->m_stor.index(), { index_null, index_temporary });
+        return rocket::is_any_of(this->index(), { index_null, index_temporary });
       }
     bool is_variable() const noexcept
       {
-        return this->m_stor.index() == index_variable;
+        return this->index() == index_variable;
       }
     bool is_tail_call() const noexcept
       {
-        return this->m_stor.index() == index_tail_call;
+        return this->index() == index_tail_call;
       }
 
     void swap(Reference_Root& other) noexcept

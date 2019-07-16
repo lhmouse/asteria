@@ -96,6 +96,11 @@ class Infix_Element
       }
 
   public:
+    Index index() const noexcept
+      {
+        return static_cast<Index>(this->m_stor.index());
+      }
+
     // Returns the precedence of this element.
     Precedence tell_precedence() const noexcept;
     // Moves all units into `units`.

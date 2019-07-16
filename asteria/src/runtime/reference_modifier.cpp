@@ -10,7 +10,7 @@ namespace Asteria {
 
 const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_array_index:
       {
         const auto& altr = this->m_stor.as<index_array_index>();
@@ -49,13 +49,13 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         return std::addressof(rit->second);
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered.");
     }
   }
 
 Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_array_index:
       {
         const auto& altr = this->m_stor.as<index_array_index>();
@@ -113,13 +113,13 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         return std::addressof(rit->second);
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered.");
     }
   }
 
 Value Reference_Modifier::apply_and_erase(Value& parent) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_array_index:
       {
         const auto& altr = this->m_stor.as<index_array_index>();
@@ -162,7 +162,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         return elem;
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered.");
     }
   }
 

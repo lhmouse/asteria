@@ -540,7 +540,7 @@ namespace Asteria {
 
 void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_expression:
       {
         const auto& altr = this->m_stor.as<index_expression>();
@@ -829,7 +829,7 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown statement type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown statement type enumeration `", this->index(), "` has been encountered.");
     }
   }
 

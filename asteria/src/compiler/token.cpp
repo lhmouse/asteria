@@ -429,7 +429,7 @@ const char* Token::stringify_punctuator(Punctuator punct) noexcept
 
 std::ostream& Token::print(std::ostream& os) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_keyword:
       {
         // keyword `if`
@@ -461,7 +461,7 @@ std::ostream& Token::print(std::ostream& os) const
         return os << "string-literal `" << quote(this->m_stor.as<index_string_literal>().value) << "`";
       }
     default:
-      ASTERIA_TERMINATE("An unknown token type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown token type enumeration `", this->index(), "` has been encountered.");
     }
   }
 

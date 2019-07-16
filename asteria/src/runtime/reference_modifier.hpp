@@ -47,6 +47,11 @@ class Reference_Modifier
       }
 
   public:
+    Index index() const noexcept
+      {
+        return static_cast<Index>(this->m_stor.index());
+      }
+
     void swap(Reference_Modifier& other) noexcept
       {
         this->m_stor.swap(other.m_stor);

@@ -9,7 +9,7 @@ namespace Asteria {
 
 Infix_Element::Precedence Infix_Element::tell_precedence() const noexcept
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_head:
       {
         // const auto& altr = this->m_stor.as<index_head>();
@@ -103,13 +103,13 @@ Infix_Element::Precedence Infix_Element::tell_precedence() const noexcept
         }
       }
     default:
-      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered.");
     }
   }
 
 void Infix_Element::extract(Cow_Vector<Xprunit>& units)
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_head:
       {
         auto& altr = this->m_stor.as<index_head>();
@@ -161,13 +161,13 @@ void Infix_Element::extract(Cow_Vector<Xprunit>& units)
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered.");
     }
   }
 
 Cow_Vector<Xprunit>& Infix_Element::open_junction() noexcept
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_head:
       {
         auto& altr = this->m_stor.as<index_head>();
@@ -199,7 +199,7 @@ Cow_Vector<Xprunit>& Infix_Element::open_junction() noexcept
         return altr.rhs;
       }
     default:
-      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered.");
     }
   }
 

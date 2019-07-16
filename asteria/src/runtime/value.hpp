@@ -65,17 +65,17 @@ class Value
       }
     const char* gtype_name() const noexcept
       {
-        return Value::gtype_name_of(static_cast<Gtype>(this->m_stor.index()));
+        return Value::gtype_name_of(this->gtype());
       }
 
     bool is_null() const noexcept
       {
-        return this->m_stor.index() == gtype_null;
+        return this->gtype() == gtype_null;
       }
 
     bool is_boolean() const noexcept
       {
-        return this->m_stor.index() == gtype_boolean;
+        return this->gtype() == gtype_boolean;
       }
     G_boolean as_boolean() const
       {
@@ -88,7 +88,7 @@ class Value
 
     bool is_integer() const noexcept
       {
-        return this->m_stor.index() == gtype_integer;
+        return this->gtype() == gtype_integer;
       }
     G_integer as_integer() const
       {
@@ -101,7 +101,7 @@ class Value
 
     bool is_real() const noexcept
       {
-        return this->m_stor.index() == gtype_real;
+        return this->gtype() == gtype_real;
       }
     G_real as_real() const
       {
@@ -114,7 +114,7 @@ class Value
 
     bool is_string() const noexcept
       {
-        return this->m_stor.index() == gtype_string;
+        return this->gtype() == gtype_string;
       }
     const G_string& as_string() const
       {
@@ -127,7 +127,7 @@ class Value
 
     bool is_function() const noexcept
       {
-        return this->m_stor.index() == gtype_function;
+        return this->gtype() == gtype_function;
       }
     const G_function& as_function() const
       {
@@ -140,7 +140,7 @@ class Value
 
     bool is_opaque() const noexcept
       {
-        return this->m_stor.index() == gtype_opaque;
+        return this->gtype() == gtype_opaque;
       }
     const G_opaque& as_opaque() const
       {
@@ -153,7 +153,7 @@ class Value
 
     bool is_array() const noexcept
       {
-        return this->m_stor.index() == gtype_array;
+        return this->gtype() == gtype_array;
       }
     const G_array& as_array() const
       {
@@ -166,7 +166,7 @@ class Value
 
     bool is_object() const noexcept
       {
-        return this->m_stor.index() == gtype_object;
+        return this->gtype() == gtype_object;
       }
     const G_object& as_object() const
       {
@@ -184,21 +184,21 @@ class Value
 
     bool is_convertible_to_real() const noexcept
       {
-        if(this->m_stor.index() == gtype_integer) {
+        if(this->gtype() == gtype_integer) {
           return true;
         }
-        return this->m_stor.index() == gtype_real;
+        return this->gtype() == gtype_real;
       }
     G_real convert_to_real() const
       {
-        if(this->m_stor.index() == gtype_integer) {
+        if(this->gtype() == gtype_integer) {
           return G_real(this->m_stor.as<gtype_integer>());
         }
         return this->m_stor.as<gtype_real>();
       }
     G_real& mutate_into_real()
       {
-        if(this->m_stor.index() == gtype_integer) {
+        if(this->gtype() == gtype_integer) {
           return this->m_stor.emplace<gtype_real>(G_real(this->m_stor.as<gtype_integer>()));
         }
         return this->m_stor.as<gtype_real>();

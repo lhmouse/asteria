@@ -1860,7 +1860,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
 void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Compiler_Options& options, bool tco_aware, const Analytic_Context& ctx) const
   {
-    switch(static_cast<Index>(this->m_stor.index())) {
+    switch(this->index()) {
     case index_literal:
       {
         const auto& altr = this->m_stor.as<index_literal>();
@@ -2240,7 +2240,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Compiler_Options& 
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown expression unit type enumeration `", this->m_stor.index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown expression unit type enumeration `", this->index(), "` has been encountered.");
     }
   }
 
