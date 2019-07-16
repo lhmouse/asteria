@@ -995,7 +995,7 @@ namespace Asteria {
         if(!kexpr) {
           kexpr.emplace();
         }
-        if(!*qref) {
+        if(!*qref && !kexpr->empty()) {
           // Return by value.
           Xprunit::S_operator_rpn xunit = { Xprunit::xop_prefix_pos, false };
           kexpr->emplace_back(rocket::move(xunit));
