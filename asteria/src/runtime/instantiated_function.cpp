@@ -27,11 +27,11 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     // Reuse the storage of `args` to create the stack.
     Evaluation_Stack stack(rocket::move(args));
     // Execute AIR nodes one by one.
-    Air_Node::Status status;
-    rocket::any_of(this->m_code,
-                   [&](const Air_Node& node) { return (status = node.execute(stack, ctx_func,
-                                                                             this->m_zvarg->get_function_signature(), global))
-                                                      != Air_Node::status_next;  });
+    auto status = Air_Node::status_next;
+    std::find_if(this->m_code.begin(), this->m_code.end(),
+                 [&](const Air_Node& node) { return (status = node.execute(stack, ctx_func,
+                                                                           this->m_zvarg->get_function_signature(), global))
+                                                    != Air_Node::status_next;  });
     switch(status) {
     case Air_Node::status_next:
       {
