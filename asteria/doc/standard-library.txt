@@ -793,34 +793,6 @@
 	  if one is found, which is always non-negative, or `null`
 	  otherwise.
 
-`std.array.rfind(data, target)`
-
-	* Searches `data` for the last occurrence of `target`.
-
-	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
-`std.array.rfind(data, from, target)`
-
-	* Searches `data` for the last occurrence of `target`. The search
-	  operation is performed on the same subrange that would be
-	  returned by `slice(data, from)`.
-
-	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
-`std.array.rfind(data, from, [length], target)`
-
-	* Searches `data` for the last occurrence of `target`. The search
-	  operation is performed on the same subrange that would be
-	  returned by `slice(data, from, length)`.
-
-	* Returns the subscript of the last match of `target` in `data`
-	  if one is found, which is always non-negative, or `null`
-	  otherwise.
-
 `std.array.find_if(data, predictor)`
 
 	* Finds the first element, namely `x`, in `data`, for which
@@ -876,6 +848,34 @@
 
 	* Returns the subscript of such an element as an `integer`, if
 	  one is found, or `null` otherwise.
+
+`std.array.rfind(data, target)`
+
+	* Searches `data` for the last occurrence of `target`.
+
+	* Returns the subscript of the last match of `target` in `data`
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
+
+`std.array.rfind(data, from, target)`
+
+	* Searches `data` for the last occurrence of `target`. The search
+	  operation is performed on the same subrange that would be
+	  returned by `slice(data, from)`.
+
+	* Returns the subscript of the last match of `target` in `data`
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
+
+`std.array.rfind(data, from, [length], target)`
+
+	* Searches `data` for the last occurrence of `target`. The search
+	  operation is performed on the same subrange that would be
+	  returned by `slice(data, from, length)`.
+
+	* Returns the subscript of the last match of `target` in `data`
+	  if one is found, which is always non-negative, or `null`
+	  otherwise.
 
 `std.array.rfind_if(data, predictor)`
 

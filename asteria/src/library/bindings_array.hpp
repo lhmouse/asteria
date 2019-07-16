@@ -15,16 +15,16 @@ extern G_array std_array_replace_slice(const G_array& data, const G_integer& fro
 extern Opt<G_integer> std_array_find(const G_array& data, const Value& target);
 extern Opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const Value& target);
 extern Opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target);
-extern Opt<G_integer> std_array_rfind(const G_array& data, const Value& target);
-extern Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Value& target);
-extern Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target);
-
 extern Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_function& predictor);
 extern Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor);
 extern Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor);
 extern Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_function& predictor);
 extern Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor);
 extern Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor);
+
+extern Opt<G_integer> std_array_rfind(const G_array& data, const Value& target);
+extern Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Value& target);
+extern Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target);
 extern Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_function& predictor);
 extern Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor);
 extern Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor);

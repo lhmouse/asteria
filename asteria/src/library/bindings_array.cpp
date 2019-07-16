@@ -96,10 +96,35 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
     template<typename IteratorT> Opt<IteratorT> do_find_opt(IteratorT begin, IteratorT end, const Value& target)
       {
         for(auto it = rocket::move(begin); it != end; ++it) {
+          // Compare the value using the builtin 3-way comparison operator.
           if(it->compare(target) == Value::compare_equal) {
             return rocket::move(it);
           }
         }
+        // Fail to find an element.
+        return rocket::nullopt;
+      }
+
+    inline void do_push_argument(Cow_Vector<Reference>& args, const Value& value)
+      {
+        Reference_Root::S_temporary xref = { value };
+        args.emplace_back(rocket::move(xref));
+      }
+
+    template<typename IteratorT> Opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end, const G_function& predictor, bool match)
+      {
+        for(auto it = rocket::move(begin); it != end; ++it) {
+          // Set up arguments for the user-defined predictor.
+          Cow_Vector<Reference> args;
+          do_push_argument(args, *it);
+          // Call it.
+          Reference self;
+          predictor.get().invoke(self, global, rocket::move(args));
+          if(self.read().test() == match) {
+            return rocket::move(it);
+          }
+        }
+        // Fail to find an element.
         return rocket::nullopt;
       }
 
@@ -133,61 +158,6 @@ Opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const 
     }
     return *qit - data.begin();
   }
-
-Opt<G_integer> std_array_rfind(const G_array& data, const Value& target)
-  {
-    auto qit = do_find_opt(data.rbegin(), data.rend(), target);
-    if(!qit) {
-      return rocket::nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
-Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Value& target)
-  {
-    auto range = do_slice(data, from, rocket::nullopt);
-    auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
-    if(!qit) {
-      return rocket::nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
-Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target)
-  {
-    auto range = do_slice(data, from, length);
-    auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
-    if(!qit) {
-      return rocket::nullopt;
-    }
-    return data.rend() - *qit - 1;
-  }
-
-    namespace {
-
-    inline void do_push_argument(Cow_Vector<Reference>& args, const Value& value)
-      {
-        Reference_Root::S_temporary xref = { value };
-        args.emplace_back(rocket::move(xref));
-      }
-
-    template<typename IteratorT> Opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end, const G_function& predictor, bool match)
-      {
-        for(auto it = rocket::move(begin); it != end; ++it) {
-          // Set up arguments for the user-defined predictor.
-          Cow_Vector<Reference> args;
-          do_push_argument(args, *it);
-          // Call it.
-          Reference self;
-          predictor.get().invoke(self, global, rocket::move(args));
-          if(self.read().test() == match) {
-            return rocket::move(it);
-          }
-        }
-        return rocket::nullopt;
-      }
-
-    }
 
 Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
@@ -245,6 +215,35 @@ Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array
       return rocket::nullopt;
     }
     return *qit - data.begin();
+  }
+
+Opt<G_integer> std_array_rfind(const G_array& data, const Value& target)
+  {
+    auto qit = do_find_opt(data.rbegin(), data.rend(), target);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return data.rend() - *qit - 1;
+  }
+
+Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Value& target)
+  {
+    auto range = do_slice(data, from, rocket::nullopt);
+    auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return data.rend() - *qit - 1;
+  }
+
+Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target)
+  {
+    auto range = do_slice(data, from, length);
+    auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
+    if(!qit) {
+      return rocket::nullopt;
+    }
+    return data.rend() - *qit - 1;
   }
 
 Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_function& predictor)
@@ -847,89 +846,6 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           }
       )));
     //===================================================================
-    // `std.array.rfind()`
-    //===================================================================
-    result.insert_or_assign(rocket::sref("rfind"),
-      G_function(make_simple_binding(
-        // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.rfind(data, target)`\n"
-            "\n"
-            "  * Searches `data` for the last occurrence of `target`.\n"
-            "\n"
-            "  * Returns the subscript of the last match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-            "\n"
-            "`std.array.rfind(data, from, target)`\n"
-            "\n"
-            "  * Searches `data` for the last occurrence of `target`. The search\n"
-            "    operation is performed on the same subrange that would be\n"
-            "    returned by `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the last match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-            "\n"
-            "`std.array.rfind(data, from, [length], target)`\n"
-            "\n"
-            "  * Searches `data` for the last occurrence of `target`. The search\n"
-            "    operation is performed on the same subrange that would be\n"
-            "    returned by `slice(data, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of the last match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-          ),
-        // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
-        // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.rfind"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            Value target;
-            if(reader.start().g(data).save(state).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind(data, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind(data, from, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind(data, from, length, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
-          }
-      )));
-    //===================================================================
     // `std.array.find_if()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_if"),
@@ -1085,6 +1001,89 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
             if(reader.load(state).g(length).g(predictor).finish()) {
               // Call the binding function.
               auto qindex = std_array_find_if_not(global, data, from, length, predictor);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.array.rfind()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("rfind"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.array.rfind(data, target)`\n"
+            "\n"
+            "  * Searches `data` for the last occurrence of `target`.\n"
+            "\n"
+            "  * Returns the subscript of the last match of `target` in `data`\n"
+            "    if one is found, which is always non-negative, or `null`\n"
+            "    otherwise.\n"
+            "\n"
+            "`std.array.rfind(data, from, target)`\n"
+            "\n"
+            "  * Searches `data` for the last occurrence of `target`. The search\n"
+            "    operation is performed on the same subrange that would be\n"
+            "    returned by `slice(data, from)`.\n"
+            "\n"
+            "  * Returns the subscript of the last match of `target` in `data`\n"
+            "    if one is found, which is always non-negative, or `null`\n"
+            "    otherwise.\n"
+            "\n"
+            "`std.array.rfind(data, from, [length], target)`\n"
+            "\n"
+            "  * Searches `data` for the last occurrence of `target`. The search\n"
+            "    operation is performed on the same subrange that would be\n"
+            "    returned by `slice(data, from, length)`.\n"
+            "\n"
+            "  * Returns the subscript of the last match of `target` in `data`\n"
+            "    if one is found, which is always non-negative, or `null`\n"
+            "    otherwise.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.rfind"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            G_array data;
+            Value target;
+            if(reader.start().g(data).save(state).g(target).finish()) {
+              // Call the binding function.
+              auto qindex = std_array_rfind(data, target);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            G_integer from;
+            if(reader.load(state).g(from).save(state).g(target).finish()) {
+              // Call the binding function.
+              auto qindex = std_array_rfind(data, from, target);
+              if(!qindex) {
+                return Reference_Root::S_null();
+              }
+              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            Opt<G_integer> length;
+            if(reader.load(state).g(length).g(target).finish()) {
+              // Call the binding function.
+              auto qindex = std_array_rfind(data, from, length, target);
               if(!qindex) {
                 return Reference_Root::S_null();
               }
