@@ -84,6 +84,7 @@ class Reference_Root
 
     const Value& dereference_const() const;
     Value& dereference_mutable() const;
+
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
