@@ -16,8 +16,8 @@ class Reference_Stack
     Reference* m_btop;  // This points to the next element of the top.
 
   public:
-    Reference_Stack() noexcept
-      : m_stor(), m_btop(this->m_stor.mut_data())
+    template<typename... ParamsT> explicit Reference_Stack(ParamsT&&... params)
+      : m_stor(rocket::forward<ParamsT>(params)...), m_btop(this->m_stor.mut_data())
       {
       }
     ~Reference_Stack();

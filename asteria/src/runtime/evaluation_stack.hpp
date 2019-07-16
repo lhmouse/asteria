@@ -17,6 +17,11 @@ class Evaluation_Stack
 
   public:
     Evaluation_Stack() noexcept
+      : m_refs()
+      {
+      }
+    Evaluation_Stack(Cow_Vector<Reference>&& stor) noexcept
+      : m_refs(rocket::move(stor))
       {
       }
     virtual ~Evaluation_Stack();
