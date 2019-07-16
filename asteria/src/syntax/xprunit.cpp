@@ -773,13 +773,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           // Optimize the tail call.
           args.emplace_back(rocket::move(self));
           // Create a TCO wrapper.
-          Reference_Root::S_tail_call xref = { target, rocket::move(args) };
+          Reference_Root::S_tail_call xref = { sloc, func, target, rocket::move(args) };
           self = rocket::move(xref);
           return Air_Node::status_next;
         }
         // For non-tail calls, evaluate it normally.
         try {
-          ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", this = ", self.read());
+          ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
           // Call the function now.
           target->invoke(self, global, rocket::move(args));
           if(!tco_aware) {
@@ -787,7 +787,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             self.unwrap_tail_calls(global);
           }
           // The result will have been stored into `self`.
-          ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target, ", result = ", self.read());
+          ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target, ", result = ", self.read());
         }
         catch(Exception& except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());

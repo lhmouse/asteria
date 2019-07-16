@@ -30,6 +30,8 @@ class Reference_Root
       };
     struct S_tail_call
       {
+        Source_Location sloc;
+        Cow_String func;
         Rcptr<Abstract_Function> target;
         Cow_Vector<Reference> args;  // The last element is the `this` reference.
       };
@@ -99,7 +101,7 @@ class Reference_Root
 
     const Value& dereference_const() const;
     Value& dereference_mutable() const;
-    Rcptr<Abstract_Function> unpack_tail_call_opt(Reference& self, Cow_Vector<Reference>& args);
+    Rcptr<Abstract_Function> unpack_tail_call_opt(Cow_Bivector<Source_Location, Cow_String>& backtrace, Reference& self, Cow_Vector<Reference>& args);
 
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };

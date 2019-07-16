@@ -35,11 +35,11 @@ int main()
           return& ptc(n-1);
         }
         try {
-          ptc(10);
+          ptc(2000);
         }
         catch(e) {
           std.debug.dump(__backtrace);
-          assert lengthof __backtrace == 3;  // 1 throw, 1 frame, 1 catch
+          assert lengthof __backtrace == 2003;  // 1 throw, 2001 frames, 1 catch
         }
       )__";
 

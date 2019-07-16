@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "reference.hpp"
+#include "exception.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -56,15 +57,37 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
 
 Reference& Reference::do_unwrap_tail_calls(const Global_Context& global)
   {
+    Cow_Bivector<Source_Location, Cow_String> backtrace;
     Reference self;
     Cow_Vector<Reference> args;
     for(;;) {
-      // Unpack all levels of tail calls.
-      auto target = this->m_root.unpack_tail_call_opt(self, args);
+      // Unpack a tail call.
+      auto target = this->m_root.unpack_tail_call_opt(backtrace, self, args);
       if(!target) {
         break;
       }
-      target->invoke(self, global, rocket::move(args));
+      const auto& sloc = backtrace.back().first;
+      const auto& func = backtrace.back().second;
+      try {
+        // Unwrap the function call.
+        ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+        target->invoke(self, global, rocket::move(args));
+        // The result will have been stored into `self`.
+        ASTERIA_DEBUG_LOG("Returned from tail call at \'", sloc, "\' inside `", func, "`: target = ", *target, ", result = ", self.read());
+      }
+      catch(Exception& except) {
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside tail call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
+        // Append all frames that have been expanded so far and rethrow the exception.
+        std::for_each(backtrace.rbegin(), backtrace.rend(), [&](const auto& p) { except.push_frame_func(p.first, p.second);  });
+        throw;
+      }
+      catch(const std::exception& stdex) {
+        ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
+        // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
+        Exception except(stdex);
+        std::for_each(backtrace.rbegin(), backtrace.rend(), [&](const auto& p) { except.push_frame_func(p.first, p.second);  });
+        throw except;
+      }
       *this = rocket::move(self);
     }
     return *this;
