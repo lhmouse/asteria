@@ -350,7 +350,7 @@ namespace Asteria {
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        Cow_Vector<Pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
+        Cow_Bivector<PreHashed_String, Cow_Vector<Xprunit>> vars;
         for(;;) {
           auto qname = do_accept_identifier_opt(tstrm);
           if(!qname) {
@@ -385,7 +385,7 @@ namespace Asteria {
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        Cow_Vector<Pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
+        Cow_Bivector<PreHashed_String, Cow_Vector<Xprunit>> vars;
         for(;;) {
           auto qname = do_accept_identifier_opt(tstrm);
           if(!qname) {
@@ -621,7 +621,7 @@ namespace Asteria {
         return qclause;
       }
 
-    Opt<Cow_Vector<Pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>>> do_accept_switch_clause_list_opt(Token_Stream& tstrm)
+    Opt<Cow_Bivector<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_switch_clause_list_opt(Token_Stream& tstrm)
       {
         // switch-clause-list ::=
         //   switch-clause switch-clause-list-opt
@@ -629,7 +629,7 @@ namespace Asteria {
         if(!kpunct) {
           return rocket::nullopt;
         }
-        Cow_Vector<Pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> clauses;
+        Cow_Bivector<Cow_Vector<Xprunit>, Cow_Vector<Statement>> clauses;
         for(;;) {
           auto qclause = do_accept_switch_clause_opt(tstrm);
           if(!qclause) {

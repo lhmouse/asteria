@@ -32,7 +32,7 @@ class Statement
       {
         Source_Location sloc;
         bool immutable;
-        Cow_Vector<Pair<PreHashed_String, Cow_Vector<Xprunit>>> vars;
+        Cow_Bivector<PreHashed_String, Cow_Vector<Xprunit>> vars;
       };
     struct S_function
       {
@@ -51,7 +51,7 @@ class Statement
     struct S_switch
       {
         Cow_Vector<Xprunit> ctrl;
-        Cow_Vector<Pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> clauses;
+        Cow_Bivector<Cow_Vector<Xprunit>, Cow_Vector<Statement>> clauses;
       };
     struct S_do_while
       {

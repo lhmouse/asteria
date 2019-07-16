@@ -307,7 +307,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
-        Cow_Vector<Pair<Rmlist, Wide_String>> stack;
+        Cow_Bivector<Rmlist, Wide_String> stack;
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.
@@ -375,7 +375,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
-        Cow_Vector<Pair<Rmlist, Cow_String>> stack;
+        Cow_Bivector<Rmlist, Cow_String> stack;
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.
