@@ -83,6 +83,15 @@ int main()
         assert std.array.find_if_not([0,1,2,3,4,5,6,7,8,9], 5, 4, func(x) = (x % 5 != 3)) == 8;
         assert std.array.find_if_not([0,1,2,3,4,5,6,7,8,9], 3, 6, func(x) = (x % 5 != 3)) == 3;
 
+        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 2) == 6;
+        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 2, 2) == 6;
+        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 3, 2) == 6;
+        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 7, 2) == null;
+        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 2, 3, 2) == 2;
+        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 3, 3, 2) == null;
+        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 4, 3, 2) == 6;
+        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 2, 5, 2) == 6;
+
         assert std.array.rfind_if([0,1,2,3,4,5,6,7,8,9], func(x) = (x % 5 == 3)) == 8;
         assert std.array.rfind_if([0,1,2,3,4,5,6,7,8,9], 3, func(x) = (x % 5 == 3)) == 8;
         assert std.array.rfind_if([0,1,2,3,4,5,6,7,8,9], 4, func(x) = (x % 5 == 3)) == 8;
@@ -101,14 +110,32 @@ int main()
         assert std.array.rfind_if_not([0,1,2,3,4,5,6,7,8,9], 5, 4, func(x) = (x % 5 != 3)) == 8;
         assert std.array.rfind_if_not([0,1,2,3,4,5,6,7,8,9], 3, 6, func(x) = (x % 5 != 3)) == 8;
 
-        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 2) == 6;
-        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 2, 2) == 6;
-        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 3, 2) == 6;
-        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 7, 2) == null;
-        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 2, 3, 2) == 2;
-        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 3, 3, 2) == null;
-        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 4, 3, 2) == 6;
-        assert std.array.rfind([0,1,2,3,4,3,2,1,0], 2, 5, 2) == 6;
+        assert std.array.count([0,1,2,3,4,3,2,1,0], 2) == 2;
+        assert std.array.count([0,1,2,3,4,3,2,1,0], 2, 2) == 2;
+        assert std.array.count([0,1,2,3,4,3,2,1,0], 3, 2) == 1;
+        assert std.array.count([0,1,2,3,4,3,2,1,0], 7, 2) == 0;
+        assert std.array.count([0,1,2,3,4,3,2,1,0], 2, 3, 2) == 1;
+        assert std.array.count([0,1,2,3,4,3,2,1,0], 3, 3, 2) == 0;
+        assert std.array.count([0,1,2,3,4,3,2,1,0], 4, 3, 2) == 1;
+        assert std.array.count([0,1,2,3,4,3,2,1,0], 2, 5, 2) == 2;
+
+        assert std.array.count_if([0,1,2,3,4,5,6,7,8,9], func(x) = (x % 5 == 3)) == 2;
+        assert std.array.count_if([0,1,2,3,4,5,6,7,8,9], 3, func(x) = (x % 5 == 3)) == 2;
+        assert std.array.count_if([0,1,2,3,4,5,6,7,8,9], 4, func(x) = (x % 5 == 3)) == 1;
+        assert std.array.count_if([0,1,2,3,4,5,6,7,8,9], 9, func(x) = (x % 5 == 3)) == 0;
+        assert std.array.count_if([0,1,2,3,4,5,6,7,8,9], 3, 4, func(x) = (x % 5 == 3)) == 1;
+        assert std.array.count_if([0,1,2,3,4,5,6,7,8,9], 4, 4, func(x) = (x % 5 == 3)) == 0;
+        assert std.array.count_if([0,1,2,3,4,5,6,7,8,9], 5, 4, func(x) = (x % 5 == 3)) == 1;
+        assert std.array.count_if([0,1,2,3,4,5,6,7,8,9], 3, 6, func(x) = (x % 5 == 3)) == 2;
+
+        assert std.array.count_if_not([0,1,2,3,4,5,6,7,8,9], func(x) = (x % 5 != 3)) == 2;
+        assert std.array.count_if_not([0,1,2,3,4,5,6,7,8,9], 3, func(x) = (x % 5 != 3)) == 2;
+        assert std.array.count_if_not([0,1,2,3,4,5,6,7,8,9], 4, func(x) = (x % 5 != 3)) == 1;
+        assert std.array.count_if_not([0,1,2,3,4,5,6,7,8,9], 9, func(x) = (x % 5 != 3)) == 0;
+        assert std.array.count_if_not([0,1,2,3,4,5,6,7,8,9], 3, 4, func(x) = (x % 5 != 3)) == 1;
+        assert std.array.count_if_not([0,1,2,3,4,5,6,7,8,9], 4, 4, func(x) = (x % 5 != 3)) == 0;
+        assert std.array.count_if_not([0,1,2,3,4,5,6,7,8,9], 5, 4, func(x) = (x % 5 != 3)) == 1;
+        assert std.array.count_if_not([0,1,2,3,4,5,6,7,8,9], 3, 6, func(x) = (x % 5 != 3)) == 2;
 
         assert std.array.is_sorted([]) == true;
         assert std.array.is_sorted([10]) == true;

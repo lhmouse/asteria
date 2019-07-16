@@ -132,7 +132,8 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
 
 Opt<G_integer> std_array_find(const G_array& data, const Value& target)
   {
-    auto qit = do_find_opt(data.begin(), data.end(), target);
+    auto range = std::make_pair(data.begin(), data.end());
+    auto qit = do_find_opt(range.first, range.second, target);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -161,7 +162,8 @@ Opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const 
 
 Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
-    auto qit = do_find_if_opt(global, data.begin(), data.end(), predictor, true);
+    auto range = std::make_pair(data.begin(), data.end());
+    auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -190,7 +192,8 @@ Opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& da
 
 Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
-    auto qit = do_find_if_opt(global, data.begin(), data.end(), predictor, false);
+    auto range = std::make_pair(data.begin(), data.end());
+    auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -219,7 +222,8 @@ Opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array
 
 Opt<G_integer> std_array_rfind(const G_array& data, const Value& target)
   {
-    auto qit = do_find_opt(data.rbegin(), data.rend(), target);
+    auto range = std::make_pair(data.begin(), data.end());
+    auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -248,7 +252,8 @@ Opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const
 
 Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
-    auto qit = do_find_if_opt(global, data.rbegin(), data.rend(), predictor, true);
+    auto range = std::make_pair(data.begin(), data.end());
+    auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, true);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -277,7 +282,8 @@ Opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& d
 
 Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_function& predictor)
   {
-    auto qit = do_find_if_opt(global, data.rbegin(), data.rend(), predictor, false);
+    auto range = std::make_pair(data.begin(), data.end());
+    auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, false);
     if(!qit) {
       return rocket::nullopt;
     }
@@ -302,6 +308,141 @@ Opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_arra
       return rocket::nullopt;
     }
     return data.rend() - *qit - 1;
+  }
+
+G_integer std_array_count(const G_array& data, const Value& target)
+  {
+    G_integer count = 0;
+    auto range = std::make_pair(data.begin(), data.end());
+    for(;;) {
+      auto qit = do_find_opt(range.first, range.second, target);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
+  }
+
+G_integer std_array_count(const G_array& data, const G_integer& from, const Value& target)
+  {
+    G_integer count = 0;
+    auto range = do_slice(data, from, rocket::nullopt);
+    for(;;) {
+      auto qit = do_find_opt(range.first, range.second, target);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
+  }
+
+G_integer std_array_count(const G_array& data, const G_integer& from, const Opt<G_integer>& length, const Value& target)
+  {
+    G_integer count = 0;
+    auto range = do_slice(data, from, length);
+    for(;;) {
+      auto qit = do_find_opt(range.first, range.second, target);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
+  }
+
+G_integer std_array_count_if(const Global_Context& global, const G_array& data, const G_function& predictor)
+  {
+    G_integer count = 0;
+    auto range = std::make_pair(data.begin(), data.end());
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
+  }
+
+G_integer std_array_count_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
+  {
+    G_integer count = 0;
+    auto range = do_slice(data, from, rocket::nullopt);
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
+  }
+
+G_integer std_array_count_if(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor)
+  {
+    G_integer count = 0;
+    auto range = do_slice(data, from, length);
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
+  }
+
+G_integer std_array_count_if_not(const Global_Context& global, const G_array& data, const G_function& predictor)
+  {
+    G_integer count = 0;
+    auto range = std::make_pair(data.begin(), data.end());
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
+  }
+
+G_integer std_array_count_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
+  {
+    G_integer count = 0;
+    auto range = do_slice(data, from, rocket::nullopt);
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
+  }
+
+G_integer std_array_count_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const Opt<G_integer>& length, const G_function& predictor)
+  {
+    G_integer count = 0;
+    auto range = do_slice(data, from, length);
+    for(;;) {
+      auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
+      if(!qit) {
+        break;
+      }
+      ++count;
+      range.first = rocket::move(++*qit);
+    }
+    return count;
   }
 
     namespace {
@@ -1254,6 +1395,220 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
                 return Reference_Root::S_null();
               }
               Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.array.count()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("count"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.array.count(data, target)`\n"
+            "\n"
+            "  * Searches `data` for `target` and figures the total number of\n"
+            "    occurences.\n"
+            "\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+            "\n"
+            "`std.array.count(data, from, target)`\n"
+            "\n"
+            "  * Searches `data` for `target` and figures the total number of\n"
+            "    occurences. The search operation is performed on the same\n"
+            "    subrange that would be returned by `slice(data, from)`.\n"
+            "\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+            "\n"
+            "`std.array.count(data, from, [length], target)`\n"
+            "\n"
+            "  * Searches `data` for `target` and figures the total number of\n"
+            "    occurences. The search operation is performed on the same\n"
+            "    subrange that would be returned by `slice(data, from, length)`.\n"
+            "\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.count"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            G_array data;
+            Value target;
+            if(reader.start().g(data).save(state).g(target).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count(data, target) };
+              return rocket::move(xref);
+            }
+            G_integer from;
+            if(reader.load(state).g(from).save(state).g(target).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count(data, from, target) };
+              return rocket::move(xref);
+            }
+            Opt<G_integer> length;
+            if(reader.load(state).g(length).g(target).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count(data, from, length, target) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.array.count_if()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("count_if"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.array.count_if(data, target, predictor)`\n"
+            "\n"
+            "  * Searches every element, namely `x`, in `data`, for which\n"
+            "    `predictor(x)` yields logically true, and figures the total\n"
+            "    number of such occurences.\n"
+            "\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+            "\n"
+            "`std.array.count_if(data, from, target, predictor)`\n"
+            "\n"
+            "  * Searches every element, namely `x`, in `data`, for which\n"
+            "    `predictor(x)` yields logically true, and figures the total\n"
+            "    number of elements. The search operation is performed on the\n"
+            "    same subrange that would be returned by `slice(data, from)`.\n"
+            "\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+            "\n"
+            "`std.array.count_if(data, from, [length], target, predictor)`\n"
+            "\n"
+            "  * Searches every element, namely `x`, in `data`, for which\n"
+            "    `predictor(x)` yields logically true, and figures the total\n"
+            "    number of elements. The search operation is performed on the\n"
+            "    same subrange that would be returned by `slice(data, from,\n"
+            "    length)`.\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.count_if"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            G_array data;
+            G_function predictor = global.placeholder_function();
+            if(reader.start().g(data).save(state).g(predictor).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count_if(global, data, predictor) };
+              return rocket::move(xref);
+            }
+            G_integer from;
+            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count_if(global, data, from, predictor) };
+              return rocket::move(xref);
+            }
+            Opt<G_integer> length;
+            if(reader.load(state).g(length).g(predictor).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count_if(global, data, from, length, predictor) };
+              return rocket::move(xref);
+            }
+            // Fail.
+            reader.throw_no_matching_function_call();
+          }
+      )));
+    //===================================================================
+    // `std.array.count_if_not()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("count_if_not"),
+      G_function(make_simple_binding(
+        // Description
+        rocket::sref
+          (
+            "\n"
+            "`std.array.count_if_not(data, target, predictor)`\n"
+            "\n"
+            "  * Searches every element, namely `x`, in `data`, for which\n"
+            "    `predictor(x)` yields logically false, and figures the total\n"
+            "    number of such occurences.\n"
+            "\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+            "\n"
+            "`std.array.count_if_not(data, from, target, predictor)`\n"
+            "\n"
+            "  * Searches every element, namely `x`, in `data`, for which\n"
+            "    `predictor(x)` yields logically false, and figures the total\n"
+            "    number of elements. The search operation is performed on the\n"
+            "    same subrange that would be returned by `slice(data, from)`.\n"
+            "\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+            "\n"
+            "`std.array.count_if_not(data, from, [length], target, predictor)`\n"
+            "\n"
+            "  * Searches every element, namely `x`, in `data`, for which\n"
+            "    `predictor(x)` yields logically false, and figures the total\n"
+            "    number of elements. The search operation is performed on the\n"
+            "    same subrange that would be returned by `slice(data, from,\n"
+            "    length)`.\n"
+            "\n"
+            "  * Returns the number of occurrences as an `integer`, which is\n"
+            "    always non-negative.\n"
+          ),
+        // Opaque parameter
+        G_null
+          (
+            nullptr
+          ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
+          {
+            Argument_Reader reader(rocket::sref("std.array.count_if_not"), args);
+            Argument_Reader::State state;
+            // Parse arguments.
+            G_array data;
+            G_function predictor = global.placeholder_function();
+            if(reader.start().g(data).save(state).g(predictor).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, predictor) };
+              return rocket::move(xref);
+            }
+            G_integer from;
+            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, from, predictor) };
+              return rocket::move(xref);
+            }
+            Opt<G_integer> length;
+            if(reader.load(state).g(length).g(predictor).finish()) {
+              // Call the binding function.
+              Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, from, length, predictor) };
               return rocket::move(xref);
             }
             // Fail.

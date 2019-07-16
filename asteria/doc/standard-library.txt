@@ -933,6 +933,92 @@
 	* Returns the subscript of such an element as an `integer`, if
 	  one is found, or `null` otherwise.
 
+`std.array.count(data, target)`
+
+	* Searches `data` for `target` and figures the total number of
+	  occurences.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
+`std.array.count(data, from, target)`
+
+	* Searches `data` for `target` and figures the total number of
+	  occurences. The search operation is performed on the same
+	  subrange that would be returned by `slice(data, from)`.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
+`std.array.count(data, from, [length], target)`
+
+	* Searches `data` for `target` and figures the total number of
+	  occurences. The search operation is performed on the same
+	  subrange that would be returned by `slice(data, from, length)`.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
+`std.array.count_if(data, target, predictor)`
+
+	* Searches every element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true, and figures the total
+	  number of such occurences.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
+`std.array.count_if(data, from, target, predictor)`
+
+	* Searches every element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true, and figures the total
+	  number of elements. The search operation is performed on the
+	  same subrange that would be returned by `slice(data, from)`.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
+`std.array.count_if(data, from, [length], target, predictor)`
+
+	* Searches every element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically true, and figures the total
+	  number of elements. The search operation is performed on the
+	  same subrange that would be returned by `slice(data, from,
+	  length)`.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
+`std.array.count_if_not(data, target, predictor)`
+
+	* Searches every element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false, and figures the total
+	  number of such occurences.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
+`std.array.count_if_not(data, from, target, predictor)`
+
+	* Searches every element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false, and figures the total
+	  number of elements. The search operation is performed on the
+	  same subrange that would be returned by `slice(data, from)`.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
+`std.array.count_if_not(data, from, [length], target, predictor)`
+
+	* Searches every element, namely `x`, in `data`, for which
+	  `predictor(x)` yields logically false, and figures the total
+	  number of elements. The search operation is performed on the
+	  same subrange that would be returned by `slice(data, from,
+	  length)`.
+
+	* Returns the number of occurrences as an `integer`, which is
+	  always non-negative.
+
 `std.array.is_sorted(data, [comparator])`
 
 	* Checks whether `data` is sorted. That is, there is no pair of
