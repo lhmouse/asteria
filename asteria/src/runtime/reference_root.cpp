@@ -17,21 +17,19 @@ const Value& Reference_Root::dereference_const() const
       }
     case index_constant:
       {
-        const auto& altr = this->m_stor.as<index_constant>();
-        return altr.source;
+        return this->m_stor.as<index_constant>().source;
       }
     case index_temporary:
       {
-        const auto& altr = this->m_stor.as<index_temporary>();
-        return altr.value;
+        return this->m_stor.as<index_temporary>().value;
       }
     case index_variable:
       {
-        const auto& altr = this->m_stor.as<index_variable>();
-        if(!altr.var_opt) {
+        const auto& var = this->m_stor.as<index_variable>().var_opt;
+        if(!var) {
           return Value::null();
         }
-        return altr.var_opt->get_value();
+        return var->get_value();
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -47,24 +45,22 @@ Value& Reference_Root::dereference_mutable() const
       }
     case index_constant:
       {
-        const auto& altr = this->m_stor.as<index_constant>();
-        ASTERIA_THROW_RUNTIME_ERROR("The constant `", altr.source, "` cannot be modified.");
+        ASTERIA_THROW_RUNTIME_ERROR("The constant `", this->m_stor.as<index_constant>().source, "` cannot be modified.");
       }
     case index_temporary:
       {
-        const auto& altr = this->m_stor.as<index_temporary>();
-        ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", altr.value, "` cannot be modified.");
+        ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", this->m_stor.as<index_temporary>().value, "` cannot be modified.");
       }
     case index_variable:
       {
-        const auto& altr = this->m_stor.as<index_variable>();
-        if(!altr.var_opt) {
+        const auto& var = this->m_stor.as<index_variable>().var_opt;
+        if(!var) {
           ASTERIA_THROW_RUNTIME_ERROR("The reference cannot be written after being moved. This is likely a bug. Please report.");
         }
-        if(altr.var_opt->is_immutable()) {
-          ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", altr.var_opt->get_value(), "` is immutable and cannot be modified.");
+        if(var->is_immutable()) {
+          ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", var->get_value(), "` is immutable and cannot be modified.");
         }
-        return altr.var_opt->open_value();
+        return var->open_value();
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");
@@ -88,12 +84,12 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callb
       }
     case index_variable:
       {
-        const auto& altr = this->m_stor.as<index_variable>();
-        if(!altr.var_opt || !callback(altr.var_opt)) {
+        const auto& var = this->m_stor.as<index_variable>().var_opt;
+        if(!var || !callback(var)) {
           return;
         }
         // Descend into this variable recursively when the callback returns `true`.
-        return altr.var_opt->enumerate_variables(callback);
+        return var->enumerate_variables(callback);
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->m_stor.index(), "` has been encountered.");

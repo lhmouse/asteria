@@ -66,15 +66,15 @@ class Reference_Root
   public:
     bool is_constant() const noexcept
       {
-        return (this->m_stor.index() == index_null) || (this->m_stor.index() == index_constant);
+        return rocket::is_any_of(this->m_stor.index(), { index_null, index_constant });
       }
     bool is_temporary() const noexcept
       {
-        return (this->m_stor.index() == index_null) || (this->m_stor.index() == index_temporary);
+        return rocket::is_any_of(this->m_stor.index(), { index_null, index_temporary });
       }
     bool is_variable() const noexcept
       {
-        return (this->m_stor.index() == index_variable);
+        return this->m_stor.index() == index_variable;
       }
 
     void swap(Reference_Root& other) noexcept
