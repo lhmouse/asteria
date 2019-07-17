@@ -30,14 +30,13 @@
 # Characteristics
 
 1. First-class functions.
-2. Closure functions (lambda expressions).
+2. Closure functions.
 3. Exceptions.
-4. Flexible syntax similar to **C++** and **JavaScript**.
+4. Flexible syntax, similar to **C++** and **JavaScript**.
 5. Regular grammar.
-6. Pass-by-reference function arguments.  
-Return values are passed by value by default, but can also be passed by reference using the `return&` syntax.
-7. Minimal garbage collection support.  
-Objects are managed using referencing counting. Primitive types are copy-on-write hence circular references are impossible.
+6. Argument passing (by value or reference) determined by the **argument** rather than the **parameter**.
+7. Idempotently copyable values basing on copy-on-write.
+8. Minimal garbage collection support.
 
 # License
 
