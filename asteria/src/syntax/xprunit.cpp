@@ -787,7 +787,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               self.unwrap_tail_calls(global);
             }
             // The result will have been stored into `self`.
-            ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target, ", result = ", self.read());
+            ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
           }
           catch(Exception& except) {
             ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
