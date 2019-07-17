@@ -640,7 +640,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                      const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& value = p.at(0).as<Value>();
+        const auto& value = p[0].as<Value>();
         // Push the constant.
         Reference_Root::S_constant xref = { value };
         stack.push_reference(rocket::move(xref));
@@ -651,7 +651,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                              const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& ref = p.at(0).as<Reference>();
+        const auto& ref = p[0].as<Reference>();
         // Push the reference as is.
         stack.push_reference(ref);
         return Air_Node::status_next;
@@ -661,8 +661,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                    const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& name = p.at(0).as<PreHashed_String>();
-        const auto& depth = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
+        const auto& name = p[0].as<PreHashed_String>();
+        const auto& depth = static_cast<std::size_t>(p[1].as<std::int64_t>());
         // Locate the context.
         const Executive_Context* qctx = &ctx;
         for(std::size_t i = 0; i != depth; ++i) {
@@ -682,7 +682,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                     const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& name = p.at(0).as<PreHashed_String>();
+        const auto& name = p[0].as<PreHashed_String>();
         // Search for the name in the global context.
         auto qref = global.get_named_reference_opt(name);
         if(!qref) {
@@ -696,10 +696,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                  const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& options = p.at(0).as<Compiler_Options>();
-        const auto& sloc = p.at(1).as<Source_Location>();
-        const auto& params = p.at(2).as<Cow_Vector<PreHashed_String>>();
-        const auto& body = p.at(3).as<Cow_Vector<Statement>>();
+        const auto& options = p[0].as<Compiler_Options>();
+        const auto& sloc = p[1].as<Source_Location>();
+        const auto& params = p[2].as<Cow_Vector<PreHashed_String>>();
+        const auto& body = p[3].as<Cow_Vector<Statement>>();
         // Generate code of the function body.
         Cow_Vector<Air_Node> code_body;
         Analytic_Context ctx_func(&ctx);
@@ -727,9 +727,9 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& code_true = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto& code_false = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto& assign = static_cast<bool>(p.at(2).as<std::int64_t>());
+        const auto& code_true = p[0].as<Cow_Vector<Air_Node>>();
+        const auto& code_false = p[1].as<Cow_Vector<Air_Node>>();
+        const auto& assign = static_cast<bool>(p[2].as<std::int64_t>());
         // Pick a branch basing on the condition.
         if(stack.get_top_reference().read().test()) {
           // Evaluate the true branch. If the branch is empty, leave the condition on the stack.
@@ -751,9 +751,9 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                               const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& sloc = p.at(0).as<Source_Location>();
-        const auto& nargs = static_cast<std::size_t>(p.at(1).as<std::int64_t>());
-        const auto& tco_aware = static_cast<bool>(p.at(2).as<std::int64_t>());
+        const auto& sloc = p[0].as<Source_Location>();
+        const auto& nargs = static_cast<std::size_t>(p[1].as<std::int64_t>());
+        const auto& tco_aware = static_cast<bool>(p[2].as<std::int64_t>());
         // Allocate the argument vector.
         Cow_Vector<Reference> args;
         args.resize(nargs);
@@ -809,7 +809,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                               const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& name = p.at(0).as<PreHashed_String>();
+        const auto& name = p[0].as<PreHashed_String>();
         // Append a modifier.
         Reference_Modifier::S_object_key xmod = { name };
         stack.open_top_reference().zoom_in(rocket::move(xmod));
@@ -891,7 +891,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto& rref = stack.get_top_reference();
         // Copy the operand to create a temporary value, then return it.
@@ -909,7 +909,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Get the opposite of the operand as a temporary value, then return it.
@@ -932,7 +932,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                          const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
@@ -955,7 +955,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                          const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         const auto& rhs = stack.get_top_reference().read();
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
@@ -1010,7 +1010,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().unset();
         // Unset the reference and return the old value.
@@ -1022,7 +1022,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                              const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         const auto& rhs = stack.get_top_reference().read();
         // Return the number of elements in the operand.
@@ -1048,7 +1048,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                            const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         const auto& rhs = stack.get_top_reference().read();
         // Return the type name of the operand.
@@ -1061,7 +1061,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                          const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Get the square root of the operand as a temporary value, then return it.
@@ -1084,7 +1084,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Check whether the operand is a NaN, store the result in a temporary value, then return it.
@@ -1107,7 +1107,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Check whether the operand is an infinity, store the result in a temporary value, then return it.
@@ -1130,7 +1130,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Get the absolute value of the operand as a temporary value, then return it.
@@ -1153,7 +1153,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Get the sign bit of the operand as a temporary value, then return it.
@@ -1176,7 +1176,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Round the operand to the nearest integer as a temporary value, then return it.
@@ -1199,7 +1199,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
@@ -1222,7 +1222,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                          const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
@@ -1245,7 +1245,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
@@ -1268,7 +1268,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                            const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
@@ -1291,7 +1291,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                            const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
@@ -1314,7 +1314,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                           const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
@@ -1337,7 +1337,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                            const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is unary.
         auto rhs = stack.get_top_reference().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
@@ -1360,8 +1360,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                            const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        const auto& negative = static_cast<bool>(p.at(1).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
+        const auto& negative = static_cast<bool>(p[1].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1378,9 +1378,9 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                             const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
-        const auto& expect = static_cast<Value::Compare>(p.at(1).as<std::int64_t>());
-        const auto& negative = static_cast<bool>(p.at(2).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
+        const auto& expect = static_cast<Value::Compare>(p[1].as<std::int64_t>());
+        const auto& negative = static_cast<bool>(p[2].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1400,7 +1400,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                             const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1428,7 +1428,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1463,7 +1463,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1493,7 +1493,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1532,7 +1532,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1557,7 +1557,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1582,7 +1582,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1610,7 +1610,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1638,7 +1638,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1666,7 +1666,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1693,7 +1693,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1719,7 +1719,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1745,7 +1745,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                         const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is binary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();
@@ -1782,7 +1782,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                               const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& nelems = static_cast<std::size_t>(p.at(0).as<std::int64_t>());
+        const auto& nelems = static_cast<std::size_t>(p[0].as<std::int64_t>());
         // Pop references to create an array.
         G_array array;
         array.resize(nelems);
@@ -1800,7 +1800,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& keys = p.at(0).as<Cow_Vector<PreHashed_String>>();
+        const auto& keys = p[0].as<Cow_Vector<PreHashed_String>>();
         // Pop references to create an object.
         G_object object;
         object.reserve(keys.size());
@@ -1818,8 +1818,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                             const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& code_null = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto& assign = static_cast<bool>(p.at(1).as<std::int64_t>());
+        const auto& code_null = p[0].as<Cow_Vector<Air_Node>>();
+        const auto& assign = static_cast<bool>(p[1].as<std::int64_t>());
         // Pick a branch basing on the condition.
         if(!stack.get_top_reference().read().is_null()) {
           // Leave the condition on the stack.
@@ -1837,7 +1837,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                              const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& assign = static_cast<bool>(p.at(0).as<std::int64_t>());
+        const auto& assign = static_cast<bool>(p[0].as<std::int64_t>());
         // This operator is ternary.
         auto rhs = stack.get_top_reference().read();
         stack.pop_reference();

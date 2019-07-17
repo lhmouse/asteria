@@ -129,7 +129,7 @@ namespace Asteria {
                                                const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& code = p.at(0).as<Cow_Vector<Air_Node>>();
+        const auto& code = p[0].as<Cow_Vector<Air_Node>>();
         // Execute the block without affecting `ctx`.
         auto status = do_execute_block(stack, ctx, code, func, global);
         return status;
@@ -139,9 +139,9 @@ namespace Asteria {
                                                       const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& sloc = p.at(0).as<Source_Location>();
-        const auto& immutable = static_cast<bool>(p.at(1).as<std::int64_t>());
-        const auto& name = p.at(2).as<PreHashed_String>();
+        const auto& sloc = p[0].as<Source_Location>();
+        const auto& immutable = static_cast<bool>(p[1].as<std::int64_t>());
+        const auto& name = p[2].as<PreHashed_String>();
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx, "variable", name, global);
         // Initialize the variable.
@@ -153,7 +153,7 @@ namespace Asteria {
                                                         const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& name = p.at(0).as<PreHashed_String>();
+        const auto& name = p[0].as<PreHashed_String>();
         // Allocate a variable.
         auto var = do_safe_create_variable(nullptr, ctx, "variable placeholder", name, global);
         stack.set_last_variable(rocket::move(var));
@@ -166,8 +166,8 @@ namespace Asteria {
                                             const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& sloc = p.at(0).as<Source_Location>();
-        const auto& immutable = static_cast<bool>(p.at(1).as<std::int64_t>());
+        const auto& sloc = p[0].as<Source_Location>();
+        const auto& immutable = static_cast<bool>(p[1].as<std::int64_t>());
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this code.
         auto value = stack.get_top_reference().read();
@@ -183,11 +183,11 @@ namespace Asteria {
                                         const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& options = p.at(0).as<Compiler_Options>();
-        const auto& sloc = p.at(1).as<Source_Location>();
-        const auto& name = p.at(2).as<PreHashed_String>();
-        const auto& params = p.at(3).as<Cow_Vector<PreHashed_String>>();
-        const auto& body = p.at(4).as<Cow_Vector<Statement>>();
+        const auto& options = p[0].as<Compiler_Options>();
+        const auto& sloc = p[1].as<Source_Location>();
+        const auto& name = p[2].as<PreHashed_String>();
+        const auto& params = p[3].as<Cow_Vector<PreHashed_String>>();
+        const auto& body = p[4].as<Cow_Vector<Statement>>();
         // Create a dummy reference for further name lookups.
         // A function becomes visible before its definition, where it is initialized to `null`.
         auto var = do_safe_create_variable(nullptr, ctx, "function", name, global);
@@ -215,9 +215,9 @@ namespace Asteria {
                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& negative = static_cast<bool>(p.at(0).as<std::int64_t>());
-        const auto& code_true = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto& code_false = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& negative = static_cast<bool>(p[0].as<std::int64_t>());
+        const auto& code_true = p[1].as<Cow_Vector<Air_Node>>();
+        const auto& code_false = p[2].as<Cow_Vector<Air_Node>>();
         // Pick a branch basing on the condition.
         if(stack.get_top_reference().read().test() != negative) {
           // Execute the true branch. Forward any status codes unexpected to the caller.
@@ -292,9 +292,9 @@ namespace Asteria {
                                          const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& code_body = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto& negative = static_cast<bool>(p.at(1).as<std::int64_t>());
-        const auto& code_cond = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p[0].as<Cow_Vector<Air_Node>>();
+        const auto& negative = static_cast<bool>(p[1].as<std::int64_t>());
+        const auto& code_cond = p[2].as<Cow_Vector<Air_Node>>();
         // This is the same as a `do...while` loop in C.
         for(;;) {
           // Execute the body. Break out of the loop if requested. Forward any status codes unexpected to the caller.
@@ -318,9 +318,9 @@ namespace Asteria {
                                       const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& negative = static_cast<bool>(p.at(0).as<std::int64_t>());
-        const auto& code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto& code_body = p.at(2).as<Cow_Vector<Air_Node>>();
+        const auto& negative = static_cast<bool>(p[0].as<std::int64_t>());
+        const auto& code_cond = p[1].as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p[2].as<Cow_Vector<Air_Node>>();
         // This is the same as a `while` loop in C.
         for(;;) {
           // Check the condition.
@@ -344,10 +344,10 @@ namespace Asteria {
                                          const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& key_name = p.at(0).as<PreHashed_String>();
-        const auto& mapped_name = p.at(1).as<PreHashed_String>();
-        const auto& code_init = p.at(2).as<Cow_Vector<Air_Node>>();
-        const auto& code_body = p.at(3).as<Cow_Vector<Air_Node>>();
+        const auto& key_name = p[0].as<PreHashed_String>();
+        const auto& mapped_name = p[1].as<PreHashed_String>();
+        const auto& code_init = p[2].as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p[3].as<Cow_Vector<Air_Node>>();
         // This is the same as a ranged-`for` loop in C++.
         Executive_Context ctx_for(&ctx);
         auto key_var = do_safe_create_variable(nullptr, ctx_for, "key variable", key_name, global);
@@ -411,10 +411,10 @@ namespace Asteria {
                                     const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& code_init = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto& code_cond = p.at(1).as<Cow_Vector<Air_Node>>();
-        const auto& code_step = p.at(2).as<Cow_Vector<Air_Node>>();
-        const auto& code_body = p.at(3).as<Cow_Vector<Air_Node>>();
+        const auto& code_init = p[0].as<Cow_Vector<Air_Node>>();
+        const auto& code_cond = p[1].as<Cow_Vector<Air_Node>>();
+        const auto& code_step = p[2].as<Cow_Vector<Air_Node>>();
+        const auto& code_body = p[3].as<Cow_Vector<Air_Node>>();
         // This is the same as a `for` loop in C.
         Executive_Context ctx_for(&ctx);
         do_execute_statement_list(stack, ctx_for, code_init, func, global);
@@ -447,10 +447,10 @@ namespace Asteria {
                                     const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
         // Decode arguments.
-        const auto& code_try = p.at(0).as<Cow_Vector<Air_Node>>();
-        const auto& sloc = p.at(1).as<Source_Location>();
-        const auto& except_name = p.at(2).as<PreHashed_String>();
-        const auto& code_catch = p.at(3).as<Cow_Vector<Air_Node>>();
+        const auto& code_try = p[0].as<Cow_Vector<Air_Node>>();
+        const auto& sloc = p[1].as<Source_Location>();
+        const auto& except_name = p[2].as<PreHashed_String>();
+        const auto& code_catch = p[3].as<Cow_Vector<Air_Node>>();
         // This is the same as a `try...catch` block in C++.
         try {
           // Execute the `try` clause. If no exception is thrown, this will have little overhead.
@@ -475,7 +475,7 @@ namespace Asteria {
                                              const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& status = static_cast<Air_Node::Status>(p.at(0).as<std::int64_t>());
+        const auto& status = static_cast<Air_Node::Status>(p[0].as<std::int64_t>());
         // Return the status as is.
         return status;
       }
@@ -484,7 +484,7 @@ namespace Asteria {
                                                    const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& sloc = p.at(0).as<Source_Location>();
+        const auto& sloc = p[0].as<Source_Location>();
         // What to throw?
         const auto& value = stack.get_top_reference().read();
         // Unpack the nested exception, if any.
@@ -516,9 +516,9 @@ namespace Asteria {
                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& /*func*/, const Global_Context& /*global*/)
       {
         // Decode arguments.
-        const auto& sloc = p.at(0).as<Source_Location>();
-        const auto& negative = static_cast<bool>(p.at(1).as<std::int64_t>());
-        const auto& msg = p.at(2).as<PreHashed_String>();
+        const auto& sloc = p[0].as<Source_Location>();
+        const auto& negative = static_cast<bool>(p[1].as<std::int64_t>());
+        const auto& msg = p[2].as<PreHashed_String>();
         // If the assertion succeeds, there is no effect.
         if(ROCKET_EXPECT(stack.get_top_reference().read().test() != negative)) {
           return Air_Node::status_next;
