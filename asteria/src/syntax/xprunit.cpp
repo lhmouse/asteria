@@ -737,12 +737,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             rocket::for_each(code_true, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
             stack.forward_result(assign);
           }
-          return Air_Node::status_next;
         }
-        // Evaluate the false branch. If the branch is empty, leave the condition on the stack.
-        if(!code_false.empty()) {
-          rocket::for_each(code_false, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
-          stack.forward_result(assign);
+        else {
+          // Evaluate the false branch. If the branch is empty, leave the condition on the stack.
+          if(!code_false.empty()) {
+            rocket::for_each(code_false, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+            stack.forward_result(assign);
+          }
         }
         return Air_Node::status_next;
       }
@@ -1822,14 +1823,12 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         const auto& code_null = p[0].as<Cow_Vector<Air_Node>>();
         const auto& assign = static_cast<bool>(p[1].as<std::int64_t>());
         // Pick a branch basing on the condition.
-        if(!stack.get_top_reference().read().is_null()) {
-          // Leave the condition on the stack.
-          return Air_Node::status_next;
-        }
-        // Evaluate the null branch. If the branch is empty, leave the condition on the stack.
-        if(!code_null.empty()) {
-          rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
-          stack.forward_result(assign);
+        if(stack.get_top_reference().read().is_null()) {
+          // Evaluate the null branch. If the branch is empty, leave the condition on the stack.
+          if(!code_null.empty()) {
+            rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+            stack.forward_result(assign);
+          }
         }
         return Air_Node::status_next;
       }
@@ -1926,10 +1925,10 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Compiler_Options& 
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(altr.branch_true, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, false, ctx);  });
+        rocket::for_each(altr.branch_true, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, tco_aware, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         code_branch.clear();
-        rocket::for_each(altr.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, false, ctx);  });
+        rocket::for_each(altr.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, tco_aware, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 1
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 2
         code.emplace_back(do_execute_branch, rocket::move(p));
@@ -2225,7 +2224,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Compiler_Options& 
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(altr.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, false, ctx);  });
+        rocket::for_each(altr.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, tco_aware, ctx);  });
         p.emplace_back(rocket::move(code_branch));  // 0
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 1
         code.emplace_back(do_execute_coalescence, rocket::move(p));
