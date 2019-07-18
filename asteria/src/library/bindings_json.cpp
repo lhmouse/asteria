@@ -99,7 +99,7 @@ namespace Asteria {
             if(this->m_cur == 0) {
               return cstrm;
             }
-            return cstrm.fill(' '), cstrm.width(this->m_cur), cstrm << ' ';
+            return cstrm << std::setfill(' ') << std::setw(static_cast<int>(rocket::min(this->m_cur, INT_MAX))) << ' ';
           }
         void increment_level() override
           {
