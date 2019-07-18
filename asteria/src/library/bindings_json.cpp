@@ -210,6 +210,7 @@ namespace Asteria {
     G_string do_format_nonrecursive(const Value& value, Indenter& indent)
       {
         Cow_osstream cstrm;
+        cstrm.imbue(std::locale::classic());
         // Transform recursion to iteration using a handwritten stack.
         auto qvalue = std::addressof(value);
         Cow_Vector<Xformat> stack;
