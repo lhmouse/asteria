@@ -12,32 +12,31 @@ namespace Asteria {
 class Simple_Source_File
   {
   private:
-    bool m_throw_on_failure;
-    // We want type erasure.
-    Cow_Vector<Instantiated_Function> m_inst;
+    bool m_fthr;  // throw on failure
+    Cow_Vector<Instantiated_Function> m_code;  // for type erasure
 
   public:
     Simple_Source_File() noexcept
-      : m_throw_on_failure(false)
+      : m_fthr(false)
       {
       }
     Simple_Source_File(std::streambuf& cbuf, const Cow_String& filename)
-      : m_throw_on_failure(true)
+      : m_fthr(true)
       {
         this->reload(cbuf, filename);
       }
     Simple_Source_File(std::istream& cstrm, const Cow_String& filename)
-      : m_throw_on_failure(true)
+      : m_fthr(true)
       {
         this->reload(cstrm, filename);
       }
     Simple_Source_File(const Cow_String& cstr, const Cow_String& filename)
-      : m_throw_on_failure(true)
+      : m_fthr(true)
       {
         this->reload(cstr, filename);
       }
     explicit Simple_Source_File(const Cow_String& filename)
-      : m_throw_on_failure(true)
+      : m_fthr(true)
       {
         this->open(filename);
       }
@@ -49,11 +48,11 @@ class Simple_Source_File
   public:
     bool does_throw_on_failure() const noexcept
       {
-        return this->m_throw_on_failure;
+        return this->m_fthr;
       }
-    void set_throw_on_failure(bool throw_on_failure = true) noexcept
+    void set_throw_on_failure(bool fthr = true) noexcept
       {
-        this->m_throw_on_failure = throw_on_failure;
+        this->m_fthr = fthr;
       }
 
     Parser_Error reload(std::streambuf& cbuf, const Cow_String& filename);

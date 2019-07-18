@@ -39,14 +39,14 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const C
     ctx.prepare_function_parameters(params);
     rocket::for_each(parser.get_statements(), [&](const Statement& stmt) { stmt.generate_code(code, nullptr, ctx, options);  });
     // Accept the code.
-    this->m_inst.clear();
-    this->m_inst.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
+    this->m_code.clear();
+    this->m_code.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
     return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
   }
 
 Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
   {
-    if(this->m_throw_on_failure && (err != Parser_Error::code_success)) {
+    if(this->m_fthr && (err != Parser_Error::code_success)) {
       err.convert_to_runtime_error_and_throw();
     }
     return rocket::move(err);
@@ -111,18 +111,18 @@ Parser_Error Simple_Source_File::open(const Cow_String& filename)
 void Simple_Source_File::clear() noexcept
   {
     // Destroy contents.
-    this->m_inst.clear();
+    this->m_code.clear();
   }
 
 Reference Simple_Source_File::execute(const Global_Context& global, Cow_Vector<Reference>&& args) const
   {
-    if(ROCKET_UNEXPECT(this->m_inst.empty())) {
+    if(ROCKET_UNEXPECT(this->m_code.empty())) {
       // Return a null reference if there is nothing to execute.
       return Reference_Root::S_null();
     }
     // Execute the code.
     Reference self;
-    this->m_inst.front().invoke(self, global, rocket::move(args));
+    this->m_code.front().invoke(self, global, rocket::move(args));
     self.unwrap_tail_calls(global);
     return self;
   }
