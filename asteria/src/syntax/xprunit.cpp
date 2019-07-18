@@ -723,6 +723,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
+    void do_execute_subexpression(Evaluation_Stack& stack, Executive_Context& ctx,
+                                  const Cow_String& func, const Global_Context& global, const Cow_Vector<Air_Node>& code, bool assign)
+      {
+        rocket::for_each(code, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
+        stack.forward_result(assign);
+      }
+
     Air_Node::Status do_execute_branch(Evaluation_Stack& stack, Executive_Context& ctx,
                                        const Cow_Vector<Air_Node::Parameter>& p, const Cow_String& func, const Global_Context& global)
       {
@@ -733,17 +740,11 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Pick a branch basing on the condition.
         if(stack.get_top_reference().read().test()) {
           // Evaluate the true branch. If the branch is empty, leave the condition on the stack.
-          if(!code_true.empty()) {
-            rocket::for_each(code_true, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
-            stack.forward_result(assign);
-          }
+          do_execute_subexpression(stack, ctx, func, global, code_true, assign);
         }
         else {
           // Evaluate the false branch. If the branch is empty, leave the condition on the stack.
-          if(!code_false.empty()) {
-            rocket::for_each(code_false, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
-            stack.forward_result(assign);
-          }
+          do_execute_subexpression(stack, ctx, func, global, code_false, assign);
         }
         return Air_Node::status_next;
       }
@@ -1825,10 +1826,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Pick a branch basing on the condition.
         if(stack.get_top_reference().read().is_null()) {
           // Evaluate the null branch. If the branch is empty, leave the condition on the stack.
-          if(!code_null.empty()) {
-            rocket::for_each(code_null, [&](const Air_Node& node) { node.execute(stack, ctx, func, global);  });
-            stack.forward_result(assign);
-          }
+          do_execute_subexpression(stack, ctx, func, global, code_null, assign);
         }
         return Air_Node::status_next;
       }
