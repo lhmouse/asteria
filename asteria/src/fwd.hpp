@@ -84,7 +84,6 @@ class Backtrace_Frame;
 class Exception;
 
 // Compiler
-class Compiler_Options;
 class Parser_Error;
 class Token;
 class Token_Stream;
@@ -147,6 +146,19 @@ enum API_Version : std::uint32_t
     api_version_none       = 0x00000000,  // no standard library
     api_version_0001_0000  = 0x00010000,  // version 1.0
     api_version_latest     = 0xFFFFFFFF,  // everything
+  };
+
+// Options for source parsing and code generation
+struct Compiler_Options
+  {
+    // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
+    bool escapable_single_quote_string = false;
+    // Parse keywords as identifiers. [useful when parsing JSON text]
+    bool keyword_as_identifier = false;
+    // Parse integer literals as real literals. [useful when parsing JSON text]
+    bool integer_as_real = false;
+    // Disable Tail Call Optimization (TCO).
+    bool disable_tco = false;
   };
 
 }  // namespace Asteria

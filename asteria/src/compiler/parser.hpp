@@ -5,7 +5,6 @@
 #define ASTERIA_COMPILER_PARSER_HPP_
 
 #include "../fwd.hpp"
-#include "compiler_options.hpp"
 #include "parser_error.hpp"
 
 namespace Asteria {

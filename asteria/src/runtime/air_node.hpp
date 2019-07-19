@@ -8,7 +8,6 @@
 #include "value.hpp"
 #include "reference.hpp"
 #include "../syntax/source_location.hpp"
-#include "../compiler/compiler_options.hpp"
 
 namespace Asteria {
 
