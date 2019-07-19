@@ -22,7 +22,7 @@ Executive_Context::~Executive_Context()
 
     }  // namespace
 
-void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>& zvarg, const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args)
+void Executive_Context::do_prepare_function(const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args)
   {
     // This is the subscript of the special pameter placeholder `...`.
     Opt<std::size_t> qelps;
@@ -41,6 +41,7 @@ void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>&
       if(param.rdstr().starts_with("__")) {
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
+      // Set the parameter.
       if(ROCKET_EXPECT(i < args.size())) {
         this->open_named_reference(param) = rocket::move(args.mut(i));
       }
@@ -55,11 +56,11 @@ void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>&
         // Erase named arguments as well as the ellipsis.
         args.erase(0, *qelps);
         // Create a new argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(Rcobj<Variadic_Arguer>(zvarg.get(), rocket::move(args)));
+        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(Rcobj<Variadic_Arguer>(this->m_zvarg.get(), rocket::move(args)));
       }
       else {
         // Reference the pre-allocated zero-ary argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(zvarg);
+        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(this->m_zvarg);
       }
     }
     else {
@@ -70,11 +71,11 @@ void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>&
       }
       else {
         // Reference the pre-allocated zero-ary argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(zvarg);
+        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(this->m_zvarg);
       }
     }
     this->open_named_reference(rocket::sref("__this")) = rocket::move(self);
-    this->open_named_reference(rocket::sref("__func")) = do_make_constant<G_string>(zvarg->get_function_signature());
+    this->open_named_reference(rocket::sref("__func")) = do_make_constant<G_string>(this->m_zvarg->get_function_signature());
   }
 
 }  // namespace Asteria

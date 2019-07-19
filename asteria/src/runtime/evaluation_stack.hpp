@@ -20,10 +20,6 @@ class Evaluation_Stack
       : m_refs()
       {
       }
-    Evaluation_Stack(Cow_Vector<Reference>&& stor) noexcept
-      : m_refs(rocket::move(stor))
-      {
-      }
     virtual ~Evaluation_Stack();
 
     Evaluation_Stack(const Evaluation_Stack&)
@@ -40,6 +36,10 @@ class Evaluation_Stack
       {
         this->m_refs.clear();
       }
+   void reserve_references(Cow_Vector<Reference>&& stor) noexcept
+     {
+       this->m_refs.reserve(rocket::move(stor));
+     }
 
     const Reference& get_top_reference() const noexcept
       {

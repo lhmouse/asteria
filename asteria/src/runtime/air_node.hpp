@@ -52,8 +52,7 @@ class Air_Node
         , Cow_Vector<Air_Node>          // 7,
         , Compiler_Options              // 8,
       )>;
-    using Executor = Status (Evaluation_Stack& stack, Executive_Context& ctx,
-                             const Cow_Vector<Parameter>& params, const Cow_String& func, const Global_Context& global);
+    using Executor = Status (Executive_Context& ctx, const Cow_Vector<Parameter>& params);
 
   private:
     Executor* m_fptr;
@@ -66,7 +65,7 @@ class Air_Node
       }
 
   public:
-    Status execute(Evaluation_Stack& stack, Executive_Context& ctx, const Cow_String& func, const Global_Context& global) const;
+    Status execute(Executive_Context& ctx) const;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 

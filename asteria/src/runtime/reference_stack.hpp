@@ -16,8 +16,8 @@ class Reference_Stack
     Reference* m_btop;  // This points to the next element of the top.
 
   public:
-    template<typename... ParamsT> explicit Reference_Stack(ParamsT&&... params)
-      : m_stor(rocket::forward<ParamsT>(params)...), m_btop(this->m_stor.mut_data())
+    constexpr Reference_Stack() noexcept
+      : m_stor(), m_btop(nullptr)
       {
       }
     ~Reference_Stack();
@@ -39,6 +39,11 @@ class Reference_Stack
     void clear() noexcept
       {
         this->m_btop = this->m_stor.mut_data();
+      }
+    void reserve(Cow_Vector<Reference>&& stor) noexcept
+      {
+        this->m_stor = rocket::move(stor);
+        this->clear();
       }
 
     const Reference& get(std::size_t index) const noexcept

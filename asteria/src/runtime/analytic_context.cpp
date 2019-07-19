@@ -11,7 +11,7 @@ Analytic_Context::~Analytic_Context()
   {
   }
 
-void Analytic_Context::prepare_function_parameters(const Cow_Vector<PreHashed_String>& params)
+void Analytic_Context::do_prepare_function(const Cow_Vector<PreHashed_String>& params)
   {
     // Set parameters, which are local references.
     for(std::size_t i = 0; i < params.size(); ++i) {

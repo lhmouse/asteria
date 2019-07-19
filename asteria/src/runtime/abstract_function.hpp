@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Abstract_Function : public virtual Rcbase
   {
-  public:
+  protected:
     Abstract_Function() noexcept
       {
       }

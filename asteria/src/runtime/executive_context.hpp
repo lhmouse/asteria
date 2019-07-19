@@ -14,13 +14,27 @@ class Executive_Context : public Abstract_Context
   private:
     const Executive_Context* m_parent_opt;
 
+    std::reference_wrapper<const Global_Context> m_global;
+    std::reference_wrapper<Evaluation_Stack> m_stack;
+    const Rcobj<Variadic_Arguer>& m_zvarg;
+
   public:
-    // An executive context can only be created on another executive context (not an analytic one).
-    explicit Executive_Context(const Executive_Context* parent_opt) noexcept
-      : m_parent_opt(parent_opt)
+    Executive_Context(int, const Global_Context& xglobal, Evaluation_Stack& xstack, const Rcobj<Variadic_Arguer>& xzvarg,  // for functions
+                           const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args)
+      : m_parent_opt(nullptr),
+        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
+      {
+        this->do_prepare_function(params, rocket::move(self), rocket::move(args));
+      }
+    Executive_Context(int, const Executive_Context& parent)  // for non-functions
+      : m_parent_opt(&parent),
+        m_global(parent.m_global), m_stack(parent.m_stack), m_zvarg(parent.m_zvarg)
       {
       }
     ~Executive_Context() override;
+
+  private:
+    void do_prepare_function(const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args);
 
   public:
     bool is_analytic() const noexcept override
@@ -32,7 +46,18 @@ class Executive_Context : public Abstract_Context
         return this->m_parent_opt;
       }
 
-    void prepare_function_arguments(const Rcobj<Variadic_Arguer>& zvarg, const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args);
+    const Global_Context& global() const noexcept
+      {
+        return this->m_global;
+      }
+    Evaluation_Stack& stack() const noexcept
+      {
+        return this->m_stack;
+      }
+    const Rcobj<Variadic_Arguer>& zvarg() const noexcept
+      {
+        return this->m_zvarg;
+      }
   };
 
 }  // namespace Asteria
