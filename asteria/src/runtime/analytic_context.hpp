@@ -15,12 +15,24 @@ class Analytic_Context : public Abstract_Context
     const Abstract_Context* m_parent_opt;
 
   public:
-    // An analytic context can be created on another analytic or executive context.
-    explicit Analytic_Context(const Abstract_Context* parent_opt) noexcept
-      : m_parent_opt(parent_opt)
+    Analytic_Context(int, const Cow_Vector<PreHashed_String>& params)  // for top-level functions
+      : m_parent_opt(nullptr)
+      {
+        this->do_prepare_function(params);
+      }
+    Analytic_Context(int, const Abstract_Context& parent, const Cow_Vector<PreHashed_String>& params)  // for closure functions
+      : m_parent_opt(&parent)
+      {
+        this->do_prepare_function(params);
+      }
+    Analytic_Context(int, const Abstract_Context& parent)  // for non-functions
+      : m_parent_opt(std::addressof(parent))
       {
       }
     ~Analytic_Context() override;
+
+  private:
+    void do_prepare_function(const Cow_Vector<PreHashed_String>& params);
 
   public:
     bool is_analytic() const noexcept override
@@ -31,8 +43,6 @@ class Analytic_Context : public Abstract_Context
       {
         return this->m_parent_opt;
       }
-
-    void prepare_function_parameters(const Cow_Vector<PreHashed_String>& params);
   };
 
 }  // namespace Asteria

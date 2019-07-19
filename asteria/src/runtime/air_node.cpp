@@ -8,9 +8,9 @@
 
 namespace Asteria {
 
-Air_Node::Status Air_Node::execute(Evaluation_Stack& stack, Executive_Context& ctx, const Cow_String& func, const Global_Context& global) const
+Air_Node::Status Air_Node::execute(Executive_Context& ctx) const
   {
-    return (*(this->m_fptr))(stack, ctx, this->m_params, func, global);
+    return (*(this->m_fptr))(ctx, this->m_params);
   }
 
     namespace {

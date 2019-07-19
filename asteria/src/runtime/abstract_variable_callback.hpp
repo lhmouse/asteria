@@ -10,7 +10,7 @@ namespace Asteria {
 
 class Abstract_Variable_Callback
   {
-  public:
+  protected:
     Abstract_Variable_Callback() noexcept
       {
       }

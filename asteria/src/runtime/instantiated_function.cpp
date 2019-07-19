@@ -21,17 +21,13 @@ std::ostream& Instantiated_Function::describe(std::ostream& os) const
 
 Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const
   {
-    // Create the context for this function.
-    Executive_Context ctx_func(nullptr);
-    ctx_func.prepare_function_arguments(this->m_zvarg, this->m_params, rocket::move(self), rocket::move(args));
-    // Reuse the storage of `args` to create the stack.
-    Evaluation_Stack stack(rocket::move(args));
+    // Create the stack and context for this function.
+    Evaluation_Stack stack;
+    Executive_Context ctx_func(1, global, stack, this->m_zvarg, this->m_params, rocket::move(self), rocket::move(args));
+    stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
     auto status = Air_Node::status_next;
-    std::find_if(this->m_code.begin(), this->m_code.end(),
-                 [&](const Air_Node& node) { return (status = node.execute(stack, ctx_func,
-                                                                           this->m_zvarg->get_function_signature(), global))
-                                                    != Air_Node::status_next;  });
+    rocket::any_of(this->m_code, [&](const Air_Node& node) { return (status = node.execute(ctx_func)) != Air_Node::status_next;  });
     if(status == Air_Node::status_return){
       // Return the reference at the top of `stack`.
       self = rocket::move(stack.open_top_reference());
