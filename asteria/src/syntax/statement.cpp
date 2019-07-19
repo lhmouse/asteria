@@ -776,11 +776,8 @@ void Statement::generate_code(Cow_Vector<Air_Node>& code, Cow_Vector<PreHashed_S
         Cow_Vector<Air_Node::Parameter> p;
         code.emplace_back(do_execute_clear_stack, rocket::move(p));
         // Generate inline code for the operand.
-        if(!altr.expr.empty()) {
-          // If the last operator is a function call, it can be TCO'd.
-          std::for_each(altr.expr.begin(), altr.expr.end() - 1, [&](const Xprunit& unit) { unit.generate_code(code, options, false, ctx);  });
-          altr.expr.back().generate_code(code, options, !options.disable_tco, ctx);
-        }
+        // Only the last operator can be TCO'd.
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, rocket::same(unit, altr.expr.back()), ctx);  });
         // Encode arguments.
         p.clear();
         p.emplace_back(static_cast<std::int64_t>(Air_Node::status_return));  // 0

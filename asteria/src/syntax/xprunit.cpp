@@ -636,6 +636,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return res;
       }
 
+    void do_generate_code_branch(Cow_Vector<Air_Node>& code, const Compiler_Options& options, bool tco_aware, const Analytic_Context& ctx,
+                                 const Cow_Vector<Xprunit>& units)
+      {
+        // Only the last operatro may be TCO'd.
+        rocket::for_each(units,  [&](const Xprunit& unit) { unit.generate_code(code, options, !options.disable_tco && tco_aware
+                                                                                              && rocket::same(unit, units.back()), ctx);  });
+      }
+
     Air_Node::Status do_push_literal(Executive_Context& ctx, const Cow_Vector<Air_Node::Parameter>& p)
       {
         // Decode arguments.
@@ -776,10 +784,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
             // Call the function now.
             target->invoke(self, ctx.global(), rocket::move(args));
-            if(!tco_aware) {
-              // Unpack tail calls.
-              self.unwrap_tail_calls(ctx.global());
-            }
+            self.unwrap_tail_calls(ctx.global());
             // The result will have been stored into `self`.
             ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
           }
@@ -1869,10 +1874,10 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Compiler_Options& 
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(altr.branch_true, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, tco_aware, ctx);  });
+        do_generate_code_branch(code_branch, options, tco_aware, ctx, altr.branch_true);
         p.emplace_back(rocket::move(code_branch));  // 0
         code_branch.clear();
-        rocket::for_each(altr.branch_false, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, tco_aware, ctx);  });
+        do_generate_code_branch(code_branch, options, tco_aware, ctx, altr.branch_false);
         p.emplace_back(rocket::move(code_branch));  // 1
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 2
         code.emplace_back(do_execute_branch, rocket::move(p));
@@ -2168,7 +2173,7 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Compiler_Options& 
         // Encode arguments.
         Cow_Vector<Air_Node::Parameter> p;
         Cow_Vector<Air_Node> code_branch;
-        rocket::for_each(altr.branch_null, [&](const Xprunit& unit) { unit.generate_code(code_branch, options, tco_aware, ctx);  });
+        do_generate_code_branch(code_branch, options, tco_aware, ctx, altr.branch_null);
         p.emplace_back(rocket::move(code_branch));  // 0
         p.emplace_back(static_cast<std::int64_t>(altr.assign));  // 1
         code.emplace_back(do_execute_coalescence, rocket::move(p));

@@ -199,6 +199,11 @@ template<typename testT, typename lowerT, typename upperT> constexpr decltype(0 
                                            : noadl::forward<testT>(test);
   }
 
+template<typename lhsT, typename rhsT> inline bool same(const lhsT& lhs, const rhsT& rhs) noexcept
+  {
+    return static_cast<const void*>(::std::addressof(lhs)) == static_cast<const void*>(::std::addressof(rhs));
+  }
+
 template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<charT, traitsT>& ios, typename basic_ios<charT, traitsT>::iostate& state)
   {
     // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
