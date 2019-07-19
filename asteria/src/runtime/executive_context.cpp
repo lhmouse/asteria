@@ -66,8 +66,7 @@ void Executive_Context::do_prepare_function(const Cow_Vector<PreHashed_String>& 
     else {
       if(args.size() > params.size()) {
         // Disallow exceess arguments if the function is not variadic.
-        ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", params.size(), "`, "
-                                    "but got `", args.size(), "`).");
+        ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", params.size(), "`, but got `", args.size(), "`).");
       }
       else {
         // Reference the pre-allocated zero-ary argument getter.
