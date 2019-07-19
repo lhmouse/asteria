@@ -25,7 +25,7 @@ Executive_Context::~Executive_Context()
 void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>& zvarg, const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args)
   {
     // This is the subscript of the special pameter placeholder `...`.
-    Opt<std::size_t> elps_pos;
+    Opt<std::size_t> qelps;
     // Set parameters, which are local references.
     for(std::size_t i = 0; i < params.size(); ++i) {
       const auto& param = params.at(i);
@@ -35,7 +35,7 @@ void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>&
       if(param == "...") {
         // Nothing is set for the parameter placeholder, but the parameter list terminates here.
         ROCKET_ASSERT(i == params.size() - 1);
-        elps_pos = i;
+        qelps = i;
         break;
       }
       if(param.rdstr().starts_with("__")) {
@@ -50,10 +50,10 @@ void Executive_Context::prepare_function_arguments(const Rcobj<Variadic_Arguer>&
     }
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
-    if(elps_pos) {
-      if(args.size() > *elps_pos) {
+    if(qelps) {
+      if(args.size() > *qelps) {
         // Erase named arguments as well as the ellipsis.
-        args.erase(0, *elps_pos);
+        args.erase(0, *qelps);
         // Create a new argument getter.
         this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(Rcobj<Variadic_Arguer>(zvarg.get(), rocket::move(args)));
       }
