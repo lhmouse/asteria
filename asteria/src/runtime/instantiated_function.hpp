@@ -20,7 +20,7 @@ class Instantiated_Function : public Abstract_Function
     Cow_Vector<Air_Node> m_code;
 
   public:
-    Instantiated_Function(const Source_Location& sloc, const PreHashed_String& func, const Cow_Vector<PreHashed_String>& params,
+    Instantiated_Function(const Source_Location& sloc, const Cow_String& func, const Cow_Vector<PreHashed_String>& params,
                           Cow_Vector<Air_Node>&& code)
       : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params),
         m_code(rocket::move(code))
@@ -33,7 +33,7 @@ class Instantiated_Function : public Abstract_Function
       {
         return this->m_zvarg->get_source_location();
       }
-    const PreHashed_String& get_function_signature() const noexcept
+    const Cow_String& get_function_signature() const noexcept
       {
         return this->m_zvarg->get_function_signature();
       }

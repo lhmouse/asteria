@@ -15,11 +15,11 @@ class Variadic_Arguer : public Abstract_Function
   {
   private:
     Source_Location m_sloc;
-    PreHashed_String m_func;
+    Cow_String m_func;
     Cow_Vector<Reference> m_vargs;
 
   public:
-    template<typename... XvargsT> Variadic_Arguer(const Source_Location& sloc, const PreHashed_String& func,
+    template<typename... XvargsT> Variadic_Arguer(const Source_Location& sloc, const Cow_String& func,
                                                   XvargsT&&... xvargs)
       : m_sloc(sloc), m_func(func),
         m_vargs(rocket::forward<XvargsT>(xvargs)...)
@@ -45,7 +45,7 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_sloc.line();
       }
-    const PreHashed_String& get_function_signature() const noexcept
+    const Cow_String& get_function_signature() const noexcept
       {
         return this->m_func;
       }
