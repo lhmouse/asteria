@@ -60,7 +60,8 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
     Cow_Vector<Bucket> stor;
-    stor.resize(res_arg | 3);
+    stor.reserve(res_arg | 3);
+    stor.append(stor.capacity());
     this->m_stor.swap(stor);
     // Get table bounds.
     auto pre = this->m_stor.mut_data();
