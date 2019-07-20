@@ -60,7 +60,7 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
     ROCKET_ASSERT(res_arg >= this->m_stor.size());
     // Allocate a new vector.
     Cow_Vector<Bucket> stor;
-    stor.resize(res_arg | 2);
+    stor.resize(res_arg | 3);
     this->m_stor.swap(stor);
     // Get table bounds.
     auto pre = this->m_stor.mut_data();
@@ -70,30 +70,31 @@ void Variable_HashSet::do_rehash(std::size_t res_arg)
     end->prev = pre;
     // Update the number of elements.
     pre->size = 0;
-    // Move elements into the new table.
-    if(ROCKET_EXPECT(stor.empty())) {
+    // Move elements into the new table, if any.
+    if(stor.empty()) {
       return;
     }
-    // Drop the last reserved bucket.
-    stor.pop_back();
-    // In reality the first reserved bucket need not be moved, either.
-    // But `.empty()` is faster than `.size()`...
-    while(!stor.empty()) {
-      auto& rbkt = stor.mut_back();
-      if(ROCKET_UNEXPECT(rbkt)) {
-        // Find a bucket for the new element.
-        auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.first.get()));
-        auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket&) { return false;  });
-        ROCKET_ASSERT(bkt);
-        // Insert it into the new bucket.
-        ROCKET_ASSERT(!*bkt);
-        bkt->first.swap(rbkt.first);
-        bkt->do_attach(end);
-        // Update the number of elements.
-        pre->size++;
-      }
-      stor.pop_back();
-    }
+    std::for_each(
+      // Get the range of valid buckets.
+      stor.mut_begin() + 1, stor.mut_end() - 1,
+      // Move each bucket in the range.
+      [&](Bucket& rbkt)
+        {
+          if(ROCKET_EXPECT(!rbkt)) {
+            return;
+          }
+          // Find a bucket for the new element.
+          auto origin = rocket::get_probing_origin(pre + 1, end, reinterpret_cast<std::uintptr_t>(rbkt.first.get()));
+          auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket&) { return false;  });
+          ROCKET_ASSERT(bkt);
+          // Insert it into the new bucket.
+          ROCKET_ASSERT(!*bkt);
+          bkt->first.swap(rbkt.first);
+          bkt->do_attach(end);
+          // Update the number of elements.
+          pre->size++;
+        }
+      );
   }
 
 void Variable_HashSet::do_check_relocation(Bucket* to, Bucket* from)
