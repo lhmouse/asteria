@@ -22,7 +22,7 @@ class Abstract_Context
     Uptr<Rcbase, Collection_Trigger> m_tied_coll_opt;
     Reference_Dictionary m_named_refs;
 
-  protected:
+  public:
     Abstract_Context() noexcept
       {
       }

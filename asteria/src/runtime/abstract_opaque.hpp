@@ -11,7 +11,7 @@ namespace Asteria {
 
 class Abstract_Opaque : public virtual Rcbase
   {
-  protected:
+  public:
     Abstract_Opaque() noexcept
       {
       }
