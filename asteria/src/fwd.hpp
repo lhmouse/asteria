@@ -63,7 +63,6 @@ class Placeholder;
 class Reference_Root;
 class Reference_Modifier;
 class Reference;
-class Reference_Stack;
 class Reference_Dictionary;
 class Evaluation_Stack;
 class Variable;

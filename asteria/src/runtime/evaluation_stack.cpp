@@ -3,41 +3,11 @@
 
 #include "../precompiled.hpp"
 #include "evaluation_stack.hpp"
-#include "../utilities.hpp"
 
 namespace Asteria {
 
 Evaluation_Stack::~Evaluation_Stack()
   {
-  }
-
-void Evaluation_Stack::set_temporary_result(bool assign, Value&& value)
-  {
-    // Do not play with this at home.
-    ROCKET_ASSERT(this->m_refs.size() >= 1);
-    if(assign) {
-      // Write the value to the top refernce.
-      this->m_refs.get(0).open() = rocket::move(value);
-      return;
-    }
-    // Replace the top reference to a temporary reference to the value.
-    Reference_Root::S_temporary xref = { rocket::move(value) };
-    this->m_refs.mut(0) = rocket::move(xref);
-  }
-
-void Evaluation_Stack::forward_result(bool assign)
-  {
-    // Do not play with this at home.
-    ROCKET_ASSERT(this->m_refs.size() >= 2);
-    if(assign) {
-      // Read a value from the top reference and write it to the second reference. Drop the top reference thereafter.
-      this->m_refs.get(1).open() = this->m_refs.get(0).read();
-      this->m_refs.pop();
-      return;
-    }
-    // Remove the next reference from the top.
-    this->m_refs.mut(1) = rocket::move(this->m_refs.mut(0));
-    this->m_refs.pop();
   }
 
 }  // namespace Asteria

@@ -5,22 +5,25 @@
 #define ASTERIA_RUNTIME_EVALUATION_STACK_HPP_
 
 #include "../fwd.hpp"
-#include "reference_stack.hpp"
+#include "reference.hpp"
 
 namespace Asteria {
 
 class Evaluation_Stack
   {
   private:
-    Reference_Stack m_refs;
-    Rcptr<Variable> m_lvar_opt;
+    Cow_Vector<Reference> m_refs;
+    Reference* m_etop;
+
+    Rcptr<Variable> m_lvar;
 
   public:
     Evaluation_Stack() noexcept
-      : m_refs()
+      : m_refs(), m_etop(nullptr),
+        m_lvar(nullptr)
       {
       }
-    virtual ~Evaluation_Stack();
+    ~Evaluation_Stack();
 
     Evaluation_Stack(const Evaluation_Stack&)
       = delete;
@@ -28,49 +31,102 @@ class Evaluation_Stack
       = delete;
 
   public:
-    std::size_t get_reference_count() const noexcept
+    std::size_t count_references() const noexcept
       {
-        return this->m_refs.size();
+        return static_cast<std::size_t>(this->m_etop - this->m_refs.data());
       }
     void clear_references() noexcept
       {
-        this->m_refs.clear();
+        // We assume that `m_refs` is always owned uniquely, unless it is empty.
+        auto etop = this->m_refs.mut_data();
+        // Reset the top pointer without destroying references for efficiency.
+        this->m_etop = etop;
       }
-   void reserve_references(Cow_Vector<Reference>&& stor) noexcept
-     {
-       this->m_refs.reserve(rocket::move(stor));
-     }
+    void reserve_references(Cow_Vector<Reference>&& refs)
+      {
+        // This may throw allocation failure if `refs` is not unique.
+        auto etop = refs.mut_data();
+        // Reuse the storage of `refs` and initialize the stack to empty.
+        this->m_refs = rocket::move(refs);
+        this->m_etop = etop;
+      }
 
     const Reference& get_top_reference() const noexcept
       {
-        return this->m_refs.get(0);
+        auto etop = this->m_etop;
+        ROCKET_ASSERT(etop);
+        ROCKET_ASSERT(etop - this->m_refs.data() >= 1);
+        return etop[-1];
       }
     Reference& open_top_reference() noexcept
       {
-        return this->m_refs.mut(0);
+        auto etop = this->m_etop;
+        ROCKET_ASSERT(etop);
+        ROCKET_ASSERT(etop - this->m_refs.data() >= 1);
+        return etop[-1];
       }
-    template<typename ParamT> Reference& push_reference(ParamT&& param)
+    template<typename XrefT> Reference& push_reference(XrefT&& xref)
       {
-        return this->m_refs.push(rocket::forward<ParamT>(param));
+        auto etop = this->m_etop;
+        if(etop && (etop < this->m_refs.data() + this->m_refs.size())) {
+          // Overwrite the next element.
+          *etop = rocket::forward<XrefT>(xref);
+        }
+        else {
+          // Push a new element.
+          etop = std::addressof(this->m_refs.emplace_back(rocket::forward<XrefT>(xref)));
+        }
+        // Advance the top pointer past the element that has just been written.
+        this->m_etop = ++etop;
+        return etop[-1];
+      }
+    template<typename XvalueT> Reference& set_temporary_reference(bool assign, XvalueT&& xvalue)
+      {
+        auto etop = this->m_etop;
+        ROCKET_ASSERT(etop);
+        ROCKET_ASSERT(etop - this->m_refs.data() >= 1);
+        if(assign) {
+          // Write the value to the top refernce.
+          etop[-1].open() = rocket::forward<XvalueT>(xvalue);
+        }
+        else {
+          // Replace the top reference to a temporary reference to the value.
+          Reference_Root::S_temporary xref = { rocket::forward<XvalueT>(xvalue) };
+          etop[-1] = rocket::move(xref);
+        }
+        return etop[-1];
       }
     void pop_reference() noexcept
       {
-        this->m_refs.pop();
+        auto etop = this->m_etop;
+        ROCKET_ASSERT(etop);
+        ROCKET_ASSERT(etop - this->m_refs.data() >= 1);
+        this->m_etop = --etop;
+      }
+    void pop_next_reference(bool assign)
+      {
+        auto etop = this->m_etop;
+        ROCKET_ASSERT(etop);
+        ROCKET_ASSERT(etop - this->m_refs.data() >= 2);
+        if(assign) {
+          // Read a value from the top reference and write it to the one beneath it.
+          etop[-2].open() = etop[-1].read();
+        }
+        else {
+          // Overwrite the reference beneath the top.
+          etop[-2] = rocket::move(etop[-1]);
+        }
+        this->m_etop = --etop;
       }
 
     void set_last_variable(Rcptr<Variable>&& var_opt) noexcept
       {
-        this->m_lvar_opt = rocket::move(var_opt);
+        this->m_lvar = rocket::move(var_opt);
       }
     Rcptr<Variable> release_last_variable_opt() noexcept
       {
-        return std::exchange(this->m_lvar_opt, nullptr);
+        return std::exchange(this->m_lvar, nullptr);
       }
-
-    // These are auxiliary functions purely for evaluation of expressions/
-    // Do not play with these at home.
-    void set_temporary_result(bool assign, Value&& value);
-    void forward_result(bool assign);
   };
 
 }  // namespace Asteria

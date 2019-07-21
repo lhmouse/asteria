@@ -728,7 +728,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     void do_execute_subexpression(Executive_Context& ctx, const Cow_Vector<Air_Node>& code, bool assign)
       {
         rocket::for_each(code, [&](const Air_Node& node) { node.execute(ctx);  });
-        ctx.stack().forward_result(assign);
+        ctx.stack().pop_next_reference(assign);
       }
 
     Air_Node::Status do_execute_branch(Executive_Context& ctx, const Cow_Vector<Air_Node::Parameter>& p)
@@ -822,12 +822,12 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Increment the operand and return the old value. `altr.assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.mut_integer();
-          ctx.stack().set_temporary_result(false, rocket::move(lhs));
+          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
           auto& reg = lhs.mut_real();
-          ctx.stack().set_temporary_result(false, rocket::move(lhs));
+          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_real(1));
         }
         else {
@@ -844,12 +844,12 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Decrement the operand and return the old value. `altr.assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.mut_integer();
-          ctx.stack().set_temporary_result(false, rocket::move(lhs));
+          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
           auto& reg = lhs.mut_real();
-          ctx.stack().set_temporary_result(false, rocket::move(lhs));
+          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_real(1));
         }
         else {
@@ -896,7 +896,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           return Air_Node::status_next;
         }
         auto rhs = rref.read();
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -918,7 +918,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -940,7 +940,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -952,7 +952,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         const auto& rhs = ctx.stack().get_top_reference().read();
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary_result(assign, do_operator_not(rhs.test()));
+        ctx.stack().set_temporary_reference(assign, do_operator_not(rhs.test()));
         return Air_Node::status_next;
       }
 
@@ -1003,7 +1003,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // This operator is unary.
         auto rhs = ctx.stack().get_top_reference().unset();
         // Unset the reference and return the old value.
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1015,16 +1015,16 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         const auto& rhs = ctx.stack().get_top_reference().read();
         // Return the number of elements in the operand.
         if(rhs.is_null()) {
-          ctx.stack().set_temporary_result(assign, G_integer(0));
+          ctx.stack().set_temporary_reference(assign, G_integer(0));
         }
         else if(rhs.is_string()) {
-          ctx.stack().set_temporary_result(assign, G_integer(rhs.as_string().size()));
+          ctx.stack().set_temporary_reference(assign, G_integer(rhs.as_string().size()));
         }
         else if(rhs.is_array()) {
-          ctx.stack().set_temporary_result(assign, G_integer(rhs.as_array().size()));
+          ctx.stack().set_temporary_reference(assign, G_integer(rhs.as_array().size()));
         }
         else if(rhs.is_object()) {
-          ctx.stack().set_temporary_result(assign, G_integer(rhs.as_object().size()));
+          ctx.stack().set_temporary_reference(assign, G_integer(rhs.as_object().size()));
         }
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
@@ -1040,7 +1040,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         const auto& rhs = ctx.stack().get_top_reference().read();
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary_result(assign, G_string(rocket::sref(rhs.gtype_name())));
+        ctx.stack().set_temporary_reference(assign, G_string(rocket::sref(rhs.gtype_name())));
         return Air_Node::status_next;
       }
 
@@ -1062,7 +1062,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1084,7 +1084,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1106,7 +1106,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1128,7 +1128,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1150,7 +1150,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1172,7 +1172,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1194,7 +1194,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1216,7 +1216,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1238,7 +1238,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1260,7 +1260,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1282,7 +1282,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1304,7 +1304,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1326,7 +1326,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1343,7 +1343,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
         rhs = G_boolean((comp == Value::compare_equal) != negative);
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1364,7 +1364,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", rhs, "` are unordered.");
         }
         rhs = G_boolean((comp == expect) != negative);
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1391,7 +1391,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           rhs = G_integer(0);
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1425,7 +1425,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1454,7 +1454,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1492,7 +1492,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1516,7 +1516,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1540,7 +1540,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1567,7 +1567,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1594,7 +1594,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1621,7 +1621,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1647,7 +1647,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1672,7 +1672,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1697,7 +1697,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1722,7 +1722,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1732,7 +1732,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         auto rhs = ctx.stack().get_top_reference().read();
         ctx.stack().pop_reference();
         // Copy the value to the LHS operand which is write-only. `altr.assign` is ignored.
-        ctx.stack().set_temporary_result(true, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(true, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
@@ -1801,7 +1801,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_result(assign, rocket::move(rhs));
+        ctx.stack().set_temporary_reference(assign, rocket::move(rhs));
         return Air_Node::status_next;
       }
 
