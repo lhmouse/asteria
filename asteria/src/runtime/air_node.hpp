@@ -5,9 +5,6 @@
 #define ASTERIA_RUNTIME_AIR_NODE_HPP_
 
 #include "../fwd.hpp"
-#include "value.hpp"
-#include "reference.hpp"
-#include "../syntax/source_location.hpp"
 
 namespace Asteria {
 
@@ -27,45 +24,15 @@ class Air_Node
         status_continue_for     = 8,
       };
 
-    enum Index : std::uint8_t
-      {
-        index_int64             = 0,
-        index_string            = 1,
-        index_vector_string     = 2,
-        index_source_location   = 3,
-        index_vector_statement  = 4,
-        index_value             = 5,
-        index_reference         = 6,
-        index_vector_air_node   = 7,
-        index_compiler_options  = 8,
-      };
-    using Parameter = Variant<
-      ROCKET_CDR(
-        , std::int64_t                  // 0,
-        , PreHashed_String              // 1,
-        , Cow_Vector<PreHashed_String>  // 2,
-        , Source_Location               // 3,
-        , Cow_Vector<Statement>         // 4,
-        , Value                         // 5,
-        , Reference                     // 6,
-        , Cow_Vector<Air_Node>          // 7,
-        , Compiler_Options              // 8,
-      )>;
-    using Executor = Status (Executive_Context& ctx, const Cow_Vector<Parameter>& params);
-
-  private:
-    Executor* m_fptr;
-    Cow_Vector<Parameter> m_params;
-
   public:
-    Air_Node(Executor* fptr, Cow_Vector<Parameter>&& params) noexcept
-      : m_fptr(fptr), m_params(rocket::move(params))
+    Air_Node() noexcept
       {
       }
+    virtual ~Air_Node();
 
   public:
-    Status execute(Executive_Context& ctx) const;
-    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
+    virtual Status execute(Executive_Context& ctx) const = 0;
+    virtual void enumerate_variables(const Abstract_Variable_Callback& callback) const = 0;
   };
 
 }  // namespace Asteria
