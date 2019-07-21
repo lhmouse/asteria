@@ -1826,35 +1826,35 @@ void Xprunit::generate_code(Cow_Vector<Air_Node>& code, const Compiler_Options& 
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
         const Abstract_Context* qctx = &ctx;
         std::size_t depth = 0;
-        for(;;) {
+        do {
           auto qref = qctx->get_named_reference_opt(altr.name);
           if(qref) {
-            if(!qctx->is_analytic()) {
+            if(qctx->is_analytic()) {
+              // A later-declared reference has been found.
+              // Record the context depth for later lookups.
+              Cow_Vector<Air_Node::Parameter> p;
+              p.emplace_back(altr.name);  // 0
+              p.emplace_back(static_cast<std::int64_t>(depth));  // 1
+              code.emplace_back(do_find_named_reference_local, rocket::move(p));
+            }
+            else {
               // Bind the reference.
               Cow_Vector<Air_Node::Parameter> p;
               p.emplace_back(*qref);  // 0
               code.emplace_back(do_push_bound_reference, rocket::move(p));
-              return;
             }
-            // A later-declared reference has been found.
-            // Record the context depth for later lookups.
-            Cow_Vector<Air_Node::Parameter> p;
-            p.emplace_back(altr.name);  // 0
-            p.emplace_back(static_cast<std::int64_t>(depth));  // 1
-            code.emplace_back(do_find_named_reference_local, rocket::move(p));
             return;
           }
           qctx = qctx->get_parent_opt();
           if(!qctx) {
-            break;
+            // No name has been found so far.
+            Cow_Vector<Air_Node::Parameter> p;
+            p.emplace_back(altr.name);  // 0
+            code.emplace_back(do_find_named_reference_global, rocket::move(p));
+            return;
           }
           ++depth;
-        }
-        // No name has been found so far.
-        Cow_Vector<Air_Node::Parameter> p;
-        p.emplace_back(altr.name);  // 0
-        code.emplace_back(do_find_named_reference_global, rocket::move(p));
-        return;
+        } while(true);
       }
     case index_closure_function:
       {
