@@ -257,30 +257,16 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
 
     ROCKET_PURE_FUNCTION G_integer do_saturating_add(const G_integer& lhs, const G_integer& rhs)
       {
-        if(rhs >= 0) {
-          if(lhs > INT64_MAX - rhs) {
-            return INT64_MAX;
-          }
-        }
-        else {
-          if(lhs < INT64_MIN - rhs) {
-            return INT64_MIN;
-          }
+        if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
+          return (rhs >> 63) ^ INT64_MAX;
         }
         return lhs + rhs;
       }
 
     ROCKET_PURE_FUNCTION G_integer do_saturating_sub(const G_integer& lhs, const G_integer& rhs)
       {
-        if(rhs >= 0) {
-          if(lhs < INT64_MIN + rhs) {
-            return INT64_MIN;
-          }
-        }
-        else {
-          if(lhs > INT64_MAX + rhs) {
-            return INT64_MAX;
-          }
+        if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
+          return (rhs >> 63) ^ INT64_MIN;
         }
         return lhs - rhs;
       }
@@ -299,22 +285,15 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
         if((lhs == -1) || (rhs == -1)) {
           return (lhs ^ rhs) + 1;
         }
-        // signed lhs and absolute rhs
-        auto m = rhs >> 63;
-        auto slhs = (lhs ^ m) - m;
-        auto arhs = (rhs ^ m) - m;
-        // `arhs` will only be positive here.
-        if(slhs >= 0) {
-          if(slhs > INT64_MAX / arhs) {
-            return INT64_MAX;
-          }
+        // absolute lhs and signed rhs
+        auto m = lhs >> 63;
+        auto alhs = (lhs ^ m) - m;
+        auto srhs = (rhs ^ m) - m;
+        // `alhs` may only be positive here.
+        if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)) {
+          return (srhs >> 63) ^ INT64_MAX;
         }
-        else {
-          if(slhs < INT64_MIN / arhs) {
-            return INT64_MIN;
-          }
-        }
-        return slhs * arhs;
+        return alhs * srhs;
       }
 
     ROCKET_PURE_FUNCTION G_real do_saturating_add(const G_real& lhs, const G_real& rhs)

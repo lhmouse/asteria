@@ -268,30 +268,16 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_integer& rhs)
       {
-        if(rhs >= 0) {
-          if(lhs > INT64_MAX - rhs) {
-            do_throw_integral_overflow("addition", lhs, rhs);
-          }
-        }
-        else {
-          if(lhs < INT64_MIN - rhs) {
-            do_throw_integral_overflow("addition", lhs, rhs);
-          }
+        if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
+          do_throw_integral_overflow("addition", lhs, rhs);
         }
         return lhs + rhs;
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_sub(const G_integer& lhs, const G_integer& rhs)
       {
-        if(rhs >= 0) {
-          if(lhs < INT64_MIN + rhs) {
-            do_throw_integral_overflow("subtraction", lhs, rhs);
-          }
-        }
-        else {
-          if(lhs > INT64_MAX + rhs) {
-            do_throw_integral_overflow("subtraction", lhs, rhs);
-          }
+        if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
+          do_throw_integral_overflow("subtraction", lhs, rhs);
         }
         return lhs - rhs;
       }
@@ -310,22 +296,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         if((lhs == -1) || (rhs == -1)) {
           return (lhs ^ rhs) + 1;
         }
-        // signed lhs and absolute rhs
-        auto m = rhs >> 63;
-        auto slhs = (lhs ^ m) - m;
-        auto arhs = (rhs ^ m) - m;
-        // `arhs` will only be positive here.
-        if(slhs >= 0) {
-          if(slhs > INT64_MAX / arhs) {
-            do_throw_integral_overflow("multiplication", lhs, rhs);
-          }
+        // absolute lhs and signed rhs
+        auto m = lhs >> 63;
+        auto alhs = (lhs ^ m) - m;
+        auto srhs = (rhs ^ m) - m;
+        // `alhs` may only be positive here.
+        if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)) {
+          do_throw_integral_overflow("multiplication", lhs, rhs);
         }
-        else {
-          if(slhs < INT64_MIN / arhs) {
-            do_throw_integral_overflow("multiplication", lhs, rhs);
-          }
-        }
-        return slhs * arhs;
+        return alhs * srhs;
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_div(const G_integer& lhs, const G_integer& rhs)
@@ -1123,12 +1102,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             auto& rref = ctx.stack().get_top_reference();
             // Copy the operand to create a temporary value, then return it.
             // N.B. This is one of the few operators that work on all types.
-            if(!rref.is_variable()) {
-              // There is nothing to do.
-              return Air_Node::status_next;
+            if(rref.is_variable()) {
+              auto rhs = rref.read();
+              ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             }
-            auto rhs = rref.read();
-            ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
