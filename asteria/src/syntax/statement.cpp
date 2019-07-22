@@ -59,7 +59,7 @@ namespace Asteria {
     Air_Node::Status do_execute_statement_list(Executive_Context& ctx, const Cow_Vector<Uptr<Air_Node>>& code)
       {
         auto status = Air_Node::status_next;
-        rocket::any_of(code, [&](const Uptr<Air_Node>& qnode) { return (status = qnode->execute(ctx)) != Air_Node::status_next;  });
+        rocket::any_of(code, [&](const Uptr<Air_Node>& qnode) { return ROCKET_UNEXPECT((status = qnode->execute(ctx)) != Air_Node::status_next);  });
         return status;
       }
 
@@ -104,9 +104,9 @@ namespace Asteria {
 
     Reference&& do_evaluate_expression_nonempty(const Cow_Vector<Uptr<Air_Node>>& code, const Executive_Context& ctx)
       {
-        ctx.stack().clear_references();
-        // Evaluate the expression. The result will be pushed on `stack`.
         ROCKET_ASSERT(!code.empty());
+        // Evaluate the expression. The result will be pushed on `stack`.
+        ctx.stack().clear_references();
         rocket::for_each(code, [&](const Uptr<Air_Node>& qnode) { qnode->execute(const_cast<Executive_Context&>(ctx));  });
         return rocket::move(ctx.stack().open_top_reference());
       }
@@ -384,9 +384,9 @@ namespace Asteria {
           }
         void enumerate_variables(const Abstract_Variable_Callback& callback) const override
           {
-            for(const auto& clause : this->m_clauses) {
-              rocket::for_each(clause.code_cond, [&](const Uptr<Air_Node>& qnode) { qnode->enumerate_variables(callback);  });
-              rocket::for_each(clause.code_clause, [&](const Uptr<Air_Node>& qnode) { qnode->enumerate_variables(callback);  });
+            for(auto it = this->m_clauses.begin(); it != this->m_clauses.end(); ++it) {
+              rocket::for_each(it->code_cond, [&](const Uptr<Air_Node>& qnode) { qnode->enumerate_variables(callback);  });
+              rocket::for_each(it->code_clause, [&](const Uptr<Air_Node>& qnode) { qnode->enumerate_variables(callback);  });
             }
           }
       };

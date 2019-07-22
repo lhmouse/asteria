@@ -27,7 +27,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
     auto status = Air_Node::status_next;
-    rocket::any_of(this->m_code, [&](const Uptr<Air_Node>& qnode) { return (status = qnode->execute(ctx_func)) != Air_Node::status_next;  });
+    rocket::any_of(this->m_code, [&](const Uptr<Air_Node>& qnode) { return ROCKET_UNEXPECT((status = qnode->execute(ctx_func)) != Air_Node::status_next);  });
     if(status == Air_Node::status_return){
       // Return the reference at the top of `stack`.
       self = rocket::move(stack.open_top_reference());
