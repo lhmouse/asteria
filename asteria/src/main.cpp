@@ -30,13 +30,10 @@ int main(int argc, char** argv)
 #else
     static constexpr char src[] =
       R"_____(
-func sum(x, s) {
-  return (x <= 0) ? s : sum(x - 1, (s ?? 0) + x);
-}
-var res;
-for(var i = 0; i != 1000; ++i)
-  res = sum(1000);
-return res;
+        func sum(x, s) {
+          return (x <= 0) ? s : sum(x - 1, (s ?? 0) + x);
+        }
+        return sum(1e6);
       )_____";
     Cow_isstream iss(rocket::sref(src));
     std::cerr << "# Source code:" << std::endl
