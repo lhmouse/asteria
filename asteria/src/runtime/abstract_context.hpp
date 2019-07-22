@@ -34,8 +34,6 @@ class Abstract_Context
       = delete;
 
   public:
-    void tie_collector(Rcptr<Generational_Collector> coll_opt) noexcept;
-
     const Reference* get_named_reference_opt(const PreHashed_String& name) const
       {
         return this->m_named_refs.get_opt(name);
@@ -51,6 +49,8 @@ class Abstract_Context
 
     virtual bool is_analytic() const noexcept = 0;
     virtual const Abstract_Context* get_parent_opt() const noexcept = 0;
+
+    void tie_collector(Rcptr<Generational_Collector> coll_opt) noexcept;
   };
 
 }  // namespace Asteria

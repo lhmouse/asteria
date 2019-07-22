@@ -71,11 +71,11 @@ Global_Context::~Global_Context()
 
 void Global_Context::initialize(API_Version version)
   {
-    // Purge the context.
-    this->clear_named_references();
     ///////////////////////////////////////////////////////////////////////////
     // Initializer global objects.
     ///////////////////////////////////////////////////////////////////////////
+    this->clear_named_references();
+    // Allocate a new placeholder.
     auto placeholder = rocket::make_refcnt<Placeholder>();
     this->m_placeholder = placeholder;
     // Use default seed.
@@ -94,9 +94,10 @@ void Global_Context::initialize(API_Version version)
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which will be referenced as `yend[-1].version`.
     G_object ostd;
-    auto emods = std::upper_bound(std::begin(s_modules) + 1, std::end(s_modules), version, Module_Comparator());
+    auto bmods = std::begin(s_modules) + 1;
+    auto emods = std::upper_bound(bmods, std::end(s_modules), version, Module_Comparator());
     // Initialize library modules.
-    for(auto q = std::begin(s_modules) + 1; q != emods; ++q) {
+    for(auto q = bmods; q != emods; ++q) {
       // Create the subobject if it doesn't exist.
       auto pair = ostd.try_emplace(rocket::sref(q->name));
       if(pair.second) {
