@@ -57,23 +57,23 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
 
 Reference& Reference::do_unwrap_tail_calls(const Global_Context& global)
   {
-    // We will need to rebuild the backtrace in case of exceptions.
-    Cow_Bivector<Source_Location, Cow_String> backtrace;
+    auto& self = *this;
+    // Note that `*this` is overwritten before the wrapped function is called.
+    Cow_Vector<Reference_Root::S_tail_call> rqueue;
     bool by_ref = true;
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
-      auto xroot = rocket::move(this->m_root.open_tail_call());
-      // Unpack the frame.
-      backtrace.emplace_back(rocket::move(xroot.sloc), rocket::move(xroot.func));
-      const auto& sloc = backtrace.back().first;
-      const auto& func = backtrace.back().second;
+      auto& xroot = rqueue.emplace_back(rocket::move(this->m_root.open_tail_call()));
       // Unpack the function reference.
       by_ref &= xroot.by_ref;
       const auto& target = xroot.target;
       // Unpack arguments.
-      *this = rocket::move(xroot.args_self.mut_back());
+      self = rocket::move(xroot.args_self.mut_back());
       xroot.args_self.pop_back();
       auto& args = xroot.args_self;
+      // Call the function now.
+      const auto& sloc = xroot.sloc;
+      const auto& func = xroot.func;
       try {
         // Unwrap the function call.
         ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
@@ -84,23 +84,23 @@ Reference& Reference::do_unwrap_tail_calls(const Global_Context& global)
       catch(Exception& except) {
         ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside tail call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
         // Append all frames that have been expanded so far and rethrow the exception.
-        std::for_each(backtrace.rbegin(), backtrace.rend(), [&](const auto& p) { except.push_frame_func(p.first, p.second);  });
+        std::for_each(rqueue.rbegin(), rqueue.rend(), [&](const auto& r) { except.push_frame_func(r.sloc, r.func);  });
         throw;
       }
       catch(const std::exception& stdex) {
         ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Exception except(stdex);
-        std::for_each(backtrace.rbegin(), backtrace.rend(), [&](const auto& p) { except.push_frame_func(p.first, p.second);  });
+        std::for_each(rqueue.rbegin(), rqueue.rend(), [&](const auto& r) { except.push_frame_func(r.sloc, r.func);  });
         throw except;
       }
     }
     // Convert the result to an rvalue if it isn't passed by reference.
-    if(!by_ref && this->is_variable()) {
-      Reference_Root::S_temporary xroot = { this->read() };
-      *this = rocket::move(xroot);
+    if(!by_ref && self.is_variable()) {
+      Reference_Root::S_temporary xroot = { self.read() };
+      self = rocket::move(xroot);
     }
-    return *this;
+    return self;
   }
 
 void Reference::enumerate_variables(const Abstract_Variable_Callback& callback) const
