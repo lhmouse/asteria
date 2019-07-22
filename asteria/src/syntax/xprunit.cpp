@@ -839,16 +839,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_function_call : public Air_Node
+    class Air_execute_function_tail_call : public Air_Node
       {
       private:
         Source_Location m_sloc;
         std::size_t m_nargs;
-        bool m_tco_aware;
 
       public:
-        Air_execute_function_call(const Source_Location& sloc, std::size_t nargs, bool tco_aware)
-          : m_sloc(sloc), m_nargs(nargs), m_tco_aware(tco_aware)
+        Air_execute_function_tail_call(const Source_Location& sloc, std::size_t nargs)
+          : m_sloc(sloc), m_nargs(nargs)
           {
           }
 
@@ -870,38 +869,73 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             const auto& target = target_value.as_function();
             // Make the `this` reference. On the function's return it is reused to store the result of the function.
             auto& self = ctx.stack().open_top_reference().zoom_out();
+            // Create a TCO wrapper.
             const auto& sloc = this->m_sloc;
             const auto& func = ctx.zvarg()->get_function_signature();
-            if(this->m_tco_aware) {
-              // Optimize the tail call.
-              args.emplace_back(rocket::move(self));
-              // Create a TCO wrapper.
-              Reference_Root::S_tail_call xref = { sloc, func, target, rocket::move(args) };
-              self = rocket::move(xref);
+            args.emplace_back(rocket::move(self));
+            // The caller shall unwrap the proxy reference when appropriate.
+            Reference_Root::S_tail_call xref = { sloc, func, target, rocket::move(args) };
+            self = rocket::move(xref);
+            return Air_Node::status_next;
+          }
+        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+          {
+          }
+      };
+
+    class Air_execute_function_call : public Air_Node
+      {
+      private:
+        Source_Location m_sloc;
+        std::size_t m_nargs;
+
+      public:
+        Air_execute_function_call(const Source_Location& sloc, std::size_t nargs)
+          : m_sloc(sloc), m_nargs(nargs)
+          {
+          }
+
+      public:
+        Air_Node::Status execute(Executive_Context& ctx) const override
+          {
+            // Allocate the argument vector.
+            Cow_Vector<Reference> args;
+            args.resize(this->m_nargs);
+            for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
+              *it = rocket::move(ctx.stack().open_top_reference());
+              ctx.stack().pop_reference();
             }
-            else {
-              // For non-tail calls, evaluate it normally.
-              try {
-                ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
-                // Call the function now.
-                target->invoke(self, ctx.global(), rocket::move(args));
-                self.unwrap_tail_calls(ctx.global());
-                // The result will have been stored into `self`.
-                ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
-              }
-              catch(Exception& except) {
-                ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
-                // Append the current frame and rethrow the exception.
-                except.push_frame_func(sloc, func);
-                throw;
-              }
-              catch(const std::exception& stdex) {
-                ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
-                // Translate the exception, append the current frame, and throw the new exception.
-                Exception except(stdex);
-                except.push_frame_func(sloc, func);
-                throw except;
-              }
+            // Get the target reference.
+            auto target_value = ctx.stack().get_top_reference().read();
+            if(!target_value.is_function()) {
+              ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", target_value, "` which is not a function.");
+            }
+            const auto& target = target_value.as_function();
+            // Make the `this` reference. On the function's return it is reused to store the result of the function.
+            auto& self = ctx.stack().open_top_reference().zoom_out();
+            // Call the function now.
+            const auto& sloc = this->m_sloc;
+            const auto& func = ctx.zvarg()->get_function_signature();
+            try {
+              ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+              // Call the function now.
+              target->invoke(self, ctx.global(), rocket::move(args));
+              self.unwrap_tail_calls(ctx.global());
+              // The result will have been stored into `self`.
+              ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+            }
+            catch(Exception& except) {
+              ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
+              // Append the current frame and rethrow the exception.
+              except.push_frame_func(sloc, func);
+              throw;
+            }
+            catch(const std::exception& stdex) {
+              ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
+              // Translate the exception, append the current frame, and throw the new exception.
+              Exception except(stdex);
+              except.push_frame_func(sloc, func);
+              throw except;
             }
             return Air_Node::status_next;
           }
@@ -2577,7 +2611,11 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
       {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_function_call>(altr.sloc, altr.nargs, tco_aware));
+        if(tco_aware) {
+          code.emplace_back(rocket::make_unique<Air_execute_function_tail_call>(altr.sloc, altr.nargs));
+          return;
+        }
+        code.emplace_back(rocket::make_unique<Air_execute_function_call>(altr.sloc, altr.nargs));
         return;
       }
     case index_member_access:
