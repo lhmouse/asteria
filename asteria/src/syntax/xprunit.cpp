@@ -671,61 +671,54 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_push_bound_reference : public Air_Node
+    template<typename ContextT> class Context_iterator
       {
+      public:
+        using iterator_category  = std::forward_iterator_tag;
+        using value_type         = const ContextT;
+        using pointer            = value_type*;
+        using reference          = value_type&;
+        using difference_type    = std::ptrdiff_t;
+
       private:
-        Reference m_ref;
+        value_type* m_qctx;
 
       public:
-        explicit Air_push_bound_reference(const Reference& ref)
-          : m_ref(ref)
+        constexpr Context_iterator() noexcept
+          : m_qctx(nullptr)
           {
           }
-
-      public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
-          {
-            // Push the reference as is.
-            ctx.stack().push_reference(this->m_ref);
-            return Air_Node::status_next;
-          }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
-          {
-            this->m_ref.enumerate_variables(callback);
-          }
-      };
-
-    class Air_find_named_reference_local : public Air_Node
-      {
-      private:
-        PreHashed_String m_name;
-        std::size_t m_depth;
-
-      public:
-        Air_find_named_reference_local(const PreHashed_String& name, std::size_t depth)
-          : m_name(name), m_depth(depth)
+        explicit constexpr Context_iterator(value_type& ctx) noexcept
+          : m_qctx(std::addressof(ctx))
           {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        constexpr reference operator*() const noexcept
           {
-            // Locate the context.
-            const Executive_Context* qctx = &ctx;
-            for(std::size_t i = 0; i != this->m_depth; ++i) {
-              qctx = qctx->get_parent_opt();
-              ROCKET_ASSERT(qctx);
-            }
-            // Search for the name in the target context. It has to exist, or we would be having a bug here.
-            auto qref = qctx->get_named_reference_opt(this->m_name);
-            if(!qref) {
-              ASTERIA_THROW_RUNTIME_ERROR("The identifier `", this->m_name, "` has not been declared yet.");
-            }
-            ctx.stack().push_reference(*qref);
-            return Air_Node::status_next;
+            return *(this->m_qctx);
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        constexpr pointer operator->() const noexcept
           {
+            return this->m_qctx;
+          }
+
+        constexpr bool operator==(const Context_iterator& other) const noexcept
+          {
+            return this->m_qctx == other.m_qctx;
+          }
+        constexpr bool operator!=(const Context_iterator& other) const noexcept
+          {
+            return this->m_qctx != other.m_qctx;
+          }
+
+        Context_iterator& operator++() noexcept
+          {
+            return std::exchange(this->m_qctx, this->m_qctx->get_parent_opt()), *this;
+          }
+        Context_iterator operator++(int) noexcept
+          {
+            return Context_iterator(std::exchange(this->m_qctx, this->m_qctx->get_parent_opt()));
           }
       };
 
@@ -753,6 +746,61 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {
+          }
+      };
+
+    class Air_find_named_reference_local : public Air_Node
+      {
+      private:
+        PreHashed_String m_name;
+        std::ptrdiff_t m_depth;
+
+      public:
+        Air_find_named_reference_local(const PreHashed_String& name, std::ptrdiff_t depth)
+          : m_name(name), m_depth(depth)
+          {
+          }
+
+      public:
+        Air_Node::Status execute(Executive_Context& ctx) const override
+          {
+            // Locate the context.
+            auto qctx = std::next(Context_iterator<Executive_Context>(ctx), this->m_depth);
+            ROCKET_ASSERT(qctx != Context_iterator<Executive_Context>());
+            // Search for the name in the target context. It has to exist, or we would be having a bug here.
+            auto qref = qctx->get_named_reference_opt(this->m_name);
+            if(!qref) {
+              ASTERIA_THROW_RUNTIME_ERROR("The identifier `", this->m_name, "` has not been declared yet.");
+            }
+            ctx.stack().push_reference(*qref);
+            return Air_Node::status_next;
+          }
+        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+          {
+          }
+      };
+
+    class Air_push_bound_reference : public Air_Node
+      {
+      private:
+        Reference m_ref;
+
+      public:
+        explicit Air_push_bound_reference(const Reference& ref)
+          : m_ref(ref)
+          {
+          }
+
+      public:
+        Air_Node::Status execute(Executive_Context& ctx) const override
+          {
+            // Push the reference as is.
+            ctx.stack().push_reference(this->m_ref);
+            return Air_Node::status_next;
+          }
+        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+          {
+            this->m_ref.enumerate_variables(callback);
           }
       };
 
@@ -2565,30 +2613,24 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
         const auto& altr = this->m_stor.as<index_named_reference>();
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
-        const Abstract_Context* qctx = &ctx;
-        std::size_t depth = 0;
-        do {
-          auto qref = qctx->get_named_reference_opt(altr.name);
-          if(qref) {
-            if(qctx->is_analytic()) {
-              // A later-declared reference has been found.
-              // Record the context depth for later lookups.
-              code.emplace_back(rocket::make_unique<Air_find_named_reference_local>(altr.name, depth));
-            }
-            else {
-              // Bind the reference.
-              code.emplace_back(rocket::make_unique<Air_push_bound_reference>(*qref));
-            }
-            return;
-          }
-          qctx = qctx->get_parent_opt();
-          if(!qctx) {
-            // No name has been found so far.
-            code.emplace_back(rocket::make_unique<Air_find_named_reference_global>(altr.name));
-            return;
-          }
-          ++depth;
-        } while(true);
+        const Reference* qref = nullptr;
+        std::ptrdiff_t depth = -1;
+        // Look for the name recursively.
+        auto qctx = std::find_if(Context_iterator<Abstract_Context>(ctx), Context_iterator<Abstract_Context>(),
+                                 [&](const Abstract_Context& r) { return ++depth, (qref = r.get_named_reference_opt(altr.name)) != nullptr;  });
+        if(!qref) {
+          // No name has been found so far. Assume that the name will be found in the global context later.
+          code.emplace_back(rocket::make_unique<Air_find_named_reference_global>(altr.name));
+        }
+        else if(qctx->is_analytic()) {
+          // A reference declared later has been found. Record the context depth for later lookups.
+          code.emplace_back(rocket::make_unique<Air_find_named_reference_local>(altr.name, depth));
+        }
+        else {
+          // A reference declared previously has been found. Bind it immediately.
+          code.emplace_back(rocket::make_unique<Air_push_bound_reference>(*qref));
+        }
+        return;
       }
     case index_closure_function:
       {
