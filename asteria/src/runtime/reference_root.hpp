@@ -33,7 +33,7 @@ class Reference_Root
         Source_Location sloc;
         Cow_String func;
         Rcptr<Abstract_Function> target;
-        Cow_Vector<Reference> args;  // The last element is the `this` reference.
+        Cow_Vector<Reference> args_self;  // The last element is the `this` reference.
       };
 
     enum Index : std::uint8_t

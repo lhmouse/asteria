@@ -995,14 +995,14 @@ namespace Asteria {
         if(!kexpr) {
           kexpr.emplace();
         }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        if(!kpunct) {
+          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
+        }
         if(!*qref && !kexpr->empty()) {
           // Return by value.
           Xprunit::S_operator_rpn xunit = { Xprunit::xop_prefix_pos, false };
           kexpr->emplace_back(rocket::move(xunit));
-        }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
-        if(!kpunct) {
-          throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
         Statement::S_return xstmt = { rocket::move(*kexpr) };
         return rocket::move(xstmt);
@@ -1344,7 +1344,7 @@ namespace Asteria {
         }
         auto qinit = do_accept_equal_initializer_opt(tstrm);
         if(qinit) {
-          // In the case of an `equal-initializer`, behave as if a `return-statement`.
+          // In the case of an `equal-initializer`, behave as if it was a `return-statement`.
           // Note that the result is returned by value.
           Xprunit::S_operator_rpn xunit = { Xprunit::xop_prefix_pos, false };
           qinit->emplace_back(rocket::move(xunit));

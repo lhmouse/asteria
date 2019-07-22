@@ -86,9 +86,9 @@ Rcptr<Abstract_Function> Reference_Root::unpack_tail_call_opt(Cow_Bivector<Sourc
     // Unpack a backtrace frame.
     backtrace.emplace_back(rocket::move(altr.sloc), rocket::move(altr.func));
     // Unpack arguments.
-    self = rocket::move(altr.args.mut_back());
-    altr.args.pop_back();
-    args = rocket::move(altr.args);
+    self = rocket::move(altr.args_self.mut_back());
+    altr.args_self.pop_back();
+    args = rocket::move(altr.args_self);
     // Return a pointer to the wrapped function.
     return altr.target;
   }
@@ -119,7 +119,7 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callb
       }
     case index_tail_call:
       {
-        return rocket::for_each(this->m_stor.as<index_tail_call>().args, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
+        return rocket::for_each(this->m_stor.as<index_tail_call>().args_self, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
