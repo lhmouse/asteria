@@ -999,12 +999,7 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
-        if(!*qref && !kexpr->empty()) {
-          // Return by value.
-          Xprunit::S_operator_rpn xunit = { Xprunit::xop_prefix_pos, false };
-          kexpr->emplace_back(rocket::move(xunit));
-        }
-        Statement::S_return xstmt = { rocket::move(*kexpr) };
+        Statement::S_return xstmt = { *qref, rocket::move(*kexpr) };
         return rocket::move(xstmt);
       }
 
@@ -1346,10 +1341,7 @@ namespace Asteria {
         if(qinit) {
           // In the case of an `equal-initializer`, behave as if it was a `return-statement`.
           // Note that the result is returned by value.
-          Xprunit::S_operator_rpn xunit = { Xprunit::xop_prefix_pos, false };
-          qinit->emplace_back(rocket::move(xunit));
-          // The body contains solely a `return-statement`.
-          Statement::S_return xstmt = { rocket::move(*qinit) };
+          Statement::S_return xstmt = { false, rocket::move(*qinit) };
           qblock.emplace().emplace_back(rocket::move(xstmt));
           return qblock;
         }

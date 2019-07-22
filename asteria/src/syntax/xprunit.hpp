@@ -67,6 +67,13 @@ class Xprunit
         xop_infix_assign     = 92,  // =
       };
 
+    enum TCO_Awareness : std::uint8_t
+      {
+        tco_none      = 0,
+        tco_by_ref    = 1,
+        tco_by_value  = 2,
+      };
+
     struct S_literal
       {
         Value value;
@@ -172,7 +179,7 @@ class Xprunit
         return static_cast<Index>(this->m_stor.index());
       }
 
-    void generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Options& options, bool tco_aware, const Analytic_Context& ctx) const;
+    void generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Options& options, TCO_Awareness tco_awareness, const Analytic_Context& ctx) const;
   };
 
 }  // namespace Asteria

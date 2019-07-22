@@ -57,21 +57,27 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
 
 Reference& Reference::do_unwrap_tail_calls(const Global_Context& global)
   {
+    // We will need to rebuild the backtrace in case of exceptions.
     Cow_Bivector<Source_Location, Cow_String> backtrace;
-    Reference self;
-    Cow_Vector<Reference> args;
-    for(;;) {
-      // Unpack a tail call.
-      auto target = this->m_root.unpack_tail_call_opt(backtrace, self, args);
-      if(!target) {
-        break;
-      }
+    bool by_ref = true;
+    // Unpack all tail call wrappers.
+    while(this->m_root.is_tail_call()) {
+      auto xroot = rocket::move(this->m_root.open_tail_call());
+      // Unpack the frame.
+      backtrace.emplace_back(rocket::move(xroot.sloc), rocket::move(xroot.func));
       const auto& sloc = backtrace.back().first;
       const auto& func = backtrace.back().second;
+      // Unpack the function reference.
+      by_ref &= xroot.by_ref;
+      const auto& target = xroot.target;
+      // Unpack arguments.
+      *this = rocket::move(xroot.args_self.mut_back());
+      xroot.args_self.pop_back();
+      auto& args = xroot.args_self;
       try {
         // Unwrap the function call.
         ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
-        target->invoke(self, global, rocket::move(args));
+        target->invoke(*this, global, rocket::move(args));
         // The result will have been stored into `self`.
         ASTERIA_DEBUG_LOG("Returned from tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
       }
@@ -88,7 +94,11 @@ Reference& Reference::do_unwrap_tail_calls(const Global_Context& global)
         std::for_each(backtrace.rbegin(), backtrace.rend(), [&](const auto& p) { except.push_frame_func(p.first, p.second);  });
         throw except;
       }
-      *this = rocket::move(self);
+    }
+    // Convert the result to an rvalue if it isn't passed by reference.
+    if(!by_ref && this->is_variable()) {
+      Reference_Root::S_temporary xroot = { this->read() };
+      *this = rocket::move(xroot);
     }
     return *this;
   }

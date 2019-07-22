@@ -32,7 +32,8 @@ class Reference_Root
       {
         Source_Location sloc;
         Cow_String func;
-        Rcptr<Abstract_Function> target;
+        bool by_ref;
+        Rcobj<Abstract_Function> target;
         Cow_Vector<Reference> args_self;  // The last element is the `this` reference.
       };
 
@@ -89,9 +90,14 @@ class Reference_Root
       {
         return this->index() == index_variable;
       }
+
     bool is_tail_call() const noexcept
       {
         return this->index() == index_tail_call;
+      }
+    S_tail_call& open_tail_call()
+      {
+        return this->m_stor.as<index_tail_call>();
       }
 
     void swap(Reference_Root& other) noexcept
@@ -101,8 +107,6 @@ class Reference_Root
 
     const Value& dereference_const() const;
     Value& dereference_mutable() const;
-    Rcptr<Abstract_Function> unpack_tail_call_opt(Cow_Bivector<Source_Location, Cow_String>& backtrace, Reference& self, Cow_Vector<Reference>& args);
-
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 

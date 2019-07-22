@@ -98,7 +98,7 @@ namespace Asteria {
     Cow_Vector<Uptr<Air_Node>> do_generate_code_expression(const Compiler_Options& options, const Analytic_Context& ctx, const Cow_Vector<Xprunit>& expr)
       {
         Cow_Vector<Uptr<Air_Node>> code;
-        rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, options, false, ctx);  });
+        rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         return code;
       }
 
@@ -675,6 +675,33 @@ namespace Asteria {
           }
       };
 
+    class Air_execute_return : public Air_Node
+      {
+      private:
+        bool m_by_ref;
+
+      public:
+        explicit Air_execute_return(bool by_ref)
+          : m_by_ref(by_ref)
+          {
+          }
+
+      public:
+        Air_Node::Status execute(Executive_Context& ctx) const override
+          {
+            // Convert the result to an rvalue if it isn't passed by reference.
+            auto& self = ctx.stack().open_top_reference();
+            if(!this->m_by_ref && self.is_variable()) {
+              Reference_Root::S_temporary xroot = { self.read() };
+              self = rocket::move(xroot);
+            }
+            return Air_Node::status_return;
+          }
+        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+          {
+          }
+      };
+
     class Air_execute_throw : public Air_Node
       {
       private:
@@ -772,7 +799,7 @@ void Statement::generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHa
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the expression.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, false, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         return;
       }
     case index_block:
@@ -799,7 +826,7 @@ void Statement::generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHa
           // A variable becomes visible before its initializer, where it is initialized to `null`.
           code.emplace_back(rocket::make_unique<Air_declare_variable_and_clear_stack>(pair.first));
           // Generate inline code for the initializer.
-          rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, options, false, ctx);  });
+          rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
           // Generate code to initialize the variable.
           code.emplace_back(rocket::make_unique<Air_initialize_variable>(altr.sloc, altr.immutable));
         }
@@ -820,7 +847,7 @@ void Statement::generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHa
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the condition expression.
-        rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, options, false, ctx);  });
+        rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Generate code for branches.
         auto code_true = do_generate_code_block(options, ctx, altr.branch_true);
         auto code_false = do_generate_code_block(options, ctx, altr.branch_false);
@@ -834,7 +861,7 @@ void Statement::generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHa
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the condition expression.
-        rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, options, false, ctx);  });
+        rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Create a fresh context for the `switch` body.
         // Note that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_switch(1, ctx);
@@ -977,7 +1004,7 @@ void Statement::generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHa
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, false, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_throw>(altr.sloc));
         return;
@@ -989,9 +1016,12 @@ void Statement::generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHa
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
         // Only the last operator can be TCO'd.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, rocket::same(unit, altr.expr.back()), ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options,
+                                                                                  !rocket::same(unit, altr.expr.back()) ? Xprunit::tco_none
+                                                                                                                        : altr.by_ref ? Xprunit::tco_by_ref
+                                                                                                                                      : Xprunit::tco_by_value, ctx);  });
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_return));
+        code.emplace_back(rocket::make_unique<Air_execute_return>(altr.by_ref));
         return;
       }
     case index_assert:
@@ -1000,7 +1030,7 @@ void Statement::generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHa
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, false, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_assert>(altr.sloc, altr.negative, altr.msg));
         return;

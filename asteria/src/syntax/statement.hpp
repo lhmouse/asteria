@@ -101,6 +101,7 @@ class Statement
       };
     struct S_return
       {
+        bool by_ref;
         Cow_Vector<Xprunit> expr;
       };
     struct S_assert

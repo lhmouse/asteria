@@ -76,23 +76,6 @@ Value& Reference_Root::dereference_mutable() const
     }
   }
 
-Rcptr<Abstract_Function> Reference_Root::unpack_tail_call_opt(Cow_Bivector<Source_Location, Cow_String>& backtrace, Reference& self, Cow_Vector<Reference>& args)
-  {
-    if(this->index() != index_tail_call) {
-      // This is not a tail call wrapper.
-      return nullptr;
-    }
-    auto& altr = this->m_stor.as<index_tail_call>();
-    // Unpack a backtrace frame.
-    backtrace.emplace_back(rocket::move(altr.sloc), rocket::move(altr.func));
-    // Unpack arguments.
-    self = rocket::move(altr.args_self.mut_back());
-    altr.args_self.pop_back();
-    args = rocket::move(altr.args_self);
-    // Return a pointer to the wrapped function.
-    return altr.target;
-  }
-
 void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     switch(this->index()) {

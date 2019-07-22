@@ -12,27 +12,12 @@ int main()
   {
     static constexpr char s_source[] =
       R"__(
-        // tail call, non-proper
-        func nptc(n) {
-          if(n <= 0) {
-            throw "boom";
-          }
-          return nptc(n-1);
-        }
-        try {
-          nptc(10);
-        }
-        catch(e) {
-          std.debug.dump(__backtrace);
-          assert lengthof __backtrace == 13;  // 1 throw, 11 frames, 1 catch
-        }
-
         // tail call, proper
         func ptc(n) {
           if(n <= 0) {
             throw "boom";
           }
-          return& ptc(n-1);
+          return ptc(n-1);  // this may blow the system stack up if non-proper.
         }
         try {
           ptc(2000);

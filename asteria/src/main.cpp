@@ -23,7 +23,7 @@ int main(int argc, char** argv)
       args.emplace_back(rocket::move(xref));
     }
     // prepare test code.
-#if 0
+#if 1
     std::cerr << "# Input your program:" << std::endl
               << "---" << std::endl;
     Simple_Source_File code(std::cin, rocket::sref("<stdin>"));
