@@ -117,9 +117,10 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
           // Set up arguments for the user-defined predictor.
           Cow_Vector<Reference> args;
           do_push_argument(args, *it);
-          // Call it.
+          // Call the predictor function and check the return value.
           Reference self;
           predictor.get().invoke(self, global, rocket::move(args));
+          self.unwrap_tail_calls(global);
           if(self.read().test() == match) {
             return rocket::move(it);
           }
@@ -457,9 +458,10 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
         Cow_Vector<Reference> args;
         do_push_argument(args, lhs);
         do_push_argument(args, rhs);
-        // Call it.
+        // Call the predictor function and compare the result with `0`.
         Reference self;
         comparator->get().invoke(self, global, rocket::move(args));
+        self.unwrap_tail_calls(global);
         return self.read().compare(G_integer(0));
       }
 
@@ -740,9 +742,10 @@ G_array std_array_generate(const Global_Context& global, const G_function& gener
       Cow_Vector<Reference> args;
       do_push_argument(args, G_integer(i));
       do_push_argument(args, res.empty() ? Value::null() : res.back());
-      // Call it.
+      // Call the generator function and push the return value.
       Reference self;
       generator.get().invoke(self, global, rocket::move(args));
+      self.unwrap_tail_calls(global);
       res.emplace_back(self.read());
     }
     return res;

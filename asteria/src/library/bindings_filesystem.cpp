@@ -704,10 +704,9 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
         Cow_Vector<Reference> args;
         do_push_argument(args, offset);
         do_push_argument(args, data);
-        // Call it.
+        // Call the predictor function, but discard the return value.
         Reference self;
         callback.get().invoke(self, global, rocket::move(args));
-        // The return value is ignored.
       }
 
     }
