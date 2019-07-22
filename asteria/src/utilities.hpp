@@ -100,8 +100,7 @@ class Formatter
   public:
     template<typename ValueT> Formatter& operator,(const ValueT& value) noexcept
       try {
-        this->do_put(value);
-        return *this;
+        return this->do_put(value), *this;
       }
       catch(...) {
         return *this;
