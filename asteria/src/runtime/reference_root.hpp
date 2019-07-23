@@ -26,7 +26,7 @@ class Reference_Root
       };
     struct S_variable
       {
-        Rcptr<Variable> var_opt;
+        Rcobj<Variable> var;
       };
     struct S_tail_call
       {

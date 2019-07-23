@@ -26,11 +26,7 @@ const Value& Reference_Root::dereference_const() const
       }
     case index_variable:
       {
-        const auto& var = this->m_stor.as<index_variable>().var_opt;
-        if(!var) {
-          return Value::null();
-        }
-        return var->get_value();
+        return this->m_stor.as<index_variable>().var->get_value();
       }
     case index_tail_call:
       {
@@ -58,10 +54,7 @@ Value& Reference_Root::dereference_mutable() const
       }
     case index_variable:
       {
-        const auto& var = this->m_stor.as<index_variable>().var_opt;
-        if(!var) {
-          ASTERIA_THROW_RUNTIME_ERROR("The reference cannot be written after being moved. This is likely a bug. Please report.");
-        }
+        const auto& var = this->m_stor.as<index_variable>().var;
         if(var->is_immutable()) {
           ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", var->get_value(), "` is immutable and cannot be modified.");
         }
@@ -93,8 +86,8 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callb
       }
     case index_variable:
       {
-        const auto& var = this->m_stor.as<index_variable>().var_opt;
-        if(!var || !callback(var)) {
+        const auto& var = this->m_stor.as<index_variable>().var;
+        if(!callback(var)) {
           return;
         }
         // Descend into this variable recursively when the callback returns `true`.
