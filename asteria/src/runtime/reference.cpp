@@ -69,8 +69,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       const auto& target = xroot.target;
       // Unpack arguments.
       self = rocket::move(xroot.args_self.mut_back());
-      xroot.args_self.pop_back();
-      auto& args = xroot.args_self;
+      auto& args = xroot.args_self.pop_back();
       // Call the function now.
       const auto& sloc = xroot.sloc;
       const auto& func = xroot.func;

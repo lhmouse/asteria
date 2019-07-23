@@ -867,55 +867,95 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
+    template<typename XcallT, typename... XaddT> Air_Node::Status do_execute_function_common(Executive_Context& ctx,
+                                                                                             const Source_Location& sloc, const Cow_Vector<bool>& by_refs,
+                                                                                             XcallT&& xcall, XaddT&&... xadd)
+      {
+        Value value;
+        // Allocate the argument vector.
+        Cow_Vector<Reference> args;
+        args.resize(by_refs.size());
+        for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
+          if(!ctx.stack().get_top_reference().is_rvalue() && !by_refs.rbegin()[it - args.rbegin()]) {
+            // If this argument is not an rvalue and it is not passed by reference, convert it to an rvalue.
+            ctx.stack().set_temporary_reference(false, rocket::move(value = ctx.stack().get_top_reference().read()));
+          }
+          *it = rocket::move(ctx.stack().open_top_reference());
+          ctx.stack().pop_reference();
+        }
+        // Get the target reference.
+        value = ctx.stack().get_top_reference().read();
+        if(!value.is_function()) {
+          ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", value, "` which is not a function.");
+        }
+        // Call the function now.
+        rocket::forward<XcallT>(xcall)(sloc, ctx.zvarg()->get_function_signature(),  // sloc, func,
+                                       value.as_function(), ctx.stack().open_top_reference().zoom_out(), rocket::move(args),  // target, self, args,
+                                       rocket::forward<XaddT>(xadd)...);
+        return Air_Node::status_next;
+      }
+
+    Air_Node::Status do_xcall_tail(const Source_Location& sloc, const Cow_String& func,
+                                   const Rcobj<Abstract_Function>& target, Reference& self, Cow_Vector<Reference>&& args,
+                                   bool tco_by_ref)
+      {
+        // Pack arguments.
+        auto& args_self = args;
+        args_self.emplace_back(rocket::move(self));
+        // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
+        Reference_Root::S_tail_call xref = { sloc, func, tco_by_ref, target, rocket::move(args_self) };
+        self = rocket::move(xref);
+        return Air_Node::status_next;
+      }
+
     class Air_execute_function_tail_call : public Air_Node
       {
       private:
         Source_Location m_sloc;
-        bool m_tco_by_ref;
         Cow_Vector<bool> m_by_refs;
+        bool m_tco_by_ref;
 
       public:
-        Air_execute_function_tail_call(const Source_Location& sloc, bool tco_by_ref, const Cow_Vector<bool>& by_refs)
-          : m_sloc(sloc), m_tco_by_ref(tco_by_ref), m_by_refs(by_refs)
+        Air_execute_function_tail_call(const Source_Location& sloc, const Cow_Vector<bool>& by_refs, bool tco_by_ref)
+          : m_sloc(sloc), m_by_refs(by_refs), m_tco_by_ref(tco_by_ref)
           {
           }
 
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
-            Value value;
-            // Allocate the argument vector.
-            Cow_Vector<Reference> args;
-            args.resize(this->m_by_refs.size());
-            for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
-              if(!ctx.stack().get_top_reference().is_rvalue() && !this->m_by_refs.rbegin()[it - args.rbegin()]) {
-                // If this argument is not an rvalue and it is not passed by reference, convert it to an rvalue.
-                ctx.stack().set_temporary_reference(false, rocket::move(value = ctx.stack().get_top_reference().read()));
-              }
-              *it = rocket::move(ctx.stack().open_top_reference());
-              ctx.stack().pop_reference();
-            }
-            // Get the target reference.
-            value = ctx.stack().get_top_reference().read();
-            if(!value.is_function()) {
-              ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", value, "` which is not a function.");
-            }
-            const auto& target = value.as_function();
-            // Make the `this` reference. On the function's return it is reused to store the result of the function.
-            auto& self = ctx.stack().open_top_reference().zoom_out();
-            // Create a TCO wrapper.
-            const auto& sloc = this->m_sloc;
-            const auto& func = ctx.zvarg()->get_function_signature();
-            args.emplace_back(rocket::move(self));
-            // The caller shall unwrap the proxy reference when appropriate.
-            Reference_Root::S_tail_call xref = { sloc, func, this->m_tco_by_ref, target, rocket::move(args) };
-            self = rocket::move(xref);
-            return Air_Node::status_next;
+            return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_tail, this->m_tco_by_ref);
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
+
+    Air_Node::Status do_xcall_plain(const Source_Location& sloc, const Cow_String& func,
+                                    const Rcobj<Abstract_Function>& target, Reference& self, Cow_Vector<Reference>&& args,
+                                    const Global_Context& global)
+      try {
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+        // Call the function now.
+        target->invoke(self, global, rocket::move(args));
+        self.finish_call(global);
+        // The result will have been stored into `self`.
+        ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+        return Air_Node::status_next;
+      }
+      catch(Exception& except) {
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
+        // Append the current frame and rethrow the exception.
+        except.push_frame_func(sloc, func);
+        throw;
+      }
+      catch(const std::exception& stdex) {
+        ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
+        // Translate the exception, append the current frame, and throw the new exception.
+        Exception except(stdex);
+        except.push_frame_func(sloc, func);
+        throw except;
+      }
 
     class Air_execute_function_call : public Air_Node
       {
@@ -932,51 +972,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
-            Value value;
-            // Allocate the argument vector.
-            Cow_Vector<Reference> args;
-            args.resize(this->m_by_refs.size());
-            for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
-              if(!ctx.stack().get_top_reference().is_rvalue() && !this->m_by_refs.rbegin()[it - args.rbegin()]) {
-                // If this argument is not an rvalue and it is not passed by reference, convert it to an rvalue.
-                ctx.stack().set_temporary_reference(false, rocket::move(value = ctx.stack().get_top_reference().read()));
-              }
-              *it = rocket::move(ctx.stack().open_top_reference());
-              ctx.stack().pop_reference();
-            }
-            // Get the target reference.
-            value = ctx.stack().get_top_reference().read();
-            if(!value.is_function()) {
-              ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", value, "` which is not a function.");
-            }
-            const auto& target = value.as_function();
-            // Make the `this` reference. On the function's return it is reused to store the result of the function.
-            auto& self = ctx.stack().open_top_reference().zoom_out();
-            // Call the function now.
-            const auto& sloc = this->m_sloc;
-            const auto& func = ctx.zvarg()->get_function_signature();
-            try {
-              ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
-              // Call the function now.
-              target->invoke(self, ctx.global(), rocket::move(args));
-              self.finish_call(ctx.global());
-              // The result will have been stored into `self`.
-              ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
-            }
-            catch(Exception& except) {
-              ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
-              // Append the current frame and rethrow the exception.
-              except.push_frame_func(sloc, func);
-              throw;
-            }
-            catch(const std::exception& stdex) {
-              ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
-              // Translate the exception, append the current frame, and throw the new exception.
-              Exception except(stdex);
-              except.push_frame_func(sloc, func);
-              throw except;
-            }
-            return Air_Node::status_next;
+            return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_plain, ctx.global());
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {
@@ -2694,7 +2690,7 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
         if(!options.disable_tco && (tco_awareness != tco_none)) {
-          code.emplace_back(rocket::make_unique<Air_execute_function_tail_call>(altr.sloc, tco_awareness == tco_by_ref, altr.by_refs));
+          code.emplace_back(rocket::make_unique<Air_execute_function_tail_call>(altr.sloc, altr.by_refs, tco_awareness == tco_by_ref));
           return;
         }
         code.emplace_back(rocket::make_unique<Air_execute_function_call>(altr.sloc, altr.by_refs));
