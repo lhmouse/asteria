@@ -83,7 +83,7 @@ void Global_Context::initialize(API_Version version)
     this->m_prng = prng;
     // Tie the collector to `*this` so a full garbage collection is performed when this context is destroyed.
     auto gcoll = rocket::make_refcnt<Generational_Collector>();
-    this->tie_collector(gcoll);
+    this->set_tied_collector(gcoll);
     this->m_gcoll = gcoll;
     ///////////////////////////////////////////////////////////////////////////
     // Initialize standard library modules.

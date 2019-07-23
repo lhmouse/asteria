@@ -12,14 +12,13 @@ namespace Asteria {
 class Abstract_Context
   {
   private:
-    struct Collection_Trigger
+    struct Cleaner
       {
-        void operator()(Rcbase* base_opt) noexcept;
+        void operator()(Rcbase* base) noexcept;
       };
 
   private:
-    // Mind the order of destruction.
-    Uptr<Rcbase, Collection_Trigger> m_tied_coll_opt;
+    Uptr<Rcbase, Cleaner> m_coll_opt;  // Note the order of destruction here.
     Reference_Dictionary m_named_refs;
 
   public:
@@ -47,10 +46,11 @@ class Abstract_Context
         this->m_named_refs.clear();
       }
 
+    Generational_Collector* get_tied_collector_opt() const noexcept;
+    void set_tied_collector(const Rcptr<Generational_Collector>& coll_opt) noexcept;
+
     virtual bool is_analytic() const noexcept = 0;
     virtual const Abstract_Context* get_parent_opt() const noexcept = 0;
-
-    void tie_collector(Rcptr<Generational_Collector> coll_opt) noexcept;
   };
 
 }  // namespace Asteria

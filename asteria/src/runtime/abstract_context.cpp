@@ -8,26 +8,29 @@
 
 namespace Asteria {
 
-void Abstract_Context::Collection_Trigger::operator()(Rcbase* base_opt) noexcept
-  {
-    // Take ownership of the argument.
-    auto qcoll = rocket::dynamic_pointer_cast<Generational_Collector>(Rcptr<Rcbase>(base_opt));
-    // Collect all generations.
-    try {
-      qcoll->collect_variables(9);
-    }
-    catch(const std::exception& stdex) {
-      ASTERIA_DEBUG_LOG("An exception was thrown during the final garbage collection; some resources might have leaked: ", stdex.what());
-    }
+void Abstract_Context::Cleaner::operator()(Rcbase* base) noexcept
+  try {
+    auto coll = rocket::dynamic_pointer_cast<Generational_Collector>(Rcptr<Rcbase>(base));
+    ROCKET_ASSERT(coll);
+    coll->collect_variables(9);
+  }
+  catch(const std::exception& stdex) {
+    ASTERIA_DEBUG_LOG("An exception was thrown during garbage collection and some resources might have leaked: ", stdex.what());
   }
 
 Abstract_Context::~Abstract_Context()
   {
   }
 
-void Abstract_Context::tie_collector(Rcptr<Generational_Collector> coll_opt) noexcept
+
+Generational_Collector* Abstract_Context::get_tied_collector_opt() const noexcept
   {
-    this->m_tied_coll_opt.reset(coll_opt.release());
+    return dynamic_cast<Generational_Collector*>(this->m_coll_opt.get());
+  }
+
+void Abstract_Context::set_tied_collector(const Rcptr<Generational_Collector>& coll_opt) noexcept
+  {
+    this->m_coll_opt.reset(rocket::static_pointer_cast<Rcbase>(coll_opt).release());
   }
 
 }  // namespace Asteria
