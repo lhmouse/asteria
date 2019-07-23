@@ -113,6 +113,15 @@ namespace Asteria {
 
     class Air_execute_clear_stack : public Air_Node
       {
+      private:
+        //
+
+      public:
+        Air_execute_clear_stack()
+          // :
+          {
+          }
+
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {

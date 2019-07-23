@@ -1000,6 +1000,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     class Air_execute_operator_rpn_postfix_inc : public Air_Node
       {
+      private:
+        //
+
+      public:
+        Air_execute_operator_rpn_postfix_inc()
+          // :
+          {
+          }
+
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
@@ -1029,6 +1038,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     class Air_execute_operator_rpn_postfix_dec : public Air_Node
       {
+      private:
+        //
+
+      public:
+        Air_execute_operator_rpn_postfix_dec()
+          // :
+          {
+          }
+
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
@@ -1058,6 +1076,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     class Air_execute_operator_rpn_postfix_at : public Air_Node
       {
+      private:
+        //
+
+      public:
+        Air_execute_operator_rpn_postfix_at()
+          // :
+          {
+          }
+
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
@@ -1216,6 +1243,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     class Air_execute_operator_rpn_prefix_inc : public Air_Node
       {
+      private:
+        //
+
+      public:
+        Air_execute_operator_rpn_prefix_inc()
+          // :
+          {
+          }
+
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
@@ -1243,6 +1279,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     class Air_execute_operator_rpn_prefix_dec : public Air_Node
       {
+      private:
+        //
+
+      public:
+        Air_execute_operator_rpn_prefix_dec()
+          // :
+          {
+          }
+
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
@@ -2436,6 +2481,15 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     class Air_execute_operator_rpn_infix_assign : public Air_Node
       {
+      private:
+        //
+
+      public:
+        Air_execute_operator_rpn_infix_assign()
+          // :
+          {
+          }
+
       public:
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
