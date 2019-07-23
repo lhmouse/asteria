@@ -97,7 +97,7 @@ class Xprunit
     struct S_function_call
       {
         Source_Location sloc;
-        std::size_t nargs;
+        Cow_Vector<bool> by_refs;
       };
     struct S_member_access
       {

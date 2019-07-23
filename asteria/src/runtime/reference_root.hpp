@@ -90,6 +90,10 @@ class Reference_Root
       {
         return this->index() == index_variable;
       }
+    bool is_rvalue() const noexcept
+      {
+        return rocket::is_any_of(this->index(), { index_null, index_constant, index_temporary });
+      }
 
     bool is_tail_call() const noexcept
       {

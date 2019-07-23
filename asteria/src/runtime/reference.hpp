@@ -56,6 +56,10 @@ class Reference
       {
         return this->m_root.is_variable();
       }
+    bool is_rvalue() const noexcept
+      {
+        return this->m_root.is_rvalue();
+      }
 
     template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
       {
