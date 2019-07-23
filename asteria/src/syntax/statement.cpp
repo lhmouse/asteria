@@ -684,33 +684,6 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_return : public Air_Node
-      {
-      private:
-        bool m_by_ref;
-
-      public:
-        explicit Air_execute_return(bool by_ref)
-          : m_by_ref(by_ref)
-          {
-          }
-
-      public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
-          {
-            // Convert the result to an rvalue if it isn't passed by reference.
-            auto& self = ctx.stack().open_top_reference();
-            if(!this->m_by_ref && self.is_variable()) {
-              Reference_Root::S_temporary xroot = { self.read() };
-              self = rocket::move(xroot);
-            }
-            return Air_Node::status_return;
-          }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
-          {
-          }
-      };
-
     class Air_execute_throw : public Air_Node
       {
       private:
@@ -750,6 +723,34 @@ namespace Asteria {
               qnested.emplace(this->m_sloc, value);
             }
             throw *qnested;
+          }
+        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+          {
+          }
+      };
+
+    class Air_execute_return_by_value : public Air_Node
+      {
+      private:
+        //
+
+      public:
+        Air_execute_return_by_value()
+          // :
+          {
+          }
+
+      public:
+        Air_Node::Status execute(Executive_Context& ctx) const override
+          {
+            // What to return?
+            auto& self = ctx.stack().open_top_reference();
+            if(self.is_lvalue()) {
+              // If the result is not an rvalue and it is not passed by reference, convert it to an rvalue.
+              Reference_Root::S_temporary xroot = { self.read() };
+              self = rocket::move(xroot);
+            }
+            return Air_Node::status_return;
           }
         void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
           {
@@ -1023,14 +1024,22 @@ void Statement::generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHa
         const auto& altr = this->m_stor.as<index_return>();
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
-        // Generate inline code for the operand.
-        // Only the last operator can be TCO'd.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options,
-                                                                                  !rocket::same(unit, altr.expr.back()) ? Xprunit::tco_none
-                                                                                                                        : altr.by_ref ? Xprunit::tco_by_ref
-                                                                                                                                      : Xprunit::tco_by_value, ctx);  });
-        // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_return>(altr.by_ref));
+        if(altr.by_ref) {
+          // Generate inline code for the operand. Only the last operator can be TCO'd.
+          rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options,
+                                                                                    rocket::same(unit, altr.expr.back()) ? Xprunit::tco_by_ref
+                                                                                                                         : Xprunit::tco_none, ctx);  });
+          // Return the reference as is.
+          code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_return));
+        }
+        else {
+          // Generate inline code for the operand. Only the last operator can be TCO'd.
+          rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options,
+                                                                                    rocket::same(unit, altr.expr.back()) ? Xprunit::tco_by_value
+                                                                                                                         : Xprunit::tco_none, ctx);  });
+          // Return the reference as is.
+          code.emplace_back(rocket::make_unique<Air_execute_return_by_value>());
+        }
         return;
       }
     case index_assert:

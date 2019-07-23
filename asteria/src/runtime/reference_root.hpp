@@ -78,17 +78,11 @@ class Reference_Root
       {
         return static_cast<Index>(this->m_stor.index());
       }
-    bool is_constant() const noexcept
+
+    // Note that a tail call wrapper is neither an lvalue nor an rvalue.
+    bool is_lvalue() const noexcept
       {
-        return rocket::is_any_of(this->index(), { index_null, index_constant });
-      }
-    bool is_temporary() const noexcept
-      {
-        return rocket::is_any_of(this->index(), { index_null, index_temporary });
-      }
-    bool is_variable() const noexcept
-      {
-        return this->index() == index_variable;
+        return rocket::is_any_of(this->index(), { index_variable });
       }
     bool is_rvalue() const noexcept
       {

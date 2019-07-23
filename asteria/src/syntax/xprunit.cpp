@@ -615,14 +615,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    Cow_Vector<Uptr<Air_Node>> do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx,
+    Cow_Vector<Uptr<Air_Node>> do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco, const Analytic_Context& ctx,
                                                        const Cow_Vector<Xprunit>& units)
       {
         Cow_Vector<Uptr<Air_Node>> code;
         // Only the last operatro may be TCO'd.
         rocket::for_each(units,  [&](const Xprunit& unit) { unit.generate_code(code, options,
-                                                                               !rocket::same(unit, units.back()) ? Xprunit::tco_none
-                                                                                                                 : tco_awareness, ctx);  });
+                                                                               rocket::same(unit, units.back()) ? tco
+                                                                                                                : Xprunit::tco_none, ctx);  });
         return code;
       }
 
@@ -2634,7 +2634,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }  // namespace
 
-void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx) const
+void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Options& options, Xprunit::TCO_Awareness tco, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal:
@@ -2679,8 +2679,8 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
       {
         const auto& altr = this->m_stor.as<index_branch>();
         // Generate code.
-        auto code_true = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_true);
-        auto code_false = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_false);
+        auto code_true = do_generate_code_branch(options, tco, ctx, altr.branch_true);
+        auto code_false = do_generate_code_branch(options, tco, ctx, altr.branch_false);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_branch>(rocket::move(code_true), rocket::move(code_false), altr.assign));
         return;
@@ -2689,8 +2689,8 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
       {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        if(!options.disable_tco && (tco_awareness != tco_none)) {
-          code.emplace_back(rocket::make_unique<Air_execute_function_tail_call>(altr.sloc, altr.by_refs, tco_awareness == tco_by_ref));
+        if(!options.disable_tco && (tco != tco_none)) {
+          code.emplace_back(rocket::make_unique<Air_execute_function_tail_call>(altr.sloc, altr.by_refs, tco == tco_by_ref));
           return;
         }
         code.emplace_back(rocket::make_unique<Air_execute_function_call>(altr.sloc, altr.by_refs));
@@ -2954,7 +2954,7 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
       {
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Generate code.
-        auto code_null = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_null);
+        auto code_null = do_generate_code_branch(options, tco, ctx, altr.branch_null);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_coalescence>(rocket::move(code_null), altr.assign));
         return;

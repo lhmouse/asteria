@@ -44,17 +44,10 @@ class Reference
     Reference& do_finish_call(const Global_Context& global);
 
   public:
-    bool is_constant() const noexcept
+    // Note that a tail call wrapper is neither an lvalue nor an rvalue.
+    bool is_lvalue() const noexcept
       {
-        return this->m_root.is_constant();
-      }
-    bool is_temporary() const noexcept
-      {
-        return this->m_root.is_temporary();
-      }
-    bool is_variable() const noexcept
-      {
-        return this->m_root.is_variable();
+        return this->m_root.is_lvalue();
       }
     bool is_rvalue() const noexcept
       {

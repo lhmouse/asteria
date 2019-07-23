@@ -57,18 +57,18 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
 
 Reference& Reference::do_finish_call(const Global_Context& global)
   {
-    auto& self = *this;
     // Note that `*this` is overwritten before the wrapped function is called.
     Cow_Vector<Reference_Root::S_tail_call> rqueue;
-    bool by_ref = true;
+    // The function call shall yield an rvalue unless all wrapped calls return by reference.
+    bool conj_ref = true;
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
       auto& xroot = rqueue.emplace_back(rocket::move(this->m_root.open_tail_call()));
       // Unpack the function reference.
-      by_ref &= xroot.by_ref;
+      conj_ref &= xroot.by_ref;
       const auto& target = xroot.target;
       // Unpack arguments.
-      self = rocket::move(xroot.args_self.mut_back());
+      *this = rocket::move(xroot.args_self.mut_back());
       auto& args = xroot.args_self.pop_back();
       // Call the function now.
       const auto& sloc = xroot.sloc;
@@ -77,7 +77,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         // Unwrap the function call.
         ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
         target->invoke(*this, global, rocket::move(args));
-        // The result will have been stored into `self`.
+        // The result will have been stored into `*this`.
         ASTERIA_DEBUG_LOG("Returned from tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
       }
       catch(Exception& except) {
@@ -94,12 +94,12 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         throw except;
       }
     }
-    // Convert the result to an rvalue if it isn't passed by reference.
-    if(!by_ref && self.is_variable()) {
-      Reference_Root::S_temporary xroot = { self.read() };
-      self = rocket::move(xroot);
+    if(!this->is_rvalue() && !conj_ref) {
+      // If the result is not an rvalue and it is not passed by reference, convert it to an rvalue.
+      Reference_Root::S_temporary xroot = { this->read() };
+      *this = rocket::move(xroot);
     }
-    return self;
+    return *this;
   }
 
 void Reference::enumerate_variables(const Abstract_Variable_Callback& callback) const
