@@ -26,7 +26,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
         return "postfix decrement";
       }
-    case xop_postfix_at:
+    case xop_postfix_subscr:
       {
         return "postfix subscript";
       }
@@ -1074,13 +1074,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_postfix_at : public Air_Node
+    class Air_execute_operator_rpn_postfix_subscr : public Air_Node
       {
       private:
         //
 
       public:
-        Air_execute_operator_rpn_postfix_at()
+        Air_execute_operator_rpn_postfix_subscr()
           // :
           {
           }
@@ -2715,9 +2715,9 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
             code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_dec>());
             return;
           }
-        case xop_postfix_at:
+        case xop_postfix_subscr:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_at>());
+            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_subscr>());
             return;
           }
         case xop_prefix_pos:

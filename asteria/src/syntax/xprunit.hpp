@@ -19,7 +19,7 @@ class Xprunit
         // Postfix operators
         xop_postfix_inc      = 10,  // ++
         xop_postfix_dec      = 11,  // --
-        xop_postfix_at       = 12,  // []
+        xop_postfix_subscr   = 12,  // []
         // Prefix operators
         xop_prefix_pos       = 20,  // +
         xop_prefix_neg       = 21,  // -

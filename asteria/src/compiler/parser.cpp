@@ -1654,7 +1654,7 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
-        Xprunit::S_operator_rpn xunit = { Xprunit::xop_postfix_at, false };
+        Xprunit::S_operator_rpn xunit = { Xprunit::xop_postfix_subscr, false };
         units.emplace_back(rocket::move(xunit));
         return true;
       }
