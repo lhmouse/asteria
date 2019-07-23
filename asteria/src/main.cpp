@@ -23,17 +23,21 @@ int main(int argc, char** argv)
       args.emplace_back(rocket::move(xref));
     }
     // prepare test code.
-#if 0
+#if 1
     std::cerr << "# Input your program:" << std::endl
               << "---" << std::endl;
     Simple_Source_File code(std::cin, rocket::sref("<stdin>"));
 #else
     static constexpr char src[] =
       R"_____(
-        func sum(x, s) {
-          return (x <= 0) ? s : sum(x - 1, (s ?? 0) + x);
+        func fib(n) {
+          var r = n;
+          if!(n <= 1) {
+            r = fib(n-1) + fib(n-2);
+          }
+          return& r;
         }
-        return sum(1e6);
+        return fib(30);
       )_____";
     Cow_isstream iss(rocket::sref(src));
     std::cerr << "# Source code:" << std::endl
