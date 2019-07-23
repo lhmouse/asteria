@@ -950,7 +950,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
               // Call the function now.
               target->invoke(self, ctx.global(), rocket::move(args));
-              self.unwrap_tail_calls(ctx.global());
+              self.finish_call(ctx.global());
               // The result will have been stored into `self`.
               ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
             }

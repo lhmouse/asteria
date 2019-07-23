@@ -41,7 +41,7 @@ class Reference
     Value& do_open(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const;
     Value do_unset(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const;
 
-    Reference& do_unwrap_tail_calls(const Global_Context& global);
+    Reference& do_finish_call(const Global_Context& global);
 
   public:
     bool is_constant() const noexcept
@@ -115,12 +115,12 @@ class Reference
         return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
-    Reference& unwrap_tail_calls(const Global_Context& global)
+    Reference& finish_call(const Global_Context& global)
       {
         if(!this->m_root.is_tail_call()) {
           return *this;
         }
-        return this->do_unwrap_tail_calls(global);
+        return this->do_finish_call(global);
       }
 
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;

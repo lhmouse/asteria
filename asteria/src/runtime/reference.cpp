@@ -55,7 +55,7 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
     return last.apply_and_erase(*qref);
   }
 
-Reference& Reference::do_unwrap_tail_calls(const Global_Context& global)
+Reference& Reference::do_finish_call(const Global_Context& global)
   {
     auto& self = *this;
     // Note that `*this` is overwritten before the wrapped function is called.

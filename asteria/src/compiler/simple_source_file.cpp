@@ -122,7 +122,7 @@ Reference Simple_Source_File::execute(const Global_Context& global, Cow_Vector<R
     // Execute the code.
     Reference self;
     this->m_code.front().invoke(self, global, rocket::move(args));
-    self.unwrap_tail_calls(global);
+    self.finish_call(global);
     return self;
   }
 
