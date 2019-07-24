@@ -147,13 +147,15 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       : m_sth(hf, init)
       {
       }
-    basic_prehashed_string(const basic_prehashed_string& other) noexcept(conjunction<is_nothrow_copy_constructible<string_type>,
+    basic_prehashed_string(const basic_prehashed_string& other) noexcept(conjunction<is_nothrow_constructible<string_type>,
+                                                                                     is_nothrow_copy_assignable<string_type>,
                                                                                      is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(other.m_sth.as_hasher())
       {
         this->m_sth.assign(other.m_sth);
       }
-    basic_prehashed_string(basic_prehashed_string&& other) noexcept(conjunction<is_nothrow_move_constructible<string_type>,
+    basic_prehashed_string(basic_prehashed_string&& other) noexcept(conjunction<is_nothrow_constructible<string_type>,
+                                                                                is_nothrow_move_assignable<string_type>,
                                                                                 is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(other.m_sth.as_hasher())
       {
