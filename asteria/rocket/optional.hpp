@@ -35,28 +35,22 @@ template<typename valueT> class optional
       : m_stor()
       {
       }
-    template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT&&,
-                                                               value_type>::value)>
-            optional(yvalueT&& yvalue) noexcept(is_nothrow_constructible<value_type,
-                                                                         yvalueT&&>::value)
+    template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT&&, value_type>::value)>
+            optional(yvalueT&& yvalue) noexcept(is_nothrow_constructible<value_type, yvalueT&&>::value)
       : m_stor()
       {
         this->m_stor.emplace_back(noadl::forward<yvalueT>(yvalue));
       }
-    template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&,
-                                                               value_type>::value)>
-            optional(const optional<yvalueT>& other) noexcept(is_nothrow_constructible<value_type,
-                                                                                       const typename optional<yvalueT>::value_type&>::value)
+    template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&, value_type>::value)>
+            optional(const optional<yvalueT>& other) noexcept(is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>::value)
       : m_stor()
       {
         if(other.m_stor.empty()) {
           this->m_stor.emplace_back(other.m_stor.front());
         }
       }
-    template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<typename optional<yvalueT>::value_type&&,
-                                                               value_type>::value)>
-            optional(optional<yvalueT>&& other) noexcept(is_nothrow_constructible<value_type,
-                                                                                  typename optional<yvalueT>::value_type&&>::value)
+    template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<typename optional<yvalueT>::value_type&&, value_type>::value)>
+            optional(optional<yvalueT>&& other) noexcept(is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>::value)
       : m_stor()
       {
         if(!other.m_stor.empty()) {
@@ -69,12 +63,9 @@ template<typename valueT> class optional
         this->m_stor.clear();
         return *this;
       }
-    template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type,
-                                                              yvalueT&&>::value)>
-            optional& operator=(yvalueT&& yvalue) noexcept(conjunction<is_nothrow_constructible<value_type,
-                                                                                                yvalueT&&>,
-                                                                       is_nothrow_assignable<value_type,
-                                                                                             yvalueT&&>>::value)
+    template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, yvalueT&&>::value)>
+            optional& operator=(yvalueT&& yvalue) noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>,
+                                                                       is_nothrow_assignable<value_type, yvalueT&&>>::value)
       {
         if(!this->m_stor.empty()) {
           this->m_stor.mut_front() = noadl::forward<yvalueT>(yvalue);
@@ -84,12 +75,9 @@ template<typename valueT> class optional
         }
         return *this;
       }
-    template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type,
-                                                              const typename optional<yvalueT>::value_type&>::value)>
-            optional& operator=(const optional<yvalueT>& other) noexcept(conjunction<is_nothrow_constructible<value_type,
-                                                                                                              const typename optional<yvalueT>::value_type&>,
-                                                                                     is_nothrow_assignable<value_type,
-                                                                                                           const typename optional<yvalueT>::value_type&>>::value)
+    template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, const typename optional<yvalueT>::value_type&>::value)>
+            optional& operator=(const optional<yvalueT>& other) noexcept(conjunction<is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>,
+                                                                                     is_nothrow_assignable<value_type, const typename optional<yvalueT>::value_type&>>::value)
       {
         if(other.m_stor.empty()) {
           this->m_stor.clear();
@@ -102,12 +90,9 @@ template<typename valueT> class optional
         }
         return *this;
       }
-    template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type,
-                                                              typename optional<yvalueT>::value_type&&>::value)>
-            optional& operator=(optional<yvalueT>&& other) noexcept(conjunction<is_nothrow_constructible<value_type,
-                                                                                                         typename optional<yvalueT>::value_type&&>,
-                                                                                is_nothrow_assignable<value_type,
-                                                                                                      typename optional<yvalueT>::value_type&&>>::value)
+    template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, typename optional<yvalueT>::value_type&&>::value)>
+            optional& operator=(optional<yvalueT>&& other) noexcept(conjunction<is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>,
+                                                                                is_nothrow_assignable<value_type, typename optional<yvalueT>::value_type&&>>::value)
       {
         if(other.m_stor.empty()) {
           this->m_stor.clear();
