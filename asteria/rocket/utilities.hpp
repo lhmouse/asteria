@@ -547,6 +547,39 @@ template<typename pointerT> typename remove_reference<decltype(*(::std::declval<
     return ::std::addressof(*ptr);
   }
 
+    namespace details_utilities {
+
+    template<typename targetT,
+             typename sourceT, typename = void> struct can_static_cast_aux : false_type
+      {
+      };
+    template<typename targetT,
+             typename sourceT> struct can_static_cast_aux<targetT, sourceT,
+                                                          decltype(static_cast<void>(static_cast<targetT>(::std::declval<sourceT>())))> : true_type
+      {
+      };
+
+    template<typename targetT, typename sourceT> constexpr targetT static_or_dynamic_cast_aux(true_type, sourceT&& src)
+      {
+        return static_cast<targetT>(noadl::forward<sourceT&&>(src));
+      }
+    template<typename targetT, typename sourceT> constexpr targetT static_or_dynamic_cast_aux(false_type, sourceT&& src)
+      {
+        return dynamic_cast<targetT>(noadl::forward<sourceT&&>(src));
+      }
+
+    }
+
+template<typename targetT, typename sourceT> struct can_static_cast : details_utilities::can_static_cast_aux<targetT, sourceT>
+  {
+  };
+
+template<typename targetT, typename sourceT> constexpr targetT static_or_dynamic_cast(sourceT&& src)
+  {
+    return details_utilities::static_or_dynamic_cast_aux<targetT, sourceT>(details_utilities::can_static_cast_aux<targetT, sourceT&&>(),
+                                                                           noadl::forward<sourceT>(src));
+  }
+
 }  // namespace rocket
 
 #endif
