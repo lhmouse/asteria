@@ -50,9 +50,8 @@ template<typename valueT> class optional
       : m_stor()
       {
         if(other.m_stor.empty()) {
-          return;
+          this->m_stor.emplace_back(other.m_stor.front());
         }
-        this->m_stor.emplace_back(other.m_stor.front());
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<typename optional<yvalueT>::value_type&&,
                                                                value_type>::value)>
@@ -60,10 +59,9 @@ template<typename valueT> class optional
                                                                               typename optional<yvalueT>::value_type&&>::value)
       : m_stor()
       {
-        if(other.m_stor.empty()) {
-          return;
+        if(!other.m_stor.empty()) {
+          this->m_stor.emplace_back(noadl::move(other.m_stor.front()));
         }
-        this->m_stor.emplace_back(noadl::move(other.m_stor.front()));
       }
     // 19.6.3.3, assignment
     optional& operator=(nullopt_t) noexcept
@@ -124,7 +122,7 @@ template<typename valueT> class optional
       }
 
   private:
-    [[noreturn]] ROCKET_NOINLINE void do_throw_valueless() const
+    [[noreturn]] ROCKET_NOINLINE reference do_throw_valueless() const
       {
         noadl::sprintf_and_throw<length_error>("variant: No value has been stored in this variant.");
       }
@@ -142,60 +140,39 @@ template<typename valueT> class optional
 
     const_reference value() const
       {
-        if(this->m_stor.empty()) {
-          this->do_throw_valueless();
-        }
-        return this->m_stor.front();
+        return this->m_stor.empty() ? this->do_throw_valueless() : this->m_stor.front();
       }
     reference value()
       {
-        if(this->m_stor.empty()) {
-          this->do_throw_valueless();
-        }
-        return this->m_stor.mut_front();
+        return this->m_stor.empty() ? this->do_throw_valueless() : this->m_stor.mut_front();
       }
     // N.B. This is a non-standard extension.
     const value_type* value_ptr() const
       {
-        if(this->m_stor.empty()) {
-          return nullptr;
-        }
-        return ::std::addressof(this->m_stor.front());
+        return this->m_stor.empty() ? nullptr : ::std::addressof(this->m_stor.front());
       }
     // N.B. This is a non-standard extension.
     value_type* value_ptr()
       {
-        if(this->m_stor.empty()) {
-          return nullptr;
-        }
-        return ::std::addressof(this->m_stor.mut_front());
+        return this->m_stor.empty() ? nullptr : ::std::addressof(this->m_stor.mut_front());
       }
     // N.B. The return type differs from `std::variant`.
     template<typename dvalueT> decltype(0 ? ::std::declval<const_reference>()
                                           : ::std::declval<dvalueT>()) value_or(dvalueT&& dvalue) const
       {
-        if(this->m_stor.empty()) {
-          return noadl::forward<dvalueT>(dvalue);
-        }
-        return this->m_stor.front();
+        return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : this->m_stor.front();
       }
     // N.B. The return type differs from `std::variant`.
     template<typename dvalueT> decltype(0 ? ::std::declval<reference>()
                                           : ::std::declval<dvalueT>()) value_or(dvalueT&& dvalue)
       {
-        if(this->m_stor.empty()) {
-          return noadl::forward<dvalueT>(dvalue);
-        }
-        return this->m_stor.mut_front();
+        return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : this->m_stor.mut_front();
       }
     // N.B. This is a non-standard extension.
     template<typename dvalueT> decltype(0 ? ::std::declval<value_type&&>()
                                           : ::std::declval<dvalueT>()) move_value_or(dvalueT&& dvalue)
       {
-        if(this->m_stor.empty()) {
-          return noadl::forward<dvalueT>(dvalue);
-        }
-        return noadl::move(this->m_stor.mut_front());
+        return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : noadl::move(this->m_stor.mut_front());
       }
 
     constexpr const_reference operator*() const
@@ -222,14 +199,12 @@ template<typename valueT> class optional
       }
     template<typename... paramsT> reference emplace(paramsT&&... params)
       {
-        this->m_stor.clear();
-        return this->m_stor.emplace_back(noadl::forward<paramsT>(params)...);
+        return this->m_stor.clear(), this->m_stor.emplace_back(noadl::forward<paramsT>(params)...);
       }
     // N.B. This is a non-standard extension.
     template<typename... paramsT> reference value_or_emplace(paramsT&&... params)
       {
-        return this->m_stor.empty() ? this->m_stor.emplace_back(noadl::forward<paramsT>(params)...)
-                                    : this->m_stor.mut_front();
+        return this->m_stor.empty() ? this->m_stor.emplace_back(noadl::forward<paramsT>(params)...) : this->m_stor.mut_front();
       }
 
     // 19.6.3.4, swap
