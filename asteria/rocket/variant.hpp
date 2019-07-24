@@ -52,17 +52,17 @@ template<typename... alternativesT> class variant;
         throw;
       }
 
-    constexpr bool any_of(const bool* table, size_t count) noexcept
-      {
-        return (count != 0) && (table[0] || any_of(table + 1, count - 1));
-      }
     constexpr bool all_of(const bool* table, size_t count) noexcept
       {
         return (count == 0) || (table[0] && all_of(table + 1, count - 1));
       }
+    constexpr bool any_of(const bool* table, size_t count) noexcept
+      {
+        return (count != 0) && (table[0] || any_of(table + 1, count - 1));
+      }
     constexpr bool test_bit(const bool* table, size_t count, size_t index) noexcept
       {
-        return any_of(table, count) && (all_of(table, count) || table[index]);
+        return all_of(table, count) || (any_of(table, count) && table[index]);
       }
 
     template<typename alternativeT> void wrapped_copy_construct(void* dptr, const void* sptr)
@@ -215,51 +215,36 @@ template<typename... alternativesT> class variant
     static constexpr size_t alternative_size = sizeof...(alternativesT);
 
   private:
-    struct storage
-      {
-        typename aligned_union<1, alternativesT...>::type bytes;
-
-        template<typename otherT> operator const otherT* () const noexcept
-          {
-            return static_cast<const otherT*>(static_cast<const void*>(this));
-          }
-        template<typename otherT> operator otherT* () noexcept
-          {
-            return static_cast<otherT*>(static_cast<void*>(this));
-          }
-      };
-
-  private:
     typename lowest_unsigned<alternative_size - 1>::type m_index;
-    storage m_stor;
+    typename aligned_union<1, alternativesT...>::type m_stor[1];
 
   public:
     // 23.7.3.1, constructors
     variant() noexcept(is_nothrow_constructible<typename alternative_at<0>::type>::value)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(&(this->m_stor)), '*', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '*', sizeof(this->m_stor));
 #endif
         constexpr auto index_new = size_t(0);
         // Value-initialize the first alternative in place.
-        noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(this->m_stor));
+        noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)));
         this->m_index = index_new;
       }
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
             variant(paramT&& param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT&&>::value)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(&(this->m_stor)), '*', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '*', sizeof(this->m_stor));
 #endif
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
-        noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(this->m_stor), noadl::forward<paramT>(param));
+        noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), noadl::forward<paramT>(param));
         this->m_index = index_new;
       }
     variant(const variant& other) noexcept(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(&(this->m_stor)), '*', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '*', sizeof(this->m_stor));
 #endif
         auto index_new = other.m_index;
         // Copy-construct the active alternative in place.
@@ -269,7 +254,7 @@ template<typename... alternativesT> class variant
     variant(variant&& other) noexcept
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(static_cast<void*>(&(this->m_stor)), '*', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '*', sizeof(this->m_stor));
 #endif
         auto index_new = other.m_index;
         // Move-construct the active alternative in place.
@@ -285,22 +270,22 @@ template<typename... alternativesT> class variant
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Copy-assign the alternative in place.
-          *static_cast<typename alternative_at<index_new>::type*>(this->m_stor) = param;
+          *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)) = param;
         }
         else if(is_nothrow_copy_constructible<paramT>::value) {
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Copy-construct the alternative in place.
-          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(this->m_stor), param);
+          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), param);
           this->m_index = index_new;
         }
         else {
           // Make a backup.
-          storage backup;
+          typename aligned_union<1, alternativesT...>::type backup[1];
           details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           try {
             // Copy-construct the alternative in place.
-            noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(this->m_stor), param);
+            noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), param);
             this->m_index = index_new;
           }
           catch(...) {
@@ -320,13 +305,13 @@ template<typename... alternativesT> class variant
         constexpr auto index_new = index_of<paramT>::value;
         if(index_old == index_new) {
           // Move-assign the alternative in place.
-          *static_cast<typename alternative_at<index_new>::type*>(this->m_stor) = noadl::move(param);
+          *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)) = noadl::move(param);
         }
         else {
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Move-construct the alternative in place.
-          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(this->m_stor), noadl::move(param));
+          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), noadl::move(param));
           this->m_index = index_new;
         }
         return *this;
@@ -349,7 +334,7 @@ template<typename... alternativesT> class variant
         }
         else {
           // Make a backup.
-          storage backup;
+          typename aligned_union<1, alternativesT...>::type backup[1];
           details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           try {
             // Copy-construct the alternative in place.
@@ -389,7 +374,7 @@ template<typename... alternativesT> class variant
         details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
 #ifdef ROCKET_DEBUG
         this->m_index = static_cast<decltype(this->m_index)>(0xBAD1BEEF);
-        ::std::memset(static_cast<void*>(&(this->m_stor)), '@', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '@', sizeof(this->m_stor));
 #endif
       }
 
@@ -419,7 +404,7 @@ template<typename... alternativesT> class variant
         if(this->m_index != indexT) {
           return nullptr;
         }
-        return static_cast<const typename alternative_at<indexT>::type*>(this->m_stor);
+        return static_cast<const typename alternative_at<indexT>::type*>(static_cast<const void*>(this->m_stor));
       }
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)> const targetT* get() const noexcept
       {
@@ -430,7 +415,7 @@ template<typename... alternativesT> class variant
         if(this->m_index != indexT) {
           return nullptr;
         }
-        return static_cast<typename alternative_at<indexT>::type*>(this->m_stor);
+        return static_cast<typename alternative_at<indexT>::type*>(static_cast<void*>(this->m_stor));
       }
     template<typename targetT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<targetT>::value)> targetT* get() noexcept
       {
@@ -483,16 +468,16 @@ template<typename... alternativesT> class variant
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Construct the alternative in place.
-          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(this->m_stor), noadl::forward<paramsT>(params)...);
+          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), noadl::forward<paramsT>(params)...);
           this->m_index = index_new;
         }
         else {
           // Make a backup.
-          storage backup;
+          typename aligned_union<1, alternativesT...>::type backup[1];
           details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           try {
             // Construct the alternative in place.
-            noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(this->m_stor), noadl::forward<paramsT>(params)...);
+            noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), noadl::forward<paramsT>(params)...);
             this->m_index = index_new;
           }
           catch(...) {
@@ -502,7 +487,7 @@ template<typename... alternativesT> class variant
           }
           details_variant::dispatch_destroy<alternativesT...>(index_old, backup);
         }
-        return *static_cast<typename alternative_at<index_new>::type*>(this->m_stor);
+        return *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor));
       }
     template<typename targetT, typename... paramsT>
             targetT& emplace(paramsT&&... params) noexcept(is_nothrow_constructible<targetT, paramsT&&...>::value)
@@ -521,7 +506,7 @@ template<typename... alternativesT> class variant
         }
         else {
           // Swap active alternatives using an indeterminate buffer.
-          storage backup;
+          typename aligned_union<1, alternativesT...>::type backup[1];
           details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           // Move-construct the other alternative in place.
           details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_new, this->m_stor, other.m_stor);
