@@ -27,6 +27,8 @@ using ::std::ptrdiff_t;
 using ::std::size_t;
 using ::std::intptr_t;
 using ::std::uintptr_t;
+using ::std::intmax_t;
+using ::std::uintmax_t;
 using ::std::int8_t;
 using ::std::uint8_t;
 using ::std::int16_t;
@@ -137,32 +139,26 @@ template<typename... unusedT> struct make_void
 #define ROCKET_RETURN_DISABLE_IF(R_, ...)    typename ::std::enable_if<!bool(__VA_ARGS__), R_>::type
 
 // The argument must be a non-const lvalue.
-template<typename argT, ROCKET_ENABLE_IF(is_same<typename remove_cv<argT>::type, argT>::value)> constexpr typename remove_reference<argT>::type&& move(argT& arg) noexcept
+template<typename argT,
+         ROCKET_ENABLE_IF(is_same<typename remove_cv<argT>::type,
+                                  argT>::value)> constexpr typename remove_reference<argT>::type&& move(argT& arg) noexcept
   {
     return static_cast<typename remove_reference<argT>::type&&>(arg);
   }
 
 // The argument must be an lvalue.
-template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_lvalue_reference<argT&&>::value)> constexpr targetT&& forward(argT&& arg) noexcept
+template<typename targetT, typename argT,
+         ROCKET_ENABLE_IF(is_lvalue_reference<argT&&>::value)> constexpr targetT&& forward(argT&& arg) noexcept
   {
     return static_cast<targetT&&>(arg);
   }
-
-struct identity
-  {
-    using is_transparent = void;
-
-    template<typename paramT> constexpr paramT&& operator()(paramT&& param) const noexcept
-      {
-        return noadl::forward<paramT>(param);
-      }
-  };
 
     namespace details_utilities {
 
     using ::std::swap;
 
-    template<typename typeT> struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
+    template<typename typeT> struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(),
+                                                                                                 ::std::declval<typeT&>()))>
       {
       };
 
@@ -190,21 +186,23 @@ template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhs
                        : noadl::forward<lhsT>(lhs);
   }
 
-template<typename testT, typename lowerT, typename upperT> constexpr decltype(0 ? ::std::declval<lowerT>()
-                                                                                : 0 ? ::std::declval<upperT>()
-                                                                                    : ::std::declval<testT>()) clamp(testT&& test, lowerT&& lower, upperT&& upper)
+template<typename testT,
+         typename lowerT, typename upperT> constexpr decltype(0 ? ::std::declval<lowerT>()
+                                                                : 0 ? ::std::declval<upperT>()
+                                                                    : ::std::declval<testT>()) clamp(testT&& test,
+                                                                                                     lowerT&& lower, upperT&& upper)
   {
     return (test < lower) ? noadl::forward<lowerT>(lower)
                           : (upper < test) ? noadl::forward<upperT>(upper)
                                            : noadl::forward<testT>(test);
   }
 
-template<typename lhsT, typename rhsT> inline bool same(const lhsT& lhs, const rhsT& rhs) noexcept
+template<typename lhsT, typename rhsT> bool same(const lhsT& lhs, const rhsT& rhs) noexcept
   {
-    return static_cast<const void*>(::std::addressof(lhs)) == static_cast<const void*>(::std::addressof(rhs));
+    return reinterpret_cast<const volatile char (&)[1]>(lhs) == reinterpret_cast<const volatile char (&)[1]>(rhs);
   }
 
-template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<charT, traitsT>& ios, typename basic_ios<charT, traitsT>::iostate& state)
+template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<charT, traitsT>& ios, ios_base::iostate& state)
   {
     // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
     // Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
@@ -223,8 +221,8 @@ template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<c
   }
 
 template<typename iteratorT, typename eiteratorT,
-         typename functionT, typename... paramsT> inline void ranged_for(iteratorT first, eiteratorT last,
-                                                                         functionT&& func, const paramsT&... params)
+         typename functionT, typename... paramsT> void ranged_for(iteratorT first, eiteratorT last,
+                                                                  functionT&& func, const paramsT&... params)
   {
     for(auto qit = noadl::move(first); qit != last; ++qit) {
       noadl::forward<functionT>(func)(qit, params...);
@@ -232,8 +230,8 @@ template<typename iteratorT, typename eiteratorT,
   }
 
 template<typename iteratorT, typename eiteratorT,
-         typename functionT, typename... paramsT> inline void ranged_do_while(iteratorT first, eiteratorT last,
-                                                                              functionT&& func, const paramsT&... params)
+         typename functionT, typename... paramsT> void ranged_do_while(iteratorT first, eiteratorT last,
+                                                                       functionT&& func, const paramsT&... params)
   {
     auto qit = noadl::move(first);
     do {
@@ -244,24 +242,28 @@ template<typename iteratorT, typename eiteratorT,
 template<typename... typesT> struct conjunction : true_type
   {
   };
-template<typename firstT, typename... restT> struct conjunction<firstT, restT...> : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
+template<typename firstT, typename... restT> struct conjunction<firstT, restT...> : conditional<bool(firstT::value),
+                                                                                                conjunction<restT...>,
+                                                                                                firstT>::type
   {
   };
 
 template<typename... typesT> struct disjunction : false_type
   {
   };
-template<typename firstT, typename... restT> struct disjunction<firstT, restT...> : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
+template<typename firstT, typename... restT> struct disjunction<firstT, restT...> : conditional<bool(firstT::value),
+                                                                                                firstT,
+                                                                                                disjunction<restT...>>::type
   {
   };
 
     namespace details_utilities {
 
-    template<typename iteratorT> constexpr size_t tagged_estimate_distance(input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
+    template<typename iteratorT> constexpr size_t estimate_distance_aux(input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
       {
         return 0;
       }
-    template<typename iteratorT> inline size_t tagged_estimate_distance(forward_iterator_tag, iteratorT first, iteratorT last)
+    template<typename iteratorT> size_t estimate_distance_aux(forward_iterator_tag, iteratorT first, iteratorT last)
       {
         size_t total = 0;
         for(auto qit = noadl::move(first); qit != last; ++qit) {
@@ -269,7 +271,7 @@ template<typename firstT, typename... restT> struct disjunction<firstT, restT...
         }
         return total;
       }
-    template<typename iteratorT> constexpr size_t tagged_estimate_distance(random_access_iterator_tag, iteratorT first, iteratorT last)
+    template<typename iteratorT> constexpr size_t estimate_distance_aux(random_access_iterator_tag, iteratorT first, iteratorT last)
       {
         return static_cast<size_t>(last - first);
       }
@@ -278,10 +280,13 @@ template<typename firstT, typename... restT> struct disjunction<firstT, restT...
 
 template<typename iteratorT> constexpr size_t estimate_distance(iteratorT first, iteratorT last)
   {
-    return details_utilities::tagged_estimate_distance(typename iterator_traits<iteratorT>::iterator_category(), noadl::move(first), noadl::move(last));
+    return details_utilities::estimate_distance_aux(typename iterator_traits<iteratorT>::iterator_category(),
+                                                    noadl::move(first), noadl::move(last));
   }
 
-template<typename elementT, typename... paramsT> elementT* construct_at(elementT* ptr, paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
+template<typename elementT,
+         typename... paramsT> elementT* construct_at(elementT* ptr,
+                                                     paramsT&&... params) noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xAA, sizeof(elementT));
@@ -370,7 +375,7 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline void for_each_nonconstexpr(containerT&& container, callbackT&& callback)
+    template<typename containerT, typename callbackT> void for_each_nonconstexpr(containerT&& container, callbackT&& callback)
       {
         for(auto&& qelem : container) {
           noadl::forward<callbackT>(callback)(qelem);
@@ -379,18 +384,18 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
 
     }  // namespace details_utilities
 
-template<typename containerT, typename callbackT> inline void for_each(containerT&& container, callbackT&& callback)
+template<typename containerT, typename callbackT> void for_each(containerT&& container, callbackT&& callback)
   {
     return details_utilities::for_each_nonconstexpr(noadl::forward<containerT>(container), noadl::forward<callbackT>(callback));
   }
-template<typename elementT, typename callbackT> inline void for_each(initializer_list<elementT> init, callbackT&& callback)
+template<typename elementT, typename callbackT> void for_each(initializer_list<elementT> init, callbackT&& callback)
   {
     return details_utilities::for_each_nonconstexpr(init, noadl::forward<callbackT>(callback));
   }
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline bool any_of_nonconstexpr(containerT&& container, callbackT&& callback)
+    template<typename containerT, typename callbackT> bool any_of_nonconstexpr(containerT&& container, callbackT&& callback)
       {
         for(auto&& qelem : container) {
           if(noadl::forward<callbackT>(callback)(qelem)) {
@@ -413,7 +418,7 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> inline bool none_of_nonconstexpr(containerT&& container, callbackT&& callback)
+    template<typename containerT, typename callbackT> bool none_of_nonconstexpr(containerT&& container, callbackT&& callback)
       {
         for(auto&& qelem : container) {
           if(noadl::forward<callbackT>(callback)(qelem)) {
@@ -436,7 +441,7 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
 
     namespace details_utilities {
 
-    template<typename targetT, typename containerT> inline bool is_any_of_nonconstexpr(targetT&& targ, containerT&& container)
+    template<typename targetT, typename containerT> bool is_any_of_nonconstexpr(targetT&& targ, containerT&& container)
       {
         for(auto&& qelem : container) {
           if(noadl::forward<targetT>(targ) == qelem) {
@@ -498,21 +503,30 @@ template<typename elementT, size_t countT> constexpr size_t countof(const elemen
       };
     template<typename integerT, integerT valueT,
              typename firstT, typename... remainingT> struct integer_selector<integerT, valueT,
-                                                                              firstT, remainingT...> : conditional<static_cast<firstT>(valueT) == valueT,
-                                                                                                                   enable_if<1, firstT>,
-                                                                                                                   integer_selector<integerT, valueT, remainingT...>>::type
+                                                                              firstT, remainingT...> : conditional<firstT(valueT) != valueT,
+                                                                                                                   integer_selector<integerT, valueT,
+                                                                                                                                    remainingT...>,
+                                                                                                                   enable_if<1, firstT>>::type
       {
       };
 
     }  // namespace details_utilities
 
-template<long long valueT> struct lowest_signed : details_utilities::integer_selector<long long, valueT,
-                                                                                      signed char, short, int, long, long long>
+template<intmax_t valueT> struct lowest_signed : details_utilities::integer_selector<intmax_t, valueT,
+                                                                                     signed char,
+                                                                                     signed short,
+                                                                                     signed,
+                                                                                     signed long,
+                                                                                     signed long long>
   {
   };
 
-template<unsigned long long valueT> struct lowest_unsigned : details_utilities::integer_selector<unsigned long long, valueT,
-                                                                                                 unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
+template<uintmax_t valueT> struct lowest_unsigned : details_utilities::integer_selector<uintmax_t, valueT,
+                                                                                        unsigned char,
+                                                                                        unsigned short,
+                                                                                        unsigned,
+                                                                                        unsigned long,
+                                                                                        unsigned long long>
   {
   };
 
@@ -522,6 +536,12 @@ struct clear_t
   {
   }
 constexpr clear;
+
+// Fancy pointer conversion
+template<typename pointerT> typename remove_reference<decltype(*(::std::declval<pointerT>()))>::type* unfancy(pointerT&& ptr)
+  {
+    return ::std::addressof(*ptr);
+  }
 
 }  // namespace rocket
 

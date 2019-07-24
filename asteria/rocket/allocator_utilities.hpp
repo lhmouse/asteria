@@ -131,11 +131,6 @@ template<typename valueT> struct is_std_allocator<::std::allocator<valueT>> : tr
   {
   };
 
-template<typename pointerT> typename remove_reference<decltype(*(::std::declval<pointerT>()))>::type* unfancy(pointerT&& ptr)
-  {
-    return ::std::addressof(*ptr);
-  }
-
 }  // namespace rocket
 
 #endif
