@@ -14,28 +14,9 @@
 namespace rocket {
 
 template<typename elementT, typename deleterT = default_delete<const elementT>> class refcnt_base;
-
 template<typename elementT> class refcnt_ptr;
 
     namespace details_refcnt_ptr {
-
-    template<typename resultT, typename sourceT,
-             typename = void> struct static_cast_or_dynamic_cast_helper
-      {
-        constexpr resultT operator()(sourceT&& src) const
-          {
-            return dynamic_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
-    template<typename resultT, typename sourceT
-             > struct static_cast_or_dynamic_cast_helper<resultT, sourceT,
-                                                         typename make_void<decltype(static_cast<resultT>(::std::declval<sourceT>()))>::type>
-      {
-        constexpr resultT operator()(sourceT&& src) const
-          {
-            return static_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
 
     class reference_counter_base
       {
@@ -62,17 +43,90 @@ template<typename elementT> class refcnt_ptr;
           }
       };
 
+    }
+
+template<typename elementT, typename deleterT> class refcnt_base : public virtual details_refcnt_ptr::reference_counter_base,
+                                                                   private virtual allocator_wrapper_base_for<deleterT>::type
+  {
+  public:
+    using element_type  = elementT;
+    using deleter_type  = deleterT;
+    using pointer       = elementT*;
+
+  private:
+    using deleter_base  = typename allocator_wrapper_base_for<deleter_type>::type;
+
+  private:
+    [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info& ytype) const
+      {
+        noadl::sprintf_and_throw<domain_error>("refcnt_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
+                                               ytype.name(), typeid(*this).name());
+      }
+
+  public:
+    const deleter_type& as_deleter() const noexcept
+      {
+        return static_cast<const deleter_base&>(*this);
+      }
+    deleter_type& as_deleter() noexcept
+      {
+        return static_cast<deleter_base&>(*this);
+      }
+
+    bool unique() const noexcept
+      {
+        return this->details_refcnt_ptr::reference_counter_base::unique();
+      }
+    long use_count() const noexcept
+      {
+        return this->details_refcnt_ptr::reference_counter_base::use_count();
+      }
+
+    void add_reference() const noexcept
+      {
+        return this->details_refcnt_ptr::reference_counter_base::add_reference();
+      }
+    bool drop_reference() const noexcept
+      {
+        return this->details_refcnt_ptr::reference_counter_base::drop_reference();
+      }
+
+    template<typename yelementT = elementT> refcnt_ptr<const yelementT> share_this() const
+      {
+        auto ptr = noadl::static_or_dynamic_cast<const yelementT*>(this);
+        if(!ptr) {
+          this->do_throw_bad_cast(typeid(yelementT));
+        }
+        // Share ownership.
+        refcnt_ptr<const yelementT> dptr(ptr);
+        this->details_refcnt_ptr::reference_counter_base::add_reference();
+        return dptr;
+      }
+    template<typename yelementT = elementT> refcnt_ptr<yelementT> share_this()
+      {
+        auto ptr = noadl::static_or_dynamic_cast<yelementT*>(this);
+        if(!ptr) {
+          this->do_throw_bad_cast(typeid(yelementT));
+        }
+        // Share ownership.
+        refcnt_ptr<yelementT> dptr(ptr);
+        this->details_refcnt_ptr::reference_counter_base::add_reference();
+        return dptr;
+      }
+  };
+
+    namespace details_refcnt_ptr {
+
+    template<typename elementT, typename deleterT> deleterT copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
+      {
+        return base.as_deleter();
+      }
+
     template<typename elementT> class stored_pointer
       {
       public:
         using element_type  = elementT;
         using pointer       = element_type*;
-
-      private:
-        template<typename yelementT, typename deleterT> static constexpr const deleterT& do_locate_deleter(const refcnt_base<yelementT, deleterT>& base) noexcept
-          {
-            return base.as_deleter();
-          }
 
       private:
         pointer m_ptr;
@@ -113,20 +167,17 @@ template<typename elementT> class refcnt_ptr;
           {
             return this->m_ptr;
           }
-        pointer copy_release() const noexcept
-          {
-            auto ptr = this->m_ptr;
-            if(ptr) {
-              ptr->reference_counter_base::add_reference();
-            }
-            return ptr;
-          }
         pointer release() noexcept
           {
+            return ::std::exchange(this->m_ptr, pointer());
+          }
+        pointer fork() const noexcept
+          {
             auto ptr = this->m_ptr;
-            if(ptr) {
-              this->m_ptr = pointer();
+            if(!ptr) {
+              return pointer();
             }
+            ptr->reference_counter_base::add_reference();
             return ptr;
           }
         void reset(pointer ptr_new) noexcept
@@ -135,124 +186,45 @@ template<typename elementT> class refcnt_ptr;
             if(!ptr) {
               return;
             }
-            if(!ptr->reference_counter_base::drop_reference()) {
+            if(ROCKET_EXPECT(!ptr->reference_counter_base::drop_reference())) {
               return;
             }
-            // Copy-construct a deleter from the object, which is used to delete the object thereafter.
-            auto tdel = stored_pointer::do_locate_deleter(*ptr);
-            noadl::move(tdel)(ptr);
+            copy_deleter</*noadl*/>(*ptr)(ptr);
           }
         void exchange(stored_pointer& other) noexcept
           {
-            ::std::swap(this->m_ptr, other.m_ptr);
+            noadl::adl_swap(this->m_ptr, other.m_ptr);
           }
       };
 
-    struct static_caster
+    template<typename targetT, typename sourceT,
+             typename casterT> refcnt_ptr<targetT> pointer_cast_aux(const refcnt_ptr<sourceT>& sptr, casterT&& caster)
       {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
-          {
-            return static_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
-    struct dynamic_caster
+        refcnt_ptr<targetT> dptr;
+        // Try casting.
+        auto ptr = ::rocket::forward<casterT>(caster)(sptr.get());
+        if(ptr) {
+          // Share ownership.
+          dptr.reset(ptr);
+          ptr->reference_counter_base::add_reference();
+        }
+        return dptr;
+      }
+    template<typename targetT, typename sourceT,
+             typename casterT> refcnt_ptr<targetT> pointer_cast_aux(refcnt_ptr<sourceT>&& sptr, casterT&& caster)
       {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
-          {
-            return dynamic_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
-    struct const_caster
-      {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
-          {
-            return const_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
-
-    template<typename resptrT, typename casterT> struct pointer_cast_helper
-      {
-        template<typename srcptrT> resptrT operator()(srcptrT&& sptr) const
-          {
-            auto ptr = casterT::template do_cast<typename resptrT::pointer>(sptr.get());
-            if(!ptr) {
-              return nullptr;
-            }
-            auto tptr = noadl::forward<srcptrT>(sptr);
-            tptr.release();
-            return resptrT(ptr);
-          }
-      };
+        refcnt_ptr<targetT> dptr;
+        // Try casting.
+        auto ptr = ::rocket::forward<casterT>(caster)(sptr.get());
+        if(ptr) {
+          // Transfer ownership.
+          dptr.reset(ptr);
+          sptr.release();
+        }
+        return dptr;
+      }
 
     }  // namespace details_refcnt_ptr
-
-template<typename elementT, typename deleterT> class refcnt_base : protected virtual details_refcnt_ptr::reference_counter_base,
-                                                                   private virtual allocator_wrapper_base_for<deleterT>::type
-  {
-    template<typename> friend class details_refcnt_ptr::stored_pointer;
-
-  public:
-    using element_type  = elementT;
-    using deleter_type  = deleterT;
-    using pointer       = elementT*;
-
-  protected:
-    using deleter_base  = typename allocator_wrapper_base_for<deleter_type>::type;
-
-  private:
-    [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info& ytype) const
-      {
-        noadl::sprintf_and_throw<domain_error>("refcnt_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
-                                               ytype.name(), typeid(*this).name());
-      }
-
-  public:
-    const deleter_type& as_deleter() const noexcept
-      {
-        return static_cast<const deleter_base&>(*this);
-      }
-    deleter_type& as_deleter() noexcept
-      {
-        return static_cast<deleter_base&>(*this);
-      }
-
-    bool unique() const noexcept
-      {
-        return this->details_refcnt_ptr::reference_counter_base::unique();
-      }
-    long use_count() const noexcept
-      {
-        return this->details_refcnt_ptr::reference_counter_base::use_count();
-      }
-
-    void add_reference() const noexcept
-      {
-        return this->details_refcnt_ptr::reference_counter_base::add_reference();
-      }
-    bool drop_reference() const noexcept
-      {
-        return this->details_refcnt_ptr::reference_counter_base::drop_reference();
-      }
-
-    template<typename yelementT = elementT> refcnt_ptr<const yelementT> share_this() const
-      {
-        auto ptr = details_refcnt_ptr::static_cast_or_dynamic_cast_helper<const yelementT*, const refcnt_base*>(this);
-        if(!ptr) {
-          this->do_throw_bad_cast(typeid(yelementT));
-        }
-        this->details_refcnt_ptr::reference_counter_base::add_reference();
-        return refcnt_ptr<const yelementT>(ptr);
-      }
-    template<typename yelementT = elementT> refcnt_ptr<yelementT> share_this()
-      {
-        auto ptr = details_refcnt_ptr::static_cast_or_dynamic_cast_helper<yelementT*, refcnt_base*>(this);
-        if(!ptr) {
-          this->do_throw_bad_cast(typeid(yelementT));
-        }
-        this->details_refcnt_ptr::reference_counter_base::add_reference();
-        return refcnt_ptr<yelementT>(ptr);
-      }
-  };
 
 template<typename elementT> class refcnt_ptr
   {
@@ -277,24 +249,24 @@ template<typename elementT> class refcnt_ptr
       {
         this->reset(ptr);
       }
-    refcnt_ptr(const refcnt_ptr& other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+            refcnt_ptr(const refcnt_ptr<yelementT>& other) noexcept
       : refcnt_ptr()
       {
-        this->reset(other.m_sth.copy_release());
+        this->reset(other.m_sth.fork());
       }
-    refcnt_ptr(refcnt_ptr&& other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+            refcnt_ptr(refcnt_ptr<yelementT>&& other) noexcept
       : refcnt_ptr()
       {
         this->reset(other.m_sth.release());
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_ptr(const refcnt_ptr<yelementT>& other) noexcept
+    refcnt_ptr(const refcnt_ptr& other) noexcept
       : refcnt_ptr()
       {
-        this->reset(other.m_sth.copy_release());
+        this->reset(other.m_sth.fork());
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_ptr(refcnt_ptr<yelementT>&& other) noexcept
+    refcnt_ptr(refcnt_ptr&& other) noexcept
       : refcnt_ptr()
       {
         this->reset(other.m_sth.release());
@@ -304,24 +276,24 @@ template<typename elementT> class refcnt_ptr
         this->reset();
         return *this;
       }
-    refcnt_ptr& operator=(const refcnt_ptr& other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+            refcnt_ptr& operator=(const refcnt_ptr<yelementT>& other) noexcept
       {
-        this->reset(other.m_sth.copy_release());
+        this->reset(other.m_sth.fork());
         return *this;
       }
-    refcnt_ptr& operator=(refcnt_ptr&& other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
+            refcnt_ptr& operator=(refcnt_ptr<yelementT>&& other) noexcept
       {
         this->reset(other.m_sth.release());
         return *this;
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_ptr& operator=(const refcnt_ptr<yelementT>& other) noexcept
+    refcnt_ptr& operator=(const refcnt_ptr& other) noexcept
       {
-        this->reset(other.m_sth.copy_release());
+        this->reset(other.m_sth.fork());
         return *this;
       }
-    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer,
-                                                                 pointer>::value)> refcnt_ptr& operator=(refcnt_ptr<yelementT>&& other) noexcept
+    refcnt_ptr& operator=(refcnt_ptr&& other) noexcept
       {
         this->reset(other.m_sth.release());
         return *this;
@@ -365,12 +337,11 @@ template<typename elementT> class refcnt_ptr
     // 23.11.1.2.5, modifiers
     pointer release() noexcept
       {
-        auto ptr = this->m_sth.release();
-        return ptr;
+        return this->m_sth.release();
       }
-    void reset(pointer ptr = pointer()) noexcept
+    refcnt_ptr& reset(pointer ptr = pointer()) noexcept
       {
-        this->m_sth.reset(ptr);
+        return this->m_sth.reset(ptr), *this;
       }
 
     void swap(refcnt_ptr& other) noexcept
@@ -434,46 +405,45 @@ template<typename elementT> constexpr bool operator!=(nullptr_t, const refcnt_pt
     return !!rhs;
   }
 
-template<typename elementT> inline void swap(refcnt_ptr<elementT>& lhs,
-                                             refcnt_ptr<elementT>& rhs) noexcept
+template<typename elementT> void swap(refcnt_ptr<elementT>& lhs, refcnt_ptr<elementT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,
-         typename elementT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
-                                                                              const refcnt_ptr<elementT>& rhs)
+         typename elementT> basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+                                                                      const refcnt_ptr<elementT>& rhs)
   {
     return os << rhs.get();
   }
 
-template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
+template<typename targetT, typename sourceT> refcnt_ptr<targetT> static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::static_caster>()(sptr);
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr, [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
-template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> dynamic_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
+template<typename targetT, typename sourceT> refcnt_ptr<targetT> dynamic_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::dynamic_caster>()(sptr);
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr, [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
-template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> const_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
+template<typename targetT, typename sourceT> refcnt_ptr<targetT> const_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::const_caster>()(sptr);
-  }
-
-template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> static_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
-  {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::static_caster>()(noadl::move(sptr));
-  }
-template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
-  {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::dynamic_caster>()(noadl::move(sptr));
-  }
-template<typename resultT, typename sourceT> inline refcnt_ptr<resultT> const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
-  {
-    return details_refcnt_ptr::pointer_cast_helper<refcnt_ptr<resultT>, details_refcnt_ptr::const_caster>()(noadl::move(sptr));
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr, [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
-template<typename elementT, typename... paramsT> inline refcnt_ptr<elementT> make_refcnt(paramsT&&... params)
+template<typename targetT, typename sourceT> refcnt_ptr<targetT> static_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
+  {
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr), [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+  }
+template<typename targetT, typename sourceT> refcnt_ptr<targetT> dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
+  {
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr), [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+  }
+template<typename targetT, typename sourceT> refcnt_ptr<targetT> const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
+  {
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr), [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+  }
+
+template<typename elementT, typename... paramsT> refcnt_ptr<elementT> make_refcnt(paramsT&&... params)
   {
     return refcnt_ptr<elementT>(new elementT(noadl::forward<paramsT>(params)...));
   }
