@@ -530,8 +530,7 @@ template<uintmax_t valueT> struct lowest_unsigned : details_utilities::integer_s
   {
   };
 
-// This tag value is used to construct an empty container.
-// Assigning `clear` to a container clears it.
+// This tag value is used to construct an empty container. Assigning `clear` to a container clears it.
 struct clear_t
   {
   }
