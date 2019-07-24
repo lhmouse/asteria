@@ -32,6 +32,11 @@ template<typename charT, typename traitsT = char_traits<charT>,
           {
           }
 
+        streamsize max_size() const noexcept
+          {
+            return static_cast<streamsize>(this->str.max_size());
+          }
+
         ::std::ios_base::openmode rewind(::std::ios_base::openmode which) noexcept
           {
             // Reset get and put positions.
@@ -408,7 +413,7 @@ template<typename charT, typename traitsT,
       }
     streamsize xsgetn(char_type* s, streamsize n) override
       {
-        return (n <= 0) ? 0 : static_cast<streamsize>(this->do_xsgetn(s, static_cast<size_type>(noadl::min(n, static_cast<streamsize>(this->m_stor.str.max_size())))));
+        return (n <= 0) ? 0 : static_cast<streamsize>(this->do_xsgetn(s, static_cast<size_type>(noadl::min(n, this->m_stor.max_size()))));
       }
     int_type pbackfail(int_type ch) override
       {
@@ -420,7 +425,7 @@ template<typename charT, typename traitsT,
       }
     streamsize xsputn(const char_type* s, streamsize n) override
       {
-        return (n <= 0) ? 0 : static_cast<streamsize>(this->do_xsputn(s, static_cast<size_type>(noadl::min(n, static_cast<streamsize>(this->m_stor.str.max_size())))));
+        return (n <= 0) ? 0 : static_cast<streamsize>(this->do_xsputn(s, static_cast<size_type>(noadl::min(n, this->m_stor.max_size()))));
       }
 
   public:
