@@ -891,13 +891,13 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     cow_hashmap& operator=(const cow_hashmap& other) noexcept
       {
         this->assign(other);
-        allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return *this;
       }
     cow_hashmap& operator=(cow_hashmap&& other) noexcept
       {
         this->assign(noadl::move(other));
-        allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         return *this;
       }
     cow_hashmap& operator=(initializer_list<value_type> init)
@@ -1313,7 +1313,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     void swap(cow_hashmap& other) noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
-        allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
       }
 
     // N.B. The return type differs from `std::unordered_map`.

@@ -11,14 +11,6 @@ namespace rocket {
 
     namespace details_allocator_utilities {
 
-    template<typename typeT> using is_final =
-#if defined(__cpp_lib_is_final) && (__cpp_lib_is_final >= 201402)
-                                              ::std::is_final<typeT>
-#else
-                                              ::std::false_type
-#endif
-                                                                     ;
-
     template<typename allocatorT> class final_wrapper
       {
       private:
@@ -51,62 +43,86 @@ namespace rocket {
 
     }  // namespace details_allocator_utilities
 
-template<typename allocatorT> struct allocator_wrapper_base_for : conditional<details_allocator_utilities::is_final<allocatorT>::value,
+template<typename allocatorT> struct allocator_wrapper_base_for : conditional<std::is_final<allocatorT>::value,
                                                                               details_allocator_utilities::final_wrapper<allocatorT>,
                                                                               allocatorT>
   {
   };
 
-template<typename allocatorT,
-         bool propagateT = allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value
-         > struct allocator_copy_assigner
-  {
-    void operator()(allocatorT& /*lhs*/, const allocatorT& /*rhs*/) const
+    namespace details_allocator_utilities {
+
+    // don't propagate
+    struct propagate_none_tag
       {
       }
-  };
-template<typename allocatorT> struct allocator_copy_assigner<allocatorT,
-                                                             true>  // propagateT
-  {
-    void operator()(allocatorT& lhs, const allocatorT& rhs) const
+    constexpr propagate_none;
+
+    template<typename allocatorT> void propagate(propagate_none_tag,
+                                                 allocatorT& /*lhs*/, const allocatorT& /*rhs*/) noexcept
+      {
+      }
+
+    // propagate_on_container_copy_assignment
+    struct propagate_copy_tag
+      {
+      }
+    constexpr propagate_copy;
+
+    template<typename allocatorT> void propagate(propagate_copy_tag,
+                                                 allocatorT& lhs, const allocatorT& rhs) noexcept
       {
         lhs = rhs;
       }
-  };
 
-template<typename allocatorT,
-         bool propagateT = allocator_traits<allocatorT>::propagate_on_container_move_assignment::value
-         > struct allocator_move_assigner
-  {
-    void operator()(allocatorT& /*lhs*/, allocatorT&& /*rhs*/) const
+    // propagate_on_container_move_assignment
+    struct propagate_move_tag
       {
       }
-  };
-template<typename allocatorT> struct allocator_move_assigner<allocatorT,
-                                                             true>  // propagateT
-  {
-    void operator()(allocatorT& lhs, allocatorT&& rhs) const
+    constexpr propagate_move;
+
+    template<typename allocatorT> void propagate(propagate_move_tag,
+                                                 allocatorT& lhs, allocatorT& rhs) noexcept
       {
         lhs = noadl::move(rhs);
       }
-  };
 
-template<typename allocatorT,
-         bool propagateT = allocator_traits<allocatorT>::propagate_on_container_swap::value
-         > struct allocator_swapper
-  {
-    void operator()(allocatorT& /*lhs*/, allocatorT& /*rhs*/) const
+    // propagate_on_container_swap
+    struct propagate_swap_tag
       {
       }
-  };
-template<typename allocatorT> struct allocator_swapper<allocatorT,
-                                                       true>  // propagateT
-  {
-    void operator()(allocatorT& lhs, allocatorT& rhs) const
+    constexpr propagate_swap;
+
+    template<typename allocatorT> void propagate(propagate_swap_tag,
+                                                 allocatorT& lhs, allocatorT& rhs) noexcept
       {
         noadl::adl_swap(lhs, rhs);
       }
-  };
+
+    }
+
+template<typename allocatorT> void propagate_allocator_on_copy(allocatorT& lhs, const allocatorT& rhs) noexcept
+  {
+    details_allocator_utilities::propagate<allocatorT>(typename conditional<allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value,
+                                                                            details_allocator_utilities::propagate_copy_tag,
+                                                                            details_allocator_utilities::propagate_none_tag>::type(),
+                                                       lhs, rhs);
+  }
+
+template<typename allocatorT> void propagate_allocator_on_move(allocatorT& lhs, allocatorT&& rhs) noexcept
+  {
+    details_allocator_utilities::propagate<allocatorT>(typename conditional<allocator_traits<allocatorT>::propagate_on_container_move_assignment::value,
+                                                                            details_allocator_utilities::propagate_move_tag,
+                                                                            details_allocator_utilities::propagate_none_tag>::type(),
+                                                       lhs, rhs);
+  }
+
+template<typename allocatorT> void propagate_allocator_on_swap(allocatorT& lhs, allocatorT& rhs) noexcept
+  {
+    details_allocator_utilities::propagate<allocatorT>(typename conditional<allocator_traits<allocatorT>::propagate_on_container_swap::value,
+                                                                            details_allocator_utilities::propagate_swap_tag,
+                                                                            details_allocator_utilities::propagate_none_tag>::type(),
+                                                       lhs, rhs);
+  }
 
 template<typename allocatorT> struct is_std_allocator : false_type
   {
@@ -115,15 +131,9 @@ template<typename valueT> struct is_std_allocator<::std::allocator<valueT>> : tr
   {
   };
 
-template<typename xpointerT>
-#if defined(__cpp_lib_addressof_constexpr) && (__cpp_lib_addressof_constexpr >= 201603)
-                             constexpr
-#else
-                             inline
-#endif
-                                       typename ::std::remove_reference<decltype(*(::std::declval<xpointerT>()))>::type* unfancy(xpointerT&& xptr) noexcept
+template<typename pointerT> typename remove_reference<decltype(*(::std::declval<pointerT>()))>::type* unfancy(pointerT&& ptr)
   {
-    return ::std::addressof(*xptr);
+    return ::std::addressof(*ptr);
   }
 
 }  // namespace rocket

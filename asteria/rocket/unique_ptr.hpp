@@ -208,7 +208,7 @@ template<typename elementT, typename deleterT> class unique_ptr
     // 23.11.1.2.3, assignment
     unique_ptr& operator=(unique_ptr&& other) noexcept
       {
-        allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), noadl::move(other.m_sth.as_deleter()));
+        this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -218,7 +218,7 @@ template<typename elementT, typename deleterT> class unique_ptr
                                                                                                  deleter_type>>::value)
              > unique_ptr& operator=(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       {
-        allocator_move_assigner<deleter_type, true>()(this->m_sth.as_deleter(), noadl::move(other.m_sth.as_deleter()));
+        this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -272,7 +272,7 @@ template<typename elementT, typename deleterT> class unique_ptr
 
     void swap(unique_ptr& other) noexcept
       {
-        allocator_swapper<deleter_type, true>()(this->m_sth.as_deleter(), other.m_sth.as_deleter());
+        noadl::adl_swap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
         this->m_sth.exchange(other.m_sth);
       }
   };

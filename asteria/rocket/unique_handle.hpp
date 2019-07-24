@@ -142,7 +142,7 @@ template<typename handleT, typename closerT> class unique_handle
     // 23.11.1.2.3, assignment
     unique_handle& operator=(unique_handle&& other) noexcept
       {
-        allocator_move_assigner<closer_type, true>()(this->m_sth.as_closer(), noadl::move(other.m_sth.as_closer()));
+        this->m_sth.as_closer() = noadl::move(other.m_sth.as_closer());
         this->reset(other.m_sth.release());
         return *this;
       }
@@ -189,7 +189,7 @@ template<typename handleT, typename closerT> class unique_handle
 
     void swap(unique_handle& other) noexcept
       {
-        allocator_swapper<closer_type, true>()(this->m_sth.as_closer(), other.m_sth.as_closer());
+        noadl::adl_swap(this->m_sth.as_closer(), other.m_sth.as_closer());
         this->m_sth.exchange(other.m_sth);
       }
   };

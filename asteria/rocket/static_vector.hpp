@@ -462,14 +462,14 @@ template<typename valueT, size_t capacityT,
                                                                               is_nothrow_copy_constructible<value_type>>::value)
       {
         this->assign(other);
-        allocator_copy_assigner<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         return *this;
       }
     static_vector& operator=(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                                                                          is_nothrow_move_constructible<value_type>>::value)
       {
         this->assign(noadl::move(other));
-        allocator_move_assigner<allocator_type>()(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         return *this;
       }
     static_vector& operator=(initializer_list<value_type> init)
@@ -884,7 +884,7 @@ template<typename valueT, size_t capacityT,
           }
           this->m_sth.pop_back_n_unchecked(sl - sr);
         }
-        allocator_swapper<allocator_type>()(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
       }
 
     // 26.3.11.4, data access
