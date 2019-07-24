@@ -469,7 +469,7 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&&
 
     namespace details_utilities {
 
-    template<typename targetT, typename containerT> inline bool is_none_of_nonconstexpr(targetT&& targ, containerT&& container)
+    template<typename targetT, typename containerT> bool is_none_of_nonconstexpr(targetT&& targ, containerT&& container)
       {
         for(auto&& qelem : container) {
           if(noadl::forward<targetT>(targ) == qelem) {
