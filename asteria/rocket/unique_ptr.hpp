@@ -16,32 +16,14 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
 
     namespace details_unique_ptr {
 
-    template<typename elementT, typename deleterT,
-             typename = void> struct pointer_of : enable_if<1, elementT*>
+    template<typename elementT,
+             typename deleterT, typename = void> struct pointer_of : enable_if<1, elementT*>
       {
       };
-    template<typename elementT, typename deleterT
-             > struct pointer_of<elementT, deleterT,
-                                 typename make_void<typename deleterT::pointer>::type> : enable_if<1, typename deleterT::pointer>
+    template<typename elementT,
+             typename deleterT> struct pointer_of<elementT, deleterT,
+                                                  typename make_void<typename deleterT::pointer>::type> : enable_if<1, typename deleterT::pointer>
       {
-      };
-
-    template<typename resultT, typename sourceT,
-             typename = void> struct static_cast_or_dynamic_cast_helper
-      {
-        constexpr resultT operator()(sourceT&& src) const
-          {
-            return dynamic_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
-    template<typename resultT, typename sourceT
-             > struct static_cast_or_dynamic_cast_helper<resultT, sourceT,
-                                                         typename make_void<decltype(static_cast<resultT>(::std::declval<sourceT>()))>::type>
-      {
-        constexpr resultT operator()(sourceT&& src) const
-          {
-            return static_cast<resultT>(noadl::forward<sourceT>(src));
-          }
       };
 
     template<typename pointerT, typename deleterT> class stored_pointer : private allocator_wrapper_base_for<deleterT>::type
@@ -114,41 +96,19 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
           }
       };
 
-    struct static_caster
+    template<typename targetT, typename sourceT,
+             typename casterT> unique_ptr<targetT> pointer_cast_aux(unique_ptr<sourceT>&& sptr, casterT&& caster)
       {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
-          {
-            return static_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
-    struct dynamic_caster
-      {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
-          {
-            return dynamic_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
-    struct const_caster
-      {
-        template<typename resultT, typename sourceT> static constexpr resultT do_cast(sourceT&& src)
-          {
-            return const_cast<resultT>(noadl::forward<sourceT>(src));
-          }
-      };
-
-    template<typename resultptrT, typename casterT> struct pointer_cast_helper
-      {
-        template<typename sourceptrT> resultptrT operator()(sourceptrT&& sptr) const
-          {
-            auto ptr = casterT::template do_cast<typename resultptrT::pointer>(sptr.get());
-            if(!ptr) {
-              return nullptr;
-            }
-            auto tptr = noadl::forward<sourceptrT>(sptr);
-            tptr.release();
-            return resultptrT(ptr);
-          }
-      };
+        unique_ptr<targetT> dptr;
+        // Try casting.
+        auto ptr = ::rocket::forward<casterT>(caster)(sptr.get());
+        if(ptr) {
+          // Transfer ownership.
+          dptr.reset(ptr);
+          sptr.release();
+        }
+        return dptr;
+      }
 
     }  // namespace details_unique_ptr
 
@@ -186,6 +146,13 @@ template<typename elementT, typename deleterT> class unique_ptr
       {
         this->reset(ptr);
       }
+    template<typename yelementT, typename ydeleterT, ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
+                                                                                  is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
+            unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
+      : unique_ptr(noadl::move(other.m_sth.as_deleter()))
+      {
+        this->reset(other.m_sth.release());
+      }
     unique_ptr(unique_ptr&& other) noexcept
       : unique_ptr(noadl::move(other.m_sth.as_deleter()))
       {
@@ -196,30 +163,19 @@ template<typename elementT, typename deleterT> class unique_ptr
       {
         this->reset(other.m_sth.release());
       }
-    template<typename yelementT, typename ydeleterT, ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer,
-                                                                                                 pointer>,
-                                                                                  is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type,
-                                                                                                 deleter_type>>::value)
-             > unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
-      : unique_ptr(noadl::move(other.m_sth.as_deleter()))
-      {
-        this->reset(other.m_sth.release());
-      }
     // 23.11.1.2.3, assignment
     unique_ptr& operator=(unique_ptr&& other) noexcept
       {
-        this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
+        this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
         return *this;
       }
-    template<typename yelementT, typename ydeleterT, ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer,
-                                                                                                 pointer>,
-                                                                                  is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type,
-                                                                                                 deleter_type>>::value)
-             > unique_ptr& operator=(unique_ptr<yelementT, ydeleterT>&& other) noexcept
+    template<typename yelementT, typename ydeleterT, ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
+                                                                                  is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
+            unique_ptr& operator=(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       {
-        this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
         this->reset(other.m_sth.release());
+        this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
         return *this;
       }
 
@@ -272,8 +228,8 @@ template<typename elementT, typename deleterT> class unique_ptr
 
     void swap(unique_ptr& other) noexcept
       {
-        noadl::adl_swap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
         this->m_sth.exchange(other.m_sth);
+        noadl::adl_swap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
       }
   };
 
@@ -332,33 +288,32 @@ template<typename elementT, typename deleterT> constexpr bool operator!=(nullptr
     return !!rhs;
   }
 
-template<typename elementT, typename deleterT> inline void swap(unique_ptr<elementT, deleterT>& lhs,
-                                                                unique_ptr<elementT, deleterT>& rhs) noexcept
+template<typename elementT, typename deleterT> void swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,
-         typename elementT, typename deleterT> inline basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
-                                                                                                 const unique_ptr<elementT, deleterT>& rhs)
+         typename elementT, typename deleterT> basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+                                                                                         const unique_ptr<elementT, deleterT>& rhs)
   {
     return os << rhs.get();
   }
 
-template<typename resultT, typename sourceT> inline unique_ptr<resultT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+template<typename targetT, typename sourceT> unique_ptr<targetT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::static_caster>()(noadl::move(sptr));
+    return details_unique_ptr::pointer_cast_aux(noadl::move(sptr), [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
-template<typename resultT, typename sourceT> inline unique_ptr<resultT> dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+template<typename targetT, typename sourceT> unique_ptr<targetT> dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::dynamic_caster>()(noadl::move(sptr));
+    return details_unique_ptr::pointer_cast_aux(noadl::move(sptr), [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
-template<typename resultT, typename sourceT> inline unique_ptr<resultT> const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+template<typename targetT, typename sourceT> unique_ptr<targetT> const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
-    return details_unique_ptr::pointer_cast_helper<unique_ptr<resultT>, details_unique_ptr::const_caster>()(noadl::move(sptr));
+    return details_unique_ptr::pointer_cast_aux(noadl::move(sptr), [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
-template<typename elementT, typename... paramsT> inline unique_ptr<elementT> make_unique(paramsT&&... params)
+template<typename elementT, typename... paramsT> unique_ptr<elementT> make_unique(paramsT&&... params)
   {
     return unique_ptr<elementT>(new elementT(noadl::forward<paramsT>(params)...));
   }
