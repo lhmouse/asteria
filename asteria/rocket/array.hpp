@@ -140,9 +140,7 @@ template<typename valueT, size_t capacityT,
     // N.B. The template parameter is a non-standard extension.
     template<typename otherT> void fill(const otherT& other)
       {
-        for(size_type i = 0; i < capacityT; ++i) {
-          this->storage[i] = other;
-        }
+        noadl::ranged_for(size_type(), capacityT, [&](size_type i) { this->storage[i] = other;  });
       }
     // N.B. This is a non-standard extension.
     static constexpr size_type capacity() noexcept
@@ -205,9 +203,7 @@ template<typename valueT, size_t capacityT,
 
     void swap(array& other) noexcept(is_nothrow_swappable<value_type>::value)
       {
-        for(size_type i = 0; i < capacityT; ++i) {
-          noadl::adl_swap(this->storage[i], other.storage[i]);
-        }
+        noadl::ranged_for(size_type(), capacityT, [&](size_type i) { noadl::adl_swap(this->storage[i], other.storage[i]);  });
       }
 
     // element access
@@ -224,8 +220,8 @@ template<typename valueT, size_t capacityT,
   };
 
 template<typename valueT, size_t capacityT,
-         size_t... nestedT> inline void swap(array<valueT, capacityT, nestedT...>& lhs,
-                                             array<valueT, capacityT, nestedT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+         size_t... nestedT> void swap(array<valueT, capacityT, nestedT...>& lhs,
+                                      array<valueT, capacityT, nestedT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
