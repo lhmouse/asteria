@@ -24,7 +24,6 @@
 #include "../rocket/cow_hashmap.hpp"
 #include "../rocket/static_vector.hpp"
 #include "../rocket/prehashed_string.hpp"
-#include "../rocket/transparent_comparators.hpp"
 #include "../rocket/unique_handle.hpp"
 #include "../rocket/unique_ptr.hpp"
 #include "../rocket/refcnt_ptr.hpp"
@@ -106,7 +105,7 @@ template<typename E, typename D = std::default_delete<const E>> using Uptr = roc
 template<typename E> using Rcptr = rocket::refcnt_ptr<E>;
 template<typename E> using Rcobj = rocket::refcnt_object<E>;
 template<typename E> using Cow_Vector = rocket::cow_vector<E>;
-template<typename K, typename V, typename H> using Cow_HashMap = rocket::cow_hashmap<K, V, H, rocket::transparent_equal_to>;
+template<typename K, typename V, typename H> using Cow_HashMap = rocket::cow_hashmap<K, V, H, std::equal_to<void>>;
 template<typename E, std::size_t k> using Static_Vector = rocket::static_vector<E, k>;
 template<typename... P> using Variant = rocket::variant<P...>;
 template<typename T> using Opt = rocket::optional<T>;

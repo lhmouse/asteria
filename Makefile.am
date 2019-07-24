@@ -44,7 +44,6 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/hash_table_utilities.hpp  \
   asteria/rocket/variant.hpp  \
   asteria/rocket/fill_iterator.hpp  \
-  asteria/rocket/transparent_comparators.hpp  \
   asteria/rocket/unique_handle.hpp  \
   asteria/rocket/reference_counter.hpp  \
   asteria/rocket/cow_string.hpp  \

@@ -40,7 +40,6 @@
 #include "../rocket/cow_hashmap.hpp"
 #include "../rocket/static_vector.hpp"
 #include "../rocket/prehashed_string.hpp"
-#include "../rocket/transparent_comparators.hpp"
 #include "../rocket/unique_handle.hpp"
 #include "../rocket/unique_ptr.hpp"
 #include "../rocket/refcnt_ptr.hpp"
