@@ -443,8 +443,8 @@ template<typename valueT, size_t capacityT,
       {
         this->assign(n, value);
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
-            static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> static_vector(inputT first, inputT last,
+                                                                                                                   const allocator_type& alloc = allocator_type())
       : static_vector(alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));

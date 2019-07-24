@@ -27,8 +27,8 @@
 
 namespace rocket {
 
-template<typename keyT, typename mappedT,
-         typename hashT = hash<keyT>, typename eqT = equal_to<keyT>, typename allocatorT = allocator<pair<const keyT, mappedT>>> class cow_hashmap;
+template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = equal_to<keyT>,
+         typename allocatorT = allocator<pair<const keyT, mappedT>>> class cow_hashmap;
 
     namespace details_cow_hashmap {
 
