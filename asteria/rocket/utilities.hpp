@@ -157,20 +157,25 @@ template<typename targetT, typename argT,
 
     using ::std::swap;
 
-    template<typename typeT> struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(),
-                                                                                                 ::std::declval<typeT&>()))>
+    template<typename typeT> struct is_nothrow_swappable_aux : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
       {
       };
 
-    template<typename typeT> void adl_swap(typeT& lhs, typeT& rhs) noexcept(is_nothrow_swappable<typeT>::value)
+    template<typename typeT> void adl_swap_aux(typeT& lhs, typeT& rhs)
       {
         swap(lhs, rhs);
       }
 
     }  // namespace details_utilities
 
-using details_utilities::is_nothrow_swappable;
-using details_utilities::adl_swap;
+template<typename typeT> struct is_nothrow_swappable : details_utilities::is_nothrow_swappable_aux<typeT>
+  {
+  };
+
+template<typename typeT> void adl_swap(typeT& lhs, typeT& rhs) noexcept(is_nothrow_swappable<typeT>::value)
+  {
+    details_utilities::adl_swap_aux<typeT>(lhs, rhs);
+  }
 
 template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
                                                             : ::std::declval<rhsT>()) min(lhsT&& lhs, rhsT&& rhs)
