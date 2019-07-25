@@ -26,8 +26,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     Executive_Context ctx_func(1, global, stack, this->m_zvarg, this->m_params, rocket::move(self), rocket::move(args));
     stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
-    auto status = Air_Node::status_next;
-    rocket::any_of(this->m_code, [&](const Uptr<Air_Node>& qnode) { return ROCKET_UNEXPECT((status = qnode->execute(ctx_func)) != Air_Node::status_next);  });
+    auto status = this->m_code.execute(ctx_func);
     if(status == Air_Node::status_return){
       // Return the reference at the top of `stack`.
       self = rocket::move(stack.open_top_reference());
@@ -45,7 +44,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
 void Instantiated_Function::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
     // Enumerate all variables inside the function body.
-    rocket::for_each(this->m_code, [&](const Uptr<Air_Node>& qnode) { qnode->enumerate_variables(callback);  });
+    this->m_code.enumerate_variables(callback);
   }
 
 }  // namespace Asteria

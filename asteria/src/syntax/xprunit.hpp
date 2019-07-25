@@ -179,7 +179,7 @@ class Xprunit
         return static_cast<Index>(this->m_stor.index());
       }
 
-    void generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Options& options, TCO_Awareness tco, const Analytic_Context& ctx) const;
+    void generate_code(Air_Queue& code, const Compiler_Options& options, TCO_Awareness tco, const Analytic_Context& ctx) const;
   };
 
 }  // namespace Asteria

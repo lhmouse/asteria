@@ -10,6 +10,8 @@ namespace Asteria {
 
 class Air_Node
   {
+    friend Air_Queue;
+
   public:
     enum Status : std::uint8_t
       {
@@ -24,8 +26,12 @@ class Air_Node
         status_continue_for     = 8,
       };
 
+  private:
+    const Air_Node* m_next;
+
   public:
     Air_Node() noexcept
+      : m_next(nullptr)
       {
       }
     virtual ~Air_Node();

@@ -172,7 +172,7 @@ class Statement
         return static_cast<Index>(this->m_stor.index());
       }
 
-    void generate_code(Cow_Vector<Uptr<Air_Node>>& code, Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const;
+    void generate_code(Air_Queue& code, Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const;
   };
 
 }  // namespace Asteria

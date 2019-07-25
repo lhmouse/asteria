@@ -48,6 +48,9 @@ namespace Asteria {
 class Formatter;
 class Runtime_Error;
 
+// Low-level Data Structure
+class Air_Queue;
+
 // Syntax
 class Source_Location;
 class Xprunit;

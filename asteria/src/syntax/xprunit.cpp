@@ -4,13 +4,13 @@
 #include "../precompiled.hpp"
 #include "xprunit.hpp"
 #include "statement.hpp"
-#include "../runtime/air_node.hpp"
 #include "../runtime/evaluation_stack.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/executive_context.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../runtime/exception.hpp"
+#include "../llds/air_queue.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -615,10 +615,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    Cow_Vector<Uptr<Air_Node>> do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco, const Analytic_Context& ctx,
+    Air_Queue do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco, const Analytic_Context& ctx,
                                                        const Cow_Vector<Xprunit>& units)
       {
-        Cow_Vector<Uptr<Air_Node>> code;
+        Air_Queue code;
         // Only the last operatro may be TCO'd.
         rocket::for_each(units,  [&](const Xprunit& unit) { unit.generate_code(code, options,
                                                                                rocket::same(unit, units.back()) ? tco
@@ -804,7 +804,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         Air_Node::Status execute(Executive_Context& ctx) const override
           {
             // Generate code of the function body.
-            Cow_Vector<Uptr<Air_Node>> code_body;
+            Air_Queue code_body;
             Analytic_Context ctx_func(1, ctx, this->m_params);
             rocket::for_each(this->m_body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func, this->m_options);  });
             // Format the prototype string.
@@ -829,21 +829,21 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    void do_execute_subexpression(Executive_Context& ctx, const Cow_Vector<Uptr<Air_Node>>& code, bool assign)
+    void do_execute_subexpression(Executive_Context& ctx, const Air_Queue& code, bool assign)
       {
-        rocket::for_each(code, [&](const Uptr<Air_Node>& qnode) { qnode->execute(ctx);  });
+        code.execute(ctx);
         ctx.stack().pop_next_reference(assign);
       }
 
     class Air_execute_branch : public Air_Node
       {
       private:
-        Cow_Vector<Uptr<Air_Node>> m_code_true;
-        Cow_Vector<Uptr<Air_Node>> m_code_false;
+        Air_Queue m_code_true;
+        Air_Queue m_code_false;
         bool m_assign;
 
       public:
-        Air_execute_branch(Cow_Vector<Uptr<Air_Node>>&& code_true, Cow_Vector<Uptr<Air_Node>>&& code_false, bool assign)
+        Air_execute_branch(Air_Queue&& code_true, Air_Queue&& code_false, bool assign)
           : m_code_true(rocket::move(code_true)), m_code_false(rocket::move(code_false)), m_assign(assign)
           {
           }
@@ -2572,11 +2572,11 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     class Air_execute_coalescence : public Air_Node
       {
       private:
-        Cow_Vector<Uptr<Air_Node>> m_code_null;
+        Air_Queue m_code_null;
         bool m_assign;
 
       public:
-        Air_execute_coalescence(Cow_Vector<Uptr<Air_Node>>&& code_null, bool assign)
+        Air_execute_coalescence(Air_Queue&& code_null, bool assign)
           : m_code_null(rocket::move(code_null)), m_assign(assign)
           {
           }
@@ -2634,14 +2634,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }  // namespace
 
-void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Options& options, Xprunit::TCO_Awareness tco, const Analytic_Context& ctx) const
+void Xprunit::generate_code(Air_Queue& code, const Compiler_Options& options, Xprunit::TCO_Awareness tco, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal:
       {
         const auto& altr = this->m_stor.as<index_literal>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_push_literal>(altr.value));
+        code.push<Air_push_literal>(altr.value);
         return;
       }
     case index_named_reference:
@@ -2656,15 +2656,15 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
                                  [&](const Abstract_Context& r) { return ++depth, (qref = r.get_named_reference_opt(altr.name)) != nullptr;  });
         if(!qref) {
           // No name has been found so far. Assume that the name will be found in the global context later.
-          code.emplace_back(rocket::make_unique<Air_find_named_reference_global>(altr.name));
+          code.push<Air_find_named_reference_global>(altr.name);
         }
         else if(qctx->is_analytic()) {
           // A reference declared later has been found. Record the context depth for later lookups.
-          code.emplace_back(rocket::make_unique<Air_find_named_reference_local>(altr.name, depth));
+          code.push<Air_find_named_reference_local>(altr.name, depth);
         }
         else {
           // A reference declared previously has been found. Bind it immediately.
-          code.emplace_back(rocket::make_unique<Air_push_bound_reference>(*qref));
+          code.push<Air_push_bound_reference>(*qref);
         }
         return;
       }
@@ -2672,7 +2672,7 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
       {
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_closure_function>(options, altr.sloc, altr.params, altr.body));
+        code.push<Air_execute_closure_function>(options, altr.sloc, altr.params, altr.body);
         return;
       }
     case index_branch:
@@ -2682,7 +2682,7 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
         auto code_true = do_generate_code_branch(options, tco, ctx, altr.branch_true);
         auto code_false = do_generate_code_branch(options, tco, ctx, altr.branch_false);
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_branch>(rocket::move(code_true), rocket::move(code_false), altr.assign));
+        code.push<Air_execute_branch>(rocket::move(code_true), rocket::move(code_false), altr.assign);
         return;
       }
     case index_function_call:
@@ -2690,17 +2690,17 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
         if(!options.disable_tco && (tco != tco_none)) {
-          code.emplace_back(rocket::make_unique<Air_execute_function_tail_call>(altr.sloc, altr.by_refs, tco == tco_by_ref));
+          code.push<Air_execute_function_tail_call>(altr.sloc, altr.by_refs, tco == tco_by_ref);
           return;
         }
-        code.emplace_back(rocket::make_unique<Air_execute_function_call>(altr.sloc, altr.by_refs));
+        code.push<Air_execute_function_call>(altr.sloc, altr.by_refs);
         return;
       }
     case index_member_access:
       {
         const auto& altr = this->m_stor.as<index_member_access>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_member_access>(altr.name));
+        code.push<Air_execute_member_access>(altr.name);
         return;
       }
     case index_operator_rpn:
@@ -2709,227 +2709,227 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
         switch(altr.xop) {
         case xop_postfix_inc:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_inc>());
+            code.push<Air_execute_operator_rpn_postfix_inc>();
             return;
           }
         case xop_postfix_dec:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_dec>());
+            code.push<Air_execute_operator_rpn_postfix_dec>();
             return;
           }
         case xop_postfix_subscr:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_subscr>());
+            code.push<Air_execute_operator_rpn_postfix_subscr>();
             return;
           }
         case xop_prefix_pos:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_pos>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_pos>(altr.assign);
             return;
           }
         case xop_prefix_neg:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_neg>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_neg>(altr.assign);
             return;
           }
         case xop_prefix_notb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_notb>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_notb>(altr.assign);
             return;
           }
         case xop_prefix_notl:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_notl>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_notl>(altr.assign);
             return;
           }
         case xop_prefix_inc:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_inc>());
+            code.push<Air_execute_operator_rpn_prefix_inc>();
             return;
           }
         case xop_prefix_dec:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_dec>());
+            code.push<Air_execute_operator_rpn_prefix_dec>();
             return;
           }
         case xop_prefix_unset:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_unset>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_unset>(altr.assign);
             return;
           }
         case xop_prefix_lengthof:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_lengthof>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_lengthof>(altr.assign);
             return;
           }
         case xop_prefix_typeof:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_typeof>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_typeof>(altr.assign);
             return;
           }
         case xop_prefix_sqrt:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_sqrt>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_sqrt>(altr.assign);
             return;
           }
         case xop_prefix_isnan:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_isnan>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_isnan>(altr.assign);
             return;
           }
         case xop_prefix_isinf:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_isinf>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_isinf>(altr.assign);
             return;
           }
         case xop_prefix_abs:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_abs>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_abs>(altr.assign);
             return;
           }
         case xop_prefix_signb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_signb>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_signb>(altr.assign);
             return;
           }
         case xop_prefix_round:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_round>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_round>(altr.assign);
             return;
           }
         case xop_prefix_floor:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_floor>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_floor>(altr.assign);
             return;
           }
         case xop_prefix_ceil:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_ceil>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_ceil>(altr.assign);
             return;
           }
         case xop_prefix_trunc:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_trunc>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_trunc>(altr.assign);
             return;
           }
         case xop_prefix_iround:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_iround>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_iround>(altr.assign);
             return;
           }
         case xop_prefix_ifloor:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_ifloor>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_ifloor>(altr.assign);
             return;
           }
         case xop_prefix_iceil:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_iceil>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_iceil>(altr.assign);
             return;
           }
         case xop_prefix_itrunc:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_itrunc>(altr.assign));
+            code.push<Air_execute_operator_rpn_prefix_itrunc>(altr.assign);
             return;
           }
         case xop_infix_cmp_eq:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xeq>(altr.assign, false));
+            code.push<Air_execute_operator_rpn_infix_cmp_xeq>(altr.assign, false);
             return;
           }
         case xop_infix_cmp_ne:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xeq>(altr.assign, true));
+            code.push<Air_execute_operator_rpn_infix_cmp_xeq>(altr.assign, true);
             return;
           }
         case xop_infix_cmp_lt:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_less, false));
+            code.push<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_less, false);
             return;
           }
         case xop_infix_cmp_gt:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_greater, false));
+            code.push<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_greater, false);
             return;
           }
         case xop_infix_cmp_lte:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_greater, true));
+            code.push<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_greater, true);
             return;
           }
         case xop_infix_cmp_gte:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_less, true));
+            code.push<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_less, true);
             return;
           }
         case xop_infix_cmp_3way:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_3way>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_cmp_3way>(altr.assign);
             return;
           }
         case xop_infix_add:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_add>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_add>(altr.assign);
             return;
           }
         case xop_infix_sub:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_sub>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_sub>(altr.assign);
             return;
           }
         case xop_infix_mul:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_mul>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_mul>(altr.assign);
             return;
           }
         case xop_infix_div:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_div>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_div>(altr.assign);
             return;
           }
         case xop_infix_mod:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_mod>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_mod>(altr.assign);
             return;
           }
         case xop_infix_sll:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_sll>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_sll>(altr.assign);
             return;
           }
         case xop_infix_srl:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_srl>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_srl>(altr.assign);
             return;
           }
         case xop_infix_sla:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_sla>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_sla>(altr.assign);
             return;
           }
         case xop_infix_sra:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_sra>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_sra>(altr.assign);
             return;
           }
         case xop_infix_andb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_andb>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_andb>(altr.assign);
             return;
           }
         case xop_infix_orb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_orb>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_orb>(altr.assign);
             return;
           }
         case xop_infix_xorb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_xorb>(altr.assign));
+            code.push<Air_execute_operator_rpn_infix_xorb>(altr.assign);
             return;
           }
         case xop_infix_assign:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_assign>());
+            code.push<Air_execute_operator_rpn_infix_assign>();
             return;
           }
         default:
@@ -2940,14 +2940,14 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
       {
         const auto& altr = this->m_stor.as<index_unnamed_array>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_unnamed_array>(altr.nelems));
+        code.push<Air_execute_unnamed_array>(altr.nelems);
         return;
       }
     case index_unnamed_object:
       {
         const auto& altr = this->m_stor.as<index_unnamed_object>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_unnamed_object>(altr.keys));
+        code.push<Air_execute_unnamed_object>(altr.keys);
         return;
       }
     case index_coalescence:
@@ -2956,14 +2956,14 @@ void Xprunit::generate_code(Cow_Vector<Uptr<Air_Node>>& code, const Compiler_Opt
         // Generate code.
         auto code_null = do_generate_code_branch(options, tco, ctx, altr.branch_null);
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_coalescence>(rocket::move(code_null), altr.assign));
+        code.push<Air_execute_coalescence>(rocket::move(code_null), altr.assign);
         return;
       }
     case index_operator_fma:
       {
         const auto& altr = this->m_stor.as<index_operator_fma>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_operator_fma>(altr.assign));
+        code.push<Air_execute_operator_fma>(altr.assign);
         return;
       }
     default:

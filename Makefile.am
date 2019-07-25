@@ -84,6 +84,10 @@ pkginclude_HEADERS =  \
   asteria/src/fwd.hpp  \
   asteria/src/utilities.hpp
 
+pkginclude_lldsdir = ${pkgincludedir}/llds
+pkginclude_llds_HEADERS =  \
+  asteria/src/llds/air_queue.hpp
+
 pkginclude_syntaxdir = ${pkgincludedir}/syntax
 pkginclude_syntax_HEADERS =  \
   asteria/src/syntax/source_location.hpp  \
@@ -145,6 +149,7 @@ pkginclude_library_HEADERS =  \
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
+  asteria/src/llds/air_queue.cpp  \
   asteria/src/syntax/source_location.cpp  \
   asteria/src/syntax/xprunit.cpp  \
   asteria/src/syntax/statement.cpp  \

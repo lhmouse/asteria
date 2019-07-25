@@ -6,7 +6,6 @@
 #include "token_stream.hpp"
 #include "parser.hpp"
 #include "../syntax/statement.hpp"
-#include "../runtime/air_node.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../utilities.hpp"
@@ -34,7 +33,7 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const C
     Cow_Vector<PreHashed_String> params;
     params.emplace_back(rocket::sref("..."));
     // Generate code.
-    Cow_Vector<Uptr<Air_Node>> code;
+    Air_Queue code;
     Analytic_Context ctx(1, params);
     rocket::for_each(parser.get_statements(), [&](const Statement& stmt) { stmt.generate_code(code, nullptr, ctx, options);  });
     // Accept the code.

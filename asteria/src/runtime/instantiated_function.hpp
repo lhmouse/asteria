@@ -7,6 +7,7 @@
 #include "../fwd.hpp"
 #include "abstract_function.hpp"
 #include "variadic_arguer.hpp"
+#include "../llds/air_queue.hpp"
 
 namespace Asteria {
 
@@ -17,11 +18,11 @@ class Instantiated_Function : public Abstract_Function
     Rcobj<Variadic_Arguer> m_zvarg;
     Cow_Vector<PreHashed_String> m_params;
     // the function body
-    Cow_Vector<Uptr<Air_Node>> m_code;
+    Air_Queue m_code;
 
   public:
     Instantiated_Function(const Source_Location& sloc, const Cow_String& func, const Cow_Vector<PreHashed_String>& params,
-                          Cow_Vector<Uptr<Air_Node>>&& code)
+                          Air_Queue&& code)
       : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params),
         m_code(rocket::move(code))
       {
