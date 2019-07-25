@@ -86,6 +86,6 @@ inline void swap(Air_Queue& lhs, Air_Queue& rhs) noexcept
     return lhs.swap(rhs);
   }
 
-}
+}  // namespace Asteria
 
 #endif

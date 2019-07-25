@@ -742,4 +742,4 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
     //===================================================================
   }
 
-}
+}  // namespace Asteria
