@@ -47,7 +47,7 @@ class Air_Queue
     void do_clear_nodes() noexcept;
 
   public:
-    constexpr bool empty() const noexcept
+    bool empty() const noexcept
       {
         return this->m_stor.head == nullptr;
       }
