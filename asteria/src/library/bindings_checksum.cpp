@@ -1229,468 +1229,438 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("crc32_new"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.crc32_new()`\n"
-            "\n"
-            "  * Creates a CRC-32 hasher according to ISO/IEC 3309. The divisor\n"
-            "    is `0x04C11DB7` (or `0xEDB88320` in reverse form).\n"
-            "\n"
-            "  * Returns the hasher as an `object` consisting of the following\n"
-            "    members:\n"
-            "\n"
-            "    * `write(data)`\n"
-            "    * `finish()`\n"
-            "\n"
-            "    The function `write()` is used to put data into the hasher,\n"
-            "    which shall be of type `string`. After all data have been put,\n"
-            "    the function `finish()` extracts the checksum as an `integer`\n"
-            "    (whose high-order 32 bits are always zeroes), then resets the\n"
-            "    hasher, making it suitable for further data as if it had just\n"
-            "    been created.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.crc32_new()`\n"
+          "\n"
+          "  * Creates a CRC-32 hasher according to ISO/IEC 3309. The divisor\n"
+          "    is `0x04C11DB7` (or `0xEDB88320` in reverse form).\n"
+          "\n"
+          "  * Returns the hasher as an `object` consisting of the following\n"
+          "    members:\n"
+          "\n"
+          "    * `write(data)`\n"
+          "    * `finish()`\n"
+          "\n"
+          "    The function `write()` is used to put data into the hasher,\n"
+          "    which shall be of type `string`. After all data have been put,\n"
+          "    the function `finish()` extracts the checksum as an `integer`\n"
+          "    (whose high-order 32 bits are always zeroes), then resets the\n"
+          "    hasher, making it suitable for further data as if it had just\n"
+          "    been created.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.crc32_new"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_crc32_new() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.crc32_new"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_crc32_new() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.crc32()`
     //===================================================================
     result.insert_or_assign(rocket::sref("crc32"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.crc32(data)`\n"
-            "\n"
-            "  * Calculates the CRC-32 checksum of `data` which must be of type\n"
-            "    `string`, as if this function was defined as\n"
-            "\n"
-            "    ```\n"
-            "      std.checksum.crc32 = func(data) {\n"
-            "        var h = this.crc32_new();\n"
-            "        h.write(data);\n"
-            "        return h.finish();\n"
-            "      };\n"
-            "    ```\n"
-            "\n"
-            "    This function is expected to be both more efficient and easier\n"
-            "    to use.\n"
-            "\n"
-            "  * Returns the CRC-32 checksum as an `integer`. The high-order 32\n"
-            "    bits are always zeroes.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.crc32(data)`\n"
+          "\n"
+          "  * Calculates the CRC-32 checksum of `data` which must be of type\n"
+          "    `string`, as if this function was defined as\n"
+          "\n"
+          "    ```\n"
+          "      std.checksum.crc32 = func(data) {\n"
+          "        var h = this.crc32_new();\n"
+          "        h.write(data);\n"
+          "        return h.finish();\n"
+          "      };\n"
+          "    ```\n"
+          "\n"
+          "    This function is expected to be both more efficient and easier\n"
+          "    to use.\n"
+          "\n"
+          "  * Returns the CRC-32 checksum as an `integer`. The high-order 32\n"
+          "    bits are always zeroes.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.crc32"), args);
-            // Parse arguments.
-            G_string data;
-            if(reader.start().g(data).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_crc32(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.crc32"), args);
+          // Parse arguments.
+          G_string data;
+          if(reader.start().g(data).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_crc32(data) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.fnv1a32_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("fnv1a32_new"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.fnv1a32_new()`\n"
-            "\n"
-            "  * Creates a 32-bit Fowler-Noll-Vo (a.k.a. FNV) hasher of the\n"
-            "    32-bit FNV-1a variant. The FNV prime is `16777619` and the FNV\n"
-            "    offset basis is `2166136261`.\n"
-            "\n"
-            "  * Returns the hasher as an `object` consisting of the following\n"
-            "    members:\n"
-            "\n"
-            "    * `write(data)`\n"
-            "    * `finish()`\n"
-            "\n"
-            "    The function `write()` is used to put data into the hasher,\n"
-            "    which shall be of type `string`. After all data have been put,\n"
-            "    the function `finish()` extracts the checksum as an `integer`\n"
-            "    (whose high-order 32 bits are always zeroes), then resets the\n"
-            "    hasher, making it suitable for further data as if it had just\n"
-            "    been created.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.fnv1a32_new()`\n"
+          "\n"
+          "  * Creates a 32-bit Fowler-Noll-Vo (a.k.a. FNV) hasher of the\n"
+          "    32-bit FNV-1a variant. The FNV prime is `16777619` and the FNV\n"
+          "    offset basis is `2166136261`.\n"
+          "\n"
+          "  * Returns the hasher as an `object` consisting of the following\n"
+          "    members:\n"
+          "\n"
+          "    * `write(data)`\n"
+          "    * `finish()`\n"
+          "\n"
+          "    The function `write()` is used to put data into the hasher,\n"
+          "    which shall be of type `string`. After all data have been put,\n"
+          "    the function `finish()` extracts the checksum as an `integer`\n"
+          "    (whose high-order 32 bits are always zeroes), then resets the\n"
+          "    hasher, making it suitable for further data as if it had just\n"
+          "    been created.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.fnv1a32_new"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_fnv1a32_new() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.fnv1a32_new"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_fnv1a32_new() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.fnv1a32()`
     //===================================================================
     result.insert_or_assign(rocket::sref("fnv1a32"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.fnv1a32(data)`\n"
-            "\n"
-            "  * Calculates the 32-bit FNV-1a checksum of `data` which must be\n"
-            "    of type `string`, as if this function was defined as\n"
-            "\n"
-            "    ```\n"
-            "      std.checksum.fnv1a32 = func(data) {\n"
-            "        var h = this.fnv1a32_new();\n"
-            "        h.write(data);\n"
-            "        return h.finish();\n"
-            "      };\n"
-            "    ```\n"
-            "\n"
-            "    This function is expected to be both more efficient and easier\n"
-            "    to use.\n"
-            "\n"
-            "  * Returns the 32-bit FNV-1a checksum as an `integer`. The\n"
-            "    high-order 32 bits are always zeroes.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.fnv1a32(data)`\n"
+          "\n"
+          "  * Calculates the 32-bit FNV-1a checksum of `data` which must be\n"
+          "    of type `string`, as if this function was defined as\n"
+          "\n"
+          "    ```\n"
+          "      std.checksum.fnv1a32 = func(data) {\n"
+          "        var h = this.fnv1a32_new();\n"
+          "        h.write(data);\n"
+          "        return h.finish();\n"
+          "      };\n"
+          "    ```\n"
+          "\n"
+          "    This function is expected to be both more efficient and easier\n"
+          "    to use.\n"
+          "\n"
+          "  * Returns the 32-bit FNV-1a checksum as an `integer`. The\n"
+          "    high-order 32 bits are always zeroes.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.fnv1a32"), args);
-            // Parse arguments.
-            G_string data;
-            if(reader.start().g(data).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_fnv1a32(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.fnv1a32"), args);
+          // Parse arguments.
+          G_string data;
+          if(reader.start().g(data).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_fnv1a32(data) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.md5_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("md5_new"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.md5_new()`\n"
-            "\n"
-            "  * Creates an MD5 hasher.\n"
-            "\n"
-            "  * Returns the hasher as an `object` consisting of the following\n"
-            "    members:\n"
-            "\n"
-            "    * `write(data)`\n"
-            "    * `finish()`\n"
-            "\n"
-            "    The function `write()` is used to put data into the hasher,\n"
-            "    which shall be of type `string`. After all data have been put,\n"
-            "    the function `finish()` extracts the checksum as a `string` of\n"
-            "    32 hexadecimal digits in uppercase, then resets the hasher,\n"
-            "    making it suitable for further data as if it had just been\n"
-            "    created.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.md5_new()`\n"
+          "\n"
+          "  * Creates an MD5 hasher.\n"
+          "\n"
+          "  * Returns the hasher as an `object` consisting of the following\n"
+          "    members:\n"
+          "\n"
+          "    * `write(data)`\n"
+          "    * `finish()`\n"
+          "\n"
+          "    The function `write()` is used to put data into the hasher,\n"
+          "    which shall be of type `string`. After all data have been put,\n"
+          "    the function `finish()` extracts the checksum as a `string` of\n"
+          "    32 hexadecimal digits in uppercase, then resets the hasher,\n"
+          "    making it suitable for further data as if it had just been\n"
+          "    created.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.md5_new"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_md5_new() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.md5_new"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_md5_new() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.md5()`
     //===================================================================
     result.insert_or_assign(rocket::sref("md5"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.md5(data)`\n"
-            "\n"
-            "  * Calculates the MD5 checksum of `data` which must be of type\n"
-            "    `string`, as if this function was defined as\n"
-            "\n"
-            "    ```\n"
-            "      std.checksum.md5 = func(data) {\n"
-            "        var h = this.md5_new();\n"
-            "        h.write(data);\n"
-            "        return h.finish();\n"
-            "      };\n"
-            "    ```\n"
-            "\n"
-            "    This function is expected to be both more efficient and easier\n"
-            "    to use.\n"
-            "\n"
-            "  * Returns the 2 checksum as a `string` of 32 hexadecimal digits\n"
-            "    in uppercase.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.md5(data)`\n"
+          "\n"
+          "  * Calculates the MD5 checksum of `data` which must be of type\n"
+          "    `string`, as if this function was defined as\n"
+          "\n"
+          "    ```\n"
+          "      std.checksum.md5 = func(data) {\n"
+          "        var h = this.md5_new();\n"
+          "        h.write(data);\n"
+          "        return h.finish();\n"
+          "      };\n"
+          "    ```\n"
+          "\n"
+          "    This function is expected to be both more efficient and easier\n"
+          "    to use.\n"
+          "\n"
+          "  * Returns the 2 checksum as a `string` of 32 hexadecimal digits\n"
+          "    in uppercase.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.md5"), args);
-            // Parse arguments.
-            G_string data;
-            if(reader.start().g(data).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_md5(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.md5"), args);
+          // Parse arguments.
+          G_string data;
+          if(reader.start().g(data).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_md5(data) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.sha1_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sha1_new"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.sha1_new()`\n"
-            "\n"
-            "  * Creates an SHA-1 hasher.\n"
-            "\n"
-            "  * Returns the hasher as an `object` consisting of the following\n"
-            "    members:\n"
-            "\n"
-            "    * `write(data)`\n"
-            "    * `finish()`\n"
-            "\n"
-            "    The function `write()` is used to put data into the hasher,\n"
-            "    which shall be of type `string`. After all data have been put,\n"
-            "    the function `finish()` extracts the checksum as a `string` of\n"
-            "    40 hexadecimal digits in uppercase, then resets the hasher,\n"
-            "    making it suitable for further data as if it had just been\n"
-            "    created.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.sha1_new()`\n"
+          "\n"
+          "  * Creates an SHA-1 hasher.\n"
+          "\n"
+          "  * Returns the hasher as an `object` consisting of the following\n"
+          "    members:\n"
+          "\n"
+          "    * `write(data)`\n"
+          "    * `finish()`\n"
+          "\n"
+          "    The function `write()` is used to put data into the hasher,\n"
+          "    which shall be of type `string`. After all data have been put,\n"
+          "    the function `finish()` extracts the checksum as a `string` of\n"
+          "    40 hexadecimal digits in uppercase, then resets the hasher,\n"
+          "    making it suitable for further data as if it had just been\n"
+          "    created.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.sha1_new"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_sha1_new() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.sha1_new"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_sha1_new() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.sha1()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sha1"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.sha1(data)`\n"
-            "\n"
-            "  * Calculates the SHA-1 checksum of `data` which must be of type\n"
-            "    `string`, as if this function was defined as\n"
-            "\n"
-            "    ```\n"
-            "      std.checksum.sha1 = func(data) {\n"
-            "        var h = this.sha1_new();\n"
-            "        h.write(data);\n"
-            "        return h.finish();\n"
-            "      };\n"
-            "    ```\n"
-            "\n"
-            "    This function is expected to be both more efficient and easier\n"
-            "    to use.\n"
-            "\n"
-            "  * Returns the SHA-1 checksum as a `string` of 40 hexadecimal\n"
-            "    digits in uppercase.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.sha1(data)`\n"
+          "\n"
+          "  * Calculates the SHA-1 checksum of `data` which must be of type\n"
+          "    `string`, as if this function was defined as\n"
+          "\n"
+          "    ```\n"
+          "      std.checksum.sha1 = func(data) {\n"
+          "        var h = this.sha1_new();\n"
+          "        h.write(data);\n"
+          "        return h.finish();\n"
+          "      };\n"
+          "    ```\n"
+          "\n"
+          "    This function is expected to be both more efficient and easier\n"
+          "    to use.\n"
+          "\n"
+          "  * Returns the SHA-1 checksum as a `string` of 40 hexadecimal\n"
+          "    digits in uppercase.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.sha1"), args);
-            // Parse arguments.
-            G_string data;
-            if(reader.start().g(data).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_sha1(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.sha1"), args);
+          // Parse arguments.
+          G_string data;
+          if(reader.start().g(data).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_sha1(data) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.sha256_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sha256_new"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.sha256_new()`\n"
-            "\n"
-            "  * Creates an SHA-256 hasher.\n"
-            "\n"
-            "  * Returns the hasher as an `object` consisting of the following\n"
-            "    members:\n"
-            "\n"
-            "    * `write(data)`\n"
-            "    * `finish()`\n"
-            "\n"
-            "    The function `write()` is used to put data into the hasher,\n"
-            "    which shall be of type `string`. After all data have been put,\n"
-            "    the function `finish()` extracts the checksum as a `string` of\n"
-            "    64 hexadecimal digits in uppercase, then resets the hasher,\n"
-            "    making it suitable for further data as if it had just been\n"
-            "    created.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.sha256_new()`\n"
+          "\n"
+          "  * Creates an SHA-256 hasher.\n"
+          "\n"
+          "  * Returns the hasher as an `object` consisting of the following\n"
+          "    members:\n"
+          "\n"
+          "    * `write(data)`\n"
+          "    * `finish()`\n"
+          "\n"
+          "    The function `write()` is used to put data into the hasher,\n"
+          "    which shall be of type `string`. After all data have been put,\n"
+          "    the function `finish()` extracts the checksum as a `string` of\n"
+          "    64 hexadecimal digits in uppercase, then resets the hasher,\n"
+          "    making it suitable for further data as if it had just been\n"
+          "    created.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.sha256_new"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_sha256_new() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.sha256_new"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_sha256_new() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.checksum.sha256()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sha256"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.checksum.sha256(data)`\n"
-            "\n"
-            "  * Calculates the SHA-256 checksum of `data` which must be of type\n"
-            "    `string`, as if this function was defined as\n"
-            "\n"
-            "    ```\n"
-            "      std.checksum.sha256 = func(data) {\n"
-            "        var h = this.sha256_new();\n"
-            "        h.write(data);\n"
-            "        return h.finish();\n"
-            "      };\n"
-            "    ```\n"
-            "\n"
-            "    This function is expected to be both more efficient and easier\n"
-            "    to use.\n"
-            "\n"
-            "  * Returns the SHA-256 checksum as a `string` of 64 hexadecimal\n"
-            "    digits in uppercase.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.checksum.sha256(data)`\n"
+          "\n"
+          "  * Calculates the SHA-256 checksum of `data` which must be of type\n"
+          "    `string`, as if this function was defined as\n"
+          "\n"
+          "    ```\n"
+          "      std.checksum.sha256 = func(data) {\n"
+          "        var h = this.sha256_new();\n"
+          "        h.write(data);\n"
+          "        return h.finish();\n"
+          "      };\n"
+          "    ```\n"
+          "\n"
+          "    This function is expected to be both more efficient and easier\n"
+          "    to use.\n"
+          "\n"
+          "  * Returns the SHA-256 checksum as a `string` of 64 hexadecimal\n"
+          "    digits in uppercase.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.checksum.sha256"), args);
-            // Parse arguments.
-            G_string data;
-            if(reader.start().g(data).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_checksum_sha256(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.checksum.sha256"), args);
+          // Parse arguments.
+          G_string data;
+          if(reader.start().g(data).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_checksum_sha256(data) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // End of `std.checksum`
     //===================================================================

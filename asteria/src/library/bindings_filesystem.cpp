@@ -974,583 +974,544 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("get_working_directory"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.get_working_directory()`\n"
-            "\n"
-            "  * Gets the absolute path of the current working directory.\n"
-            "\n"
-            "  * Returns a `string` containing the path to the current working\n"
-            "    directory.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.get_working_directory()`\n"
+          "\n"
+          "  * Gets the absolute path of the current working directory.\n"
+          "\n"
+          "  * Returns a `string` containing the path to the current working\n"
+          "    directory.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.get_working_directory"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_filesystem_get_working_directory() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.get_working_directory"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_filesystem_get_working_directory() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.get_information()`
     //===================================================================
     result.insert_or_assign(rocket::sref("get_information"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.get_information(path)`\n"
-            "\n"
-            "  * Retrieves information of the file or directory designated by\n"
-            "    `path`.\n"
-            "\n"
-            "  * Returns an `object` consisting of the following members (names\n"
-            "    that start with `b_` are `boolean` flags; names that start with\n"
-            "    `i_` are IDs as `integer`s; names that start with `n_` are\n"
-            "    plain `integer`s; names that start with `t_` are timestamps in\n"
-            "    UTC as `integer`s):\n"
-            "\n"
-            "    * `i_dev`   unique device id on this machine.\n"
-            "    * `i_file`  unique file id on this device.\n"
-            "    * `n_ref`   number of hard links to this file.\n"
-            "    * `b_dir`   whether this is a directory.\n"
-            "    * `b_sym`   whether this is a symbolic link.\n"
-            "    * `n_size`  number of bytes this file contains.\n"
-            "    * `n_ocup`  number of bytes this file occupies.\n"
-            "    * `t_accs`  timestamp of last access.\n"
-            "    * `t_mod`   timestamp of last modification.\n"
-            "\n"
-            "    On failure, `null` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.get_information(path)`\n"
+          "\n"
+          "  * Retrieves information of the file or directory designated by\n"
+          "    `path`.\n"
+          "\n"
+          "  * Returns an `object` consisting of the following members (names\n"
+          "    that start with `b_` are `boolean` flags; names that start with\n"
+          "    `i_` are IDs as `integer`s; names that start with `n_` are\n"
+          "    plain `integer`s; names that start with `t_` are timestamps in\n"
+          "    UTC as `integer`s):\n"
+          "\n"
+          "    * `i_dev`   unique device id on this machine.\n"
+          "    * `i_file`  unique file id on this device.\n"
+          "    * `n_ref`   number of hard links to this file.\n"
+          "    * `b_dir`   whether this is a directory.\n"
+          "    * `b_sym`   whether this is a symbolic link.\n"
+          "    * `n_size`  number of bytes this file contains.\n"
+          "    * `n_ocup`  number of bytes this file occupies.\n"
+          "    * `t_accs`  timestamp of last access.\n"
+          "    * `t_mod`   timestamp of last modification.\n"
+          "\n"
+          "    On failure, `null` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.get_information"), args);
-            // Parse arguments.
-            G_string path;
-            if(reader.start().g(path).finish()) {
-              // Call the binding function.
-              auto qres = std_filesystem_get_information(path);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.get_information"), args);
+          // Parse arguments.
+          G_string path;
+          if(reader.start().g(path).finish()) {
+            // Call the binding function.
+            auto qres = std_filesystem_get_information(path);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.remove_recursive()`
     //===================================================================
     result.insert_or_assign(rocket::sref("remove_recursive"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.remove_recursive(path)`\n"
-            "\n"
-            "  * Removes the file or directory at `path`. If `path` designates\n"
-            "    a directory, all of its contents are removed recursively.\n"
-            "\n"
-            "  * Returns the number of files and directories that have been\n"
-            "    successfully removed in total, or `null` on failure.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.remove_recursive(path)`\n"
+          "\n"
+          "  * Removes the file or directory at `path`. If `path` designates\n"
+          "    a directory, all of its contents are removed recursively.\n"
+          "\n"
+          "  * Returns the number of files and directories that have been\n"
+          "    successfully removed in total, or `null` on failure.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.remove_recursive"), args);
-            // Parse arguments.
-            G_string path;
-            if(reader.start().g(path).finish()) {
-              // Call the binding function.
-              auto qres = std_filesystem_remove_recursive(path);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.remove_recursive"), args);
+          // Parse arguments.
+          G_string path;
+          if(reader.start().g(path).finish()) {
+            // Call the binding function.
+            auto qres = std_filesystem_remove_recursive(path);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.move_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(rocket::sref("move_from"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.move_from(path_new, path_old)`\n"
-            "\n"
-            "  * Moves (renames) the file or directory at `path_old` to\n"
-            "    `path_new`.\n"
-            "\n"
-            "  * Returns `true` on success, or `null` on failure.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.move_from(path_new, path_old)`\n"
+          "\n"
+          "  * Moves (renames) the file or directory at `path_old` to\n"
+          "    `path_new`.\n"
+          "\n"
+          "  * Returns `true` on success, or `null` on failure.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.move_from"), args);
-            // Parse arguments.
-            G_string path_new;
-            G_string path_old;
-            if(reader.start().g(path_new).g(path_old).finish()) {
-              // Call the binding function.
-              if(!std_filesystem_move_from(path_new, path_old)) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { true };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.move_from"), args);
+          // Parse arguments.
+          G_string path_new;
+          G_string path_old;
+          if(reader.start().g(path_new).g(path_old).finish()) {
+            // Call the binding function.
+            if(!std_filesystem_move_from(path_new, path_old)) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { true };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.directory_list()`
     //===================================================================
     result.insert_or_assign(rocket::sref("directory_list"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.directory_list(path)`\n"
-            "\n"
-            "  * Lists the contents of the directory at `path`.\n"
-            "\n"
-            "  * Returns an `object` containing all entries of the directory at\n"
-            "    `path`, including the special subdirectories '.' and '..'. For\n"
-            "    each element, its key specifies the filename and the value is\n"
-            "    an `object` consisting of the following members (names that\n"
-            "    start with `b_` are `boolean` flags; names that start with `i_`\n"
-            "    are IDs as `integer`s):\n"
-            "\n"
-            "    * `b_dir`   whether this is a directory.\n"
-            "    * `b_sym`   whether this is a symbolic link.\n"
-            "\n"
-            "    On failure, `null` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.directory_list(path)`\n"
+          "\n"
+          "  * Lists the contents of the directory at `path`.\n"
+          "\n"
+          "  * Returns an `object` containing all entries of the directory at\n"
+          "    `path`, including the special subdirectories '.' and '..'. For\n"
+          "    each element, its key specifies the filename and the value is\n"
+          "    an `object` consisting of the following members (names that\n"
+          "    start with `b_` are `boolean` flags; names that start with `i_`\n"
+          "    are IDs as `integer`s):\n"
+          "\n"
+          "    * `b_dir`   whether this is a directory.\n"
+          "    * `b_sym`   whether this is a symbolic link.\n"
+          "\n"
+          "    On failure, `null` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.directory_list"), args);
-            // Parse arguments.
-            G_string path;
-            if(reader.start().g(path).finish()) {
-              // Call the binding function.
-              auto qres = std_filesystem_directory_list(path);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.directory_list"), args);
+          // Parse arguments.
+          G_string path;
+          if(reader.start().g(path).finish()) {
+            // Call the binding function.
+            auto qres = std_filesystem_directory_list(path);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.directory_create()`
     //===================================================================
     result.insert_or_assign(rocket::sref("directory_create"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.directory_create(path)`\n"
-            "\n"
-            "  * Creates a directory at `path`. Its parent directory must exist\n"
-            "    and must be accessible. This function does not fail if either\n"
-            "    a directory or a symbolic link to a directory already exists on\n"
-            "    `path`.\n"
-            "\n"
-            "  * Returns `1` if a new directory has been created successfully,\n"
-            "    `0` if the directory already exists, or `null` on failure.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.directory_create(path)`\n"
+          "\n"
+          "  * Creates a directory at `path`. Its parent directory must exist\n"
+          "    and must be accessible. This function does not fail if either\n"
+          "    a directory or a symbolic link to a directory already exists on\n"
+          "    `path`.\n"
+          "\n"
+          "  * Returns `1` if a new directory has been created successfully,\n"
+          "    `0` if the directory already exists, or `null` on failure.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.directory_create"), args);
-            // Parse arguments.
-            G_string path;
-            if(reader.start().g(path).finish()) {
-              // Call the binding function.
-              auto qres = std_filesystem_directory_create(path);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.directory_create"), args);
+          // Parse arguments.
+          G_string path;
+          if(reader.start().g(path).finish()) {
+            // Call the binding function.
+            auto qres = std_filesystem_directory_create(path);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.directory_remove()`
     //===================================================================
     result.insert_or_assign(rocket::sref("directory_remove"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.directory_remove(path)`\n"
-            "\n"
-            "  * Removes the directory at `path`. The directory must be empty.\n"
-            "    This function fails if `path` does not designate a directory.\n"
-            "\n"
-            "  * Returns `1` if the directory has been removed successfully, `0`\n"
-            "    if it is not empty, or `null` on failure.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.directory_remove(path)`\n"
+          "\n"
+          "  * Removes the directory at `path`. The directory must be empty.\n"
+          "    This function fails if `path` does not designate a directory.\n"
+          "\n"
+          "  * Returns `1` if the directory has been removed successfully, `0`\n"
+          "    if it is not empty, or `null` on failure.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.directory_remove"), args);
-            // Parse arguments.
-            G_string path;
-            if(reader.start().g(path).finish()) {
-              // Call the binding function.
-              auto qres = std_filesystem_directory_remove(path);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.directory_remove"), args);
+          // Parse arguments.
+          G_string path;
+          if(reader.start().g(path).finish()) {
+            // Call the binding function.
+            auto qres = std_filesystem_directory_remove(path);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.file_read()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_read"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.file_read(path, [offset], [limit])`\n"
-            "\n"
-            "  * Reads the file at `path` in binary mode. The read operation\n"
-            "    starts from the byte offset that is denoted by `offset` if it\n"
-            "    is specified, or from the beginning of the file otherwise. If\n"
-            "    `limit` is specified, no more than this number of bytes will be\n"
-            "    read.\n"
-            "\n"
-            "  * Returns the bytes that have been read as a `string`, or `null`\n"
-            "    on failure.\n"
-            "\n"
-            "  * Throws an exception if `offset` is negative.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.file_read(path, [offset], [limit])`\n"
+          "\n"
+          "  * Reads the file at `path` in binary mode. The read operation\n"
+          "    starts from the byte offset that is denoted by `offset` if it\n"
+          "    is specified, or from the beginning of the file otherwise. If\n"
+          "    `limit` is specified, no more than this number of bytes will be\n"
+          "    read.\n"
+          "\n"
+          "  * Returns the bytes that have been read as a `string`, or `null`\n"
+          "    on failure.\n"
+          "\n"
+          "  * Throws an exception if `offset` is negative.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.file_read"), args);
-            // Parse arguments.
-            G_string path;
-            Opt<G_integer> offset;
-            Opt<G_integer> limit;
-            if(reader.start().g(path).g(offset).g(limit).finish()) {
-              // Call the binding function.
-              auto qres = std_filesystem_file_read(path, offset, limit);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.file_read"), args);
+          // Parse arguments.
+          G_string path;
+          Opt<G_integer> offset;
+          Opt<G_integer> limit;
+          if(reader.start().g(path).g(offset).g(limit).finish()) {
+            // Call the binding function.
+            auto qres = std_filesystem_file_read(path, offset, limit);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.file_stream()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_stream"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.file_stream(path, callback, [offset], [limit])`\n"
-            "\n"
-            "  * Reads the file at `path` in binary mode and invokes `callback`\n"
-            "    with the data read repeatedly. `callback` shall be a binary\n"
-            "    `function` whose first argument is the absolute offset of the\n"
-            "    data block that has been read, and whose second argument is the\n"
-            "    bytes read and stored in a `string`. Data may be transferred in\n"
-            "    multiple blocks of variable sizes; the caller shall make no\n"
-            "    assumption about the number of times that `callback` will be\n"
-            "    called or the size of each individual block. The read operation\n"
-            "    starts from the byte offset that is denoted by `offset` if it\n"
-            "    is specified, or from the beginning of the file otherwise. If\n"
-            "    `limit` is specified, no more than this number of bytes will be\n"
-            "    read.\n"
-            "\n"
-            "  * Returns `true` if all data have been processed successfully, or\n"
-            "    `null` on failure.\n"
-            "\n"
-            "  * Throws an exception if `offset` is negative.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.file_stream(path, callback, [offset], [limit])`\n"
+          "\n"
+          "  * Reads the file at `path` in binary mode and invokes `callback`\n"
+          "    with the data read repeatedly. `callback` shall be a binary\n"
+          "    `function` whose first argument is the absolute offset of the\n"
+          "    data block that has been read, and whose second argument is the\n"
+          "    bytes read and stored in a `string`. Data may be transferred in\n"
+          "    multiple blocks of variable sizes; the caller shall make no\n"
+          "    assumption about the number of times that `callback` will be\n"
+          "    called or the size of each individual block. The read operation\n"
+          "    starts from the byte offset that is denoted by `offset` if it\n"
+          "    is specified, or from the beginning of the file otherwise. If\n"
+          "    `limit` is specified, no more than this number of bytes will be\n"
+          "    read.\n"
+          "\n"
+          "  * Returns `true` if all data have been processed successfully, or\n"
+          "    `null` on failure.\n"
+          "\n"
+          "  * Throws an exception if `offset` is negative.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.file_stream"), args);
-            // Parse arguments.
-            G_string path;
-            G_function callback = global.placeholder_function();
-            Opt<G_integer> offset;
-            Opt<G_integer> limit;
-            if(reader.start().g(path).g(callback).g(offset).g(limit).finish()) {
-              // Call the binding function.
-              if(!std_filesystem_file_stream(global, path, callback, offset, limit)) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { true };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.file_stream"), args);
+          // Parse arguments.
+          G_string path;
+          G_function callback = global.placeholder_function();
+          Opt<G_integer> offset;
+          Opt<G_integer> limit;
+          if(reader.start().g(path).g(callback).g(offset).g(limit).finish()) {
+            // Call the binding function.
+            if(!std_filesystem_file_stream(global, path, callback, offset, limit)) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { true };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.file_write()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_write"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.file_write(path, data, [offset])`\n"
-            "\n"
-            "  * Writes the file at `path` in binary mode. The write operation\n"
-            "    starts from the byte offset that is denoted by `offset` if it\n"
-            "    is specified, or from the beginning of the file otherwise. The\n"
-            "    file is truncated to this length before the write operation;\n"
-            "    any existent contents after the write point are discarded. This\n"
-            "    function fails if the data can only be written partially.\n"
-            "\n"
-            "  * Returns `true` if all data have been written successfully, or\n"
-            "    `null` on failure.\n"
-            "\n"
-            "  * Throws an exception if `offset` is negative.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.file_write(path, data, [offset])`\n"
+          "\n"
+          "  * Writes the file at `path` in binary mode. The write operation\n"
+          "    starts from the byte offset that is denoted by `offset` if it\n"
+          "    is specified, or from the beginning of the file otherwise. The\n"
+          "    file is truncated to this length before the write operation;\n"
+          "    any existent contents after the write point are discarded. This\n"
+          "    function fails if the data can only be written partially.\n"
+          "\n"
+          "  * Returns `true` if all data have been written successfully, or\n"
+          "    `null` on failure.\n"
+          "\n"
+          "  * Throws an exception if `offset` is negative.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.file_write"), args);
-            // Parse arguments.
-            G_string path;
-            G_string data;
-            Opt<G_integer> offset;
-            if(reader.start().g(path).g(data).g(offset).finish()) {
-              // Call the binding function.
-              if(!std_filesystem_file_write(path, data, offset)) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { true };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.file_write"), args);
+          // Parse arguments.
+          G_string path;
+          G_string data;
+          Opt<G_integer> offset;
+          if(reader.start().g(path).g(data).g(offset).finish()) {
+            // Call the binding function.
+            if(!std_filesystem_file_write(path, data, offset)) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { true };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.file_append()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_append"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.file_append(path, data)`\n"
-            "\n"
-            "  * Writes the file at `path` in binary mode. The write operation\n"
-            "    starts from the end of the file; existent contents of the file\n"
-            "    are left intact. If `exclusive` is `true` and a file exists on\n"
-            "    `path`, this function fails. This function also fails if the\n"
-            "    data can only be written partially.\n"
-            "\n"
-            "  * Returns `true` if all data have been written successfully, or\n"
-            "    `null` on failure.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.file_append(path, data)`\n"
+          "\n"
+          "  * Writes the file at `path` in binary mode. The write operation\n"
+          "    starts from the end of the file; existent contents of the file\n"
+          "    are left intact. If `exclusive` is `true` and a file exists on\n"
+          "    `path`, this function fails. This function also fails if the\n"
+          "    data can only be written partially.\n"
+          "\n"
+          "  * Returns `true` if all data have been written successfully, or\n"
+          "    `null` on failure.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.file_append"), args);
-            // Parse arguments.
-            G_string path;
-            G_string data;
-            Opt<G_boolean> exclusive;
-            if(reader.start().g(path).g(data).g(exclusive).finish()) {
-              // Call the binding function.
-              if(!std_filesystem_file_append(path, data, exclusive)) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { true };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.file_append"), args);
+          // Parse arguments.
+          G_string path;
+          G_string data;
+          Opt<G_boolean> exclusive;
+          if(reader.start().g(path).g(data).g(exclusive).finish()) {
+            // Call the binding function.
+            if(!std_filesystem_file_append(path, data, exclusive)) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { true };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.file_copy_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_copy_from"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.file_copy_from(path_new, path_old)`\n"
-            "\n"
-            "  * Copies the file `path_old` to `path_new`. If `path_old` is a\n"
-            "    symbolic link, it is the target that will be copied, rather\n"
-            "    than the symbolic link itself. This function fails if\n"
-            "    `path_old` designates a directory.\n"
-            "\n"
-            "  * Returns `true` on success, or `null` on failure.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.file_copy_from(path_new, path_old)`\n"
+          "\n"
+          "  * Copies the file `path_old` to `path_new`. If `path_old` is a\n"
+          "    symbolic link, it is the target that will be copied, rather\n"
+          "    than the symbolic link itself. This function fails if\n"
+          "    `path_old` designates a directory.\n"
+          "\n"
+          "  * Returns `true` on success, or `null` on failure.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.file_copy_from"), args);
-            // Parse arguments.
-            G_string path_new;
-            G_string path_old;
-            if(reader.start().g(path_new).g(path_old).finish()) {
-              // Call the binding function.
-              if(!std_filesystem_file_copy_from(path_new, path_old)) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { true };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.file_copy_from"), args);
+          // Parse arguments.
+          G_string path_new;
+          G_string path_old;
+          if(reader.start().g(path_new).g(path_old).finish()) {
+            // Call the binding function.
+            if(!std_filesystem_file_copy_from(path_new, path_old)) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { true };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.filesystem.file_remove()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_remove"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.filesystem.file_remove(path)`\n"
-            "\n"
-            "  * Removes the file at `path`. This function fails if `path`\n"
-            "    designates a directory.\n"
-            "\n"
-            "  * Returns `true` if the file has been removed successfully, or\n"
-            "    `null` on failure.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.filesystem.file_remove(path)`\n"
+          "\n"
+          "  * Removes the file at `path`. This function fails if `path`\n"
+          "    designates a directory.\n"
+          "\n"
+          "  * Returns `true` if the file has been removed successfully, or\n"
+          "    `null` on failure.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.filesystem.file_remove"), args);
-            // Parse arguments.
-            G_string path;
-            if(reader.start().g(path).finish()) {
-              // Call the binding function.
-              if(!std_filesystem_file_remove(path)) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { true };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.filesystem.file_remove"), args);
+          // Parse arguments.
+          G_string path;
+          if(reader.start().g(path).finish()) {
+            // Call the binding function.
+            if(!std_filesystem_file_remove(path)) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { true };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // End of `std.filesystem`
     //===================================================================

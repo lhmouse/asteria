@@ -810,1424 +810,1349 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("slice"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.slice(data, from, [length])`\n"
-            "\n"
-            "  * Copies a subrange of `data` to create a new `array`. Elements\n"
-            "    are copied from `from` if it is non-negative, or from\n"
-            "    `lengthof(data) + from` otherwise. If `length` is set to an\n"
-            "    `integer`, no more than this number of elements will be copied.\n"
-            "    If it is absent, all elements from `from` to the end of `data`\n"
-            "    will be copied. If `from` is outside `data`, an empty `array`\n"
-            "    is returned.\n"
-            "\n"
-            "  * Returns the specified subarray of `data`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.slice(data, from, [length])`\n"
+          "\n"
+          "  * Copies a subrange of `data` to create a new `array`. Elements\n"
+          "    are copied from `from` if it is non-negative, or from\n"
+          "    `lengthof(data) + from` otherwise. If `length` is set to an\n"
+          "    `integer`, no more than this number of elements will be copied.\n"
+          "    If it is absent, all elements from `from` to the end of `data`\n"
+          "    will be copied. If `from` is outside `data`, an empty `array`\n"
+          "    is returned.\n"
+          "\n"
+          "  * Returns the specified subarray of `data`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.slice"), args);
-            // Parse arguments.
-            G_array data;
-            G_integer from;
-            Opt<G_integer> length;
-            if(reader.start().g(data).g(from).g(length).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_slice(data, from, length) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.slice"), args);
+          // Parse arguments.
+          G_array data;
+          G_integer from;
+          Opt<G_integer> length;
+          if(reader.start().g(data).g(from).g(length).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_slice(data, from, length) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.replace_slice()`
     //===================================================================
     result.insert_or_assign(rocket::sref("replace_slice"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.replace_slice(data, from, replacement)`\n"
-            "\n"
-            "  * Replaces all elements from `from` to the end of `data` with\n"
-            "    `replacement` and returns the new `array`. If `from` is\n"
-            "    negative, it specifies an offset from the end of `data`. This\n"
-            "    function returns a new `array` without modifying `data`.\n"
-            "\n"
-            "  * Returns a `array` with the subrange replaced.\n"
-            "\n"
-            "`std.array.replace_slice(data, from, [length], replacement)`\n"
-            "\n"
-            "  * Replaces a subrange of `data` with `replacement` to create a\n"
-            "    new `array`. `from` specifies the start of the subrange to\n"
-            "    replace. If `from` is negative, it specifies an offset from the\n"
-            "    end of `data`. `length` specifies the maximum number of\n"
-            "    elements to replace. If it is set to `null`, this function is\n"
-            "    equivalent to `replace_slice(data, from, replacement)`. This\n"
-            "    function returns a new `array` without modifying `data`.\n"
-            "\n"
-            "  * Returns a `array` with the subrange replaced.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.replace_slice(data, from, replacement)`\n"
+          "\n"
+          "  * Replaces all elements from `from` to the end of `data` with\n"
+          "    `replacement` and returns the new `array`. If `from` is\n"
+          "    negative, it specifies an offset from the end of `data`. This\n"
+          "    function returns a new `array` without modifying `data`.\n"
+          "\n"
+          "  * Returns a `array` with the subrange replaced.\n"
+          "\n"
+          "`std.array.replace_slice(data, from, [length], replacement)`\n"
+          "\n"
+          "  * Replaces a subrange of `data` with `replacement` to create a\n"
+          "    new `array`. `from` specifies the start of the subrange to\n"
+          "    replace. If `from` is negative, it specifies an offset from the\n"
+          "    end of `data`. `length` specifies the maximum number of\n"
+          "    elements to replace. If it is set to `null`, this function is\n"
+          "    equivalent to `replace_slice(data, from, replacement)`. This\n"
+          "    function returns a new `array` without modifying `data`.\n"
+          "\n"
+          "  * Returns a `array` with the subrange replaced.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.replace"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            G_integer from;
-            G_array replacement;
-            if(reader.start().g(data).g(from).save(state).g(replacement).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, replacement) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(replacement).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, length, replacement) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.replace"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          G_integer from;
+          G_array replacement;
+          if(reader.start().g(data).g(from).save(state).g(replacement).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, replacement) };
+            return rocket::move(xref);
           }
-      )));
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(replacement).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_replace_slice(data, from, length, replacement) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.find()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.find(data, target)`\n"
-            "\n"
-            "  * Searches `data` for the first occurrence of `target`.\n"
-            "\n"
-            "  * Returns the subscript of the first match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-            "\n"
-            "`std.array.find(data, from, target)`\n"
-            "\n"
-            "  * Searches `data` for the first occurrence of `target`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the first match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-            "\n"
-            "`std.array.find(data, from, [length], target)`\n"
-            "\n"
-            "  * Searches `data` for the first occurrence of `target`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(data, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of the first match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.find(data, target)`\n"
+          "\n"
+          "  * Searches `data` for the first occurrence of `target`.\n"
+          "\n"
+          "  * Returns the subscript of the first match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+          "\n"
+          "`std.array.find(data, from, target)`\n"
+          "\n"
+          "  * Searches `data` for the first occurrence of `target`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the subscript of the first match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+          "\n"
+          "`std.array.find(data, from, [length], target)`\n"
+          "\n"
+          "  * Searches `data` for the first occurrence of `target`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(data, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of the first match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.find"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            Value target;
-            if(reader.start().g(data).save(state).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find(data, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.find"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          Value target;
+          if(reader.start().g(data).save(state).g(target).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find(data, target);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find(data, from, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find(data, from, length, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(target).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find(data, from, target);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(target).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find(data, from, length, target);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.find_if()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_if"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.find_if(data, predictor)`\n"
-            "\n"
-            "  * Finds the first element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "`std.array.find_if(data, from, predictor)`\n"
-            "\n"
-            "  * Finds the first element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true. The search operation is\n"
-            "    performed on the same subrange that would be returned by\n"
-            "    `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "`std.array.find_if(data, from, [length], predictor)`\n"
-            "\n"
-            "  * Finds the first element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true. The search operation is\n"
-            "    performed on the same subrange that would be returned by\n"
-            "    `slice(data, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.find_if(data, predictor)`\n"
+          "\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "`std.array.find_if(data, from, predictor)`\n"
+          "\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "`std.array.find_if(data, from, [length], predictor)`\n"
+          "\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.find_if"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            G_function predictor = global.placeholder_function();
-            if(reader.start().g(data).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find_if(global, data, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.find_if"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          G_function predictor = global.placeholder_function();
+          if(reader.start().g(data).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find_if(global, data, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find_if(global, data, from, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find_if(global, data, from, length, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find_if(global, data, from, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find_if(global, data, from, length, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.find_if_not()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_if_not"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.find_if_not(data, predictor)`\n"
-            "\n"
-            "  * Finds the first element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "`std.array.find_if_not(data, from, predictor)`\n"
-            "\n"
-            "  * Finds the first element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false. The search operation is\n"
-            "    performed on the same subrange that would be returned by\n"
-            "    `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "`std.array.find_if_not(data, from, [length], predictor)`\n"
-            "\n"
-            "  * Finds the first element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false. The search operation is\n"
-            "    performed on the same subrange that would be returned by\n"
-            "    `slice(data, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.find_if_not(data, predictor)`\n"
+          "\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "`std.array.find_if_not(data, from, predictor)`\n"
+          "\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "`std.array.find_if_not(data, from, [length], predictor)`\n"
+          "\n"
+          "  * Finds the first element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.find_if_not"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            G_function predictor = global.placeholder_function();
-            if(reader.start().g(data).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find_if_not(global, data, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.find_if_not"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          G_function predictor = global.placeholder_function();
+          if(reader.start().g(data).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find_if_not(global, data, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find_if_not(global, data, from, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_find_if_not(global, data, from, length, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find_if_not(global, data, from, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_find_if_not(global, data, from, length, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.rfind()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.rfind(data, target)`\n"
-            "\n"
-            "  * Searches `data` for the last occurrence of `target`.\n"
-            "\n"
-            "  * Returns the subscript of the last match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-            "\n"
-            "`std.array.rfind(data, from, target)`\n"
-            "\n"
-            "  * Searches `data` for the last occurrence of `target`. The search\n"
-            "    operation is performed on the same subrange that would be\n"
-            "    returned by `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the last match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-            "\n"
-            "`std.array.rfind(data, from, [length], target)`\n"
-            "\n"
-            "  * Searches `data` for the last occurrence of `target`. The search\n"
-            "    operation is performed on the same subrange that would be\n"
-            "    returned by `slice(data, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of the last match of `target` in `data`\n"
-            "    if one is found, which is always non-negative, or `null`\n"
-            "    otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.rfind(data, target)`\n"
+          "\n"
+          "  * Searches `data` for the last occurrence of `target`.\n"
+          "\n"
+          "  * Returns the subscript of the last match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+          "\n"
+          "`std.array.rfind(data, from, target)`\n"
+          "\n"
+          "  * Searches `data` for the last occurrence of `target`. The search\n"
+          "    operation is performed on the same subrange that would be\n"
+          "    returned by `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the subscript of the last match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+          "\n"
+          "`std.array.rfind(data, from, [length], target)`\n"
+          "\n"
+          "  * Searches `data` for the last occurrence of `target`. The search\n"
+          "    operation is performed on the same subrange that would be\n"
+          "    returned by `slice(data, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of the last match of `target` in `data`\n"
+          "    if one is found, which is always non-negative, or `null`\n"
+          "    otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.rfind"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            Value target;
-            if(reader.start().g(data).save(state).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind(data, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.rfind"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          Value target;
+          if(reader.start().g(data).save(state).g(target).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind(data, target);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind(data, from, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(target).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind(data, from, length, target);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(target).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind(data, from, target);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(target).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind(data, from, length, target);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.rfind_if()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind_if"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.rfind_if(data, predictor)`\n"
-            "\n"
-            "  * Finds the last element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "`std.array.rfind_if(data, from, predictor)`\n"
-            "\n"
-            "  * Finds the last element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true. The search operation is\n"
-            "    performed on the same subrange that would be returned by\n"
-            "    `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "`std.array.rfind_if(data, from, [length], predictor)`\n"
-            "\n"
-            "  * Finds the last element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true. The search operation is\n"
-            "    performed on the same subrange that would be returned by\n"
-            "    `slice(data, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.rfind_if(data, predictor)`\n"
+          "\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "`std.array.rfind_if(data, from, predictor)`\n"
+          "\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "`std.array.rfind_if(data, from, [length], predictor)`\n"
+          "\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.rfind_if"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            G_function predictor = global.placeholder_function();
-            if(reader.start().g(data).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind_if(global, data, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.rfind_if"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          G_function predictor = global.placeholder_function();
+          if(reader.start().g(data).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind_if(global, data, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind_if(global, data, from, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind_if(global, data, from, length, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind_if(global, data, from, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind_if(global, data, from, length, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.rfind_if_not()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind_if_not"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.rfind_if_not(data, predictor)`\n"
-            "\n"
-            "  * Finds the last element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "`std.array.rfind_if_not(data, from, predictor)`\n"
-            "\n"
-            "  * Finds the last element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false. The search operation is\n"
-            "    performed on the same subrange that would be returned by\n"
-            "    `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "`std.array.rfind_if_not(data, from, [length], predictor)`\n"
-            "\n"
-            "  * Finds the last element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false. The search operation is\n"
-            "    performed on the same subrange that would be returned by\n"
-            "    `slice(data, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.rfind_if_not(data, predictor)`\n"
+          "\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "`std.array.rfind_if_not(data, from, predictor)`\n"
+          "\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "`std.array.rfind_if_not(data, from, [length], predictor)`\n"
+          "\n"
+          "  * Finds the last element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false. The search operation is\n"
+          "    performed on the same subrange that would be returned by\n"
+          "    `slice(data, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.rfind_if_not"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            G_function predictor = global.placeholder_function();
-            if(reader.start().g(data).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind_if_not(global, data, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.rfind_if_not"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          G_function predictor = global.placeholder_function();
+          if(reader.start().g(data).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind_if_not(global, data, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind_if_not(global, data, from, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(predictor).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_rfind_if_not(global, data, from, length, predictor);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind_if_not(global, data, from, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(predictor).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_rfind_if_not(global, data, from, length, predictor);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.count()`
     //===================================================================
     result.insert_or_assign(rocket::sref("count"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.count(data, target)`\n"
-            "\n"
-            "  * Searches `data` for `target` and figures the total number of\n"
-            "    occurences.\n"
-            "\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-            "\n"
-            "`std.array.count(data, from, target)`\n"
-            "\n"
-            "  * Searches `data` for `target` and figures the total number of\n"
-            "    occurences. The search operation is performed on the same\n"
-            "    subrange that would be returned by `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-            "\n"
-            "`std.array.count(data, from, [length], target)`\n"
-            "\n"
-            "  * Searches `data` for `target` and figures the total number of\n"
-            "    occurences. The search operation is performed on the same\n"
-            "    subrange that would be returned by `slice(data, from, length)`.\n"
-            "\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.count(data, target)`\n"
+          "\n"
+          "  * Searches `data` for `target` and figures the total number of\n"
+          "    occurences.\n"
+          "\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+          "\n"
+          "`std.array.count(data, from, target)`\n"
+          "\n"
+          "  * Searches `data` for `target` and figures the total number of\n"
+          "    occurences. The search operation is performed on the same\n"
+          "    subrange that would be returned by `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+          "\n"
+          "`std.array.count(data, from, [length], target)`\n"
+          "\n"
+          "  * Searches `data` for `target` and figures the total number of\n"
+          "    occurences. The search operation is performed on the same\n"
+          "    subrange that would be returned by `slice(data, from, length)`.\n"
+          "\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.count"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            Value target;
-            if(reader.start().g(data).save(state).g(target).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count(data, target) };
-              return rocket::move(xref);
-            }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(target).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count(data, from, target) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(target).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count(data, from, length, target) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.count"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          Value target;
+          if(reader.start().g(data).save(state).g(target).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count(data, target) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(target).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count(data, from, target) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(target).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count(data, from, length, target) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.count_if()`
     //===================================================================
     result.insert_or_assign(rocket::sref("count_if"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.count_if(data, target, predictor)`\n"
-            "\n"
-            "  * Searches every element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true, and figures the total\n"
-            "    number of such occurences.\n"
-            "\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-            "\n"
-            "`std.array.count_if(data, from, target, predictor)`\n"
-            "\n"
-            "  * Searches every element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true, and figures the total\n"
-            "    number of elements. The search operation is performed on the\n"
-            "    same subrange that would be returned by `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-            "\n"
-            "`std.array.count_if(data, from, [length], target, predictor)`\n"
-            "\n"
-            "  * Searches every element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically true, and figures the total\n"
-            "    number of elements. The search operation is performed on the\n"
-            "    same subrange that would be returned by `slice(data, from,\n"
-            "    length)`.\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.count_if(data, target, predictor)`\n"
+          "\n"
+          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true, and figures the total\n"
+          "    number of such occurences.\n"
+          "\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+          "\n"
+          "`std.array.count_if(data, from, target, predictor)`\n"
+          "\n"
+          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true, and figures the total\n"
+          "    number of elements. The search operation is performed on the\n"
+          "    same subrange that would be returned by `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+          "\n"
+          "`std.array.count_if(data, from, [length], target, predictor)`\n"
+          "\n"
+          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically true, and figures the total\n"
+          "    number of elements. The search operation is performed on the\n"
+          "    same subrange that would be returned by `slice(data, from,\n"
+          "    length)`.\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.count_if"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            G_function predictor = global.placeholder_function();
-            if(reader.start().g(data).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count_if(global, data, predictor) };
-              return rocket::move(xref);
-            }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count_if(global, data, from, predictor) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(predictor).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count_if(global, data, from, length, predictor) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.count_if"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          G_function predictor = global.placeholder_function();
+          if(reader.start().g(data).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count_if(global, data, predictor) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count_if(global, data, from, predictor) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(predictor).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count_if(global, data, from, length, predictor) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.count_if_not()`
     //===================================================================
     result.insert_or_assign(rocket::sref("count_if_not"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.count_if_not(data, target, predictor)`\n"
-            "\n"
-            "  * Searches every element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false, and figures the total\n"
-            "    number of such occurences.\n"
-            "\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-            "\n"
-            "`std.array.count_if_not(data, from, target, predictor)`\n"
-            "\n"
-            "  * Searches every element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false, and figures the total\n"
-            "    number of elements. The search operation is performed on the\n"
-            "    same subrange that would be returned by `slice(data, from)`.\n"
-            "\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-            "\n"
-            "`std.array.count_if_not(data, from, [length], target, predictor)`\n"
-            "\n"
-            "  * Searches every element, namely `x`, in `data`, for which\n"
-            "    `predictor(x)` yields logically false, and figures the total\n"
-            "    number of elements. The search operation is performed on the\n"
-            "    same subrange that would be returned by `slice(data, from,\n"
-            "    length)`.\n"
-            "\n"
-            "  * Returns the number of occurrences as an `integer`, which is\n"
-            "    always non-negative.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.count_if_not(data, target, predictor)`\n"
+          "\n"
+          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false, and figures the total\n"
+          "    number of such occurences.\n"
+          "\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+          "\n"
+          "`std.array.count_if_not(data, from, target, predictor)`\n"
+          "\n"
+          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false, and figures the total\n"
+          "    number of elements. The search operation is performed on the\n"
+          "    same subrange that would be returned by `slice(data, from)`.\n"
+          "\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+          "\n"
+          "`std.array.count_if_not(data, from, [length], target, predictor)`\n"
+          "\n"
+          "  * Searches every element, namely `x`, in `data`, for which\n"
+          "    `predictor(x)` yields logically false, and figures the total\n"
+          "    number of elements. The search operation is performed on the\n"
+          "    same subrange that would be returned by `slice(data, from,\n"
+          "    length)`.\n"
+          "\n"
+          "  * Returns the number of occurrences as an `integer`, which is\n"
+          "    always non-negative.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.count_if_not"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_array data;
-            G_function predictor = global.placeholder_function();
-            if(reader.start().g(data).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, predictor) };
-              return rocket::move(xref);
-            }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(predictor).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, from, predictor) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(predictor).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, from, length, predictor) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.count_if_not"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_array data;
+          G_function predictor = global.placeholder_function();
+          if(reader.start().g(data).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, predictor) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(predictor).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, from, predictor) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(predictor).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, from, length, predictor) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.is_sorted()`
     //===================================================================
     result.insert_or_assign(rocket::sref("is_sorted"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.is_sorted(data, [comparator])`\n"
-            "\n"
-            "  * Checks whether `data` is sorted. That is, there is no pair of\n"
-            "    adjacent elements in `data` such that the first one is greater\n"
-            "    than or unordered with the second one. Elements are compared\n"
-            "    using `comparator`, which shall be a binary `function` that\n"
-            "    returns a negative `integer` or `real` if the first argument is\n"
-            "    less than the second one, a positive `integer` or `real` if the\n"
-            "    first argument is greater than the second one, or `0` if the\n"
-            "    arguments are equal; other values indicate that the arguments\n"
-            "    are unordered. If no `comparator` is provided, the built-in\n"
-            "    3-way comparison operator is used. An `array` that contains no\n"
-            "    elements is considered to have been sorted.\n"
-            "\n"
-            "  * Returns `true` if `data` is sorted or empty, or `false`\n"
-            "    otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.is_sorted(data, [comparator])`\n"
+          "\n"
+          "  * Checks whether `data` is sorted. That is, there is no pair of\n"
+          "    adjacent elements in `data` such that the first one is greater\n"
+          "    than or unordered with the second one. Elements are compared\n"
+          "    using `comparator`, which shall be a binary `function` that\n"
+          "    returns a negative `integer` or `real` if the first argument is\n"
+          "    less than the second one, a positive `integer` or `real` if the\n"
+          "    first argument is greater than the second one, or `0` if the\n"
+          "    arguments are equal; other values indicate that the arguments\n"
+          "    are unordered. If no `comparator` is provided, the built-in\n"
+          "    3-way comparison operator is used. An `array` that contains no\n"
+          "    elements is considered to have been sorted.\n"
+          "\n"
+          "  * Returns `true` if `data` is sorted or empty, or `false`\n"
+          "    otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.is_sorted"), args);
-            // Parse arguments.
-            G_array data;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_is_sorted(global, data, comparator) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.is_sorted"), args);
+          // Parse arguments.
+          G_array data;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_is_sorted(global, data, comparator) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.binary_search()`
     //===================================================================
     result.insert_or_assign(rocket::sref("binary_search"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.binary_search(data, target, [comparator])`\n"
-            "\n"
-            "  * Finds the first element in `data` that is equal to `target`.\n"
-            "    The principle of user-defined `comparator`s is the same as the\n"
-            "    `is_sorted()` function. As a consequence, the function call\n"
-            "    `is_sorted(data, comparator)` shall yield `true` prior to this\n"
-            "    call, otherwise the effect is undefined.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`, if\n"
-            "    one is found, or `null` otherwise.\n"
-            "\n"
-            "  * Throws an exception if `data` has not been sorted properly. Be\n"
-            "    advised that in this case there is no guarantee whether an\n"
-            "    exception will be thrown or not.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.binary_search(data, target, [comparator])`\n"
+          "\n"
+          "  * Finds the first element in `data` that is equal to `target`.\n"
+          "    The principle of user-defined `comparator`s is the same as the\n"
+          "    `is_sorted()` function. As a consequence, the function call\n"
+          "    `is_sorted(data, comparator)` shall yield `true` prior to this\n"
+          "    call, otherwise the effect is undefined.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`, if\n"
+          "    one is found, or `null` otherwise.\n"
+          "\n"
+          "  * Throws an exception if `data` has not been sorted properly. Be\n"
+          "    advised that in this case there is no guarantee whether an\n"
+          "    exception will be thrown or not.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.binary_search"), args);
-            // Parse arguments.
-            G_array data;
-            Value target;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(target).g(comparator).finish()) {
-              // Call the binding function.
-              auto qindex = std_array_binary_search(global, data, target, comparator);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.binary_search"), args);
+          // Parse arguments.
+          G_array data;
+          Value target;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(target).g(comparator).finish()) {
+            // Call the binding function.
+            auto qindex = std_array_binary_search(global, data, target, comparator);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.lower_bound()`
     //===================================================================
     result.insert_or_assign(rocket::sref("lower_bound"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.lower_bound(data, target, [comparator])`\n"
-            "\n"
-            "  * Finds the first element in `data` that is greater than or equal\n"
-            "    to `target` and precedes all elements that are less than\n"
-            "    `target` if any. The principle of user-defined `comparator`s is\n"
-            "    the same as the `is_sorted()` function. As a consequence, the\n"
-            "    function call `is_sorted(data, comparator)` shall yield `true`\n"
-            "    prior to this call, otherwise the effect is undefined.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`. This\n"
-            "    function returns `lengthof(data)` if all elements are less than\n"
-            "    `target`.\n"
-            "\n"
-            "  * Throws an exception if `data` has not been sorted properly. Be\n"
-            "    advised that in this case there is no guarantee whether an\n"
-            "    exception will be thrown or not.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.lower_bound(data, target, [comparator])`\n"
+          "\n"
+          "  * Finds the first element in `data` that is greater than or equal\n"
+          "    to `target` and precedes all elements that are less than\n"
+          "    `target` if any. The principle of user-defined `comparator`s is\n"
+          "    the same as the `is_sorted()` function. As a consequence, the\n"
+          "    function call `is_sorted(data, comparator)` shall yield `true`\n"
+          "    prior to this call, otherwise the effect is undefined.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`. This\n"
+          "    function returns `lengthof(data)` if all elements are less than\n"
+          "    `target`.\n"
+          "\n"
+          "  * Throws an exception if `data` has not been sorted properly. Be\n"
+          "    advised that in this case there is no guarantee whether an\n"
+          "    exception will be thrown or not.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
-            // Parse arguments.
-            G_array data;
-            Value target;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(target).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_lower_bound(global, data, target, comparator) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
+          // Parse arguments.
+          G_array data;
+          Value target;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(target).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_lower_bound(global, data, target, comparator) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.upper_bound()`
     //===================================================================
     result.insert_or_assign(rocket::sref("upper_bound"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.upper_bound(data, target, [comparator])`\n"
-            "\n"
-            "  * Finds the first element in `data` that is greater than `target`\n"
-            "    and precedes all elements that are less than or equal to\n"
-            "    `target` if any. The principle of user-defined `comparator`s is\n"
-            "    the same as the `is_sorted()` function. As a consequence, the\n"
-            "    function call `is_sorted(data, comparator)` shall yield `true`\n"
-            "    prior to this call, otherwise the effect is undefined.\n"
-            "\n"
-            "  * Returns the subscript of such an element as an `integer`. This\n"
-            "    function returns `lengthof(data)` if all elements are less than\n"
-            "    or equal to `target`.\n"
-            "\n"
-            "  * Throws an exception if `data` has not been sorted properly. Be\n"
-            "    advised that in this case there is no guarantee whether an\n"
-            "    exception will be thrown or not.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.upper_bound(data, target, [comparator])`\n"
+          "\n"
+          "  * Finds the first element in `data` that is greater than `target`\n"
+          "    and precedes all elements that are less than or equal to\n"
+          "    `target` if any. The principle of user-defined `comparator`s is\n"
+          "    the same as the `is_sorted()` function. As a consequence, the\n"
+          "    function call `is_sorted(data, comparator)` shall yield `true`\n"
+          "    prior to this call, otherwise the effect is undefined.\n"
+          "\n"
+          "  * Returns the subscript of such an element as an `integer`. This\n"
+          "    function returns `lengthof(data)` if all elements are less than\n"
+          "    or equal to `target`.\n"
+          "\n"
+          "  * Throws an exception if `data` has not been sorted properly. Be\n"
+          "    advised that in this case there is no guarantee whether an\n"
+          "    exception will be thrown or not.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.upper_bound"), args);
-            // Parse arguments.
-            G_array data;
-            Value target;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(target).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_upper_bound(global, data, target, comparator) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.upper_bound"), args);
+          // Parse arguments.
+          G_array data;
+          Value target;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(target).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_upper_bound(global, data, target, comparator) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.equal_range()`
     //===================================================================
     result.insert_or_assign(rocket::sref("equal_range"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.equal_range(data, target, [comparator])`\n"
-            "\n"
-            "  * Gets the range of elements equivalent to `target` in `data` as\n"
-            "    a single function call. This function is equivalent to calling\n"
-            "    `lower_bound(data, target, comparator)` and\n"
-            "    `upper_bound(data, target, comparator)` respectively then\n"
-            "    storing both results in an `array`.\n"
-            "\n"
-            "  * Returns an `array` of two `integer`s, the first of which\n"
-            "    specifies the lower bound and the other specifies the upper\n"
-            "    bound.\n"
-            "\n"
-            "  * Throws an exception if `data` has not been sorted properly. Be\n"
-            "    advised that in this case there is no guarantee whether an\n"
-            "    exception will be thrown or not.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.equal_range(data, target, [comparator])`\n"
+          "\n"
+          "  * Gets the range of elements equivalent to `target` in `data` as\n"
+          "    a single function call. This function is equivalent to calling\n"
+          "    `lower_bound(data, target, comparator)` and\n"
+          "    `upper_bound(data, target, comparator)` respectively then\n"
+          "    storing both results in an `array`.\n"
+          "\n"
+          "  * Returns an `array` of two `integer`s, the first of which\n"
+          "    specifies the lower bound and the other specifies the upper\n"
+          "    bound.\n"
+          "\n"
+          "  * Throws an exception if `data` has not been sorted properly. Be\n"
+          "    advised that in this case there is no guarantee whether an\n"
+          "    exception will be thrown or not.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
-            // Parse arguments.
-            G_array data;
-            Value target;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(target).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_equal_range(global, data, target, comparator) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.lower_bound"), args);
+          // Parse arguments.
+          G_array data;
+          Value target;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(target).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_equal_range(global, data, target, comparator) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.sort()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sort"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.sort(data, [comparator])`\n"
-            "\n"
-            "  * Sorts elements in `data` in ascending order. The principle of\n"
-            "    user-defined `comparator`s is the same as the `is_sorted()`\n"
-            "    function. The algorithm shall finish in `O(n log n)` time where\n"
-            "    `n` is the number of elements in `data`, and shall be stable.\n"
-            "    This function returns a new `array` without modifying `data`.\n"
-            "\n"
-            "  * Returns the sorted `array`.\n"
-            "\n"
-            "  * Throws an exception if any elements are unordered. Be advised\n"
-            "    that in this case there is no guarantee whether an exception\n"
-            "    will be thrown or not.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.sort(data, [comparator])`\n"
+          "\n"
+          "  * Sorts elements in `data` in ascending order. The principle of\n"
+          "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+          "    function. The algorithm shall finish in `O(n log n)` time where\n"
+          "    `n` is the number of elements in `data`, and shall be stable.\n"
+          "    This function returns a new `array` without modifying `data`.\n"
+          "\n"
+          "  * Returns the sorted `array`.\n"
+          "\n"
+          "  * Throws an exception if any elements are unordered. Be advised\n"
+          "    that in this case there is no guarantee whether an exception\n"
+          "    will be thrown or not.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.sort"), args);
-            // Parse arguments.
-            G_array data;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_sort(global, data, comparator) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.sort"), args);
+          // Parse arguments.
+          G_array data;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_sort(global, data, comparator) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.sortu()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sortu"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.sortu(data, [comparator])`\n"
-            "\n"
-            "  * Sorts elements in `data` in ascending order, then removes all\n"
-            "    elements that have preceding equivalents. The principle of\n"
-            "    user-defined `comparator`s is the same as the `is_sorted()`\n"
-            "    function. The algorithm shall finish in `O(n log n)` time where\n"
-            "    `n` is the number of elements in `data`. This function returns\n"
-            "    a new `array` without modifying `data`.\n"
-            "\n"
-            "  * Returns the sorted `array` with no duplicate elements.\n"
-            "\n"
-            "  * Throws an exception if any elements are unordered. Be advised\n"
-            "    that in this case there is no guarantee whether an exception\n"
-            "    will be thrown or not.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.sortu(data, [comparator])`\n"
+          "\n"
+          "  * Sorts elements in `data` in ascending order, then removes all\n"
+          "    elements that have preceding equivalents. The principle of\n"
+          "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+          "    function. The algorithm shall finish in `O(n log n)` time where\n"
+          "    `n` is the number of elements in `data`. This function returns\n"
+          "    a new `array` without modifying `data`.\n"
+          "\n"
+          "  * Returns the sorted `array` with no duplicate elements.\n"
+          "\n"
+          "  * Throws an exception if any elements are unordered. Be advised\n"
+          "    that in this case there is no guarantee whether an exception\n"
+          "    will be thrown or not.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.sortu"), args);
-            // Parse arguments.
-            G_array data;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_sortu(global, data, comparator) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.sortu"), args);
+          // Parse arguments.
+          G_array data;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_sortu(global, data, comparator) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.max_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("max_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.max_of(data, [comparator])`\n"
-            "\n"
-            "  * Finds the maximum element in `data`. The principle of\n"
-            "    user-defined `comparator`s is the same as the `is_sorted()`\n"
-            "    function. Elements that are unordered with the first element\n"
-            "    are ignored silently.\n"
-            "\n"
-            "  * Returns a copy of the maximum element, or `null` if `data` is\n"
-            "    empty.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.max_of(data, [comparator])`\n"
+          "\n"
+          "  * Finds the maximum element in `data`. The principle of\n"
+          "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+          "    function. Elements that are unordered with the first element\n"
+          "    are ignored silently.\n"
+          "\n"
+          "  * Returns a copy of the maximum element, or `null` if `data` is\n"
+          "    empty.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.max_of"), args);
-            // Parse arguments.
-            G_array data;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_max_of(global, data, comparator) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.max_of"), args);
+          // Parse arguments.
+          G_array data;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_max_of(global, data, comparator) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.min_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("min_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.min_of(data, [comparator])`\n"
-            "\n"
-            "  * Finds the minimum element in `data`. The principle of\n"
-            "    user-defined `comparator`s is the same as the `is_sorted()`\n"
-            "    function. Elements that are unordered with the first element\n"
-            "    are ignored silently.\n"
-            "\n"
-            "  * Returns a copy of the minimum element, or `null` if `data` is\n"
-            "    empty.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.min_of(data, [comparator])`\n"
+          "\n"
+          "  * Finds the minimum element in `data`. The principle of\n"
+          "    user-defined `comparator`s is the same as the `is_sorted()`\n"
+          "    function. Elements that are unordered with the first element\n"
+          "    are ignored silently.\n"
+          "\n"
+          "  * Returns a copy of the minimum element, or `null` if `data` is\n"
+          "    empty.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.min_of"), args);
-            // Parse arguments.
-            G_array data;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_min_of(global, data, comparator) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.min_of"), args);
+          // Parse arguments.
+          G_array data;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_min_of(global, data, comparator) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.reverse()`
     //===================================================================
     result.insert_or_assign(rocket::sref("reverse"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.reverse(data)`\n"
-            "\n"
-            "  * Reverses an `array`. This function returns a new `array`\n"
-            "    without modifying `text`.\n"
-            "\n"
-            "  * Returns the reversed `array`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.reverse(data)`\n"
+          "\n"
+          "  * Reverses an `array`. This function returns a new `array`\n"
+          "    without modifying `text`.\n"
+          "\n"
+          "  * Returns the reversed `array`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.reverse"), args);
-            // Parse arguments.
-            G_array data;
-            Opt<G_function> comparator;
-            if(reader.start().g(data).g(comparator).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_reverse(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.reverse"), args);
+          // Parse arguments.
+          G_array data;
+          Opt<G_function> comparator;
+          if(reader.start().g(data).g(comparator).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_reverse(data) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.generate()`
     //===================================================================
     result.insert_or_assign(rocket::sref("generate"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.generate(generator, length)`\n"
-            "\n"
-            "  * Calls `generator` repeatedly up to `length` times and returns\n"
-            "    an `array` consisting of all values returned. `generator` shall\n"
-            "    be a binary function. The first argument will be the number of\n"
-            "    elements having been generated; the second argument is the\n"
-            "    previous element generated, or `null` in the case of the first\n"
-            "    element.\n"
-            "\n"
-            "  * Returns an `array` containing all values generated.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.generate(generator, length)`\n"
+          "\n"
+          "  * Calls `generator` repeatedly up to `length` times and returns\n"
+          "    an `array` consisting of all values returned. `generator` shall\n"
+          "    be a binary function. The first argument will be the number of\n"
+          "    elements having been generated; the second argument is the\n"
+          "    previous element generated, or `null` in the case of the first\n"
+          "    element.\n"
+          "\n"
+          "  * Returns an `array` containing all values generated.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.generate"), args);
-            // Parse arguments.
-            G_function generator = global.placeholder_function();
-            G_integer length;
-            if(reader.start().g(generator).g(length).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_generate(global, generator, length) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.generate"), args);
+          // Parse arguments.
+          G_function generator = global.placeholder_function();
+          G_integer length;
+          if(reader.start().g(generator).g(length).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_generate(global, generator, length) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.shuffle()`
     //===================================================================
     result.insert_or_assign(rocket::sref("shuffle"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.shuffle(data, [seed])`\n"
-            "\n"
-            "  * Shuffles elements in `data` randomly. If `seed` is set to an\n"
-            "    `integer`, the internal pseudo random number generator will be\n"
-            "    initialized with it and will produce the same series of numbers\n"
-            "    for a specific `seed` value. If it is absent, an unspecified\n"
-            "    seed is generated when this function is called. This function\n"
-            "    returns a new `array` without modifying `data`.\n"
-            "\n"
-            "  * Returns the shuffled `array`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.shuffle(data, [seed])`\n"
+          "\n"
+          "  * Shuffles elements in `data` randomly. If `seed` is set to an\n"
+          "    `integer`, the internal pseudo random number generator will be\n"
+          "    initialized with it and will produce the same series of numbers\n"
+          "    for a specific `seed` value. If it is absent, an unspecified\n"
+          "    seed is generated when this function is called. This function\n"
+          "    returns a new `array` without modifying `data`.\n"
+          "\n"
+          "  * Returns the shuffled `array`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.shuffle"), args);
-            // Parse arguments.
-            G_array data;
-            Opt<G_integer> seed;
-            if(reader.start().g(data).g(seed).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_array_shuffle(data, seed) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.shuffle"), args);
+          // Parse arguments.
+          G_array data;
+          Opt<G_integer> seed;
+          if(reader.start().g(data).g(seed).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_array_shuffle(data, seed) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.copy_keys()`
     //===================================================================
     result.insert_or_assign(rocket::sref("copy_keys"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.copy_keys([source])`\n"
-            "\n"
-            "  * Copies all keys from `source`, which shall be an `object`, to\n"
-            "    create an `array`.\n"
-            "\n"
-            "  * Returns an `array` of all keys in `source`. If `source` is\n"
-            "    `null`, `null` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.copy_keys([source])`\n"
+          "\n"
+          "  * Copies all keys from `source`, which shall be an `object`, to\n"
+          "    create an `array`.\n"
+          "\n"
+          "  * Returns an `array` of all keys in `source`. If `source` is\n"
+          "    `null`, `null` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.copy_keys"), args);
-            // Parse arguments.
-            Opt<G_object> source;
-            if(reader.start().g(source).finish()) {
-              // Call the binding function.
-              auto qres = std_array_copy_keys(source);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.copy_keys"), args);
+          // Parse arguments.
+          Opt<G_object> source;
+          if(reader.start().g(source).finish()) {
+            // Call the binding function.
+            auto qres = std_array_copy_keys(source);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.array.copy_values()`
     //===================================================================
     result.insert_or_assign(rocket::sref("copy_values"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.array.copy_values([source])`\n"
-            "\n"
-            "  * Copies all values from `source`, which shall be an `object`, to\n"
-            "    create an `array`.\n"
-            "\n"
-            "  * Returns an `array` of all values in `source`. If `source` is\n"
-            "    `null`, `null` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.array.copy_values([source])`\n"
+          "\n"
+          "  * Copies all values from `source`, which shall be an `object`, to\n"
+          "    create an `array`.\n"
+          "\n"
+          "  * Returns an `array` of all values in `source`. If `source` is\n"
+          "    `null`, `null` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.array.copy_values"), args);
-            // Parse arguments.
-            Opt<G_object> source;
-            if(reader.start().g(source).finish()) {
-              // Call the binding function.
-              auto qres = std_array_copy_values(source);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.array.copy_values"), args);
+          // Parse arguments.
+          Opt<G_object> source;
+          if(reader.start().g(source).finish()) {
+            // Call the binding function.
+            auto qres = std_array_copy_values(source);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // End of `std.array`
     //===================================================================

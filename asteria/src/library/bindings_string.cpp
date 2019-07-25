@@ -1324,2204 +1324,2069 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("slice"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.slice(text, from, [length])`\n"
-            "\n"
-            "  * Copies a subrange of `text` to create a new byte string. Bytes\n"
-            "    are copied from `from` if it is non-negative, or from\n"
-            "    `lengthof(text) + from` otherwise. If `length` is set to an\n"
-            "    `integer`, no more than this number of bytes will be copied. If\n"
-            "    it is absent, all bytes from `from` to the end of `text` will\n"
-            "    be copied. If `from` is outside `text`, an empty `string` is\n"
-            "    returned.\n"
-            "\n"
-            "  * Returns the specified substring of `text`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.slice(text, from, [length])`\n"
+          "\n"
+          "  * Copies a subrange of `text` to create a new byte string. Bytes\n"
+          "    are copied from `from` if it is non-negative, or from\n"
+          "    `lengthof(text) + from` otherwise. If `length` is set to an\n"
+          "    `integer`, no more than this number of bytes will be copied. If\n"
+          "    it is absent, all bytes from `from` to the end of `text` will\n"
+          "    be copied. If `from` is outside `text`, an empty `string` is\n"
+          "    returned.\n"
+          "\n"
+          "  * Returns the specified substring of `text`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.slice"), args);
-            // Parse arguments.
-            G_string text;
-            G_integer from;
-            Opt<G_integer> length;
-            if(reader.start().g(text).g(from).g(length).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_slice(text, from, length) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.slice"), args);
+          // Parse arguments.
+          G_string text;
+          G_integer from;
+          Opt<G_integer> length;
+          if(reader.start().g(text).g(from).g(length).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_slice(text, from, length) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.replace_slice()`
     //===================================================================
     result.insert_or_assign(rocket::sref("replace_slice"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.replace_slice(text, from, replacement)`\n"
-            "\n"
-            "  * Replaces all bytes from `from` to the end of `text` with\n"
-            "    `replacement` and returns the new byte string. If `from` is\n"
-            "    negative, it specifies an offset from the end of `text`. This\n"
-            "    function returns a new `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns a `string` with the subrange replaced.\n"
-            "\n"
-            "`std.string.replace_slice(text, from, [length], replacement)`\n"
-            "\n"
-            "  * Replaces a subrange of `text` with `replacement` to create a\n"
-            "    new byte string. `from` specifies the start of the subrange to\n"
-            "    replace. If `from` is negative, it specifies an offset from the\n"
-            "    end of `text`. `length` specifies the maximum number of bytes\n"
-            "    to replace. If it is set to `null`, this function is equivalent\n"
-            "    to `replace_slice(text, from, replacement)`. This function\n"
-            "    returns a new `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns a `string` with the subrange replaced.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.replace_slice(text, from, replacement)`\n"
+          "\n"
+          "  * Replaces all bytes from `from` to the end of `text` with\n"
+          "    `replacement` and returns the new byte string. If `from` is\n"
+          "    negative, it specifies an offset from the end of `text`. This\n"
+          "    function returns a new `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns a `string` with the subrange replaced.\n"
+          "\n"
+          "`std.string.replace_slice(text, from, [length], replacement)`\n"
+          "\n"
+          "  * Replaces a subrange of `text` with `replacement` to create a\n"
+          "    new byte string. `from` specifies the start of the subrange to\n"
+          "    replace. If `from` is negative, it specifies an offset from the\n"
+          "    end of `text`. `length` specifies the maximum number of bytes\n"
+          "    to replace. If it is set to `null`, this function is equivalent\n"
+          "    to `replace_slice(text, from, replacement)`. This function\n"
+          "    returns a new `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns a `string` with the subrange replaced.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.replace"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_string text;
-            G_integer from;
-            G_string replacement;
-            if(reader.start().g(text).g(from).save(state).g(replacement).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_replace_slice(text, from, replacement) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(replacement).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_replace_slice(text, from, length, replacement) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.replace"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_string text;
+          G_integer from;
+          G_string replacement;
+          if(reader.start().g(text).g(from).save(state).g(replacement).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_replace_slice(text, from, replacement) };
+            return rocket::move(xref);
           }
-      )));
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(replacement).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_replace_slice(text, from, length, replacement) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.compare()`
     //===================================================================
     result.insert_or_assign(rocket::sref("compare"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.compare(text1, text2, [length])`\n"
-            "\n"
-            "  * Performs lexicographical comparison on two byte strings. If\n"
-            "    `length` is set to an `integer`, no more than this number of\n"
-            "    bytes are compared. This function behaves like the `strncmp()`\n"
-            "    function in C, except that null characters do not terminate\n"
-            "    strings.\n"
-            "\n"
-            "  * Returns a positive `integer` if `text1` compares greater than\n"
-            "    `text2`, a negative `integer` if `text1` compares less than\n"
-            "    `text2`, or zero if `text1` compares equal to `text2`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.compare(text1, text2, [length])`\n"
+          "\n"
+          "  * Performs lexicographical comparison on two byte strings. If\n"
+          "    `length` is set to an `integer`, no more than this number of\n"
+          "    bytes are compared. This function behaves like the `strncmp()`\n"
+          "    function in C, except that null characters do not terminate\n"
+          "    strings.\n"
+          "\n"
+          "  * Returns a positive `integer` if `text1` compares greater than\n"
+          "    `text2`, a negative `integer` if `text1` compares less than\n"
+          "    `text2`, or zero if `text1` compares equal to `text2`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.compare"), args);
-            // Parse arguments.
-            G_string text1;
-            G_string text2;
-            Opt<G_integer> length;
-            if(reader.start().g(text1).g(text2).g(length).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_compare(text1, text2, length) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.compare"), args);
+          // Parse arguments.
+          G_string text1;
+          G_string text2;
+          Opt<G_integer> length;
+          if(reader.start().g(text1).g(text2).g(length).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_compare(text1, text2, length) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.starts_with()`
     //===================================================================
     result.insert_or_assign(rocket::sref("starts_with"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.starts_with(text, prefix)`\n"
-            "\n"
-            "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
-            "    `string` is considered to be a prefix of any string.\n"
-            "\n"
-            "  * Returns `true` if `prefix` is a prefix of `text`, or `false`\n"
-            "    otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.starts_with(text, prefix)`\n"
+          "\n"
+          "  * Checks whether `prefix` is a prefix of `text`. The empty\n"
+          "    `string` is considered to be a prefix of any string.\n"
+          "\n"
+          "  * Returns `true` if `prefix` is a prefix of `text`, or `false`\n"
+          "    otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
-            // Parse arguments.
-            G_string text;
-            G_string prefix;
-            if(reader.start().g(text).g(prefix).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_starts_with(text, prefix) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
+          // Parse arguments.
+          G_string text;
+          G_string prefix;
+          if(reader.start().g(text).g(prefix).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_starts_with(text, prefix) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.ends_with()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ends_with"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.ends_with(text, suffix)`\n"
-            "\n"
-            "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
-            "    `string` is considered to be a suffix of any string.\n"
-            "\n"
-            "  * Returns `true` if `suffix` is a suffix of `text`, or `false`\n"
-            "    otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.ends_with(text, suffix)`\n"
+          "\n"
+          "  * Checks whether `suffix` is a suffix of `text`. The empty\n"
+          "    `string` is considered to be a suffix of any string.\n"
+          "\n"
+          "  * Returns `true` if `suffix` is a suffix of `text`, or `false`\n"
+          "    otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
-            // Parse arguments.
-            G_string text;
-            G_string suffix;
-            if(reader.start().g(text).g(suffix).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_ends_with(text, suffix) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
+          // Parse arguments.
+          G_string text;
+          G_string suffix;
+          if(reader.start().g(text).g(suffix).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_ends_with(text, suffix) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.find()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.find(text, pattern)`\n"
-            "\n"
-            "  * Searches `text` for the first occurrence of `pattern`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte of the first match of\n"
-            "    `pattern` in `text` if one is found, which is always\n"
-            "    non-negative, or `null` otherwise.\n"
-            "\n"
-            "`std.string.find(text, from, pattern)`\n"
-            "\n"
-            "  * Searches `text` for the first occurrence of `pattern`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(text, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte of the first match of\n"
-            "    `pattern` in `text` if one is found, which is always\n"
-            "    non-negative, or `null` otherwise.\n"
-            "\n"
-            "`std.string.find(text, from, [length], pattern)`\n"
-            "\n"
-            "  * Searches `text` for the first occurrence of `pattern`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(text, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte of the first match of\n"
-            "    `pattern` in `text` if one is found, which is always\n"
-            "    non-negative, or `null` otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.find(text, pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of `pattern`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte of the first match of\n"
+          "    `pattern` in `text` if one is found, which is always\n"
+          "    non-negative, or `null` otherwise.\n"
+          "\n"
+          "`std.string.find(text, from, pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of `pattern`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(text, from)`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte of the first match of\n"
+          "    `pattern` in `text` if one is found, which is always\n"
+          "    non-negative, or `null` otherwise.\n"
+          "\n"
+          "`std.string.find(text, from, [length], pattern)`\n"
+          "\n"
+          "  * Searches `text` for the first occurrence of `pattern`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(text, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte of the first match of\n"
+          "    `pattern` in `text` if one is found, which is always\n"
+          "    non-negative, or `null` otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.find"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_string text;
-            G_string pattern;
-            if(reader.start().g(text).save(state).g(pattern).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find(text, pattern);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.find"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_string text;
+          G_string pattern;
+          if(reader.start().g(text).save(state).g(pattern).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find(text, pattern);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(pattern).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find(text, from, pattern);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(pattern).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find(text, from, length, pattern);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(pattern).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find(text, from, pattern);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(pattern).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find(text, from, length, pattern);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.rfind()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.rfind(text, pattern)`\n"
-            "\n"
-            "  * Searches `text` for the last occurrence of `pattern`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte of the last match of\n"
-            "    `pattern` in `text` if one is found, which is always\n"
-            "    non-negative, or `null` otherwise.\n"
-            "\n"
-            "`std.string.rfind(text, from, pattern)`\n"
-            "\n"
-            "  * Searches `text` for the last occurrence of `pattern`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(text, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte of the last match of\n"
-            "    `pattern` in `text` if one is found, which is always\n"
-            "    non-negative, or `null` otherwise.\n"
-            "\n"
-            "`std.string.rfind(text, from, [length], pattern)`\n"
-            "\n"
-            "  * Searches `text` for the last occurrence of `pattern`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte of the last match of\n"
-            "    `pattern` in `text` if one is found, which is always\n"
-            "    non-negative, or `null` otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.rfind(text, pattern)`\n"
+          "\n"
+          "  * Searches `text` for the last occurrence of `pattern`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte of the last match of\n"
+          "    `pattern` in `text` if one is found, which is always\n"
+          "    non-negative, or `null` otherwise.\n"
+          "\n"
+          "`std.string.rfind(text, from, pattern)`\n"
+          "\n"
+          "  * Searches `text` for the last occurrence of `pattern`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(text, from)`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte of the last match of\n"
+          "    `pattern` in `text` if one is found, which is always\n"
+          "    non-negative, or `null` otherwise.\n"
+          "\n"
+          "`std.string.rfind(text, from, [length], pattern)`\n"
+          "\n"
+          "  * Searches `text` for the last occurrence of `pattern`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte of the last match of\n"
+          "    `pattern` in `text` if one is found, which is always\n"
+          "    non-negative, or `null` otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.rfind"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_string text;
-            G_string pattern;
-            if(reader.start().g(text).save(state).g(pattern).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind(text, pattern);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.rfind"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_string text;
+          G_string pattern;
+          if(reader.start().g(text).save(state).g(pattern).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind(text, pattern);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(pattern).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind(text, from, pattern);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(pattern).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind(text, from, length, pattern);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(pattern).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind(text, from, pattern);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(pattern).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind(text, from, length, pattern);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.find_and_replace()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_and_replace"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.find_and_replace(text, pattern, replacement)`\n"
-            "\n"
-            "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-            "    `replacement`. This function returns a new `string` without\n"
-            "    modifying `text`.\n"
-            "\n"
-            "  * Returns the string with `pattern` replaced. If `text` does not\n"
-            "    contain `pattern`, it is returned intact.\n"
-            "\n"
-            "`std.string.find_and_replace(text, from, pattern, replacement)`\n"
-            "\n"
-            "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-            "    `replacement`. The search operation is performed on the same\n"
-            "    subrange that would be returned by `slice(text, from)`. This\n"
-            "    function returns a new `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns the string with `pattern` replaced. If `text` does not\n"
-            "    contain `pattern`, it is returned intact.\n"
-            "\n"
-            "`std.string.find_and_replace(text, from, [length], pattern, replacement)`\n"
-            "\n"
-            "  * Searches `text` and replaces all occurrences of `pattern` with\n"
-            "    `replacement`. The search operation is performed on the same\n"
-            "    subrange that would be returned by `slice(text, from, length)`.\n"
-            "    This function returns a new `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns the string with `pattern` replaced. If `text` does not\n"
-            "    contain `pattern`, it is returned intact.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.find_and_replace(text, pattern, replacement)`\n"
+          "\n"
+          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
+          "    `replacement`. This function returns a new `string` without\n"
+          "    modifying `text`.\n"
+          "\n"
+          "  * Returns the string with `pattern` replaced. If `text` does not\n"
+          "    contain `pattern`, it is returned intact.\n"
+          "\n"
+          "`std.string.find_and_replace(text, from, pattern, replacement)`\n"
+          "\n"
+          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
+          "    `replacement`. The search operation is performed on the same\n"
+          "    subrange that would be returned by `slice(text, from)`. This\n"
+          "    function returns a new `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the string with `pattern` replaced. If `text` does not\n"
+          "    contain `pattern`, it is returned intact.\n"
+          "\n"
+          "`std.string.find_and_replace(text, from, [length], pattern, replacement)`\n"
+          "\n"
+          "  * Searches `text` and replaces all occurrences of `pattern` with\n"
+          "    `replacement`. The search operation is performed on the same\n"
+          "    subrange that would be returned by `slice(text, from, length)`.\n"
+          "    This function returns a new `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the string with `pattern` replaced. If `text` does not\n"
+          "    contain `pattern`, it is returned intact.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.find_and_replace"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_string text;
-            G_string pattern;
-            G_string replacement;
-            if(reader.start().g(text).save(state).g(pattern).g(replacement).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_find_and_replace(text, pattern, replacement) };
-              return rocket::move(xref);
-            }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(pattern).g(replacement).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, pattern, replacement) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(pattern).g(replacement).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, length, pattern, replacement) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.find_and_replace"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_string text;
+          G_string pattern;
+          G_string replacement;
+          if(reader.start().g(text).save(state).g(pattern).g(replacement).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_find_and_replace(text, pattern, replacement) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(pattern).g(replacement).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, pattern, replacement) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(pattern).g(replacement).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_find_and_replace(text, from, length, pattern, replacement) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.find_any_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_any_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.find_any_of(text, accept)`\n"
-            "\n"
-            "  * Searches `text` for bytes that exist in `accept`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-            "\n"
-            "`std.string.find_any_of(text, from, accept)`\n"
-            "\n"
-            "  * Searches `text` for bytes that exist in `accept`. The search\n"
-            "    operation is performed on the same subrange that would be\n"
-            "    returned by `slice(text, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-            "\n"
-            "`std.string.find_any_of(text, from, [length], accept)`\n"
-            "\n"
-            "  * Searches `text` for bytes that exist in `accept`. The search\n"
-            "    operation is performed on the same subrange that would be\n"
-            "    returned by `slice(text, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.find_any_of(text, accept)`\n"
+          "\n"
+          "  * Searches `text` for bytes that exist in `accept`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+          "\n"
+          "`std.string.find_any_of(text, from, accept)`\n"
+          "\n"
+          "  * Searches `text` for bytes that exist in `accept`. The search\n"
+          "    operation is performed on the same subrange that would be\n"
+          "    returned by `slice(text, from)`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+          "\n"
+          "`std.string.find_any_of(text, from, [length], accept)`\n"
+          "\n"
+          "  * Searches `text` for bytes that exist in `accept`. The search\n"
+          "    operation is performed on the same subrange that would be\n"
+          "    returned by `slice(text, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.find_any_of"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_string text;
-            G_string accept;
-            if(reader.start().g(text).save(state).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find_any_of(text, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.find_any_of"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_string text;
+          G_string accept;
+          if(reader.start().g(text).save(state).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find_any_of(text, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find_any_of(text, from, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find_any_of(text, from, length, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find_any_of(text, from, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find_any_of(text, from, length, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.rfind_any_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind_any_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.rfind_any_of(text, accept)`\n"
-            "\n"
-            "  * Searches `text` for bytes that exist in `accept`.\n"
-            "\n"
-            "  * Returns the subscript of the last byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-            "\n"
-            "`std.string.rfind_any_of(text, from, accept)`\n"
-            "\n"
-            "  * Searches `text` for bytes that exist in `accept`. The search\n"
-            "    operation is performed on the same subrange that would be\n"
-            "    returned by `slice(text, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the last byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-            "\n"
-            "`std.string.rfind_any_of(text, from, [length], accept)`\n"
-            "\n"
-            "  * Searches `text` for bytes that exist in `accept`. The search\n"
-            "    operation is performed on the same subrange that would be\n"
-            "    returned by `slice(text, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of the last byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.rfind_any_of(text, accept)`\n"
+          "\n"
+          "  * Searches `text` for bytes that exist in `accept`.\n"
+          "\n"
+          "  * Returns the subscript of the last byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+          "\n"
+          "`std.string.rfind_any_of(text, from, accept)`\n"
+          "\n"
+          "  * Searches `text` for bytes that exist in `accept`. The search\n"
+          "    operation is performed on the same subrange that would be\n"
+          "    returned by `slice(text, from)`.\n"
+          "\n"
+          "  * Returns the subscript of the last byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+          "\n"
+          "`std.string.rfind_any_of(text, from, [length], accept)`\n"
+          "\n"
+          "  * Searches `text` for bytes that exist in `accept`. The search\n"
+          "    operation is performed on the same subrange that would be\n"
+          "    returned by `slice(text, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of the last byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.rfind_any_of"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_string text;
-            G_string accept;
-            if(reader.start().g(text).save(state).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind_any_of(text, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.rfind_any_of"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_string text;
+          G_string accept;
+          if(reader.start().g(text).save(state).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind_any_of(text, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind_any_of(text, from, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind_any_of(text, from, length, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind_any_of(text, from, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind_any_of(text, from, length, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.find_not_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_not_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.find_not_of(text, reject)`\n"
-            "\n"
-            "  * Searches `text` for bytes that does not exist in `reject`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-            "\n"
-            "`std.string.find_not_of(text, from, reject)`\n"
-            "\n"
-            "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(text, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-            "\n"
-            "`std.string.find_not_of(text, from, [length], reject)`\n"
-            "\n"
-            "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(text, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of the first byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.find_not_of(text, reject)`\n"
+          "\n"
+          "  * Searches `text` for bytes that does not exist in `reject`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+          "\n"
+          "`std.string.find_not_of(text, from, reject)`\n"
+          "\n"
+          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(text, from)`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+          "\n"
+          "`std.string.find_not_of(text, from, [length], reject)`\n"
+          "\n"
+          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(text, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of the first byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.find_not_of"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_string text;
-            G_string accept;
-            if(reader.start().g(text).save(state).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find_not_of(text, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.find_not_of"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_string text;
+          G_string accept;
+          if(reader.start().g(text).save(state).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find_not_of(text, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find_not_of(text, from, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_find_not_of(text, from, length, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find_not_of(text, from, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_find_not_of(text, from, length, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.rfind_not_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind_not_of"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.rfind_not_of(text, reject)`\n"
-            "\n"
-            "  * Searches `text` for bytes that does not exist in `reject`.\n"
-            "\n"
-            "  * Returns the subscript of the last byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-            "\n"
-            "`std.string.rfind_not_of(text, from, reject)`\n"
-            "\n"
-            "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(text, from)`.\n"
-            "\n"
-            "  * Returns the subscript of the last byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-            "\n"
-            "`std.string.rfind_not_of(text, from, [length], reject)`\n"
-            "\n"
-            "  * Searches `text` for bytes that does not exist in `reject`. The\n"
-            "    search operation is performed on the same subrange that would\n"
-            "    be returned by `slice(text, from, length)`.\n"
-            "\n"
-            "  * Returns the subscript of the last byte found, which is always\n"
-            "    non-negative; or `null` if no such byte exists.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.rfind_not_of(text, reject)`\n"
+          "\n"
+          "  * Searches `text` for bytes that does not exist in `reject`.\n"
+          "\n"
+          "  * Returns the subscript of the last byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+          "\n"
+          "`std.string.rfind_not_of(text, from, reject)`\n"
+          "\n"
+          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(text, from)`.\n"
+          "\n"
+          "  * Returns the subscript of the last byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+          "\n"
+          "`std.string.rfind_not_of(text, from, [length], reject)`\n"
+          "\n"
+          "  * Searches `text` for bytes that does not exist in `reject`. The\n"
+          "    search operation is performed on the same subrange that would\n"
+          "    be returned by `slice(text, from, length)`.\n"
+          "\n"
+          "  * Returns the subscript of the last byte found, which is always\n"
+          "    non-negative; or `null` if no such byte exists.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.rfind_not_of"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            G_string text;
-            G_string accept;
-            if(reader.start().g(text).save(state).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind_not_of(text, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.rfind_not_of"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          G_string text;
+          G_string accept;
+          if(reader.start().g(text).save(state).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind_not_of(text, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
             }
-            G_integer from;
-            if(reader.load(state).g(from).save(state).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind_not_of(text, from, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            Opt<G_integer> length;
-            if(reader.load(state).g(length).g(accept).finish()) {
-              // Call the binding function.
-              auto qindex = std_string_rfind_not_of(text, from, length, accept);
-              if(!qindex) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qindex) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer from;
+          if(reader.load(state).g(from).save(state).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind_not_of(text, from, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          Opt<G_integer> length;
+          if(reader.load(state).g(length).g(accept).finish()) {
+            // Call the binding function.
+            auto qindex = std_string_rfind_not_of(text, from, length, accept);
+            if(!qindex) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qindex) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.reverse()`
     //===================================================================
     result.insert_or_assign(rocket::sref("reverse"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.reverse(text)`\n"
-            "\n"
-            "  * Reverses a byte string. This function returns a new `string`\n"
-            "    without modifying `text`.\n"
-            "\n"
-            "  * Returns the reversed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.reverse(text)`\n"
+          "\n"
+          "  * Reverses a byte string. This function returns a new `string`\n"
+          "    without modifying `text`.\n"
+          "\n"
+          "  * Returns the reversed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.reverse"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_reverse(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.reverse"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_reverse(text) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.trim()`
     //===================================================================
     result.insert_or_assign(rocket::sref("trim"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.trim(text, [reject])`\n"
-            "\n"
-            "  * Removes the longest prefix and suffix consisting solely bytes\n"
-            "    from `reject`. If `reject` is empty, no byte is removed. If\n"
-            "    `reject` is not specified, spaces and tabs are removed. This\n"
-            "    function returns a new `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns the trimmed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.trim(text, [reject])`\n"
+          "\n"
+          "  * Removes the longest prefix and suffix consisting solely bytes\n"
+          "    from `reject`. If `reject` is empty, no byte is removed. If\n"
+          "    `reject` is not specified, spaces and tabs are removed. This\n"
+          "    function returns a new `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the trimmed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.trim"), args);
-            // Parse arguments.
-            G_string text;
-            Opt<G_string> reject;
-            if(reader.start().g(text).g(reject).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_trim(text, reject) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.trim"), args);
+          // Parse arguments.
+          G_string text;
+          Opt<G_string> reject;
+          if(reader.start().g(text).g(reject).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_trim(text, reject) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.ltrim()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ltrim"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.ltrim(text, [reject])`\n"
-            "\n"
-            "  * Removes the longest prefix consisting solely bytes from\n"
-            "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
-            "    is not specified, spaces and tabs are removed. This function\n"
-            "    returns a new `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns the trimmed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.ltrim(text, [reject])`\n"
+          "\n"
+          "  * Removes the longest prefix consisting solely bytes from\n"
+          "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
+          "    is not specified, spaces and tabs are removed. This function\n"
+          "    returns a new `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the trimmed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.ltrim"), args);
-            // Parse arguments.
-            G_string text;
-            Opt<G_string> reject;
-            if(reader.start().g(text).g(reject).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_ltrim(text, reject) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.ltrim"), args);
+          // Parse arguments.
+          G_string text;
+          Opt<G_string> reject;
+          if(reader.start().g(text).g(reject).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_ltrim(text, reject) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.rtrim()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rtrim"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.rtrim(text, [reject])`\n"
-            "\n"
-            "  * Removes the longest suffix consisting solely bytes from\n"
-            "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
-            "    is not specified, spaces and tabs are removed. This function\n"
-            "    returns a new `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns the trimmed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.rtrim(text, [reject])`\n"
+          "\n"
+          "  * Removes the longest suffix consisting solely bytes from\n"
+          "    `reject`. If `reject` is empty, no byte is removed. If `reject`\n"
+          "    is not specified, spaces and tabs are removed. This function\n"
+          "    returns a new `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the trimmed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.rtrim"), args);
-            // Parse arguments.
-            G_string text;
-            Opt<G_string> reject;
-            if(reader.start().g(text).g(reject).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_rtrim(text, reject) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.rtrim"), args);
+          // Parse arguments.
+          G_string text;
+          Opt<G_string> reject;
+          if(reader.start().g(text).g(reject).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_rtrim(text, reject) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.lpad()`
     //===================================================================
     result.insert_or_assign(rocket::sref("lpad"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.lpad(text, length, [padding])`\n"
-            "\n"
-            "  * Prepends `text` with `padding` repeatedly, until its length\n"
-            "    would exceed `length`. The default value of `padding` is a\n"
-            "    `string` consisting of a space. This function returns a new\n"
-            "    `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns the padded string.\n"
-            "\n"
-            "  * Throws an exception if `padding` is empty.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.lpad(text, length, [padding])`\n"
+          "\n"
+          "  * Prepends `text` with `padding` repeatedly, until its length\n"
+          "    would exceed `length`. The default value of `padding` is a\n"
+          "    `string` consisting of a space. This function returns a new\n"
+          "    `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the padded string.\n"
+          "\n"
+          "  * Throws an exception if `padding` is empty.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.lpad"), args);
-            // Parse arguments.
-            G_string text;
-            G_integer length;
-            Opt<G_string> padding;
-            if(reader.start().g(text).g(length).g(padding).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_lpad(text, length, padding) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.lpad"), args);
+          // Parse arguments.
+          G_string text;
+          G_integer length;
+          Opt<G_string> padding;
+          if(reader.start().g(text).g(length).g(padding).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_lpad(text, length, padding) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.rpad()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rpad"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.rpad(text, length, [padding])`\n"
-            "\n"
-            "  * Appends `text` with `padding` repeatedly, until its length\n"
-            "    would exceed `length`. The default value of `padding` is a\n"
-            "    `string` consisting of a space. This function returns a new\n"
-            "    `string` without modifying `text`.\n"
-            "\n"
-            "  * Returns the padded string.\n"
-            "\n"
-            "  * Throws an exception if `padding` is empty.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.rpad(text, length, [padding])`\n"
+          "\n"
+          "  * Appends `text` with `padding` repeatedly, until its length\n"
+          "    would exceed `length`. The default value of `padding` is a\n"
+          "    `string` consisting of a space. This function returns a new\n"
+          "    `string` without modifying `text`.\n"
+          "\n"
+          "  * Returns the padded string.\n"
+          "\n"
+          "  * Throws an exception if `padding` is empty.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.rpad"), args);
-            // Parse arguments.
-            G_string text;
-            G_integer length;
-            Opt<G_string> padding;
-            if(reader.start().g(text).g(length).g(padding).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_rpad(text, length, padding) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.rpad"), args);
+          // Parse arguments.
+          G_string text;
+          G_integer length;
+          Opt<G_string> padding;
+          if(reader.start().g(text).g(length).g(padding).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_rpad(text, length, padding) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.to_upper()`
     //===================================================================
     result.insert_or_assign(rocket::sref("to_upper"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.to_upper(text)`\n"
-            "\n"
-            "  * Converts all lowercase English letters in `text` to their\n"
-            "    uppercase counterparts. This function returns a new `string`\n"
-            "    without modifying `text`.\n"
-            "\n"
-            "  * Returns a new `string` after the conversion.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.to_upper(text)`\n"
+          "\n"
+          "  * Converts all lowercase English letters in `text` to their\n"
+          "    uppercase counterparts. This function returns a new `string`\n"
+          "    without modifying `text`.\n"
+          "\n"
+          "  * Returns a new `string` after the conversion.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.to_upper"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_to_upper(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.to_upper"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_to_upper(text) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.to_lower()`
     //===================================================================
     result.insert_or_assign(rocket::sref("to_lower"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.to_lower(text)`\n"
-            "\n"
-            "  * Converts all lowercase English letters in `text` to their\n"
-            "    uppercase counterparts. This function returns a new `string`\n"
-            "    without modifying `text`.\n"
-            "\n"
-            "  * Returns a new `string` after the conversion.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.to_lower(text)`\n"
+          "\n"
+          "  * Converts all lowercase English letters in `text` to their\n"
+          "    uppercase counterparts. This function returns a new `string`\n"
+          "    without modifying `text`.\n"
+          "\n"
+          "  * Returns a new `string` after the conversion.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.to_lower"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_to_lower(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.to_lower"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_to_lower(text) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.translate()`
     //===================================================================
     result.insert_or_assign(rocket::sref("translate"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.translate(text, inputs, [outputs])`\n"
-            "\n"
-            "  * Performs bytewise translation on the given string. For every\n"
-            "    byte in `text` that is also found in `inputs`, if there is a\n"
-            "    corresponding replacement byte in `outputs` with the same\n"
-            "    subscript, it is replaced with the latter; if no replacement\n"
-            "    exists, because `outputs` is shorter than `inputs` or is null,\n"
-            "    it is deleted. If `outputs` is longer than `inputs`, excess\n"
-            "    bytes are ignored. Bytes that do not exist in `inputs` are left\n"
-            "    intact. This function returns a new `string` without modifying\n"
-            "    `text`.\n"
-            "\n"
-            "  * Returns the translated `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.translate(text, inputs, [outputs])`\n"
+          "\n"
+          "  * Performs bytewise translation on the given string. For every\n"
+          "    byte in `text` that is also found in `inputs`, if there is a\n"
+          "    corresponding replacement byte in `outputs` with the same\n"
+          "    subscript, it is replaced with the latter; if no replacement\n"
+          "    exists, because `outputs` is shorter than `inputs` or is null,\n"
+          "    it is deleted. If `outputs` is longer than `inputs`, excess\n"
+          "    bytes are ignored. Bytes that do not exist in `inputs` are left\n"
+          "    intact. This function returns a new `string` without modifying\n"
+          "    `text`.\n"
+          "\n"
+          "  * Returns the translated `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.translate"), args);
-            // Parse arguments.
-            G_string text;
-            G_string inputs;
-            Opt<G_string> outputs;
-            if(reader.start().g(text).g(inputs).g(outputs).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_translate(text, inputs, outputs) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.translate"), args);
+          // Parse arguments.
+          G_string text;
+          G_string inputs;
+          Opt<G_string> outputs;
+          if(reader.start().g(text).g(inputs).g(outputs).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_translate(text, inputs, outputs) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.explode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("explode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.explode(text, [delim], [limit])`\n"
-            "\n"
-            "  * Breaks `text` down into segments, separated by `delim`. If\n"
-            "    `delim` is `null` or an empty `string`, every byte becomes a\n"
-            "    segment. If `limit` is set to a positive `integer`, there will\n"
-            "    be no more segments than this number; the last segment will\n"
-            "    contain all the remaining bytes of the `text`.\n"
-            "\n"
-            "  * Returns an `array` containing the broken-down segments. If\n"
-            "    `text` is empty, an empty `array` is returned.\n"
-            "\n"
-            "  * Throws an exception if `limit` is negative or zero.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.explode(text, [delim], [limit])`\n"
+          "\n"
+          "  * Breaks `text` down into segments, separated by `delim`. If\n"
+          "    `delim` is `null` or an empty `string`, every byte becomes a\n"
+          "    segment. If `limit` is set to a positive `integer`, there will\n"
+          "    be no more segments than this number; the last segment will\n"
+          "    contain all the remaining bytes of the `text`.\n"
+          "\n"
+          "  * Returns an `array` containing the broken-down segments. If\n"
+          "    `text` is empty, an empty `array` is returned.\n"
+          "\n"
+          "  * Throws an exception if `limit` is negative or zero.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.explode"), args);
-            // Parse arguments.
-            G_string text;
-            Opt<G_string> delim;
-            Opt<G_integer> limit;
-            if(reader.start().g(text).g(delim).g(limit).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_explode(text, delim, limit) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.explode"), args);
+          // Parse arguments.
+          G_string text;
+          Opt<G_string> delim;
+          Opt<G_integer> limit;
+          if(reader.start().g(text).g(delim).g(limit).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_explode(text, delim, limit) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.implode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("implode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.implode(segments, [delim])`\n"
-            "\n"
-            "  * Concatenates elements of an array, `segments`, to create a new\n"
-            "    `string`. All segments shall be `string`s. If `delim` is\n"
-            "    specified, it is inserted between adjacent segments.\n"
-            "\n"
-            "  * Returns a `string` containing all segments. If `segments` is\n"
-            "    empty, an empty `string` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.implode(segments, [delim])`\n"
+          "\n"
+          "  * Concatenates elements of an array, `segments`, to create a new\n"
+          "    `string`. All segments shall be `string`s. If `delim` is\n"
+          "    specified, it is inserted between adjacent segments.\n"
+          "\n"
+          "  * Returns a `string` containing all segments. If `segments` is\n"
+          "    empty, an empty `string` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.implode"), args);
-            // Parse arguments.
-            G_array segments;
-            Opt<G_string> delim;
-            if(reader.start().g(segments).g(delim).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_implode(segments, delim) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.implode"), args);
+          // Parse arguments.
+          G_array segments;
+          Opt<G_string> delim;
+          if(reader.start().g(segments).g(delim).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_implode(segments, delim) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.hex_encode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("hex_encode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.hex_encode(data, [lowercase], [delim])`\n"
-            "\n"
-            "  * Encodes all bytes in `data` as 2-digit hexadecimal numbers and\n"
-            "    concatenates them. If `lowercase` is set to `true`, hexadecimal\n"
-            "    digits above `9` are encoded as `abcdef`; otherwise they are\n"
-            "    encoded as `ABCDEF`. If `delim` is specified, it is inserted\n"
-            "    between adjacent bytes.\n"
-            "\n"
-            "  * Returns the encoded `string`. If `data` is empty, an empty\n"
-            "    `string` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.hex_encode(data, [lowercase], [delim])`\n"
+          "\n"
+          "  * Encodes all bytes in `data` as 2-digit hexadecimal numbers and\n"
+          "    concatenates them. If `lowercase` is set to `true`, hexadecimal\n"
+          "    digits above `9` are encoded as `abcdef`; otherwise they are\n"
+          "    encoded as `ABCDEF`. If `delim` is specified, it is inserted\n"
+          "    between adjacent bytes.\n"
+          "\n"
+          "  * Returns the encoded `string`. If `data` is empty, an empty\n"
+          "    `string` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.hex_encode"), args);
-            // Parse arguments.
-            G_string data;
-            Opt<G_boolean> lowercase;
-            Opt<G_string> delim;
-            if(reader.start().g(data).g(lowercase).g(delim).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_hex_encode(data, lowercase, delim) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.hex_encode"), args);
+          // Parse arguments.
+          G_string data;
+          Opt<G_boolean> lowercase;
+          Opt<G_string> delim;
+          if(reader.start().g(data).g(lowercase).g(delim).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_hex_encode(data, lowercase, delim) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.hex_decode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("hex_decode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.hex_decode(text)`\n"
-            "\n"
-            "  * Decodes all hexadecimal digits from `text` and converts them to\n"
-            "    bytes. Whitespaces can be used to delimit bytes; they shall not\n"
-            "    occur between digits in the same byte. Consequently, the total\n"
-            "    number of non-whitespace characters must be a multiple of two.\n"
-            "    Invalid characters cause parse errors.\n"
-            "\n"
-            "  * Returns a `string` containing decoded bytes. If `text` is empty\n"
-            "    or consists of only whitespaces, an empty `string` is returned.\n"
-            "    In the case of parse errors, `null` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.hex_decode(text)`\n"
+          "\n"
+          "  * Decodes all hexadecimal digits from `text` and converts them to\n"
+          "    bytes. Whitespaces can be used to delimit bytes; they shall not\n"
+          "    occur between digits in the same byte. Consequently, the total\n"
+          "    number of non-whitespace characters must be a multiple of two.\n"
+          "    Invalid characters cause parse errors.\n"
+          "\n"
+          "  * Returns a `string` containing decoded bytes. If `text` is empty\n"
+          "    or consists of only whitespaces, an empty `string` is returned.\n"
+          "    In the case of parse errors, `null` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.hex_decode"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto qdata = std_string_hex_decode(text);
-              if(!qdata) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qdata) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.hex_decode"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto qdata = std_string_hex_decode(text);
+            if(!qdata) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qdata) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.base32_encode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("base32_encode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.base32_encode(text, [uppercase])`\n"
-            "\n"
-            "  * Encodes all bytes in `text` according to the base32 encoding\n"
-            "    specified by IETF RFC 4648. If `uppercase` is set to `true`,\n"
-            "    uppercase letters are used to represent values through `0` to\n"
-            "    `25`; otherwise, lowercase letters are used. The length of\n"
-            "    encoded data is always a multiple of 8; padding characters\n"
-            "    are mandatory.\n"
-            "\n"
-            "  * Returns the encoded `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.base32_encode(text, [uppercase])`\n"
+          "\n"
+          "  * Encodes all bytes in `text` according to the base32 encoding\n"
+          "    specified by IETF RFC 4648. If `uppercase` is set to `true`,\n"
+          "    uppercase letters are used to represent values through `0` to\n"
+          "    `25`; otherwise, lowercase letters are used. The length of\n"
+          "    encoded data is always a multiple of 8; padding characters\n"
+          "    are mandatory.\n"
+          "\n"
+          "  * Returns the encoded `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.base32_encode"), args);
-            // Parse arguments.
-            G_string data;
-            Opt<G_boolean> lowercase;
-            if(reader.start().g(data).g(lowercase).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_base32_encode(data, lowercase) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.base32_encode"), args);
+          // Parse arguments.
+          G_string data;
+          Opt<G_boolean> lowercase;
+          if(reader.start().g(data).g(lowercase).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_base32_encode(data, lowercase) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.base32_decode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("base32_decode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.base32_decode(dstr)`\n"
-            "\n"
-            "  * Decodes data encoded in base32, as specified by IETF RFC 4648.\n"
-            "    Whitespaces can be used to delimit encoding units; they shall\n"
-            "    not occur between characters in the same unit. Consequently,\n"
-            "    the number of non-whitespace characters must be a multiple of\n"
-            "    eight. Invalid characters cause parse errors.\n"
-            "\n"
-            "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
-            "    or consists of only whitespaces, an empty `string` is returned.\n"
-            "    In the case of parse errors, `null` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.base32_decode(dstr)`\n"
+          "\n"
+          "  * Decodes data encoded in base32, as specified by IETF RFC 4648.\n"
+          "    Whitespaces can be used to delimit encoding units; they shall\n"
+          "    not occur between characters in the same unit. Consequently,\n"
+          "    the number of non-whitespace characters must be a multiple of\n"
+          "    eight. Invalid characters cause parse errors.\n"
+          "\n"
+          "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
+          "    or consists of only whitespaces, an empty `string` is returned.\n"
+          "    In the case of parse errors, `null` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.base32_decode"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto qdata = std_string_base32_decode(text);
-              if(!qdata) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qdata) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.base32_decode"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto qdata = std_string_base32_decode(text);
+            if(!qdata) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qdata) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.base64_encode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("base64_encode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.base64_encode(text)`\n"
-            "\n"
-            "  * Encodes all bytes in `text` according to the base64 encoding\n"
-            "    specified by IETF RFC 4648. The length of encoded data is\n"
-            "    always a multiple of 4; padding characters are mandatory.\n"
-            "\n"
-            "  * Returns the encoded `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.base64_encode(text)`\n"
+          "\n"
+          "  * Encodes all bytes in `text` according to the base64 encoding\n"
+          "    specified by IETF RFC 4648. The length of encoded data is\n"
+          "    always a multiple of 4; padding characters are mandatory.\n"
+          "\n"
+          "  * Returns the encoded `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.base64_encode"), args);
-            // Parse arguments.
-            G_string data;
-            if(reader.start().g(data).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_string_base64_encode(data) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.base64_encode"), args);
+          // Parse arguments.
+          G_string data;
+          if(reader.start().g(data).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_string_base64_encode(data) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.base64_decode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("base64_decode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.base64_decode(dstr)`\n"
-            "\n"
-            "  * Decodes data encoded in base64, as specified by IETF RFC 4648.\n"
-            "    Whitespaces can be used to delimit encoding units; they shall\n"
-            "    not occur between characters in the same unit. Consequently,\n"
-            "    the number of non-whitespace characters must be a multiple of\n"
-            "    four. Invalid characters cause parse errors.\n"
-            "    Decodes base64-encoded data. Whitespaces can be used to\n"
-            "\n"
-            "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
-            "    or consists of only whitespaces, an empty `string` is returned.\n"
-            "    In the case of parse errors, `null` is returned.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.base64_decode(dstr)`\n"
+          "\n"
+          "  * Decodes data encoded in base64, as specified by IETF RFC 4648.\n"
+          "    Whitespaces can be used to delimit encoding units; they shall\n"
+          "    not occur between characters in the same unit. Consequently,\n"
+          "    the number of non-whitespace characters must be a multiple of\n"
+          "    four. Invalid characters cause parse errors.\n"
+          "    Decodes base64-encoded data. Whitespaces can be used to\n"
+          "\n"
+          "  * Returns a `string` containing decoded bytes. If `dstr` is empty\n"
+          "    or consists of only whitespaces, an empty `string` is returned.\n"
+          "    In the case of parse errors, `null` is returned.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.base64_decode"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto qdata = std_string_base64_decode(text);
-              if(!qdata) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qdata) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.base64_decode"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto qdata = std_string_base64_decode(text);
+            if(!qdata) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qdata) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.utf8_encode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utf8_encode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.utf8_encode(code_points, [permissive])`\n"
-            "\n"
-            "  * Encodes code points from `code_points` into an UTF-8 `string`.\n"
-            "  `code_points` can be either an `integer` or an `array` of\n"
-            "  `integer`s. When an invalid code point is encountered, if\n"
-            "  `permissive` is set to `true`, it is replaced with the\n"
-            "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
-            "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
-            "\n"
-            "  * Returns the encoded `string` on success, or `null` otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.utf8_encode(code_points, [permissive])`\n"
+          "\n"
+          "  * Encodes code points from `code_points` into an UTF-8 `string`.\n"
+          "  `code_points` can be either an `integer` or an `array` of\n"
+          "  `integer`s. When an invalid code point is encountered, if\n"
+          "  `permissive` is set to `true`, it is replaced with the\n"
+          "  replacement character `\"\\uFFFD\"` and consequently encoded as\n"
+          "  `\"\\xEF\\xBF\\xBD\"`; otherwise this function fails.\n"
+          "\n"
+          "  * Returns the encoded `string` on success, or `null` otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.utf8_encode"), args);
-            // Parse arguments.
-            G_integer code_point;
-            Opt<G_boolean> permissive;
-            if(reader.start().g(code_point).g(permissive).finish()) {
-              // Call the binding function.
-              auto qtext = std_string_utf8_encode(code_point, permissive);
-              if(!qtext) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qtext) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.utf8_encode"), args);
+          // Parse arguments.
+          G_integer code_point;
+          Opt<G_boolean> permissive;
+          if(reader.start().g(code_point).g(permissive).finish()) {
+            // Call the binding function.
+            auto qtext = std_string_utf8_encode(code_point, permissive);
+            if(!qtext) {
+              return Reference_Root::S_null();
             }
-            G_array code_points;
-            if(reader.start().g(code_points).g(permissive).finish()) {
-              // Call the binding function.
-              auto qtext = std_string_utf8_encode(code_points, permissive);
-              if(!qtext) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qtext) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qtext) };
+            return rocket::move(xref);
           }
-      )));
+          G_array code_points;
+          if(reader.start().g(code_points).g(permissive).finish()) {
+            // Call the binding function.
+            auto qtext = std_string_utf8_encode(code_points, permissive);
+            if(!qtext) {
+              return Reference_Root::S_null();
+            }
+            Reference_Root::S_temporary xref = { rocket::move(*qtext) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.utf8_decode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utf8_decode"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.utf8_decode(text, [permissive])`\n"
-            "\n"
-            "  * Decodes `text`, which is expected to be a `string` containing\n"
-            "    UTF-8 code units, into an `array` of code points, represented\n"
-            "    as `integer`s. When an invalid code sequence is encountered, if\n"
-            "    `permissive` is set to `true`, all code units of it are\n"
-            "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
-            "    otherwise this function fails.\n"
-            "\n"
-            "  * Returns an `array` containing decoded code points, or `null`\n"
-            "    otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.utf8_decode(text, [permissive])`\n"
+          "\n"
+          "  * Decodes `text`, which is expected to be a `string` containing\n"
+          "    UTF-8 code units, into an `array` of code points, represented\n"
+          "    as `integer`s. When an invalid code sequence is encountered, if\n"
+          "    `permissive` is set to `true`, all code units of it are\n"
+          "    re-interpreted as isolated bytes according to ISO/IEC 8859-1;\n"
+          "    otherwise this function fails.\n"
+          "\n"
+          "  * Returns an `array` containing decoded code points, or `null`\n"
+          "    otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.utf8_decode"), args);
-            // Parse arguments.
-            G_string text;
-            Opt<G_boolean> permissive;
-            if(reader.start().g(text).g(permissive).finish()) {
-              // Call the binding function.
-              auto qres = std_string_utf8_decode(text, permissive);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.utf8_decode"), args);
+          // Parse arguments.
+          G_string text;
+          Opt<G_boolean> permissive;
+          if(reader.start().g(text).g(permissive).finish()) {
+            // Call the binding function.
+            auto qres = std_string_utf8_decode(text, permissive);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.pack8()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack8"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.pack8(values)`\n"
-            "\n"
-            "  * Packs a series of 8-bit integers into a `string`. `values` can\n"
-            "    be either an `integer` or an `array` of `integer`s, all of\n"
-            "    which are truncated to 8 bits then copied into a `string`.\n"
-            "\n"
-            "  * Returns the packed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.pack8(values)`\n"
+          "\n"
+          "  * Packs a series of 8-bit integers into a `string`. `values` can\n"
+          "    be either an `integer` or an `array` of `integer`s, all of\n"
+          "    which are truncated to 8 bits then copied into a `string`.\n"
+          "\n"
+          "  * Returns the packed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.pack8"), args);
-            // Parse arguments.
-            G_integer value;
-            if(reader.start().g(value).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack8(value);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            G_array values;
-            if(reader.start().g(values).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack8(values);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.pack8"), args);
+          // Parse arguments.
+          G_integer value;
+          if(reader.start().g(value).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack8(value);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
           }
-      )));
+          G_array values;
+          if(reader.start().g(values).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack8(values);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.unpack8()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack8"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.unpack8(text)`\n"
-            "\n"
-            "  * Unpacks 8-bit integers from a `string`. The contents of `text`\n"
-            "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
-            "    which are sign-extended to 64 bits then copied into an `array`.\n"
-            "\n"
-            "  * Returns an `array` containing unpacked integers.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.unpack8(text)`\n"
+          "\n"
+          "  * Unpacks 8-bit integers from a `string`. The contents of `text`\n"
+          "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
+          "    which are sign-extended to 64 bits then copied into an `array`.\n"
+          "\n"
+          "  * Returns an `array` containing unpacked integers.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.unpack8"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto values = std_string_unpack8(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(values) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.unpack8"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto values = std_string_unpack8(text);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(values) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.pack_16be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_16be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.pack_16be(values)`\n"
-            "\n"
-            "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
-            "    be either an `integer` or an `array` of `integers`, all of\n"
-            "    which are truncated to 16 bits then copied into a `string` in\n"
-            "    the big-endian byte order.\n"
-            "\n"
-            "  * Returns the packed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.pack_16be(values)`\n"
+          "\n"
+          "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
+          "    be either an `integer` or an `array` of `integers`, all of\n"
+          "    which are truncated to 16 bits then copied into a `string` in\n"
+          "    the big-endian byte order.\n"
+          "\n"
+          "  * Returns the packed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.pack_16be"), args);
-            // Parse arguments.
-            G_integer value;
-            if(reader.start().g(value).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_16be(value);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            G_array values;
-            if(reader.start().g(values).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_16be(values);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.pack_16be"), args);
+          // Parse arguments.
+          G_integer value;
+          if(reader.start().g(value).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_16be(value);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
           }
-      )));
+          G_array values;
+          if(reader.start().g(values).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_16be(values);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.unpack_16be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_16be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.unpack_16be(text)`\n"
-            "\n"
-            "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
-            "    are re-interpreted as contiguous signed 16-bit integers in the\n"
-            "    big-endian byte order, all of which are sign-extended to 64\n"
-            "    bits then copied into an `array`.\n"
-            "\n"
-            "  * Returns an `array` containing unpacked integers.\n"
-            "\n"
-            "  * Throws an exception if the length of `text` is not a multiple\n"
-            "    of 2.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.unpack_16be(text)`\n"
+          "\n"
+          "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
+          "    are re-interpreted as contiguous signed 16-bit integers in the\n"
+          "    big-endian byte order, all of which are sign-extended to 64\n"
+          "    bits then copied into an `array`.\n"
+          "\n"
+          "  * Returns an `array` containing unpacked integers.\n"
+          "\n"
+          "  * Throws an exception if the length of `text` is not a multiple\n"
+          "    of 2.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.unpack_16be"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto values = std_string_unpack_16be(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(values) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.unpack_16be"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto values = std_string_unpack_16be(text);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(values) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.pack_16le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_16le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.pack_16le(values)`\n"
-            "\n"
-            "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
-            "    be either an `integer` or an `array` of `integers`, all of\n"
-            "    which are truncated to 16 bits then copied into a `string` in\n"
-            "    the little-endian byte order.\n"
-            "\n"
-            "  * Returns the packed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.pack_16le(values)`\n"
+          "\n"
+          "  * Packs a series of 16-bit integers into a `string`. `values` can\n"
+          "    be either an `integer` or an `array` of `integers`, all of\n"
+          "    which are truncated to 16 bits then copied into a `string` in\n"
+          "    the little-endian byte order.\n"
+          "\n"
+          "  * Returns the packed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.pack_16le"), args);
-            // Parse arguments.
-            G_integer value;
-            if(reader.start().g(value).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_16le(value);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            G_array values;
-            if(reader.start().g(values).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_16le(values);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.pack_16le"), args);
+          // Parse arguments.
+          G_integer value;
+          if(reader.start().g(value).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_16le(value);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
           }
-      )));
+          G_array values;
+          if(reader.start().g(values).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_16le(values);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.unpack_16le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_16le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.unpack_16le(text)`\n"
-            "\n"
-            "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
-            "    are re-interpreted as contiguous signed 16-bit integers in the\n"
-            "    little-endian byte order, all of which are sign-extended to 64\n"
-            "    bits then copied into an `array`.\n"
-            "\n"
-            "  * Returns an `array` containing unpacked integers.\n"
-            "\n"
-            "  * Throws an exception if the length of `text` is not a multiple\n"
-            "    of 2.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.unpack_16le(text)`\n"
+          "\n"
+          "  * Unpacks 16-bit integers from a `string`. The contents of `text`\n"
+          "    are re-interpreted as contiguous signed 16-bit integers in the\n"
+          "    little-endian byte order, all of which are sign-extended to 64\n"
+          "    bits then copied into an `array`.\n"
+          "\n"
+          "  * Returns an `array` containing unpacked integers.\n"
+          "\n"
+          "  * Throws an exception if the length of `text` is not a multiple\n"
+          "    of 2.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.unpack_16le"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto values = std_string_unpack_16le(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(values) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.unpack_16le"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto values = std_string_unpack_16le(text);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(values) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.pack_32be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_32be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.pack_32be(values)`\n"
-            "\n"
-            "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
-            "    be either an `integer` or an `array` of `integers`, all of\n"
-            "    which are truncated to 32 bits then copied into a `string` in\n"
-            "    the big-endian byte order.\n"
-            "\n"
-            "  * Returns the packed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.pack_32be(values)`\n"
+          "\n"
+          "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
+          "    be either an `integer` or an `array` of `integers`, all of\n"
+          "    which are truncated to 32 bits then copied into a `string` in\n"
+          "    the big-endian byte order.\n"
+          "\n"
+          "  * Returns the packed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.pack_32be"), args);
-            // Parse arguments.
-            G_integer value;
-            if(reader.start().g(value).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_32be(value);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            G_array values;
-            if(reader.start().g(values).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_32be(values);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.pack_32be"), args);
+          // Parse arguments.
+          G_integer value;
+          if(reader.start().g(value).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_32be(value);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
           }
-      )));
+          G_array values;
+          if(reader.start().g(values).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_32be(values);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.unpack_32be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_32be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.unpack_32be(text)`\n"
-            "\n"
-            "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
-            "    are re-interpreted as contiguous signed 32-bit integers in the\n"
-            "    big-endian byte order, all of which are sign-extended to 64\n"
-            "    bits then copied into an `array`.\n"
-            "\n"
-            "  * Returns an `array` containing unpacked integers.\n"
-            "\n"
-            "  * Throws an exception if the length of `text` is not a multiple\n"
-            "    of 4.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.unpack_32be(text)`\n"
+          "\n"
+          "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
+          "    are re-interpreted as contiguous signed 32-bit integers in the\n"
+          "    big-endian byte order, all of which are sign-extended to 64\n"
+          "    bits then copied into an `array`.\n"
+          "\n"
+          "  * Returns an `array` containing unpacked integers.\n"
+          "\n"
+          "  * Throws an exception if the length of `text` is not a multiple\n"
+          "    of 4.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.unpack_32be"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto values = std_string_unpack_32be(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(values) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.unpack_32be"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto values = std_string_unpack_32be(text);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(values) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.pack_32le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_32le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.pack_32le(values)`\n"
-            "\n"
-            "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
-            "    be either an `integer` or an `array` of `integers`, all of\n"
-            "    which are truncated to 32 bits then copied into a `string` in\n"
-            "    the little-endian byte order.\n"
-            "\n"
-            "  * Returns the packed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.pack_32le(values)`\n"
+          "\n"
+          "  * Packs a series of 32-bit integers into a `string`. `values` can\n"
+          "    be either an `integer` or an `array` of `integers`, all of\n"
+          "    which are truncated to 32 bits then copied into a `string` in\n"
+          "    the little-endian byte order.\n"
+          "\n"
+          "  * Returns the packed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.pack_32le"), args);
-            // Parse arguments.
-            G_integer value;
-            if(reader.start().g(value).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_32le(value);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            G_array values;
-            if(reader.start().g(values).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_32le(values);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.pack_32le"), args);
+          // Parse arguments.
+          G_integer value;
+          if(reader.start().g(value).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_32le(value);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
           }
-      )));
+          G_array values;
+          if(reader.start().g(values).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_32le(values);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.unpack_32le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_32le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.unpack_32le(text)`\n"
-            "\n"
-            "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
-            "    are re-interpreted as contiguous signed 32-bit integers in the\n"
-            "    little-endian byte order, all of which are sign-extended to 64\n"
-            "    bits then copied into an `array`.\n"
-            "\n"
-            "  * Returns an `array` containing unpacked integers.\n"
-            "\n"
-            "  * Throws an exception if the length of `text` is not a multiple\n"
-            "    of 4.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.unpack_32le(text)`\n"
+          "\n"
+          "  * Unpacks 32-bit integers from a `string`. The contents of `text`\n"
+          "    are re-interpreted as contiguous signed 32-bit integers in the\n"
+          "    little-endian byte order, all of which are sign-extended to 64\n"
+          "    bits then copied into an `array`.\n"
+          "\n"
+          "  * Returns an `array` containing unpacked integers.\n"
+          "\n"
+          "  * Throws an exception if the length of `text` is not a multiple\n"
+          "    of 4.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.unpack_32le"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto values = std_string_unpack_32le(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(values) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.unpack_32le"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto values = std_string_unpack_32le(text);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(values) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.pack_64be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_64be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.pack_64be(values)`\n"
-            "\n"
-            "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
-            "    be either an `integer` or an `array` of `integers`, all of\n"
-            "    which are copied into a `string` in the big-endian byte order.\n"
-            "\n"
-            "  * Returns the packed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.pack_64be(values)`\n"
+          "\n"
+          "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
+          "    be either an `integer` or an `array` of `integers`, all of\n"
+          "    which are copied into a `string` in the big-endian byte order.\n"
+          "\n"
+          "  * Returns the packed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.pack_64be"), args);
-            // Parse arguments.
-            G_integer value;
-            if(reader.start().g(value).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_64be(value);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            G_array values;
-            if(reader.start().g(values).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_64be(values);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.pack_64be"), args);
+          // Parse arguments.
+          G_integer value;
+          if(reader.start().g(value).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_64be(value);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
           }
-      )));
+          G_array values;
+          if(reader.start().g(values).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_64be(values);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.unpack_64be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_64be"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.unpack_64be(text)`\n"
-            "\n"
-            "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
-            "    are re-interpreted as contiguous signed 64-bit integers in the\n"
-            "    big-endian byte order, all of which are copied into an `array`.\n"
-            "\n"
-            "  * Returns an `array` containing unpacked integers.\n"
-            "\n"
-            "  * Throws an exception if the length of `text` is not a multiple\n"
-            "    of 8.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.unpack_64be(text)`\n"
+          "\n"
+          "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
+          "    are re-interpreted as contiguous signed 64-bit integers in the\n"
+          "    big-endian byte order, all of which are copied into an `array`.\n"
+          "\n"
+          "  * Returns an `array` containing unpacked integers.\n"
+          "\n"
+          "  * Throws an exception if the length of `text` is not a multiple\n"
+          "    of 8.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.unpack_64be"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto values = std_string_unpack_64be(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(values) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.unpack_64be"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto values = std_string_unpack_64be(text);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(values) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.pack_64le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_64le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.pack_64le(values)`\n"
-            "\n"
-            "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
-            "    be either an `integer` or an `array` of `integers`, all of\n"
-            "    which are copied into a `string` in the little-endian byte\n"
-            "    order.\n"
-            "\n"
-            "  * Returns the packed `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.pack_64le(values)`\n"
+          "\n"
+          "  * Packs a series of 64-bit integers into a `string`. `values` can\n"
+          "    be either an `integer` or an `array` of `integers`, all of\n"
+          "    which are copied into a `string` in the little-endian byte\n"
+          "    order.\n"
+          "\n"
+          "  * Returns the packed `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.pack_64le"), args);
-            // Parse arguments.
-            G_integer value;
-            if(reader.start().g(value).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_64le(value);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            G_array values;
-            if(reader.start().g(values).finish()) {
-              // Call the binding function.
-              auto text = std_string_pack_64le(values);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.pack_64le"), args);
+          // Parse arguments.
+          G_integer value;
+          if(reader.start().g(value).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_64le(value);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
           }
-      )));
+          G_array values;
+          if(reader.start().g(values).finish()) {
+            // Call the binding function.
+            auto text = std_string_pack_64le(values);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(text) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.string.unpack_64le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_64le"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.string.unpack_64le(text)`\n"
-            "\n"
-            "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
-            "    are re-interpreted as contiguous signed 64-bit integers in the\n"
-            "    little-endian byte order, all of which are copied into an\n"
-            "    `array`.\n"
-            "\n"
-            "  * Returns an `array` containing unpacked integers.\n"
-            "\n"
-            "  * Throws an exception if the length of `text` is not a multiple\n"
-            "    of 8.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.string.unpack_64le(text)`\n"
+          "\n"
+          "  * Unpacks 64-bit integers from a `string`. The contents of `text`\n"
+          "    are re-interpreted as contiguous signed 64-bit integers in the\n"
+          "    little-endian byte order, all of which are copied into an\n"
+          "    `array`.\n"
+          "\n"
+          "  * Returns an `array` containing unpacked integers.\n"
+          "\n"
+          "  * Throws an exception if the length of `text` is not a multiple\n"
+          "    of 8.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.string.unpack_64le"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              auto values = std_string_unpack_64le(text);
-              // Forward the result.
-              Reference_Root::S_temporary xref = { rocket::move(values) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.unpack_64le"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            auto values = std_string_unpack_64le(text);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(values) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // End of `std.string`
     //===================================================================

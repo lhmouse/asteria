@@ -644,105 +644,99 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("format"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.json.format(value, [indent])`\n"
-            "\n"
-            "  * Converts a value to a `string` in the JSON format, according to\n"
-            "    IETF RFC 7159. This function generates text that conforms to\n"
-            "    JSON strictly; values whose types cannot be represented in JSON\n"
-            "    are discarded if they are found in an `object` and censored to\n"
-            "    `null` otherwise. If `indent` is set to a `string`, it is used\n"
-            "    as each level of indention following a line break, unless it is\n"
-            "    empty, in which case no line break is inserted. If `indent` is\n"
-            "    set to an `integer`, it is clamped between `0` and `10`\n"
-            "    inclusively and this function behaves as if a `string`\n"
-            "    consisting of this number of spaces was set. Its default value\n"
-            "    is an empty `string`.\n"
-            "\n"
-            "  * Returns the formatted text as a `string`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.json.format(value, [indent])`\n"
+          "\n"
+          "  * Converts a value to a `string` in the JSON format, according to\n"
+          "    IETF RFC 7159. This function generates text that conforms to\n"
+          "    JSON strictly; values whose types cannot be represented in JSON\n"
+          "    are discarded if they are found in an `object` and censored to\n"
+          "    `null` otherwise. If `indent` is set to a `string`, it is used\n"
+          "    as each level of indention following a line break, unless it is\n"
+          "    empty, in which case no line break is inserted. If `indent` is\n"
+          "    set to an `integer`, it is clamped between `0` and `10`\n"
+          "    inclusively and this function behaves as if a `string`\n"
+          "    consisting of this number of spaces was set. Its default value\n"
+          "    is an empty `string`.\n"
+          "\n"
+          "  * Returns the formatted text as a `string`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.json.format"), args);
-            Argument_Reader::State state;
-            // Parse arguments.
-            Value value;
-            Opt<G_string> sindent;
-            if(reader.start().g(value).save(state).g(sindent).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_json_format(value, sindent) };
-              return rocket::move(xref);
-            }
-            G_integer nindent;
-            if(reader.load(state).g(nindent).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_json_format(value, nindent) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.json.format"), args);
+          Argument_Reader::State state;
+          // Parse arguments.
+          Value value;
+          Opt<G_string> sindent;
+          if(reader.start().g(value).save(state).g(sindent).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_json_format(value, sindent) };
+            return rocket::move(xref);
           }
-      )));
+          G_integer nindent;
+          if(reader.load(state).g(nindent).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_json_format(value, nindent) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.json.parse()`
     //===================================================================
     result.insert_or_assign(rocket::sref("parse"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.json.parse(text)`\n"
-            "\n"
-            "  * Parses a `string` containing data encoded in the JSON format\n"
-            "    and converts it to a value. This function reuses the tokenizer\n"
-            "    of Asteria and allows quite a few extensions, some of which\n"
-            "    are also supported by JSON5:\n"
-            "\n"
-            "    * Single-line and multiple-line comments are allowed.\n"
-            "    * Binary and hexadecimal numbers are allowed.\n"
-            "    * Numbers can have binary exponents.\n"
-            "    * Infinities and NaNs are allowed.\n"
-            "    * Numbers can start with plus signs.\n"
-            "    * Strings and object keys may be single-quoted.\n"
-            "    * Escape sequences (including UTF-32) are allowed in strings.\n"
-            "    * Element lists of arrays and objects may end in commas.\n"
-            "    * Object keys may be unquoted if they are valid identifiers.\n"
-            "\n"
-            "    Be advised that numbers are always parsed as `real`s.\n"
-            "\n"
-            "  * Returns the parsed value. If `text` is empty or is not a valid\n"
-            "    JSON string, `null` is returned. There is no way to tell empty\n"
-            "    or explicit `\"null\"` inputs from failures.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.json.parse(text)`\n"
+          "\n"
+          "  * Parses a `string` containing data encoded in the JSON format\n"
+          "    and converts it to a value. This function reuses the tokenizer\n"
+          "    of Asteria and allows quite a few extensions, some of which\n"
+          "    are also supported by JSON5:\n"
+          "\n"
+          "    * Single-line and multiple-line comments are allowed.\n"
+          "    * Binary and hexadecimal numbers are allowed.\n"
+          "    * Numbers can have binary exponents.\n"
+          "    * Infinities and NaNs are allowed.\n"
+          "    * Numbers can start with plus signs.\n"
+          "    * Strings and object keys may be single-quoted.\n"
+          "    * Escape sequences (including UTF-32) are allowed in strings.\n"
+          "    * Element lists of arrays and objects may end in commas.\n"
+          "    * Object keys may be unquoted if they are valid identifiers.\n"
+          "\n"
+          "    Be advised that numbers are always parsed as `real`s.\n"
+          "\n"
+          "  * Returns the parsed value. If `text` is empty or is not a valid\n"
+          "    JSON string, `null` is returned. There is no way to tell empty\n"
+          "    or explicit `\"null\"` inputs from failures.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.json.parse"), args);
-            // Parse arguments.
-            G_string text;
-            if(reader.start().g(text).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_json_parse(text) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.json.parse"), args);
+          // Parse arguments.
+          G_string text;
+          if(reader.start().g(text).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_json_parse(text) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // End of `std.json`
     //===================================================================

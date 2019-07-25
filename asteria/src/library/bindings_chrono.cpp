@@ -409,303 +409,279 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("utc_now"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.utc_now()`\n"
-            "\n"
-            "  * Retrieves the wall clock time in UTC.\n"
-            "\n"
-            "  * Returns the number of milliseconds since the Unix epoch,\n"
-            "    represented as an `integer`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.chrono.utc_now()`\n"
+          "\n"
+          "  * Retrieves the wall clock time in UTC.\n"
+          "\n"
+          "  * Returns the number of milliseconds since the Unix epoch,\n"
+          "    represented as an `integer`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.utc_now"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_utc_now() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.chrono.utc_now"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_chrono_utc_now() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.chrono.local_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("local_now"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.local_now()`\n"
-            "\n"
-            "  * Retrieves the wall clock time in the local time zone.\n"
-            "\n"
-            "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-            "    in the local time zone, represented as an `integer`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.chrono.local_now()`\n"
+          "\n"
+          "  * Retrieves the wall clock time in the local time zone.\n"
+          "\n"
+          "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
+          "    in the local time zone, represented as an `integer`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.local_now"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_local_now() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.chrono.local_now"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_chrono_local_now() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.chrono.hires_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("hires_now"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.hires_now()`\n"
-            "\n"
-            "  * Retrieves a time point from a high resolution clock. The clock\n"
-            "    goes monotonically and cannot be adjusted, being suitable for\n"
-            "    time measurement. This function provides accuracy and might be\n"
-            "    quite heavyweight.\n"
-            "\n"
-            "  * Returns the number of milliseconds since an unspecified time\n"
-            "    point, represented as a `real`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.chrono.hires_now()`\n"
+          "\n"
+          "  * Retrieves a time point from a high resolution clock. The clock\n"
+          "    goes monotonically and cannot be adjusted, being suitable for\n"
+          "    time measurement. This function provides accuracy and might be\n"
+          "    quite heavyweight.\n"
+          "\n"
+          "  * Returns the number of milliseconds since an unspecified time\n"
+          "    point, represented as a `real`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.hires_now"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_hires_now() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.chrono.hires_now"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_chrono_hires_now() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.chrono.steady_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("steady_now"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.steady_now()`\n"
-            "\n"
-            "  * Retrieves a time point from a steady clock. The clock goes\n"
-            "    monotonically and cannot be adjusted, being suitable for time\n"
-            "    measurement. This function is supposed to be fast and might\n"
-            "    have poor accuracy.\n"
-            "\n"
-            "  * Returns the number of milliseconds since an unspecified time\n"
-            "    point, represented as an `integer`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.chrono.steady_now()`\n"
+          "\n"
+          "  * Retrieves a time point from a steady clock. The clock goes\n"
+          "    monotonically and cannot be adjusted, being suitable for time\n"
+          "    measurement. This function is supposed to be fast and might\n"
+          "    have poor accuracy.\n"
+          "\n"
+          "  * Returns the number of milliseconds since an unspecified time\n"
+          "    point, represented as an `integer`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.steady_now"), args);
-            // Parse arguments.
-            if(reader.start().finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_steady_now() };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.chrono.steady_now"), args);
+          // Parse arguments.
+          if(reader.start().finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_chrono_steady_now() };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.chrono.local_from_utc()`
     //===================================================================
     result.insert_or_assign(rocket::sref("local_from_utc"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.local_from_utc(time_utc)`\n"
-            "\n"
-            "  * Converts a UTC time point to a local one. `time_utc` shall be\n"
-            "    the number of milliseconds since the Unix epoch.\n"
-            "\n"
-            "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-            "    in the local time zone, represented as an `integer`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.chrono.local_from_utc(time_utc)`\n"
+          "\n"
+          "  * Converts a UTC time point to a local one. `time_utc` shall be\n"
+          "    the number of milliseconds since the Unix epoch.\n"
+          "\n"
+          "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
+          "    in the local time zone, represented as an `integer`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.local_from_utc"), args);
-            // Parse arguments.
-            G_integer time_utc;
-            if(reader.start().g(time_utc).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_local_from_utc(time_utc) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.chrono.local_from_utc"), args);
+          // Parse arguments.
+          G_integer time_utc;
+          if(reader.start().g(time_utc).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_chrono_local_from_utc(time_utc) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.chrono.utc_from_local()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_from_local"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.utc_from_local(time_local)`\n"
-            "\n"
-            "  * Converts a local time point to a UTC one. `time_local` shall\n"
-            "    be the number of milliseconds since `1970-01-01 00:00:00` in\n"
-            "    the local time zone.\n"
-            "\n"
-            "  * Returns the number of milliseconds since the Unix epoch,\n"
-            "    represented as an `integer`.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.chrono.utc_from_local(time_local)`\n"
+          "\n"
+          "  * Converts a local time point to a UTC one. `time_local` shall\n"
+          "    be the number of milliseconds since `1970-01-01 00:00:00` in\n"
+          "    the local time zone.\n"
+          "\n"
+          "  * Returns the number of milliseconds since the Unix epoch,\n"
+          "    represented as an `integer`.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.utc_from_local"), args);
-            // Parse arguments.
-            G_integer time_local;
-            if(reader.start().g(time_local).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_utc_from_local(time_local) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.chrono.utc_from_local"), args);
+          // Parse arguments.
+          G_integer time_local;
+          if(reader.start().g(time_local).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_chrono_utc_from_local(time_local) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.chrono.utc_format()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_format"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.utc_format(time_point, [with_ms])`\n"
-            "\n"
-            "  * Converts `time_point`, which represents the number of\n"
-            "    milliseconds since `1970-01-01 00:00:00`, to an ASCII string in\n"
-            "    the aforementioned format, according to the ISO 8601 standard.\n"
-            "    If `with_ms` is set to `true`, the string will have a 3-digit\n"
-            "    fractional part. By default, no fractional part is added.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.chrono.utc_format(time_point, [with_ms])`\n"
+          "\n"
+          "  * Converts `time_point`, which represents the number of\n"
+          "    milliseconds since `1970-01-01 00:00:00`, to an ASCII string in\n"
+          "    the aforementioned format, according to the ISO 8601 standard.\n"
+          "    If `with_ms` is set to `true`, the string will have a 3-digit\n"
+          "    fractional part. By default, no fractional part is added.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.utc_format"), args);
-            // Parse arguments.
-            G_integer time_point;
-            Opt<G_boolean> with_ms;
-            if(reader.start().g(time_point).g(with_ms).finish()) {
-              // Call the binding function.
-              Reference_Root::S_temporary xref = { std_chrono_utc_format(time_point, with_ms) };
-              return rocket::move(xref);
-            }
-            // Fail.
-            reader.throw_no_matching_function_call();
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.chrono.utc_format"), args);
+          // Parse arguments.
+          G_integer time_point;
+          Opt<G_boolean> with_ms;
+          if(reader.start().g(time_point).g(with_ms).finish()) {
+            // Call the binding function.
+            Reference_Root::S_temporary xref = { std_chrono_utc_format(time_point, with_ms) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // `std.chrono.utc_parse()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_parse"),
       G_function(make_simple_binding(
         // Description
-        rocket::sref
-          (
-            "\n"
-            "`std.chrono.utc_parse(time_str)`\n"
-            "\n"
-            "  * Parses `time_str`, which is an ASCII string representing a time\n"
-            "    point in the format `1970-01-01 00:00:00.000`, according to the\n"
-            "    ISO 8601 standard. The subsecond part is optional and may have\n"
-            "    fewer or more digits. There may be leading or trailing spaces.\n"
-            "\n"
-            "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
-            "    if the time string has been parsed successfully, or `null`\n"
-            "    otherwise.\n"
-          ),
+        rocket::sref(
+          "\n"
+          "`std.chrono.utc_parse(time_str)`\n"
+          "\n"
+          "  * Parses `time_str`, which is an ASCII string representing a time\n"
+          "    point in the format `1970-01-01 00:00:00.000`, according to the\n"
+          "    ISO 8601 standard. The subsecond part is optional and may have\n"
+          "    fewer or more digits. There may be leading or trailing spaces.\n"
+          "\n"
+          "  * Returns the number of milliseconds since `1970-01-01 00:00:00`\n"
+          "    if the time string has been parsed successfully, or `null`\n"
+          "    otherwise.\n"
+        ),
         // Opaque parameter
-        G_null
-          (
-            nullptr
-          ),
+        G_null(
+          nullptr
+        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference
-          {
-            Argument_Reader reader(rocket::sref("std.chrono.utc_parse"), args);
-            // Parse arguments.
-            G_string time_str;
-            if(reader.start().g(time_str).finish()) {
-              // Call the binding function.
-              auto qres = std_chrono_utc_parse(time_str);
-              if(!qres) {
-                return Reference_Root::S_null();
-              }
-              Reference_Root::S_temporary xref = { rocket::move(*qres) };
-              return rocket::move(xref);
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.chrono.utc_parse"), args);
+          // Parse arguments.
+          G_string time_str;
+          if(reader.start().g(time_str).finish()) {
+            // Call the binding function.
+            auto qres = std_chrono_utc_parse(time_str);
+            if(!qres) {
+              return Reference_Root::S_null();
             }
-            // Fail.
-            reader.throw_no_matching_function_call();
+            Reference_Root::S_temporary xref = { rocket::move(*qres) };
+            return rocket::move(xref);
           }
-      )));
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
     //===================================================================
     // End of `std.chrono`
     //===================================================================
