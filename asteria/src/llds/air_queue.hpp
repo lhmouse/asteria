@@ -56,6 +56,7 @@ class Air_Queue
         if(this->m_stor.head) {
           this->do_clear_nodes();
         }
+        // Clean invalid data up.
         this->m_stor.head = nullptr;
         this->m_stor.tail = nullptr;
       }
