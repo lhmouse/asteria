@@ -31,12 +31,11 @@ class Air_Queue
       }
     Air_Queue& operator=(Air_Queue&& other) noexcept
       {
-        std::swap(this->m_stor, other.m_stor);
-        return *this;
+        return std::swap(this->m_stor, other.m_stor), *this;
       }
     ~Air_Queue()
       {
-        if(this->m_stor.head != nullptr) {
+        if(this->m_stor.head) {
           this->do_clear_nodes();
         }
 #ifdef ROCKET_DEBUG
@@ -54,7 +53,7 @@ class Air_Queue
       }
     void clear() noexcept
       {
-        if(this->m_stor.head != nullptr) {
+        if(this->m_stor.head) {
           this->do_clear_nodes();
         }
         this->m_stor.head = nullptr;
