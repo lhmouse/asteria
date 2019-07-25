@@ -71,9 +71,8 @@ class Air_Queue
         // Allocate a new node.
         auto qnode = new XnodeT(rocket::forward<ParamsT>(params)...);
         // Append it to the end. Now the node is owned by `*this`.
-        auto tail = this->m_stor.tail;
+        auto tail = std::exchange(this->m_stor.tail, qnode);
         (tail ? tail->m_next : this->m_stor.head) = qnode;
-        this->m_stor.tail = qnode;
         // Return a reference to the node.
         return *qnode;
       }
