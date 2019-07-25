@@ -81,6 +81,11 @@ class Air_Queue
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
+inline void swap(Air_Queue& lhs, Air_Queue& rhs) noexcept
+  {
+    return lhs.swap(rhs);
+  }
+
 }
 
 #endif
