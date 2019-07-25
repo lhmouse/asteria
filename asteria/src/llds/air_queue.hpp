@@ -69,12 +69,12 @@ class Air_Queue
     template<typename XnodeT, typename... ParamsT> XnodeT& push(ParamsT&&... params)
       {
         // Allocate a new node.
-        auto ptr = new XnodeT(rocket::forward<ParamsT>(params)...);
+        auto qnode = new XnodeT(rocket::forward<ParamsT>(params)...);
         // Append it to the end. Now the node is owned by `*this`.
-        auto tail = std::exchange(this->m_stor.tail, ptr);
-        (tail ? tail->m_next : this->m_stor.head) = ptr;
+        auto tail = std::exchange(this->m_stor.tail, qnode);
+        (tail ? tail->m_next : this->m_stor.head) = qnode;
         // Return a reference to the node.
-        return *ptr;
+        return *qnode;
       }
 
     Air_Node::Status execute(Executive_Context& ctx) const;
