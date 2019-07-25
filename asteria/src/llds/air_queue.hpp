@@ -12,40 +12,67 @@ namespace Asteria {
 class Air_Queue
   {
   private:
-    const Air_Node* m_head;
-    Air_Node* m_tail;
+    struct Storage
+      {
+        const Air_Node* head;
+        Air_Node* tail;
+      };
+
+    Storage m_stor;
 
   public:
     constexpr Air_Queue() noexcept
-      : m_head(nullptr),
-        m_tail(nullptr)
+      : m_stor()
       {
       }
     Air_Queue(Air_Queue&& other) noexcept
-      : m_head(std::exchange(other.m_head, nullptr)),
-        m_tail(std::exchange(other.m_tail, nullptr))
+      : m_stor(std::exchange(other.m_stor, Storage()))
       {
       }
     Air_Queue& operator=(Air_Queue&& other) noexcept
       {
-        std::swap(this->m_head, other.m_head);
-        std::swap(this->m_tail, other.m_tail);
+        std::swap(this->m_stor, other.m_stor);
         return *this;
       }
-    ~Air_Queue();
+    ~Air_Queue()
+      {
+        if(this->m_stor.head != nullptr) {
+          this->do_clear_nodes();
+        }
+#ifdef ROCKET_DEBUG
+        std::memset(std::addressof(this->m_stor), 0xF9, sizeof(this->m_stor));
+#endif
+      }
+
+  private:
+    void do_clear_nodes() noexcept;
 
   public:
     constexpr bool empty() const noexcept
       {
-        return this->m_head == nullptr;
+        return this->m_stor.head == nullptr;
       }
+    void clear() noexcept
+      {
+        if(this->m_stor.head != nullptr) {
+          this->do_clear_nodes();
+        }
+        this->m_stor.head = nullptr;
+        this->m_stor.tail = nullptr;
+      }
+
+    void swap(Air_Queue& other) noexcept
+      {
+        std::swap(this->m_stor, other.m_stor);
+      }
+
     template<typename XnodeT, typename... ParamsT> XnodeT& push(ParamsT&&... params)
       {
         // Allocate a new node.
         auto ptr = new XnodeT(rocket::forward<ParamsT>(params)...);
         // Append it to the end. Now the node is owned by `*this`.
-        auto tail = std::exchange(this->m_tail, ptr);
-        (tail ? tail->m_next : this->m_head) = ptr;
+        auto tail = std::exchange(this->m_stor.tail, ptr);
+        (tail ? tail->m_next : this->m_stor.head) = ptr;
         // Return a reference to the node.
         return *ptr;
       }
