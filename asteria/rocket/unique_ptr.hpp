@@ -101,7 +101,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
       {
         unique_ptr<targetT> dptr;
         // Try casting.
-        auto ptr = ::rocket::forward<casterT>(caster)(sptr.get());
+        auto ptr = noadl::forward<casterT>(caster)(sptr.get());
         if(ptr) {
           // Transfer ownership.
           dptr.reset(ptr);

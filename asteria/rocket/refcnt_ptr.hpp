@@ -202,7 +202,7 @@ template<typename elementT, typename deleterT> class refcnt_base : public virtua
       {
         refcnt_ptr<targetT> dptr;
         // Try casting.
-        auto ptr = ::rocket::forward<casterT>(caster)(sptr.get());
+        auto ptr = noadl::forward<casterT>(caster)(sptr.get());
         if(ptr) {
           // Share ownership.
           dptr.reset(ptr);
@@ -215,7 +215,7 @@ template<typename elementT, typename deleterT> class refcnt_base : public virtua
       {
         refcnt_ptr<targetT> dptr;
         // Try casting.
-        auto ptr = ::rocket::forward<casterT>(caster)(sptr.get());
+        auto ptr = noadl::forward<casterT>(caster)(sptr.get());
         if(ptr) {
           // Transfer ownership.
           dptr.reset(ptr);
