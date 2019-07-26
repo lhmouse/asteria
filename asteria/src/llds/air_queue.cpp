@@ -9,27 +9,35 @@ namespace Asteria {
 
 void Air_Queue::do_clear_nodes() const noexcept
   {
-    auto qnode = this->m_stor.head;
-    while(ROCKET_EXPECT(qnode)) {
-      delete std::exchange(qnode, qnode->m_next);
+    auto next = this->m_stor.head;
+    while(ROCKET_EXPECT(next)) {
+      auto qnode = std::exchange(next, next->m_next);
+      // Destroy and deallocate the node.
+      delete qnode;
     }
   }
 
 Air_Node::Status Air_Queue::execute(Executive_Context& ctx) const
   {
-    auto status = Air_Node::status_next;
-    auto qnode = this->m_stor.head;
-    while(ROCKET_EXPECT(qnode && (status == Air_Node::status_next))) {
-      status = std::exchange(qnode, qnode->m_next)->execute(ctx);
+    auto next = this->m_stor.head;
+    while(ROCKET_EXPECT(next)) {
+      auto qnode = std::exchange(next, next->m_next);
+      // Execute this node and return any status code unexpected to the caller verbatim.
+      auto status = qnode->execute(ctx);
+      if(ROCKET_UNEXPECT(status != Air_Node::status_next)) {
+        return status;
+      }
     }
-    return status;
+    return Air_Node::status_next;
   }
 
 void Air_Queue::enumerate_variables(const Abstract_Variable_Callback& callback) const
   {
-    auto qnode = this->m_stor.head;
-    while(ROCKET_EXPECT(qnode)) {
-      std::exchange(qnode, qnode->m_next)->enumerate_variables(callback);
+    auto next = this->m_stor.head;
+    while(ROCKET_EXPECT(next)) {
+      auto qnode = std::exchange(next, next->m_next);
+      // Enumerate varables in this node recursively.
+      qnode->enumerate_variables(callback);
     }
   }
 
