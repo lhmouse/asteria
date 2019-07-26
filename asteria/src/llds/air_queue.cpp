@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-void Air_Queue::do_clear_nodes() noexcept
+void Air_Queue::do_clear_nodes() const noexcept
   {
     auto qnode = this->m_stor.head;
     while(ROCKET_EXPECT(qnode)) {

@@ -46,7 +46,7 @@ class Air_Queue
       }
 
   private:
-    void do_clear_nodes() noexcept;
+    void do_clear_nodes() const noexcept;
 
   public:
     bool empty() const noexcept
