@@ -102,6 +102,10 @@ class Variable_HashSet
 
     bool has(const Rcptr<Variable>& var) const noexcept
       {
+        // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
+        if(!this->m_stor.bptr) {
+          return false;
+        }
         // Find the bucket for the variable.
         auto qbkt = this->do_xprobe(var);
         if(!*qbkt) {
@@ -131,6 +135,10 @@ class Variable_HashSet
       }
     bool erase(const Rcptr<Variable>& var) noexcept
       {
+        // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
+        if(!this->m_stor.bptr) {
+          return false;
+        }
         // Find the bucket for the variable.
         auto qbkt = this->do_xprobe(var);
         if(!*qbkt) {
