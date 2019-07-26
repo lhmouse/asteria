@@ -26,12 +26,14 @@ class Air_Queue
       {
       }
     Air_Queue(Air_Queue&& other) noexcept
-      : m_stor(std::exchange(other.m_stor, Storage()))
+      : m_stor()
       {
+        std::swap(this->m_stor, other.m_stor);
       }
     Air_Queue& operator=(Air_Queue&& other) noexcept
       {
-        return std::swap(this->m_stor, other.m_stor), *this;
+        std::swap(this->m_stor, other.m_stor);
+        return *this;
       }
     ~Air_Queue()
       {
