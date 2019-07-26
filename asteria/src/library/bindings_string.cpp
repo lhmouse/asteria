@@ -54,7 +54,7 @@ namespace Asteria {
         return do_slice(text, text.begin(), rfrom + *length);
       }
 
-    }
+    }  // namespace
 
 G_string std_string_slice(const G_string& text, const G_integer& from, const Opt<G_integer>& length)
   {
@@ -140,7 +140,7 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
         return rocket::move(tpos);
       }
 
-    }
+    }  // namespace
 
 Opt<G_integer> std_string_find(const G_string& text, const G_string& pattern)
   {
@@ -272,7 +272,7 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
         return rocket::move(pos);
       }
 
-    }
+    }  // namespace
 
 Opt<G_integer> std_string_find_any_of(const G_string& text, const G_string& accept)
   {
@@ -406,7 +406,7 @@ G_string std_string_reverse(const G_string& text)
         return rocket::sref(*reject);
       }
 
-    }
+    }  // namespace
 
 G_string std_string_trim(const G_string& text, const Opt<G_string>& reject)
   {
@@ -486,7 +486,7 @@ G_string std_string_rtrim(const G_string& text, const Opt<G_string>& reject)
         return rocket::sref(*padding);
       }
 
-    }
+    }  // namespace
 
 G_string std_string_lpad(const G_string& text, const G_integer& length, const Opt<G_string>& padding)
   {
@@ -625,7 +625,7 @@ G_string std_string_translate(const G_string& text, const G_string& inputs, cons
         "\xF8", "\xF9", "\xFA", "\xFB", "\xFC", "\xFD", "\xFE", "\xFF",
       };
 
-    }
+    }  // namespace
 
 G_array std_string_explode(const G_string& text, const Opt<G_string>& delim, const Opt<G_integer>& limit)
   {
@@ -703,7 +703,7 @@ G_string std_string_implode(const G_array& segments, const Opt<G_string>& delim)
         return std::find(str, str + sizeT - 1, c);
       }
 
-    }
+    }  // namespace
 
 G_string std_string_hex_encode(const G_string& data, const Opt<G_boolean>& lowercase, const Opt<G_string>& delim)
   {
@@ -1153,7 +1153,7 @@ Opt<G_array> std_string_utf8_decode(const G_string& text, const Opt<G_boolean>& 
         return do_unpack_impl<0, WordT>(text);
       }
 
-    }
+    }  // namespace
 
 G_string std_string_pack8(const G_integer& value)
   {

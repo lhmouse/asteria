@@ -309,7 +309,7 @@ namespace Asteria {
             stack.pop_back();
           }
         } while(true);
-      }
+      }  // namespace
     G_string do_format_nonrecursive(const Value& value, Indenter&& indent)
       {
         return do_format_nonrecursive(value, indent);
@@ -607,7 +607,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         } while(true);
       }
 
-    }
+    }  // namespace
 
 Value std_json_parse(const G_string& text)
   {

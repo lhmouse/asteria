@@ -389,7 +389,7 @@ bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& 
         "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
       };
 
-    }
+    }  // namespace
 
 rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, std::size_t len)
   {

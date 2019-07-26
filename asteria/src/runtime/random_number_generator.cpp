@@ -30,7 +30,7 @@ Random_Number_Generator::~Random_Number_Generator()
         return reg >> bits;
       }
 
-    }
+    }  // namespace
 
 void Random_Number_Generator::do_update() noexcept
   {
@@ -126,7 +126,7 @@ void Random_Number_Generator::do_update() noexcept
           }
       };
 
-    }
+    }  // namespace
 
 void Random_Number_Generator::reset() noexcept
   {

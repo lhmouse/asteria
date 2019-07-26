@@ -133,7 +133,7 @@ namespace Asteria {
     // It is convertible to a native handle implicitly.
     using Directory = rocket::unique_handle<decltype(Directory_Closer().null()), Directory_Closer>;
 
-    }
+    }  // namespace
 
 G_string std_filesystem_get_working_directory()
   {
@@ -441,7 +441,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
       }
 #endif
 
-    }
+    }  // namespace
 
 Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
   {
@@ -709,7 +709,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
         callback.get().invoke(self, global, rocket::move(args));
       }
 
-    }
+    }  // namespace
 
 bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const Opt<G_integer>& offset, const Opt<G_integer>& limit)
   {

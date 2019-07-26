@@ -74,8 +74,8 @@ namespace Asteria {
           }
       };
 
-    }
-    }
+    }  // namespace CRC32
+    }  // namespace
 
 G_object std_checksum_crc32_new()
   {
@@ -191,8 +191,8 @@ G_integer std_checksum_crc32(const G_string& data)
           }
       };
 
-    }
-    }
+    }  // namespace FNV1a32
+    }  // namespace
 
 G_object std_checksum_fnv1a32_new()
   {
@@ -343,7 +343,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         rocket::ranged_for(std::size_t(0), sizeT, [&](std::size_t i) { lhs[i] += rhs[i];  });
       }
 
-    }
+    }  // namespace
 
     namespace {
     namespace MD5 {
@@ -562,8 +562,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
           }
       };
 
-    }
-    }
+    }  // namespace MD5
+    }  // namespace
 
 G_object std_checksum_md5_new()
   {
@@ -872,8 +872,8 @@ G_string std_checksum_md5(const G_string& data)
           }
       };
 
-    }
-    }
+    }  // namespace SHA1
+    }  // namespace
 
 G_object std_checksum_sha1_new()
   {
@@ -1152,8 +1152,8 @@ G_string std_checksum_sha1(const G_string& data)
           }
       };
 
-    }
-    }
+    }  // namespace SHA256
+    }  // namespace
 
 G_object std_checksum_sha256_new()
   {

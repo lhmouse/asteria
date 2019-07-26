@@ -57,7 +57,7 @@ const char* Value::gtype_name_of(Gtype gtype) noexcept
     // Don't play with this at home.
     constexpr std::aligned_union<0, Value>::type s_null[1] = { };
 
-    }
+    }  // namespace
 
 const Value& Value::null() noexcept
   {
@@ -124,7 +124,7 @@ bool Value::test() const noexcept
                                                                                              : Value::compare_equal;
       }
 
-    }
+    }  // namespace
 
 Value::Compare Value::compare(const Value& other) const noexcept
   {

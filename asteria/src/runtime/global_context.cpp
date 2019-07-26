@@ -67,7 +67,7 @@ Global_Context::~Global_Context()
           }
       };
 
-    }
+    }  // namespace
 
 void Global_Context::initialize(API_Version version)
   {

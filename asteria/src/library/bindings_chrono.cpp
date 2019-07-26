@@ -225,7 +225,7 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
         return true;
       }
 
-    }
+    }  // namespace
 
 G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>& with_ms)
   {

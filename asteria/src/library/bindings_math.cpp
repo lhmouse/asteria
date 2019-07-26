@@ -17,7 +17,7 @@ namespace Asteria {
     constexpr G_real s_const_pi   = 3.1415926535897932384626433832795028841971693993751;
     constexpr G_real s_const_lb10 = 3.3219280948873623478703194294893901758648313930246;
 
-    }
+    }  // namespace
 
 G_real std_math_exp(const G_real& y, const Opt<G_real>& base)
   {

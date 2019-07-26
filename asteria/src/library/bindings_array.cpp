@@ -55,7 +55,7 @@ namespace Asteria {
         return do_slice(text, text.begin(), rfrom + *length);
       }
 
-    }
+    }  // namespace
 
 G_array std_array_slice(const G_array& data, const G_integer& from, const Opt<G_integer>& length)
   {
@@ -129,7 +129,7 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
         return rocket::nullopt;
       }
 
-    }
+    }  // namespace
 
 Opt<G_integer> std_array_find(const G_array& data, const Value& target)
   {
@@ -465,7 +465,7 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
         return self.read().compare(G_integer(0));
       }
 
-    }
+    }  // namespace
 
 G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {
@@ -538,7 +538,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
         } while(true);
       }
 
-    }
+    }  // namespace
 
 Opt<G_integer> std_array_binary_search(const Global_Context& global, const G_array& data, const Value& target, const Opt<G_function>& comparator)
   {
@@ -650,7 +650,7 @@ G_array std_array_equal_range(const Global_Context& global, const G_array& data,
         return opos;
       }
 
-    }
+    }  // namespace
 
 G_array std_array_sort(const Global_Context& global, const G_array& data, const Opt<G_function>& comparator)
   {

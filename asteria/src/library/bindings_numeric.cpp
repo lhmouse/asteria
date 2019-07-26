@@ -84,7 +84,7 @@ G_boolean std_numeric_is_nan(const G_real& value)
         return upper;
       }
 
-    }
+    }  // namespace
 
 G_integer std_numeric_clamp(const G_integer& value, const G_integer& lower, const G_integer& upper)
   {
@@ -146,7 +146,7 @@ G_real std_numeric_trunc(const G_real& value)
         return G_integer(value);
       }
 
-    }
+    }  // namespace
 
 G_integer std_numeric_iround(const G_integer& value)
   {
@@ -311,7 +311,7 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
         return lhs * rhs;
       }
 
-    }
+    }  // namespace
 
 G_integer std_numeric_adds(const G_integer& x, const G_integer& y)
   {
@@ -1198,7 +1198,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return text;
       }
 
-    }
+    }  // namespace
 
 G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
   {
@@ -1454,7 +1454,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         return text;
       }
 
-    }
+    }  // namespace
 
 G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
   {
@@ -1553,7 +1553,7 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
         }
       }
 
-    }
+    }  // namespace
 
 Opt<G_integer> std_numeric_parse_integer(const G_string& text)
   {
