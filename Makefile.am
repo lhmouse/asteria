@@ -86,7 +86,9 @@ pkginclude_HEADERS =  \
 
 pkginclude_lldsdir = ${pkgincludedir}/llds
 pkginclude_llds_HEADERS =  \
-  asteria/src/llds/air_queue.hpp
+  asteria/src/llds/air_queue.hpp  \
+  asteria/src/llds/variable_hashset.hpp  \
+  asteria/src/llds/reference_dictionary.hpp
 
 pkginclude_syntaxdir = ${pkgincludedir}/syntax
 pkginclude_syntax_HEADERS =  \
@@ -105,7 +107,6 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/reference_modifier.hpp  \
   asteria/src/runtime/reference.hpp  \
   asteria/src/runtime/variable.hpp  \
-  asteria/src/runtime/variable_hashset.hpp  \
   asteria/src/runtime/abstract_variable_callback.hpp  \
   asteria/src/runtime/collector.hpp  \
   asteria/src/runtime/backtrace_frame.hpp  \
@@ -117,7 +118,6 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/random_number_generator.hpp  \
   asteria/src/runtime/generational_collector.hpp  \
   asteria/src/runtime/variadic_arguer.hpp  \
-  asteria/src/runtime/reference_dictionary.hpp  \
   asteria/src/runtime/evaluation_stack.hpp  \
   asteria/src/runtime/instantiated_function.hpp  \
   asteria/src/runtime/air_node.hpp
@@ -150,6 +150,8 @@ pkginclude_library_HEADERS =  \
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
   asteria/src/llds/air_queue.cpp  \
+  asteria/src/llds/variable_hashset.cpp  \
+  asteria/src/llds/reference_dictionary.cpp  \
   asteria/src/syntax/source_location.cpp  \
   asteria/src/syntax/xprunit.cpp  \
   asteria/src/syntax/statement.cpp  \
@@ -162,7 +164,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/reference_modifier.cpp  \
   asteria/src/runtime/reference.cpp  \
   asteria/src/runtime/variable.cpp  \
-  asteria/src/runtime/variable_hashset.cpp  \
   asteria/src/runtime/abstract_variable_callback.cpp  \
   asteria/src/runtime/collector.cpp  \
   asteria/src/runtime/backtrace_frame.cpp  \
@@ -174,7 +175,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/random_number_generator.cpp  \
   asteria/src/runtime/generational_collector.cpp  \
   asteria/src/runtime/variadic_arguer.cpp  \
-  asteria/src/runtime/reference_dictionary.cpp  \
   asteria/src/runtime/evaluation_stack.cpp  \
   asteria/src/runtime/instantiated_function.cpp  \
   asteria/src/runtime/air_node.cpp  \

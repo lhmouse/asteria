@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_COLLECTOR_HPP_
 
 #include "../fwd.hpp"
-#include "variable_hashset.hpp"
+#include "../llds/variable_hashset.hpp"
 
 namespace Asteria {
 
