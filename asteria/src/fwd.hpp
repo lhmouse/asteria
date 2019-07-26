@@ -33,10 +33,8 @@
 #include "../rocket/array.hpp"
 
 // Macros
-#define ASTERIA_SFINAE_CONSTRUCT(...)    ROCKET_ENABLE_IF(::std::is_constructible<ROCKET_CAR(__VA_ARGS__),  \
-                                                                                  ROCKET_CDR(__VA_ARGS__)>::value)
-#define ASTERIA_SFINAE_ASSIGN(...)       ROCKET_ENABLE_IF(::std::is_assignable<ROCKET_CAR(__VA_ARGS__),  \
-                                                                               ROCKET_CDR(__VA_ARGS__)>::value)
+#define ASTERIA_SFINAE_CONSTRUCT(...)    ROCKET_ENABLE_IF(::std::is_constructible<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
+#define ASTERIA_SFINAE_ASSIGN(...)       ROCKET_ENABLE_IF(::std::is_assignable<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
 
 #define ASTERIA_AND_(x_, y_)             (bool(x_) && bool(y_))
 #define ASTERIA_OR_(x_, y_)              (bool(x_) || bool(y_))
@@ -50,6 +48,8 @@ class Runtime_Error;
 
 // Low-level Data Structure
 class Air_Queue;
+class Variable_HashSet;
+class Reference_Dictionary;
 
 // Syntax
 class Source_Location;
@@ -65,10 +65,8 @@ class Placeholder;
 class Reference_Root;
 class Reference_Modifier;
 class Reference;
-class Reference_Dictionary;
 class Evaluation_Stack;
 class Variable;
-class Variable_HashSet;
 class Variable_Callback;
 class Abstract_Variable_Callback;
 class Collector;

@@ -1,21 +1,23 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_VARIABLE_HASHSET_HPP_
-#define ASTERIA_RUNTIME_VARIABLE_HASHSET_HPP_
+#ifndef ASTERIA_LLDS_REFERENCE_DICTIONARY_HPP_
+#define ASTERIA_LLDS_REFERENCE_DICTIONARY_HPP_
 
 #include "../fwd.hpp"
-#include "variable.hpp"
+#include "../runtime/reference.hpp"
 
 namespace Asteria {
 
-class Variable_HashSet
+class Reference_Dictionary
   {
   private:
     struct Bucket
       {
-        // A null pointer indicates an empty bucket.
-        Rcptr<Variable> first;
+        // An empty name indicates an empty bucket.
+        // `second[0]` is initialized if and only if `name` is non-empty.
+        PreHashed_String first;
+        union { Reference second[1];  };
         // For the first bucket:  `size` is the number of non-empty buckets in this container.
         // For every other bucket: `prev` points to the previous non-empty bucket.
         union { std::size_t size;  Bucket* prev;  };
@@ -25,6 +27,9 @@ class Variable_HashSet
 
         Bucket() noexcept
           {
+#ifdef ROCKET_DEBUG
+            std::memset(static_cast<void*>(this->second), 0xEC, sizeof(Reference));
+#endif
           }
         inline ~Bucket();
 
@@ -43,14 +48,14 @@ class Variable_HashSet
     Cow_Vector<Bucket> m_stor;
 
   public:
-    Variable_HashSet() noexcept
+    Reference_Dictionary() noexcept
       : m_stor()
       {
       }
 
-    Variable_HashSet(const Variable_HashSet&)
+    Reference_Dictionary(const Reference_Dictionary&)
       = delete;
-    Variable_HashSet& operator=(const Variable_HashSet&)
+    Reference_Dictionary& operator=(const Reference_Dictionary&)
       = delete;
 
   private:
@@ -81,11 +86,9 @@ class Variable_HashSet
         this->do_clear();
       }
 
-    bool has(const Rcptr<Variable>& var) const noexcept;
-    void enumerate(const Abstract_Variable_Callback& callback) const;
-    bool insert(const Rcptr<Variable>& var);
-    bool erase(const Rcptr<Variable>& var) noexcept;
-    Rcptr<Variable> erase_random_opt() noexcept;
+    const Reference* get_opt(const PreHashed_String& name) const noexcept;
+    Reference& open(const PreHashed_String& name);
+    bool remove(const PreHashed_String& name) noexcept;
   };
 
 }  // namespace Asteria

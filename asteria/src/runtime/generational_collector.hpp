@@ -6,8 +6,8 @@
 
 #include "../fwd.hpp"
 #include "rcbase.hpp"
-#include "variable_hashset.hpp"
 #include "collector.hpp"
+#include "../llds/variable_hashset.hpp"
 
 namespace Asteria {
 

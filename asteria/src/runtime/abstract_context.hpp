@@ -5,20 +5,19 @@
 #define ASTERIA_RUNTIME_ABSTRACT_CONTEXT_HPP_
 
 #include "../fwd.hpp"
-#include "reference_dictionary.hpp"
+#include "../llds/reference_dictionary.hpp"
 
 namespace Asteria {
 
 class Abstract_Context
   {
   private:
-    struct Cleaner
-      {
-        void operator()(Rcbase* base) noexcept;
-      };
+    // This pointer owns a reference count of the collector if it isn't null.
+    // It triggers a full garbage collection when destroyed, which occurs after destruction
+    // of all local references, so it shall precede everything else.
+    struct Cleaner { void operator()(Rcbase* base) noexcept;  };
+    Uptr<Rcbase, Cleaner> m_coll_opt;
 
-  private:
-    Uptr<Rcbase, Cleaner> m_coll_opt;  // Note the order of destruction here.
     Reference_Dictionary m_named_refs;
 
   public:
