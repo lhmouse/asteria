@@ -57,7 +57,7 @@ class Variable_HashSet
           this->do_free_table(this->m_stor.bptr);
         }
 #ifdef ROCKET_DEBUG
-        std::memset(std::addressof(this->m_stor), 0xF9, sizeof(this->m_stor));
+        std::memset(std::addressof(this->m_stor), 0xD2, sizeof(this->m_stor));
 #endif
       }
 
