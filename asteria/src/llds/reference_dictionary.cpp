@@ -3,220 +3,204 @@
 
 #include "../precompiled.hpp"
 #include "reference_dictionary.hpp"
+#include "../runtime/abstract_variable_callback.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
-Reference_Dictionary::Bucket::~Bucket()
+Reference_Dictionary::Bucket* Reference_Dictionary::do_allocate_table(std::size_t nbkt)
   {
-    // Be careful, VERY careful.
-    if(ROCKET_UNEXPECT(*this)) {
-      rocket::destroy_at(this->second);
+    auto bptr = static_cast<Bucket*>(std::calloc(nbkt, sizeof(Bucket)));
+    if(!bptr) {
+      throw std::bad_alloc();
+    }
+    return bptr;
+  }
+
+void Reference_Dictionary::do_free_table(Reference_Dictionary::Bucket* bptr) noexcept
+  {
+    std::free(bptr);
+  }
+
+void Reference_Dictionary::do_clear_buckets() const noexcept
+  {
+    auto next = this->m_stor.aptr;
+    if(ROCKET_EXPECT(next)) {
+      auto origin = next;
+      do {
+        auto qbkt = std::exchange(next, next->next);
+        // Destroy this bucket.
+        ROCKET_ASSERT(*qbkt);
+        rocket::destroy_at(qbkt->kstor);
+        rocket::destroy_at(qbkt->vstor);
+        qbkt->next = nullptr;
+        // Stop if the head is encountered a second time, as the linked list is circular.
+      } while(ROCKET_EXPECT(next != origin));
     }
   }
 
-Reference_Dictionary::Bucket::operator bool () const noexcept
+Reference_Dictionary::Bucket* Reference_Dictionary::do_xprobe(const PreHashed_String& name) const noexcept
   {
-    return this->first.empty() == false;
+    auto bptr = this->m_stor.bptr;
+    auto eptr = this->m_stor.eptr;
+    // Find a bucket using linear probing.
+    // We keep the load factor below 1.0 so there will always be some empty buckets in the table.
+    auto mptr = rocket::get_probing_origin(bptr, eptr, name.rdhash());
+    auto qbkt = rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket& r) { return r.kstor[0] == name;  });
+    ROCKET_ASSERT(qbkt);
+    return qbkt;
   }
 
-void Reference_Dictionary::Bucket::do_attach(Reference_Dictionary::Bucket* ipos) noexcept
+void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld) noexcept
   {
-    auto iprev = ipos->prev;
-    auto inext = ipos;
-    // Set up pointers.
-    this->prev = iprev;
-    prev->next = this;
-    this->next = inext;
-    next->prev = this;
-  }
-
-void Reference_Dictionary::Bucket::do_detach() noexcept
-  {
-    auto iprev = this->prev;
-    auto inext = this->next;
-    // Set up pointers.
-    prev->next = inext;
-    next->prev = iprev;
-  }
-
-void Reference_Dictionary::do_clear() noexcept
-  {
-    ROCKET_ASSERT(this->m_stor.size() >= 2);
-    // Get table bounds.
-    auto pre = this->m_stor.mut_data();
-    auto end = pre + (this->m_stor.size() - 1);
-    // Clear all buckets.
-    for(auto bkt = pre->next; bkt != end; bkt = bkt->next) {
-      ROCKET_ASSERT(*bkt);
-      bkt->first.clear();
-      rocket::destroy_at(bkt->second);
-    }
-    // Clear the table.
-    pre->next = end;
-    end->prev = pre;
-    // Update the number of elements.
-    pre->size = 0;
-  }
-
-void Reference_Dictionary::do_rehash(std::size_t res_arg)
-  {
-    ROCKET_ASSERT(res_arg >= this->m_stor.size());
-    // Allocate a new vector.
-    Cow_Vector<Bucket> stor;
-    stor.reserve(res_arg | 3);
-    stor.append(stor.capacity());
-    this->m_stor.swap(stor);
-    // Get table bounds.
-    auto pre = this->m_stor.mut_data();
-    auto end = pre + (this->m_stor.size() - 1);
-    // Clear the new table.
-    pre->next = end;
-    end->prev = pre;
-    // Update the number of elements.
-    pre->size = 0;
-    // Move elements into the new table, if any.
-    if(stor.empty()) {
-      return;
-    }
-    std::for_each(
-      // Get the range of valid buckets.
-      stor.mut_begin() + 1, stor.mut_end() - 1,
-      // Move each bucket in the range.
-      [&](Bucket& rbkt)
-        {
-          if(ROCKET_EXPECT(!rbkt)) {
-            return;
-          }
-          // Find a bucket for the new element.
-          auto origin = rocket::get_probing_origin(pre + 1, end, rbkt.first.rdhash());
-          auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket&) { return false;  });
-          ROCKET_ASSERT(bkt);
-          // Insert it into the new bucket.
-          ROCKET_ASSERT(!*bkt);
-          bkt->first.swap(rbkt.first);
-          rocket::construct_at(bkt->second, rocket::move(rbkt.second[0]));
-          rocket::destroy_at(rbkt.second);
-          bkt->do_attach(end);
-          // Update the number of elements.
-          pre->size++;
-        }
-      );
-  }
-
-void Reference_Dictionary::do_check_relocation(Bucket* to, Bucket* from)
-  {
-    // Get table bounds.
-    auto pre = this->m_stor.mut_data();
-    auto end = pre + (this->m_stor.size() - 1);
-    // Check them.
+    auto bptr = this->m_stor.bptr;
+    auto eptr = this->m_stor.eptr;
+    // Reallocate buckets that follow `*qbkt`.
     rocket::linear_probe(
       // Only probe non-erased buckets.
-      pre + 1, to, from, end,
+      bptr, qxcld, qxcld + 1, eptr,
       // Relocate every bucket found.
-      [&](Bucket& rbkt)
-        {
-          PreHashed_String name;
-          // Release the old element.
-          rbkt.do_detach();
-          name.swap(rbkt.first);
-          // Find a new bucket for it using linear probing.
-          auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-          auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket&) { return false;  });
-          ROCKET_ASSERT(bkt);
-          // Insert it into the new bucket.
-          ROCKET_ASSERT(!*bkt);
-          bkt->first = rocket::move(name);
-          if(bkt != &rbkt) {
-            rocket::construct_at(bkt->second, rocket::move(rbkt.second[0]));
-            rocket::destroy_at(rbkt.second);
-          }
-          bkt->do_attach(end);
-          return false;
-        }
-      );
+      [&](Bucket& r) {
+        auto qbkt = std::addressof(r);
+        // Move the old name and reference out, then destroy the bucket.
+        ROCKET_ASSERT(*qbkt);
+        auto name = rocket::move(qbkt->kstor[0]);
+        rocket::destroy_at(qbkt->kstor);
+        auto refr = rocket::move(qbkt->vstor[0]);
+        rocket::destroy_at(qbkt->vstor);
+        this->do_list_detach(qbkt);
+        // Find a new bucket for the name using linear probing.
+        // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
+        auto mptr = rocket::get_probing_origin(bptr, eptr, name.rdhash());
+        qbkt = rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
+        ROCKET_ASSERT(qbkt);
+        // Insert the reference into the new bucket.
+        ROCKET_ASSERT(!*qbkt);
+        this->do_list_attach(qbkt);
+        rocket::construct_at(qbkt->kstor, rocket::move(name));
+        rocket::construct_at(qbkt->vstor, rocket::move(refr));
+        // Keep probing until an empty bucket is found.
+        return false;
+      });
   }
 
-const Reference* Reference_Dictionary::get_opt(const PreHashed_String& name) const noexcept
+void Reference_Dictionary::do_list_attach(Reference_Dictionary::Bucket* qbkt) noexcept
   {
-    if(ROCKET_UNEXPECT(name.empty())) {
-      return nullptr;
+    auto next = std::exchange(this->m_stor.aptr, qbkt);
+    // Note the circular list.
+    if(ROCKET_EXPECT(next)) {
+      auto prev = next->prev;
+      // Insert the node between `prev` and `next`.
+      prev->next = qbkt;
+      next->prev = qbkt;
+      // Set up pointers in `qbkt`.
+      qbkt->next = next;
+      qbkt->prev = prev;
     }
-    if(ROCKET_UNEXPECT(this->m_stor.empty())) {
-      return nullptr;
+    else {
+      // Set up the first node.
+      qbkt->next = qbkt;
+      qbkt->prev = qbkt;
     }
-    // Get table bounds.
-    auto pre = this->m_stor.data();
-    auto end = pre + (this->m_stor.size() - 1);
-    // Find the element using linear probing.
-    auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket& rbkt) { return rbkt.first == name;  });
-    // There will always be some empty buckets in the table.
-    ROCKET_ASSERT(bkt);
-    if(!*bkt) {
-      // The previous probing has stopped due to an empty bucket. No equivalent key has been found so far.
-      return nullptr;
-    }
-    return bkt->second;
   }
 
-Reference& Reference_Dictionary::open(const PreHashed_String& name)
+void Reference_Dictionary::do_list_detach(Reference_Dictionary::Bucket* qbkt) noexcept
   {
-    if(ROCKET_UNEXPECT(name.empty())) {
-      ASTERIA_THROW_RUNTIME_ERROR("Empty names are not allowed in a `Reference_Dictionary`.");
+    auto next = std::exchange(qbkt->next, nullptr);
+    // Note the circular list.
+    if(ROCKET_EXPECT(next != qbkt)) {
+      auto prev = qbkt->prev;
+      // Remove the node from `prev` and `next`.
+      prev->next = next;
+      next->prev = prev;
+      // Make `aptr` point to some valid bucket, should it equal `qbkt`.
+      this->m_stor.aptr = next;
     }
-    if(ROCKET_UNEXPECT(this->size() >= this->m_stor.size() / 2)) {
-      this->do_rehash(this->m_stor.size() * 2 | 11);
+    else {
+      // Remove the last node.
+      this->m_stor.aptr = nullptr;
     }
-    // Get table bounds.
-    auto pre = this->m_stor.mut_data();
-    auto end = pre + (this->m_stor.size() - 1);
-    // Find a bucket for the new element.
-    auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket& rbkt) { return rbkt.first == name;  });
-    // There will always be some empty buckets in the table.
-    ROCKET_ASSERT(bkt);
-    if(*bkt) {
-      // A duplicate key has been found.
-      return bkt->second[0];
-    }
-    // Insert it into the new bucket.
-    bkt->first = name;
-    rocket::construct_at(bkt->second);
-    bkt->do_attach(end);
-    // Update the number of elements.
-    pre->size++;
-    return bkt->second[0];
   }
 
-bool Reference_Dictionary::remove(const PreHashed_String& name) noexcept
+void Reference_Dictionary::do_rehash(std::size_t nbkt)
   {
-    if(ROCKET_UNEXPECT(name.empty())) {
-      return false;
+    ROCKET_ASSERT(nbkt / 2 > this->m_stor.size);
+    // Allocate a new table.
+    auto bptr = this->do_allocate_table(nbkt);
+    auto eptr = bptr + nbkt;
+    // Set up an empty table.
+    auto bold = std::exchange(this->m_stor.bptr, bptr);
+    this->m_stor.eptr = eptr;
+    auto next = std::exchange(this->m_stor.aptr, nullptr);
+    // Move buckets into the new table.
+    // Warning: No exception shall be thrown from the code below.
+    if(ROCKET_EXPECT(next)) {
+      auto origin = next;
+      do {
+        auto qbkt = std::exchange(next, next->next);
+        // Move the old name and reference out, then destroy the bucket.
+        ROCKET_ASSERT(*qbkt);
+        auto name = rocket::move(qbkt->kstor[0]);
+        rocket::destroy_at(qbkt->kstor);
+        auto refr = rocket::move(qbkt->vstor[0]);
+        rocket::destroy_at(qbkt->vstor);
+        qbkt->next = nullptr;
+        // Find a new bucket for the name using linear probing.
+        // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
+        auto mptr = rocket::get_probing_origin(bptr, eptr, name.rdhash());
+        qbkt = rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
+        ROCKET_ASSERT(qbkt);
+        // Insert the reference into the new bucket.
+        ROCKET_ASSERT(!*qbkt);
+        this->do_list_attach(qbkt);
+        rocket::construct_at(qbkt->kstor, rocket::move(name));
+        rocket::construct_at(qbkt->vstor, rocket::move(refr));
+        // Stop if the head is encountered a second time, as the linked list is circular.
+      } while(ROCKET_EXPECT(next != origin));
     }
-    if(ROCKET_UNEXPECT(this->m_stor.empty())) {
-      return false;
+    // Deallocate the old table.
+    if(bold) {
+      this->do_free_table(bold);
     }
-    // Get table bounds.
-    auto pre = this->m_stor.mut_data();
-    auto end = pre + (this->m_stor.size() - 1);
-    // Find the element using linear probing.
-    auto origin = rocket::get_probing_origin(pre + 1, end, name.rdhash());
-    auto bkt = rocket::linear_probe(pre + 1, origin, origin, end, [&](const Bucket& rbkt) { return rbkt.first == name;  });
-    // There will always be some empty buckets in the table.
-    ROCKET_ASSERT(bkt);
-    if(!*bkt) {
-      return false;
+  }
+
+void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const PreHashed_String& name) noexcept
+  {
+    // Construct the node, then attach it.
+    ROCKET_ASSERT(!*qbkt);
+    this->do_list_attach(qbkt);
+    rocket::construct_at(qbkt->kstor, name);
+    rocket::construct_at(qbkt->vstor);
+    this->m_stor.size++;
+    ROCKET_ASSERT(*qbkt);
+  }
+
+void Reference_Dictionary::do_detach(Reference_Dictionary::Bucket* qbkt) noexcept
+  {
+    // Destroy the old name and reference, then detach the bucket.
+    ROCKET_ASSERT(*qbkt);
+    this->m_stor.size--;
+    rocket::destroy_at(qbkt->kstor);
+    rocket::destroy_at(qbkt->vstor);
+    this->do_list_detach(qbkt);
+    ROCKET_ASSERT(!*qbkt);
+    // Relocate nodes that follow `qbkt`, if any.
+    this->do_xrelocate_but(qbkt);
+  }
+
+void Reference_Dictionary::enumerate_variables(const Abstract_Variable_Callback& callback) const
+  {
+    auto next = this->m_stor.aptr;
+    if(ROCKET_EXPECT(next)) {
+      auto origin = next;
+      do {
+        auto qbkt = std::exchange(next, next->next);
+        // Enumerate child variables.
+        ROCKET_ASSERT(*qbkt);
+        qbkt->vstor[0].enumerate_variables(callback);
+        // Stop if the head is encountered a second time, as the linked list is circular.
+      } while(ROCKET_EXPECT(next != origin));
     }
-    // Update the number of elements.
-    pre->size--;
-    // Empty the bucket.
-    bkt->do_detach();
-    bkt->first.clear();
-    rocket::destroy_at(bkt->second);
-    // Relocate elements that are not placed in their immediate locations.
-    this->do_check_relocation(bkt, bkt + 1);
-    return true;
   }
 
 }  // namespace Asteria

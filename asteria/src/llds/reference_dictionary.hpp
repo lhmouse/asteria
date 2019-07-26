@@ -14,81 +14,144 @@ class Reference_Dictionary
   private:
     struct Bucket
       {
-        // An empty name indicates an empty bucket.
-        // `second[0]` is initialized if and only if `name` is non-empty.
-        PreHashed_String first;
-        union { Reference second[1];  };
-        // For the first bucket:  `size` is the number of non-empty buckets in this container.
-        // For every other bucket: `prev` points to the previous non-empty bucket.
-        union { std::size_t size;  Bucket* prev;  };
-        // For the last bucket:   `reserved` is reserved for future use.
-        // For every other bucket: `next` points to the next non-empty bucket.
-        union { std::size_t reserved;  Bucket* next;  };
+        Bucket* next;  // the next bucket in the circular list
+        Bucket* prev;  // the previous bucket in the circular list
+        union { PreHashed_String kstor[1];  };  // initialized iff `next` is non-null
+        union { Reference vstor[1];  };  // initialized iff `next` is non-null
 
-        Bucket() noexcept
-          {
-#ifdef ROCKET_DEBUG
-            std::memset(static_cast<void*>(this->second), 0xEC, sizeof(Reference));
-#endif
-          }
-        inline ~Bucket();
-
-        Bucket(const Bucket&)
-          = delete;
-        Bucket& operator=(const Bucket&)
-          = delete;
-
-        explicit inline operator bool () const noexcept;
-        inline void do_attach(Bucket* ipos) noexcept;
-        inline void do_detach() noexcept;
+        Bucket() noexcept { }
+        ~Bucket() { }
+        explicit operator bool () const noexcept { return this->next != nullptr;  }
       };
 
-  private:
-    // The first and last buckets are permanently reserved.
-    Cow_Vector<Bucket> m_stor;
+    struct Storage
+      {
+        Bucket* bptr;  // beginning of bucket storage
+        Bucket* eptr;  // end of bucket storage
+        Bucket* aptr;  // any initialized bucket
+        std::size_t size;  // number of initialized buckets
+      };
+
+    Storage m_stor;
 
   public:
-    Reference_Dictionary() noexcept
+    constexpr Reference_Dictionary() noexcept
       : m_stor()
       {
       }
-
-    Reference_Dictionary(const Reference_Dictionary&)
-      = delete;
-    Reference_Dictionary& operator=(const Reference_Dictionary&)
-      = delete;
+    Reference_Dictionary(Reference_Dictionary&& other) noexcept
+      : m_stor()
+      {
+        std::swap(this->m_stor, other.m_stor);
+      }
+    Reference_Dictionary& operator=(Reference_Dictionary&& other) noexcept
+      {
+        std::swap(this->m_stor, other.m_stor);
+        return *this;
+      }
+    ~Reference_Dictionary()
+      {
+        if(this->m_stor.aptr) {
+          this->do_clear_buckets();
+        }
+        if(this->m_stor.bptr) {
+          this->do_free_table(this->m_stor.bptr);
+        }
+#ifdef ROCKET_DEBUG
+        std::memset(std::addressof(this->m_stor), 0xB4, sizeof(this->m_stor));
+#endif
+      }
 
   private:
-    void do_clear() noexcept;
-    void do_rehash(std::size_t res_arg);
-    void do_check_relocation(Bucket* to, Bucket* from);
+    Bucket* do_allocate_table(std::size_t nbkt);
+    void do_free_table(Bucket* bptr) noexcept;
+    void do_clear_buckets() const noexcept;
+
+    Bucket* do_xprobe(const PreHashed_String& name) const noexcept;
+    void do_xrelocate_but(Bucket* qxcld) noexcept;
+
+    inline void do_list_attach(Bucket* qbkt) noexcept;
+    inline void do_list_detach(Bucket* qbkt) noexcept;
+
+    void do_rehash(std::size_t nbkt);
+    void do_attach(Bucket* qbkt, const PreHashed_String& name) noexcept;
+    void do_detach(Bucket* qbkt) noexcept;
 
   public:
     bool empty() const noexcept
       {
-        if(this->m_stor.empty()) {
-          return true;
-        }
-        return this->m_stor.front().size == 0;
+        return this->m_stor.aptr == nullptr;
       }
     std::size_t size() const noexcept
       {
-        if(this->m_stor.empty()) {
-          return 0;
-        }
-        return this->m_stor.front().size;
+        return this->m_stor.size;
       }
     void clear() noexcept
       {
-        if(this->m_stor.empty()) {
-          return;
+        if(this->m_stor.aptr) {
+          this->do_clear_buckets();
         }
-        this->do_clear();
+        // Clean invalid data up.
+        this->m_stor.aptr = nullptr;
+        this->m_stor.size = 0;
       }
 
-    const Reference* get_opt(const PreHashed_String& name) const noexcept;
-    Reference& open(const PreHashed_String& name);
-    bool remove(const PreHashed_String& name) noexcept;
+    void swap(Reference_Dictionary& other) noexcept
+      {
+        std::swap(this->m_stor, other.m_stor);
+      }
+
+    const Reference* get_opt(const PreHashed_String& name) const noexcept
+      {
+        // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
+        if(!this->m_stor.bptr) {
+          return nullptr;
+        }
+        // Find the bucket for the name.
+        auto qbkt = this->do_xprobe(name);
+        if(!*qbkt) {
+          // Not found.
+          return nullptr;
+        }
+        ROCKET_ASSERT(qbkt->kstor[0].rdhash() == name.rdhash());
+        return qbkt->vstor;
+      }
+    Reference& open(const PreHashed_String& name)
+      {
+        // Reserve more room by rehashing if the load factor would exceed 0.5.
+        auto nbkt = static_cast<std::size_t>(this->m_stor.eptr - this->m_stor.bptr);
+        if(ROCKET_UNEXPECT(this->m_stor.size >= nbkt / 2)) {
+          // Ensure the number of buckets is an odd number.
+          this->do_rehash(this->m_stor.size * 3 | 17);
+        }
+        // Find a bucket for the new name.
+        auto qbkt = this->do_xprobe(name);
+        if(*qbkt) {
+          // Existent.
+          return qbkt->vstor[0];
+        }
+        // Construct a null reference and return it.
+        this->do_attach(qbkt, name);
+        return qbkt->vstor[0];
+      }
+    bool erase(const PreHashed_String& name) noexcept
+      {
+        // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
+        if(!this->m_stor.bptr) {
+          return false;
+        }
+        // Find the bucket for the name.
+        auto qbkt = this->do_xprobe(name);
+        if(!*qbkt) {
+          // Not found.
+          return false;
+        }
+        // Detach this reference.
+        this->do_detach(qbkt);
+        return true;
+      }
+
+    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 
 }  // namespace Asteria
