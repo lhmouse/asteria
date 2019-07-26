@@ -159,7 +159,7 @@ void Variable_HashSet::do_rehash(std::size_t nbkt)
 
 void Variable_HashSet::do_attach(Variable_HashSet::Bucket* qbkt, const Rcptr<Variable>& var) noexcept
   {
-    // Construct the node, then attch it.
+    // Construct the node, then attach it.
     ROCKET_ASSERT(!*qbkt);
     this->do_list_attach(qbkt);
     rocket::construct_at(qbkt->kstor, var);
@@ -167,18 +167,16 @@ void Variable_HashSet::do_attach(Variable_HashSet::Bucket* qbkt, const Rcptr<Var
     ROCKET_ASSERT(*qbkt);
   }
 
-Rcptr<Variable> Variable_HashSet::do_detach(Variable_HashSet::Bucket* qbkt) noexcept
+void Variable_HashSet::do_detach(Variable_HashSet::Bucket* qbkt) noexcept
   {
     // Transfer ownership of the old variable, then detach the bucket.
     ROCKET_ASSERT(*qbkt);
-    auto var = rocket::move(qbkt->kstor[0]);
     this->m_stor.size--;
     rocket::destroy_at(qbkt->kstor);
     this->do_list_detach(qbkt);
     ROCKET_ASSERT(!*qbkt);
     // Relocate nodes that follow `qbkt`, if any.
     this->do_xrelocate_but(qbkt);
-    return var;
   }
 
 void Variable_HashSet::enumerate(const Abstract_Variable_Callback& callback) const

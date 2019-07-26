@@ -74,7 +74,7 @@ class Variable_HashSet
 
     void do_rehash(std::size_t nbkt);
     void do_attach(Bucket* qbkt, const Rcptr<Variable>& var) noexcept;
-    Rcptr<Variable> do_detach(Bucket* qbkt) noexcept;
+    void do_detach(Bucket* qbkt) noexcept;
 
   public:
     bool empty() const noexcept
@@ -138,7 +138,8 @@ class Variable_HashSet
           return false;
         }
         // Detach this variable. It cannot be unique because `var` outlives this function.
-        this->do_detach(qbkt).release()->drop_reference();
+        qbkt->kstor[0].release()->drop_reference();
+        this->do_detach(qbkt);
         return true;
       }
     Rcptr<Variable> erase_random_opt() noexcept
@@ -150,7 +151,8 @@ class Variable_HashSet
           return nullptr;
         }
         // Detach this variable and return it.
-        auto var = this->do_detach(qbkt);
+        auto var = rocket::move(qbkt->kstor[0]);
+        this->do_detach(qbkt);
         return var;
       }
 
