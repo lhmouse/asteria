@@ -26,19 +26,19 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     Executive_Context ctx_func(1, global, stack, this->m_zvarg, this->m_params, rocket::move(self), rocket::move(args));
     stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
-    auto status = this->m_code.execute(ctx_func);
-    if(status == Air_Node::status_return){
-      // Return the reference at the top of `stack`.
-      self = rocket::move(stack.open_top_reference());
-    }
-    else if(status == Air_Node::status_next) {
+    auto status = Air_Node::status_next;
+    this->m_code.execute(status, ctx_func);
+    if(status == Air_Node::status_next) {
       // Return `null` if the control flow reached the end of the function.
-      self = Reference_Root::S_null();
+      return self = Reference_Root::S_null();
+    }
+    else if(status == Air_Node::status_return){
+      // Return the reference at the top of `stack`.
+      return self = rocket::move(stack.open_top_reference());
     }
     else {
       ASTERIA_THROW_RUNTIME_ERROR("An invalid status code `", status, "` was returned from a function. This is likely a bug. Please report.");
     }
-    return self;
   }
 
 void Instantiated_Function::enumerate_variables(const Abstract_Variable_Callback& callback) const

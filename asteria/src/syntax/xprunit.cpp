@@ -831,7 +831,9 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     void do_execute_subexpression(Executive_Context& ctx, const Air_Queue& code, bool assign)
       {
-        code.execute(ctx);
+        auto status = Air_Node::status_next;
+        code.execute(status, ctx);
+        ROCKET_ASSERT(status == Air_Node::status_next);
         ctx.stack().pop_next_reference(assign);
       }
 

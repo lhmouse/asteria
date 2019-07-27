@@ -58,13 +58,16 @@ namespace Asteria {
 
     Air_Node::Status do_execute_statement_list(Executive_Context& ctx, const Air_Queue& code)
       {
-        return code.execute(ctx);
+        auto status = Air_Node::status_next;
+        code.execute(status, ctx);
+        return status;
       }
 
     Air_Node::Status do_execute_block(const Air_Queue& code, const Executive_Context& ctx)
       {
+        auto status = Air_Node::status_next;
         Executive_Context ctx_next(1, ctx);
-        auto status = do_execute_statement_list(ctx_next, code);
+        code.execute(status, ctx_next);
         return status;
       }
 
@@ -100,13 +103,18 @@ namespace Asteria {
         return code;
       }
 
-    Reference&& do_evaluate_expression_nonempty(const Air_Queue& code, const Executive_Context& ctx)
+    Reference&& do_evaluate_expression_nonempty(const Air_Queue& code, /*const*/ Executive_Context& ctx)
       {
         ROCKET_ASSERT(!code.empty());
         // Evaluate the expression. The result will be pushed on `stack`.
         ctx.stack().clear_references();
-        code.execute(const_cast<Executive_Context&>(ctx));
-        return rocket::move(ctx.stack().open_top_reference());
+        auto status = Air_Node::status_next;
+        code.execute(status, ctx);
+        ROCKET_ASSERT(status == Air_Node::status_next);
+        // The result should at the top of the stack. Don't bother constructing a new reference.
+        // Note that it is invalidated if the stack is altered after this function returns.
+        auto& self = ctx.stack().open_top_reference();
+        return rocket::move(self);
       }
 
     class Air_execute_clear_stack : public Air_Node

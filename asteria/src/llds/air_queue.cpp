@@ -17,18 +17,14 @@ void Air_Queue::do_clear_nodes() const noexcept
     }
   }
 
-Air_Node::Status Air_Queue::execute(Executive_Context& ctx) const
+void Air_Queue::execute(Air_Node::Status& status, Executive_Context& ctx) const
   {
     auto next = this->m_stor.head;
-    while(ROCKET_EXPECT(next)) {
+    while(ROCKET_EXPECT(next && !status)) {
       auto qnode = std::exchange(next, next->m_nx);
       // Execute this node and return any status code unexpected to the caller verbatim.
-      auto status = qnode->execute(ctx);
-      if(ROCKET_UNEXPECT(status != Air_Node::status_next)) {
-        return status;
-      }
+      status = qnode->execute(ctx);
     }
-    return Air_Node::status_next;
   }
 
 void Air_Queue::enumerate_variables(const Abstract_Variable_Callback& callback) const
