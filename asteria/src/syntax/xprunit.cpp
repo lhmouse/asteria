@@ -638,7 +638,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Push the constant.
             Reference_Root::S_constant xref = { this->m_value };
@@ -714,7 +714,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Search for the name in the global context.
             auto qref = ctx.global().get_named_reference_opt(this->m_name);
@@ -742,7 +742,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Locate the context.
             auto qctx = std::next(Context_iterator<Executive_Context>(ctx), this->m_depth);
@@ -772,7 +772,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Push the reference as is.
             ctx.stack().push_reference(this->m_ref);
@@ -801,7 +801,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Generate code of the function body.
             Air_Queue code_body;
@@ -849,7 +849,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Pick a branch basing on the condition.
             if(ctx.stack().get_top_reference().read().test()) {
@@ -922,7 +922,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_tail, this->m_tco_by_ref);
           }
@@ -970,7 +970,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_plain, ctx.global());
           }
@@ -991,7 +991,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Append a modifier.
             Reference_Modifier::S_object_key xmod = { this->m_name };
@@ -1015,7 +1015,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto& lhs = ctx.stack().get_top_reference().open();
@@ -1053,7 +1053,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto& lhs = ctx.stack().get_top_reference().open();
@@ -1091,7 +1091,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1131,7 +1131,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1157,7 +1157,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1193,7 +1193,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1229,7 +1229,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             const auto& rhs = ctx.stack().get_top_reference().read();
@@ -1255,7 +1255,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto& rhs = ctx.stack().get_top_reference().open();
@@ -1291,7 +1291,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto& rhs = ctx.stack().get_top_reference().open();
@@ -1327,7 +1327,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().unset();
@@ -1352,7 +1352,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             const auto& rhs = ctx.stack().get_top_reference().read();
@@ -1393,7 +1393,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             const auto& rhs = ctx.stack().get_top_reference().read();
@@ -1419,7 +1419,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1455,7 +1455,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1491,7 +1491,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1527,7 +1527,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1563,7 +1563,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1599,7 +1599,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1635,7 +1635,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1671,7 +1671,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1707,7 +1707,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1743,7 +1743,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1779,7 +1779,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1815,7 +1815,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1851,7 +1851,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is unary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1888,7 +1888,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1920,7 +1920,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1953,7 +1953,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -1994,7 +1994,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2042,7 +2042,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2085,7 +2085,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2137,7 +2137,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2175,7 +2175,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2213,7 +2213,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2254,7 +2254,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2295,7 +2295,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2336,7 +2336,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2376,7 +2376,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2415,7 +2415,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2454,7 +2454,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is binary.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2493,7 +2493,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Pop the RHS operand followed.
             auto rhs = ctx.stack().get_top_reference().read();
@@ -2519,7 +2519,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Pop references to create an array.
             G_array array;
@@ -2550,7 +2550,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Pop references to create an object.
             G_object object;
@@ -2582,7 +2582,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Pick a branch basing on the condition.
             if(ctx.stack().get_top_reference().read().is_null()) {
@@ -2608,7 +2608,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This operator is ternary.
             auto rhs = ctx.stack().get_top_reference().read();

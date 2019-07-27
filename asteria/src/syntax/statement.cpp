@@ -121,7 +121,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // We push a null reference in case of empty expressions.
             ctx.stack().clear_references();
@@ -145,7 +145,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Execute the block without affecting `ctx`.
             return do_execute_block(this->m_code, ctx);
@@ -170,7 +170,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Allocate a variable.
             auto var = do_safe_create_variable(nullptr, ctx, "variable", this->m_name);
@@ -195,7 +195,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Allocate a variable.
             auto var = do_safe_create_variable(nullptr, ctx, "variable placeholder", this->m_name);
@@ -222,7 +222,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Read the value of the initializer.
             // Note that the initializer must not have been empty for this code.
@@ -257,7 +257,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Create a dummy reference for further name lookups.
             // A function becomes visible before its definition, where it is initialized to `null`.
@@ -299,7 +299,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // Pick a branch basing on the condition.
             if(ctx.stack().get_top_reference().read().test() != this->m_negative) {
@@ -337,7 +337,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This is different from a C `switch` statement where `case` labels must have constant operands.
             // Evaluate the control expression.
@@ -412,7 +412,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This is the same as a `do...while` loop in C.
             for(;;) {
@@ -452,7 +452,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This is the same as a `while` loop in C.
             for(;;) {
@@ -495,7 +495,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This is the same as a ranged-`for` loop in C++.
             Executive_Context ctx_for(1, ctx);
@@ -579,7 +579,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This is the same as a `for` loop in C.
             Executive_Context ctx_for(1, ctx);
@@ -633,7 +633,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // This is the same as a `try...catch` block in C++.
             try {
@@ -673,7 +673,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& /*ctx*/) const override
+        Status execute(Executive_Context& /*ctx*/) const override
           {
             return this->m_status;
           }
@@ -694,7 +694,7 @@ namespace Asteria {
           }
 
       public:
-        [[noreturn]] Air_Node::Status execute(Executive_Context& ctx) const override
+        [[noreturn]] Status execute(Executive_Context& ctx) const override
           {
             // What to throw?
             const auto& value = ctx.stack().get_top_reference().read();
@@ -739,7 +739,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             // What to return?
             auto& self = ctx.stack().open_top_reference();
@@ -769,7 +769,7 @@ namespace Asteria {
           }
 
       public:
-        Air_Node::Status execute(Executive_Context& ctx) const override
+        Status execute(Executive_Context& ctx) const override
           {
             if(ROCKET_EXPECT(ctx.stack().get_top_reference().read().test() != this->m_negative)) {
               // If the assertion succeeds, there is no effect.
