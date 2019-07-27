@@ -1982,7 +1982,7 @@ Parser_Error Parser::get_parser_error() const noexcept
         return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
       }
     default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -2002,7 +2002,7 @@ const Cow_Vector<Statement>& Parser::get_statements() const
         return this->m_stor.as<Cow_Vector<Statement>>();
       }
     default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 

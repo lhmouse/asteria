@@ -28,16 +28,32 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     // Execute AIR nodes one by one.
     auto status = Air_Node::status_next;
     this->m_code.execute(status, ctx_func);
-    if(status == Air_Node::status_next) {
-      // Return `null` if the control flow reached the end of the function.
-      return self = Reference_Root::S_null();
-    }
-    else if(status == Air_Node::status_return){
-      // Return the reference at the top of `stack`.
-      return self = rocket::move(stack.open_top_reference());
-    }
-    else {
-      ASTERIA_THROW_RUNTIME_ERROR("An invalid status code `", status, "` was returned from a function. This is likely a bug. Please report.");
+    switch(status) {
+    case Air_Node::status_next:
+      {
+        // Return `null` if the control flow reached the end of the function.
+        return self = Reference_Root::S_null();
+      }
+    case Air_Node::status_return:
+      {
+        // Return the reference at the top of `stack`.
+        return self = rocket::move(stack.open_top_reference());
+      }
+    case Air_Node::status_break_unspec:
+    case Air_Node::status_break_switch:
+    case Air_Node::status_break_while:
+    case Air_Node::status_break_for:
+      {
+        ASTERIA_THROW_RUNTIME_ERROR("`break` statements are not allowed outside matching `switch` or loop statements.");
+      }
+    case Air_Node::status_continue_unspec:
+    case Air_Node::status_continue_while:
+    case Air_Node::status_continue_for:
+      {
+        ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
+      }
+    default:
+      ASTERIA_TERMINATE("An invalid status code `", status, "` was returned from a function. This is likely a bug. Please report.");
     }
   }
 

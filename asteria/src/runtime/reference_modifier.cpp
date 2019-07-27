@@ -49,7 +49,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         return std::addressof(rit->second);
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -113,7 +113,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         return std::addressof(rit->second);
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -162,7 +162,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         return elem;
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 

@@ -461,7 +461,7 @@ std::ostream& Token::print(std::ostream& os) const
         return os << "string-literal `" << quote(this->m_stor.as<index_string_literal>().value) << "`";
       }
     default:
-      ASTERIA_TERMINATE("An unknown token type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown token type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 

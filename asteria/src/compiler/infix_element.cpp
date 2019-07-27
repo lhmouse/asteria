@@ -99,11 +99,11 @@ Infix_Element::Precedence Infix_Element::tell_precedence() const noexcept
             return precedence_assignment;
           }
         default:
-          ASTERIA_TERMINATE("An invalid infix operator `", altr.xop, "` has been encountered.");
+          ASTERIA_TERMINATE("An invalid infix operator `", altr.xop, "` has been encountered. This is likely a bug. Please report.");
         }
       }
     default:
-      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -161,7 +161,7 @@ void Infix_Element::extract(Cow_Vector<Xprunit>& units)
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -199,7 +199,7 @@ Cow_Vector<Xprunit>& Infix_Element::open_junction() noexcept
         return altr.rhs;
       }
     default:
-      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown infix-element type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 

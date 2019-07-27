@@ -33,7 +33,7 @@ const Value& Reference_Root::dereference_const() const
         ASTERIA_THROW_RUNTIME_ERROR("Tail call wrappers cannot be dereferenced directly.");
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -65,7 +65,7 @@ Value& Reference_Root::dereference_mutable() const
         ASTERIA_THROW_RUNTIME_ERROR("Tail call wrappers cannot be dereferenced directly.");
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -98,7 +98,7 @@ void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callb
         return rocket::for_each(this->m_stor.as<index_tail_call>().args_self, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
       }
     default:
-      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 

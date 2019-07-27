@@ -102,7 +102,7 @@ bool Value::test() const noexcept
         return true;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -187,7 +187,7 @@ Value::Compare Value::compare(const Value& other) const noexcept
         return compare_unordered;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -225,7 +225,7 @@ bool Value::unique() const noexcept
         return this->m_stor.as<gtype_object>().unique();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -263,7 +263,7 @@ long Value::use_count() const noexcept
         return this->m_stor.as<gtype_object>().use_count();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -295,7 +295,7 @@ long Value::gcref_split() const noexcept
         return this->m_stor.as<gtype_object>().use_count();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -377,7 +377,7 @@ std::ostream& Value::print(std::ostream& os, bool escape) const
         return os;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -464,7 +464,7 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
         return os;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -496,7 +496,7 @@ void Value::enumerate_variables(const Abstract_Variable_Callback& callback) cons
         return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 

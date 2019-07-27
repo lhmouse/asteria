@@ -980,7 +980,7 @@ void Statement::generate_code(Air_Queue& code, Cow_Vector<PreHashed_String>* nam
             break;
           }
         default:
-          ASTERIA_TERMINATE("An unknown target scope type `", altr.target, "` has been encountered.");
+          ASTERIA_TERMINATE("An unknown target scope type `", altr.target, "` has been encountered. This is likely a bug. Please report.");
         }
         return;
       }
@@ -1008,7 +1008,7 @@ void Statement::generate_code(Air_Queue& code, Cow_Vector<PreHashed_String>* nam
             break;
           }
         default:
-          ASTERIA_TERMINATE("An unknown target scope type `", altr.target, "` has been encountered.");
+          ASTERIA_TERMINATE("An unknown target scope type `", altr.target, "` has been encountered. This is likely a bug. Please report.");
         }
         return;
       }
@@ -1058,7 +1058,7 @@ void Statement::generate_code(Air_Queue& code, Cow_Vector<PreHashed_String>* nam
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown statement type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown statement type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 

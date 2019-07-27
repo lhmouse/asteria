@@ -2935,7 +2935,7 @@ void Xprunit::generate_code(Air_Queue& code, const Compiler_Options& options, Xp
             return;
           }
         default:
-          ASTERIA_TERMINATE("An unknown operator type enumeration `", altr.xop, "` has been encountered.");
+          ASTERIA_TERMINATE("An unknown operator type enumeration `", altr.xop, "` has been encountered. This is likely a bug. Please report.");
         }
       }
     case index_unnamed_array:
@@ -2969,7 +2969,7 @@ void Xprunit::generate_code(Air_Queue& code, const Compiler_Options& options, Xp
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown expression unit type enumeration `", this->index(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown expression unit type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 

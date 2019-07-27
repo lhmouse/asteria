@@ -998,7 +998,7 @@ Parser_Error Token_Stream::get_parser_error() const noexcept
         return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
       }
     default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -1018,7 +1018,7 @@ bool Token_Stream::empty() const noexcept
         return this->m_stor.as<Cow_Vector<Token>>().empty();
       }
     default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -1042,7 +1042,7 @@ const Token* Token_Stream::peek_opt(std::size_t ahead) const
         return altr.data() + (altr.size() - 1 - ahead);
       }
     default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
@@ -1067,7 +1067,7 @@ void Token_Stream::shift(std::size_t count)
         return;
       }
     default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered.");
+      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
