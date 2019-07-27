@@ -163,15 +163,15 @@ void Variable_HashSet::do_attach(Variable_HashSet::Bucket* qbkt, const Rcptr<Var
     ROCKET_ASSERT(!*qbkt);
     this->do_list_attach(qbkt);
     rocket::construct_at(qbkt->kstor, var);
-    this->m_stor.size++;
     ROCKET_ASSERT(*qbkt);
+    this->m_stor.size++;
   }
 
 void Variable_HashSet::do_detach(Variable_HashSet::Bucket* qbkt) noexcept
   {
     // Transfer ownership of the old variable, then detach the bucket.
-    ROCKET_ASSERT(*qbkt);
     this->m_stor.size--;
+    ROCKET_ASSERT(*qbkt);
     rocket::destroy_at(qbkt->kstor);
     this->do_list_detach(qbkt);
     ROCKET_ASSERT(!*qbkt);

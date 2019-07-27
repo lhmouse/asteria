@@ -171,15 +171,15 @@ void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const P
     this->do_list_attach(qbkt);
     rocket::construct_at(qbkt->kstor, name);
     rocket::construct_at(qbkt->vstor);
-    this->m_stor.size++;
     ROCKET_ASSERT(*qbkt);
+    this->m_stor.size++;
   }
 
 void Reference_Dictionary::do_detach(Reference_Dictionary::Bucket* qbkt) noexcept
   {
     // Destroy the old name and reference, then detach the bucket.
-    ROCKET_ASSERT(*qbkt);
     this->m_stor.size--;
+    ROCKET_ASSERT(*qbkt);
     rocket::destroy_at(qbkt->kstor);
     rocket::destroy_at(qbkt->vstor);
     this->do_list_detach(qbkt);
