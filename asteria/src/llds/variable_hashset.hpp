@@ -53,7 +53,7 @@ class Variable_HashSet
           this->do_clear_buckets();
         }
         if(this->m_stor.bptr) {
-          this->do_free_table(this->m_stor.bptr);
+          ::operator delete(this->m_stor.bptr);
         }
 #ifdef ROCKET_DEBUG
         std::memset(std::addressof(this->m_stor), 0xD2, sizeof(this->m_stor));
@@ -61,10 +61,7 @@ class Variable_HashSet
       }
 
   private:
-    Bucket* do_allocate_table(std::size_t nbkt);
-    void do_free_table(Bucket* bptr) noexcept;
     void do_clear_buckets() const noexcept;
-
     Bucket* do_xprobe(const Rcptr<Variable>& var) const noexcept;
     void do_xrelocate_but(Bucket* qxcld) noexcept;
 

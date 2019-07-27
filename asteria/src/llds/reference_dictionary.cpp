@@ -8,20 +8,6 @@
 
 namespace Asteria {
 
-Reference_Dictionary::Bucket* Reference_Dictionary::do_allocate_table(std::size_t nbkt)
-  {
-    auto bptr = static_cast<Bucket*>(std::calloc(nbkt, sizeof(Bucket)));
-    if(!bptr) {
-      throw std::bad_alloc();
-    }
-    return bptr;
-  }
-
-void Reference_Dictionary::do_free_table(Reference_Dictionary::Bucket* bptr) noexcept
-  {
-    std::free(bptr);
-  }
-
 void Reference_Dictionary::do_clear_buckets() const noexcept
   {
     auto next = this->m_stor.aptr;
@@ -126,9 +112,15 @@ void Reference_Dictionary::do_rehash(std::size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_stor.size);
     // Allocate a new table.
-    auto bptr = this->do_allocate_table(nbkt);
+    if(nbkt > PTRDIFF_MAX / sizeof(Bucket)) {
+      throw std::bad_array_new_length();
+    }
+    auto bptr = static_cast<Bucket*>(::operator new(nbkt * sizeof(Bucket)));
     auto eptr = bptr + nbkt;
-    // Set up an empty table.
+    // Initialize an empty table.
+    for(auto qbkt = bptr; qbkt != eptr; ++qbkt) {
+      qbkt->next = nullptr;
+    }
     auto bold = std::exchange(this->m_stor.bptr, bptr);
     this->m_stor.eptr = eptr;
     auto next = std::exchange(this->m_stor.aptr, nullptr);
@@ -160,7 +152,7 @@ void Reference_Dictionary::do_rehash(std::size_t nbkt)
     }
     // Deallocate the old table.
     if(bold) {
-      this->do_free_table(bold);
+      ::operator delete(bold);
     }
   }
 
