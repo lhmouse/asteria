@@ -72,6 +72,7 @@ class Xprunit
         tco_none      = 0,
         tco_by_ref    = 1,
         tco_by_value  = 2,
+        tco_discard   = 3,
       };
 
     struct S_literal

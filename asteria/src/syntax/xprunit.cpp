@@ -615,14 +615,16 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    Air_Queue do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco, const Analytic_Context& ctx,
-                                                       const Cow_Vector<Xprunit>& units)
+    Air_Queue do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx,
+                                      const Cow_Vector<Xprunit>& units)
       {
         Air_Queue code;
         // Only the last operatro may be TCO'd.
-        rocket::for_each(units,  [&](const Xprunit& unit) { unit.generate_code(code, options,
-                                                                               rocket::same(unit, units.back()) ? tco
-                                                                                                                : Xprunit::tco_none, ctx);  });
+        auto qback = units.end();
+        if(qback != units.begin()) {
+          std::for_each(units.begin(), --qback, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
+          qback->generate_code(code, options, tco_awareness, ctx);
+        }
         return code;
       }
 

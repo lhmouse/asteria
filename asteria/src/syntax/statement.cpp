@@ -42,7 +42,7 @@ namespace Asteria {
       }
 
     Air_Queue do_generate_code_statement_list(Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx,
-                                                         const Compiler_Options& options, const Cow_Vector<Statement>& stmts)
+                                              const Compiler_Options& options, const Cow_Vector<Statement>& stmts)
       {
         Air_Queue code;
         rocket::for_each(stmts, [&](const Statement& stmt) { stmt.generate_code(code, names_opt, ctx, options);  });
@@ -1028,20 +1028,18 @@ void Statement::generate_code(Air_Queue& code, Cow_Vector<PreHashed_String>* nam
         const auto& altr = this->m_stor.as<index_return>();
         // Generate preparation code.
         code.push<Air_execute_clear_stack>();
-        if(altr.by_ref) {
-          // Generate inline code for the operand. Only the last operator can be TCO'd.
-          rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options,
-                                                                                    rocket::same(unit, altr.expr.back()) ? Xprunit::tco_by_ref
-                                                                                                                         : Xprunit::tco_none, ctx);  });
+        // Generate inline code for the operand. Only the last operator can be TCO'd.
+        auto qback = altr.expr.end();
+        if(qback != altr.expr.begin()) {
+          std::for_each(altr.expr.begin(), --qback, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
+          qback->generate_code(code, options, altr.by_ref ? Xprunit::tco_by_ref : Xprunit::tco_by_value, ctx);
+        }
+        if(altr.by_ref || altr.expr.empty()) {
           // Return the reference as is.
           code.push<Air_return_status_simple>(Air_Node::status_return);
         }
         else {
-          // Generate inline code for the operand. Only the last operator can be TCO'd.
-          rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options,
-                                                                                    rocket::same(unit, altr.expr.back()) ? Xprunit::tco_by_value
-                                                                                                                         : Xprunit::tco_none, ctx);  });
-          // Return the reference as is.
+          // Return an rvalue.
           code.push<Air_execute_return_by_value>();
         }
         return;
