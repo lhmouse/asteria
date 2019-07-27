@@ -27,11 +27,11 @@ class Air_Node
       };
 
   private:
-    Air_Node* m_nx;
+    Air_Node* m_xt;
 
   public:
     constexpr Air_Node() noexcept
-      : m_nx()
+      : m_xt()
       {
       }
     virtual ~Air_Node();
