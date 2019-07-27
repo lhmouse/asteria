@@ -14,8 +14,8 @@ class Air_Queue
   private:
     struct Storage
       {
-        Air_Node* head;
-        Air_Node* tail;
+        Air_Node* head;  // first element (or null if empty)
+        Air_Node* tail;  // last element (or null if empty)
       };
     Storage m_stor;
 
