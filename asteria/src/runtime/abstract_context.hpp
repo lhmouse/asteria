@@ -18,6 +18,7 @@ class Abstract_Context
     struct Cleaner { void operator()(Rcbase* base) noexcept;  };
     Uptr<Rcbase, Cleaner> m_coll_opt;
 
+    // All named references (variables, parameters, etc.).
     Reference_Dictionary m_named_refs;
 
   public:

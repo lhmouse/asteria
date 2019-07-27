@@ -14,10 +14,9 @@ class Air_Queue
   private:
     struct Storage
       {
-        const Air_Node* head;
+        Air_Node* head;
         Air_Node* tail;
       };
-
     Storage m_stor;
 
   public:
@@ -74,7 +73,7 @@ class Air_Queue
         auto qnode = new XnodeT(rocket::forward<ParamsT>(params)...);
         // Append it to the end. Now the node is owned by `*this`.
         auto tail = std::exchange(this->m_stor.tail, qnode);
-        (tail ? tail->m_next : this->m_stor.head) = qnode;
+        (tail ? tail->m_nx : this->m_stor.head) = qnode;
         // Return a reference to the node.
         return *qnode;
       }

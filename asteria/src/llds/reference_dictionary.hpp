@@ -31,7 +31,6 @@ class Reference_Dictionary
         Bucket* aptr;  // any initialized bucket
         std::size_t size;  // number of initialized buckets
       };
-
     Storage m_stor;
 
   public:
