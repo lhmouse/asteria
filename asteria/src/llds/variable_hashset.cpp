@@ -11,12 +11,8 @@ namespace Asteria {
 void Variable_HashSet::do_clear_buckets() const noexcept
   {
     auto next = this->m_stor.head;
-    for(;;) {
-      auto qbkt = next;
-      if(ROCKET_UNEXPECT(!qbkt)) {
-        break;
-      }
-      next = qbkt->next;
+    while(ROCKET_EXPECT(next)) {
+      auto qbkt = std::exchange(next, next->next);
       // Destroy this bucket.
       ROCKET_ASSERT(*qbkt);
       rocket::destroy_at(qbkt->kstor);
@@ -107,12 +103,8 @@ void Variable_HashSet::do_rehash(std::size_t nbkt)
     auto next = std::exchange(this->m_stor.head, nullptr);
     // Move buckets into the new table.
     // Warning: No exception shall be thrown from the code below.
-    for(;;) {
-      auto qbkt = next;
-      if(ROCKET_UNEXPECT(!qbkt)) {
-        break;
-      }
-      next = qbkt->next;
+    while(ROCKET_EXPECT(next)) {
+      auto qbkt = std::exchange(next, next->next);
       // Transfer ownership of the old variable, then destroy the bucket.
       ROCKET_ASSERT(*qbkt);
       auto var = rocket::move(qbkt->kstor[0]);
@@ -159,12 +151,8 @@ void Variable_HashSet::do_detach(Variable_HashSet::Bucket* qbkt) noexcept
 void Variable_HashSet::enumerate(const Abstract_Variable_Callback& callback) const
   {
     auto next = this->m_stor.head;
-    for(;;) {
-      auto qbkt = next;
-      if(ROCKET_UNEXPECT(!qbkt)) {
-        break;
-      }
-      next = qbkt->next;
+    while(ROCKET_EXPECT(next)) {
+      auto qbkt = std::exchange(next, next->next);
       // Enumerate a child variable.
       ROCKET_ASSERT(*qbkt);
       if(!callback(qbkt->kstor[0])) {
