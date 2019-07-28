@@ -10,17 +10,17 @@ namespace Asteria {
 
 void Variable_HashSet::do_clear_buckets() const noexcept
   {
-    auto next = this->m_stor.aptr;
-    if(ROCKET_EXPECT(next)) {
-      auto origin = next;
-      do {
-        auto qbkt = std::exchange(next, next->next);
-        // Destroy this bucket.
-        ROCKET_ASSERT(*qbkt);
-        rocket::destroy_at(qbkt->kstor);
-        qbkt->next = nullptr;
-        // Stop if the head is encountered a second time, as the linked list is circular.
-      } while(ROCKET_EXPECT(next != origin));
+    auto next = this->m_stor.head;
+    for(;;) {
+      auto qbkt = next;
+      if(ROCKET_UNEXPECT(!qbkt)) {
+        break;
+      }
+      next = qbkt->next;
+      // Destroy this bucket.
+      ROCKET_ASSERT(*qbkt);
+      rocket::destroy_at(qbkt->kstor);
+      qbkt->prev = nullptr;
     }
   }
 
@@ -68,40 +68,25 @@ void Variable_HashSet::do_xrelocate_but(Variable_HashSet::Bucket* qxcld) noexcep
 
 void Variable_HashSet::do_list_attach(Variable_HashSet::Bucket* qbkt) noexcept
   {
-    auto next = std::exchange(this->m_stor.aptr, qbkt);
-    // Note the circular list.
-    if(ROCKET_EXPECT(next)) {
-      auto prev = next->prev;
-      // Insert the node between `prev` and `next`.
-      prev->next = qbkt;
-      next->prev = qbkt;
-      // Set up pointers in `qbkt`.
-      qbkt->next = next;
-      qbkt->prev = prev;
-    }
-    else {
-      // Set up the first node.
-      qbkt->next = qbkt;
-      qbkt->prev = qbkt;
-    }
+    // Insert the bucket before `head`.
+    auto head = std::exchange(this->m_stor.head, qbkt);
+    // Update the forward list, which is non-circular.
+    qbkt->next = head;
+    // Update the backward list, which is circular.
+    qbkt->prev = head ? std::exchange(head->prev, qbkt) : qbkt;
   }
 
 void Variable_HashSet::do_list_detach(Variable_HashSet::Bucket* qbkt) noexcept
   {
-    auto next = std::exchange(qbkt->next, nullptr);
-    // Note the circular list.
-    if(ROCKET_EXPECT(next != qbkt)) {
-      auto prev = qbkt->prev;
-      // Remove the node from `prev` and `next`.
-      prev->next = next;
-      next->prev = prev;
-      // Make `aptr` point to some valid bucket, should it equal `qbkt`.
-      this->m_stor.aptr = next;
-    }
-    else {
-      // Remove the last node.
-      this->m_stor.aptr = nullptr;
-    }
+    auto next = qbkt->next;
+    auto prev = qbkt->prev;
+    auto head = this->m_stor.head;
+    // Update the forward list, which is non-circular.
+    ((qbkt == head) ? this->m_stor.head : prev->next) = next;
+    // Update the backward list, which is circular.
+    (next ? next : head)->prev = prev;
+    // Mark the bucket empty.
+    qbkt->prev = nullptr;
   }
 
 void Variable_HashSet::do_rehash(std::size_t nbkt)
@@ -115,33 +100,33 @@ void Variable_HashSet::do_rehash(std::size_t nbkt)
     auto eptr = bptr + nbkt;
     // Initialize an empty table.
     for(auto qbkt = bptr; qbkt != eptr; ++qbkt) {
-      qbkt->next = nullptr;
+      qbkt->prev = nullptr;
     }
     auto bold = std::exchange(this->m_stor.bptr, bptr);
     this->m_stor.eptr = eptr;
-    auto next = std::exchange(this->m_stor.aptr, nullptr);
+    auto next = std::exchange(this->m_stor.head, nullptr);
     // Move buckets into the new table.
     // Warning: No exception shall be thrown from the code below.
-    if(ROCKET_EXPECT(next)) {
-      auto origin = next;
-      do {
-        auto qbkt = std::exchange(next, next->next);
-        // Transfer ownership of the old variable, then destroy the bucket.
-        ROCKET_ASSERT(*qbkt);
-        auto var = rocket::move(qbkt->kstor[0]);
-        rocket::destroy_at(qbkt->kstor);
-        qbkt->next = nullptr;
-        // Find a new bucket for the variable using linear probing.
-        // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
-        auto mptr = rocket::get_probing_origin(bptr, eptr, reinterpret_cast<std::uintptr_t>(var.get()));
-        qbkt = rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
-        ROCKET_ASSERT(qbkt);
-        // Insert the variable into the new bucket.
-        ROCKET_ASSERT(!*qbkt);
-        this->do_list_attach(qbkt);
-        rocket::construct_at(qbkt->kstor, rocket::move(var));
-        // Stop if the head is encountered a second time, as the linked list is circular.
-      } while(ROCKET_EXPECT(next != origin));
+    for(;;) {
+      auto qbkt = next;
+      if(ROCKET_UNEXPECT(!qbkt)) {
+        break;
+      }
+      next = qbkt->next;
+      // Transfer ownership of the old variable, then destroy the bucket.
+      ROCKET_ASSERT(*qbkt);
+      auto var = rocket::move(qbkt->kstor[0]);
+      rocket::destroy_at(qbkt->kstor);
+      qbkt->prev = nullptr;
+      // Find a new bucket for the variable using linear probing.
+      // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
+      auto mptr = rocket::get_probing_origin(bptr, eptr, reinterpret_cast<std::uintptr_t>(var.get()));
+      qbkt = rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
+      ROCKET_ASSERT(qbkt);
+      // Insert the variable into the new bucket.
+      ROCKET_ASSERT(!*qbkt);
+      this->do_list_attach(qbkt);
+      rocket::construct_at(qbkt->kstor, rocket::move(var));
     }
     // Deallocate the old table.
     if(bold) {
@@ -173,20 +158,20 @@ void Variable_HashSet::do_detach(Variable_HashSet::Bucket* qbkt) noexcept
 
 void Variable_HashSet::enumerate(const Abstract_Variable_Callback& callback) const
   {
-    auto next = this->m_stor.aptr;
-    if(ROCKET_EXPECT(next)) {
-      auto origin = next;
-      do {
-        auto qbkt = std::exchange(next, next->next);
-        // Enumerate child variables.
-        ROCKET_ASSERT(*qbkt);
-        bool recur = callback(qbkt->kstor[0]);
-        if(recur) {
-          // Enumerate grandchildren recursively.
-          qbkt->kstor[0]->enumerate_variables(callback);
-        }
-        // Stop if the head is encountered a second time, as the linked list is circular.
-      } while(ROCKET_EXPECT(next != origin));
+    auto next = this->m_stor.head;
+    for(;;) {
+      auto qbkt = next;
+      if(ROCKET_UNEXPECT(!qbkt)) {
+        break;
+      }
+      next = qbkt->next;
+      // Enumerate a child variable.
+      ROCKET_ASSERT(*qbkt);
+      if(!callback(qbkt->kstor[0])) {
+        continue;
+      }
+      // Enumerate grandchildren recursively.
+      qbkt->kstor[0]->enumerate_variables(callback);
     }
   }
 

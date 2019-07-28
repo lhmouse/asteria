@@ -14,20 +14,20 @@ class Variable_HashSet
   private:
     struct Bucket
       {
-        Bucket* next;  // the next bucket in the circular list
-        Bucket* prev;  // the previous bucket in the circular list
-        union { Rcptr<Variable> kstor[1];  };  // initialized iff `next` is non-null
+        Bucket* next;  // the next bucket in the [non-circular] list
+        Bucket* prev;  // the previous bucket in the [circular] list
+        union { Rcptr<Variable> kstor[1];  };  // initialized iff `prev` is non-null
 
         Bucket() noexcept { }
         ~Bucket() { }
-        explicit operator bool () const noexcept { return this->next != nullptr;  }
+        explicit operator bool () const noexcept { return this->prev != nullptr;  }
       };
 
     struct Storage
       {
         Bucket* bptr;  // beginning of bucket storage
         Bucket* eptr;  // end of bucket storage
-        Bucket* aptr;  // any initialized bucket
+        Bucket* head;  // the first initialized bucket
         std::size_t size;  // number of initialized buckets
       };
     Storage m_stor;
@@ -49,7 +49,7 @@ class Variable_HashSet
       }
     ~Variable_HashSet()
       {
-        if(this->m_stor.aptr) {
+        if(this->m_stor.head) {
           this->do_clear_buckets();
         }
         if(this->m_stor.bptr) {
@@ -75,7 +75,7 @@ class Variable_HashSet
   public:
     bool empty() const noexcept
       {
-        return this->m_stor.aptr == nullptr;
+        return this->m_stor.head == nullptr;
       }
     std::size_t size() const noexcept
       {
@@ -83,11 +83,11 @@ class Variable_HashSet
       }
     void clear() noexcept
       {
-        if(this->m_stor.aptr) {
+        if(this->m_stor.head) {
           this->do_clear_buckets();
         }
         // Clean invalid data up.
-        this->m_stor.aptr = nullptr;
+        this->m_stor.head = nullptr;
         this->m_stor.size = 0;
       }
 
@@ -149,7 +149,7 @@ class Variable_HashSet
     Rcptr<Variable> erase_random_opt() noexcept
       {
         // Get a random bucket that contains a variable.
-        auto qbkt = this->m_stor.aptr;
+        auto qbkt = this->m_stor.head;
         if(!qbkt) {
           // Empty.
           return nullptr;
