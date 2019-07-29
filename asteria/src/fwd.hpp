@@ -171,8 +171,8 @@ struct Compiler_Options
     bool keyword_as_identifier = false;
     // Parse integer literals as real literals. [useful when parsing JSON text]
     bool integer_as_real = false;
-    // Disable Tail Call Optimization (TCO).
-    bool disable_tco = false;
+    // Enable proper tail calls. [commonly known as tail call optimization]
+    bool proper_tail_calls = true;
   };
 
 }  // namespace Asteria

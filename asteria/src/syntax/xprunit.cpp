@@ -2693,7 +2693,7 @@ void Xprunit::generate_code(Air_Queue& code, const Compiler_Options& options, Xp
       {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        if(!options.disable_tco && (tco != tco_none)) {
+        if(options.proper_tail_calls && (tco != tco_none)) {
           code.push<Air_execute_function_call_tail>(altr.sloc, altr.by_refs, tco == tco_by_ref);
         }
         else {
