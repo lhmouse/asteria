@@ -468,7 +468,7 @@ std::ostream& Value::dump(std::ostream& os, size_t indent, size_t hanging) const
     }
   }
 
-void Value::enumerate_variables(Abstract_Variable_Callback& callback) const
+Abstract_Variable_Callback& Value::enumerate_variables(Abstract_Variable_Callback& callback) const
   {
     switch(this->gtype()) {
     case gtype_null:
@@ -477,7 +477,7 @@ void Value::enumerate_variables(Abstract_Variable_Callback& callback) const
     case gtype_real:
     case gtype_string:
       {
-        return;
+        return callback;
       }
     case gtype_opaque:
       {
@@ -489,11 +489,11 @@ void Value::enumerate_variables(Abstract_Variable_Callback& callback) const
       }
     case gtype_array:
       {
-        return rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  });
+        return rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  }), callback;
       }
     case gtype_object:
       {
-        return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  });
+        return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  }), callback;
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");

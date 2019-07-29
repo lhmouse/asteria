@@ -69,12 +69,12 @@ Value& Reference_Root::dereference_mutable() const
     }
   }
 
-void Reference_Root::enumerate_variables(Abstract_Variable_Callback& callback) const
+Abstract_Variable_Callback& Reference_Root::enumerate_variables(Abstract_Variable_Callback& callback) const
   {
     switch(this->index()) {
     case index_null:
       {
-        return;
+        return callback;
       }
     case index_constant:
       {
@@ -87,15 +87,15 @@ void Reference_Root::enumerate_variables(Abstract_Variable_Callback& callback) c
     case index_variable:
       {
         const auto& var = this->m_stor.as<index_variable>().var;
-        if(!callback(var)) {
-          return;
+        if(callback(var)) {
+          // Descend into this variable recursively when the callback returns `true`.
+          var->enumerate_variables(callback);
         }
-        // Descend into this variable recursively when the callback returns `true`.
-        return var->enumerate_variables(callback);
+        return callback;
       }
     case index_tail_call:
       {
-        return rocket::for_each(this->m_stor.as<index_tail_call>().args_self, [&](const Reference& arg) { arg.enumerate_variables(callback);  });
+        return rocket::for_each(this->m_stor.as<index_tail_call>().args_self, [&](const Reference& arg) { arg.enumerate_variables(callback);  }), callback;
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");

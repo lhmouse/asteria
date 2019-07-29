@@ -102,9 +102,9 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     return *this;
   }
 
-void Reference::enumerate_variables(Abstract_Variable_Callback& callback) const
+Abstract_Variable_Callback& Reference::enumerate_variables(Abstract_Variable_Callback& callback) const
   {
-    this->m_root.enumerate_variables(callback);
+    return this->m_root.enumerate_variables(callback);
   }
 
 }  // namespace Asteria

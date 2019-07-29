@@ -21,7 +21,7 @@ class Placeholder : public Abstract_Opaque, public Abstract_Function
   public:
     std::ostream& describe(std::ostream& os) const override;
     [[noreturn]] Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const override;
-    void enumerate_variables(Abstract_Variable_Callback& callback) const override;
+    Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const override;
   };
 
 }  // namespace Asteria

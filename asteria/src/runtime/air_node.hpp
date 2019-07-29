@@ -39,7 +39,7 @@ class Air_Node
 
   public:
     virtual Status execute(Executive_Context& ctx) const = 0;
-    virtual void enumerate_variables(Abstract_Variable_Callback& callback) const = 0;
+    virtual Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const = 0;
   };
 
 }  // namespace Asteria

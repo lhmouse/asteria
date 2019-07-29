@@ -25,9 +25,9 @@ long Variable::increment_gcref(long split) const noexcept
     return this->m_gcref.first += carry;
   }
 
-void Variable::enumerate_variables(Abstract_Variable_Callback& callback) const
+Abstract_Variable_Callback& Variable::enumerate_variables(Abstract_Variable_Callback& callback) const
   {
-    this->m_value.enumerate_variables(callback);
+    return this->m_value.enumerate_variables(callback);
   }
 
 }  // namespace Asteria

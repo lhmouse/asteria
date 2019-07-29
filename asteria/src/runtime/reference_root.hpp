@@ -105,7 +105,7 @@ class Reference_Root
 
     const Value& dereference_const() const;
     Value& dereference_mutable() const;
-    void enumerate_variables(Abstract_Variable_Callback& callback) const;
+    Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const;
   };
 
 inline void swap(Reference_Root& lhs, Reference_Root& rhs) noexcept
