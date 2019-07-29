@@ -13,7 +13,7 @@ Generational_Collector::~Generational_Collector()
   {
   }
 
-Rcptr<Variable> Generational_Collector::create_variable(std::size_t glimit)
+rcptr<Variable> Generational_Collector::create_variable(size_t glimit)
   {
     auto rlimit = rocket::min(glimit, this->m_colls.size() - 1);
     // Get a variable from the pool.
@@ -28,11 +28,11 @@ Rcptr<Variable> Generational_Collector::create_variable(std::size_t glimit)
     return qvar;
   }
 
-std::size_t Generational_Collector::collect_variables(std::size_t glimit)
+size_t Generational_Collector::collect_variables(size_t glimit)
   {
     auto rlimit = rocket::min(glimit, this->m_colls.size() - 1);
     // Collect variables from the newest generation to the oldest generation.
-    for(std::size_t gindex = 0; gindex <= rlimit; ++gindex) {
+    for(size_t gindex = 0; gindex <= rlimit; ++gindex) {
       // Collect it.
       this->m_colls.mut(gindex).collect_single_opt();
     }

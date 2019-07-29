@@ -8,10 +8,10 @@
 
 namespace Asteria {
 
-extern G_real std_math_exp(const G_real& y, const Opt<G_real>& base);
+extern G_real std_math_exp(const G_real& y, const opt<G_real>& base);
 extern G_real std_math_expm1(const G_real& y);
 extern G_real std_math_pow(const G_real& x, const G_real& y);
-extern G_real std_math_log(const G_real& x, const Opt<G_real>& base);
+extern G_real std_math_log(const G_real& x, const opt<G_real>& base);
 extern G_real std_math_log1p(const G_real& x);
 
 extern G_real std_math_sin(const G_real& x);
@@ -22,7 +22,7 @@ extern G_real std_math_acos(const G_real& x);
 extern G_real std_math_atan(const G_real& x);
 extern G_real std_math_atan2(const G_real& y, const G_real& x);
 
-extern G_real std_math_hypot(const Cow_Vector<Value>& values);
+extern G_real std_math_hypot(const cow_vector<Value>& values);
 
 extern G_real std_math_sinh(const G_real& x);
 extern G_real std_math_cosh(const G_real& x);

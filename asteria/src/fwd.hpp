@@ -13,8 +13,8 @@
 #endif
 
 #include <utility>  // std::pair<>, rocket::move(), rocket::forward()
-#include <cstddef>  // std::nullptr_t
-#include <cstdint>  // std::uint8_t, std::int64_t
+#include <cstddef>  // nullptr_t
+#include <cstdint>  // uint8_t, int64_t
 #include <climits>
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/cow_string.hpp"
@@ -94,39 +94,54 @@ class Simple_Source_File;
 class Argument_Reader;
 class Simple_Binding_Wrapper;
 
-// Type Aliases
-using Cow_String = rocket::cow_string;
-using PreHashed_String = rocket::prehashed_string;
-using Cow_stringbuf = rocket::cow_stringbuf;
-using Cow_isstream = rocket::cow_istringstream;
-using Cow_osstream = rocket::cow_ostringstream;
+// Aliases
+using std::nullptr_t;
+using std::int8_t;
+using std::uint8_t;
+using std::int16_t;
+using std::uint16_t;
+using std::int32_t;
+using std::uint32_t;
+using std::int64_t;
+using std::uint64_t;
+using std::intptr_t;
+using std::uintptr_t;
+using std::intmax_t;
+using std::uintmax_t;
+using std::ptrdiff_t;
+using std::size_t;
 
-// Template Aliases
-template<typename E, typename D = std::default_delete<const E>> using Uptr = rocket::unique_ptr<E, D>;
-template<typename E> using Rcptr = rocket::refcnt_ptr<E>;
-template<typename E> using Rcobj = rocket::refcnt_object<E>;
-template<typename E> using Cow_Vector = rocket::cow_vector<E>;
-template<typename K, typename V, typename H> using Cow_HashMap = rocket::cow_hashmap<K, V, H, std::equal_to<void>>;
-template<typename E, std::size_t k> using Static_Vector = rocket::static_vector<E, k>;
-template<typename... P> using Variant = rocket::variant<P...>;
-template<typename T> using Opt = rocket::optional<T>;
-template<typename F, typename S> using Pair = std::pair<F, S>;
-template<typename F, typename S> using Cow_Bivector = rocket::cow_vector<std::pair<F, S>>;
-template<typename E, std::size_t ...k> using Array = rocket::array<E, k...>;
+using cow_string = rocket::cow_string;
+using phsh_string = rocket::prehashed_string;
+using cow_stringbuf = rocket::cow_stringbuf;
+using cow_isstream = rocket::cow_istringstream;
+using cow_osstream = rocket::cow_ostringstream;
+
+template<typename E, typename D = std::default_delete<const E>> using uptr = rocket::unique_ptr<E, D>;
+template<typename E> using rcptr = rocket::refcnt_ptr<E>;
+template<typename E> using rcobj = rocket::refcnt_object<E>;
+template<typename E> using cow_vector = rocket::cow_vector<E>;
+template<typename K, typename V, typename H> using cow_hashmap = rocket::cow_hashmap<K, V, H, std::equal_to<void>>;
+template<typename E, size_t k> using sso_vector = rocket::static_vector<E, k>;
+template<typename... P> using variant = rocket::variant<P...>;
+template<typename T> using opt = rocket::optional<T>;
+template<typename F, typename S> using pair = std::pair<F, S>;
+template<typename F, typename S> using cow_bivector = rocket::cow_vector<std::pair<F, S>>;
+template<typename E, size_t ...k> using array = rocket::array<E, k...>;
 
 // Fundamental Types
-using G_null      = std::nullptr_t;
+using G_null      = nullptr_t;
 using G_boolean   = bool;
-using G_integer   = std::int64_t;
+using G_integer   = int64_t;
 using G_real      = double;
-using G_string    = Cow_String;
-using G_opaque    = Rcobj<Abstract_Opaque>;
-using G_function  = Rcobj<Abstract_Function>;
-using G_array     = Cow_Vector<Value>;
-using G_object    = Cow_HashMap<PreHashed_String, Value, PreHashed_String::hash>;
+using G_string    = cow_string;
+using G_opaque    = rcobj<Abstract_Opaque>;
+using G_function  = rcobj<Abstract_Function>;
+using G_array     = cow_vector<Value>;
+using G_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
 
 // Indices of Fundamental Types
-enum Gtype : std::uint8_t
+enum Gtype : uint8_t
   {
     gtype_null      = 0,
     gtype_boolean   = 1,
@@ -140,7 +155,7 @@ enum Gtype : std::uint8_t
   };
 
 // API versioning of the standard library
-enum API_Version : std::uint32_t
+enum API_Version : uint32_t
   {
     api_version_none       = 0x00000000,  // no standard library
     api_version_0001_0000  = 0x00010000,  // version 1.0

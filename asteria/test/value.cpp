@@ -36,12 +36,12 @@ int main()
     ASTERIA_TEST_CHECK(value.as_array().at(1).as_string() == "world");
 
     G_object object;
-    object.try_emplace(PreHashed_String(rocket::sref("one")), G_boolean(true));
-    object.try_emplace(PreHashed_String(rocket::sref("two")), G_string("world"));
+    object.try_emplace(phsh_string(rocket::sref("one")), G_boolean(true));
+    object.try_emplace(phsh_string(rocket::sref("two")), G_string("world"));
     value = std::move(object);
     ASTERIA_TEST_CHECK(value.is_object());
-    ASTERIA_TEST_CHECK(value.as_object().at(PreHashed_String(rocket::sref("one"))).as_boolean() == true);
-    ASTERIA_TEST_CHECK(value.as_object().at(PreHashed_String(rocket::sref("two"))).as_string() == "world");
+    ASTERIA_TEST_CHECK(value.as_object().at(phsh_string(rocket::sref("one"))).as_boolean() == true);
+    ASTERIA_TEST_CHECK(value.as_object().at(phsh_string(rocket::sref("two"))).as_string() == "world");
 
     value = nullptr;
     Value cmp(nullptr);
@@ -136,8 +136,8 @@ int main()
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_less);
 
     object.clear();
-    object.try_emplace(PreHashed_String(rocket::sref("one")), G_boolean(true));
-    object.try_emplace(PreHashed_String(rocket::sref("two")), G_string("world"));
+    object.try_emplace(phsh_string(rocket::sref("one")), G_boolean(true));
+    object.try_emplace(phsh_string(rocket::sref("two")), G_string("world"));
     value = std::move(object);
     cmp = value;
     ASTERIA_TEST_CHECK(value.compare(cmp) == Value::compare_unordered);

@@ -15,7 +15,7 @@ class Generational_Collector : public virtual Rcbase
   {
   private:
     Variable_HashSet m_pool;
-    Static_Vector<Collector, 3> m_colls;
+    sso_vector<Collector, 3> m_colls;
 
   public:
     Generational_Collector() noexcept
@@ -32,25 +32,25 @@ class Generational_Collector : public virtual Rcbase
       = delete;
 
   public:
-    std::size_t pool_size() const noexcept
+    size_t pool_size() const noexcept
       {
         return this->m_pool.size();
       }
-    std::size_t collector_count() const noexcept
+    size_t collector_count() const noexcept
       {
         return this->m_colls.size();
       }
-    const Collector& collector(std::size_t gindex) const
+    const Collector& collector(size_t gindex) const
       {
         return this->m_colls.at(gindex);
       }
-    Collector& collector(std::size_t gindex)
+    Collector& collector(size_t gindex)
       {
         return this->m_colls.mut(gindex);
       }
 
-    Rcptr<Variable> create_variable(std::size_t glimit);
-    std::size_t collect_variables(std::size_t glimit);
+    rcptr<Variable> create_variable(size_t glimit);
+    size_t collect_variables(size_t glimit);
   };
 
 }  // namespace Asteria

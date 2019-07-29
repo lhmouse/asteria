@@ -22,12 +22,12 @@ Executive_Context::~Executive_Context()
 
     }  // namespace
 
-void Executive_Context::do_prepare_function(const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args)
+void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
   {
     // This is the subscript of the special pameter placeholder `...`.
-    Opt<std::size_t> qelps;
+    opt<size_t> qelps;
     // Set parameters, which are local references.
-    for(std::size_t i = 0; i < params.size(); ++i) {
+    for(size_t i = 0; i < params.size(); ++i) {
       const auto& param = params.at(i);
       if(param.empty()) {
         continue;
@@ -56,7 +56,7 @@ void Executive_Context::do_prepare_function(const Cow_Vector<PreHashed_String>& 
         // Erase named arguments as well as the ellipsis.
         args.erase(0, *qelps);
         // Create a new argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(Rcobj<Variadic_Arguer>(this->m_zvarg.get(), rocket::move(args)));
+        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(rcobj<Variadic_Arguer>(this->m_zvarg.get(), rocket::move(args)));
       }
       else {
         // Reference the pre-allocated zero-ary argument getter.

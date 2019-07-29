@@ -18,25 +18,25 @@ class Argument_Reader
 
     struct State
       {
-        Cow_Vector<Mparam> prototype;
+        cow_vector<Mparam> prototype;
         bool finished;
         bool succeeded;
       };
 
   private:
-    Cow_String m_name;
-    std::reference_wrapper<const Cow_Vector<Reference>> m_args;
+    cow_string m_name;
+    std::reference_wrapper<const cow_vector<Reference>> m_args;
     bool m_throw_on_failure;
 
     // This string stores all overloads that have been tested so far.
     // Overloads are encoded in binary formats.
-    Cow_Vector<Mparam> m_overloads;
+    cow_vector<Mparam> m_overloads;
     // N.B. The contents of `m_state` can be copied elsewhere and back.
     // Any further operations will resume from that point.
     State m_state;
 
   public:
-    Argument_Reader(Cow_String name, const Cow_Vector<Reference>& args) noexcept
+    Argument_Reader(cow_string name, const cow_vector<Reference>& args) noexcept
       : m_name(rocket::move(name)), m_args(args), m_throw_on_failure(false),
         m_overloads(), m_state()
       {
@@ -55,18 +55,18 @@ class Argument_Reader
     inline void do_record_parameter_finish(bool variadic);
 
     inline const Reference* do_peek_argument_opt() const;
-    inline Opt<std::ptrdiff_t> do_check_finish_opt(bool variadic) const;
+    inline opt<ptrdiff_t> do_check_finish_opt(bool variadic) const;
 
   public:
-    const Cow_String& get_name() const noexcept
+    const cow_string& get_name() const noexcept
       {
         return this->m_name;
       }
-    std::size_t count_arguments() const noexcept
+    size_t count_arguments() const noexcept
       {
         return this->m_args.get().size();
       }
-    const Reference& get_argument(std::size_t index) const
+    const Reference& get_argument(size_t index) const
       {
         return this->m_args.get().at(index);
       }
@@ -102,14 +102,14 @@ class Argument_Reader
     // The argument must exist and must be of the desired type or `null`; otherwise the operation fails.
     Argument_Reader& g(Reference& ref);
     Argument_Reader& g(Value& value);
-    Argument_Reader& g(Opt<G_boolean>& qxvalue);
-    Argument_Reader& g(Opt<G_integer>& qxvalue);
-    Argument_Reader& g(Opt<G_real>& qxvalue);  // This function converts `integer`s to `real`s implicitly.
-    Argument_Reader& g(Opt<G_string>& qxvalue);
-    Argument_Reader& g(Opt<G_opaque>& qxvalue);
-    Argument_Reader& g(Opt<G_function>& qxvalue);
-    Argument_Reader& g(Opt<G_array>& qxvalue);
-    Argument_Reader& g(Opt<G_object>& qxvalue);
+    Argument_Reader& g(opt<G_boolean>& qxvalue);
+    Argument_Reader& g(opt<G_integer>& qxvalue);
+    Argument_Reader& g(opt<G_real>& qxvalue);  // This function converts `integer`s to `real`s implicitly.
+    Argument_Reader& g(opt<G_string>& qxvalue);
+    Argument_Reader& g(opt<G_opaque>& qxvalue);
+    Argument_Reader& g(opt<G_function>& qxvalue);
+    Argument_Reader& g(opt<G_array>& qxvalue);
+    Argument_Reader& g(opt<G_object>& qxvalue);
     // Get a REQUIRED argument.
     // The argument must exist and must be of the desired type; otherwise the operation fails.
     Argument_Reader& g(G_boolean& xvalue);
@@ -124,8 +124,8 @@ class Argument_Reader
     // For the overload taking no argument, if there are excess arguments, the operation fails.
     // For the other overloads, excess arguments are copied into `vargs`.
     bool finish();
-    bool finish(Cow_Vector<Reference>& vargs);
-    bool finish(Cow_Vector<Value>& vargs);
+    bool finish(cow_vector<Reference>& vargs);
+    bool finish(cow_vector<Value>& vargs);
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]] void throw_no_matching_function_call() const;

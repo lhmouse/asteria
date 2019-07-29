@@ -12,10 +12,10 @@ namespace Asteria {
 class Evaluation_Stack
   {
   private:
-    Cow_Vector<Reference> m_refs;
+    cow_vector<Reference> m_refs;
     Reference* m_etop;
 
-    Rcptr<Variable> m_lvar;
+    rcptr<Variable> m_lvar;
 
   public:
     Evaluation_Stack() noexcept
@@ -31,9 +31,9 @@ class Evaluation_Stack
       = delete;
 
   public:
-    std::size_t count_references() const noexcept
+    size_t count_references() const noexcept
       {
-        return static_cast<std::size_t>(this->m_etop - this->m_refs.data());
+        return static_cast<size_t>(this->m_etop - this->m_refs.data());
       }
     void clear_references() noexcept
       {
@@ -42,7 +42,7 @@ class Evaluation_Stack
         // Reset the top pointer without destroying references for efficiency.
         this->m_etop = etop;
       }
-    void reserve_references(Cow_Vector<Reference>&& refs)
+    void reserve_references(cow_vector<Reference>&& refs)
       {
         // This may throw allocation failure if `refs` is not unique.
         auto etop = refs.mut_data();
@@ -119,11 +119,11 @@ class Evaluation_Stack
         this->m_etop = --etop;
       }
 
-    void set_last_variable(Rcptr<Variable>&& var_opt) noexcept
+    void set_last_variable(rcptr<Variable>&& var_opt) noexcept
       {
         this->m_lvar = rocket::move(var_opt);
       }
-    Rcptr<Variable> release_last_variable_opt() noexcept
+    rcptr<Variable> release_last_variable_opt() noexcept
       {
         return std::exchange(this->m_lvar, nullptr);
       }

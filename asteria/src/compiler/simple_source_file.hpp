@@ -13,36 +13,36 @@ class Simple_Source_File
   {
   private:
     bool m_fthr;  // throw on failure
-    Cow_Vector<Instantiated_Function> m_code;  // for type erasure
+    cow_vector<Instantiated_Function> m_code;  // for type erasure
 
   public:
     Simple_Source_File() noexcept
       : m_fthr(false)
       {
       }
-    Simple_Source_File(std::streambuf& cbuf, const Cow_String& filename)
+    Simple_Source_File(std::streambuf& cbuf, const cow_string& filename)
       : m_fthr(true)
       {
         this->reload(cbuf, filename);
       }
-    Simple_Source_File(std::istream& cstrm, const Cow_String& filename)
+    Simple_Source_File(std::istream& cstrm, const cow_string& filename)
       : m_fthr(true)
       {
         this->reload(cstrm, filename);
       }
-    Simple_Source_File(const Cow_String& cstr, const Cow_String& filename)
+    Simple_Source_File(const cow_string& cstr, const cow_string& filename)
       : m_fthr(true)
       {
         this->reload(cstr, filename);
       }
-    explicit Simple_Source_File(const Cow_String& filename)
+    explicit Simple_Source_File(const cow_string& filename)
       : m_fthr(true)
       {
         this->open(filename);
       }
 
   private:
-    inline Parser_Error do_reload_nothrow(std::streambuf& cbuf, const Cow_String& filename);
+    inline Parser_Error do_reload_nothrow(std::streambuf& cbuf, const cow_string& filename);
     inline Parser_Error do_throw_or_return(Parser_Error&& err);
 
   public:
@@ -55,13 +55,13 @@ class Simple_Source_File
         this->m_fthr = fthr;
       }
 
-    Parser_Error reload(std::streambuf& cbuf, const Cow_String& filename);
-    Parser_Error reload(std::istream& cstrm, const Cow_String& filename);
-    Parser_Error reload(const Cow_String& cstr, const Cow_String& filename);
-    Parser_Error open(const Cow_String& filename);
+    Parser_Error reload(std::streambuf& cbuf, const cow_string& filename);
+    Parser_Error reload(std::istream& cstrm, const cow_string& filename);
+    Parser_Error reload(const cow_string& cstr, const cow_string& filename);
+    Parser_Error open(const cow_string& filename);
     void clear() noexcept;
 
-    Reference execute(const Global_Context& global, Cow_Vector<Reference>&& args) const;
+    Reference execute(const Global_Context& global, cow_vector<Reference>&& args) const;
   };
 
 inline std::istream& operator>>(std::istream& is, Simple_Source_File& file)

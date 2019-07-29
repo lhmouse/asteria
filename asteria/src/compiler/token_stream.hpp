@@ -13,7 +13,7 @@ namespace Asteria {
 class Token_Stream
   {
   public:
-    enum State : std::uint8_t
+    enum State : uint8_t
       {
         state_empty    = 0,
         state_error    = 1,
@@ -21,7 +21,7 @@ class Token_Stream
       };
 
   private:
-    Variant<std::nullptr_t, Parser_Error, Cow_Vector<Token>> m_stor;  // Tokens are stored in reverse order.
+    variant<nullptr_t, Parser_Error, cow_vector<Token>> m_stor;  // Tokens are stored in reverse order.
 
   public:
     Token_Stream() noexcept
@@ -38,13 +38,13 @@ class Token_Stream
         return static_cast<State>(this->m_stor.index());
       }
 
-    bool load(std::streambuf& cbuf, const Cow_String& file, const Compiler_Options& options);
+    bool load(std::streambuf& cbuf, const cow_string& file, const Compiler_Options& options);
     void clear() noexcept;
 
     Parser_Error get_parser_error() const noexcept;
     bool empty() const noexcept;
-    const Token* peek_opt(std::size_t ahead = 0) const;
-    void shift(std::size_t count = 1);
+    const Token* peek_opt(size_t ahead = 0) const;
+    void shift(size_t count = 1);
   };
 
 }  // namespace Asteria

@@ -14,7 +14,7 @@ class Reference
   {
   private:
     Reference_Root m_root;
-    Cow_Vector<Reference_Modifier> m_mods;
+    cow_vector<Reference_Modifier> m_mods;
 
   public:
     Reference() noexcept
@@ -37,9 +37,9 @@ class Reference
   private:
     [[noreturn]] Value do_throw_unset_no_modifier() const;
 
-    const Value& do_read(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const;
-    Value& do_open(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const;
-    Value do_unset(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const;
+    const Value& do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
+    Value& do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
+    Value do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
 
     Reference& do_finish_call(const Global_Context& global);
 

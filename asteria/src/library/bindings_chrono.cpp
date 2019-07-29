@@ -25,13 +25,13 @@ G_integer std_chrono_utc_now()
     ti.HighPart = ft_u.dwHighDateTime;
     // Convert it to the number of milliseconds.
     // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    return static_cast<std::int64_t>(ti.QuadPart - 116444736000000000) / 10000;
+    return static_cast<int64_t>(ti.QuadPart - 116444736000000000) / 10000;
 #else
     // Get UTC time from the system.
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
     // Convert it to the number of milliseconds.
-    return static_cast<std::int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
+    return static_cast<int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
 #endif
   }
 
@@ -48,7 +48,7 @@ G_integer std_chrono_local_now()
     ti.HighPart = ft_l.dwHighDateTime;
     // Convert it to the number of milliseconds.
     // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    return static_cast<std::int64_t>(ti.QuadPart - 116444736000000000) / 10000;
+    return static_cast<int64_t>(ti.QuadPart - 116444736000000000) / 10000;
 #else
     // Get local time and GMT offset from the system.
     ::timespec ts;
@@ -56,7 +56,7 @@ G_integer std_chrono_local_now()
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
     // Convert it to the number of milliseconds.
-    return (static_cast<std::int64_t>(ts.tv_sec) + tr.tm_gmtoff) * 1000 + ts.tv_nsec / 1000000;
+    return (static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff) * 1000 + ts.tv_nsec / 1000000;
 #endif
   }
 
@@ -65,7 +65,7 @@ G_real std_chrono_hires_now()
 #ifdef _WIN32
     // Read the performance counter.
     // The performance counter frequency has to be obtained only once.
-    static std::atomic<std::int64_t> s_freq;
+    static std::atomic<int64_t> s_freq;
     ::LARGE_INTEGER ti;
     auto freq = s_freq.load(std::memory_order_relaxed);
     if(ROCKET_UNEXPECT(freq == 0)) {
@@ -92,14 +92,14 @@ G_integer std_chrono_steady_now()
 #ifdef _WIN32
     // Get the system tick count.
     // Add a random offset to the result to help debugging.
-    return static_cast<std::int64_t>(::GetTickCount64()) + 0x123456789;
+    return static_cast<int64_t>(::GetTickCount64()) + 0x123456789;
 #else
     // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
     // Convert it to the number of milliseconds.
     // Add a random offset to the result to help debugging.
-    return static_cast<std::int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000 + 0x123456789;
+    return static_cast<int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000 + 0x123456789;
 #endif
   }
 
@@ -171,13 +171,13 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
     constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
-    template<typename InputT> bool do_rput(char*& p, InputT in, std::size_t width)
+    template<typename InputT> bool do_rput(char*& p, InputT in, size_t width)
       {
-        std::uint32_t reg = 0;
+        uint32_t reg = 0;
         // Load the value, ignoring any overflows.
-        reg = static_cast<std::uint32_t>(in);
+        reg = static_cast<uint32_t>(in);
         // Write digits backwards.
-        for(std::size_t i = 0; i < width; ++i) {
+        for(size_t i = 0; i < width; ++i) {
           char c = static_cast<char>('0' + reg % 10);
           reg /= 10;
           p[i] = c;
@@ -195,17 +195,17 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
         return true;
       }
 
-    template<typename OutputT> bool do_getx(const char*& p, OutputT& out, std::size_t width)
+    template<typename OutputT> bool do_getx(const char*& p, OutputT& out, size_t width)
       {
-        std::uint32_t reg = 0;
+        uint32_t reg = 0;
         // Read digits forwards.
-        for(std::size_t i = 0; i < width; ++i) {
+        for(size_t i = 0; i < width; ++i) {
           char c = p[i];
           if((c < '0') || ('9' < c)) {
             return false;
           }
           reg *= 10;
-          reg += static_cast<std::uint32_t>(c - '0');
+          reg += static_cast<uint32_t>(c - '0');
         }
         // Save the value, ignoring any overflows.
         out = static_cast<OutputT>(reg);
@@ -227,7 +227,7 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
 
     }  // namespace
 
-G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>& with_ms)
+G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>& with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -245,7 +245,7 @@ G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>
     // Convert the time point to Windows NT time.
     // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
     ::ULARGE_INTEGER ti;
-    ti.QuadPart = static_cast<std::uint64_t>(time_point) * 10000 + 116444736000000000;
+    ti.QuadPart = static_cast<uint64_t>(time_point) * 10000 + 116444736000000000;
     ::FILETIME ft;
     ft.dwLowDateTime = ti.LowPart;
     ft.dwHighDateTime = ti.HighPart;
@@ -271,7 +271,7 @@ G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>
     // Write fields backwards.
     // Get the second and millisecond parts.
     // Note that the number of seconds shall be rounded towards negative infinity.
-    int ms = static_cast<int>((static_cast<std::uint64_t>(time_point) + 9223372036854775000) % 1000);
+    int ms = static_cast<int>((static_cast<uint64_t>(time_point) + 9223372036854775000) % 1000);
     ::time_t tp = static_cast<::time_t>((time_point - ms) / 1000);
     if(pms) {
       do_rput(qwt, ms, 3);
@@ -294,7 +294,7 @@ G_string std_chrono_utc_format(const G_integer& time_point, const Opt<G_boolean>
     return G_string(std::make_reverse_iterator(qwt), std::make_reverse_iterator(wbuf));
   }
 
-Opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
+opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
   {
     auto n = time_str.find_first_not_of(s_spaces);
     if(n == G_string::npos) {
@@ -345,7 +345,7 @@ Opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
     ti.HighPart = ft.dwHighDateTime;
     // Convert it to the number of milliseconds.
     // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    time_point = static_cast<std::int64_t>(ti.QuadPart - 116444736000000000) / 10000;
+    time_point = static_cast<int64_t>(ti.QuadPart - 116444736000000000) / 10000;
 #else
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::tm tr;
@@ -378,7 +378,7 @@ Opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
       return rocket::nullopt;
     }
     // Convert it to the number of milliseconds.
-    time_point = static_cast<std::int64_t>(tp) * 1000;
+    time_point = static_cast<int64_t>(tp) * 1000;
 #endif
     // Parse the subsecond part if any.
     if(do_getx(qrd, { '.', ',' })) {
@@ -423,7 +423,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.chrono.utc_now"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -455,7 +455,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.chrono.local_now"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -490,7 +490,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.chrono.hires_now"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -525,7 +525,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.chrono.steady_now"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -558,7 +558,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.chrono.local_from_utc"), args);
           // Parse arguments.
           G_integer time_utc;
@@ -593,7 +593,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.chrono.utc_from_local"), args);
           // Parse arguments.
           G_integer time_local;
@@ -627,11 +627,11 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.chrono.utc_format"), args);
           // Parse arguments.
           G_integer time_point;
-          Opt<G_boolean> with_ms;
+          opt<G_boolean> with_ms;
           if(reader.start().g(time_point).g(with_ms).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_chrono_utc_format(time_point, with_ms) };
@@ -665,7 +665,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.chrono.utc_parse"), args);
           // Parse arguments.
           G_string time_str;

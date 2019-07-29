@@ -107,7 +107,7 @@ Infix_Element::Precedence Infix_Element::tell_precedence() const noexcept
     }
   }
 
-void Infix_Element::extract(Cow_Vector<Xprunit>& units)
+void Infix_Element::extract(cow_vector<Xprunit>& units)
   {
     switch(this->index()) {
     case index_head:
@@ -165,7 +165,7 @@ void Infix_Element::extract(Cow_Vector<Xprunit>& units)
     }
   }
 
-Cow_Vector<Xprunit>& Infix_Element::open_junction() noexcept
+cow_vector<Xprunit>& Infix_Element::open_junction() noexcept
   {
     switch(this->index()) {
     case index_head:

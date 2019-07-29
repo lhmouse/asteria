@@ -11,7 +11,7 @@ namespace Asteria {
 
     namespace {
 
-    enum : std::uint8_t
+    enum : uint8_t
       {
         cctype_space   = 0x01,  // [ \t\v\f\r\n]
         cctype_alpha   = 0x02,  // [A-Za-z]
@@ -20,7 +20,7 @@ namespace Asteria {
         cctype_namei   = 0x10,  // [A-Za-z_]
       };
 
-    constexpr std::uint8_t s_cctypes[128] =
+    constexpr uint8_t s_cctypes[128] =
       {
         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00,
@@ -40,7 +40,7 @@ namespace Asteria {
         0x12, 0x12, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00,
       };
 
-    inline bool do_check_cctype(char c, std::uint8_t mask) noexcept
+    inline bool do_check_cctype(char c, uint8_t mask) noexcept
       {
         int index = c & 0x7F;
         if(index != c) {
@@ -49,7 +49,7 @@ namespace Asteria {
         return s_cctypes[index] & mask;
       }
 
-    constexpr std::uint8_t s_digits[128] =
+    constexpr uint8_t s_digits[128] =
       {
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -69,7 +69,7 @@ namespace Asteria {
         0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
       };
 
-    inline std::uint8_t do_translate_digit(char c) noexcept
+    inline uint8_t do_translate_digit(char c) noexcept
       {
         int index = c & 0x7F;
         if(index != c) {
@@ -82,14 +82,14 @@ namespace Asteria {
       {
       private:
         std::reference_wrapper<std::streambuf> m_cbuf;
-        Cow_String m_file;
+        cow_string m_file;
 
-        Cow_String m_str;
-        std::int64_t m_line;
-        std::size_t m_offset;
+        cow_string m_str;
+        int64_t m_line;
+        size_t m_offset;
 
       public:
-        Line_Reader(std::streambuf& xcbuf, const Cow_String& xfile)
+        Line_Reader(std::streambuf& xcbuf, const cow_string& xfile)
           : m_cbuf(xcbuf), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
@@ -105,12 +105,12 @@ namespace Asteria {
           {
             return this->m_cbuf;
           }
-        const Cow_String& file() const noexcept
+        const cow_string& file() const noexcept
           {
             return this->m_file;
           }
 
-        std::int64_t line() const noexcept
+        int64_t line() const noexcept
           {
             return this->m_line;
           }
@@ -142,36 +142,36 @@ namespace Asteria {
             return true;
           }
 
-        std::size_t offset() const noexcept
+        size_t offset() const noexcept
           {
             return this->m_offset;
           }
-        std::size_t navail() const noexcept
+        size_t navail() const noexcept
           {
             return this->m_str.size() - this->m_offset;
           }
-        const char* data(std::size_t add = 0) const
+        const char* data(size_t add = 0) const
           {
             if(add > this->m_str.size() - this->m_offset) {
               ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
             }
             return this->m_str.data() + (this->m_offset + add);
           }
-        char peek(std::size_t add = 0) const noexcept
+        char peek(size_t add = 0) const noexcept
           {
             if(add > this->m_str.size() - this->m_offset) {
               return 0;
             }
             return this->m_str[this->m_offset + add];
           }
-        void consume(std::size_t add)
+        void consume(size_t add)
           {
             if(add > this->m_str.size() - this->m_offset) {
               ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
             }
             this->m_offset += add;
           }
-        void rewind(std::size_t off = 0)
+        void rewind(size_t off = 0)
           {
             if(off > this->m_str.size()) {
               ASTERIA_THROW_RUNTIME_ERROR("The offset was past the end of the current line.");
@@ -180,7 +180,7 @@ namespace Asteria {
           }
       };
 
-    inline Parser_Error do_make_parser_error(const Line_Reader& reader, std::size_t tlen, Parser_Error::Code code)
+    inline Parser_Error do_make_parser_error(const Line_Reader& reader, size_t tlen, Parser_Error::Code code)
       {
         return Parser_Error(reader.line(), reader.offset(), tlen, code);
       }
@@ -188,9 +188,9 @@ namespace Asteria {
     class Tack
       {
       private:
-        std::int64_t m_line;
-        std::size_t m_offset;
-        std::size_t m_length;
+        int64_t m_line;
+        size_t m_offset;
+        size_t m_length;
 
       public:
         constexpr Tack() noexcept
@@ -199,15 +199,15 @@ namespace Asteria {
           }
 
       public:
-        constexpr std::int64_t line() const noexcept
+        constexpr int64_t line() const noexcept
           {
             return this->m_line;
           }
-        constexpr std::size_t offset() const noexcept
+        constexpr size_t offset() const noexcept
           {
             return this->m_offset;
           }
-        constexpr std::size_t length() const noexcept
+        constexpr size_t length() const noexcept
           {
             return this->m_length;
           }
@@ -215,7 +215,7 @@ namespace Asteria {
           {
             return this->m_line != 0;
           }
-        Tack& set(const Line_Reader& reader, std::size_t xlength) noexcept
+        Tack& set(const Line_Reader& reader, size_t xlength) noexcept
           {
             this->m_line = reader.line();
             this->m_offset = reader.offset();
@@ -229,13 +229,13 @@ namespace Asteria {
           }
       };
 
-    template<typename XtokenT> void do_push_token(Cow_Vector<Token>& seq, Line_Reader& reader, std::size_t tlen, XtokenT&& xtoken)
+    template<typename XtokenT> void do_push_token(cow_vector<Token>& seq, Line_Reader& reader, size_t tlen, XtokenT&& xtoken)
       {
         seq.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, rocket::forward<XtokenT>(xtoken));
         reader.consume(tlen);
       }
 
-    inline bool do_accumulate_digit(std::int64_t& value, std::int64_t limit, std::uint8_t base, std::uint8_t dvalue) noexcept
+    inline bool do_accumulate_digit(int64_t& value, int64_t limit, uint8_t base, uint8_t dvalue) noexcept
       {
         if(limit >= 0) {
           // Accumulate the digit towards positive infinity.
@@ -256,7 +256,7 @@ namespace Asteria {
         return true;
       }
 
-    inline void do_raise(double& value, std::uint8_t base, std::int64_t exp) noexcept
+    inline void do_raise(double& value, uint8_t base, int64_t exp) noexcept
       {
         if(exp > 0) {
           value *= std::pow(base, +exp);
@@ -266,7 +266,7 @@ namespace Asteria {
         }
       }
 
-    bool do_may_infix_operators_follow(Cow_Vector<Token>& seq)
+    bool do_may_infix_operators_follow(cow_vector<Token>& seq)
       {
         if(seq.empty()) {
           // No previous token exists.
@@ -288,7 +288,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_numeric_literal(Cow_Vector<Token>& seq, Line_Reader& reader, bool integer_as_real)
+    bool do_accept_numeric_literal(cow_vector<Token>& seq, Line_Reader& reader, bool integer_as_real)
       {
         // numeric-literal ::=
         //   number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -307,17 +307,17 @@ namespace Asteria {
         // binary-exponent-suffix ::=
         //   PCRE([pP][-+]?([0-9]`?)+)
         bool rneg = false;  // is the number negative?
-        std::size_t rbegin = 0;  // beginning of significant figures
-        std::size_t rend = 0;  // end of significant figures
-        std::uint8_t rbase = 10;  // the base of the integral and fractional parts.
-        std::int64_t icnt = 0;  // number of integral digits (always non-negative)
-        std::int64_t fcnt = 0;  // number of fractional digits (always non-negative)
-        std::uint8_t pbase = 0;  // the base of the exponent.
+        size_t rbegin = 0;  // beginning of significant figures
+        size_t rend = 0;  // end of significant figures
+        uint8_t rbase = 10;  // the base of the integral and fractional parts.
+        int64_t icnt = 0;  // number of integral digits (always non-negative)
+        int64_t fcnt = 0;  // number of fractional digits (always non-negative)
+        uint8_t pbase = 0;  // the base of the exponent.
         bool pneg = false;  // is the exponent negative?
-        std::int64_t pexp = 0;  // `pbase`'d exponent
-        std::int64_t pcnt = 0;  // number of exponent digits (always non-negative)
+        int64_t pexp = 0;  // `pbase`'d exponent
+        int64_t pcnt = 0;  // number of exponent digits (always non-negative)
         // Get the sign of the number if any.
-        std::size_t tlen = 0;
+        size_t tlen = 0;
         switch(reader.peek(tlen)) {
         case '+':
           tlen++;
@@ -452,7 +452,7 @@ namespace Asteria {
         // Is this an `integer` or a `real`?
         if(!integer_as_real && (fcnt == 0)) {
           // The literal is an `integer` if there is no decimal point.
-          std::int64_t value = 0;
+          int64_t value = 0;
           // Accumulate digits from left to right.
           for(auto ri = rbegin; ri != rend; ++ri) {
             auto dvalue = do_translate_digit(reader.peek(ri));
@@ -491,8 +491,8 @@ namespace Asteria {
         }
         // Digits are accumulated using a 64-bit integer with no fractional part.
         // Excess significant figures are discard if the integer would overflow.
-        std::int64_t tvalue = 0;
-        std::int64_t tcnt = icnt;
+        int64_t tvalue = 0;
+        int64_t tcnt = icnt;
         // Accumulate digits from left to right.
         for(auto ri = rbegin; ri != rend; ++ri) {
           auto dvalue = do_translate_digit(reader.peek(ri));
@@ -610,7 +610,7 @@ namespace Asteria {
         { "~",     Token::punctuator_notb        },
       };
 
-    bool do_accept_punctuator(Cow_Vector<Token>& seq, Line_Reader& reader)
+    bool do_accept_punctuator(cow_vector<Token>& seq, Line_Reader& reader)
       {
 #ifdef ROCKET_DEBUG
         ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_Comparator()));
@@ -636,7 +636,7 @@ namespace Asteria {
         }
       }
 
-    bool do_accept_string_literal(Cow_Vector<Token>& seq, Line_Reader& reader, char head, bool escapable)
+    bool do_accept_string_literal(cow_vector<Token>& seq, Line_Reader& reader, char head, bool escapable)
       {
         // string-literal ::=
         //   escape-string-literal | noescape-string-literal
@@ -648,8 +648,8 @@ namespace Asteria {
           return false;
         }
         // Get a string literal.
-        std::size_t tlen = 1;
-        Cow_String value;
+        size_t tlen = 1;
+        cow_string value;
         for(;;) {
           // Read a character.
           auto next = reader.peek(tlen);
@@ -833,7 +833,7 @@ namespace Asteria {
         { "while",     Token::keyword_while     },
       };
 
-    bool do_accept_identifier_or_keyword(Cow_Vector<Token>& seq, Line_Reader& reader, bool keyword_as_identifier)
+    bool do_accept_identifier_or_keyword(cow_vector<Token>& seq, Line_Reader& reader, bool keyword_as_identifier)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -841,7 +841,7 @@ namespace Asteria {
           return false;
         }
         // Get the length of this identifier.
-        std::size_t tlen = 1;
+        size_t tlen = 1;
         for(;;) {
           auto next = reader.peek(tlen);
           if(next == 0) {
@@ -854,7 +854,7 @@ namespace Asteria {
         }
         if(keyword_as_identifier) {
           // Do not check for identifiers.
-          Token::S_identifier xtoken = { Cow_String(reader.data(), tlen) };
+          Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
           do_push_token(seq, reader, tlen, rocket::move(xtoken));
           return true;
         }
@@ -865,7 +865,7 @@ namespace Asteria {
         for(;;) {
           if(range.first == range.second) {
             // No matching keyword has been found so far.
-            Token::S_identifier xtoken = { Cow_String(reader.data(), tlen) };
+            Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
             do_push_token(seq, reader, tlen, rocket::move(xtoken));
             return true;
           }
@@ -882,13 +882,13 @@ namespace Asteria {
 
     }  // namespace
 
-bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Compiler_Options& options)
+bool Token_Stream::load(std::streambuf& cbuf, const cow_string& file, const Compiler_Options& options)
   {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
     // Store tokens parsed here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
-    Cow_Vector<Token> seq;
+    cow_vector<Token> seq;
     try {
       // Save the position of an unterminated block comment.
       Tack bcomm;
@@ -907,7 +907,7 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Comp
           if(!utf8_decode(cp, tptr, reader.navail())) {
             throw do_make_parser_error(reader, reader.navail(), Parser_Error::code_utf8_sequence_invalid);
           }
-          auto u8len = static_cast<std::size_t>(tptr - reader.data());
+          auto u8len = static_cast<size_t>(tptr - reader.data());
           // Disallow plain null characters in source data.
           if(cp == 0) {
             throw do_make_parser_error(reader, u8len, Parser_Error::code_null_character_disallowed);
@@ -926,7 +926,7 @@ bool Token_Stream::load(std::streambuf& cbuf, const Cow_String& file, const Comp
               // The block comment will not end in this line. Stop.
               break;
             }
-            auto tlen = static_cast<std::size_t>(tptr + 2 - reader.data());
+            auto tlen = static_cast<size_t>(tptr + 2 - reader.data());
             // Finish this comment and resume from the end of it.
             bcomm.clear();
             reader.consume(tlen);
@@ -1015,14 +1015,14 @@ bool Token_Stream::empty() const noexcept
       }
     case state_success:
       {
-        return this->m_stor.as<Cow_Vector<Token>>().empty();
+        return this->m_stor.as<cow_vector<Token>>().empty();
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
-const Token* Token_Stream::peek_opt(std::size_t ahead) const
+const Token* Token_Stream::peek_opt(size_t ahead) const
   {
     switch(this->state()) {
     case state_empty:
@@ -1035,7 +1035,7 @@ const Token* Token_Stream::peek_opt(std::size_t ahead) const
       }
     case state_success:
       {
-        auto& altr = this->m_stor.as<Cow_Vector<Token>>();
+        auto& altr = this->m_stor.as<cow_vector<Token>>();
         if(ahead >= altr.size()) {
           return nullptr;
         }
@@ -1046,7 +1046,7 @@ const Token* Token_Stream::peek_opt(std::size_t ahead) const
     }
   }
 
-void Token_Stream::shift(std::size_t count)
+void Token_Stream::shift(size_t count)
   {
     switch(this->state()) {
     case state_empty:
@@ -1059,7 +1059,7 @@ void Token_Stream::shift(std::size_t count)
       }
     case state_success:
       {
-        auto& altr = this->m_stor.as<Cow_Vector<Token>>();
+        auto& altr = this->m_stor.as<cow_vector<Token>>();
         if(count > altr.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
         }

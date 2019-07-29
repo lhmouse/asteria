@@ -26,18 +26,18 @@ class Reference_Root
       };
     struct S_variable
       {
-        Rcobj<Variable> var;
+        rcobj<Variable> var;
       };
     struct S_tail_call
       {
         Source_Location sloc;
-        Cow_String func;
+        cow_string func;
         bool by_ref;
-        Rcobj<Abstract_Function> target;
-        Cow_Vector<Reference> args_self;  // The last element is the `this` reference.
+        rcobj<Abstract_Function> target;
+        cow_vector<Reference> args_self;  // The last element is the `this` reference.
       };
 
-    enum Index : std::uint8_t
+    enum Index : uint8_t
       {
         index_null       = 0,
         index_constant   = 1,
@@ -45,7 +45,7 @@ class Reference_Root
         index_variable   = 3,
         index_tail_call  = 4,
       };
-    using Xvariant = Variant<
+    using Xvariant = variant<
       ROCKET_CDR(
         , S_null       // 0,
         , S_constant   // 1,

@@ -13,7 +13,7 @@ using namespace Asteria;
 
 int main(int argc, char** argv)
   try {
-    Cow_Vector<Reference> args;
+    cow_vector<Reference> args;
     for(int i = 0; i < argc; ++i) {
       G_string arg;
       if(argv[i]) {
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
         }
         return fib(30);
       )_____";
-    Cow_isstream iss(rocket::sref(src));
+    cow_isstream iss(rocket::sref(src));
     std::cerr << "# Source code:" << std::endl
               << "---" << std::endl
               << src << std::endl
@@ -69,7 +69,7 @@ int main(int argc, char** argv)
               << "---" << std::endl
               << "# Caught `Exception`:" << std::endl
               << e << std::endl;
-    for(std::size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {
+    for(size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {
       const auto& f = e.get_frame(i);
       std::cerr << "  thrown from \'" << f.location() << "\' <" << Backtrace_Frame::stringify_ftype(f.ftype()) << ">: " << f.value() << std::endl;
     }

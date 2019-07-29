@@ -16,7 +16,7 @@ class Variable_HashSet
       {
         Bucket* next;  // the next bucket in the [non-circular] list
         Bucket* prev;  // the previous bucket in the [circular] list
-        union { Rcptr<Variable> kstor[1];  };  // initialized iff `prev` is non-null
+        union { rcptr<Variable> kstor[1];  };  // initialized iff `prev` is non-null
 
         Bucket() noexcept { }
         ~Bucket() { }
@@ -28,7 +28,7 @@ class Variable_HashSet
         Bucket* bptr;  // beginning of bucket storage
         Bucket* eptr;  // end of bucket storage
         Bucket* head;  // the first initialized bucket
-        std::size_t size;  // number of initialized buckets
+        size_t size;  // number of initialized buckets
       };
     Storage m_stor;
 
@@ -62,14 +62,14 @@ class Variable_HashSet
 
   private:
     void do_clear_buckets() const noexcept;
-    Bucket* do_xprobe(const Rcptr<Variable>& var) const noexcept;
+    Bucket* do_xprobe(const rcptr<Variable>& var) const noexcept;
     void do_xrelocate_but(Bucket* qxcld) noexcept;
 
     inline void do_list_attach(Bucket* qbkt) noexcept;
     inline void do_list_detach(Bucket* qbkt) noexcept;
 
-    void do_rehash(std::size_t nbkt);
-    void do_attach(Bucket* qbkt, const Rcptr<Variable>& var) noexcept;
+    void do_rehash(size_t nbkt);
+    void do_attach(Bucket* qbkt, const rcptr<Variable>& var) noexcept;
     void do_detach(Bucket* qbkt) noexcept;
 
   public:
@@ -77,7 +77,7 @@ class Variable_HashSet
       {
         return this->m_stor.head == nullptr;
       }
-    std::size_t size() const noexcept
+    size_t size() const noexcept
       {
         return this->m_stor.size;
       }
@@ -96,7 +96,7 @@ class Variable_HashSet
         std::swap(this->m_stor, other.m_stor);
       }
 
-    bool has(const Rcptr<Variable>& var) const noexcept
+    bool has(const rcptr<Variable>& var) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
         if(!this->m_stor.bptr) {
@@ -111,10 +111,10 @@ class Variable_HashSet
         ROCKET_ASSERT(qbkt->kstor[0] == var);
         return true;
       }
-    bool insert(const Rcptr<Variable>& var) noexcept
+    bool insert(const rcptr<Variable>& var) noexcept
       {
         // Reserve more room by rehashing if the load factor would exceed 0.5.
-        auto nbkt = static_cast<std::size_t>(this->m_stor.eptr - this->m_stor.bptr);
+        auto nbkt = static_cast<size_t>(this->m_stor.eptr - this->m_stor.bptr);
         if(ROCKET_UNEXPECT(this->m_stor.size >= nbkt / 2)) {
           // Ensure the number of buckets is an odd number.
           this->do_rehash(this->m_stor.size * 3 | 97);
@@ -129,7 +129,7 @@ class Variable_HashSet
         this->do_attach(qbkt, var);
         return true;
       }
-    bool erase(const Rcptr<Variable>& var) noexcept
+    bool erase(const rcptr<Variable>& var) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
         if(!this->m_stor.bptr) {
@@ -146,7 +146,7 @@ class Variable_HashSet
         this->do_detach(qbkt);
         return true;
       }
-    Rcptr<Variable> erase_random_opt() noexcept
+    rcptr<Variable> erase_random_opt() noexcept
       {
         // Get a random bucket that contains a variable.
         auto qbkt = this->m_stor.head;

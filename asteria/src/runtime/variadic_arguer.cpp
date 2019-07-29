@@ -13,11 +13,11 @@ std::ostream& Variadic_Arguer::describe(std::ostream& os) const
     return os << "<built-in>.__varg([index]) @ " << this->m_sloc;
   }
 
-Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, Cow_Vector<Reference>&& args) const
+Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, cow_vector<Reference>&& args) const
   {
     Argument_Reader reader(rocket::sref("<built-in>.__varg"), args);
     // Extract arguments.
-    Opt<G_integer> qindex;
+    opt<G_integer> qindex;
     if(reader.start().g(qindex).finish()) {
       auto nvargs = this->m_vargs.size();
       if(!qindex) {

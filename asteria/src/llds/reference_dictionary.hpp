@@ -16,7 +16,7 @@ class Reference_Dictionary
       {
         Bucket* next;  // the next bucket in the [non-circular] list
         Bucket* prev;  // the previous bucket in the [circular] list
-        union { PreHashed_String kstor[1];  };  // initialized iff `prev` is non-null
+        union { phsh_string kstor[1];  };  // initialized iff `prev` is non-null
         union { Reference vstor[1];  };  // initialized iff `prev` is non-null
 
         Bucket() noexcept { }
@@ -29,7 +29,7 @@ class Reference_Dictionary
         Bucket* bptr;  // beginning of bucket storage
         Bucket* eptr;  // end of bucket storage
         Bucket* head;  // the first initialized bucket
-        std::size_t size;  // number of initialized buckets
+        size_t size;  // number of initialized buckets
       };
     Storage m_stor;
 
@@ -63,14 +63,14 @@ class Reference_Dictionary
 
   private:
     void do_clear_buckets() const noexcept;
-    Bucket* do_xprobe(const PreHashed_String& name) const noexcept;
+    Bucket* do_xprobe(const phsh_string& name) const noexcept;
     void do_xrelocate_but(Bucket* qxcld) noexcept;
 
     inline void do_list_attach(Bucket* qbkt) noexcept;
     inline void do_list_detach(Bucket* qbkt) noexcept;
 
-    void do_rehash(std::size_t nbkt);
-    void do_attach(Bucket* qbkt, const PreHashed_String& name) noexcept;
+    void do_rehash(size_t nbkt);
+    void do_attach(Bucket* qbkt, const phsh_string& name) noexcept;
     void do_detach(Bucket* qbkt) noexcept;
 
   public:
@@ -78,7 +78,7 @@ class Reference_Dictionary
       {
         return this->m_stor.head == nullptr;
       }
-    std::size_t size() const noexcept
+    size_t size() const noexcept
       {
         return this->m_stor.size;
       }
@@ -97,7 +97,7 @@ class Reference_Dictionary
         std::swap(this->m_stor, other.m_stor);
       }
 
-    const Reference* get_opt(const PreHashed_String& name) const noexcept
+    const Reference* get_opt(const phsh_string& name) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
         if(!this->m_stor.bptr) {
@@ -112,10 +112,10 @@ class Reference_Dictionary
         ROCKET_ASSERT(qbkt->kstor[0].rdhash() == name.rdhash());
         return qbkt->vstor;
       }
-    Reference& open(const PreHashed_String& name)
+    Reference& open(const phsh_string& name)
       {
         // Reserve more room by rehashing if the load factor would exceed 0.5.
-        auto nbkt = static_cast<std::size_t>(this->m_stor.eptr - this->m_stor.bptr);
+        auto nbkt = static_cast<size_t>(this->m_stor.eptr - this->m_stor.bptr);
         if(ROCKET_UNEXPECT(this->m_stor.size >= nbkt / 2)) {
           // Ensure the number of buckets is an odd number.
           this->do_rehash(this->m_stor.size * 3 | 17);
@@ -130,7 +130,7 @@ class Reference_Dictionary
         this->do_attach(qbkt, name);
         return qbkt->vstor[0];
       }
-    bool erase(const PreHashed_String& name) noexcept
+    bool erase(const phsh_string& name) noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
         if(!this->m_stor.bptr) {

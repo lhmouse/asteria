@@ -16,11 +16,11 @@ class Executive_Context : public Abstract_Context
 
     std::reference_wrapper<const Global_Context> m_global;
     std::reference_wrapper<Evaluation_Stack> m_stack;
-    const Rcobj<Variadic_Arguer>& m_zvarg;
+    const rcobj<Variadic_Arguer>& m_zvarg;
 
   public:
-    Executive_Context(int, const Global_Context& xglobal, Evaluation_Stack& xstack, const Rcobj<Variadic_Arguer>& xzvarg,  // for functions
-                           const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args)
+    Executive_Context(int, const Global_Context& xglobal, Evaluation_Stack& xstack, const rcobj<Variadic_Arguer>& xzvarg,  // for functions
+                           const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
       : m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
       {
@@ -34,7 +34,7 @@ class Executive_Context : public Abstract_Context
     ~Executive_Context() override;
 
   private:
-    void do_prepare_function(const Cow_Vector<PreHashed_String>& params, Reference&& self, Cow_Vector<Reference>&& args);
+    void do_prepare_function(const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args);
 
   public:
     bool is_analytic() const noexcept override
@@ -54,7 +54,7 @@ class Executive_Context : public Abstract_Context
       {
         return this->m_stack;
       }
-    const Rcobj<Variadic_Arguer>& zvarg() const noexcept
+    const rcobj<Variadic_Arguer>& zvarg() const noexcept
       {
         return this->m_zvarg;
       }

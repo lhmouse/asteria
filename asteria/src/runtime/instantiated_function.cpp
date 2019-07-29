@@ -19,7 +19,7 @@ std::ostream& Instantiated_Function::describe(std::ostream& os) const
     return os << this->m_zvarg->get_function_signature() << " @ " << this->m_zvarg->get_source_location();
   }
 
-Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const
+Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const
   {
     // Create the stack and context for this function.
     Evaluation_Stack stack;

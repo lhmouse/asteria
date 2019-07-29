@@ -17,8 +17,8 @@ namespace Asteria {
 
     namespace {
 
-    template<typename XrefT> void do_set_user_declared_reference(Cow_Vector<PreHashed_String>* names_opt, Abstract_Context& ctx,
-                                                                 const char* desc, const PreHashed_String& name, XrefT&& xref)
+    template<typename XrefT> void do_set_user_declared_reference(cow_vector<phsh_string>* names_opt, Abstract_Context& ctx,
+                                                                 const char* desc, const phsh_string& name, XrefT&& xref)
       {
         if(name.empty()) {
           return;
@@ -32,8 +32,8 @@ namespace Asteria {
         ctx.open_named_reference(name) = rocket::forward<XrefT>(xref);
       }
 
-    Rcptr<Variable> do_safe_create_variable(Cow_Vector<PreHashed_String>* names_opt, Executive_Context& ctx,
-                                            const char* desc, const PreHashed_String& name)
+    rcptr<Variable> do_safe_create_variable(cow_vector<phsh_string>* names_opt, Executive_Context& ctx,
+                                            const char* desc, const phsh_string& name)
       {
         auto var = ctx.global().create_variable();
         Reference_Root::S_variable xref = { var };
@@ -41,15 +41,15 @@ namespace Asteria {
         return var;
       }
 
-    Air_Queue do_generate_code_statement_list(Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx,
-                                              const Compiler_Options& options, const Cow_Vector<Statement>& stmts)
+    Air_Queue do_generate_code_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                                              const Compiler_Options& options, const cow_vector<Statement>& stmts)
       {
         Air_Queue code;
         rocket::for_each(stmts, [&](const Statement& stmt) { stmt.generate_code(code, names_opt, ctx, options);  });
         return code;
       }
 
-    Air_Queue do_generate_code_block(const Compiler_Options& options, const Analytic_Context& ctx, const Cow_Vector<Statement>& block)
+    Air_Queue do_generate_code_block(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Statement>& block)
       {
         Analytic_Context ctx_next(1, ctx);
         auto code = do_generate_code_statement_list(nullptr, ctx_next, options, block);
@@ -71,14 +71,14 @@ namespace Asteria {
         return status;
       }
 
-    Air_Node::Status do_execute_catch(const Air_Queue& code, const PreHashed_String& except_name, const Exception& except, const Executive_Context& ctx)
+    Air_Node::Status do_execute_catch(const Air_Queue& code, const phsh_string& except_name, const Exception& except, const Executive_Context& ctx)
       {
         Executive_Context ctx_catch(1, ctx);
         Reference_Root::S_temporary xref = { except.get_value() };
         do_set_user_declared_reference(nullptr, ctx_catch, "exception reference", except_name, rocket::move(xref));
         // Initialize backtrace information.
         G_array backtrace;
-        for(std::size_t i = 0; i < except.count_frames(); ++i) {
+        for(size_t i = 0; i < except.count_frames(); ++i) {
           const auto& frame = except.get_frame(i);
           G_object elem;
           // Translate the frame.
@@ -96,7 +96,7 @@ namespace Asteria {
         return do_execute_statement_list(ctx_catch, code);
       }
 
-    Air_Queue do_generate_code_expression(const Compiler_Options& options, const Analytic_Context& ctx, const Cow_Vector<Xprunit>& expr)
+    Air_Queue do_generate_code_expression(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Xprunit>& expr)
       {
         Air_Queue code;
         rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
@@ -169,10 +169,10 @@ namespace Asteria {
       private:
         Source_Location m_sloc;
         bool m_immutable;
-        PreHashed_String m_name;
+        phsh_string m_name;
 
       public:
-        Air_define_uninitialized_variable(const Source_Location& sloc, bool immutable, const PreHashed_String& name)
+        Air_define_uninitialized_variable(const Source_Location& sloc, bool immutable, const phsh_string& name)
           : m_sloc(sloc), m_immutable(immutable), m_name(name)
           {
           }
@@ -194,10 +194,10 @@ namespace Asteria {
     class Air_declare_variable_and_clear_stack : public virtual Air_Node
       {
       private:
-        PreHashed_String m_name;
+        phsh_string m_name;
 
       public:
-        explicit Air_declare_variable_and_clear_stack(const PreHashed_String& name)
+        explicit Air_declare_variable_and_clear_stack(const phsh_string& name)
           : m_name(name)
           {
           }
@@ -252,13 +252,13 @@ namespace Asteria {
       private:
         Compiler_Options m_options;
         Source_Location m_sloc;
-        PreHashed_String m_name;
-        Cow_Vector<PreHashed_String> m_params;
-        Cow_Vector<Statement> m_body;
+        phsh_string m_name;
+        cow_vector<phsh_string> m_params;
+        cow_vector<Statement> m_body;
 
       public:
         Air_define_function(const Compiler_Options& options, const Source_Location& sloc,
-                            const PreHashed_String& name, const Cow_Vector<PreHashed_String>& params, const Cow_Vector<Statement>& body)
+                            const phsh_string& name, const cow_vector<phsh_string>& params, const cow_vector<Statement>& body)
           : m_options(options), m_sloc(sloc),
             m_name(name), m_params(params), m_body(body)
           {
@@ -275,15 +275,15 @@ namespace Asteria {
             Analytic_Context ctx_func(1, ctx, this->m_params);
             rocket::for_each(this->m_body, [&](const Statement& stmt) { stmt.generate_code(code_func, nullptr, ctx_func, this->m_options);  });
             // Format the prototype string.
-            Cow_osstream fmtss;
+            cow_osstream fmtss;
             fmtss.imbue(std::locale::classic());
             fmtss << this->m_name << "(";
             if(!this->m_params.empty()) {
-              std::for_each(this->m_params.begin(), this->m_params.end() - 1, [&](const PreHashed_String& param) { fmtss << param << ", ";  });
+              std::for_each(this->m_params.begin(), this->m_params.end() - 1, [&](const phsh_string& param) { fmtss << param << ", ";  });
               fmtss << this->m_params.back();
             }
             fmtss <<")";
-            Rcobj<Instantiated_Function> closure(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_func));
+            rcobj<Instantiated_Function> closure(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_func));
             // Initialized the function variable.
             var->reset(this->m_sloc, G_function(rocket::move(closure)), true);
             return Air_Node::status_next;
@@ -330,16 +330,16 @@ namespace Asteria {
       {
         Air_Queue code_cond;
         Air_Queue code_clause;
-        Cow_Vector<PreHashed_String> names;
+        cow_vector<phsh_string> names;
       };
 
     class Air_execute_switch : public virtual Air_Node
       {
       private:
-        Cow_Vector<S_xswitch_clause> m_clauses;
+        cow_vector<S_xswitch_clause> m_clauses;
 
       public:
-        explicit Air_execute_switch(Cow_Vector<S_xswitch_clause>&& clauses)
+        explicit Air_execute_switch(cow_vector<S_xswitch_clause>&& clauses)
           : m_clauses(rocket::move(clauses))
           {
           }
@@ -381,7 +381,7 @@ namespace Asteria {
             // Skip clauses that precede `*qtarget`.
             for(auto it = this->m_clauses.begin(); it != target; ++it) {
               // Inject all names into this scope.
-              rocket::for_each(it->names, [&](const PreHashed_String& name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
+              rocket::for_each(it->names, [&](const phsh_string& name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
                                                                                                              name, Reference_Root::S_null());  });
             }
             // Execute all clauses from `*qtarget` to the end of this block.
@@ -489,13 +489,13 @@ namespace Asteria {
     class Air_execute_for_each : public virtual Air_Node
       {
       private:
-        PreHashed_String m_key_name;
-        PreHashed_String m_mapped_name;
+        phsh_string m_key_name;
+        phsh_string m_mapped_name;
         Air_Queue m_code_init;
         Air_Queue m_code_body;
 
       public:
-        Air_execute_for_each(const PreHashed_String& key_name, const PreHashed_String& mapped_name, Air_Queue&& code_init,
+        Air_execute_for_each(const phsh_string& key_name, const phsh_string& mapped_name, Air_Queue&& code_init,
                              Air_Queue&& code_body)
           : m_key_name(key_name), m_mapped_name(mapped_name), m_code_init(rocket::move(code_init)),
             m_code_body(rocket::move(code_body))
@@ -629,12 +629,12 @@ namespace Asteria {
       private:
         Air_Queue m_code_try;
         Source_Location m_sloc;
-        PreHashed_String m_except_name;
+        phsh_string m_except_name;
         Air_Queue m_code_catch;
 
       public:
         Air_execute_try(Air_Queue&& code_try,
-                        const Source_Location& sloc, const PreHashed_String& except_name, Air_Queue&& code_catch)
+                        const Source_Location& sloc, const phsh_string& except_name, Air_Queue&& code_catch)
           : m_code_try(rocket::move(code_try)), m_sloc(sloc), m_except_name(except_name),
             m_code_catch(rocket::move(code_catch))
           {
@@ -707,7 +707,7 @@ namespace Asteria {
             // What to throw?
             const auto& value = ctx.stack().get_top_reference().read();
             // Unpack the nested exception, if any.
-            Opt<Exception> qnested;
+            opt<Exception> qnested;
             try {
               // Rethrow the current exception to get its effective type.
               auto eptr = std::current_exception();
@@ -768,10 +768,10 @@ namespace Asteria {
       private:
         Source_Location m_sloc;
         bool m_negative;
-        Cow_String m_msg;
+        cow_string m_msg;
 
       public:
-        Air_execute_assert(const Source_Location& sloc, bool negative, const Cow_String& msg)
+        Air_execute_assert(const Source_Location& sloc, bool negative, const cow_string& msg)
           : m_sloc(sloc), m_negative(negative), m_msg(msg)
           {
           }
@@ -784,7 +784,7 @@ namespace Asteria {
               return Air_Node::status_next;
             }
             // Throw a `Runtime_Error` if the assertion fails.
-            Cow_osstream fmtss;
+            cow_osstream fmtss;
             fmtss.imbue(std::locale::classic());
             fmtss << "Assertion failed at \'" << this->m_sloc << "\'";
             if(this->m_msg.empty()) {
@@ -802,7 +802,7 @@ namespace Asteria {
 
     }  // namespace
 
-void Statement::generate_code(Air_Queue& code, Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const
+void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const
   {
     switch(this->index()) {
     case index_expression:
@@ -882,8 +882,8 @@ void Statement::generate_code(Air_Queue& code, Cow_Vector<PreHashed_String>* nam
         // Note that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_switch(1, ctx);
         // Generate code for all clauses. Names are accumulated.
-        Cow_Vector<S_xswitch_clause> clauses;
-        Cow_Vector<PreHashed_String> names;
+        cow_vector<S_xswitch_clause> clauses;
+        cow_vector<phsh_string> names;
         for(const auto& pair : altr.clauses) {
           auto& clause = clauses.emplace_back();
           clause.code_cond = do_generate_code_expression(options, ctx_switch, pair.first);

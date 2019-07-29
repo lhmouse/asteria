@@ -12,7 +12,7 @@ namespace Asteria {
 class Statement
   {
   public:
-    enum Target : std::uint8_t
+    enum Target : uint8_t
       {
         target_unspec  = 0,
         target_switch  = 1,
@@ -22,69 +22,69 @@ class Statement
 
     struct S_expression
       {
-        Cow_Vector<Xprunit> expr;
+        cow_vector<Xprunit> expr;
       };
     struct S_block
       {
-        Cow_Vector<Statement> body;
+        cow_vector<Statement> body;
       };
     struct S_variable
       {
         Source_Location sloc;
         bool immutable;
-        Cow_Bivector<PreHashed_String, Cow_Vector<Xprunit>> vars;
+        cow_bivector<phsh_string, cow_vector<Xprunit>> vars;
       };
     struct S_function
       {
         Source_Location sloc;
-        PreHashed_String name;
-        Cow_Vector<PreHashed_String> params;
-        Cow_Vector<Statement> body;
+        phsh_string name;
+        cow_vector<phsh_string> params;
+        cow_vector<Statement> body;
       };
     struct S_if
       {
         bool negative;
-        Cow_Vector<Xprunit> cond;
-        Cow_Vector<Statement> branch_true;
-        Cow_Vector<Statement> branch_false;
+        cow_vector<Xprunit> cond;
+        cow_vector<Statement> branch_true;
+        cow_vector<Statement> branch_false;
       };
     struct S_switch
       {
-        Cow_Vector<Xprunit> ctrl;
-        Cow_Bivector<Cow_Vector<Xprunit>, Cow_Vector<Statement>> clauses;
+        cow_vector<Xprunit> ctrl;
+        cow_bivector<cow_vector<Xprunit>, cow_vector<Statement>> clauses;
       };
     struct S_do_while
       {
-        Cow_Vector<Statement> body;
+        cow_vector<Statement> body;
         bool negative;
-        Cow_Vector<Xprunit> cond;
+        cow_vector<Xprunit> cond;
       };
     struct S_while
       {
         bool negative;
-        Cow_Vector<Xprunit> cond;
-        Cow_Vector<Statement> body;
+        cow_vector<Xprunit> cond;
+        cow_vector<Statement> body;
       };
     struct S_for_each
       {
-        PreHashed_String key_name;
-        PreHashed_String mapped_name;
-        Cow_Vector<Xprunit> init;
-        Cow_Vector<Statement> body;
+        phsh_string key_name;
+        phsh_string mapped_name;
+        cow_vector<Xprunit> init;
+        cow_vector<Statement> body;
       };
     struct S_for
       {
-        Cow_Vector<Statement> init;
-        Cow_Vector<Xprunit> cond;
-        Cow_Vector<Xprunit> step;
-        Cow_Vector<Statement> body;
+        cow_vector<Statement> init;
+        cow_vector<Xprunit> cond;
+        cow_vector<Xprunit> step;
+        cow_vector<Statement> body;
       };
     struct S_try
       {
-        Cow_Vector<Statement> body_try;
+        cow_vector<Statement> body_try;
         Source_Location sloc;
-        PreHashed_String except_name;
-        Cow_Vector<Statement> body_catch;
+        phsh_string except_name;
+        cow_vector<Statement> body_catch;
       };
     struct S_break
       {
@@ -97,22 +97,22 @@ class Statement
     struct S_throw
       {
         Source_Location sloc;
-        Cow_Vector<Xprunit> expr;
+        cow_vector<Xprunit> expr;
       };
     struct S_return
       {
         bool by_ref;
-        Cow_Vector<Xprunit> expr;
+        cow_vector<Xprunit> expr;
       };
     struct S_assert
       {
         Source_Location sloc;
         bool negative;
-        Cow_Vector<Xprunit> expr;
-        Cow_String msg;
+        cow_vector<Xprunit> expr;
+        cow_string msg;
       };
 
-    enum Index : std::uint8_t
+    enum Index : uint8_t
       {
         index_expression  =  0,
         index_block       =  1,
@@ -131,7 +131,7 @@ class Statement
         index_return      = 14,
         index_assert      = 15,
       };
-    using Xvariant = Variant<
+    using Xvariant = variant<
       ROCKET_CDR(
         , S_expression  //  0,
         , S_block       //  1,
@@ -172,7 +172,7 @@ class Statement
         return static_cast<Index>(this->m_stor.index());
       }
 
-    void generate_code(Air_Queue& code, Cow_Vector<PreHashed_String>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const;
+    void generate_code(Air_Queue& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const;
   };
 
 }  // namespace Asteria

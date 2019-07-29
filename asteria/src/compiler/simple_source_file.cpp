@@ -13,7 +13,7 @@
 
 namespace Asteria {
 
-Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const Cow_String& filename)
+Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const cow_string& filename)
   {
     // Use default options.
     Compiler_Options options = { };
@@ -30,7 +30,7 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const C
     // Initialize parameters of the top scope.
     Source_Location sloc(filename, 1);
     // The file is considered to be a function taking variadic arguments.
-    Cow_Vector<PreHashed_String> params;
+    cow_vector<phsh_string> params;
     params.emplace_back(rocket::sref("..."));
     // Generate code.
     Air_Queue code;
@@ -50,19 +50,19 @@ Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
     return rocket::move(err);
   }
 
-Parser_Error Simple_Source_File::reload(std::streambuf& cbuf, const Cow_String& filename)
+Parser_Error Simple_Source_File::reload(std::streambuf& cbuf, const cow_string& filename)
   {
     return this->do_throw_or_return(this->do_reload_nothrow(cbuf, filename));
   }
 
-Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& filename)
+Parser_Error Simple_Source_File::reload(std::istream& cstrm, const cow_string& filename)
   {
     std::istream::sentry sentry(cstrm, true);
     if(!sentry) {
       return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
     // Extract characters from the stream buffer directly.
-    Opt<Parser_Error> qerr;
+    opt<Parser_Error> qerr;
     std::ios_base::iostate state = std::ios_base::goodbit;
     try {
       qerr = this->do_reload_nothrow(*(cstrm.rdbuf()), filename);
@@ -88,15 +88,15 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const Cow_String& f
     return this->do_throw_or_return(rocket::move(*qerr));
   }
 
-Parser_Error Simple_Source_File::reload(const Cow_String& cstr, const Cow_String& filename)
+Parser_Error Simple_Source_File::reload(const cow_string& cstr, const cow_string& filename)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.
-    Cow_stringbuf cbuf;
+    cow_stringbuf cbuf;
     cbuf.set_string(cstr);
     return this->reload(cbuf, filename);
   }
 
-Parser_Error Simple_Source_File::open(const Cow_String& filename)
+Parser_Error Simple_Source_File::open(const cow_string& filename)
   {
     // Open the file designated by `filename`.
     std::filebuf cbuf;
@@ -112,7 +112,7 @@ void Simple_Source_File::clear() noexcept
     this->m_code.clear();
   }
 
-Reference Simple_Source_File::execute(const Global_Context& global, Cow_Vector<Reference>&& args) const
+Reference Simple_Source_File::execute(const Global_Context& global, cow_vector<Reference>&& args) const
   {
     if(ROCKET_UNEXPECT(this->m_code.empty())) {
       // Return a null reference if there is nothing to execute.

@@ -12,7 +12,7 @@ namespace Asteria {
 class Parser
   {
   public:
-    enum State : std::uint8_t
+    enum State : uint8_t
       {
         state_empty    = 0,
         state_error    = 1,
@@ -20,7 +20,7 @@ class Parser
       };
 
   private:
-    Variant<std::nullptr_t, Parser_Error, Cow_Vector<Statement>> m_stor;
+    variant<nullptr_t, Parser_Error, cow_vector<Statement>> m_stor;
 
   public:
     Parser() noexcept
@@ -41,7 +41,7 @@ class Parser
     void clear() noexcept;
 
     Parser_Error get_parser_error() const noexcept;
-    const Cow_Vector<Statement>& get_statements() const;
+    const cow_vector<Statement>& get_statements() const;
   };
 
 }  // namespace Asteria

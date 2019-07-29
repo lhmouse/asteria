@@ -34,11 +34,11 @@ class Rcbase : public rocket::refcnt_base<Rcbase>
         return rocket::refcnt_base<Rcbase>::use_count();
       }
 
-    template<typename TargetT> Rcptr<const TargetT> share_this() const
+    template<typename TargetT> rcptr<const TargetT> share_this() const
       {
         return rocket::refcnt_base<Rcbase>::share_this<TargetT>();
       }
-    template<typename TargetT> Rcptr<TargetT> share_this()
+    template<typename TargetT> rcptr<TargetT> share_this()
       {
         return rocket::refcnt_base<Rcbase>::share_this<TargetT>();
       }

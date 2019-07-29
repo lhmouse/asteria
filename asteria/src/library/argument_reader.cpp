@@ -9,7 +9,7 @@ namespace Asteria {
 
 struct Argument_Reader::Mparam
   {
-    enum Tag : std::uint8_t
+    enum Tag : uint8_t
       {
         tag_optional  = 0,  // optional, statically typed
         tag_required  = 1,  // required, statically typed
@@ -109,14 +109,14 @@ const Reference* Argument_Reader::do_peek_argument_opt() const
     return &(this->m_args.get().at(nparams - 1));
   }
 
-Opt<std::ptrdiff_t> Argument_Reader::do_check_finish_opt(bool variadic) const
+opt<ptrdiff_t> Argument_Reader::do_check_finish_opt(bool variadic) const
   {
     if(!this->m_state.succeeded) {
       return rocket::nullopt;
     }
     // Before calling this function, a finish tag must have been recorded in `m_state.prototype`.
     auto nparams = this->m_state.prototype.size() - 1;
-    return static_cast<std::ptrdiff_t>(nparams - variadic);
+    return static_cast<ptrdiff_t>(nparams - variadic);
   }
 
 Argument_Reader& Argument_Reader::start() noexcept
@@ -155,7 +155,7 @@ Argument_Reader& Argument_Reader::g(Value& value)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Opt<G_boolean>& qxvalue)
+Argument_Reader& Argument_Reader::g(opt<G_boolean>& qxvalue)
   {
     this->do_record_parameter(gtype_boolean, false);
     // Get the next argument.
@@ -182,7 +182,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_boolean>& qxvalue)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Opt<G_integer>& qxvalue)
+Argument_Reader& Argument_Reader::g(opt<G_integer>& qxvalue)
   {
     this->do_record_parameter(gtype_integer, false);
     // Get the next argument.
@@ -209,7 +209,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_integer>& qxvalue)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Opt<G_real>& qxvalue)
+Argument_Reader& Argument_Reader::g(opt<G_real>& qxvalue)
   {
     this->do_record_parameter(gtype_real, false);
     // Get the next argument.
@@ -236,7 +236,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_real>& qxvalue)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Opt<G_string>& qxvalue)
+Argument_Reader& Argument_Reader::g(opt<G_string>& qxvalue)
   {
     this->do_record_parameter(gtype_string, false);
     // Get the next argument.
@@ -263,7 +263,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_string>& qxvalue)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Opt<G_opaque>& qxvalue)
+Argument_Reader& Argument_Reader::g(opt<G_opaque>& qxvalue)
   {
     this->do_record_parameter(gtype_opaque, false);
     // Get the next argument.
@@ -290,7 +290,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_opaque>& qxvalue)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Opt<G_function>& qxvalue)
+Argument_Reader& Argument_Reader::g(opt<G_function>& qxvalue)
   {
     this->do_record_parameter(gtype_function, false);
     // Get the next argument.
@@ -317,7 +317,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_function>& qxvalue)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Opt<G_array>& qxvalue)
+Argument_Reader& Argument_Reader::g(opt<G_array>& qxvalue)
   {
     this->do_record_parameter(gtype_array, false);
     // Get the next argument.
@@ -344,7 +344,7 @@ Argument_Reader& Argument_Reader::g(Opt<G_array>& qxvalue)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Opt<G_object>& qxvalue)
+Argument_Reader& Argument_Reader::g(opt<G_object>& qxvalue)
   {
     this->do_record_parameter(gtype_object, false);
     // Get the next argument.
@@ -564,7 +564,7 @@ bool Argument_Reader::finish()
     return true;
   }
 
-bool Argument_Reader::finish(Cow_Vector<Reference>& vargs)
+bool Argument_Reader::finish(cow_vector<Reference>& vargs)
   {
     this->do_record_parameter_finish(true);
     // Get the number of named parameters.
@@ -580,7 +580,7 @@ bool Argument_Reader::finish(Cow_Vector<Reference>& vargs)
     return true;
   }
 
-bool Argument_Reader::finish(Cow_Vector<Value>& vargs)
+bool Argument_Reader::finish(cow_vector<Value>& vargs)
   {
     this->do_record_parameter_finish(true);
     // Get the number of named parameters.
@@ -601,7 +601,7 @@ void Argument_Reader::throw_no_matching_function_call() const
     const auto& name = this->m_name;
     const auto& args = this->m_args.get();
     // Create a message containing arguments.
-    Cow_osstream fmtss;
+    cow_osstream fmtss;
     fmtss.imbue(std::locale::classic());
     fmtss << "There was no matching overload for function call `" << name << "(";
     if(!args.empty()) {

@@ -15,13 +15,13 @@ class Instantiated_Function : public Abstract_Function
   {
   private:
     // pre-defined constants and parameters
-    Rcobj<Variadic_Arguer> m_zvarg;
-    Cow_Vector<PreHashed_String> m_params;
+    rcobj<Variadic_Arguer> m_zvarg;
+    cow_vector<phsh_string> m_params;
     // the function body
     Air_Queue m_code;
 
   public:
-    Instantiated_Function(const Source_Location& sloc, const Cow_String& func, const Cow_Vector<PreHashed_String>& params,
+    Instantiated_Function(const Source_Location& sloc, const cow_string& func, const cow_vector<phsh_string>& params,
                           Air_Queue&& code)
       : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params),
         m_code(rocket::move(code))
@@ -34,17 +34,17 @@ class Instantiated_Function : public Abstract_Function
       {
         return this->m_zvarg->get_source_location();
       }
-    const Cow_String& get_function_signature() const noexcept
+    const cow_string& get_function_signature() const noexcept
       {
         return this->m_zvarg->get_function_signature();
       }
-    const Cow_Vector<PreHashed_String>& get_parameters() const noexcept
+    const cow_vector<phsh_string>& get_parameters() const noexcept
       {
         return this->m_params;
       }
 
     std::ostream& describe(std::ostream& os) const override;
-    Reference& invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const override;
+    Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const override;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const override;
   };
 

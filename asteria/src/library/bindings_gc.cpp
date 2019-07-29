@@ -11,12 +11,12 @@
 
 namespace Asteria {
 
-Opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation)
+opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation)
   {
     if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<std::size_t>(generation);
+    auto rgen = static_cast<size_t>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
@@ -27,12 +27,12 @@ Opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_intege
     return G_integer(count);
   }
 
-Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
+opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
   {
     if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<std::size_t>(generation);
+    auto rgen = static_cast<size_t>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
@@ -43,12 +43,12 @@ Opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_intege
     return G_integer(thres);
   }
 
-Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold)
+opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold)
   {
     if((generation < 0) || (generation > 9)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<std::size_t>(generation);
+    auto rgen = static_cast<size_t>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(rgen);
     if(!qcoll) {
@@ -57,13 +57,13 @@ Opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_intege
     // Get the current threshold.
     auto thres = qcoll->get_threshold();
     // Set a new threshold.
-    qcoll->set_threshold(static_cast<std::size_t>(rocket::clamp(threshold, 0, PTRDIFF_MAX)));
+    qcoll->set_threshold(static_cast<size_t>(rocket::clamp(threshold, 0, PTRDIFF_MAX)));
     return G_integer(thres);
   }
 
-G_integer std_gc_collect(const Global_Context& global, const Opt<G_integer>& generation_limit)
+G_integer std_gc_collect(const Global_Context& global, const opt<G_integer>& generation_limit)
   {
-    auto rgen = static_cast<std::size_t>(rocket::clamp(generation_limit.value_or(9), 0, 9));
+    auto rgen = static_cast<size_t>(rocket::clamp(generation_limit.value_or(9), 0, 9));
     // Perform full garbage collection.
     auto nvars = global.collect_variables(rgen);
     return G_integer(nvars);
@@ -93,7 +93,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.gc.tracked_count"), args);
           // Parse arguments.
           G_integer generation;
@@ -131,7 +131,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.gc.get_threshold"), args);
           // Parse arguments.
           G_integer generation;
@@ -174,7 +174,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.gc.set_threshold"), args);
           // Parse arguments.
           G_integer generation;
@@ -214,10 +214,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.gc.collect"), args);
           // Parse arguments.
-          Opt<G_integer> generation_limit;
+          opt<G_integer> generation_limit;
           if(reader.start().g(generation_limit).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_gc_collect(global, generation_limit) };

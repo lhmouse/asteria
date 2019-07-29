@@ -14,7 +14,7 @@ namespace Asteria {
 class Backtrace_Frame
   {
   public:
-    enum Ftype : std::uint8_t
+    enum Ftype : uint8_t
       {
         ftype_native  = 0,
         ftype_throw   = 1,
@@ -47,11 +47,11 @@ class Backtrace_Frame
       {
         return this->m_sloc;
       }
-    const Cow_String& file() const noexcept
+    const cow_string& file() const noexcept
       {
         return this->m_sloc.file();
       }
-    std::int64_t line() const noexcept
+    int64_t line() const noexcept
       {
         return this->m_sloc.line();
       }

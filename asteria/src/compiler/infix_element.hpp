@@ -12,7 +12,7 @@ namespace Asteria {
 class Infix_Element
   {
   public:
-    enum Precedence : std::uint8_t
+    enum Precedence : uint8_t
       {
         precedence_multiplicative  =  1,
         precedence_additive        =  2,
@@ -31,37 +31,37 @@ class Infix_Element
 
     struct S_head
       {
-        Cow_Vector<Xprunit> units;
+        cow_vector<Xprunit> units;
       };
     struct S_ternary  // ? :
       {
         bool assign;
-        Cow_Vector<Xprunit> branch_true;
-        Cow_Vector<Xprunit> branch_false;
+        cow_vector<Xprunit> branch_true;
+        cow_vector<Xprunit> branch_false;
       };
     struct S_logical_and  // &&
       {
         bool assign;
-        Cow_Vector<Xprunit> branch_true;
+        cow_vector<Xprunit> branch_true;
       };
     struct S_logical_or  // ||
       {
         bool assign;
-        Cow_Vector<Xprunit> branch_false;
+        cow_vector<Xprunit> branch_false;
       };
     struct S_coalescence  // ??
       {
         bool assign;
-        Cow_Vector<Xprunit> branch_null;
+        cow_vector<Xprunit> branch_null;
       };
     struct S_general  // no short circuit
       {
         Xprunit::Xop xop;
         bool assign;
-        Cow_Vector<Xprunit> rhs;
+        cow_vector<Xprunit> rhs;
       };
 
-    enum Index : std::uint8_t
+    enum Index : uint8_t
       {
         index_head         = 0,
         index_ternary      = 1,
@@ -70,7 +70,7 @@ class Infix_Element
         index_coalescence  = 4,
         index_general      = 5,
       };
-    using Xvariant = Variant<
+    using Xvariant = variant<
       ROCKET_CDR(
         , S_head         // 0,
         , S_ternary      // 1,
@@ -104,9 +104,9 @@ class Infix_Element
     // Returns the precedence of this element.
     Precedence tell_precedence() const noexcept;
     // Moves all units into `units`.
-    void extract(Cow_Vector<Xprunit>& units);
+    void extract(cow_vector<Xprunit>& units);
     // Returns a reference where new units will be appended.
-    Cow_Vector<Xprunit>& open_junction() noexcept;
+    cow_vector<Xprunit>& open_junction() noexcept;
   };
 
 }  // namespace Asteria

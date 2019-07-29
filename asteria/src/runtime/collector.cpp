@@ -9,7 +9,7 @@
 
 namespace Asteria {
 
-bool Collector::track_variable(const Rcptr<Variable>& var)
+bool Collector::track_variable(const rcptr<Variable>& var)
   {
     if(!this->m_tracked.insert(var)) {
       return false;
@@ -24,7 +24,7 @@ bool Collector::track_variable(const Rcptr<Variable>& var)
     return true;
   }
 
-bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
+bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
   {
     if(!this->m_tracked.erase(var)) {
       return false;
@@ -76,7 +76,7 @@ bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
           }
 
       public:
-        bool operator()(const Rcptr<Variable>& var) const override
+        bool operator()(const rcptr<Variable>& var) const override
           {
             return this->m_func(var);
           }
@@ -86,7 +86,7 @@ bool Collector::untrack_variable(const Rcptr<Variable>& var) noexcept
       {
         set.enumerate(Variable_Callback<FuncT>(rocket::forward<FuncT>(func)));
       }
-    template<typename FuncT> void do_enumerate_variables(const Rcptr<Variable>& var, FuncT&& func)
+    template<typename FuncT> void do_enumerate_variables(const rcptr<Variable>& var, FuncT&& func)
       {
         var->enumerate_variables(Variable_Callback<FuncT>(rocket::forward<FuncT>(func)));
       }
@@ -115,7 +115,7 @@ Collector* Collector::collect_single_opt()
     //   into the staging area.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_tracked,
-      [&](const Rcptr<Variable>& root) {
+      [&](const rcptr<Variable>& root) {
         // Add a variable that is reachable directly.
         // The reference from `m_tracked` should be excluded, so we initialize the gcref counter to 1.
         root->reset_gcref(1);
@@ -131,7 +131,7 @@ Collector* Collector::collect_single_opt()
         }
         // Enumerate variables that are reachable from `root` indirectly.
         do_enumerate_variables(root,
-          [&](const Rcptr<Variable>& child) {
+          [&](const rcptr<Variable>& child) {
             // If this variable has been inserted indirectly, finish.
             if(!this->m_staging.insert(child)) {
               return false;
@@ -149,7 +149,7 @@ Collector* Collector::collect_single_opt()
     //   Drop references directly or indirectly from `m_staging`.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const Rcptr<Variable>& root) {
+      [&](const rcptr<Variable>& root) {
         // Drop a direct reference.
         root->increment_gcref(1);
         ROCKET_ASSERT(root->get_gcref() <= root->use_count());
@@ -160,7 +160,7 @@ Collector* Collector::collect_single_opt()
         }
         // Enumerate variables that are reachable from `root` indirectly.
         do_enumerate_variables(root,
-          [&](const Rcptr<Variable>& child) {
+          [&](const rcptr<Variable>& child) {
             // Drop an indirect reference.
             child->increment_gcref(split);
             ROCKET_ASSERT(child->get_gcref() <= child->use_count());
@@ -174,7 +174,7 @@ Collector* Collector::collect_single_opt()
     //   Mark variables reachable indirectly from those reachable directly.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const Rcptr<Variable>& root) {
+      [&](const rcptr<Variable>& root) {
         // Skip variables that are possibly unreachable.
         if(root->get_gcref() >= root->use_count()) {
           return false;
@@ -183,7 +183,7 @@ Collector* Collector::collect_single_opt()
         root->reset_gcref(-1);
         // ... as well as all children.
         do_enumerate_variables(root,
-          [&](const Rcptr<Variable>& child) {
+          [&](const rcptr<Variable>& child) {
             // Skip variables that have already been marked.
             if(child->get_gcref() < 0) {
               return false;
@@ -201,7 +201,7 @@ Collector* Collector::collect_single_opt()
     //   reference counts.
     ///////////////////////////////////////////////////////////////////////////
     do_enumerate_variables(this->m_staging,
-      [&](const Rcptr<Variable>& root) {
+      [&](const rcptr<Variable>& root) {
         // All reachable variables will have negative gcref counters.
         if(root->get_gcref() >= 0) {
           // Overwrite the value of this variable with a scalar value to break reference cycles.

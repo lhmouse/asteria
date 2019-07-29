@@ -19,7 +19,7 @@ namespace Asteria {
 
     }  // namespace
 
-G_real std_math_exp(const G_real& y, const Opt<G_real>& base)
+G_real std_math_exp(const G_real& y, const opt<G_real>& base)
   {
     if(!base) {
       return std::exp(y);
@@ -43,7 +43,7 @@ G_real std_math_pow(const G_real& x, const G_real& y)
     return std::pow(x, y);
   }
 
-G_real std_math_log(const G_real& x, const Opt<G_real>& base)
+G_real std_math_log(const G_real& x, const opt<G_real>& base)
   {
     if(!base) {
       return std::log(x);
@@ -100,7 +100,7 @@ G_real std_math_atan2(const G_real& y, const G_real& x)
     return std::atan2(y, x);
   }
 
-G_real std_math_hypot(const Cow_Vector<Value>& values)
+G_real std_math_hypot(const cow_vector<Value>& values)
   {
     switch(values.size()) {
     case 0:
@@ -118,7 +118,7 @@ G_real std_math_hypot(const Cow_Vector<Value>& values)
         // Call the C `hypot()` function.
         auto result = std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
         // Sum up all the other values.
-        for(std::size_t i = 2; i < values.size(); ++i) {
+        for(size_t i = 2; i < values.size(); ++i) {
           result = std::hypot(result, values[i].convert_to_real());
         }
         return result;
@@ -222,11 +222,11 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.exp"), args);
           // Parse arguments.
           G_real y;
-          Opt<G_real> base;
+          opt<G_real> base;
           if(reader.start().g(y).g(base).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_exp(y, base) };
@@ -256,7 +256,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.expm1"), args);
           // Parse arguments.
           G_real y;
@@ -290,7 +290,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.pow"), args);
           // Parse arguments.
           G_real x;
@@ -324,11 +324,11 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.log"), args);
           // Parse arguments.
           G_real y;
-          Opt<G_real> base;
+          opt<G_real> base;
           if(reader.start().g(y).g(base).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_log(y, base) };
@@ -358,7 +358,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.log1p"), args);
           // Parse arguments.
           G_real y;
@@ -390,7 +390,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.sin"), args);
           // Parse arguments.
           G_real x;
@@ -422,7 +422,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.cos"), args);
           // Parse arguments.
           G_real x;
@@ -454,7 +454,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.tan"), args);
           // Parse arguments.
           G_real x;
@@ -486,7 +486,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.asin"), args);
           // Parse arguments.
           G_real x;
@@ -518,7 +518,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.acos"), args);
           // Parse arguments.
           G_real x;
@@ -550,7 +550,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.atan"), args);
           // Parse arguments.
           G_real x;
@@ -582,7 +582,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.atan2"), args);
           // Parse arguments.
           G_real y;
@@ -619,10 +619,10 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.hypot"), args);
           // Parse variadic arguments.
-          Cow_Vector<Value> values;
+          cow_vector<Value> values;
           if(reader.start().finish(values)) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_math_hypot(values) };
@@ -651,7 +651,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.sinh"), args);
           // Parse arguments.
           G_real x;
@@ -683,7 +683,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.cosh"), args);
           // Parse arguments.
           G_real x;
@@ -715,7 +715,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.tanh"), args);
           // Parse arguments.
           G_real x;
@@ -747,7 +747,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.asinh"), args);
           // Parse arguments.
           G_real x;
@@ -779,7 +779,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.acosh"), args);
           // Parse arguments.
           G_real x;
@@ -811,7 +811,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.atanh"), args);
           // Parse arguments.
           G_real x;
@@ -843,7 +843,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.erf"), args);
           // Parse arguments.
           G_real x;
@@ -875,7 +875,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.cerf"), args);
           // Parse arguments.
           G_real x;
@@ -907,7 +907,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.gamma"), args);
           // Parse arguments.
           G_real x;
@@ -940,7 +940,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.math.lgamma"), args);
           // Parse arguments.
           G_real x;

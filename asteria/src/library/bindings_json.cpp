@@ -115,7 +115,7 @@ namespace Asteria {
       {
         // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
         cstrm << '\"';
-        std::size_t offset = 0;
+        size_t offset = 0;
         while(offset < str.size()) {
           // Convert UTF-8 to UTF-16.
           char32_t cp;
@@ -205,15 +205,15 @@ namespace Asteria {
         std::reference_wrapper<const G_object> object;
         G_object::const_iterator cur;
       };
-    using Xformat = Variant<S_xformat_array, S_xformat_object>;
+    using Xformat = variant<S_xformat_array, S_xformat_object>;
 
     G_string do_format_nonrecursive(const Value& value, Indenter& indent)
       {
-        Cow_osstream cstrm;
+        cow_osstream cstrm;
         cstrm.imbue(std::locale::classic());
         // Transform recursion to iteration using a handwritten stack.
         auto qvalue = std::addressof(value);
-        Cow_Vector<Xformat> stack;
+        cow_vector<Xformat> stack;
         do {
           // Find a leaf value. `qvalue` must always point to a valid value here.
           if(qvalue->is_array()){
@@ -317,7 +317,7 @@ namespace Asteria {
 
     }
 
-G_string std_json_format(const Value& value, const Opt<G_string>& indent)
+G_string std_json_format(const Value& value, const opt<G_string>& indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, Indenter_none())
@@ -333,7 +333,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
 
     namespace {
 
-    Opt<G_string> do_accept_identifier_opt(Token_Stream& tstrm, std::initializer_list<const char*> accept)
+    opt<G_string> do_accept_identifier_opt(Token_Stream& tstrm, std::initializer_list<const char*> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -350,7 +350,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    Opt<Token::Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Token::Punctuator> accept)
+    opt<Token::Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Token::Punctuator> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -367,7 +367,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    Opt<G_real> do_accept_number_opt(Token_Stream& tstrm)
+    opt<G_real> do_accept_number_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -414,7 +414,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    Opt<G_string> do_accept_string_opt(Token_Stream& tstrm)
+    opt<G_string> do_accept_string_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -429,7 +429,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    Opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
+    opt<Value> do_accept_scalar_opt(Token_Stream& tstrm)
       {
         auto qnum = do_accept_number_opt(tstrm);
         if(qnum) {
@@ -465,7 +465,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    Opt<G_string> do_accept_key_opt(Token_Stream& tstrm)
+    opt<G_string> do_accept_key_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -495,13 +495,13 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         G_object object;
         G_string key;
       };
-    using Xparse = Variant<S_xparse_array, S_xparse_object>;
+    using Xparse = variant<S_xparse_array, S_xparse_object>;
 
-    Opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
+    opt<Value> do_json_parse_nonrecursive_opt(Token_Stream& tstrm)
       {
         Value value;
         // Implement a recursive descent parser without recursion.
-        Cow_Vector<Xparse> stack;
+        cow_vector<Xparse> stack;
         do {
           // Accept a leaf value. No other things such as closed brackets are allowed.
           auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op, Token::punctuator_brace_op });
@@ -618,7 +618,7 @@ Value std_json_parse(const G_string& text)
     options.keyword_as_identifier = true;
     options.integer_as_real = true;
     // Use a `streambuf` rather than an `istream` to minimize overheads.
-    Cow_stringbuf cbuf(text, std::ios_base::in);
+    cow_stringbuf cbuf(text, std::ios_base::in);
     Token_Stream tstrm;
     if(!tstrm.load(cbuf, rocket::sref("<JSON text>"), options)) {
       ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", text);
@@ -667,12 +667,12 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.json.format"), args);
           Argument_Reader::State state;
           // Parse arguments.
           Value value;
-          Opt<G_string> sindent;
+          opt<G_string> sindent;
           if(reader.start().g(value).save(state).g(sindent).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_json_format(value, sindent) };
@@ -724,7 +724,7 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.json.parse"), args);
           // Parse arguments.
           G_string text;

@@ -21,7 +21,7 @@ void Reference_Dictionary::do_clear_buckets() const noexcept
     }
   }
 
-Reference_Dictionary::Bucket* Reference_Dictionary::do_xprobe(const PreHashed_String& name) const noexcept
+Reference_Dictionary::Bucket* Reference_Dictionary::do_xprobe(const phsh_string& name) const noexcept
   {
     auto bptr = this->m_stor.bptr;
     auto eptr = this->m_stor.eptr;
@@ -89,7 +89,7 @@ void Reference_Dictionary::do_list_detach(Reference_Dictionary::Bucket* qbkt) no
     qbkt->prev = nullptr;
   }
 
-void Reference_Dictionary::do_rehash(std::size_t nbkt)
+void Reference_Dictionary::do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_stor.size);
     // Allocate a new table.
@@ -133,7 +133,7 @@ void Reference_Dictionary::do_rehash(std::size_t nbkt)
     }
   }
 
-void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const PreHashed_String& name) noexcept
+void Reference_Dictionary::do_attach(Reference_Dictionary::Bucket* qbkt, const phsh_string& name) noexcept
   {
     // Construct the node, then attach it.
     ROCKET_ASSERT(!*qbkt);

@@ -14,7 +14,7 @@ namespace Asteria {
 class Xprunit
   {
   public:
-    enum Xop : std::uint8_t
+    enum Xop : uint8_t
       {
         // Postfix operators
         xop_postfix_inc      = 10,  // ++
@@ -67,7 +67,7 @@ class Xprunit
         xop_infix_assign     = 92,  // =
       };
 
-    enum TCO_Awareness : std::uint8_t
+    enum TCO_Awareness : uint8_t
       {
         tco_none      = 0,
         tco_by_ref    = 1,
@@ -81,28 +81,28 @@ class Xprunit
       };
     struct S_named_reference
       {
-        PreHashed_String name;
+        phsh_string name;
       };
     struct S_closure_function
       {
         Source_Location sloc;
-        Cow_Vector<PreHashed_String> params;
-        Cow_Vector<Statement> body;
+        cow_vector<phsh_string> params;
+        cow_vector<Statement> body;
       };
     struct S_branch
       {
-        Cow_Vector<Xprunit> branch_true;
-        Cow_Vector<Xprunit> branch_false;
+        cow_vector<Xprunit> branch_true;
+        cow_vector<Xprunit> branch_false;
         bool assign;
       };
     struct S_function_call
       {
         Source_Location sloc;
-        Cow_Vector<bool> by_refs;
+        cow_vector<bool> by_refs;
       };
     struct S_member_access
       {
-        PreHashed_String name;
+        phsh_string name;
       };
     struct S_operator_rpn
       {
@@ -111,15 +111,15 @@ class Xprunit
       };
     struct S_unnamed_array
       {
-        std::size_t nelems;
+        size_t nelems;
       };
     struct S_unnamed_object
       {
-        Cow_Vector<PreHashed_String> keys;
+        cow_vector<phsh_string> keys;
       };
     struct S_coalescence
       {
-        Cow_Vector<Xprunit> branch_null;
+        cow_vector<Xprunit> branch_null;
         bool assign;
       };
     struct S_operator_fma
@@ -127,7 +127,7 @@ class Xprunit
         bool assign;
       };
 
-    enum Index : std::uint8_t
+    enum Index : uint8_t
       {
         index_literal           =  0,
         index_named_reference   =  1,
@@ -141,7 +141,7 @@ class Xprunit
         index_coalescence       =  9,
         index_operator_fma      = 10,
       };
-    using Xvariant = Variant<
+    using Xvariant = variant<
       ROCKET_CDR(
         , S_literal           //  0,
         , S_named_reference   //  1,

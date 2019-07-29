@@ -354,7 +354,7 @@ std::ostream& Value::print(std::ostream& os, bool escape) const
         const auto& altr = this->m_stor.as<gtype_array>();
         // [ 1, 2, 3, ]
         os << '[';
-        for(std::size_t i = 0; i < altr.size(); ++i) {
+        for(size_t i = 0; i < altr.size(); ++i) {
           os << ' ';
           altr[i].print(os, true);
           os << ',';
@@ -381,7 +381,7 @@ std::ostream& Value::print(std::ostream& os, bool escape) const
     }
   }
 
-std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hanging) const
+std::ostream& Value::dump(std::ostream& os, size_t indent, size_t hanging) const
   {
     switch(this->gtype()) {
     case gtype_null:
@@ -437,7 +437,7 @@ std::ostream& Value::dump(std::ostream& os, std::size_t indent, std::size_t hang
         //  ]
         os << "array(" << std::dec << altr.size() << ")";
         os << pwrapln(ibuf, indent, hanging + 1) << '[';
-        for(std::size_t i = 0; i < altr.size(); ++i) {
+        for(size_t i = 0; i < altr.size(); ++i) {
           os << pwrapln(ibuf, indent, hanging + indent) << std::dec << i << " = ";
           altr[i].dump(os, indent, hanging + indent) << ';';
         }

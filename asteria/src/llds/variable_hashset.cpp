@@ -20,13 +20,13 @@ void Variable_HashSet::do_clear_buckets() const noexcept
     }
   }
 
-Variable_HashSet::Bucket* Variable_HashSet::do_xprobe(const Rcptr<Variable>& var) const noexcept
+Variable_HashSet::Bucket* Variable_HashSet::do_xprobe(const rcptr<Variable>& var) const noexcept
   {
     auto bptr = this->m_stor.bptr;
     auto eptr = this->m_stor.eptr;
     // Find a bucket using linear probing.
     // We keep the load factor below 1.0 so there will always be some empty buckets in the table.
-    auto mptr = rocket::get_probing_origin(bptr, eptr, reinterpret_cast<std::uintptr_t>(var.get()));
+    auto mptr = rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(var.get()));
     auto qbkt = rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket& r) { return r.kstor[0] == var;  });
     ROCKET_ASSERT(qbkt);
     return qbkt;
@@ -50,7 +50,7 @@ void Variable_HashSet::do_xrelocate_but(Variable_HashSet::Bucket* qxcld) noexcep
         this->do_list_detach(qbkt);
         // Find a new bucket for the variable using linear probing.
         // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
-        auto mptr = rocket::get_probing_origin(bptr, eptr, reinterpret_cast<std::uintptr_t>(var.get()));
+        auto mptr = rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(var.get()));
         qbkt = rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
         ROCKET_ASSERT(qbkt);
         // Insert the variable into the new bucket.
@@ -85,7 +85,7 @@ void Variable_HashSet::do_list_detach(Variable_HashSet::Bucket* qbkt) noexcept
     qbkt->prev = nullptr;
   }
 
-void Variable_HashSet::do_rehash(std::size_t nbkt)
+void Variable_HashSet::do_rehash(size_t nbkt)
   {
     ROCKET_ASSERT(nbkt / 2 > this->m_stor.size);
     // Allocate a new table.
@@ -112,7 +112,7 @@ void Variable_HashSet::do_rehash(std::size_t nbkt)
       qbkt->prev = nullptr;
       // Find a new bucket for the variable using linear probing.
       // Uniqueness has already been implied for all elements, so there is no need to check for collisions.
-      auto mptr = rocket::get_probing_origin(bptr, eptr, reinterpret_cast<std::uintptr_t>(var.get()));
+      auto mptr = rocket::get_probing_origin(bptr, eptr, reinterpret_cast<uintptr_t>(var.get()));
       qbkt = rocket::linear_probe(bptr, mptr, mptr, eptr, [&](const Bucket&) { return false;  });
       ROCKET_ASSERT(qbkt);
       // Insert the variable into the new bucket.
@@ -126,7 +126,7 @@ void Variable_HashSet::do_rehash(std::size_t nbkt)
     }
   }
 
-void Variable_HashSet::do_attach(Variable_HashSet::Bucket* qbkt, const Rcptr<Variable>& var) noexcept
+void Variable_HashSet::do_attach(Variable_HashSet::Bucket* qbkt, const rcptr<Variable>& var) noexcept
   {
     // Construct the node, then attach it.
     ROCKET_ASSERT(!*qbkt);

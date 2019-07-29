@@ -16,15 +16,15 @@ class Collector
   private:
     Variable_HashSet* m_output_opt;
     Collector* m_tied_opt;
-    std::size_t m_threshold;
+    size_t m_threshold;
 
-    std::size_t m_counter;
+    size_t m_counter;
     long m_recur;
     Variable_HashSet m_tracked;
     Variable_HashSet m_staging;
 
   public:
-    Collector(Variable_HashSet* output_opt, Collector* tied_opt, std::size_t threshold) noexcept
+    Collector(Variable_HashSet* output_opt, Collector* tied_opt, size_t threshold) noexcept
       : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold),
         m_counter(0), m_recur(0)
       {
@@ -54,21 +54,21 @@ class Collector
         this->m_tied_opt = tied_opt;
       }
 
-    std::size_t get_threshold() const noexcept
+    size_t get_threshold() const noexcept
       {
         return this->m_threshold;
       }
-    void set_threshold(std::size_t threshold) noexcept
+    void set_threshold(size_t threshold) noexcept
       {
         this->m_threshold = threshold;
       }
 
-    std::size_t get_tracked_variable_count() const noexcept
+    size_t get_tracked_variable_count() const noexcept
       {
         return this->m_tracked.size();
       }
-    bool track_variable(const Rcptr<Variable>& var);
-    bool untrack_variable(const Rcptr<Variable>& var) noexcept;
+    bool track_variable(const rcptr<Variable>& var);
+    bool untrack_variable(const rcptr<Variable>& var) noexcept;
     Collector* collect_single_opt();
   };
 

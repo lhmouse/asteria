@@ -14,28 +14,28 @@ namespace Asteria {
     namespace {
     namespace CRC32 {
 
-    template<std::uint32_t valueT, std::uint32_t divisorT, int roundT> struct Generator : Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
+    template<uint32_t valueT, uint32_t divisorT, int roundT> struct Generator : Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
       {
       };
-    template<std::uint32_t valueT, std::uint32_t divisorT> struct Generator<valueT, divisorT, 8> : std::integral_constant<std::uint32_t, valueT>
+    template<uint32_t valueT, uint32_t divisorT> struct Generator<valueT, divisorT, 8> : std::integral_constant<uint32_t, valueT>
       {
       };
-    template<std::uint32_t divisorT, std::size_t... indicesT> constexpr Array<std::uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
+    template<uint32_t divisorT, size_t... indicesT> constexpr array<uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
       {
-        return {{ Generator<std::uint8_t(indicesT), divisorT, 0>::value... }};
+        return {{ Generator<uint8_t(indicesT), divisorT, 0>::value... }};
       }
-    template<std::uint32_t divisorT> constexpr Array<std::uint32_t, 256> do_generate_table() noexcept
+    template<uint32_t divisorT> constexpr array<uint32_t, 256> do_generate_table() noexcept
       {
         return do_generate_table_impl<divisorT>(std::make_index_sequence<256>());
       }
     constexpr auto s_iso3309_table = do_generate_table<0xEDB88320>();
 
-    constexpr std::uint32_t s_init = UINT32_MAX;
+    constexpr uint32_t s_init = UINT32_MAX;
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        std::uint32_t m_reg;
+        uint32_t m_reg;
 
       public:
         Hasher() noexcept
@@ -55,11 +55,11 @@ namespace Asteria {
 
         void write(const G_string& data) noexcept
           {
-            const auto p = reinterpret_cast<const std::uint8_t*>(data.data());
+            const auto p = reinterpret_cast<const uint8_t*>(data.data());
             const auto n = data.size();
             auto r = this->m_reg;
             // Hash bytes one by one.
-            for(std::size_t i = 0; i != n; ++i) {
+            for(size_t i = 0; i != n; ++i) {
               r = s_iso3309_table[((r ^ p[i]) & 0xFF)] ^ (r >> 8);
             }
             this->m_reg = r;
@@ -92,7 +92,7 @@ G_object std_checksum_crc32_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.write"), args);
               // Get the hasher.
@@ -117,7 +117,7 @@ G_object std_checksum_crc32_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.finish"), args);
               // Get the hasher.
@@ -146,13 +146,13 @@ G_integer std_checksum_crc32(const G_string& data)
     namespace {
     namespace FNV1a32 {
 
-    constexpr std::uint32_t s_prime = 16777619;
-    constexpr std::uint32_t s_offset = 2166136261;
+    constexpr uint32_t s_prime = 16777619;
+    constexpr uint32_t s_offset = 2166136261;
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        std::uint32_t m_reg;
+        uint32_t m_reg;
 
       public:
         Hasher() noexcept
@@ -172,11 +172,11 @@ G_integer std_checksum_crc32(const G_string& data)
 
         void write(const G_string& data) noexcept
           {
-            const auto p = reinterpret_cast<const std::uint8_t*>(data.data());
+            const auto p = reinterpret_cast<const uint8_t*>(data.data());
             const auto n = data.size();
             auto r = this->m_reg;
             // Hash bytes one by one.
-            for(std::size_t i = 0; i != n; ++i) {
+            for(size_t i = 0; i != n; ++i) {
               r = (r ^ p[i]) * s_prime;
             }
             this->m_reg = r;
@@ -209,7 +209,7 @@ G_object std_checksum_fnv1a32_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.write"), args);
               // Get the hasher.
@@ -234,7 +234,7 @@ G_object std_checksum_fnv1a32_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.finish"), args);
               // Get the hasher.
@@ -262,24 +262,24 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
     namespace {
 
-    template<std::uint8_t valueT> struct Hexdigit : std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
+    template<uint8_t valueT> struct Hexdigit : std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
       {
       };
-    template<std::uint8_t valueT> constexpr Array<char, 2> do_generate_hex_digits_for_byte() noexcept
+    template<uint8_t valueT> constexpr array<char, 2> do_generate_hex_digits_for_byte() noexcept
       {
-        return {{ Hexdigit<std::uint8_t(valueT / 16)>::value, Hexdigit<std::uint8_t(valueT % 16)>::value }};
+        return {{ Hexdigit<uint8_t(valueT / 16)>::value, Hexdigit<uint8_t(valueT % 16)>::value }};
       };
-    template<std::size_t... indicesT> constexpr Array<char, 256, 2> do_generate_hexdigits_impl(const std::index_sequence<indicesT...>&) noexcept
+    template<size_t... indicesT> constexpr array<char, 256, 2> do_generate_hexdigits_impl(const std::index_sequence<indicesT...>&) noexcept
       {
-        return {{ do_generate_hex_digits_for_byte<std::uint8_t(indicesT)>()... }};
+        return {{ do_generate_hex_digits_for_byte<uint8_t(indicesT)>()... }};
       }
     constexpr auto s_hexdigits = do_generate_hexdigits_impl(std::make_index_sequence<256>());
 
     template<bool bigendT, typename WordT> G_string& do_pdigits_impl(G_string& str, const WordT& ref)
       {
         static_assert(std::is_unsigned<WordT>::value, "??");
-        std::array<std::uint8_t, sizeof(WordT)> stor_le;
-        std::uint64_t word = static_cast<std::uint64_t>(ref);
+        std::array<uint8_t, sizeof(WordT)> stor_le;
+        uint64_t word = static_cast<uint64_t>(ref);
         // Write the word in little-endian order.
         for(auto& byte : stor_le) {
           byte = word & 0xFF;
@@ -287,10 +287,10 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         }
         // Append hexadecimal digits.
         if(bigendT) {
-          std::for_each(stor_le.rbegin(), stor_le.rend(), [&](std::uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
+          std::for_each(stor_le.rbegin(), stor_le.rend(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
         }
         else {
-          std::for_each(stor_le.begin(), stor_le.end(), [&](std::uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
+          std::for_each(stor_le.begin(), stor_le.end(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
         }
         return str;
       }
@@ -303,11 +303,11 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         return do_pdigits_impl<0, WordT>(str, ref);
       }
 
-    template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const std::uint8_t* ptr)
+    template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const uint8_t* ptr)
       {
         static_assert(std::is_unsigned<WordT>::value, "??");
-        std::array<std::uint8_t, sizeof(WordT)> stor_be;
-        std::uint64_t word = 0;
+        std::array<uint8_t, sizeof(WordT)> stor_be;
+        uint64_t word = 0;
         // Re-arrange bytes.
         if(bigendT) {
           std::copy_n(ptr, stor_be.size(), stor_be.begin());
@@ -322,25 +322,25 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         }
         return ref = static_cast<WordT>(word);
       }
-    template<typename WordT> WordT& do_load_be(WordT& ref, const std::uint8_t* ptr)
+    template<typename WordT> WordT& do_load_be(WordT& ref, const uint8_t* ptr)
       {
         return do_load_impl<1, WordT>(ref, ptr);
       }
-    template<typename WordT> WordT& do_load_le(WordT& ref, const std::uint8_t* ptr)
+    template<typename WordT> WordT& do_load_le(WordT& ref, const uint8_t* ptr)
       {
         return do_load_impl<0, WordT>(ref, ptr);
       }
 
-    template<typename WordT> constexpr WordT do_rotl(const WordT& ref, std::size_t bits)
+    template<typename WordT> constexpr WordT do_rotl(const WordT& ref, size_t bits)
       {
         constexpr auto width = sizeof(WordT) * 8;
         auto sum = (ref << (+bits) % width) | (ref >> (-bits) % width);
         return static_cast<WordT>(sum);
       }
 
-    template<typename WordT, std::size_t sizeT> inline void do_padd(std::array<WordT, sizeT>& lhs, const std::array<WordT, sizeT>& rhs)
+    template<typename WordT, size_t sizeT> inline void do_padd(std::array<WordT, sizeT>& lhs, const std::array<WordT, sizeT>& rhs)
       {
-        rocket::ranged_for(std::size_t(0), sizeT, [&](std::size_t i) { lhs[i] += rhs[i];  });
+        rocket::ranged_for(size_t(0), sizeT, [&](size_t i) { lhs[i] += rhs[i];  });
       }
 
     }  // namespace
@@ -348,14 +348,14 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     namespace {
     namespace MD5 {
 
-    constexpr std::array<std::uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
+    constexpr std::array<uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        std::array<std::uint32_t, 4> m_regs;
-        std::uint64_t m_size;
-        std::array<std::uint8_t, 64> m_chunk;
+        std::array<uint32_t, 4> m_regs;
+        uint64_t m_size;
+        std::array<uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -365,34 +365,34 @@ G_integer std_checksum_fnv1a32(const G_string& data)
           }
 
       private:
-        void do_consume_chunk(const std::uint8_t* p) noexcept
+        void do_consume_chunk(const uint8_t* p) noexcept
           {
-            std::uint32_t w;
-            std::uint32_t f, g;
+            uint32_t w;
+            uint32_t f, g;
             // https://en.wikipedia.org/wiki/MD5
-            auto update = [&](std::uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, std::uint32_t k, std::uint8_t r)
+            auto update = [&](uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, uint32_t k, uint8_t r)
               {
                 specx(i, b, c, d);
                 do_load_le(w, p + g * 4);
                 w = a + f + k + w;
                 a = b + do_rotl(w, r);
               };
-            auto spec0 = [&](std::uint32_t i, auto& b, auto& c, auto& d)
+            auto spec0 = [&](uint32_t i, auto& b, auto& c, auto& d)
               {
                 f = d ^ (b & (c ^ d));
                 g = i;
               };
-            auto spec1 = [&](std::uint32_t i, auto& b, auto& c, auto& d)
+            auto spec1 = [&](uint32_t i, auto& b, auto& c, auto& d)
               {
                 f = c ^ (d & (b ^ c));
                 g = (5 * i + 1) % 16;
               };
-            auto spec2 = [&](std::uint32_t i, auto& b, auto& c, auto& d)
+            auto spec2 = [&](uint32_t i, auto& b, auto& c, auto& d)
               {
                 f = b ^ c ^ d;
                 g = (3 * i + 5) % 16;
               };
-            auto spec3 = [&](std::uint32_t i, auto& b, auto& c, auto& d)
+            auto spec3 = [&](uint32_t i, auto& b, auto& c, auto& d)
               {
                 f = c ^ (b | ~d);
                 g = (7 * i) % 16;
@@ -483,17 +483,17 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
         void write(const G_string& data) noexcept
           {
-            auto bp = reinterpret_cast<const std::uint8_t*>(data.data());
+            auto bp = reinterpret_cast<const uint8_t*>(data.data());
             auto ep = bp + data.size();
-            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
             auto ec = this->m_chunk.end();
-            std::ptrdiff_t n;
+            ptrdiff_t n;
             // If the last chunk was not empty, ...
             if(bc != this->m_chunk.begin()) {
               // ... append data to the last chunk, ...
               n = rocket::min(ep - bp, ec - bc);
               std::copy_n(bp, n, bc);
-              this->m_size += static_cast<std::uint64_t>(n);
+              this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
               // ... and if is still not full, there aren't going to be any more data.
@@ -516,7 +516,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             n = ep - bp;
             if(n != 0) {
               std::copy_n(bp, n, bc);
-              this->m_size += static_cast<std::uint64_t>(n);
+              this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
             }
@@ -525,9 +525,9 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         G_string finish() noexcept
           {
             // Finalize the hasher.
-            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
             auto ec = this->m_chunk.end();
-            std::ptrdiff_t n;
+            ptrdiff_t n;
             // Append a `0x80` byte followed by zeroes.
             *(bc++) = 0x80;
             n = ec - bc;
@@ -546,7 +546,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             ROCKET_ASSERT(ec - bc == 8);
             // Write the number of bits in little-endian order.
             auto bits = this->m_size * 8;
-            for(std::ptrdiff_t i = 0; i != 8; ++i) {
+            for(ptrdiff_t i = 0; i != 8; ++i) {
               bc[i] = bits & 0xFF;
               bits >>= 8;
             }
@@ -554,7 +554,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             // Get the checksum.
             G_string ck;
             ck.reserve(this->m_regs.size() * 8);
-            rocket::for_each(this->m_regs, [&](std::uint32_t w) { do_pdigits_le(ck, w);  });
+            rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_le(ck, w);  });
             // Reset internal states.
             this->m_regs = s_init;
             this->m_size = 0;
@@ -580,7 +580,7 @@ G_object std_checksum_md5_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.md5_new()>.write"), args);
               // Get the hasher.
@@ -605,7 +605,7 @@ G_object std_checksum_md5_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.md5_new()>.finish"), args);
               // Get the hasher.
@@ -634,14 +634,14 @@ G_string std_checksum_md5(const G_string& data)
     namespace {
     namespace SHA1 {
 
-    constexpr std::array<std::uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
+    constexpr std::array<uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        std::array<std::uint32_t, 5> m_regs;
-        std::uint64_t m_size;
-        std::array<std::uint8_t, 64> m_chunk;
+        std::array<uint32_t, 5> m_regs;
+        uint64_t m_size;
+        std::array<uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -651,21 +651,21 @@ G_string std_checksum_md5(const G_string& data)
           }
 
       private:
-        void do_consume_chunk(const std::uint8_t* p) noexcept
+        void do_consume_chunk(const uint8_t* p) noexcept
           {
-            std::array<std::uint32_t, 80> w;
-            std::uint32_t f, k;
+            std::array<uint32_t, 80> w;
+            uint32_t f, k;
             // https://en.wikipedia.org/wiki/SHA-1
-            for(std::size_t i =  0; i < 16; ++i) {
+            for(size_t i =  0; i < 16; ++i) {
               do_load_be(w[i], p + i * 4);
             }
-            for(std::size_t i = 16; i < 32; ++i) {
+            for(size_t i = 16; i < 32; ++i) {
               w[i] = do_rotl(w[i-3] ^ w[i- 8] ^ w[i-14] ^ w[i-16], 1);
             }
-            for(std::size_t i = 32; i < 80; ++i) {
+            for(size_t i = 32; i < 80; ++i) {
               w[i] = do_rotl(w[i-6] ^ w[i-16] ^ w[i-28] ^ w[i-32], 2);
             }
-            auto update = [&](std::uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, auto& e)
+            auto update = [&](uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, auto& e)
               {
                 specx(b, c, d);
                 e += do_rotl(a, 5) + f + k + w[i];
@@ -793,17 +793,17 @@ G_string std_checksum_md5(const G_string& data)
 
         void write(const G_string& data) noexcept
           {
-            auto bp = reinterpret_cast<const std::uint8_t*>(data.data());
+            auto bp = reinterpret_cast<const uint8_t*>(data.data());
             auto ep = bp + data.size();
-            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
             auto ec = this->m_chunk.end();
-            std::ptrdiff_t n;
+            ptrdiff_t n;
             // If the last chunk was not empty, ...
             if(bc != this->m_chunk.begin()) {
               // ... append data to the last chunk, ...
               n = rocket::min(ep - bp, ec - bc);
               std::copy_n(bp, n, bc);
-              this->m_size += static_cast<std::uint64_t>(n);
+              this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
               // ... and if is still not full, there aren't going to be any more data.
@@ -826,7 +826,7 @@ G_string std_checksum_md5(const G_string& data)
             n = ep - bp;
             if(n != 0) {
               std::copy_n(bp, n, bc);
-              this->m_size += static_cast<std::uint64_t>(n);
+              this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
             }
@@ -835,9 +835,9 @@ G_string std_checksum_md5(const G_string& data)
         G_string finish() noexcept
           {
             // Finalize the hasher.
-            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
             auto ec = this->m_chunk.end();
-            std::ptrdiff_t n;
+            ptrdiff_t n;
             // Append a `0x80` byte followed by zeroes.
             *(bc++) = 0x80;
             n = ec - bc;
@@ -856,7 +856,7 @@ G_string std_checksum_md5(const G_string& data)
             ROCKET_ASSERT(ec - bc == 8);
             // Write the number of bits in big-endian order.
             auto bits = this->m_size * 8;
-            for(std::ptrdiff_t i = 7; i != -1; --i) {
+            for(ptrdiff_t i = 7; i != -1; --i) {
               bc[i] = bits & 0xFF;
               bits >>= 8;
             }
@@ -864,7 +864,7 @@ G_string std_checksum_md5(const G_string& data)
             // Get the checksum.
             G_string ck;
             ck.reserve(this->m_regs.size() * 8);
-            rocket::for_each(this->m_regs, [&](std::uint32_t w) { do_pdigits_be(ck, w);  });
+            rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
             // Reset internal states.
             this->m_regs = s_init;
             this->m_size = 0;
@@ -890,7 +890,7 @@ G_object std_checksum_sha1_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.write"), args);
               // Get the hasher.
@@ -915,7 +915,7 @@ G_object std_checksum_sha1_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.finish"), args);
               // Get the hasher.
@@ -944,14 +944,14 @@ G_string std_checksum_sha1(const G_string& data)
     namespace {
     namespace SHA256 {
 
-    constexpr std::array<std::uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
+    constexpr std::array<uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
 
     class Hasher : public Abstract_Opaque
       {
       private:
-        std::array<std::uint32_t, 8> m_regs;
-        std::uint64_t m_size;
-        std::array<std::uint8_t, 64> m_chunk;
+        std::array<uint32_t, 8> m_regs;
+        uint64_t m_size;
+        std::array<uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -961,22 +961,22 @@ G_string std_checksum_sha1(const G_string& data)
           }
 
       private:
-        void do_consume_chunk(const std::uint8_t* p) noexcept
+        void do_consume_chunk(const uint8_t* p) noexcept
           {
-            std::array<std::uint32_t, 64> w;
-            std::uint32_t s0, maj, t2, s1, ch, t1;
+            std::array<uint32_t, 64> w;
+            uint32_t s0, maj, t2, s1, ch, t1;
             // https://en.wikipedia.org/wiki/SHA-2
-            for(std::size_t i =  0; i < 16; ++i) {
+            for(size_t i =  0; i < 16; ++i) {
               do_load_be(w[i], p + i * 4);
             }
-            for(std::size_t i = 16; i < 64; ++i) {
+            for(size_t i = 16; i < 64; ++i) {
               t1 = w[i-15];
               s0 = do_rotl(t1, 14) ^ do_rotl(t1, 25) ^ (t1 >>  3);
               t2 = w[i- 2];
               s1 = do_rotl(t2, 13) ^ do_rotl(t2, 15) ^ (t2 >> 10);
               w[i] = w[i-16] + w[i-7] + s0 + s1;
             }
-            auto update = [&](std::uint32_t i, auto& a, auto& b, auto& c, auto& d, auto& e, auto& f, auto& g, auto& h, std::uint32_t k)
+            auto update = [&](uint32_t i, auto& a, auto& b, auto& c, auto& d, auto& e, auto& f, auto& g, auto& h, uint32_t k)
               {
                 s0 = do_rotl(a, 10) ^ do_rotl(a, 19) ^ do_rotl(a, 30);
                 maj = (a & b) | (c & (a ^ b));
@@ -1073,17 +1073,17 @@ G_string std_checksum_sha1(const G_string& data)
 
         void write(const G_string& data) noexcept
           {
-            auto bp = reinterpret_cast<const std::uint8_t*>(data.data());
+            auto bp = reinterpret_cast<const uint8_t*>(data.data());
             auto ep = bp + data.size();
-            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
             auto ec = this->m_chunk.end();
-            std::ptrdiff_t n;
+            ptrdiff_t n;
             // If the last chunk was not empty, ...
             if(bc != this->m_chunk.begin()) {
               // ... append data to the last chunk, ...
               n = rocket::min(ep - bp, ec - bc);
               std::copy_n(bp, n, bc);
-              this->m_size += static_cast<std::uint64_t>(n);
+              this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
               // ... and if is still not full, there aren't going to be any more data.
@@ -1106,7 +1106,7 @@ G_string std_checksum_sha1(const G_string& data)
             n = ep - bp;
             if(n != 0) {
               std::copy_n(bp, n, bc);
-              this->m_size += static_cast<std::uint64_t>(n);
+              this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
             }
@@ -1115,9 +1115,9 @@ G_string std_checksum_sha1(const G_string& data)
         G_string finish() noexcept
           {
             // Finalize the hasher.
-            auto bc = this->m_chunk.begin() + static_cast<std::ptrdiff_t>(this->m_size % 64);
+            auto bc = this->m_chunk.begin() + static_cast<ptrdiff_t>(this->m_size % 64);
             auto ec = this->m_chunk.end();
-            std::ptrdiff_t n;
+            ptrdiff_t n;
             // Append a `0x80` byte followed by zeroes.
             *(bc++) = 0x80;
             n = ec - bc;
@@ -1136,7 +1136,7 @@ G_string std_checksum_sha1(const G_string& data)
             ROCKET_ASSERT(ec - bc == 8);
             // Write the number of bits in big-endian order.
             auto bits = this->m_size * 8;
-            for(std::ptrdiff_t i = 7; i != -1; --i) {
+            for(ptrdiff_t i = 7; i != -1; --i) {
               bc[i] = bits & 0xFF;
               bits >>= 8;
             }
@@ -1144,7 +1144,7 @@ G_string std_checksum_sha1(const G_string& data)
             // Get the checksum.
             G_string ck;
             ck.reserve(this->m_regs.size() * 8);
-            rocket::for_each(this->m_regs, [&](std::uint32_t w) { do_pdigits_be(ck, w);  });
+            rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
             // Reset internal states.
             this->m_regs = s_init;
             this->m_size = 0;
@@ -1170,7 +1170,7 @@ G_object std_checksum_sha256_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.write"), args);
               // Get the hasher.
@@ -1195,7 +1195,7 @@ G_object std_checksum_sha256_new()
           // Opaque parameter
           G_null(),
           // Definition
-          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, Cow_Vector<Reference>&& args) -> Reference
+          [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
               Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.finish"), args);
               // Get the hasher.
@@ -1254,7 +1254,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.crc32_new"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -1298,7 +1298,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.crc32"), args);
           // Parse arguments.
           G_string data;
@@ -1343,7 +1343,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.fnv1a32_new"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -1387,7 +1387,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.fnv1a32"), args);
           // Parse arguments.
           G_string data;
@@ -1430,7 +1430,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.md5_new"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -1474,7 +1474,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.md5"), args);
           // Parse arguments.
           G_string data;
@@ -1517,7 +1517,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.sha1_new"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -1561,7 +1561,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.sha1"), args);
           // Parse arguments.
           G_string data;
@@ -1604,7 +1604,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.sha256_new"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -1648,7 +1648,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.checksum.sha256"), args);
           // Parse arguments.
           G_string data;

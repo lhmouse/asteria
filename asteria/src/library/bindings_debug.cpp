@@ -9,20 +9,20 @@
 
 namespace Asteria {
 
-bool std_debug_print(const Cow_Vector<Value>& values)
+bool std_debug_print(const cow_vector<Value>& values)
   {
-    Cow_osstream fmtss;
+    cow_osstream fmtss;
     fmtss.imbue(std::locale::classic());
     rocket::for_each(values, std::bind(&Value::print, std::placeholders::_1, std::ref(fmtss), false));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, fmtss.extract_string());
     return succ;
   }
 
-bool std_debug_dump(const Value& value, const Opt<G_integer>& indent)
+bool std_debug_dump(const Value& value, const opt<G_integer>& indent)
   {
-    Cow_osstream fmtss;
+    cow_osstream fmtss;
     fmtss.imbue(std::locale::classic());
-    value.dump(fmtss, static_cast<std::size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
+    value.dump(fmtss, static_cast<size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, fmtss.extract_string());
     return succ;
   }
@@ -49,10 +49,10 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.debug.print"), args);
           // Parse variadic arguments.
-          Cow_Vector<Value> values;
+          cow_vector<Value> values;
           if(reader.start().finish(values)) {
             // Call the binding function.
             if(!std_debug_print(values)) {
@@ -89,11 +89,11 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.debug.dump"), args);
           // Parse arguments.
           Value value;
-          Opt<G_integer> indent;
+          opt<G_integer> indent;
           if(reader.start().g(value).g(indent).finish()) {
             // Call the binding function.
             if(!std_debug_dump(value, indent)) {

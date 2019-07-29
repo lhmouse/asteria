@@ -11,7 +11,7 @@ namespace Asteria {
 class Parser_Error
   {
   public:
-    enum Code : std::int64_t
+    enum Code : int64_t
       {
         // Special
         code_success                                    =    0,
@@ -74,27 +74,27 @@ class Parser_Error
     ROCKET_PURE_FUNCTION static const char* describe_code(Code xcode) noexcept;
 
   private:
-    std::int64_t m_line;
-    std::size_t m_offset;
-    std::size_t m_length;
+    int64_t m_line;
+    size_t m_offset;
+    size_t m_length;
     Code m_code;
 
   public:
-    constexpr Parser_Error(std::int64_t xline, std::size_t xoffset, std::size_t xlength, Code xcode) noexcept
+    constexpr Parser_Error(int64_t xline, size_t xoffset, size_t xlength, Code xcode) noexcept
       : m_line(xline), m_offset(xoffset), m_length(xlength), m_code(xcode)
       {
       }
 
   public:
-    constexpr std::int64_t line() const noexcept
+    constexpr int64_t line() const noexcept
       {
         return this->m_line;
       }
-    constexpr std::size_t offset() const noexcept
+    constexpr size_t offset() const noexcept
       {
         return this->m_offset;
       }
-    constexpr std::size_t length() const noexcept
+    constexpr size_t length() const noexcept
       {
         return this->m_length;
       }

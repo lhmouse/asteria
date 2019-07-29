@@ -17,7 +17,7 @@ std::ostream& Simple_Binding_Wrapper::describe(std::ostream& os) const
     return os << this->m_desc;
   }
 
-Reference& Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const
+Reference& Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const
   {
     return self = (*(this->m_fptr))(this->m_opaque, global, rocket::move(self), rocket::move(args));
   }

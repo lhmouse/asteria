@@ -13,19 +13,19 @@ class Reference_Modifier
   public:
     struct S_array_index
       {
-        std::int64_t index;
+        int64_t index;
       };
     struct S_object_key
       {
-        PreHashed_String key;
+        phsh_string key;
       };
 
-    enum Index : std::uint8_t
+    enum Index : uint8_t
       {
         index_array_index  = 0,
         index_object_key   = 1,
       };
-    using Xvariant = Variant<
+    using Xvariant = variant<
       ROCKET_CDR(
         , S_array_index  // 0,
         , S_object_key   // 1,

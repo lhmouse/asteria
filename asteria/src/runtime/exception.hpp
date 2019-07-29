@@ -14,7 +14,7 @@ class Exception : public std::exception
   {
   private:
     Value m_value;
-    Cow_Vector<Backtrace_Frame> m_frames;
+    cow_vector<Backtrace_Frame> m_frames;
 
   public:
     template<typename XvalueT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalueT&&)> Exception(const Source_Location& sloc, XvalueT&& xvalue)
@@ -43,11 +43,11 @@ class Exception : public std::exception
       {
         return this->m_value;
       }
-    std::size_t count_frames() const noexcept
+    size_t count_frames() const noexcept
       {
         return this->m_frames.size();
       }
-    const Backtrace_Frame& get_frame(std::size_t i) const
+    const Backtrace_Frame& get_frame(size_t i) const
       {
         return this->m_frames.at(i);
       }

@@ -125,70 +125,70 @@ void Global_Context::initialize(API_Version version)
     this->m_vstd = vstd;
   }
 
-Rcobj<Placeholder> Global_Context::placeholder() const noexcept
+rcobj<Placeholder> Global_Context::placeholder() const noexcept
   {
     auto placeholder = rocket::dynamic_pointer_cast<Placeholder>(this->m_placeholder);
     ROCKET_ASSERT(placeholder);
     return rocket::move(placeholder);
   }
 
-Rcobj<Abstract_Opaque> Global_Context::placeholder_opaque() const noexcept
+rcobj<Abstract_Opaque> Global_Context::placeholder_opaque() const noexcept
   {
     auto placeholder = rocket::dynamic_pointer_cast<Abstract_Opaque>(this->m_placeholder);
     ROCKET_ASSERT(placeholder);
     return rocket::move(placeholder);
   }
 
-Rcobj<Abstract_Function> Global_Context::placeholder_function() const noexcept
+rcobj<Abstract_Function> Global_Context::placeholder_function() const noexcept
   {
     auto placeholder = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_placeholder);
     ROCKET_ASSERT(placeholder);
     return rocket::move(placeholder);
   }
 
-std::uint32_t Global_Context::get_random_uint32() const noexcept
+uint32_t Global_Context::get_random_uint32() const noexcept
   {
     auto prng = rocket::dynamic_pointer_cast<Random_Number_Generator>(this->m_prng);
     ROCKET_ASSERT(prng);
     return prng->bump();
   }
 
-Collector* Global_Context::get_collector_opt(std::size_t gindex) const
+Collector* Global_Context::get_collector_opt(size_t gindex) const
   {
     auto gcoll = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     return (gindex < gcoll->collector_count()) ? std::addressof(gcoll->collector(gindex)) : nullptr;
   }
 
-Rcptr<Variable> Global_Context::create_variable(std::size_t ghint) const
+rcptr<Variable> Global_Context::create_variable(size_t ghint) const
   {
     auto gcoll = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     return gcoll->create_variable(ghint);
   }
 
-std::size_t Global_Context::collect_variables(std::size_t glimit) const
+size_t Global_Context::collect_variables(size_t glimit) const
   {
     auto gcoll = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
     ROCKET_ASSERT(gcoll);
     return gcoll->collect_variables(glimit);
   }
 
-const Value& Global_Context::get_std_member(const PreHashed_String& name) const
+const Value& Global_Context::get_std_member(const phsh_string& name) const
   {
     auto vstd = rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
     ROCKET_ASSERT(vstd);
     return vstd->get_value().as_object().get_or(name, Value::null());
   }
 
-Value& Global_Context::open_std_member(const PreHashed_String& name)
+Value& Global_Context::open_std_member(const phsh_string& name)
   {
     auto vstd = rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
     ROCKET_ASSERT(vstd);
     return vstd->open_value().mut_object().try_emplace(name).first->second;
   }
 
-bool Global_Context::remove_std_member(const PreHashed_String& name)
+bool Global_Context::remove_std_member(const phsh_string& name)
   {
     auto vstd = rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
     ROCKET_ASSERT(vstd);

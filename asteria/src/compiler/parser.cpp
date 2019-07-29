@@ -32,7 +32,7 @@ namespace Asteria {
         return Source_Location(qtok->file(), qtok->line());
       }
 
-    Opt<Token::Keyword> do_accept_keyword_opt(Token_Stream& tstrm, std::initializer_list<Token::Keyword> accept)
+    opt<Token::Keyword> do_accept_keyword_opt(Token_Stream& tstrm, std::initializer_list<Token::Keyword> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -51,7 +51,7 @@ namespace Asteria {
         return keyword;
       }
 
-    Opt<Token::Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Token::Punctuator> accept)
+    opt<Token::Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Token::Punctuator> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -70,7 +70,7 @@ namespace Asteria {
         return punct;
       }
 
-    Opt<Cow_String> do_accept_identifier_opt(Token_Stream& tstrm)
+    opt<cow_string> do_accept_identifier_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -86,7 +86,7 @@ namespace Asteria {
         return name;
       }
 
-    Cow_String& do_concatenate_string_literal_sequence(Cow_String& value, Token_Stream& tstrm)
+    cow_string& do_concatenate_string_literal_sequence(cow_string& value, Token_Stream& tstrm)
       {
         for(;;) {
           auto qtok = tstrm.peek_opt();
@@ -104,7 +104,7 @@ namespace Asteria {
         return value;
       }
 
-    Opt<Cow_String> do_accept_string_literal_opt(Token_Stream& tstrm)
+    opt<cow_string> do_accept_string_literal_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -121,7 +121,7 @@ namespace Asteria {
         return value;
       }
 
-    Opt<Cow_String> do_accept_json5_key_opt(Token_Stream& tstrm)
+    opt<cow_string> do_accept_json5_key_opt(Token_Stream& tstrm)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -190,7 +190,7 @@ namespace Asteria {
         return lhs.keyword == rhs;
       }
 
-    Opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
+    opt<Value> do_accept_literal_value_opt(Token_Stream& tstrm)
       {
         // literal ::=
         //   null-literal | boolean-literal | string-literal | numeric-literal | nan-literal | infinity-literal
@@ -238,7 +238,7 @@ namespace Asteria {
         return rocket::nullopt;
       }
 
-    Opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
+    opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
       {
         // negation ::=
         //   "!" | "not"
@@ -260,17 +260,17 @@ namespace Asteria {
       }
 
     // Accept a statement; a blockt is converted to a single statement.
-    extern Opt<Statement> do_accept_statement_opt(Token_Stream& tstrm);
+    extern opt<Statement> do_accept_statement_opt(Token_Stream& tstrm);
     // Accept a statement; a non-block statement is converted to a block consisting of a single statement.
-    extern Opt<Cow_Vector<Statement>> do_accept_statement_as_block_opt(Token_Stream& tstrm);
+    extern opt<cow_vector<Statement>> do_accept_statement_as_block_opt(Token_Stream& tstrm);
 
-    extern bool do_accept_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm);
+    extern bool do_accept_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm);
 
-    Opt<Cow_Vector<Xprunit>> do_accept_expression_opt(Token_Stream& tstrm)
+    opt<cow_vector<Xprunit>> do_accept_expression_opt(Token_Stream& tstrm)
       {
         // expression-opt ::=
         //   expression | ""
-        Cow_Vector<Xprunit> units;
+        cow_vector<Xprunit> units;
         bool succ = do_accept_expression(units, tstrm);
         if(!succ) {
           return rocket::nullopt;
@@ -278,7 +278,7 @@ namespace Asteria {
         return rocket::move(units);
       }
 
-    Opt<Cow_Vector<Statement>> do_accept_block_opt(Token_Stream& tstrm)
+    opt<cow_vector<Statement>> do_accept_block_opt(Token_Stream& tstrm)
       {
         // block ::=
         //   "{" statement-list-opt "}"
@@ -290,7 +290,7 @@ namespace Asteria {
         if(!kpunct) {
           return rocket::nullopt;
         }
-        Cow_Vector<Statement> body;
+        cow_vector<Statement> body;
         for(;;) {
           auto qstmt = do_accept_statement_opt(tstrm);
           if(!qstmt) {
@@ -305,7 +305,7 @@ namespace Asteria {
         return rocket::move(body);
       }
 
-    Opt<Statement> do_accept_block_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_block_statement_opt(Token_Stream& tstrm)
       {
         auto qbody = do_accept_block_opt(tstrm);
         if(!qbody) {
@@ -315,7 +315,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Cow_Vector<Xprunit>> do_accept_equal_initializer_opt(Token_Stream& tstrm)
+    opt<cow_vector<Xprunit>> do_accept_equal_initializer_opt(Token_Stream& tstrm)
       {
         // equal-initializer-opt ::=
         //   equal-initializer | ""
@@ -328,7 +328,7 @@ namespace Asteria {
         return do_accept_expression_opt(tstrm);
       }
 
-    Opt<Statement> do_accept_null_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_null_statement_opt(Token_Stream& tstrm)
       {
         // null-statement ::=
         //   ";"
@@ -340,7 +340,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -350,7 +350,7 @@ namespace Asteria {
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        Cow_Bivector<PreHashed_String, Cow_Vector<Xprunit>> vars;
+        cow_bivector<phsh_string, cow_vector<Xprunit>> vars;
         for(;;) {
           auto qname = do_accept_identifier_opt(tstrm);
           if(!qname) {
@@ -375,7 +375,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -385,7 +385,7 @@ namespace Asteria {
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        Cow_Bivector<PreHashed_String, Cow_Vector<Xprunit>> vars;
+        cow_bivector<phsh_string, cow_vector<Xprunit>> vars;
         for(;;) {
           auto qname = do_accept_identifier_opt(tstrm);
           if(!qname) {
@@ -410,7 +410,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Cow_Vector<PreHashed_String>> do_accept_parameter_list_opt(Token_Stream& tstrm)
+    opt<cow_vector<phsh_string>> do_accept_parameter_list_opt(Token_Stream& tstrm)
       {
         // parameter-list-opt ::=
         //   identifier parameter-list-carriage-opt | "..." | ""
@@ -418,7 +418,7 @@ namespace Asteria {
         //   "," ( identifier comma-parameter-list-opt | "..." ) | ""
         auto qname = do_accept_identifier_opt(tstrm);
         if(qname) {
-          Cow_Vector<PreHashed_String> names;
+          cow_vector<phsh_string> names;
           for(;;) {
             names.emplace_back(rocket::move(*qname));
             // Look for the separator.
@@ -441,14 +441,14 @@ namespace Asteria {
         }
         auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_ellipsis });
         if(kpunct) {
-          Cow_Vector<PreHashed_String> names;
+          cow_vector<phsh_string> names;
           names.emplace_back(rocket::sref("..."));
           return rocket::move(names);
         }
         return rocket::nullopt;
       }
 
-    Opt<Cow_Vector<PreHashed_String>> do_accept_parameter_list_declaration_opt(Token_Stream& tstrm)
+    opt<cow_vector<phsh_string>> do_accept_parameter_list_declaration_opt(Token_Stream& tstrm)
       {
         // parameter-list-declaration ::=
         //   "(" parameter-list-opt ")"
@@ -467,7 +467,7 @@ namespace Asteria {
         return rocket::move(*qnames);
       }
 
-    Opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_function_definition_opt(Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -493,7 +493,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_expression_statement_opt(Token_Stream& tstrm)
       {
         // expression-statement ::=
         //   expression ";"
@@ -509,7 +509,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Cow_Vector<Statement>> do_accept_else_branch_opt(Token_Stream& tstrm)
+    opt<cow_vector<Statement>> do_accept_else_branch_opt(Token_Stream& tstrm)
       {
         // else-branch-opt ::=
         //   "else" statement | ""
@@ -524,7 +524,7 @@ namespace Asteria {
         return rocket::move(*qbody);
       }
 
-    Opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_if_statement_opt(Token_Stream& tstrm)
       {
         // if-statement ::=
         //   "if" negation-opt "(" expression ")" statement else-branch-opt
@@ -564,7 +564,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_case_clause_opt(Token_Stream& tstrm)
+    opt<pair<cow_vector<Xprunit>, cow_vector<Statement>>> do_accept_case_clause_opt(Token_Stream& tstrm)
       {
         // case-clause ::=
         //   "case" expression ":" statement-list-opt
@@ -587,7 +587,7 @@ namespace Asteria {
         return std::make_pair(rocket::move(*qcond), rocket::move(*qclause));
       }
 
-    Opt<Pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_default_clause_opt(Token_Stream& tstrm)
+    opt<pair<cow_vector<Xprunit>, cow_vector<Statement>>> do_accept_default_clause_opt(Token_Stream& tstrm)
       {
         // default-clause ::=
         //   "default" ":" statement-list-opt
@@ -606,7 +606,7 @@ namespace Asteria {
         return std::make_pair(rocket::clear, rocket::move(*qclause));
       }
 
-    Opt<Pair<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_switch_clause_opt(Token_Stream& tstrm)
+    opt<pair<cow_vector<Xprunit>, cow_vector<Statement>>> do_accept_switch_clause_opt(Token_Stream& tstrm)
       {
         // switch-clause ::=
         //   case-clause | default-clause
@@ -621,7 +621,7 @@ namespace Asteria {
         return qclause;
       }
 
-    Opt<Cow_Bivector<Cow_Vector<Xprunit>, Cow_Vector<Statement>>> do_accept_switch_clause_list_opt(Token_Stream& tstrm)
+    opt<cow_bivector<cow_vector<Xprunit>, cow_vector<Statement>>> do_accept_switch_clause_list_opt(Token_Stream& tstrm)
       {
         // switch-clause-list ::=
         //   switch-clause switch-clause-list-opt
@@ -629,7 +629,7 @@ namespace Asteria {
         if(!kpunct) {
           return rocket::nullopt;
         }
-        Cow_Bivector<Cow_Vector<Xprunit>, Cow_Vector<Statement>> clauses;
+        cow_bivector<cow_vector<Xprunit>, cow_vector<Statement>> clauses;
         for(;;) {
           auto qclause = do_accept_switch_clause_opt(tstrm);
           if(!qclause) {
@@ -644,7 +644,7 @@ namespace Asteria {
         return rocket::move(clauses);
       }
 
-    Opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
       {
         // switch-statement ::=
         //   "switch" "(" expression ")" switch-block
@@ -676,7 +676,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_do_while_statement_opt(Token_Stream& tstrm)
       {
         // do-while-statement ::=
         //   "do" statement "while" negation-opt "(" expression ")" ";"
@@ -716,7 +716,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_while_statement_opt(Token_Stream& tstrm)
       {
         // while-statement ::=
         //   "while" negation-opt "(" expression ")" statement
@@ -748,7 +748,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_for_complement_range_opt(Token_Stream& tstrm)
       {
         // for-complement-range ::=
         //   "each" identifier "," identifier ":" expression ")" statement
@@ -788,7 +788,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_for_initializer_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_for_initializer_opt(Token_Stream& tstrm)
       {
         // for-initializer ::=
         //   null-statement | variable-definition | immutable-variable-definition | expression-statement
@@ -807,7 +807,7 @@ namespace Asteria {
         return qinit;
       }
 
-    Opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_for_complement_triplet_opt(Token_Stream& tstrm)
       {
         // for-complement-triplet ::=
         //   for-initializer expression-opt ";" expression-opt ")" statement
@@ -835,13 +835,13 @@ namespace Asteria {
         if(!qbody) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        Cow_Vector<Statement> rvinit;
+        cow_vector<Statement> rvinit;
         rvinit.emplace_back(rocket::move(*qinit));
         Statement::S_for xstmt = { rocket::move(rvinit), rocket::move(*qcond), rocket::move(*kstep), rocket::move(*qbody) };
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_for_complement_opt(Token_Stream& tstrm)
       {
         // for-complement ::=
         //   for-complement-range | for-complement-triplet
@@ -856,7 +856,7 @@ namespace Asteria {
         return qcompl;
       }
 
-    Opt<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_for_statement_opt(Token_Stream& tstrm)
       {
         // for-statement ::=
         //   "for" "(" for-complement
@@ -875,7 +875,7 @@ namespace Asteria {
         return rocket::move(*qcompl);
       }
 
-    Opt<Statement::Target> do_accept_break_target_opt(Token_Stream& tstrm)
+    opt<Statement::Target> do_accept_break_target_opt(Token_Stream& tstrm)
       {
         // break-target-opt ::=
         //   "switch" | "while" | "for" | ""
@@ -892,7 +892,7 @@ namespace Asteria {
         return rocket::nullopt;
       }
 
-    Opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
       {
         // break-statement ::=
         //   "break" break-target-opt ";"
@@ -912,7 +912,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement::Target> do_accept_continue_target_opt(Token_Stream& tstrm)
+    opt<Statement::Target> do_accept_continue_target_opt(Token_Stream& tstrm)
       {
         // continue-target-opt ::=
         //   "while" | "for" | ""
@@ -926,7 +926,7 @@ namespace Asteria {
         return rocket::nullopt;
       }
 
-    Opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
       {
         // continue-statement ::=
         //   "continue" continue-target-opt ";"
@@ -946,7 +946,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_throw_statement_opt(Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -968,7 +968,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<bool> do_accept_reference_specifier_opt(Token_Stream& tstrm)
+    opt<bool> do_accept_reference_specifier_opt(Token_Stream& tstrm)
       {
         // reference-specifier-opt ::=
         //   "&" | ""
@@ -979,7 +979,7 @@ namespace Asteria {
         return true;
       }
 
-    Opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_return_statement_opt(Token_Stream& tstrm)
       {
         // return-statement ::=
         //   "return" reference-specifier-opt expression-opt ";"
@@ -1003,7 +1003,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Cow_String> do_accept_assert_message_opt(Token_Stream& tstrm)
+    opt<cow_string> do_accept_assert_message_opt(Token_Stream& tstrm)
       {
         // assert-message ::=
         //   ":" string-literal | ""
@@ -1018,7 +1018,7 @@ namespace Asteria {
         return rocket::move(*kmsg);
       }
 
-    Opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_assert_statement_opt(Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -1048,7 +1048,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_try_statement_opt(Token_Stream& tstrm)
       {
         // try-statement ::=
         //   "try" statement "catch" "(" identifier ")" statement
@@ -1086,7 +1086,7 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    Opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_nonblock_statement_opt(Token_Stream& tstrm)
       {
         // nonblock-statement ::=
         //   null-statement |
@@ -1162,7 +1162,7 @@ namespace Asteria {
         return qstmt;
       }
 
-    Opt<Statement> do_accept_statement_opt(Token_Stream& tstrm)
+    opt<Statement> do_accept_statement_opt(Token_Stream& tstrm)
       {
         // statement ::=
         //   block | nonblock-statement
@@ -1177,7 +1177,7 @@ namespace Asteria {
         return qstmt;
       }
 
-    Opt<Cow_Vector<Statement>> do_accept_statement_as_block_opt(Token_Stream& tstrm)
+    opt<cow_vector<Statement>> do_accept_statement_as_block_opt(Token_Stream& tstrm)
       {
         // statement ::=
         //   block | nonblock-statement
@@ -1244,7 +1244,7 @@ namespace Asteria {
         return lhs.punct == rhs;
       }
 
-    bool do_accept_prefix_operator(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_prefix_operator(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" |
@@ -1280,7 +1280,7 @@ namespace Asteria {
         return false;
       }
 
-    bool do_accept_named_reference(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_named_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -1305,7 +1305,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_literal(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_literal(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Get a literal as a `Value`.
         auto qvalue = do_accept_literal_value_opt(tstrm);
@@ -1317,7 +1317,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_this(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_this(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Get the keyword `this`.
         auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_this });
@@ -1329,7 +1329,7 @@ namespace Asteria {
         return true;
       }
 
-    Opt<Cow_Vector<Statement>> do_accept_closure_body_opt(Token_Stream& tstrm)
+    opt<cow_vector<Statement>> do_accept_closure_body_opt(Token_Stream& tstrm)
       {
         // closure-body ::=
         //   block | equal-initializer
@@ -1348,7 +1348,7 @@ namespace Asteria {
         return qblock;
       }
 
-    bool do_accept_closure_function(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_closure_function(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -1371,7 +1371,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_unnamed_array(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_unnamed_array(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // unnamed-array ::=
         //   "[" array-element-list-opt "]"
@@ -1383,7 +1383,7 @@ namespace Asteria {
         if(!kpunct) {
           return false;
         }
-        std::size_t nelems = 0;
+        size_t nelems = 0;
         for(;;) {
           bool succ = do_accept_expression(units, tstrm);
           if(!succ) {
@@ -1405,7 +1405,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_unnamed_object(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_unnamed_object(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // unnamed-object ::=
         //   "{" key-mapped-list-opt "}"
@@ -1417,14 +1417,14 @@ namespace Asteria {
         if(!kpunct) {
           return false;
         }
-        Cow_Vector<PreHashed_String> keys;
+        cow_vector<phsh_string> keys;
         for(;;) {
           auto duplicate_key_error = do_make_parser_error(tstrm, Parser_Error::code_duplicate_object_key);
           auto qkey = do_accept_json5_key_opt(tstrm);
           if(!qkey) {
             break;
           }
-          if(rocket::any_of(keys, [&](const PreHashed_String& r) { return r == *qkey;  })) {
+          if(rocket::any_of(keys, [&](const phsh_string& r) { return r == *qkey;  })) {
             throw duplicate_key_error;
           }
           // Look for the initializer.
@@ -1452,7 +1452,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_nested_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_nested_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // nested-expression ::=
         //   "(" expression ")"
@@ -1471,7 +1471,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_fused_multiply_add(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_fused_multiply_add(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // fused-multiply-add ::=
         //   "__fma" "(" expression "," expression "," expression ")"
@@ -1512,7 +1512,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_primary_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_primary_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // primary-expression ::=
         //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression |
@@ -1568,7 +1568,7 @@ namespace Asteria {
         return lhs.punct == rhs;
       }
 
-    bool do_accept_postfix_operator(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_postfix_operator(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // postfix-operator ::=
         //   "++" | "--"
@@ -1590,7 +1590,7 @@ namespace Asteria {
         return false;
       }
 
-    bool do_accept_postfix_function_call(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_postfix_function_call(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
@@ -1604,7 +1604,7 @@ namespace Asteria {
         if(!kpunct) {
           return false;
         }
-        Cow_Vector<bool> by_refs;
+        cow_vector<bool> by_refs;
         for(;;) {
           auto qref = do_accept_reference_specifier_opt(tstrm);
           if(!qref) {
@@ -1633,7 +1633,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_postfix_subscript(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_postfix_subscript(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // postfix-subscript ::=
         //   "[" expression "]"
@@ -1654,7 +1654,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_postfix_member_access(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_postfix_member_access(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // postfix-member-access ::=
         //   "." ( string-literal | identifier )
@@ -1671,7 +1671,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_infix_element(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_infix_element(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // infix-element ::=
         //   prefix-operator-list-opt primary-expression postfix-operator-list-opt
@@ -1683,7 +1683,7 @@ namespace Asteria {
         //   postfix-operator-list | ""
         // postfix-operator-list ::=
         //   postfix-operator | postfix-function-call | postfix-subscript | postfix-member-access
-        Cow_Vector<Xprunit> prefixes;
+        cow_vector<Xprunit> prefixes;
         bool succ;
         do {
           succ = do_accept_prefix_operator(prefixes, tstrm);
@@ -1709,11 +1709,11 @@ namespace Asteria {
         return true;
       }
 
-    Opt<Infix_Element> do_accept_infix_head_opt(Token_Stream& tstrm)
+    opt<Infix_Element> do_accept_infix_head_opt(Token_Stream& tstrm)
       {
         // infix-head ::=
         //   infix-element
-        Cow_Vector<Xprunit> units;
+        cow_vector<Xprunit> units;
         bool succ = do_accept_infix_element(units, tstrm);
         if(!succ) {
           return rocket::nullopt;
@@ -1722,7 +1722,7 @@ namespace Asteria {
         return rocket::move(xelem);
       }
 
-    Opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
+    opt<Infix_Element> do_accept_infix_operator_ternary_opt(Token_Stream& tstrm)
       {
         // infix-operator-ternary ::=
         //   ( "?" | "?=" ) expression ":"
@@ -1742,7 +1742,7 @@ namespace Asteria {
         return rocket::move(xelem);
       }
 
-    Opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
+    opt<Infix_Element> do_accept_infix_operator_logical_and_opt(Token_Stream& tstrm)
       {
         // infix-operator-logical-and ::=
         //   "&&" | "&&=" | "and"
@@ -1758,7 +1758,7 @@ namespace Asteria {
         return rocket::move(xelem);
       }
 
-    Opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
+    opt<Infix_Element> do_accept_infix_operator_logical_or_opt(Token_Stream& tstrm)
       {
         // infix-operator-logical-or ::=
         //   "||" | "||=" | "or"
@@ -1774,7 +1774,7 @@ namespace Asteria {
         return rocket::move(xelem);
       }
 
-    Opt<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
+    opt<Infix_Element> do_accept_infix_operator_coalescence_opt(Token_Stream& tstrm)
       {
         // infix-operator-coalescence ::=
         //   "??" | "??="
@@ -1833,7 +1833,7 @@ namespace Asteria {
         return lhs.punct == rhs;
       }
 
-    Opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
+    opt<Infix_Element> do_accept_infix_operator_general_opt(Token_Stream& tstrm)
       {
         // infix-operator-general ::=
         //   "+"  | "-"  | "*"  | "/"  | "%"  | "<<"  | ">>"  | "<<<"  | ">>>"  | "&"  | "|"  | "^"  |
@@ -1856,7 +1856,7 @@ namespace Asteria {
         return rocket::nullopt;
       }
 
-    Opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
+    opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)
       {
         // infix-operator ::=
         //   infix-operator-ternary | infix-operator-logical-and | infix-operator-logical-or |
@@ -1884,7 +1884,7 @@ namespace Asteria {
         return qelem;
       }
 
-    bool do_accept_expression(Cow_Vector<Xprunit>& units, Token_Stream& tstrm)
+    bool do_accept_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // expression ::=
         //   infix-head infix-carriage-list-opt
@@ -1898,7 +1898,7 @@ namespace Asteria {
         if(!qelem) {
           return false;
         }
-        Cow_Vector<Infix_Element> stack;
+        cow_vector<Infix_Element> stack;
         stack.emplace_back(rocket::move(*qelem));
         for(;;) {
           auto qnext = do_accept_infix_operator_opt(tstrm);
@@ -1938,7 +1938,7 @@ bool Parser::load(Token_Stream& tstrm, const Compiler_Options& /*options*/)
     this->m_stor = nullptr;
     // document ::=
     //   statement-list-opt
-    Cow_Vector<Statement> stmts;
+    cow_vector<Statement> stmts;
     try {
       // Parse the document recursively.
       for(;;) {
@@ -1986,7 +1986,7 @@ Parser_Error Parser::get_parser_error() const noexcept
     }
   }
 
-const Cow_Vector<Statement>& Parser::get_statements() const
+const cow_vector<Statement>& Parser::get_statements() const
   {
     switch(this->state()) {
     case state_empty:
@@ -1999,7 +1999,7 @@ const Cow_Vector<Statement>& Parser::get_statements() const
       }
     case state_success:
       {
-        return this->m_stor.as<Cow_Vector<Statement>>();
+        return this->m_stor.as<cow_vector<Statement>>();
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");

@@ -188,7 +188,7 @@ G_integer std_numeric_itrunc(const G_real& value)
     return do_icast(std::trunc(value));
   }
 
-G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& limit)
+G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit)
   {
     if(limit) {
       int fpcls = std::fpclassify(*limit);
@@ -200,7 +200,7 @@ G_real std_numeric_random(const Global_Context& global, const Opt<G_real>& limit
       }
     }
     // sqword <= [0,0x1p54)
-    std::int64_t sqword = global.get_random_uint32();
+    int64_t sqword = global.get_random_uint32();
     sqword <<= 21;
     sqword ^= global.get_random_uint32();
     return static_cast<double>(sqword) / 0x1p53 * limit.value_or(1);
@@ -240,17 +240,17 @@ G_real std_numeric_ldexp(const G_real& frac, const G_integer& exp)
 
 G_integer std_numeric_addm(const G_integer& x, const G_integer& y)
   {
-    return G_integer(static_cast<std::uint64_t>(x) + static_cast<std::uint64_t>(y));
+    return G_integer(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
   }
 
 G_integer std_numeric_subm(const G_integer& x, const G_integer& y)
   {
-    return G_integer(static_cast<std::uint64_t>(x) - static_cast<std::uint64_t>(y));
+    return G_integer(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
   }
 
 G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
   {
-    return G_integer(static_cast<std::uint64_t>(x) * static_cast<std::uint64_t>(y));
+    return G_integer(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
   }
 
     namespace {
@@ -347,15 +347,15 @@ G_integer std_numeric_lzcnt(const G_integer& x)
   {
 #if defined(_WIN64) || defined(_M_ARM)
     unsigned long index;
-    if(!::_BitScanReverse64(&index, static_cast<std::uint64_t>(x))) {
+    if(!::_BitScanReverse64(&index, static_cast<uint64_t>(x))) {
       return 64;
     }
     return 63 - index;
 #elif defined(_WIN32)
     unsigned long index;
-    if(!::_BitScanReverse(&index, static_cast<std::uint32_t>(x >> 32))) {
+    if(!::_BitScanReverse(&index, static_cast<uint32_t>(x >> 32))) {
       // Scan the lower half.
-      if(!::_BitScanReverse(&index, static_cast<std::uint32_t>(x))) {
+      if(!::_BitScanReverse(&index, static_cast<uint32_t>(x))) {
         return 64;
       }
       return 63 - index;
@@ -365,7 +365,7 @@ G_integer std_numeric_lzcnt(const G_integer& x)
     if(x == 0) {
       return 64;
     }
-    return static_cast<unsigned>(__builtin_clzll(static_cast<std::uint64_t>(x)));
+    return static_cast<unsigned>(__builtin_clzll(static_cast<uint64_t>(x)));
 #else
 #  error Please implement `lzcnt` for this platform.
 #endif
@@ -375,15 +375,15 @@ G_integer std_numeric_tzcnt(const G_integer& x)
   {
 #if defined(_WIN64) || defined(_M_ARM)
     unsigned long index;
-    if(!::_BitScanForward64(&index, static_cast<std::uint64_t>(x))) {
+    if(!::_BitScanForward64(&index, static_cast<uint64_t>(x))) {
       return 64;
     }
     return index;
 #elif defined(_WIN32)
     unsigned long index;
-    if(!::_BitScanForward(&index, static_cast<std::uint32_t>(x))) {
+    if(!::_BitScanForward(&index, static_cast<uint32_t>(x))) {
       // Scan the higher half.
-      if(!::_BitScanForward(&index, static_cast<std::uint32_t>(x >> 32))) {
+      if(!::_BitScanForward(&index, static_cast<uint32_t>(x >> 32))) {
         return 64;
       }
       return 32 + index;
@@ -393,7 +393,7 @@ G_integer std_numeric_tzcnt(const G_integer& x)
     if(x == 0) {
       return 64;
     }
-    return static_cast<unsigned>(__builtin_ctzll(static_cast<std::uint64_t>(x)));
+    return static_cast<unsigned>(__builtin_ctzll(static_cast<uint64_t>(x)));
 #else
 #  error Please implement `lzcnt` for this platform.
 #endif
@@ -402,11 +402,11 @@ G_integer std_numeric_tzcnt(const G_integer& x)
 G_integer std_numeric_popcnt(const G_integer& x)
   {
 #if defined(_WIN64) || defined(_M_ARM)
-    return static_cast<long long>(__popcnt64(static_cast<std::uint64_t>(x)));
+    return static_cast<long long>(__popcnt64(static_cast<uint64_t>(x)));
 #elif defined(_WIN32)
-    return __popcnt(static_cast<std::uint32_t>(x >> 32)) + __popcnt(static_cast<std::uint32_t>(x));
+    return __popcnt(static_cast<uint32_t>(x >> 32)) + __popcnt(static_cast<uint32_t>(x));
 #elif defined(__GNUC__)
-    return static_cast<unsigned>(__builtin_popcountll(static_cast<std::uint64_t>(x)));
+    return static_cast<unsigned>(__builtin_popcountll(static_cast<uint64_t>(x)));
 #else
 #  error Please implement `lzcnt` for this platform.
 #endif
@@ -1058,19 +1058,19 @@ G_integer std_numeric_popcnt(const G_integer& x)
       {
         bool sbt;  // sign bit
         char rsv;  // (do not use)
-        std::uint8_t bsf;  // beginning of significant figures
-        std::uint8_t esf;  // end of significant figures
+        uint8_t bsf;  // beginning of significant figures
+        uint8_t esf;  // end of significant figures
         char sfs[64];  // significant figures
         int exp;  // normalized exponent (a.k.a. exponent of the first significant digit)
       };
 
-    Parts do_format_partial(std::uint8_t rbase, const G_integer& value)
+    Parts do_format_partial(uint8_t rbase, const G_integer& value)
       {
         Parts p;
         // Get the absolute value of `value` without causing overflow.
-        auto m = static_cast<std::uint64_t>(value >> 63);
+        auto m = static_cast<uint64_t>(value >> 63);
         p.sbt = m;
-        auto reg = (static_cast<std::uint64_t>(value) ^ m) - m;
+        auto reg = (static_cast<uint64_t>(value) ^ m) - m;
         // Extract digits from right to left.
         // Note that if `value` is zero then `exp` is set to `-1`.
         p.bsf = 64;
@@ -1078,7 +1078,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         p.exp = -1;
         while(reg != 0) {
           // Shift a digit out.
-          auto dvalue = static_cast<std::uint8_t>(reg % rbase);
+          auto dvalue = static_cast<uint8_t>(reg % rbase);
           reg /= rbase;
           // Locate the digit in uppercase.
           int doff = dvalue * 2;
@@ -1088,7 +1088,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return p;
       }
 
-    G_string& do_prefix(G_string& text, std::uint8_t rbase, const Parts& p)
+    G_string& do_prefix(G_string& text, uint8_t rbase, const Parts& p)
       {
         // Prepend a minus sign if the numebr is negative.
         if(p.sbt) {
@@ -1110,7 +1110,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return text;
       }
 
-    G_string& do_format_no_exponent(G_string& text, std::uint8_t rbase, const G_integer& value)
+    G_string& do_format_no_exponent(G_string& text, uint8_t rbase, const G_integer& value)
       {
         auto p = do_format_partial(rbase, value);
         // Write prefixes.
@@ -1127,7 +1127,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return text;
       }
 
-    Pair<G_integer, int> do_decompose_integer(std::uint8_t pbase, const G_integer& value)
+    pair<G_integer, int> do_decompose_integer(uint8_t pbase, const G_integer& value)
       {
         auto ireg = value;
         int iexp = 0;
@@ -1145,7 +1145,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return std::make_pair(ireg, iexp);
       }
 
-    G_string& do_format_exponent(G_string& text, std::uint8_t pbase, int exp)
+    G_string& do_format_exponent(G_string& text, uint8_t pbase, int exp)
       {
         // Write the exponent prefix.
         switch(pbase) {
@@ -1182,14 +1182,14 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return text;
       }
 
-    G_string do_format_no_exponent(std::uint8_t rbase, const G_integer& value)
+    G_string do_format_no_exponent(uint8_t rbase, const G_integer& value)
       {
         G_string text;
         do_format_no_exponent(text, rbase, value);
         return text;
       }
 
-    G_string do_format_with_exponent(std::uint8_t rbase, std::uint8_t pbase, const G_integer& value)
+    G_string do_format_with_exponent(uint8_t rbase, uint8_t pbase, const G_integer& value)
       {
         G_string text;
         auto pair = do_decompose_integer(pbase, value);
@@ -1200,7 +1200,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
 
     }  // namespace
 
-G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
+G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
   {
     switch(base.value_or(10)) {
     case  2:
@@ -1259,7 +1259,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         return true;
       }
 
-    Parts do_format_partial(std::uint8_t rbase, const G_real& value)
+    Parts do_format_partial(uint8_t rbase, const G_real& value)
       {
         Parts p;
         // Get the absolute value of `value`.
@@ -1285,7 +1285,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
             while(reg != 0) {
               // Shift a digit out.
               reg *=  2;
-              auto dvalue = static_cast<std::uint8_t>(reg);
+              auto dvalue = static_cast<uint8_t>(reg);
               reg -= dvalue;
               // Locate the digit in uppercase.
               doff = dvalue * 2;
@@ -1311,7 +1311,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
             while(reg != 0) {
               // Shift a digit out.
               reg *= 16;
-              auto dvalue = static_cast<std::uint8_t>(reg);
+              auto dvalue = static_cast<uint8_t>(reg);
               reg -= dvalue;
               // Locate the digit in uppercase.
               doff = dvalue * 2;
@@ -1333,7 +1333,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
             // This result is inexact.
             for(;;) {
               // Shift a digit out.
-              auto dvalue = static_cast<std::uint8_t>(qdigit - qbase + 1);
+              auto dvalue = static_cast<uint8_t>(qdigit - qbase + 1);
               if(dvalue != 0) {
                 reg -= *qdigit;
               }
@@ -1369,7 +1369,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         return p;
       }
 
-    G_string& do_format_no_exponent(G_string& text, std::uint8_t rbase, const G_real& value)
+    G_string& do_format_no_exponent(G_string& text, uint8_t rbase, const G_real& value)
       {
         auto p = do_format_partial(rbase, value);
         // Write prefixes.
@@ -1402,7 +1402,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         return text;
       }
 
-    G_string do_format_no_exponent(std::uint8_t rbase, const G_real& value)
+    G_string do_format_no_exponent(uint8_t rbase, const G_real& value)
       {
         G_string text;
         if(!do_check_finite(text, value)) {
@@ -1412,7 +1412,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
         return text;
       }
 
-    G_string do_format_scientific_binary(std::uint8_t rbase, const G_real& value)
+    G_string do_format_scientific_binary(uint8_t rbase, const G_real& value)
       {
         G_string text;
         if(!do_check_finite(text, value)) {
@@ -1456,7 +1456,7 @@ G_string std_numeric_format(const G_integer& value, const Opt<G_integer>& base, 
 
     }  // namespace
 
-G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, const Opt<G_integer>& ebase)
+G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
   {
     switch(base.value_or(10)) {
     case  2:
@@ -1499,9 +1499,9 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
 
     namespace {
 
-    inline int do_compare_lowercase(const G_string& str, std::size_t from, const char* cmp, std::size_t len) noexcept
+    inline int do_compare_lowercase(const G_string& str, size_t from, const char* cmp, size_t len) noexcept
       {
-        for(std::size_t si = from, ci = 0; ci != len; ++si, ++ci) {
+        for(size_t si = from, ci = 0; ci != len; ++si, ++ci) {
           // Read a character from `str` and convert it into lowercase.
           int sc = static_cast<unsigned char>(str[si]);
           if(('A' <= sc) && (sc <= 'Z')) {
@@ -1517,12 +1517,12 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
         return 0;
       }
 
-    inline std::uint8_t do_translate_digit(char c) noexcept
+    inline uint8_t do_translate_digit(char c) noexcept
       {
-        return static_cast<std::size_t>(std::find(s_xdigits, s_xdigits + 32, c) - s_xdigits) / 2 & 0xFF;
+        return static_cast<size_t>(std::find(s_xdigits, s_xdigits + 32, c) - s_xdigits) / 2 & 0xFF;
       }
 
-    inline bool do_accumulate_digit(std::int64_t& value, std::int64_t limit, std::uint8_t base, std::uint8_t dvalue) noexcept
+    inline bool do_accumulate_digit(int64_t& value, int64_t limit, uint8_t base, uint8_t dvalue) noexcept
       {
         if(limit >= 0) {
           // Accumulate the digit towards positive infinity.
@@ -1543,7 +1543,7 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
         return true;
       }
 
-    inline void do_raise_real(double& value, std::uint8_t base, std::int64_t exp) noexcept
+    inline void do_raise_real(double& value, uint8_t base, int64_t exp) noexcept
       {
         if(exp > 0) {
           value *= std::pow(base, +exp);
@@ -1555,7 +1555,7 @@ G_string std_numeric_format(const G_real& value, const Opt<G_integer>& base, con
 
     }  // namespace
 
-Opt<G_integer> std_numeric_parse_integer(const G_string& text)
+opt<G_integer> std_numeric_parse_integer(const G_string& text)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == G_string::npos) {
@@ -1563,14 +1563,14 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
       return rocket::nullopt;
     }
     bool rneg = false;  // is the number negative?
-    std::size_t rbegin = 0;  // beginning of significant figures
-    std::size_t rend = 0;  // end of significant figures
-    std::uint8_t rbase = 10;  // the base of the integral and fractional parts.
-    std::int64_t icnt = 0;  // number of integral digits (always non-negative)
-    std::uint8_t pbase = 0;  // the base of the exponent.
+    size_t rbegin = 0;  // beginning of significant figures
+    size_t rend = 0;  // end of significant figures
+    uint8_t rbase = 10;  // the base of the integral and fractional parts.
+    int64_t icnt = 0;  // number of integral digits (always non-negative)
+    uint8_t pbase = 0;  // the base of the exponent.
     bool pneg = false;  // is the exponent negative?
-    std::int64_t pexp = 0;  // `pbase`'d exponent
-    std::int64_t pcnt = 0;  // number of exponent digits (always non-negative)
+    int64_t pexp = 0;  // `pbase`'d exponent
+    int64_t pcnt = 0;  // number of exponent digits (always non-negative)
     // Get the sign of the number if any.
     switch(text[tpos]) {
     case '+':
@@ -1686,7 +1686,7 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
       return rocket::nullopt;
     }
     // The literal is an `integer` if there is no decimal point.
-    std::int64_t value = 0;
+    int64_t value = 0;
     // Accumulate digits from left to right.
     for(auto ri = rbegin; ri != rend; ++ri) {
       auto dvalue = do_translate_digit(text[ri]);
@@ -1715,7 +1715,7 @@ Opt<G_integer> std_numeric_parse_integer(const G_string& text)
     return value;
   }
 
-Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& saturating)
+opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == G_string::npos) {
@@ -1723,15 +1723,15 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
       return rocket::nullopt;
     }
     bool rneg = false;  // is the number negative?
-    std::size_t rbegin = 0;  // beginning of significant figures
-    std::size_t rend = 0;  // end of significant figures
-    std::uint8_t rbase = 10;  // the base of the integral and fractional parts.
-    std::int64_t icnt = 0;  // number of integral digits (always non-negative)
-    std::int64_t fcnt = 0;  // number of fractional digits (always non-negative)
-    std::uint8_t pbase = 0;  // the base of the exponent.
+    size_t rbegin = 0;  // beginning of significant figures
+    size_t rend = 0;  // end of significant figures
+    uint8_t rbase = 10;  // the base of the integral and fractional parts.
+    int64_t icnt = 0;  // number of integral digits (always non-negative)
+    int64_t fcnt = 0;  // number of fractional digits (always non-negative)
+    uint8_t pbase = 0;  // the base of the exponent.
     bool pneg = false;  // is the exponent negative?
-    std::int64_t pexp = 0;  // `pbase`'d exponent
-    std::int64_t pcnt = 0;  // number of exponent digits (always non-negative)
+    int64_t pexp = 0;  // `pbase`'d exponent
+    int64_t pcnt = 0;  // number of exponent digits (always non-negative)
     // Get the sign of the number if any.
     switch(text[tpos]) {
     case '+':
@@ -1908,8 +1908,8 @@ Opt<G_real> std_numeric_parse_real(const G_string& text, const Opt<G_boolean>& s
     }
     // Digits are accumulated using a 64-bit integer with no fractional part.
     // Excess significant figures are discard if the integer would overflow.
-    std::int64_t tvalue = 0;
-    std::int64_t tcnt = icnt;
+    int64_t tvalue = 0;
+    int64_t tcnt = icnt;
     // Accumulate digits from left to right.
     for(auto ri = rbegin; ri != rend; ++ri) {
       auto dvalue = do_translate_digit(text[ri]);
@@ -1991,7 +1991,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     result.insert_or_assign(rocket::sref("size_max"),
       G_integer(
         // The maximum length of a `string` or `array`.
-        std::numeric_limits<std::ptrdiff_t>::max()
+        std::numeric_limits<ptrdiff_t>::max()
       ));
     //===================================================================
     // `std.numeric.abs()`
@@ -2018,7 +2018,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.abs"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2058,7 +2058,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.sign"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2100,7 +2100,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.is_finite"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2142,7 +2142,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.is_infinity"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2183,7 +2183,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.is_nan"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2227,7 +2227,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.clamp"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2271,7 +2271,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.round"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2311,7 +2311,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.floor"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2351,7 +2351,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.ceil"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2391,7 +2391,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.trunc"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2435,7 +2435,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.iround"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2479,7 +2479,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.ifloor"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2523,7 +2523,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.iceil"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2567,7 +2567,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.itrunc"), args);
           // Parse arguments.
           G_integer ivalue;
@@ -2609,10 +2609,10 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.random"), args);
           // Parse arguments.
-          Opt<G_real> limit;
+          opt<G_real> limit;
           if(reader.start().g(limit).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_numeric_random(global, limit) };
@@ -2642,7 +2642,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.sqrt"), args);
           // Parse arguments.
           G_real x;
@@ -2676,7 +2676,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.fma"), args);
           // Parse arguments.
           G_real x;
@@ -2712,7 +2712,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.remainder"), args);
           // Parse arguments.
           G_real x;
@@ -2751,7 +2751,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.frexp"), args);
           // Parse arguments.
           G_real x;
@@ -2785,7 +2785,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.ldexp"), args);
           // Parse arguments.
           G_real frac;
@@ -2821,7 +2821,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.addm"), args);
           // Parse arguments.
           G_integer x;
@@ -2858,7 +2858,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.subm"), args);
           // Parse arguments.
           G_integer x;
@@ -2895,7 +2895,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.mulm"), args);
           // Parse arguments.
           G_integer x;
@@ -2933,7 +2933,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.adds"), args);
           // Parse arguments.
           G_integer ix;
@@ -2978,7 +2978,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.subs"), args);
           // Parse arguments.
           G_integer ix;
@@ -3023,7 +3023,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.muls"), args);
           // Parse arguments.
           G_integer ix;
@@ -3065,7 +3065,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.lzcnt"), args);
           // Parse arguments.
           G_integer x;
@@ -3099,7 +3099,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.tzcnt"), args);
           // Parse arguments.
           G_integer x;
@@ -3132,7 +3132,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.popcnt"), args);
           // Parse arguments.
           G_integer x;
@@ -3179,12 +3179,12 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.format"), args);
           // Parse arguments.
           G_integer ivalue;
-          Opt<G_integer> base;
-          Opt<G_integer> ebase;
+          opt<G_integer> base;
+          opt<G_integer> ebase;
           if(reader.start().g(ivalue).g(base).g(ebase).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_numeric_format(ivalue, base, ebase) };
@@ -3235,7 +3235,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.parse_integer"), args);
           // Parse arguments.
           G_string text;
@@ -3293,11 +3293,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.numeric.parse_real"), args);
           // Parse arguments.
           G_string text;
-          Opt<G_boolean> saturating;
+          opt<G_boolean> saturating;
           if(reader.start().g(text).g(saturating).finish()) {
             // Call the binding function.
             auto qres = std_numeric_parse_real(text, saturating);

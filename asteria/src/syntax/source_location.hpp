@@ -11,21 +11,21 @@ namespace Asteria {
 class Source_Location
   {
   private:
-    Cow_String m_file;
-    std::int64_t m_line;
+    cow_string m_file;
+    int64_t m_line;
 
   public:
-    Source_Location(Cow_String xfile, std::int64_t xline) noexcept
+    Source_Location(cow_string xfile, int64_t xline) noexcept
       : m_file(rocket::move(xfile)), m_line(xline)
       {
       }
 
   public:
-    const Cow_String& file() const noexcept
+    const cow_string& file() const noexcept
       {
         return this->m_file;
       }
-    std::int64_t line() const noexcept
+    int64_t line() const noexcept
       {
         return this->m_line;
       }

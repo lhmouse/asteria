@@ -155,35 +155,35 @@ class Runtime_Error : public virtual std::exception
 
 extern bool utf8_encode(char*& pos, char32_t cp);
 extern bool utf8_encode(rocket::cow_string& text, char32_t cp);
-extern bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail);
-extern bool utf8_decode(char32_t& cp, const rocket::cow_string& text, std::size_t& offset);
+extern bool utf8_decode(char32_t& cp, const char*& pos, size_t avail);
+extern bool utf8_decode(char32_t& cp, const rocket::cow_string& text, size_t& offset);
 
 extern bool utf16_encode(char16_t*& pos, char32_t cp);
 extern bool utf16_encode(rocket::cow_u16string& text, char32_t cp);
-extern bool utf16_decode(char32_t& cp, const char16_t*& pos, std::size_t avail);
-extern bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& offset);
+extern bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail);
+extern bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, size_t& offset);
 
-extern rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, std::size_t len);
-extern rocket::cow_string quote(const char* str, std::size_t len);
+extern rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, size_t len);
+extern rocket::cow_string quote(const char* str, size_t len);
 extern rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str);
 extern rocket::cow_string quote(const char* str);
 extern rocket::cow_string& quote(rocket::cow_string& sbuf, const rocket::cow_string& str);
 extern rocket::cow_string quote(const rocket::cow_string& str);
 
-extern rocket::cow_string& pwrapln(rocket::cow_string& sbuf, std::size_t indent, std::size_t hanging);
-extern rocket::cow_string pwrapln(std::size_t indent, std::size_t hanging);
+extern rocket::cow_string& pwrapln(rocket::cow_string& sbuf, size_t indent, size_t hanging);
+extern rocket::cow_string pwrapln(size_t indent, size_t hanging);
 
 struct Wrapped_Index
   {
-    std::uint64_t nprepend;  // number of elements to prepend
-    std::uint64_t nappend;  // number of elements to append
-    std::size_t rindex;  // the wrapped index (valid if both `nprepend` and `nappend` are zeroes)
+    uint64_t nprepend;  // number of elements to prepend
+    uint64_t nappend;  // number of elements to append
+    size_t rindex;  // the wrapped index (valid if both `nprepend` and `nappend` are zeroes)
   };
 
-extern Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept;
+extern Wrapped_Index wrap_index(int64_t index, size_t size) noexcept;
 
 // Note that the return value may be either positive or negative.
-extern std::uint64_t generate_random_seed() noexcept;
+extern uint64_t generate_random_seed() noexcept;
 
 }  // namespace Asteria
 

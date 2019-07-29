@@ -40,7 +40,7 @@ namespace Asteria {
           }
         }
         // Convert all characters.
-        std::size_t offset = 0;
+        size_t offset = 0;
         while(offset < path.size()) {
           char32_t cp;
           if(!utf8_decode(cp, path, offset)) {
@@ -55,9 +55,9 @@ namespace Asteria {
       }
 
     // Compose a pair of `DWORD`s to form an `uint64_t`.
-    constexpr std::uint64_t do_compose(::DWORD high, ::DWORD low) noexcept
+    constexpr uint64_t do_compose(::DWORD high, ::DWORD low) noexcept
       {
-        return (static_cast<std::uint64_t>(high) << 32) + low;
+        return (static_cast<uint64_t>(high) << 32) + low;
       }
 #endif
 
@@ -141,7 +141,7 @@ G_string std_filesystem_get_working_directory()
 #ifdef _WIN32
     // Get the current directory as UTF-16.
     Wide_String ucwd(MAX_PATH, L'*');
-    auto nreq = ::GetCurrentDirectoryW(static_cast<std::uint32_t>(ucwd.size()), ucwd.mut_data());
+    auto nreq = ::GetCurrentDirectoryW(static_cast<uint32_t>(ucwd.size()), ucwd.mut_data());
     if(nreq > ucwd.size()) {
       // The buffer was too small.
       ucwd.append(nreq - ucwd.size(), L'*');
@@ -176,7 +176,7 @@ G_string std_filesystem_get_working_directory()
     return cwd;
   }
 
-Opt<G_object> std_filesystem_get_information(const G_string& path)
+opt<G_object> std_filesystem_get_information(const G_string& path)
   {
     G_object stat;
 #ifdef _WIN32
@@ -264,15 +264,15 @@ Opt<G_object> std_filesystem_get_information(const G_string& path)
       ));
     stat.insert_or_assign(rocket::sref("n_ocup"),
       G_integer(
-        static_cast<std::uint64_t>(stb.st_blocks) * 512  // number of bytes this file occupies.
+        static_cast<uint64_t>(stb.st_blocks) * 512  // number of bytes this file occupies.
       ));
     stat.insert_or_assign(rocket::sref("t_accs"),
       G_integer(
-        static_cast<std::int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access.
+        static_cast<int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access.
       ));
     stat.insert_or_assign(rocket::sref("t_mod"),
       G_integer(
-        static_cast<std::int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification.
+        static_cast<int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification.
       ));
 #endif
     return rocket::move(stat);
@@ -303,11 +303,11 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 
     // Remove the directory recursively.
 #ifdef _WIN32
-    Opt<G_integer> do_remove_directory_recursive(const Wide_String& root)
+    opt<G_integer> do_remove_directory_recursive(const Wide_String& root)
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
-        Cow_Bivector<Rmlist, Wide_String> stack;
+        cow_bivector<Rmlist, Wide_String> stack;
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.
@@ -371,11 +371,11 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
         return rocket::move(count);
       }
 #else
-    Opt<G_integer> do_remove_directory_recursive(const rocket::cow_string& root)
+    opt<G_integer> do_remove_directory_recursive(const rocket::cow_string& root)
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
-        Cow_Bivector<Rmlist, Cow_String> stack;
+        cow_bivector<Rmlist, cow_string> stack;
         stack.emplace_back(rmlist_expand, root);
         while(!stack.empty()) {
           // Pop an element off the stack.
@@ -443,7 +443,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 
     }  // namespace
 
-Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
+opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
   {
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
@@ -482,7 +482,7 @@ Opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
 #endif
   }
 
-Opt<G_object> std_filesystem_directory_list(const G_string& path)
+opt<G_object> std_filesystem_directory_list(const G_string& path)
   {
     G_object entries;
 #ifdef _WIN32
@@ -506,7 +506,7 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
       return rocket::move(entries);
     }
     do {
-      Cow_String name;
+      cow_string name;
       G_object entry;
       // Convert UTF-16 to UTF-8.
       // We only want to stop when a NUL character is encountered.
@@ -542,7 +542,7 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
     // Write entries.
     struct ::dirent* next;
     while((next = ::readdir(hd)) != nullptr) {
-      Cow_String name;
+      cow_string name;
       G_object entry;
       // Assume the name is in UTF-8.
       name.assign(next->d_name);
@@ -585,7 +585,7 @@ Opt<G_object> std_filesystem_directory_list(const G_string& path)
     return rocket::move(entries);
   }
 
-Opt<G_integer> std_filesystem_directory_create(const G_string& path)
+opt<G_integer> std_filesystem_directory_create(const G_string& path)
   {
     G_integer count = 1;
 #ifdef _WIN32
@@ -622,7 +622,7 @@ Opt<G_integer> std_filesystem_directory_create(const G_string& path)
     return rocket::move(count);
   }
 
-Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
+opt<G_integer> std_filesystem_directory_remove(const G_string& path)
   {
     G_integer count = 1;
 #ifdef _WIN32
@@ -642,13 +642,13 @@ Opt<G_integer> std_filesystem_directory_remove(const G_string& path)
     return rocket::move(count);
   }
 
-Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer>& offset, const Opt<G_integer>& limit)
+opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
-    std::int64_t roffset = offset.value_or(0);
-    std::int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 1048576);
+    int64_t roffset = offset.value_or(0);
+    int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 1048576);
     G_string data;
     // Open the file for reading.
 #ifdef _WIN32
@@ -675,7 +675,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
       }
     }
     // Don't read too many bytes at a time.
-    data.resize(static_cast<std::size_t>(rlimit));
+    data.resize(static_cast<size_t>(rlimit));
     // Read data from the offset specified.
 #ifdef _WIN32
     ::DWORD nread;
@@ -686,13 +686,13 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 #endif
       return rocket::nullopt;
     }
-    data.erase(static_cast<std::size_t>(nread));
+    data.erase(static_cast<size_t>(nread));
     return rocket::move(data);
   }
 
     namespace {
 
-    inline void do_push_argument(Cow_Vector<Reference>& args, const Value& value)
+    inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
       {
         Reference_Root::S_temporary xref = { value };
         args.emplace_back(rocket::move(xref));
@@ -701,7 +701,7 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
     void do_process_block(const Global_Context& global, const G_function& callback, const G_integer& offset, const G_string& data)
       {
         // Set up arguments for the user-defined predictor.
-        Cow_Vector<Reference> args;
+        cow_vector<Reference> args;
         do_push_argument(args, offset);
         do_push_argument(args, data);
         // Call the predictor function, but discard the return value.
@@ -711,14 +711,14 @@ Opt<G_string> std_filesystem_file_read(const G_string& path, const Opt<G_integer
 
     }  // namespace
 
-bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const Opt<G_integer>& offset, const Opt<G_integer>& limit)
+bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
-    std::int64_t roffset = offset.value_or(0);
-    std::int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 1048576);
-    std::int64_t nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
+    int64_t roffset = offset.value_or(0);
+    int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 1048576);
+    int64_t nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
     G_string data;
     // Open the file for reading.
 #ifdef _WIN32
@@ -750,7 +750,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
         break;
       }
       // Don't read too many bytes at a time.
-      data.resize(static_cast<std::size_t>(rlimit));
+      data.resize(static_cast<size_t>(rlimit));
       // Read data from the offset specified.
 #ifdef _WIN32
       ::DWORD nread;
@@ -764,7 +764,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
       if(nread == 0) {
         break;
       }
-      data.erase(static_cast<std::size_t>(nread));
+      data.erase(static_cast<size_t>(nread));
       do_process_block(global, callback, roffset, data);
       // Read the next block.
       nremaining -= nread;
@@ -773,13 +773,13 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     return true;
   }
 
-bool std_filesystem_file_write(const G_string& path, const G_string& data, const Opt<G_integer>& offset)
+bool std_filesystem_file_write(const G_string& path, const G_string& data, const opt<G_integer>& offset)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
-    std::int64_t roffset = offset.value_or(0);
-    std::int64_t nremaining = static_cast<std::int64_t>(data.size());
+    int64_t roffset = offset.value_or(0);
+    int64_t nremaining = static_cast<int64_t>(data.size());
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Calculate the `dwCreationDisposition` argument.
@@ -834,9 +834,9 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       // Write data to the end.
 #ifdef _WIN32
       ::DWORD nwritten;
-      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<std::uint32_t>(rocket::min(nremaining, INT32_MAX)), &nwritten, nullptr) == FALSE) {
+      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<uint32_t>(rocket::min(nremaining, INT32_MAX)), &nwritten, nullptr) == FALSE) {
 #else
-      ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining));
+      ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<size_t>(nremaining));
       if(nwritten < 0) {
 #endif
         return false;
@@ -846,9 +846,9 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     return true;
   }
 
-bool std_filesystem_file_append(const G_string& path, const G_string& data, const Opt<G_boolean>& exclusive)
+bool std_filesystem_file_append(const G_string& path, const G_string& data, const opt<G_boolean>& exclusive)
   {
-    std::int64_t nremaining = static_cast<std::int64_t>(data.size());
+    int64_t nremaining = static_cast<int64_t>(data.size());
 #ifdef _WIN32
     auto wpath = do_translate_winnt_path(path);
     // Calculate the `dwCreationDisposition` argument.
@@ -882,9 +882,9 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       // Write data to the end.
 #ifdef _WIN32
       ::DWORD nwritten;
-      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<std::uint32_t>(rocket::min(nremaining, INT32_MAX)), &nwritten, nullptr) == FALSE) {
+      if(::WriteFile(hf, data.data() + data.size() - nremaining, static_cast<uint32_t>(rocket::min(nremaining, INT32_MAX)), &nwritten, nullptr) == FALSE) {
 #else
-      ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<std::size_t>(nremaining));
+      ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<size_t>(nremaining));
       if(nwritten < 0) {
 #endif
         return false;
@@ -925,7 +925,7 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
     }
     // Allocate the I/O buffer.
     G_string buff;
-    buff.resize(static_cast<std::size_t>(stb_old.st_blksize));
+    buff.resize(static_cast<size_t>(stb_old.st_blksize));
     for(;;) {
       // Read some bytes.
       ::ssize_t nread = ::read(hf_old, buff.mut_data(), buff.size());
@@ -938,7 +938,7 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
       // Write them all.
       ::ssize_t ntotal = 0;
       do {
-        ::ssize_t nwritten = ::write(hf_new, buff.mut_data() + ntotal, static_cast<std::size_t>(nread - ntotal));
+        ::ssize_t nwritten = ::write(hf_new, buff.mut_data() + ntotal, static_cast<size_t>(nread - ntotal));
         if(nwritten < 0) {
           return false;
         }
@@ -988,7 +988,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.get_working_directory"), args);
           // Parse arguments.
           if(reader.start().finish()) {
@@ -1036,7 +1036,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.get_information"), args);
           // Parse arguments.
           G_string path;
@@ -1074,7 +1074,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.remove_recursive"), args);
           // Parse arguments.
           G_string path;
@@ -1111,7 +1111,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.move_from"), args);
           // Parse arguments.
           G_string path_new;
@@ -1157,7 +1157,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.directory_list"), args);
           // Parse arguments.
           G_string path;
@@ -1197,7 +1197,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.directory_create"), args);
           // Parse arguments.
           G_string path;
@@ -1235,7 +1235,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.directory_remove"), args);
           // Parse arguments.
           G_string path;
@@ -1278,12 +1278,12 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_read"), args);
           // Parse arguments.
           G_string path;
-          Opt<G_integer> offset;
-          Opt<G_integer> limit;
+          opt<G_integer> offset;
+          opt<G_integer> limit;
           if(reader.start().g(path).g(offset).g(limit).finish()) {
             // Call the binding function.
             auto qres = std_filesystem_file_read(path, offset, limit);
@@ -1330,13 +1330,13 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_stream"), args);
           // Parse arguments.
           G_string path;
           G_function callback = global.placeholder_function();
-          Opt<G_integer> offset;
-          Opt<G_integer> limit;
+          opt<G_integer> offset;
+          opt<G_integer> limit;
           if(reader.start().g(path).g(callback).g(offset).g(limit).finish()) {
             // Call the binding function.
             if(!std_filesystem_file_stream(global, path, callback, offset, limit)) {
@@ -1376,12 +1376,12 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_write"), args);
           // Parse arguments.
           G_string path;
           G_string data;
-          Opt<G_integer> offset;
+          opt<G_integer> offset;
           if(reader.start().g(path).g(data).g(offset).finish()) {
             // Call the binding function.
             if(!std_filesystem_file_write(path, data, offset)) {
@@ -1418,12 +1418,12 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_append"), args);
           // Parse arguments.
           G_string path;
           G_string data;
-          Opt<G_boolean> exclusive;
+          opt<G_boolean> exclusive;
           if(reader.start().g(path).g(data).g(exclusive).finish()) {
             // Call the binding function.
             if(!std_filesystem_file_append(path, data, exclusive)) {
@@ -1458,7 +1458,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_copy_from"), args);
           // Parse arguments.
           G_string path_new;
@@ -1496,7 +1496,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           nullptr
         ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, Cow_Vector<Reference>&& args) -> Reference {
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_remove"), args);
           // Parse arguments.
           G_string path;

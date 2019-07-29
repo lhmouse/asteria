@@ -36,13 +36,13 @@ bool are_debug_logs_enabled() noexcept
 
     namespace {
 
-    void do_ltoa_fixed(rocket::cow_string& str, long num, std::size_t width)
+    void do_ltoa_fixed(rocket::cow_string& str, long num, size_t width)
       {
         std::array<char, 64> sbuf;
         auto spos = sbuf.end();
         // Write digits from the right to the left.
         long reg = num;
-        for(std::size_t i = 0; i < width; ++i) {
+        for(size_t i = 0; i < width; ++i) {
           long d = reg % 10;
           reg /= 10;
           *--spos = static_cast<char>('0' + d);
@@ -126,7 +126,7 @@ bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) 
     // Neutralize control characters and indent paragraphs.
     for(char c : msg) {
       // Control characters are ['\x00','\x1F'] and '\x7F'.
-      std::size_t uch = c & 0xFF;
+      size_t uch = c & 0xFF;
       if(uch == 0x7F) {
         do_append_str(str, "[DEL\\x7F]");
         continue;
@@ -207,7 +207,7 @@ bool utf8_encode(rocket::cow_string& text, char32_t cp)
     return true;
   }
 
-bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail)
+bool utf8_decode(char32_t& cp, const char*& pos, size_t avail)
   {
     if(avail == 0) {
       return false;
@@ -223,7 +223,7 @@ bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail)
       return false;
     }
     // Calculate the number of bytes in this code point.
-    auto u8len = static_cast<std::size_t>(2 + (cp >= 0xE0) + (cp >= 0xF0));
+    auto u8len = static_cast<size_t>(2 + (cp >= 0xE0) + (cp >= 0xF0));
     ROCKET_ASSERT(u8len >= 2);
     ROCKET_ASSERT(u8len <= 4);
     if(u8len > avail) {
@@ -233,7 +233,7 @@ bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail)
     // Unset bits that are not part of the payload.
     cp &= UINT32_C(0xFF) >> u8len;
     // Accumulate trailing code units.
-    for(std::size_t i = 1; i < u8len; ++i) {
+    for(size_t i = 1; i < u8len; ++i) {
       char32_t cu = *(pos++) & 0xFF;
       if((cu < 0x80) || (0xC0 <= cu)) {
         // This trailing character is not valid.
@@ -250,7 +250,7 @@ bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail)
       return false;
     }
     // Re-encode it and check for overlong sequences.
-    auto milen = static_cast<std::size_t>(1 + (cp >= 0x80) + (cp >= 0x800) + (cp >= 0x10000));
+    auto milen = static_cast<size_t>(1 + (cp >= 0x80) + (cp >= 0x800) + (cp >= 0x10000));
     if(milen != u8len) {
       // Overlong sequences are not allowed.
       return false;
@@ -258,7 +258,7 @@ bool utf8_decode(char32_t& cp, const char*& pos, std::size_t avail)
     return true;
   }
 
-bool utf8_decode(char32_t& cp, const rocket::cow_string& text, std::size_t& offset)
+bool utf8_decode(char32_t& cp, const rocket::cow_string& text, size_t& offset)
   {
     if(offset >= text.size()) {
       return false;
@@ -269,7 +269,7 @@ bool utf8_decode(char32_t& cp, const rocket::cow_string& text, std::size_t& offs
       return false;
     }
     // Update the offset.
-    offset = static_cast<std::size_t>(pos - text.data());
+    offset = static_cast<size_t>(pos - text.data());
     return true;
   }
 
@@ -307,7 +307,7 @@ bool utf16_encode(rocket::cow_u16string& text, char32_t cp)
     return true;
   }
 
-bool utf16_decode(char32_t& cp, const char16_t*& pos, std::size_t avail)
+bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
   {
     if(avail == 0) {
       return false;
@@ -336,7 +336,7 @@ bool utf16_decode(char32_t& cp, const char16_t*& pos, std::size_t avail)
     return true;
   }
 
-bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& offset)
+bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, size_t& offset)
   {
     if(offset >= text.size()) {
       return false;
@@ -347,7 +347,7 @@ bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& 
       return false;
     }
     // Update the offset.
-    offset = static_cast<std::size_t>(pos - text.data());
+    offset = static_cast<size_t>(pos - text.data());
     return true;
   }
 
@@ -391,7 +391,7 @@ bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, std::size_t& 
 
     }  // namespace
 
-rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, std::size_t len)
+rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, size_t len)
   {
     sbuf.clear();
     // Enclose the string with double quotes, escaping characters as needed.
@@ -401,7 +401,7 @@ rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, std::size_t
     return sbuf;
   }
 
-rocket::cow_string quote(const char* str, std::size_t len)
+rocket::cow_string quote(const char* str, size_t len)
   {
     rocket::cow_string sbuf;
     quote(sbuf, str, len);
@@ -428,7 +428,7 @@ rocket::cow_string quote(const rocket::cow_string& str)
     return quote(str.data(), str.size());
   }
 
-rocket::cow_string& pwrapln(rocket::cow_string& sbuf, std::size_t indent, std::size_t hanging)
+rocket::cow_string& pwrapln(rocket::cow_string& sbuf, size_t indent, size_t hanging)
   {
     sbuf.clear();
     if(indent != 0) {
@@ -446,42 +446,42 @@ rocket::cow_string& pwrapln(rocket::cow_string& sbuf, std::size_t indent, std::s
     return sbuf;
   }
 
-rocket::cow_string pwrapln(std::size_t indent, std::size_t hanging)
+rocket::cow_string pwrapln(size_t indent, size_t hanging)
   {
     rocket::cow_string sbuf;
     pwrapln(sbuf, indent, hanging);
     return sbuf;
   }
 
-Wrapped_Index wrap_index(std::int64_t index, std::size_t size) noexcept
+Wrapped_Index wrap_index(int64_t index, size_t size) noexcept
   {
     ROCKET_ASSERT(size <= PTRDIFF_MAX);
     // The range of valid indices is (~size, size).
     Wrapped_Index w;
-    auto ssize = static_cast<std::int64_t>(size);
+    auto ssize = static_cast<int64_t>(size);
     if(index >= 0) {
       // Append elements as needed.
       auto nappend = rocket::max(index, ssize - 1) - (ssize - 1);
       w.nprepend = 0;
-      w.nappend = static_cast<std::uint64_t>(nappend);
+      w.nappend = static_cast<uint64_t>(nappend);
       // `index` is truncated if it does not fit in `size_t`, but in this case it shouldn't be used.
-      w.rindex = static_cast<std::size_t>(index);
+      w.rindex = static_cast<size_t>(index);
     }
     else {
       // Prepend elements as needed.
       auto nprepend = rocket::max(index - 1, ~ssize) - (index - 1);
-      w.nprepend = static_cast<std::uint64_t>(nprepend);
+      w.nprepend = static_cast<uint64_t>(nprepend);
       w.nappend = 0;
       // `index + ssize` cannot overflow when `index` is negative and `ssize` is not.
-      w.rindex = static_cast<std::size_t>(index + ssize) + static_cast<std::size_t>(nprepend);
+      w.rindex = static_cast<size_t>(index + ssize) + static_cast<size_t>(nprepend);
     }
     return w;
   }
 
-std::uint64_t generate_random_seed() noexcept
+uint64_t generate_random_seed() noexcept
   {
     // Get the system time of very high resolution.
-    std::int64_t tp;
+    int64_t tp;
 #ifdef _WIN32
     ::LARGE_INTEGER li;
     ::QueryPerformanceCounter(&li);
@@ -489,12 +489,12 @@ std::uint64_t generate_random_seed() noexcept
 #else
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    tp = static_cast<std::int64_t>(ts.tv_sec) * 1000000000 + ts.tv_nsec;
+    tp = static_cast<int64_t>(ts.tv_sec) * 1000000000 + ts.tv_nsec;
 #endif
     // Hash it using FNV-1a to erase sensitive information.
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
     // The timestamp is read in little-endian byte order.
-    std::uint64_t seed = 0xCBF29CE484222325;
+    uint64_t seed = 0xCBF29CE484222325;
     for(int i = 0; i < 8; ++i) {
       auto byte = static_cast<unsigned char>(tp >> i * 8);
       seed = (seed ^ byte) * 0x100000001B3;

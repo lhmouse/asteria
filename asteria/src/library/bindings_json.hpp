@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-extern G_string std_json_format(const Value& value, const Opt<G_string>& indent = rocket::nullopt);
+extern G_string std_json_format(const Value& value, const opt<G_string>& indent = rocket::nullopt);
 extern G_string std_json_format(const Value& value, const G_integer& indent);
 extern Value std_json_parse(const G_string& text);
 

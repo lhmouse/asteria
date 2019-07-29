@@ -15,12 +15,12 @@ class Analytic_Context : public Abstract_Context
     const Abstract_Context* m_parent_opt;
 
   public:
-    Analytic_Context(int, const Cow_Vector<PreHashed_String>& params)  // for top-level functions
+    Analytic_Context(int, const cow_vector<phsh_string>& params)  // for top-level functions
       : m_parent_opt(nullptr)
       {
         this->do_prepare_function(params);
       }
-    Analytic_Context(int, const Abstract_Context& parent, const Cow_Vector<PreHashed_String>& params)  // for closure functions
+    Analytic_Context(int, const Abstract_Context& parent, const cow_vector<phsh_string>& params)  // for closure functions
       : m_parent_opt(&parent)
       {
         this->do_prepare_function(params);
@@ -32,7 +32,7 @@ class Analytic_Context : public Abstract_Context
     ~Analytic_Context() override;
 
   private:
-    void do_prepare_function(const Cow_Vector<PreHashed_String>& params);
+    void do_prepare_function(const cow_vector<phsh_string>& params);
 
   public:
     bool is_analytic() const noexcept override

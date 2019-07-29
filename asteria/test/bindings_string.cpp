@@ -278,7 +278,7 @@ int main()
         assert std.string.unpack_64le("\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E") == [ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ];
       )__";
 
-    Cow_isstream iss(rocket::sref(s_source));
+    cow_isstream iss(rocket::sref(s_source));
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global, { });

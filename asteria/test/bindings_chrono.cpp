@@ -40,7 +40,7 @@ int main()
         assert t == null;
       )__";
 
-    Cow_isstream iss(rocket::sref(s_source));
+    cow_isstream iss(rocket::sref(s_source));
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global, { });

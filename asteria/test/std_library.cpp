@@ -9,7 +9,7 @@ using namespace Asteria;
 
 int main()
   {
-    Cow_isstream iss(
+    cow_isstream iss(
       rocket::sref(
         R"__(
           return std.meow;

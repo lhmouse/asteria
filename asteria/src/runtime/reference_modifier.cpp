@@ -25,7 +25,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         auto w = wrap_index(altr.index, array.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
-          ASTERIA_DEBUG_LOG("Array subscript was out of range: index = ", altr.index, ", size = ", array.size());
+          ASTERIA_DEBUG_LOG("array subscript was out of range: index = ", altr.index, ", size = ", array.size());
           return nullptr;
         }
         return std::addressof(array.at(w.rindex));
@@ -74,14 +74,14 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
           if(!create_new) {
-            ASTERIA_DEBUG_LOG("Array subscript was out of range: index = ", altr.index, ", size = ", array.size());
+            ASTERIA_DEBUG_LOG("array subscript was out of range: index = ", altr.index, ", size = ", array.size());
             return nullptr;
           }
           if(nadd > array.max_size() - array.size()) {
             ASTERIA_THROW_RUNTIME_ERROR("Extending an `array` of length `", array.size(), "` by `", nadd, "` would exceed the system limit.");
           }
-          array.insert(array.begin(), static_cast<std::size_t>(w.nprepend));
-          array.insert(array.end(), static_cast<std::size_t>(w.nappend));
+          array.insert(array.begin(), static_cast<size_t>(w.nprepend));
+          array.insert(array.end(), static_cast<size_t>(w.nappend));
         }
         return std::addressof(array.mut(w.rindex));
       }
@@ -134,7 +134,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         auto w = wrap_index(altr.index, array.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
-          ASTERIA_DEBUG_LOG("Array subscript was out of range: index = ", altr.index, ", size = ", array.size());
+          ASTERIA_DEBUG_LOG("array subscript was out of range: index = ", altr.index, ", size = ", array.size());
           return G_null();
         }
         auto elem = rocket::move(array.mut(w.rindex));

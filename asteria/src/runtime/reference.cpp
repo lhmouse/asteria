@@ -13,10 +13,10 @@ Value Reference::do_throw_unset_no_modifier() const
     ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
   }
 
-const Value& Reference::do_read(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const
+const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
     auto qref = std::addressof(this->m_root.dereference_const());
-    for(std::size_t i = 0; i != nmod; ++i) {
+    for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_const_opt(*qref);
       if(!qref) {
@@ -27,10 +27,10 @@ const Value& Reference::do_read(const Reference_Modifier* mods, std::size_t nmod
     return (qref = last.apply_const_opt(*qref)) ? *qref : Value::null();
   }
 
-Value& Reference::do_open(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const
+Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
     auto qref = std::addressof(this->m_root.dereference_mutable());
-    for(std::size_t i = 0; i != nmod; ++i) {
+    for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, true);  // create new
       if(!qref) {
@@ -41,10 +41,10 @@ Value& Reference::do_open(const Reference_Modifier* mods, std::size_t nmod, cons
     return (qref = last.apply_mutable_opt(*qref, true)), ROCKET_ASSERT(qref), *qref;
   }
 
-Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, const Reference_Modifier& last) const
+Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
     auto qref = std::addressof(this->m_root.dereference_mutable());
-    for(std::size_t i = 0; i != nmod; ++i) {
+    for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, false);  // no create
       if(!qref) {
@@ -58,7 +58,7 @@ Value Reference::do_unset(const Reference_Modifier* mods, std::size_t nmod, cons
 Reference& Reference::do_finish_call(const Global_Context& global)
   {
     // Note that `*this` is overwritten before the wrapped function is called.
-    Cow_Vector<Reference_Root::S_tail_call> rqueue;
+    cow_vector<Reference_Root::S_tail_call> rqueue;
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     bool conj_ref = true;
     // Unpack all tail call wrappers.

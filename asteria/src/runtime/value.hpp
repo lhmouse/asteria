@@ -13,7 +13,7 @@ namespace Asteria {
 class Value
   {
   public:
-    enum Compare : std::uint8_t
+    enum Compare : uint8_t
       {
         compare_unordered  = 0,  // 0000
         compare_equal      = 1,  // 0001
@@ -21,7 +21,7 @@ class Value
         compare_greater    = 9,  // 1001
       };
 
-    using Xvariant = Variant<
+    using Xvariant = variant<
       ROCKET_CDR(
         , G_null      // 0,
         , G_boolean   // 1,
@@ -212,7 +212,7 @@ class Value
     ROCKET_PURE_FUNCTION long gcref_split() const noexcept;
 
     std::ostream& print(std::ostream& os, bool escape = false) const;
-    std::ostream& dump(std::ostream& os, std::size_t indent = 2, std::size_t hanging = 0) const;
+    std::ostream& dump(std::ostream& os, size_t indent = 2, size_t hanging = 0) const;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const;
   };
 

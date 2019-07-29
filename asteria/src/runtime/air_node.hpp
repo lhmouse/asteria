@@ -13,7 +13,7 @@ class Air_Node
     friend Air_Queue;
 
   public:
-    enum Status : std::uint8_t
+    enum Status : uint8_t
       {
         status_next             = 0,
         status_return           = 1,

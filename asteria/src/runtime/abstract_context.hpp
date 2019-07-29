@@ -16,7 +16,7 @@ class Abstract_Context
     // It triggers a full garbage collection when destroyed, which occurs after destruction
     // of all local references, so it shall precede everything else.
     struct Cleaner { void operator()(Rcbase* base) noexcept;  };
-    Uptr<Rcbase, Cleaner> m_coll_opt;
+    uptr<Rcbase, Cleaner> m_coll_opt;
 
     // All named references (variables, parameters, etc.).
     Reference_Dictionary m_named_refs;
@@ -33,11 +33,11 @@ class Abstract_Context
       = delete;
 
   public:
-    const Reference* get_named_reference_opt(const PreHashed_String& name) const
+    const Reference* get_named_reference_opt(const phsh_string& name) const
       {
         return this->m_named_refs.get_opt(name);
       }
-    Reference& open_named_reference(const PreHashed_String& name)
+    Reference& open_named_reference(const phsh_string& name)
       {
         return this->m_named_refs.open(name);
       }
@@ -47,7 +47,7 @@ class Abstract_Context
       }
 
     Generational_Collector* get_tied_collector_opt() const noexcept;
-    void set_tied_collector(const Rcptr<Generational_Collector>& coll_opt) noexcept;
+    void set_tied_collector(const rcptr<Generational_Collector>& coll_opt) noexcept;
 
     virtual bool is_analytic() const noexcept = 0;
     virtual const Abstract_Context* get_parent_opt() const noexcept = 0;

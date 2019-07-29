@@ -337,7 +337,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         if(rhs >= 64) {
           return 0;
         }
-        return G_integer(static_cast<std::uint64_t>(lhs) << rhs);
+        return G_integer(static_cast<uint64_t>(lhs) << rhs);
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_srl(const G_integer& lhs, const G_integer& rhs)
@@ -348,7 +348,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         if(rhs >= 64) {
           return 0;
         }
-        return G_integer(static_cast<std::uint64_t>(lhs) >> rhs);
+        return G_integer(static_cast<uint64_t>(lhs) >> rhs);
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_sla(const G_integer& lhs, const G_integer& rhs)
@@ -363,12 +363,12 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
         auto bc = static_cast<int>(63 - rhs);
-        auto mask_out = static_cast<std::uint64_t>(lhs) >> bc << bc;
-        auto mask_sbt = static_cast<std::uint64_t>(lhs >> 63) << bc;
+        auto mask_out = static_cast<uint64_t>(lhs) >> bc << bc;
+        auto mask_sbt = static_cast<uint64_t>(lhs >> 63) << bc;
         if(mask_out != mask_sbt) {
           ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
         }
-        return G_integer(static_cast<std::uint64_t>(lhs) << rhs);
+        return G_integer(static_cast<uint64_t>(lhs) << rhs);
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_sra(const G_integer& lhs, const G_integer& rhs)
@@ -520,10 +520,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         if((nchars == 0) || (rhs == 0)) {
           return res;
         }
-        if(nchars > res.max_size() / static_cast<std::uint64_t>(rhs)) {
+        if(nchars > res.max_size() / static_cast<uint64_t>(rhs)) {
           ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
         }
-        auto times = static_cast<std::size_t>(rhs);
+        auto times = static_cast<size_t>(rhs);
         if(nchars == 1) {
           // Fast fill.
           res.assign(times, lhs.front());
@@ -558,10 +558,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         G_string res;
         // Reserve space for the result string.
         auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
-        if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
+        if(static_cast<uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
-        auto count = static_cast<std::size_t>(rhs);
+        auto count = static_cast<size_t>(rhs);
         // Copy the substring in the right.
         std::memcpy(ptr, lhs.data() + count, lhs.size() - count);
         return res;
@@ -575,10 +575,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         G_string res;
         // Reserve space for the result string.
         auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
-        if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
+        if(static_cast<uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
-        auto count = static_cast<std::size_t>(rhs);
+        auto count = static_cast<size_t>(rhs);
         // Copy the substring in the left.
         std::memcpy(ptr + count, lhs.data(), lhs.size() - count);
         return res;
@@ -590,10 +590,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
         G_string res;
-        if(static_cast<std::uint64_t>(rhs) >= res.max_size() - lhs.size()) {
+        if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size()) {
           ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
         }
-        auto count = static_cast<std::size_t>(rhs);
+        auto count = static_cast<size_t>(rhs);
         // Append spaces in the right and return the result.
         res.assign(G_string::shallow_type(lhs));
         res.append(count, ' ');
@@ -606,17 +606,17 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
         }
         G_string res;
-        if(static_cast<std::uint64_t>(rhs) >= lhs.size()) {
+        if(static_cast<uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
-        auto count = static_cast<std::size_t>(rhs);
+        auto count = static_cast<size_t>(rhs);
         // Return the substring in the left.
         res.append(lhs.data(), lhs.size() - count);
         return res;
       }
 
     Air_Queue do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx,
-                                      const Cow_Vector<Xprunit>& units)
+                                      const cow_vector<Xprunit>& units)
       {
         Air_Queue code;
         // Only the last operatro may be TCO'd.
@@ -660,7 +660,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         using value_type         = const ContextT;
         using pointer            = value_type*;
         using reference          = value_type&;
-        using difference_type    = std::ptrdiff_t;
+        using difference_type    = ptrdiff_t;
 
       private:
         value_type* m_qctx;
@@ -707,10 +707,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     class Air_find_named_reference_global : public virtual Air_Node
       {
       private:
-        PreHashed_String m_name;
+        phsh_string m_name;
 
       public:
-        Air_find_named_reference_global(const PreHashed_String& name)
+        Air_find_named_reference_global(const phsh_string& name)
           : m_name(name)
           {
           }
@@ -734,11 +734,11 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     class Air_find_named_reference_local : public virtual Air_Node
       {
       private:
-        PreHashed_String m_name;
-        std::ptrdiff_t m_depth;
+        phsh_string m_name;
+        ptrdiff_t m_depth;
 
       public:
-        Air_find_named_reference_local(const PreHashed_String& name, std::ptrdiff_t depth)
+        Air_find_named_reference_local(const phsh_string& name, ptrdiff_t depth)
           : m_name(name), m_depth(depth)
           {
           }
@@ -791,12 +791,12 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       private:
         Compiler_Options m_options;
         Source_Location m_sloc;
-        Cow_Vector<PreHashed_String> m_params;
-        Cow_Vector<Statement> m_body;
+        cow_vector<phsh_string> m_params;
+        cow_vector<Statement> m_body;
 
       public:
         Air_execute_closure_function(const Compiler_Options& options,
-                                     const Source_Location& sloc, const Cow_Vector<PreHashed_String>& params, const Cow_Vector<Statement>& body)
+                                     const Source_Location& sloc, const cow_vector<phsh_string>& params, const cow_vector<Statement>& body)
           : m_options(options),
             m_sloc(sloc), m_params(params), m_body(body)
           {
@@ -810,16 +810,16 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             Analytic_Context ctx_func(1, ctx, this->m_params);
             rocket::for_each(this->m_body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func, this->m_options);  });
             // Format the prototype string.
-            Cow_osstream fmtss;
+            cow_osstream fmtss;
             fmtss.imbue(std::locale::classic());
             fmtss << "<closure> (";
             if(!this->m_params.empty()) {
-              std::for_each(this->m_params.begin(), this->m_params.end() - 1, [&](const PreHashed_String& param) { fmtss << param << ", ";  });
+              std::for_each(this->m_params.begin(), this->m_params.end() - 1, [&](const phsh_string& param) { fmtss << param << ", ";  });
               fmtss << this->m_params.back();
             }
             fmtss <<")";
             // Instantiate the function.
-            Rcobj<Instantiated_Function> closure(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
+            rcobj<Instantiated_Function> closure(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
             ASTERIA_DEBUG_LOG("New closure function: ", closure);
             // Push the function object.
             Reference_Root::S_temporary xref = { G_function(rocket::move(closure)) };
@@ -872,12 +872,12 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       };
 
     template<typename XcallT, typename... XaddT> Air_Node::Status do_execute_function_common(Executive_Context& ctx,
-                                                                                             const Source_Location& sloc, const Cow_Vector<bool>& by_refs,
+                                                                                             const Source_Location& sloc, const cow_vector<bool>& by_refs,
                                                                                              XcallT&& xcall, XaddT&&... xadd)
       {
         Value value;
         // Allocate the argument vector.
-        Cow_Vector<Reference> args;
+        cow_vector<Reference> args;
         args.resize(by_refs.size());
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
           if(!ctx.stack().get_top_reference().is_rvalue() && !by_refs.rbegin()[it - args.rbegin()]) {
@@ -899,8 +899,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    Air_Node::Status do_xcall_tail(const Source_Location& sloc, const Cow_String& func,
-                                   const Rcobj<Abstract_Function>& target, Reference& self, Cow_Vector<Reference>&& args,
+    Air_Node::Status do_xcall_tail(const Source_Location& sloc, const cow_string& func,
+                                   const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
                                    bool tco_by_ref)
       {
         // Pack arguments.
@@ -916,11 +916,11 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
       private:
         Source_Location m_sloc;
-        Cow_Vector<bool> m_by_refs;
+        cow_vector<bool> m_by_refs;
         bool m_tco_by_ref;
 
       public:
-        Air_execute_function_call_tail(const Source_Location& sloc, const Cow_Vector<bool>& by_refs, bool tco_by_ref)
+        Air_execute_function_call_tail(const Source_Location& sloc, const cow_vector<bool>& by_refs, bool tco_by_ref)
           : m_sloc(sloc), m_by_refs(by_refs), m_tco_by_ref(tco_by_ref)
           {
           }
@@ -935,8 +935,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    Air_Node::Status do_xcall_plain(const Source_Location& sloc, const Cow_String& func,
-                                    const Rcobj<Abstract_Function>& target, Reference& self, Cow_Vector<Reference>&& args,
+    Air_Node::Status do_xcall_plain(const Source_Location& sloc, const cow_string& func,
+                                    const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
                                     const Global_Context& global)
       try {
         ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
@@ -965,10 +965,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
       private:
         Source_Location m_sloc;
-        Cow_Vector<bool> m_by_refs;
+        cow_vector<bool> m_by_refs;
 
       public:
-        Air_execute_function_call_plain(const Source_Location& sloc, const Cow_Vector<bool>& by_refs)
+        Air_execute_function_call_plain(const Source_Location& sloc, const cow_vector<bool>& by_refs)
           : m_sloc(sloc), m_by_refs(by_refs)
           {
           }
@@ -986,10 +986,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     class Air_execute_member_access : public virtual Air_Node
       {
       private:
-        PreHashed_String m_name;
+        phsh_string m_name;
 
       public:
-        explicit Air_execute_member_access(const PreHashed_String& name)
+        explicit Air_execute_member_access(const phsh_string& name)
           : m_name(name)
           {
           }
@@ -1361,7 +1361,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // This operator is unary.
             const auto& rhs = ctx.stack().get_top_reference().read();
             // Return the number of elements in the operand.
-            std::size_t nelems;
+            size_t nelems;
             if(rhs.is_null()) {
               nelems = 0;
             }
@@ -2514,10 +2514,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     class Air_execute_unnamed_array : public virtual Air_Node
       {
       private:
-        std::size_t m_nelems;
+        size_t m_nelems;
 
       public:
-        explicit Air_execute_unnamed_array(std::size_t nelems)
+        explicit Air_execute_unnamed_array(size_t nelems)
           : m_nelems(nelems)
           {
           }
@@ -2545,10 +2545,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
     class Air_execute_unnamed_object : public virtual Air_Node
       {
       private:
-        Cow_Vector<PreHashed_String> m_keys;
+        cow_vector<phsh_string> m_keys;
 
       public:
-        explicit Air_execute_unnamed_object(const Cow_Vector<PreHashed_String>& keys)
+        explicit Air_execute_unnamed_object(const cow_vector<phsh_string>& keys)
           : m_keys(keys)
           {
           }
@@ -2654,7 +2654,7 @@ void Xprunit::generate_code(Air_Queue& code, const Compiler_Options& options, Xp
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
         const Reference* qref = nullptr;
-        std::ptrdiff_t depth = -1;
+        ptrdiff_t depth = -1;
         // Look for the name recursively.
         auto qctx = std::find_if(Context_iterator<Abstract_Context>(ctx), Context_iterator<Abstract_Context>(),
                                  [&](const Abstract_Context& r) { return ++depth, (qref = r.get_named_reference_opt(altr.name)) != nullptr;  });

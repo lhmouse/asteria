@@ -13,13 +13,13 @@ class Global_Context : public Abstract_Context
   {
   private:
     // This is used to initialize an object of type `G_opaque` or `G_function` which does not have a default constructor.
-    Rcptr<Rcbase> m_placeholder;
+    rcptr<Rcbase> m_placeholder;
     // This is the global high-quality Pseudo Random Number Generator (PRNG).
-    Rcptr<Rcbase> m_prng;
+    rcptr<Rcbase> m_prng;
     // This is the global garbage collector.
-    Rcptr<Rcbase> m_gcoll;
+    rcptr<Rcbase> m_gcoll;
     // This is the variable holding an object referenced as `std` in this context.
-    Rcptr<Rcbase> m_vstd;
+    rcptr<Rcbase> m_vstd;
 
   public:
     // A global context does not have a parent context.
@@ -43,22 +43,22 @@ class Global_Context : public Abstract_Context
     void initialize(API_Version version = api_version_latest);
 
     // These are interfaces of the placeholder.
-    Rcobj<Placeholder> placeholder() const noexcept;
-    Rcobj<Abstract_Opaque> placeholder_opaque() const noexcept;
-    Rcobj<Abstract_Function> placeholder_function() const noexcept;
+    rcobj<Placeholder> placeholder() const noexcept;
+    rcobj<Abstract_Opaque> placeholder_opaque() const noexcept;
+    rcobj<Abstract_Function> placeholder_function() const noexcept;
 
     // These are interfaces of the PRNG.
-    std::uint32_t get_random_uint32() const noexcept;
+    uint32_t get_random_uint32() const noexcept;
 
     // These are interfaces of the global garbage collector.
-    Collector* get_collector_opt(std::size_t gindex) const;
-    Rcptr<Variable> create_variable(std::size_t ghint = 0) const;
-    std::size_t collect_variables(std::size_t glimit = 9) const;
+    Collector* get_collector_opt(size_t gindex) const;
+    rcptr<Variable> create_variable(size_t ghint = 0) const;
+    size_t collect_variables(size_t glimit = 9) const;
 
     // These are interfaces of the standard library.
-    const Value& get_std_member(const PreHashed_String& name) const;
-    Value& open_std_member(const PreHashed_String& name);
-    bool remove_std_member(const PreHashed_String& name);
+    const Value& get_std_member(const phsh_string& name) const;
+    Value& open_std_member(const phsh_string& name);
+    bool remove_std_member(const phsh_string& name);
   };
 
 }  // namespace Asteria

@@ -12,7 +12,7 @@ namespace Asteria {
 class Token
   {
   public:
-    enum Keyword : std::uint8_t
+    enum Keyword : uint8_t
       {
         keyword_var       =  0,
         keyword_const     =  1,
@@ -61,7 +61,7 @@ class Token
         keyword_itrunc    = 44,  // __itrunc
         keyword_fma       = 45,  // __fma
       };
-    enum Punctuator : std::uint8_t
+    enum Punctuator : uint8_t
       {
         punctuator_add         =  0,  // +
         punctuator_add_eq      =  1,  // +=
@@ -130,11 +130,11 @@ class Token
       };
     struct S_identifier
       {
-        Cow_String name;
+        cow_string name;
       };
     struct S_integer_literal
       {
-        std::int64_t value;
+        int64_t value;
       };
     struct S_real_literal
       {
@@ -142,10 +142,10 @@ class Token
       };
     struct S_string_literal
       {
-        Cow_String value;
+        cow_string value;
       };
 
-    enum Index : std::uint8_t
+    enum Index : uint8_t
       {
         index_keyword          = 0,
         index_punctuator       = 1,
@@ -154,7 +154,7 @@ class Token
         index_real_literal     = 4,
         index_string_literal   = 5,
       };
-    using Xvariant = Variant<
+    using Xvariant = variant<
       ROCKET_CDR(
         , S_keyword          // 0,
         , S_punctuator       // 1,
@@ -170,34 +170,34 @@ class Token
     ROCKET_PURE_FUNCTION static const char* stringify_punctuator(Punctuator punct) noexcept;
 
   private:
-    Cow_String m_file;
-    std::int64_t m_line;
-    std::size_t m_offset;
-    std::size_t m_length;
+    cow_string m_file;
+    int64_t m_line;
+    size_t m_offset;
+    size_t m_length;
     Xvariant m_stor;
 
   public:
-    template<typename XtokT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XtokT&&)> Token(const Cow_String& xfile, std::int64_t xline,
-                                                                                std::size_t xoffset, std::size_t xlength, XtokT&& xtok)
+    template<typename XtokT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XtokT&&)> Token(const cow_string& xfile, int64_t xline,
+                                                                                size_t xoffset, size_t xlength, XtokT&& xtok)
       : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
         m_stor(rocket::forward<XtokT>(xtok))
       {
       }
 
   public:
-    const Cow_String& file() const noexcept
+    const cow_string& file() const noexcept
       {
         return this->m_file;
       }
-    std::int64_t line() const noexcept
+    int64_t line() const noexcept
       {
         return this->m_line;
       }
-    std::size_t offset() const noexcept
+    size_t offset() const noexcept
       {
         return this->m_offset;
       }
-    std::size_t length() const noexcept
+    size_t length() const noexcept
       {
         return this->m_length;
       }
@@ -229,7 +229,7 @@ class Token
       {
         return this->index() == index_identifier;
       }
-    const Cow_String& as_identifier() const
+    const cow_string& as_identifier() const
       {
         return this->m_stor.as<index_identifier>().name;
       }
@@ -238,7 +238,7 @@ class Token
       {
         return this->index() == index_integer_literal;
       }
-    std::int64_t as_integer_literal() const
+    int64_t as_integer_literal() const
       {
         return this->m_stor.as<index_integer_literal>().value;
       }
@@ -256,7 +256,7 @@ class Token
       {
         return this->index() == index_string_literal;
       }
-    const Cow_String& as_string_literal() const
+    const cow_string& as_string_literal() const
       {
         return this->m_stor.as<index_string_literal>().value;
       }

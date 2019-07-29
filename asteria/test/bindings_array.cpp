@@ -206,7 +206,7 @@ int main()
         assert std.array.sort(std.array.copy_values({a:1,b:2,c:3,d:4})) == [1,2,3,4];
       )__";
 
-    Cow_isstream iss(rocket::sref(s_source));
+    cow_isstream iss(rocket::sref(s_source));
     Simple_Source_File code(iss, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global, { });

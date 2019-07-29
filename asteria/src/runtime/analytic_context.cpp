@@ -11,10 +11,10 @@ Analytic_Context::~Analytic_Context()
   {
   }
 
-void Analytic_Context::do_prepare_function(const Cow_Vector<PreHashed_String>& params)
+void Analytic_Context::do_prepare_function(const cow_vector<phsh_string>& params)
   {
     // Set parameters, which are local references.
-    for(std::size_t i = 0; i < params.size(); ++i) {
+    for(size_t i = 0; i < params.size(); ++i) {
       const auto& param = params.at(i);
       if(param.empty()) {
         continue;

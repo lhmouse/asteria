@@ -15,11 +15,11 @@ class Variadic_Arguer : public Abstract_Function
   {
   private:
     Source_Location m_sloc;
-    Cow_String m_func;
-    Cow_Vector<Reference> m_vargs;
+    cow_string m_func;
+    cow_vector<Reference> m_vargs;
 
   public:
-    template<typename... XvargsT> Variadic_Arguer(const Source_Location& sloc, const Cow_String& func,
+    template<typename... XvargsT> Variadic_Arguer(const Source_Location& sloc, const cow_string& func,
                                                   XvargsT&&... xvargs)
       : m_sloc(sloc), m_func(func),
         m_vargs(rocket::forward<XvargsT>(xvargs)...)
@@ -37,29 +37,29 @@ class Variadic_Arguer : public Abstract_Function
       {
         return this->m_sloc;
       }
-    const Cow_String& get_source_file() const noexcept
+    const cow_string& get_source_file() const noexcept
       {
         return this->m_sloc.file();
       }
-    std::int64_t get_source_line() const noexcept
+    int64_t get_source_line() const noexcept
       {
         return this->m_sloc.line();
       }
-    const Cow_String& get_function_signature() const noexcept
+    const cow_string& get_function_signature() const noexcept
       {
         return this->m_func;
       }
-    std::size_t count_arguments() const noexcept
+    size_t count_arguments() const noexcept
       {
         return this->m_vargs.size();
       }
-    const Reference& get_argument(std::size_t index) const
+    const Reference& get_argument(size_t index) const
       {
         return this->m_vargs.at(index);
       }
 
     std::ostream& describe(std::ostream& os) const override;
-    Reference& invoke(Reference& self, const Global_Context& global, Cow_Vector<Reference>&& args) const override;
+    Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const override;
     void enumerate_variables(const Abstract_Variable_Callback& callback) const override;
   };
 

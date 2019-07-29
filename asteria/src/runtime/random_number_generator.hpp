@@ -16,13 +16,13 @@ class Random_Number_Generator : public Rcbase
   {
   private:
     // generated result
-    std::uint32_t m_ngot;
-    std::uint32_t m_pool[256];
+    uint32_t m_ngot;
+    uint32_t m_pool[256];
     // generator state
-    std::uint32_t m_aa;
-    std::uint32_t m_bb;
-    std::uint32_t m_cc;
-    std::uint32_t m_mm[256];
+    uint32_t m_aa;
+    uint32_t m_bb;
+    uint32_t m_cc;
+    uint32_t m_mm[256];
 
   public:
     Random_Number_Generator() noexcept
@@ -42,7 +42,7 @@ class Random_Number_Generator : public Rcbase
 
   public:
     void reset() noexcept;
-    std::uint32_t bump() noexcept;
+    uint32_t bump() noexcept;
   };
 
 }  // namespace Asteria
