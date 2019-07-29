@@ -136,7 +136,7 @@ namespace Asteria {
             ctx.stack().push_reference(Reference_Root::S_null());
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -158,7 +158,7 @@ namespace Asteria {
             // Execute the block without affecting `ctx`.
             return do_execute_block(this->m_code, ctx);
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_code.enumerate_variables(callback);
           }
@@ -186,7 +186,7 @@ namespace Asteria {
             var->reset(this->m_sloc, G_null(), this->m_immutable);
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -212,7 +212,7 @@ namespace Asteria {
             ctx.stack().clear_references();
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -242,7 +242,7 @@ namespace Asteria {
             var->reset(this->m_sloc, rocket::move(value), this->m_immutable);
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -288,7 +288,7 @@ namespace Asteria {
             var->reset(this->m_sloc, G_function(rocket::move(closure)), true);
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -319,7 +319,7 @@ namespace Asteria {
               return do_execute_block(this->m_code_false, ctx);
             }
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_code_true.enumerate_variables(callback);
             this->m_code_false.enumerate_variables(callback);
@@ -397,7 +397,7 @@ namespace Asteria {
             }
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             for(auto it = this->m_clauses.begin(); it != this->m_clauses.end(); ++it) {
               it->code_cond.enumerate_variables(callback);
@@ -439,7 +439,7 @@ namespace Asteria {
             }
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_code_body.enumerate_variables(callback);
             this->m_code_cond.enumerate_variables(callback);
@@ -479,7 +479,7 @@ namespace Asteria {
             }
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_code_body.enumerate_variables(callback);
             this->m_code_cond.enumerate_variables(callback);
@@ -563,7 +563,7 @@ namespace Asteria {
               ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", range_value.gtype_name(), "`.");
             }
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_code_init.enumerate_variables(callback);
             this->m_code_body.enumerate_variables(callback);
@@ -615,7 +615,7 @@ namespace Asteria {
             }
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_code_init.enumerate_variables(callback);
             this->m_code_cond.enumerate_variables(callback);
@@ -662,7 +662,7 @@ namespace Asteria {
               return do_execute_catch(this->m_code_catch, this->m_except_name, except, ctx);
             }
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_code_try.enumerate_variables(callback);
             this->m_code_catch.enumerate_variables(callback);
@@ -685,7 +685,7 @@ namespace Asteria {
           {
             return this->m_status;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -730,7 +730,7 @@ namespace Asteria {
             }
             throw *qnested;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -758,7 +758,7 @@ namespace Asteria {
             }
             return Air_Node::status_return;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -795,7 +795,7 @@ namespace Asteria {
             }
             throw_runtime_error(__func__, fmtss.extract_string());
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };

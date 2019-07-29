@@ -160,7 +160,7 @@ class Variable_HashSet
         return var;
       }
 
-    void enumerate(const Abstract_Variable_Callback& callback) const;
+    void enumerate(Abstract_Variable_Callback& callback) const;
   };
 
 inline void swap(Variable_HashSet& lhs, Variable_HashSet& rhs) noexcept

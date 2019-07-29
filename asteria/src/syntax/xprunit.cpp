@@ -647,7 +647,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().push_reference(rocket::move(xref));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_value.enumerate_variables(callback);
           }
@@ -726,7 +726,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().push_reference(*qref);
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -757,7 +757,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().push_reference(*qref);
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -780,7 +780,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().push_reference(this->m_ref);
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& callback) const override
+        void enumerate_variables(Abstract_Variable_Callback& callback) const override
           {
             this->m_ref.enumerate_variables(callback);
           }
@@ -826,7 +826,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().push_reference(rocket::move(xref));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -866,7 +866,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             }
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -930,7 +930,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           {
             return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_tail, this->m_tco_by_ref);
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -978,7 +978,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           {
             return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_plain, ctx.global());
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1002,7 +1002,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().open_top_reference().zoom_in(rocket::move(xmod));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1040,7 +1040,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // The operand has been modified in place. No further action needs to be taken.
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1078,7 +1078,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // The operand has been modified in place. No further action needs to be taken.
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1118,7 +1118,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // The operand has been modified in place. No further action needs to be taken.
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1144,7 +1144,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1180,7 +1180,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1216,7 +1216,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1242,7 +1242,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, do_operator_not(rhs.test()));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1278,7 +1278,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // The operand has been modified in place. No further action needs to be taken.
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1314,7 +1314,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // The operand has been modified in place. No further action needs to be taken.
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1339,7 +1339,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1380,7 +1380,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, G_integer(nelems));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1406,7 +1406,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, G_string(rocket::sref(rhs.gtype_name())));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1442,7 +1442,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1478,7 +1478,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1514,7 +1514,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1550,7 +1550,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1586,7 +1586,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1622,7 +1622,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1658,7 +1658,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1694,7 +1694,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1730,7 +1730,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1766,7 +1766,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1802,7 +1802,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1838,7 +1838,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1874,7 +1874,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1905,7 +1905,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1940,7 +1940,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -1981,7 +1981,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2029,7 +2029,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2072,7 +2072,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2124,7 +2124,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2162,7 +2162,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2200,7 +2200,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2241,7 +2241,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2282,7 +2282,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2323,7 +2323,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2363,7 +2363,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2402,7 +2402,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2441,7 +2441,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2480,7 +2480,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2506,7 +2506,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(true, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2537,7 +2537,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().push_reference(rocket::move(xref));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2568,7 +2568,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().push_reference(rocket::move(xref));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2595,7 +2595,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             }
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };
@@ -2631,7 +2631,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
             return Air_Node::status_next;
           }
-        void enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const override
+        void enumerate_variables(Abstract_Variable_Callback& /*callback*/) const override
           {
           }
       };

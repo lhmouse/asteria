@@ -30,7 +30,7 @@ void Air_Queue::execute(Air_Node::Status& status, Executive_Context& ctx) const
     }
   }
 
-void Air_Queue::enumerate_variables(const Abstract_Variable_Callback& callback) const
+void Air_Queue::enumerate_variables(Abstract_Variable_Callback& callback) const
   {
     auto next = this->m_stor.head;
     while(ROCKET_EXPECT(next)) {

@@ -84,11 +84,13 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 
     template<typename FuncT> void do_enumerate_variables(Variable_HashSet& set, FuncT&& func)
       {
-        set.enumerate(Variable_Callback<FuncT>(rocket::forward<FuncT>(func)));
+        Variable_Callback<FuncT> callback(rocket::forward<FuncT>(func));
+        set.enumerate(callback);
       }
     template<typename FuncT> void do_enumerate_variables(const rcptr<Variable>& var, FuncT&& func)
       {
-        var->enumerate_variables(Variable_Callback<FuncT>(rocket::forward<FuncT>(func)));
+        Variable_Callback<FuncT> callback(rocket::forward<FuncT>(func));
+        var->enumerate_variables(callback);
       }
 
     }  // namespace

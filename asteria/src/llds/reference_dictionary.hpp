@@ -147,7 +147,7 @@ class Reference_Dictionary
         return true;
       }
 
-    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
+    void enumerate_variables(Abstract_Variable_Callback& callback) const;
   };
 
 }  // namespace Asteria

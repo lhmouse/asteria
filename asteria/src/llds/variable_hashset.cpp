@@ -148,7 +148,7 @@ void Variable_HashSet::do_detach(Variable_HashSet::Bucket* qbkt) noexcept
     this->do_xrelocate_but(qbkt);
   }
 
-void Variable_HashSet::enumerate(const Abstract_Variable_Callback& callback) const
+void Variable_HashSet::enumerate(Abstract_Variable_Callback& callback) const
   {
     auto next = this->m_stor.head;
     while(ROCKET_EXPECT(next)) {

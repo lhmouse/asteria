@@ -82,7 +82,7 @@ class Air_Queue
       }
 
     void execute(Air_Node::Status& status, Executive_Context& ctx) const;
-    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
+    void enumerate_variables(Abstract_Variable_Callback& callback) const;
   };
 
 inline void swap(Air_Queue& lhs, Air_Queue& rhs) noexcept

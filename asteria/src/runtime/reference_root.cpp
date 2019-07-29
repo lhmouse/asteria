@@ -69,7 +69,7 @@ Value& Reference_Root::dereference_mutable() const
     }
   }
 
-void Reference_Root::enumerate_variables(const Abstract_Variable_Callback& callback) const
+void Reference_Root::enumerate_variables(Abstract_Variable_Callback& callback) const
   {
     switch(this->index()) {
     case index_null:

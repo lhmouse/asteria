@@ -21,7 +21,7 @@ Reference& Placeholder::invoke(Reference& /*self*/, const Global_Context& /*glob
     ASTERIA_THROW_RUNTIME_ERROR("An uninitialized function cannot be called.");
   }
 
-void Placeholder::enumerate_variables(const Abstract_Variable_Callback& /*callback*/) const
+void Placeholder::enumerate_variables(Abstract_Variable_Callback& /*callback*/) const
   {
   }
 

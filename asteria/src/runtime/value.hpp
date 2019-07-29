@@ -213,7 +213,7 @@ class Value
 
     std::ostream& print(std::ostream& os, bool escape = false) const;
     std::ostream& dump(std::ostream& os, size_t indent = 2, size_t hanging = 0) const;
-    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
+    void enumerate_variables(Abstract_Variable_Callback& callback) const;
   };
 
 inline void swap(Value& lhs, Value& rhs) noexcept

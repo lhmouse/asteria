@@ -120,7 +120,7 @@ class Reference
         return this->do_finish_call(global);
       }
 
-    void enumerate_variables(const Abstract_Variable_Callback& callback) const;
+    void enumerate_variables(Abstract_Variable_Callback& callback) const;
   };
 
 inline void swap(Reference& lhs, Reference& rhs) noexcept
