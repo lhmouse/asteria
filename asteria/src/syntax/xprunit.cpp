@@ -912,7 +912,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    class Air_execute_function_tail_call : public Air_Node
+    class Air_execute_function_call_tail : public Air_Node
       {
       private:
         Source_Location m_sloc;
@@ -920,7 +920,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         bool m_tco_by_ref;
 
       public:
-        Air_execute_function_tail_call(const Source_Location& sloc, const Cow_Vector<bool>& by_refs, bool tco_by_ref)
+        Air_execute_function_call_tail(const Source_Location& sloc, const Cow_Vector<bool>& by_refs, bool tco_by_ref)
           : m_sloc(sloc), m_by_refs(by_refs), m_tco_by_ref(tco_by_ref)
           {
           }
@@ -961,14 +961,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         throw except;
       }
 
-    class Air_execute_function_call : public Air_Node
+    class Air_execute_function_call_plain : public Air_Node
       {
       private:
         Source_Location m_sloc;
         Cow_Vector<bool> m_by_refs;
 
       public:
-        Air_execute_function_call(const Source_Location& sloc, const Cow_Vector<bool>& by_refs)
+        Air_execute_function_call_plain(const Source_Location& sloc, const Cow_Vector<bool>& by_refs)
           : m_sloc(sloc), m_by_refs(by_refs)
           {
           }
@@ -2694,10 +2694,11 @@ void Xprunit::generate_code(Air_Queue& code, const Compiler_Options& options, Xp
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
         if(!options.disable_tco && (tco != tco_none)) {
-          code.push<Air_execute_function_tail_call>(altr.sloc, altr.by_refs, tco == tco_by_ref);
-          return;
+          code.push<Air_execute_function_call_tail>(altr.sloc, altr.by_refs, tco == tco_by_ref);
         }
-        code.push<Air_execute_function_call>(altr.sloc, altr.by_refs);
+        else {
+          code.push<Air_execute_function_call_plain>(altr.sloc, altr.by_refs);
+        }
         return;
       }
     case index_member_access:
