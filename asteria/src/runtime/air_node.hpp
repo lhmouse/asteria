@@ -27,11 +27,12 @@ class Air_Node
       };
 
   private:
-    Air_Node* m_xt;
+    Air_Node* m_next;  // pointer to the next node in the queue
+    Air_Node* m_prev;  // pointer to the previous node in the queue
 
   public:
     constexpr Air_Node() noexcept
-      : m_xt()
+      : m_next(), m_prev()
       {
       }
     virtual ~Air_Node();
