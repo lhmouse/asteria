@@ -70,15 +70,15 @@ class Air_Queue
     template<typename XnodeT, typename... ParamsT> XnodeT& push(ParamsT&&... params)
       {
         // Allocate a new node.
-        auto qresi = rocket::make_unique<XnodeT>(rocket::forward<ParamsT>(params)...);
-        auto qnode = qresi.get();
+        auto resp = rocket::make_unique<XnodeT>(rocket::forward<ParamsT>(params)...);
+        auto node = resp.get();
         // Append it to the end.
-        auto prev = std::exchange(this->m_stor.tail, qnode);
-        qnode->m_prev = prev;
-        (prev ? prev->m_next : this->m_stor.head) = qnode;
+        auto prev = std::exchange(this->m_stor.tail, node);
+        node->m_prev = prev;
+        (prev ? prev->m_next : this->m_stor.head) = node;
         // The node is now owned by `*this`.
-        qresi.release();
-        return *qnode;
+        resp.release();
+        return *node;
       }
 
     void execute(Air_Node::Status& status, Executive_Context& ctx) const;
