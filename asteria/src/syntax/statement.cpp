@@ -117,7 +117,7 @@ namespace Asteria {
         return rocket::move(self);
       }
 
-    class Air_execute_clear_stack : public Air_Node
+    class Air_execute_clear_stack : public virtual Air_Node
       {
       private:
         //
@@ -141,7 +141,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_block : public Air_Node
+    class Air_execute_block : public virtual Air_Node
       {
       private:
         Air_Queue m_code;
@@ -164,7 +164,7 @@ namespace Asteria {
           }
       };
 
-    class Air_define_uninitialized_variable : public Air_Node
+    class Air_define_uninitialized_variable : public virtual Air_Node
       {
       private:
         Source_Location m_sloc;
@@ -191,7 +191,7 @@ namespace Asteria {
           }
       };
 
-    class Air_declare_variable_and_clear_stack : public Air_Node
+    class Air_declare_variable_and_clear_stack : public virtual Air_Node
       {
       private:
         PreHashed_String m_name;
@@ -217,7 +217,7 @@ namespace Asteria {
           }
       };
 
-    class Air_initialize_variable : public Air_Node
+    class Air_initialize_variable : public virtual Air_Node
       {
       private:
         Source_Location m_sloc;
@@ -247,7 +247,7 @@ namespace Asteria {
           }
       };
 
-    class Air_define_function : public Air_Node
+    class Air_define_function : public virtual Air_Node
       {
       private:
         Compiler_Options m_options;
@@ -293,7 +293,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_branch : public Air_Node
+    class Air_execute_branch : public virtual Air_Node
       {
       private:
         bool m_negative;
@@ -333,7 +333,7 @@ namespace Asteria {
         Cow_Vector<PreHashed_String> names;
       };
 
-    class Air_execute_switch : public Air_Node
+    class Air_execute_switch : public virtual Air_Node
       {
       private:
         Cow_Vector<S_xswitch_clause> m_clauses;
@@ -406,7 +406,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_do_while : public Air_Node
+    class Air_execute_do_while : public virtual Air_Node
       {
       private:
         Air_Queue m_code_body;
@@ -446,7 +446,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_while : public Air_Node
+    class Air_execute_while : public virtual Air_Node
       {
       private:
         bool m_negative;
@@ -486,7 +486,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_for_each : public Air_Node
+    class Air_execute_for_each : public virtual Air_Node
       {
       private:
         PreHashed_String m_key_name;
@@ -570,7 +570,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_for : public Air_Node
+    class Air_execute_for : public virtual Air_Node
       {
       private:
         Air_Queue m_code_init;
@@ -624,7 +624,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_try : public Air_Node
+    class Air_execute_try : public virtual Air_Node
       {
       private:
         Air_Queue m_code_try;
@@ -669,7 +669,7 @@ namespace Asteria {
           }
       };
 
-    class Air_return_status_simple : public Air_Node
+    class Air_return_status_simple : public virtual Air_Node
       {
       private:
         Air_Node::Status m_status;
@@ -690,7 +690,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_throw : public Air_Node
+    class Air_execute_throw : public virtual Air_Node
       {
       private:
         Source_Location m_sloc;
@@ -735,7 +735,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_return_by_value : public Air_Node
+    class Air_execute_return_by_value : public virtual Air_Node
       {
       private:
         //
@@ -763,7 +763,7 @@ namespace Asteria {
           }
       };
 
-    class Air_execute_assert : public Air_Node
+    class Air_execute_assert : public virtual Air_Node
       {
       private:
         Source_Location m_sloc;

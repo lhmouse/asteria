@@ -628,7 +628,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return code;
       }
 
-    class Air_push_literal : public Air_Node
+    class Air_push_literal : public virtual Air_Node
       {
       private:
         Value m_value;
@@ -704,7 +704,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_find_named_reference_global : public Air_Node
+    class Air_find_named_reference_global : public virtual Air_Node
       {
       private:
         PreHashed_String m_name;
@@ -731,7 +731,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_find_named_reference_local : public Air_Node
+    class Air_find_named_reference_local : public virtual Air_Node
       {
       private:
         PreHashed_String m_name;
@@ -762,7 +762,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_push_bound_reference : public Air_Node
+    class Air_push_bound_reference : public virtual Air_Node
       {
       private:
         Reference m_ref;
@@ -786,7 +786,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_closure_function : public Air_Node
+    class Air_execute_closure_function : public virtual Air_Node
       {
       private:
         Compiler_Options m_options;
@@ -839,7 +839,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         ctx.stack().pop_next_reference(assign);
       }
 
-    class Air_execute_branch : public Air_Node
+    class Air_execute_branch : public virtual Air_Node
       {
       private:
         Air_Queue m_code_true;
@@ -912,7 +912,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return Air_Node::status_next;
       }
 
-    class Air_execute_function_call_tail : public Air_Node
+    class Air_execute_function_call_tail : public virtual Air_Node
       {
       private:
         Source_Location m_sloc;
@@ -961,7 +961,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         throw except;
       }
 
-    class Air_execute_function_call_plain : public Air_Node
+    class Air_execute_function_call_plain : public virtual Air_Node
       {
       private:
         Source_Location m_sloc;
@@ -983,7 +983,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_member_access : public Air_Node
+    class Air_execute_member_access : public virtual Air_Node
       {
       private:
         PreHashed_String m_name;
@@ -1007,7 +1007,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_postfix_inc : public Air_Node
+    class Air_execute_operator_rpn_postfix_inc : public virtual Air_Node
       {
       private:
         //
@@ -1045,7 +1045,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_postfix_dec : public Air_Node
+    class Air_execute_operator_rpn_postfix_dec : public virtual Air_Node
       {
       private:
         //
@@ -1083,7 +1083,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_postfix_subscr : public Air_Node
+    class Air_execute_operator_rpn_postfix_subscr : public virtual Air_Node
       {
       private:
         //
@@ -1123,7 +1123,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_pos : public Air_Node
+    class Air_execute_operator_rpn_prefix_pos : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1149,7 +1149,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_neg : public Air_Node
+    class Air_execute_operator_rpn_prefix_neg : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1185,7 +1185,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_notb : public Air_Node
+    class Air_execute_operator_rpn_prefix_notb : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1221,7 +1221,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_notl : public Air_Node
+    class Air_execute_operator_rpn_prefix_notl : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1247,7 +1247,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_inc : public Air_Node
+    class Air_execute_operator_rpn_prefix_inc : public virtual Air_Node
       {
       private:
         //
@@ -1283,7 +1283,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_dec : public Air_Node
+    class Air_execute_operator_rpn_prefix_dec : public virtual Air_Node
       {
       private:
         //
@@ -1319,7 +1319,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_unset : public Air_Node
+    class Air_execute_operator_rpn_prefix_unset : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1344,7 +1344,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_lengthof : public Air_Node
+    class Air_execute_operator_rpn_prefix_lengthof : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1385,7 +1385,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_typeof : public Air_Node
+    class Air_execute_operator_rpn_prefix_typeof : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1411,7 +1411,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_sqrt : public Air_Node
+    class Air_execute_operator_rpn_prefix_sqrt : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1447,7 +1447,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_isnan : public Air_Node
+    class Air_execute_operator_rpn_prefix_isnan : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1483,7 +1483,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_isinf : public Air_Node
+    class Air_execute_operator_rpn_prefix_isinf : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1519,7 +1519,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_abs : public Air_Node
+    class Air_execute_operator_rpn_prefix_abs : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1555,7 +1555,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_signb : public Air_Node
+    class Air_execute_operator_rpn_prefix_signb : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1591,7 +1591,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_round : public Air_Node
+    class Air_execute_operator_rpn_prefix_round : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1627,7 +1627,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_floor : public Air_Node
+    class Air_execute_operator_rpn_prefix_floor : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1663,7 +1663,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_ceil : public Air_Node
+    class Air_execute_operator_rpn_prefix_ceil : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1699,7 +1699,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_trunc : public Air_Node
+    class Air_execute_operator_rpn_prefix_trunc : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1735,7 +1735,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_iround : public Air_Node
+    class Air_execute_operator_rpn_prefix_iround : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1771,7 +1771,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_ifloor : public Air_Node
+    class Air_execute_operator_rpn_prefix_ifloor : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1807,7 +1807,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_iceil : public Air_Node
+    class Air_execute_operator_rpn_prefix_iceil : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1843,7 +1843,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_itrunc : public Air_Node
+    class Air_execute_operator_rpn_prefix_itrunc : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1879,7 +1879,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_cmp_xeq : public Air_Node
+    class Air_execute_operator_rpn_infix_cmp_xeq : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1910,7 +1910,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_cmp_xrel : public Air_Node
+    class Air_execute_operator_rpn_infix_cmp_xrel : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1945,7 +1945,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_cmp_3way : public Air_Node
+    class Air_execute_operator_rpn_infix_cmp_3way : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -1986,7 +1986,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_add : public Air_Node
+    class Air_execute_operator_rpn_infix_add : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2034,7 +2034,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_sub : public Air_Node
+    class Air_execute_operator_rpn_infix_sub : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2077,7 +2077,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_mul : public Air_Node
+    class Air_execute_operator_rpn_infix_mul : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2129,7 +2129,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_div : public Air_Node
+    class Air_execute_operator_rpn_infix_div : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2167,7 +2167,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_mod : public Air_Node
+    class Air_execute_operator_rpn_infix_mod : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2205,7 +2205,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_sll : public Air_Node
+    class Air_execute_operator_rpn_infix_sll : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2246,7 +2246,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_srl : public Air_Node
+    class Air_execute_operator_rpn_infix_srl : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2287,7 +2287,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_sla : public Air_Node
+    class Air_execute_operator_rpn_infix_sla : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2328,7 +2328,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_sra : public Air_Node
+    class Air_execute_operator_rpn_infix_sra : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2368,7 +2368,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_andb : public Air_Node
+    class Air_execute_operator_rpn_infix_andb : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2407,7 +2407,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_orb : public Air_Node
+    class Air_execute_operator_rpn_infix_orb : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2446,7 +2446,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_xorb : public Air_Node
+    class Air_execute_operator_rpn_infix_xorb : public virtual Air_Node
       {
       private:
         bool m_assign;
@@ -2485,7 +2485,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_assign : public Air_Node
+    class Air_execute_operator_rpn_infix_assign : public virtual Air_Node
       {
       private:
         //
@@ -2511,7 +2511,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_unnamed_array : public Air_Node
+    class Air_execute_unnamed_array : public virtual Air_Node
       {
       private:
         std::size_t m_nelems;
@@ -2542,7 +2542,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_unnamed_object : public Air_Node
+    class Air_execute_unnamed_object : public virtual Air_Node
       {
       private:
         Cow_Vector<PreHashed_String> m_keys;
@@ -2573,7 +2573,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_coalescence : public Air_Node
+    class Air_execute_coalescence : public virtual Air_Node
       {
       private:
         Air_Queue m_code_null;
@@ -2600,7 +2600,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_fma : public Air_Node
+    class Air_execute_operator_fma : public virtual Air_Node
       {
       private:
         bool m_assign;
