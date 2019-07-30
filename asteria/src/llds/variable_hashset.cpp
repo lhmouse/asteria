@@ -65,11 +65,11 @@ void Variable_HashSet::do_xrelocate_but(Variable_HashSet::Bucket* qxcld) noexcep
 void Variable_HashSet::do_list_attach(Variable_HashSet::Bucket* qbkt) noexcept
   {
     // Insert the bucket before `head`.
-    auto head = std::exchange(this->m_stor.head, qbkt);
+    auto next = std::exchange(this->m_stor.head, qbkt);
     // Update the forward list, which is non-circular.
-    qbkt->next = head;
+    qbkt->next = next;
     // Update the backward list, which is circular.
-    qbkt->prev = head ? std::exchange(head->prev, qbkt) : qbkt;
+    qbkt->prev = next ? std::exchange(next->prev, qbkt) : qbkt;
   }
 
 void Variable_HashSet::do_list_detach(Variable_HashSet::Bucket* qbkt) noexcept

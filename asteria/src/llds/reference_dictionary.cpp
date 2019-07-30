@@ -69,11 +69,11 @@ void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld)
 void Reference_Dictionary::do_list_attach(Reference_Dictionary::Bucket* qbkt) noexcept
   {
     // Insert the bucket before `head`.
-    auto head = std::exchange(this->m_stor.head, qbkt);
+    auto next = std::exchange(this->m_stor.head, qbkt);
     // Update the forward list, which is non-circular.
-    qbkt->next = head;
+    qbkt->next = next;
     // Update the backward list, which is circular.
-    qbkt->prev = head ? std::exchange(head->prev, qbkt) : qbkt;
+    qbkt->prev = next ? std::exchange(next->prev, qbkt) : qbkt;
   }
 
 void Reference_Dictionary::do_list_detach(Reference_Dictionary::Bucket* qbkt) noexcept
