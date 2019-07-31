@@ -653,20 +653,20 @@ G_array std_string_explode(const G_string& text, const opt<G_string>& delim, con
       return segments;
     }
     // Break `text` down.
-    size_t bpos = 0;
-    size_t epos;
+    auto bpos = text.begin();
+    auto epos = text.end();
     for(;;) {
       if(segments.size() + 1 >= rlimit) {
-        segments.emplace_back(G_string(text, bpos));
+        segments.emplace_back(G_string(bpos, epos));
         break;
       }
-      epos = text.find(*delim, bpos);
-      if(epos == G_string::npos) {
-        segments.emplace_back(G_string(text, bpos));
+      auto mpos = std::search(bpos, epos, delim->begin(), delim->end());
+      if(mpos == epos) {
+        segments.emplace_back(G_string(bpos, epos));
         break;
       }
-      segments.emplace_back(G_string(text, bpos, epos - bpos));
-      bpos = epos + delim->size();
+      segments.emplace_back(G_string(bpos, mpos));
+      bpos = mpos + delim->ssize();
     }
     return segments;
   }
