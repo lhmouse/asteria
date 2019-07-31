@@ -41,6 +41,7 @@ class Reference
     Value& do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
     Value do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
 
+    Reference& do_convert_to_temporary();
     Reference& do_finish_call(const Global_Context& global);
 
   public:
@@ -65,10 +66,11 @@ class Reference
         if(ROCKET_EXPECT(this->m_mods.empty())) {
           // If there is no modifier, set `this` to `null`.
           this->m_root = Reference_Root::S_null();
-          return *this;
         }
-        // Drop the last modifier.
-        this->m_mods.pop_back();
+        else {
+          // Drop the last modifier.
+          this->m_mods.pop_back();
+        }
         return *this;
       }
 
@@ -112,9 +114,16 @@ class Reference
         return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
+    Reference& convert_to_rvalue()
+      {
+        if(ROCKET_EXPECT(this->m_root.is_rvalue() && this->m_mods.empty())) {
+          return *this;
+        }
+        return this->do_convert_to_temporary();
+      }
     Reference& finish_call(const Global_Context& global)
       {
-        if(!this->m_root.is_tail_call()) {
+        if(ROCKET_EXPECT(!this->m_root.is_tail_call())) {
           return *this;
         }
         return this->do_finish_call(global);

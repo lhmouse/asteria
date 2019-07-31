@@ -24,7 +24,11 @@ const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, con
       }
     }
     // Apply the last modifier.
-    return (qref = last.apply_const_opt(*qref)) ? *qref : Value::null();
+    qref = last.apply_const_opt(*qref);
+    if(!qref) {
+      return Value::null();
+    }
+    return *qref;
   }
 
 Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
@@ -38,7 +42,9 @@ Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Ref
       }
     }
     // Apply the last modifier.
-    return (qref = last.apply_mutable_opt(*qref, true)), ROCKET_ASSERT(qref), *qref;
+    qref = last.apply_mutable_opt(*qref, true);
+    ROCKET_ASSERT(qref);
+    return *qref;
   }
 
 Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
@@ -53,6 +59,14 @@ Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Ref
     }
     // Apply the last modifier.
     return last.apply_and_erase(*qref);
+  }
+
+Reference& Reference::do_convert_to_temporary()
+  {
+    // Replace `*this` with a reference to temporary.
+    Reference_Root::S_temporary xroot = { this->read() };
+    *this = rocket::move(xroot);
+    return *this;
   }
 
 Reference& Reference::do_finish_call(const Global_Context& global)
@@ -96,10 +110,9 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         throw except;
       }
     }
-    if((tco_disp == tco_by_value) && !this->is_rvalue()) {
-      // If the result is to be passed by value but is not an rvalue, convert it.
-      Reference_Root::S_temporary xroot = { this->read() };
-      *this = rocket::move(xroot);
+    if(tco_disp == tco_by_value) {
+      // Convert the result to an rvalue if it shouldn't be passed by reference.
+      this->convert_to_rvalue();
     }
     return *this;
   }
