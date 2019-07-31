@@ -65,12 +65,12 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const cow_string& f
     std::ios_base::iostate state = std::ios_base::goodbit;
     try {
       qerr = this->do_reload_nothrow(*(cstrm.rdbuf()), filename);
-      // N.B. `do_reload_nothrow()` shall have consumed all data, so `eofbit` is always set.
-      state |= std::ios_base::eofbit;
       // If the source code contains errors, fail.
       if(*qerr != Parser_Error::code_success) {
         state |= std::ios_base::failbit;
       }
+      // N.B. `do_reload_nothrow()` shall have consumed all data, so `eofbit` is always set.
+      state |= std::ios_base::eofbit;
     }
     catch(...) {
       rocket::handle_ios_exception(cstrm, state);
