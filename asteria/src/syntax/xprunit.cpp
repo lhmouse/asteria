@@ -823,10 +823,9 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             }
             fmtss <<")";
             // Instantiate the function.
-            rcobj<Instantiated_Function> closure(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
-            ASTERIA_DEBUG_LOG("New closure function: ", closure);
-            // Push the function object.
-            Reference_Root::S_temporary xref = { G_function(rocket::move(closure)) };
+            auto target = rocket::make_refcnt<Instantiated_Function>(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
+            ASTERIA_DEBUG_LOG("New closure function: ", *target);
+            Reference_Root::S_temporary xref = { G_function(rocket::move(target)) };
             ctx.stack().push_reference(rocket::move(xref));
             return Air_Node::status_next;
           }

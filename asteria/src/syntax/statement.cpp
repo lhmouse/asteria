@@ -286,9 +286,9 @@ namespace Asteria {
               fmtss << this->m_params.back();
             }
             fmtss <<")";
-            rcobj<Instantiated_Function> closure(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
             // Initialized the function variable.
-            var->reset(this->m_sloc, G_function(rocket::move(closure)), true);
+            auto target = rocket::make_refcnt<Instantiated_Function>(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
+            var->reset(this->m_sloc, G_function(rocket::move(target)), true);
             return Air_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
