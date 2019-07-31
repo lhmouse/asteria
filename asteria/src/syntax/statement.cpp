@@ -810,7 +810,8 @@ namespace Asteria {
 
     }  // namespace
 
-void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const
+void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                              const Compiler_Options& options) const
   {
     switch(this->index()) {
     case index_expression:

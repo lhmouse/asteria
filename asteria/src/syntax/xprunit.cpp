@@ -2684,7 +2684,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }  // namespace
 
-void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code, const Compiler_Options& options, TCO_Awareness tco_awareness, const Analytic_Context& ctx) const
+void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
+                            const Compiler_Options& options, TCO_Awareness tco_awareness, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal:
