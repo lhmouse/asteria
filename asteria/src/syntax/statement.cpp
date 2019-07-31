@@ -99,7 +99,7 @@ namespace Asteria {
     cow_vector<uptr<Air_Node>> do_generate_code_expression(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Xprunit>& expr)
       {
         cow_vector<uptr<Air_Node>> code;
-        rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
+        rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
         return code;
       }
 
@@ -274,9 +274,9 @@ namespace Asteria {
             // A function becomes visible before its definition, where it is initialized to `null`.
             auto var = do_safe_create_variable(nullptr, ctx, "function", this->m_name);
             // Generate code for the function body.
-            cow_vector<uptr<Air_Node>> code_func;
+            cow_vector<uptr<Air_Node>> code_body;
             Analytic_Context ctx_func(1, ctx, this->m_params);
-            rocket::for_each(this->m_body, [&](const Statement& stmt) { stmt.generate_code(code_func, nullptr, ctx_func, this->m_options);  });
+            rocket::for_each(this->m_body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func, this->m_options);  });
             // Format the prototype string.
             cow_osstream fmtss;
             fmtss.imbue(std::locale::classic());
@@ -286,7 +286,7 @@ namespace Asteria {
               fmtss << this->m_params.back();
             }
             fmtss <<")";
-            rcobj<Instantiated_Function> closure(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_func));
+            rcobj<Instantiated_Function> closure(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
             // Initialized the function variable.
             var->reset(this->m_sloc, G_function(rocket::move(closure)), true);
             return Air_Node::status_next;
@@ -824,14 +824,9 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
     case index_expression:
       {
         const auto& altr = this->m_stor.as<index_expression>();
-        if(altr.expr.empty()) {
-          // Generate nothing for empty expressions.
-          return;
-        }
-        // Generate preparation code.
+        // Generate code for the expression.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
-        // Generate inline code for the expression.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
         return;
       }
     case index_block:
@@ -850,17 +845,18 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         for(const auto& pair : altr.vars) {
           // Create a dummy reference for further name lookups.
           do_set_user_declared_reference(names_opt, ctx, "variable placeholder", pair.first, Reference_Root::S_null());
-          // Distinguish uninitialized variables from initialized ones.
           if(pair.second.empty()) {
+            // Generate code to define a variable initialized to `null`.
             code.emplace_back(rocket::make_unique<Air_define_uninitialized_variable>(altr.sloc, altr.immutable, pair.first));
-            continue;
           }
-          // A variable becomes visible before its initializer, where it is initialized to `null`.
-          code.emplace_back(rocket::make_unique<Air_declare_variable_and_clear_stack>(pair.first));
-          // Generate inline code for the initializer.
-          rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
-          // Generate code to initialize the variable.
-          code.emplace_back(rocket::make_unique<Air_initialize_variable>(altr.sloc, altr.immutable));
+          else {
+            // A variable becomes visible before its initializer, where it is initialized to `null`.
+            code.emplace_back(rocket::make_unique<Air_declare_variable_and_clear_stack>(pair.first));
+            // Generate inline code for the initializer.
+            rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+            // Generate code to initialize the variable.
+            code.emplace_back(rocket::make_unique<Air_initialize_variable>(altr.sloc, altr.immutable));
+          }
         }
         return;
       }
@@ -879,7 +875,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the condition expression.
-        rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
+        rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
         // Generate code for branches.
         auto code_true = do_generate_code_block(options, ctx, altr.branch_true);
         auto code_false = do_generate_code_block(options, ctx, altr.branch_false);
@@ -893,7 +889,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the condition expression.
-        rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
+        rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
         // Create a fresh context for the `switch` body.
         // Note that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_switch(1, ctx);
@@ -1034,7 +1030,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_throw>(altr.sloc));
         return;
@@ -1047,8 +1043,8 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate inline code for the operand. Only the last operator can be TCO'd.
         auto qback = altr.expr.end();
         if(qback != altr.expr.begin()) {
-          std::for_each(altr.expr.begin(), --qback, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
-          qback->generate_code(code, options, altr.by_ref ? Xprunit::tco_by_ref : Xprunit::tco_by_value, ctx);
+          std::for_each(altr.expr.begin(), --qback, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+          qback->generate_code(code, options, altr.by_ref ? tco_by_ref : tco_by_value, ctx);
         }
         if(altr.by_ref || altr.expr.empty()) {
           // Return the reference as is.
@@ -1066,7 +1062,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_assert>(altr.sloc, altr.negative, altr.msg));
         return;

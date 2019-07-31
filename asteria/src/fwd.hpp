@@ -160,6 +160,15 @@ enum API_Version : uint32_t
     api_version_latest     = 0xFFFFFFFF,  // everything
   };
 
+// Tail Call Optimization (TCO) constants
+enum TCO_Awareness : uint8_t
+  {
+    tco_none      = 0,
+    tco_by_ref    = 1,
+    tco_by_value  = 2,
+    tco_nullify   = 3,
+  };
+
 // Options for source parsing and code generation
 struct Compiler_Options
   {

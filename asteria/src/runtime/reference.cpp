@@ -60,12 +60,14 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     // Note that `*this` is overwritten before the wrapped function is called.
     cow_vector<Reference_Root::S_tail_call> rqueue;
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
-    bool conj_ref = true;
+    auto tco_disp = tco_by_ref;
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
       auto& xroot = rqueue.emplace_back(rocket::move(this->m_root.open_tail_call()));
       // Unpack the function reference.
-      conj_ref &= xroot.by_ref;
+      if((xroot.aware == tco_by_value) && (tco_disp == tco_by_ref)) {
+        tco_disp = tco_by_value;
+      }
       const auto& target = xroot.target;
       // Unpack arguments.
       *this = rocket::move(xroot.args_self.mut_back());
@@ -94,8 +96,8 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         throw except;
       }
     }
-    if(!this->is_rvalue() && !conj_ref) {
-      // If the result is not an rvalue and it is not passed by reference, convert it to an rvalue.
+    if((tco_disp == tco_by_value) && !this->is_rvalue()) {
+      // If the result is to be passed by value but is not an rvalue, convert it.
       Reference_Root::S_temporary xroot = { this->read() };
       *this = rocket::move(xroot);
     }
