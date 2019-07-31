@@ -653,25 +653,22 @@ namespace Asteria {
 
       public:
         Status execute(Executive_Context& ctx) const override
-          {
-            // This is the same as a `try...catch` block in C++.
-            try {
-              // Execute the `try` clause. If no exception is thrown, this will have little overhead.
-              return do_execute_block(this->m_code_try, ctx);
-            }
-            catch(Exception& except) {
-              // Reuse the exception object. Don't bother allocating a new one.
-              except.push_frame_catch(this->m_sloc);
-              ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except);
-              return do_execute_catch(this->m_code_catch, this->m_except_name, except, ctx);
-            }
-            catch(const std::exception& stdex) {
-              // Translate the exception.
-              Exception except(stdex);
-              except.push_frame_catch(this->m_sloc);
-              ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except);
-              return do_execute_catch(this->m_code_catch, this->m_except_name, except, ctx);
-            }
+          try {
+            // Execute the `try` clause. If no exception is thrown, this will have little overhead.
+            return do_execute_block(this->m_code_try, ctx);
+          }
+          catch(Exception& except) {
+            // Reuse the exception object. Don't bother allocating a new one.
+            except.push_frame_catch(this->m_sloc);
+            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except);
+            return do_execute_catch(this->m_code_catch, this->m_except_name, except, ctx);
+          }
+          catch(const std::exception& stdex) {
+            // Translate the exception.
+            Exception except(stdex);
+            except.push_frame_catch(this->m_sloc);
+            ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except);
+            return do_execute_catch(this->m_code_catch, this->m_except_name, except, ctx);
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
