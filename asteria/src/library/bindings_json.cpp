@@ -614,9 +614,9 @@ Value std_json_parse(const G_string& text)
     // Tokenize source data.
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric literals and comments.
     Compiler_Options options = { };
-    options.escapable_single_quote_string = true;
-    options.keyword_as_identifier = true;
-    options.integer_as_real = true;
+    options.escapable_single_quote_strings = true;
+    options.keywords_as_identifiers = true;
+    options.integers_as_reals = true;
     // Use a `streambuf` rather than an `istream` to minimize overheads.
     cow_stringbuf cbuf(text, std::ios_base::in);
     Token_Stream tstrm;

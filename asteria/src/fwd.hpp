@@ -164,11 +164,11 @@ enum API_Version : uint32_t
 struct Compiler_Options
   {
     // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
-    bool escapable_single_quote_string = false;
+    bool escapable_single_quote_strings = false;
     // Parse keywords as identifiers. [useful when parsing JSON text]
-    bool keyword_as_identifier = false;
+    bool keywords_as_identifiers = false;
     // Parse integer literals as real literals. [useful when parsing JSON text]
-    bool integer_as_real = false;
+    bool integers_as_reals = false;
     // Enable proper tail calls. [commonly known as tail call optimization]
     bool proper_tail_calls = true;
   };

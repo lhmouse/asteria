@@ -288,7 +288,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_numeric_literal(cow_vector<Token>& seq, Line_Reader& reader, bool integer_as_real)
+    bool do_accept_numeric_literal(cow_vector<Token>& seq, Line_Reader& reader, bool integers_as_reals)
       {
         // numeric-literal ::=
         //   number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -450,7 +450,7 @@ namespace Asteria {
           throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_suffix_disallowed);
         }
         // Is this an `integer` or a `real`?
-        if(!integer_as_real && (fcnt == 0)) {
+        if(!integers_as_reals && (fcnt == 0)) {
           // The literal is an `integer` if there is no decimal point.
           int64_t value = 0;
           // Accumulate digits from left to right.
@@ -833,7 +833,7 @@ namespace Asteria {
         { "while",     Token::keyword_while     },
       };
 
-    bool do_accept_identifier_or_keyword(cow_vector<Token>& seq, Line_Reader& reader, bool keyword_as_identifier)
+    bool do_accept_identifier_or_keyword(cow_vector<Token>& seq, Line_Reader& reader, bool keywords_as_identifiers)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -852,7 +852,7 @@ namespace Asteria {
           }
           ++tlen;
         }
-        if(keyword_as_identifier) {
+        if(keywords_as_identifiers) {
           // Do not check for identifiers.
           Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
           do_push_token(seq, reader, tlen, rocket::move(xtoken));
@@ -950,11 +950,11 @@ bool Token_Stream::load(std::streambuf& cbuf, const cow_string& file, const Comp
               continue;
             }
           }
-          bool token_got = do_accept_numeric_literal(seq, reader, options.integer_as_real) ||
+          bool token_got = do_accept_numeric_literal(seq, reader, options.integers_as_reals) ||
                            do_accept_punctuator(seq, reader) ||
                            do_accept_string_literal(seq, reader, '\"', true) ||
-                           do_accept_string_literal(seq, reader, '\'', options.escapable_single_quote_string) ||
-                           do_accept_identifier_or_keyword(seq, reader, options.keyword_as_identifier);
+                           do_accept_string_literal(seq, reader, '\'', options.escapable_single_quote_strings) ||
+                           do_accept_identifier_or_keyword(seq, reader, options.keywords_as_identifiers);
           if(!token_got) {
             ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data());
             throw do_make_parser_error(reader, 1, Parser_Error::code_token_character_unrecognized);

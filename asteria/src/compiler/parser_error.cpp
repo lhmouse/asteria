@@ -101,11 +101,11 @@ const char* Parser_Error::describe_code(Parser_Error::Code xcode) noexcept
       }
     case code_real_literal_overflow:
       {
-        return "The value of this real number literal was so large that would yield infinity.";
+        return "The value of this real literal was so large that would yield infinity.";
       }
     case code_real_literal_underflow:
       {
-        return "The value of this real number literal was so small that would yield zero.";
+        return "The value of this real literal was so small that would yield zero.";
       }
     case code_block_comment_unclosed:
       {
