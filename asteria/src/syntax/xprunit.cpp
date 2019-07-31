@@ -619,12 +619,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                                        const cow_vector<Xprunit>& units)
       {
         cow_vector<uptr<Air_Node>> code;
-        // Only the last operator may be TCO'd.
-        auto qback = units.end();
-        if(qback != units.begin()) {
-          std::for_each(units.begin(), --qback, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
-          qback->generate_code(code, options, tco_awareness, ctx);
-        }
+        rocket::ranged_xfor(units.begin(), units.end(), [&](auto it) { it->generate_code(code, options, tco_none, ctx);  },
+                                                        [&](auto it) { it->generate_code(code, options, tco_awareness, ctx);  });
         return code;
       }
 

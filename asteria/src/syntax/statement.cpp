@@ -1033,11 +1033,8 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand. Only the last operator can be TCO'd.
-        auto qback = altr.expr.end();
-        if(qback != altr.expr.begin()) {
-          std::for_each(altr.expr.begin(), --qback, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
-          qback->generate_code(code, options, altr.by_ref ? tco_by_ref : tco_by_value, ctx);
-        }
+        rocket::ranged_xfor(altr.expr.begin(), altr.expr.end(), [&](auto it) { it->generate_code(code, options, tco_none, ctx);  },
+                                                                [&](auto it) { it->generate_code(code, options, altr.by_ref ? tco_by_ref : tco_by_value, ctx);  });
         if(altr.by_ref || altr.expr.empty()) {
           // Return the reference as is.
           code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_return));
