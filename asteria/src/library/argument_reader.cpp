@@ -50,6 +50,15 @@ struct Argument_Reader::Mparam
       }
   };
 
+    namespace {
+
+    inline std::ostream& operator<<(std::ostream& os, const Argument_Reader::Mparam& param)
+      {
+        return param.print(os);
+      }
+
+    }
+
 template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
   {
     if(this->m_throw_on_failure) {
@@ -604,31 +613,23 @@ void Argument_Reader::throw_no_matching_function_call() const
     cow_osstream fmtss;
     fmtss.imbue(std::locale::classic());
     fmtss << "There was no matching overload for function call `" << name << "(";
-    if(!args.empty()) {
-      fmtss << args.front().read().gtype_name();
-      std::for_each(args.begin() + 1, args.end(), [&](const Reference& arg) { fmtss <<", " << arg.read().gtype_name();  });
-    }
+    rocket::ranged_xfor(args.begin(), args.end(), [&](auto it) { fmtss << it->read().gtype_name() << ", ";  }, [&](auto it) { fmtss << it->read().gtype_name();  });
     fmtss << ")`.";
     // If overload information is available, append the list of overloads.
-    if(!this->m_overloads.empty()) {
+    auto qovld = this->m_overloads.begin();
+    if(qovld != this->m_overloads.end()) {
       fmtss << "\n[list of overloads: ";
-      // Decode overloads one by one.
-      auto bpos = this->m_overloads.begin();
       for(;;) {
-        auto epos = std::find_if(bpos, this->m_overloads.end(), [&](const Mparam& pinfo) { return pinfo.tag == Mparam::tag_finish;  });
+        auto qend = std::find_if(qovld, this->m_overloads.end(), [&](const Mparam& pinfo) { return pinfo.tag == Mparam::tag_finish;  });
         // Append this overload.
         fmtss << "`" << name << "(";
-        if(bpos != epos) {
-          bpos->print(fmtss);
-          std::for_each(bpos + 1, epos, [&](const Mparam& pinfo) { pinfo.print(fmtss << ", ");  });
-        }
+        rocket::ranged_xfor(qovld, qend, [&](auto it) { fmtss << *it << ", ";  }, [&](auto it) { fmtss << *it;  });
         fmtss << ")`";
         // Are there more overloads?
-        if(this->m_overloads.end() - epos <= 1) {
+        qovld = qend + 1;
+        if(qovld == this->m_overloads.end()) {
           break;
         }
-        // Read the next overload.
-        bpos = epos + 1;
         fmtss << ", ";
       }
       fmtss << "]";
