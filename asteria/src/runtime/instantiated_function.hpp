@@ -45,7 +45,7 @@ class Instantiated_Function : public Abstract_Function
 
     std::ostream& describe(std::ostream& os) const override;
     Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const override;
-    Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const override;
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;
   };
 
 }  // namespace Asteria

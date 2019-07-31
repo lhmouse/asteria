@@ -468,7 +468,7 @@ std::ostream& Value::dump(std::ostream& os, size_t indent, size_t hanging) const
     }
   }
 
-Abstract_Variable_Callback& Value::enumerate_variables(Abstract_Variable_Callback& callback) const
+Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->gtype()) {
     case gtype_null:

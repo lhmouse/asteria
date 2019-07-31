@@ -22,7 +22,7 @@ Reference& Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context&
     return self = (*(this->m_fptr))(this->m_opaque, global, rocket::move(self), rocket::move(args));
   }
 
-Abstract_Variable_Callback& Simple_Binding_Wrapper::enumerate_variables(Abstract_Variable_Callback& callback) const
+Variable_Callback& Simple_Binding_Wrapper::enumerate_variables(Variable_Callback& callback) const
   {
     return this->m_opaque.enumerate_variables(callback);
   }

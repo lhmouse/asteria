@@ -57,7 +57,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     }
   }
 
-Abstract_Variable_Callback& Instantiated_Function::enumerate_variables(Abstract_Variable_Callback& callback) const
+Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
   {
     // Enumerate all variables inside the function body.
     return this->m_code.enumerate_variables(callback), callback;

@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "reference_dictionary.hpp"
-#include "../runtime/abstract_variable_callback.hpp"
+#include "../runtime/variable_callback.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -157,7 +157,7 @@ void Reference_Dictionary::do_detach(Reference_Dictionary::Bucket* qbkt) noexcep
     this->do_xrelocate_but(qbkt);
   }
 
-void Reference_Dictionary::enumerate_variables(Abstract_Variable_Callback& callback) const
+void Reference_Dictionary::enumerate_variables(Variable_Callback& callback) const
   {
     auto next = this->m_stor.head;
     while(ROCKET_EXPECT(next)) {

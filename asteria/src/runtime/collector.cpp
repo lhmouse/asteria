@@ -4,7 +4,7 @@
 #include "../precompiled.hpp"
 #include "collector.hpp"
 #include "variable.hpp"
-#include "abstract_variable_callback.hpp"
+#include "variable_callback.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -64,13 +64,13 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
           }
       };
 
-    template<typename FuncT> class Variable_Callback : public Abstract_Variable_Callback
+    template<typename FuncT> class Callback_Wrapper : public Variable_Callback
       {
       private:
         FuncT m_func;  // If `FuncT` is a reference type then this is a reference.
 
       public:
-        explicit Variable_Callback(FuncT&& func)
+        explicit Callback_Wrapper(FuncT&& func)
           : m_func(rocket::forward<FuncT>(func))
           {
           }
@@ -84,12 +84,12 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 
     template<typename FuncT> void do_enumerate_variables(Variable_HashSet& set, FuncT&& func)
       {
-        Variable_Callback<FuncT> callback(rocket::forward<FuncT>(func));
+        Callback_Wrapper<FuncT> callback(rocket::forward<FuncT>(func));
         set.enumerate(callback);
       }
     template<typename FuncT> void do_enumerate_variables(const rcptr<Variable>& var, FuncT&& func)
       {
-        Variable_Callback<FuncT> callback(rocket::forward<FuncT>(func));
+        Callback_Wrapper<FuncT> callback(rocket::forward<FuncT>(func));
         var->enumerate_variables(callback);
       }
 

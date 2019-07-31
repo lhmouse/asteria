@@ -30,7 +30,7 @@ class Simple_Binding_Wrapper : public Abstract_Function
   public:
     std::ostream& describe(std::ostream& os) const override;
     Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const override;
-    Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const override;
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;
   };
 
 inline rcobj<Simple_Binding_Wrapper> make_simple_binding(cow_string desc, Value opaque, Simple_Binding_Wrapper::Prototype* fptr)

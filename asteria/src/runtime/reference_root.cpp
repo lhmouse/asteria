@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "reference_root.hpp"
-#include "abstract_variable_callback.hpp"
+#include "variable_callback.hpp"
 #include "reference.hpp"
 #include "../utilities.hpp"
 
@@ -69,7 +69,7 @@ Value& Reference_Root::dereference_mutable() const
     }
   }
 
-Abstract_Variable_Callback& Reference_Root::enumerate_variables(Abstract_Variable_Callback& callback) const
+Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callback) const
   {
     switch(this->index()) {
     case index_null:

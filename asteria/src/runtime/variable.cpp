@@ -25,7 +25,7 @@ long Variable::increment_gcref(long split) const noexcept
     return this->m_gcref.first += carry;
   }
 
-Abstract_Variable_Callback& Variable::enumerate_variables(Abstract_Variable_Callback& callback) const
+Variable_Callback& Variable::enumerate_variables(Variable_Callback& callback) const
   {
     return this->m_value.enumerate_variables(callback);
   }

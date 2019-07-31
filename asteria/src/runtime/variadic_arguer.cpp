@@ -38,7 +38,7 @@ Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*glob
     reader.throw_no_matching_function_call();
   }
 
-Abstract_Variable_Callback& Variadic_Arguer::enumerate_variables(Abstract_Variable_Callback& callback) const
+Variable_Callback& Variadic_Arguer::enumerate_variables(Variable_Callback& callback) const
   {
     return rocket::for_each(this->m_vargs, [&](const Reference& arg) { arg.enumerate_variables(callback);  }), callback;
   }

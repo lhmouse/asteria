@@ -102,7 +102,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     return *this;
   }
 
-Abstract_Variable_Callback& Reference::enumerate_variables(Abstract_Variable_Callback& callback) const
+Variable_Callback& Reference::enumerate_variables(Variable_Callback& callback) const
   {
     return this->m_root.enumerate_variables(callback);
   }

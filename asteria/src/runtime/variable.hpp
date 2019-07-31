@@ -75,7 +75,7 @@ class Variable : public virtual Rcbase
       }
     long increment_gcref(long split) const noexcept;
 
-    Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const;
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
   };
 
 }  // namespace Asteria

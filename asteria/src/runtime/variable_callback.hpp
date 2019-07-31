@@ -8,13 +8,13 @@
 
 namespace Asteria {
 
-class Abstract_Variable_Callback
+class Variable_Callback
   {
   public:
-    Abstract_Variable_Callback() noexcept
+    Variable_Callback() noexcept
       {
       }
-    virtual ~Abstract_Variable_Callback();
+    virtual ~Variable_Callback();
 
   public:
     // The return value indicates whether to invoke `*this` on child VARIABLES recursively.

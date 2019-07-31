@@ -48,7 +48,7 @@ namespace Asteria {
           {
             return os << "CRC-32 hasher";
           }
-        Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const override
+        Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
             return callback;
           }
@@ -165,7 +165,7 @@ G_integer std_checksum_crc32(const G_string& data)
           {
             return os << "FNV-1a hasher (32-bit)";
           }
-        Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const override
+        Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
             return callback;
           }
@@ -476,7 +476,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
           {
             return os << "MD5 hasher";
           }
-        Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const override
+        Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
             return callback;
           }
@@ -786,7 +786,7 @@ G_string std_checksum_md5(const G_string& data)
           {
             return os << "SHA-1 hasher";
           }
-        Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const override
+        Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
             return callback;
           }
@@ -1066,7 +1066,7 @@ G_string std_checksum_sha1(const G_string& data)
           {
             return os << "SHA-256 hasher";
           }
-        Abstract_Variable_Callback& enumerate_variables(Abstract_Variable_Callback& callback) const override
+        Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
             return callback;
           }
