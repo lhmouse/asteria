@@ -760,12 +760,10 @@ namespace Asteria {
       public:
         Status execute(Executive_Context& ctx) const override
           {
-            // What to return?
-            auto& self = ctx.stack().open_top_reference();
-            if(self.is_lvalue()) {
-              // If the result is not an rvalue and it is not passed by reference, convert it to an rvalue.
-              Reference_Root::S_temporary xroot = { self.read() };
-              self = rocket::move(xroot);
+            // Convert the result to an rvalue if it shouldn't be passed by reference.
+            // TCO wrappers are forwarded as is.
+            if(ctx.stack().open_top_reference().is_lvalue()) {
+              ctx.stack().open_top_reference().convert_to_rvalue();
             }
             return Air_Node::status_return;
           }

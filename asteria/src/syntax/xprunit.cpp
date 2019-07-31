@@ -884,10 +884,12 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         cow_vector<Reference> args;
         args.resize(by_refs.size());
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
-          if(!ctx.stack().get_top_reference().is_rvalue() && !by_refs.rbegin()[it - args.rbegin()]) {
-            // If this argument is not an rvalue and it is not passed by reference, convert it to an rvalue.
-            ctx.stack().set_temporary_reference(false, rocket::move(value = ctx.stack().get_top_reference().read()));
+          // Convert the argument to an rvalue if it shouldn't be passed by reference.
+          bool by_ref = *(it - args.rbegin() + by_refs.rbegin());
+          if(!by_ref) {
+            ctx.stack().open_top_reference().convert_to_rvalue();
           }
+          // Fill an argument.
           *it = rocket::move(ctx.stack().open_top_reference());
           ctx.stack().pop_reference();
         }
