@@ -817,10 +817,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             cow_osstream fmtss;
             fmtss.imbue(std::locale::classic());
             fmtss << "<closure> (";
-            if(!this->m_params.empty()) {
-              std::for_each(this->m_params.begin(), this->m_params.end() - 1, [&](const phsh_string& param) { fmtss << param << ", ";  });
-              fmtss << this->m_params.back();
-            }
+            rocket::ranged_xfor(this->m_params.begin(), this->m_params.end(), [&](auto it) { fmtss << *it << ", ";  }, [&](auto it) { fmtss << *it;  });
             fmtss <<")";
             // Instantiate the function.
             auto target = rocket::make_refcnt<Instantiated_Function>(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));

@@ -202,11 +202,6 @@ template<typename testT,
                                            : noadl::forward<testT>(test);
   }
 
-template<typename lhsT, typename rhsT> bool same(const lhsT& lhs, const rhsT& rhs) noexcept
-  {
-    return reinterpret_cast<const volatile char (&)[1]>(lhs) == reinterpret_cast<const volatile char (&)[1]>(rhs);
-  }
-
 template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<charT, traitsT>& ios, ios_base::iostate& state)
   {
     // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
@@ -225,23 +220,38 @@ template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<c
     state &= ~ios_base::badbit;
   }
 
-template<typename iteratorT, typename eiteratorT,
-         typename functionT, typename... paramsT> void ranged_for(iteratorT first, eiteratorT last,
-                                                                  functionT&& func, const paramsT&... params)
+template<typename firstT, typename lastT,
+         typename funcT, typename... paramsT> void ranged_for(firstT first, lastT last,
+                                                              funcT&& func, const paramsT&... params)
   {
     for(auto qit = noadl::move(first); qit != last; ++qit) {
-      noadl::forward<functionT>(func)(qit, params...);
+      noadl::forward<funcT>(func)(qit, params...);
     }
   }
 
-template<typename iteratorT, typename eiteratorT,
-         typename functionT, typename... paramsT> void ranged_do_while(iteratorT first, eiteratorT last,
-                                                                       functionT&& func, const paramsT&... params)
+template<typename firstT, typename lastT,
+         typename funcT, typename... paramsT> void ranged_do_while(firstT first, lastT last,
+                                                                   funcT&& func, const paramsT&... params)
   {
     auto qit = noadl::move(first);
     do {
-      noadl::forward<functionT>(func)(qit, params...);
+      noadl::forward<funcT>(func)(qit, params...);
     } while(++qit != last);
+  }
+
+template<typename firstT, typename lastT,
+         typename funcT, typename fbackT, typename... paramsT> void ranged_xfor(firstT first, lastT last,
+                                                                                funcT&& func, fbackT&& fback, const paramsT&... params)
+  {
+    auto next = noadl::move(first);
+    if(next != last) {
+      auto qit = next;
+      while(++next != last) {
+        noadl::forward<funcT>(func)(qit, params...);
+        qit = next;
+      }
+      noadl::forward<fbackT>(fback)(qit, params...);
+    }
   }
 
 template<typename... typesT> struct conjunction : true_type
