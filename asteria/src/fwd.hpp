@@ -67,7 +67,6 @@ class Reference_Modifier;
 class Reference;
 class Evaluation_Stack;
 class Variable;
-class Variable_Callback;
 class Abstract_Variable_Callback;
 class Collector;
 class Abstract_Context;
