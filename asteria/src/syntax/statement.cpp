@@ -793,12 +793,13 @@ namespace Asteria {
             // Throw a `Runtime_Error` if the assertion fails.
             cow_osstream fmtss;
             fmtss.imbue(std::locale::classic());
-            fmtss << "Assertion failed at \'" << this->m_sloc << "\'";
-            if(this->m_msg.empty()) {
-              fmtss << "!";
-            }
-            else {
-              fmtss << ": " << this->m_msg;
+            fmtss << "Assertion failed at \'" << this->m_sloc << "\'!";
+            auto msg = fmtss.extract_string();
+            if(!this->m_msg.empty()) {
+              // Append the error message.
+              msg.pop_back();
+              msg.append(": ");
+              msg.append(this->m_msg);
             }
             throw_runtime_error(__func__, fmtss.extract_string());
           }
