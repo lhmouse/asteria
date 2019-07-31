@@ -4,13 +4,13 @@
 #include "../precompiled.hpp"
 #include "statement.hpp"
 #include "xprunit.hpp"
+#include "../runtime/air_node.hpp"
 #include "../runtime/analytic_context.hpp"
 #include "../runtime/executive_context.hpp"
 #include "../runtime/global_context.hpp"
 #include "../runtime/evaluation_stack.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../runtime/exception.hpp"
-#include "../llds/air_queue.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -41,37 +41,37 @@ namespace Asteria {
         return var;
       }
 
-    Air_Queue do_generate_code_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                              const Compiler_Options& options, const cow_vector<Statement>& stmts)
+    cow_vector<uptr<Air_Node>> do_generate_code_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                                                               const Compiler_Options& options, const cow_vector<Statement>& stmts)
       {
-        Air_Queue code;
+        cow_vector<uptr<Air_Node>> code;
         rocket::for_each(stmts, [&](const Statement& stmt) { stmt.generate_code(code, names_opt, ctx, options);  });
         return code;
       }
 
-    Air_Queue do_generate_code_block(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Statement>& block)
+    cow_vector<uptr<Air_Node>> do_generate_code_block(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Statement>& block)
       {
         Analytic_Context ctx_next(1, ctx);
         auto code = do_generate_code_statement_list(nullptr, ctx_next, options, block);
         return code;
       }
 
-    Air_Node::Status do_execute_statement_list(Executive_Context& ctx, const Air_Queue& code)
+    Air_Node::Status do_execute_statement_list(Executive_Context& ctx, const cow_vector<uptr<Air_Node>>& code)
       {
         auto status = Air_Node::status_next;
-        code.execute(status, ctx);
+        rocket::any_of(code, [&](const uptr<Air_Node>& q) { return (status = q->execute(ctx)) != Air_Node::status_next;  });
         return status;
       }
 
-    Air_Node::Status do_execute_block(const Air_Queue& code, const Executive_Context& ctx)
+    Air_Node::Status do_execute_block(const cow_vector<uptr<Air_Node>>& code, const Executive_Context& ctx)
       {
         auto status = Air_Node::status_next;
         Executive_Context ctx_next(1, ctx);
-        code.execute(status, ctx_next);
+        rocket::any_of(code, [&](const uptr<Air_Node>& q) { return (status = q->execute(ctx_next)) != Air_Node::status_next;  });
         return status;
       }
 
-    Air_Node::Status do_execute_catch(const Air_Queue& code, const phsh_string& except_name, const Exception& except, const Executive_Context& ctx)
+    Air_Node::Status do_execute_catch(const cow_vector<uptr<Air_Node>>& code, const phsh_string& except_name, const Exception& except, const Executive_Context& ctx)
       {
         Executive_Context ctx_catch(1, ctx);
         Reference_Root::S_temporary xref = { except.get_value() };
@@ -96,21 +96,19 @@ namespace Asteria {
         return do_execute_statement_list(ctx_catch, code);
       }
 
-    Air_Queue do_generate_code_expression(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Xprunit>& expr)
+    cow_vector<uptr<Air_Node>> do_generate_code_expression(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Xprunit>& expr)
       {
-        Air_Queue code;
+        cow_vector<uptr<Air_Node>> code;
         rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         return code;
       }
 
-    Reference&& do_evaluate_expression_nonempty(const Air_Queue& code, /*const*/ Executive_Context& ctx)
+    Reference&& do_evaluate_expression_nonempty(const cow_vector<uptr<Air_Node>>& code, /*const*/ Executive_Context& ctx)
       {
         ROCKET_ASSERT(!code.empty());
         // Evaluate the expression. The result will be pushed on `stack`.
         ctx.stack().clear_references();
-        auto status = Air_Node::status_next;
-        code.execute(status, ctx);
-        ROCKET_ASSERT(status == Air_Node::status_next);
+        rocket::for_each(code, [&](const uptr<Air_Node>& q) { q->execute(ctx);  });
         // The result should at the top of the stack. Don't bother constructing a new reference.
         // Note that it is invalidated if the stack is altered after this function returns.
         auto& self = ctx.stack().open_top_reference();
@@ -145,10 +143,10 @@ namespace Asteria {
     class Air_execute_block : public virtual Air_Node
       {
       private:
-        Air_Queue m_code;
+        cow_vector<uptr<Air_Node>> m_code;
 
       public:
-        explicit Air_execute_block(Air_Queue&& code)
+        explicit Air_execute_block(cow_vector<uptr<Air_Node>>&& code)
           : m_code(rocket::move(code))
           {
           }
@@ -161,7 +159,7 @@ namespace Asteria {
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
-            this->m_code.enumerate_variables(callback);
+            rocket::for_each(this->m_code, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
             return callback;
           }
       };
@@ -276,7 +274,7 @@ namespace Asteria {
             // A function becomes visible before its definition, where it is initialized to `null`.
             auto var = do_safe_create_variable(nullptr, ctx, "function", this->m_name);
             // Generate code for the function body.
-            Air_Queue code_func;
+            cow_vector<uptr<Air_Node>> code_func;
             Analytic_Context ctx_func(1, ctx, this->m_params);
             rocket::for_each(this->m_body, [&](const Statement& stmt) { stmt.generate_code(code_func, nullptr, ctx_func, this->m_options);  });
             // Format the prototype string.
@@ -303,11 +301,11 @@ namespace Asteria {
       {
       private:
         bool m_negative;
-        Air_Queue m_code_true;
-        Air_Queue m_code_false;
+        cow_vector<uptr<Air_Node>> m_code_true;
+        cow_vector<uptr<Air_Node>> m_code_false;
 
       public:
-        Air_execute_branch(bool negative, Air_Queue&& code_true, Air_Queue&& code_false)
+        Air_execute_branch(bool negative, cow_vector<uptr<Air_Node>>&& code_true, cow_vector<uptr<Air_Node>>&& code_false)
           : m_negative(negative), m_code_true(rocket::move(code_true)), m_code_false(rocket::move(code_false))
           {
           }
@@ -327,16 +325,16 @@ namespace Asteria {
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
-            this->m_code_true.enumerate_variables(callback);
-            this->m_code_false.enumerate_variables(callback);
+            rocket::for_each(this->m_code_true, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+            rocket::for_each(this->m_code_false, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
             return callback;
           }
       };
 
     struct S_xswitch_clause
       {
-        Air_Queue code_cond;
-        Air_Queue code_clause;
+        cow_vector<uptr<Air_Node>> code_cond;
+        cow_vector<uptr<Air_Node>> code_clause;
         cow_vector<phsh_string> names;
       };
 
@@ -407,8 +405,8 @@ namespace Asteria {
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
             for(auto it = this->m_clauses.begin(); it != this->m_clauses.end(); ++it) {
-              it->code_cond.enumerate_variables(callback);
-              it->code_clause.enumerate_variables(callback);
+              rocket::for_each(it->code_cond, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+              rocket::for_each(it->code_clause, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
             }
             return callback;
           }
@@ -417,12 +415,12 @@ namespace Asteria {
     class Air_execute_do_while : public virtual Air_Node
       {
       private:
-        Air_Queue m_code_body;
+        cow_vector<uptr<Air_Node>> m_code_body;
         bool m_negative;
-        Air_Queue m_code_cond;
+        cow_vector<uptr<Air_Node>> m_code_cond;
 
       public:
-        Air_execute_do_while(Air_Queue&& code_body, bool negative, Air_Queue&& code_cond)
+        Air_execute_do_while(cow_vector<uptr<Air_Node>>&& code_body, bool negative, cow_vector<uptr<Air_Node>>&& code_cond)
           : m_code_body(rocket::move(code_body)), m_negative(negative), m_code_cond(rocket::move(code_cond))
           {
           }
@@ -449,8 +447,8 @@ namespace Asteria {
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
-            this->m_code_body.enumerate_variables(callback);
-            this->m_code_cond.enumerate_variables(callback);
+            rocket::for_each(this->m_code_body, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+            rocket::for_each(this->m_code_cond, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
             return callback;
           }
       };
@@ -459,11 +457,11 @@ namespace Asteria {
       {
       private:
         bool m_negative;
-        Air_Queue m_code_cond;
-        Air_Queue m_code_body;
+        cow_vector<uptr<Air_Node>> m_code_cond;
+        cow_vector<uptr<Air_Node>> m_code_body;
 
       public:
-        Air_execute_while(bool negative, Air_Queue&& code_cond, Air_Queue&& code_body)
+        Air_execute_while(bool negative, cow_vector<uptr<Air_Node>>&& code_cond, cow_vector<uptr<Air_Node>>&& code_body)
           : m_negative(negative), m_code_cond(rocket::move(code_cond)), m_code_body(rocket::move(code_body))
           {
           }
@@ -490,8 +488,8 @@ namespace Asteria {
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
-            this->m_code_body.enumerate_variables(callback);
-            this->m_code_cond.enumerate_variables(callback);
+            rocket::for_each(this->m_code_body, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+            rocket::for_each(this->m_code_cond, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
             return callback;
           }
       };
@@ -501,12 +499,12 @@ namespace Asteria {
       private:
         phsh_string m_key_name;
         phsh_string m_mapped_name;
-        Air_Queue m_code_init;
-        Air_Queue m_code_body;
+        cow_vector<uptr<Air_Node>> m_code_init;
+        cow_vector<uptr<Air_Node>> m_code_body;
 
       public:
-        Air_execute_for_each(const phsh_string& key_name, const phsh_string& mapped_name, Air_Queue&& code_init,
-                             Air_Queue&& code_body)
+        Air_execute_for_each(const phsh_string& key_name, const phsh_string& mapped_name, cow_vector<uptr<Air_Node>>&& code_init,
+                             cow_vector<uptr<Air_Node>>&& code_body)
           : m_key_name(key_name), m_mapped_name(mapped_name), m_code_init(rocket::move(code_init)),
             m_code_body(rocket::move(code_body))
           {
@@ -575,8 +573,8 @@ namespace Asteria {
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
-            this->m_code_init.enumerate_variables(callback);
-            this->m_code_body.enumerate_variables(callback);
+            rocket::for_each(this->m_code_init, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+            rocket::for_each(this->m_code_body, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
             return callback;
           }
       };
@@ -584,14 +582,14 @@ namespace Asteria {
     class Air_execute_for : public virtual Air_Node
       {
       private:
-        Air_Queue m_code_init;
-        Air_Queue m_code_cond;
-        Air_Queue m_code_step;
-        Air_Queue m_code_body;
+        cow_vector<uptr<Air_Node>> m_code_init;
+        cow_vector<uptr<Air_Node>> m_code_cond;
+        cow_vector<uptr<Air_Node>> m_code_step;
+        cow_vector<uptr<Air_Node>> m_code_body;
 
       public:
-        Air_execute_for(Air_Queue&& code_init, Air_Queue&& code_cond, Air_Queue&& code_step,
-                        Air_Queue&& code_body)
+        Air_execute_for(cow_vector<uptr<Air_Node>>&& code_init, cow_vector<uptr<Air_Node>>&& code_cond, cow_vector<uptr<Air_Node>>&& code_step,
+                        cow_vector<uptr<Air_Node>>&& code_body)
           : m_code_init(rocket::move(code_init)), m_code_cond(rocket::move(code_cond)), m_code_step(rocket::move(code_step)),
             m_code_body(rocket::move(code_body))
           {
@@ -628,10 +626,10 @@ namespace Asteria {
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
-            this->m_code_init.enumerate_variables(callback);
-            this->m_code_cond.enumerate_variables(callback);
-            this->m_code_step.enumerate_variables(callback);
-            this->m_code_body.enumerate_variables(callback);
+            rocket::for_each(this->m_code_init, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+            rocket::for_each(this->m_code_cond, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+            rocket::for_each(this->m_code_step, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+            rocket::for_each(this->m_code_body, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
             return callback;
           }
       };
@@ -639,16 +637,17 @@ namespace Asteria {
     class Air_execute_try : public virtual Air_Node
       {
       private:
-        Air_Queue m_code_try;
+        cow_vector<uptr<Air_Node>> m_code_try;
+
         Source_Location m_sloc;
         phsh_string m_except_name;
-        Air_Queue m_code_catch;
+        cow_vector<uptr<Air_Node>> m_code_catch;
 
       public:
-        Air_execute_try(Air_Queue&& code_try,
-                        const Source_Location& sloc, const phsh_string& except_name, Air_Queue&& code_catch)
-          : m_code_try(rocket::move(code_try)), m_sloc(sloc), m_except_name(except_name),
-            m_code_catch(rocket::move(code_catch))
+        Air_execute_try(cow_vector<uptr<Air_Node>>&& code_try,
+                        const Source_Location& sloc, const phsh_string& except_name, cow_vector<uptr<Air_Node>>&& code_catch)
+          : m_code_try(rocket::move(code_try)),
+            m_sloc(sloc), m_except_name(except_name), m_code_catch(rocket::move(code_catch))
           {
           }
 
@@ -676,8 +675,8 @@ namespace Asteria {
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
-            this->m_code_try.enumerate_variables(callback);
-            this->m_code_catch.enumerate_variables(callback);
+            rocket::for_each(this->m_code_try, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+            rocket::for_each(this->m_code_catch, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
             return callback;
           }
       };
@@ -819,7 +818,7 @@ namespace Asteria {
 
     }  // namespace
 
-void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const
+void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const
   {
     switch(this->index()) {
     case index_expression:
@@ -830,7 +829,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
           return;
         }
         // Generate preparation code.
-        code.push<Air_execute_clear_stack>();
+        code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the expression.
         rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         return;
@@ -841,7 +840,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         // Generate code for the body.
         auto code_body = do_generate_code_block(options, ctx, altr.body);
         // Encode arguments.
-        code.push<Air_execute_block>(rocket::move(code_body));
+        code.emplace_back(rocket::make_unique<Air_execute_block>(rocket::move(code_body)));
         return;
       }
     case index_variable:
@@ -853,15 +852,15 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
           do_set_user_declared_reference(names_opt, ctx, "variable placeholder", pair.first, Reference_Root::S_null());
           // Distinguish uninitialized variables from initialized ones.
           if(pair.second.empty()) {
-            code.push<Air_define_uninitialized_variable>(altr.sloc, altr.immutable, pair.first);
+            code.emplace_back(rocket::make_unique<Air_define_uninitialized_variable>(altr.sloc, altr.immutable, pair.first));
             continue;
           }
           // A variable becomes visible before its initializer, where it is initialized to `null`.
-          code.push<Air_declare_variable_and_clear_stack>(pair.first);
+          code.emplace_back(rocket::make_unique<Air_declare_variable_and_clear_stack>(pair.first));
           // Generate inline code for the initializer.
           rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
           // Generate code to initialize the variable.
-          code.push<Air_initialize_variable>(altr.sloc, altr.immutable);
+          code.emplace_back(rocket::make_unique<Air_initialize_variable>(altr.sloc, altr.immutable));
         }
         return;
       }
@@ -871,28 +870,28 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         // Create a dummy reference for further name lookups.
         do_set_user_declared_reference(names_opt, ctx, "function placeholder", altr.name, Reference_Root::S_null());
         // Encode arguments.
-        code.push<Air_define_function>(options, altr.sloc, altr.name, altr.params, altr.body);
+        code.emplace_back(rocket::make_unique<Air_define_function>(options, altr.sloc, altr.name, altr.params, altr.body));
         return;
       }
     case index_if:
       {
         const auto& altr = this->m_stor.as<index_if>();
         // Generate preparation code.
-        code.push<Air_execute_clear_stack>();
+        code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the condition expression.
         rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Generate code for branches.
         auto code_true = do_generate_code_block(options, ctx, altr.branch_true);
         auto code_false = do_generate_code_block(options, ctx, altr.branch_false);
         // Encode arguments.
-        code.push<Air_execute_branch>(altr.negative, rocket::move(code_true), rocket::move(code_false));
+        code.emplace_back(rocket::make_unique<Air_execute_branch>(altr.negative, rocket::move(code_true), rocket::move(code_false)));
         return;
       }
     case index_switch:
       {
         const auto& altr = this->m_stor.as<index_switch>();
         // Generate preparation code.
-        code.push<Air_execute_clear_stack>();
+        code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the condition expression.
         rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Create a fresh context for the `switch` body.
@@ -907,7 +906,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
           clause.code_clause = do_generate_code_statement_list(&names, ctx_switch, options, pair.second);
           clause.names = names;
         }
-        code.push<Air_execute_switch>(rocket::move(clauses));
+        code.emplace_back(rocket::make_unique<Air_execute_switch>(rocket::move(clauses)));
         return;
       }
     case index_do_while:
@@ -917,7 +916,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         auto code_body = do_generate_code_block(options, ctx, altr.body);
         auto code_cond = do_generate_code_expression(options, ctx, altr.cond);
         // Encode arguments.
-        code.push<Air_execute_do_while>(rocket::move(code_body), altr.negative, rocket::move(code_cond));
+        code.emplace_back(rocket::make_unique<Air_execute_do_while>(rocket::move(code_body), altr.negative, rocket::move(code_cond)));
         return;
       }
     case index_while:
@@ -927,7 +926,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         auto code_cond = do_generate_code_expression(options, ctx, altr.cond);
         auto code_body = do_generate_code_block(options, ctx, altr.body);
         // Encode arguments.
-        code.push<Air_execute_while>(altr.negative, rocket::move(code_cond), rocket::move(code_body));
+        code.emplace_back(rocket::make_unique<Air_execute_while>(altr.negative, rocket::move(code_cond), rocket::move(code_body)));
         return;
       }
     case index_for_each:
@@ -941,7 +940,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         auto code_init = do_generate_code_expression(options, ctx_for, altr.init);
         auto code_body = do_generate_code_block(options, ctx_for, altr.body);
         // Encode arguments.
-        code.push<Air_execute_for_each>(altr.key_name, altr.mapped_name, rocket::move(code_init), rocket::move(code_body));
+        code.emplace_back(rocket::make_unique<Air_execute_for_each>(altr.key_name, altr.mapped_name, rocket::move(code_init), rocket::move(code_body)));
         return;
       }
     case index_for:
@@ -955,7 +954,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         auto code_step = do_generate_code_expression(options, ctx_for, altr.step);
         auto code_body = do_generate_code_block(options, ctx_for, altr.body);
         // Encode arguments.
-        code.push<Air_execute_for>(rocket::move(code_init), rocket::move(code_cond), rocket::move(code_step), rocket::move(code_body));
+        code.emplace_back(rocket::make_unique<Air_execute_for>(rocket::move(code_init), rocket::move(code_cond), rocket::move(code_step), rocket::move(code_body)));
         return;
       }
     case index_try:
@@ -969,7 +968,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         auto code_try = do_generate_code_block(options, ctx, altr.body_try);
         auto code_catch = do_generate_code_statement_list(nullptr, ctx_catch, options, altr.body_catch);
         // Encode arguments.
-        code.push<Air_execute_try>(rocket::move(code_try), altr.sloc, altr.except_name, rocket::move(code_catch));
+        code.emplace_back(rocket::make_unique<Air_execute_try>(rocket::move(code_try), altr.sloc, altr.except_name, rocket::move(code_catch)));
         return;
       }
     case index_break:
@@ -978,22 +977,22 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         switch(altr.target) {
         case Statement::target_unspec:
           {
-            code.push<Air_return_status_simple>(Air_Node::status_break_unspec);
+            code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_break_unspec));
             break;
           }
         case Statement::target_switch:
           {
-            code.push<Air_return_status_simple>(Air_Node::status_break_switch);
+            code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_break_switch));
             break;
           }
         case Statement::target_while:
           {
-            code.push<Air_return_status_simple>(Air_Node::status_break_while);
+            code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_break_while));
             break;
           }
         case Statement::target_for:
           {
-            code.push<Air_return_status_simple>(Air_Node::status_break_for);
+            code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_break_for));
             break;
           }
         default:
@@ -1007,7 +1006,7 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         switch(altr.target) {
         case Statement::target_unspec:
           {
-            code.push<Air_return_status_simple>(Air_Node::status_continue_unspec);
+            code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_continue_unspec));
             break;
           }
         case Statement::target_switch:
@@ -1016,12 +1015,12 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
           }
         case Statement::target_while:
           {
-            code.push<Air_return_status_simple>(Air_Node::status_continue_while);
+            code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_continue_while));
             break;
           }
         case Statement::target_for:
           {
-            code.push<Air_return_status_simple>(Air_Node::status_continue_for);
+            code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_continue_for));
             break;
           }
         default:
@@ -1033,18 +1032,18 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
       {
         const auto& altr = this->m_stor.as<index_throw>();
         // Generate preparation code.
-        code.push<Air_execute_clear_stack>();
+        code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
         rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Encode arguments.
-        code.push<Air_execute_throw>(altr.sloc);
+        code.emplace_back(rocket::make_unique<Air_execute_throw>(altr.sloc));
         return;
       }
     case index_return:
       {
         const auto& altr = this->m_stor.as<index_return>();
         // Generate preparation code.
-        code.push<Air_execute_clear_stack>();
+        code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand. Only the last operator can be TCO'd.
         auto qback = altr.expr.end();
         if(qback != altr.expr.begin()) {
@@ -1053,11 +1052,11 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
         }
         if(altr.by_ref || altr.expr.empty()) {
           // Return the reference as is.
-          code.push<Air_return_status_simple>(Air_Node::status_return);
+          code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_return));
         }
         else {
           // Return an rvalue.
-          code.push<Air_execute_return_by_value>();
+          code.emplace_back(rocket::make_unique<Air_execute_return_by_value>());
         }
         return;
       }
@@ -1065,11 +1064,11 @@ void Statement::generate_code(Air_Queue& code, cow_vector<phsh_string>* names_op
       {
         const auto& altr = this->m_stor.as<index_assert>();
         // Generate preparation code.
-        code.push<Air_execute_clear_stack>();
+        code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
         rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Encode arguments.
-        code.push<Air_execute_assert>(altr.sloc, altr.negative, altr.msg);
+        code.emplace_back(rocket::make_unique<Air_execute_assert>(altr.sloc, altr.negative, altr.msg));
         return;
       }
     default:

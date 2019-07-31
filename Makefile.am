@@ -86,7 +86,6 @@ pkginclude_HEADERS =  \
 
 pkginclude_lldsdir = ${pkgincludedir}/llds
 pkginclude_llds_HEADERS =  \
-  asteria/src/llds/air_queue.hpp  \
   asteria/src/llds/variable_hashset.hpp  \
   asteria/src/llds/reference_dictionary.hpp
 
@@ -149,7 +148,6 @@ pkginclude_library_HEADERS =  \
 
 lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
-  asteria/src/llds/air_queue.cpp  \
   asteria/src/llds/variable_hashset.cpp  \
   asteria/src/llds/reference_dictionary.cpp  \
   asteria/src/syntax/source_location.cpp  \

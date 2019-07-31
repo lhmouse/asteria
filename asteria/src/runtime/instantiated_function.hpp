@@ -7,22 +7,20 @@
 #include "../fwd.hpp"
 #include "abstract_function.hpp"
 #include "variadic_arguer.hpp"
-#include "../llds/air_queue.hpp"
 
 namespace Asteria {
 
 class Instantiated_Function : public Abstract_Function
   {
   private:
-    // pre-defined constants and parameters
     rcobj<Variadic_Arguer> m_zvarg;
     cow_vector<phsh_string> m_params;
-    // the function body
-    Air_Queue m_code;
+
+    cow_vector<uptr<Air_Node>> m_code;
 
   public:
     Instantiated_Function(const Source_Location& sloc, const cow_string& func, const cow_vector<phsh_string>& params,
-                          Air_Queue&& code)
+                          cow_vector<uptr<Air_Node>>&& code)
       : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params),
         m_code(rocket::move(code))
       {

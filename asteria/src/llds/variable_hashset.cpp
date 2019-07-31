@@ -20,6 +20,20 @@ void Variable_HashSet::do_clear_buckets() const noexcept
     }
   }
 
+void Variable_HashSet::do_enumerate(Variable_Callback& callback) const
+  {
+    auto next = this->m_stor.head;
+    while(ROCKET_EXPECT(next)) {
+      auto qbkt = std::exchange(next, next->next);
+      // Enumerate a child variable.
+      ROCKET_ASSERT(*qbkt);
+      if(callback(qbkt->kstor[0])) {
+        // Enumerate grandchildren recursively.
+        qbkt->kstor[0]->enumerate_variables(callback);
+      }
+    }
+  }
+
 Variable_HashSet::Bucket* Variable_HashSet::do_xprobe(const rcptr<Variable>& var) const noexcept
   {
     auto bptr = this->m_stor.bptr;
@@ -146,20 +160,6 @@ void Variable_HashSet::do_detach(Variable_HashSet::Bucket* qbkt) noexcept
     ROCKET_ASSERT(!*qbkt);
     // Relocate nodes that follow `qbkt`, if any.
     this->do_xrelocate_but(qbkt);
-  }
-
-void Variable_HashSet::enumerate(Variable_Callback& callback) const
-  {
-    auto next = this->m_stor.head;
-    while(ROCKET_EXPECT(next)) {
-      auto qbkt = std::exchange(next, next->next);
-      // Enumerate a child variable.
-      ROCKET_ASSERT(*qbkt);
-      if(callback(qbkt->kstor[0])) {
-        // Enumerate grandchildren recursively.
-        qbkt->kstor[0]->enumerate_variables(callback);
-      }
-    }
   }
 
 }  // namespace Asteria

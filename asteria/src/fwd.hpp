@@ -47,7 +47,6 @@ class Formatter;
 class Runtime_Error;
 
 // Low-level Data Structure
-class Air_Queue;
 class Variable_HashSet;
 class Reference_Dictionary;
 

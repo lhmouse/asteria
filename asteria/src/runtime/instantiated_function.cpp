@@ -27,7 +27,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
     auto status = Air_Node::status_next;
-    this->m_code.execute(status, ctx_func);
+    rocket::any_of(this->m_code, [&](const uptr<Air_Node>& q) { return (status = q->execute(ctx_func)) != Air_Node::status_next;  });
     switch(status) {
     case Air_Node::status_next:
       {
@@ -60,7 +60,8 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
   {
     // Enumerate all variables inside the function body.
-    return this->m_code.enumerate_variables(callback), callback;
+    rocket::for_each(this->m_code, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+    return callback;
   }
 
 }  // namespace Asteria

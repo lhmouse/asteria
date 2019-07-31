@@ -82,15 +82,12 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
           }
       };
 
-    template<typename FuncT> void do_enumerate_variables(Variable_HashSet& set, FuncT&& func)
+    template<typename ContT, typename FuncT> void do_enumerate_variables(const ContT& cont, FuncT&& func)
       {
+        // The callback has to be an lvalue.
         Callback_Wrapper<FuncT> callback(rocket::forward<FuncT>(func));
-        set.enumerate(callback);
-      }
-    template<typename FuncT> void do_enumerate_variables(const rcptr<Variable>& var, FuncT&& func)
-      {
-        Callback_Wrapper<FuncT> callback(rocket::forward<FuncT>(func));
-        var->enumerate_variables(callback);
+        // Call the `enumerate_variables()` member function.
+        cont.enumerate_variables(callback);
       }
 
     }  // namespace
@@ -132,7 +129,7 @@ Collector* Collector::collect_single_opt()
           return false;
         }
         // Enumerate variables that are reachable from `root` indirectly.
-        do_enumerate_variables(root,
+        do_enumerate_variables(*root,
           [&](const rcptr<Variable>& child) {
             // If this variable has been inserted indirectly, finish.
             if(!this->m_staging.insert(child)) {
@@ -161,7 +158,7 @@ Collector* Collector::collect_single_opt()
           return false;
         }
         // Enumerate variables that are reachable from `root` indirectly.
-        do_enumerate_variables(root,
+        do_enumerate_variables(*root,
           [&](const rcptr<Variable>& child) {
             // Drop an indirect reference.
             child->increment_gcref(split);
@@ -184,7 +181,7 @@ Collector* Collector::collect_single_opt()
         // Make this variable reachable, ...
         root->reset_gcref(-1);
         // ... as well as all children.
-        do_enumerate_variables(root,
+        do_enumerate_variables(*root,
           [&](const rcptr<Variable>& child) {
             // Skip variables that have already been marked.
             if(child->get_gcref() < 0) {

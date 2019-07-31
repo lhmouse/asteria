@@ -63,6 +63,8 @@ class Reference_Dictionary
 
   private:
     void do_clear_buckets() const noexcept;
+    void do_enumerate(Variable_Callback& callback) const;
+
     Bucket* do_xprobe(const phsh_string& name) const noexcept;
     void do_xrelocate_but(Bucket* qxcld) noexcept;
 
@@ -147,7 +149,11 @@ class Reference_Dictionary
         return true;
       }
 
-    void enumerate_variables(Variable_Callback& callback) const;
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+      {
+        this->do_enumerate(callback);
+        return callback;
+      }
   };
 
 }  // namespace Asteria

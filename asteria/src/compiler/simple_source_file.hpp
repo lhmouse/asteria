@@ -13,7 +13,7 @@ class Simple_Source_File
   {
   private:
     bool m_fthr;  // throw on failure
-    cow_vector<Instantiated_Function> m_code;  // for type erasure
+    rcptr<Abstract_Function> m_cptr;  // note type erasure
 
   public:
     Simple_Source_File() noexcept

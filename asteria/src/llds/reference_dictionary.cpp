@@ -21,6 +21,17 @@ void Reference_Dictionary::do_clear_buckets() const noexcept
     }
   }
 
+void Reference_Dictionary::do_enumerate(Variable_Callback& callback) const
+  {
+    auto next = this->m_stor.head;
+    while(ROCKET_EXPECT(next)) {
+      auto qbkt = std::exchange(next, next->next);
+      // Enumerate child variables.
+      ROCKET_ASSERT(*qbkt);
+      qbkt->vstor[0].enumerate_variables(callback);
+    }
+  }
+
 Reference_Dictionary::Bucket* Reference_Dictionary::do_xprobe(const phsh_string& name) const noexcept
   {
     auto bptr = this->m_stor.bptr;
@@ -155,17 +166,6 @@ void Reference_Dictionary::do_detach(Reference_Dictionary::Bucket* qbkt) noexcep
     ROCKET_ASSERT(!*qbkt);
     // Relocate nodes that follow `qbkt`, if any.
     this->do_xrelocate_but(qbkt);
-  }
-
-void Reference_Dictionary::enumerate_variables(Variable_Callback& callback) const
-  {
-    auto next = this->m_stor.head;
-    while(ROCKET_EXPECT(next)) {
-      auto qbkt = std::exchange(next, next->next);
-      // Enumerate child variables.
-      ROCKET_ASSERT(*qbkt);
-      qbkt->vstor[0].enumerate_variables(callback);
-    }
   }
 
 }  // namespace Asteria

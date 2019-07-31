@@ -33,12 +33,11 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const c
     cow_vector<phsh_string> params;
     params.emplace_back(rocket::sref("..."));
     // Generate code.
-    Air_Queue code;
+    cow_vector<uptr<Air_Node>> code;
     Analytic_Context ctx(1, params);
     rocket::for_each(parser.get_statements(), [&](const Statement& stmt) { stmt.generate_code(code, nullptr, ctx, options);  });
     // Accept the code.
-    this->m_code.clear();
-    this->m_code.emplace_back(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
+    this->m_cptr = rocket::make_refcnt<Instantiated_Function>(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
     return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
   }
 
@@ -108,19 +107,16 @@ Parser_Error Simple_Source_File::open(const cow_string& filename)
 
 void Simple_Source_File::clear() noexcept
   {
-    // Destroy contents.
-    this->m_code.clear();
+    this->m_cptr = nullptr;
   }
 
 Reference Simple_Source_File::execute(const Global_Context& global, cow_vector<Reference>&& args) const
   {
-    if(ROCKET_UNEXPECT(this->m_code.empty())) {
-      // Return a null reference if there is nothing to execute.
-      return Reference_Root::S_null();
-    }
-    // Execute the code.
     Reference self;
-    this->m_code.front().invoke(self, global, rocket::move(args));
+    if(!this->m_cptr) {
+      ASTERIA_THROW_RUNTIME_ERROR("No code has been loaded so far.");
+    }
+    this->m_cptr->invoke(self, global, rocket::move(args));
     self.finish_call(global);
     return self;
   }
