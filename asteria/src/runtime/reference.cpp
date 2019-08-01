@@ -79,7 +79,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     while(this->m_root.is_tail_call()) {
       auto& xroot = rqueue.emplace_back(rocket::move(this->m_root.open_tail_call()));
       // Unpack the function reference.
-      if((xroot.aware == tco_by_value) && (tco_disp == tco_by_ref)) {
+      if((xroot.tco == tco_by_value) && (tco_disp == tco_by_ref)) {
         tco_disp = tco_by_value;
       }
       const auto& target = xroot.target;

@@ -615,12 +615,12 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    cow_vector<uptr<Air_Node>> do_generate_code_branch(const Compiler_Options& options, TCO_Awareness tco_awareness, const Analytic_Context& ctx,
+    cow_vector<uptr<Air_Node>> do_generate_code_branch(const Compiler_Options& options, TCO_Awareness tco, const Analytic_Context& ctx,
                                                        const cow_vector<Xprunit>& units)
       {
         cow_vector<uptr<Air_Node>> code;
         rocket::ranged_xfor(units.begin(), units.end(), [&](auto it) { it->generate_code(code, options, tco_none, ctx);  },
-                                                        [&](auto it) { it->generate_code(code, options, tco_awareness, ctx);  });
+                                                        [&](auto it) { it->generate_code(code, options, tco, ctx);  });
         return code;
       }
 
@@ -899,13 +899,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     Air_Node::Status do_xcall_tail(const Source_Location& sloc, const cow_string& func,
                                    const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
-                                   TCO_Awareness tco_awareness)
+                                   TCO_Awareness tco)
       {
         // Pack arguments.
         auto& args_self = args;
         args_self.emplace_back(rocket::move(self));
         // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
-        Reference_Root::S_tail_call xref = { sloc, func, tco_awareness, target, rocket::move(args_self) };
+        Reference_Root::S_tail_call xref = { sloc, func, tco, target, rocket::move(args_self) };
         self = rocket::move(xref);
         return Air_Node::status_next;
       }
@@ -915,18 +915,18 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       private:
         Source_Location m_sloc;
         cow_vector<bool> m_by_refs;
-        TCO_Awareness m_tco_awareness;
+        TCO_Awareness m_tco;
 
       public:
-        Air_execute_function_call_tail(const Source_Location& sloc, const cow_vector<bool>& by_refs, TCO_Awareness tco_awareness)
-          : m_sloc(sloc), m_by_refs(by_refs), m_tco_awareness(tco_awareness)
+        Air_execute_function_call_tail(const Source_Location& sloc, const cow_vector<bool>& by_refs, TCO_Awareness tco)
+          : m_sloc(sloc), m_by_refs(by_refs), m_tco(tco)
           {
           }
 
       public:
         Status execute(Executive_Context& ctx) const override
           {
-            return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_tail, this->m_tco_awareness);
+            return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_tail, this->m_tco);
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2684,8 +2684,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }  // namespace
 
-void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
-                            const Compiler_Options& options, TCO_Awareness tco_awareness, const Analytic_Context& ctx) const
+void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code, const Compiler_Options& options, TCO_Awareness tco, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal:
@@ -2730,8 +2729,8 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
       {
         const auto& altr = this->m_stor.as<index_branch>();
         // Generate code.
-        auto code_true = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_true);
-        auto code_false = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_false);
+        auto code_true = do_generate_code_branch(options, tco, ctx, altr.branch_true);
+        auto code_false = do_generate_code_branch(options, tco, ctx, altr.branch_false);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_branch>(rocket::move(code_true), rocket::move(code_false), altr.assign));
         return;
@@ -2740,8 +2739,8 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
       {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        if(options.proper_tail_calls && (tco_awareness != tco_none)) {
-          code.emplace_back(rocket::make_unique<Air_execute_function_call_tail>(altr.sloc, altr.by_refs, tco_awareness));
+        if(options.proper_tail_calls && (tco != tco_none)) {
+          code.emplace_back(rocket::make_unique<Air_execute_function_call_tail>(altr.sloc, altr.by_refs, tco));
         }
         else {
           code.emplace_back(rocket::make_unique<Air_execute_function_call_plain>(altr.sloc, altr.by_refs));
@@ -3006,7 +3005,7 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
       {
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Generate code.
-        auto code_null = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_null);
+        auto code_null = do_generate_code_branch(options, tco, ctx, altr.branch_null);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_coalescence>(rocket::move(code_null), altr.assign));
         return;

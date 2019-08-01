@@ -32,7 +32,7 @@ class Reference_Root
       {
         Source_Location sloc;
         cow_string func;
-        TCO_Awareness aware;
+        TCO_Awareness tco;
         rcobj<Abstract_Function> target;
         cow_vector<Reference> args_self;  // The last element is the `this` reference.
       };
