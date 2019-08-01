@@ -808,12 +808,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // Generate code of the function body.
             cow_vector<uptr<Air_Node>> code_body;
             Analytic_Context ctx_func(1, ctx, this->m_params);
-            rocket::for_each(this->m_body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func, this->m_options);  });
+            rocket::ranged_xfor(this->m_body.begin(), this->m_body.end(), [&](auto it) { it->generate_code(code_body, nullptr, ctx_func, this->m_options, false);  },
+                                                                          [&](auto it) { it->generate_code(code_body, nullptr, ctx_func, this->m_options, true);  });
             // Format the prototype string.
             cow_osstream fmtss;
             fmtss.imbue(std::locale::classic());
             fmtss << "<closure> (";
-            rocket::ranged_xfor(this->m_params.begin(), this->m_params.end(), [&](auto it) { fmtss << *it << ", ";  }, [&](auto it) { fmtss << *it;  });
+            rocket::ranged_xfor(this->m_params.begin(), this->m_params.end(), [&](auto it) { fmtss << *it << ", ";  },
+                                                                              [&](auto it) { fmtss << *it;  });
             fmtss <<")";
             // Instantiate the function.
             auto target = rocket::make_refcnt<Instantiated_Function>(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
@@ -891,10 +893,9 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", value, "` which is not a function.");
         }
         // Call the function now.
-        rocket::forward<XcallT>(xcall)(sloc, ctx.zvarg()->get_function_signature(),  // sloc, func,
-                                       value.as_function(), ctx.stack().open_top_reference().zoom_out(), rocket::move(args),  // target, self, args,
-                                       rocket::forward<XaddT>(xadd)...);
-        return Air_Node::status_next;
+        return rocket::forward<XcallT>(xcall)(sloc, ctx.zvarg()->get_function_signature(),  // sloc, func,
+                                              value.as_function(), ctx.stack().open_top_reference().zoom_out(), rocket::move(args),  // target, self, args,
+                                              rocket::forward<XaddT>(xadd)...);
       }
 
     Air_Node::Status do_xcall_tail(const Source_Location& sloc, const cow_string& func,
@@ -907,7 +908,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
         Reference_Root::S_tail_call xref = { sloc, func, tco, target, rocket::move(args_self) };
         self = rocket::move(xref);
-        return Air_Node::status_next;
+        return Air_Node::status_return;
       }
 
     class Air_execute_function_call_tail : public virtual Air_Node
@@ -2684,7 +2685,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }  // namespace
 
-void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code, const Compiler_Options& options, TCO_Awareness tco, const Analytic_Context& ctx) const
+void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
+                            const Compiler_Options& options, TCO_Awareness tco, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal:

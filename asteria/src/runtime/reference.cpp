@@ -79,7 +79,10 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     while(this->m_root.is_tail_call()) {
       auto& xroot = rqueue.emplace_back(rocket::move(this->m_root.open_tail_call()));
       // Unpack the function reference.
-      if((xroot.tco == tco_by_value) && (tco_conj == tco_by_ref)) {
+      if(xroot.tco == tco_nullify) {
+        tco_conj = tco_nullify;
+      }
+      else if((xroot.tco == tco_by_value) && (tco_conj == tco_by_ref)) {
         tco_conj = tco_by_value;
       }
       const auto& target = xroot.target;
@@ -110,7 +113,11 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         throw except;
       }
     }
-    if(tco_conj == tco_by_value) {
+    if(tco_conj == tco_nullify) {
+      // Return a `null`.
+      *this = Reference_Root::S_null();
+    }
+    else if(tco_conj == tco_by_value) {
       // Convert the result to an rvalue if it shouldn't be passed by reference.
       this->convert_to_rvalue();
     }

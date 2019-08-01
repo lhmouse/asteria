@@ -42,17 +42,18 @@ namespace Asteria {
       }
 
     cow_vector<uptr<Air_Node>> do_generate_code_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                               const Compiler_Options& options, const cow_vector<Statement>& stmts)
+                                                               const Compiler_Options& options, const cow_vector<Statement>& stmts, bool end_of_func)
       {
         cow_vector<uptr<Air_Node>> code;
-        rocket::for_each(stmts, [&](const Statement& stmt) { stmt.generate_code(code, names_opt, ctx, options);  });
+        rocket::ranged_xfor(stmts.begin(), stmts.end(), [&](auto it) { it->generate_code(code, names_opt, ctx, options, false);  },
+                                                        [&](auto it) { it->generate_code(code, names_opt, ctx, options, end_of_func);  });
         return code;
       }
 
-    cow_vector<uptr<Air_Node>> do_generate_code_block(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Statement>& block)
+    cow_vector<uptr<Air_Node>> do_generate_code_block(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Statement>& block, bool end_of_func)
       {
         Analytic_Context ctx_next(1, ctx);
-        auto code = do_generate_code_statement_list(nullptr, ctx_next, options, block);
+        auto code = do_generate_code_statement_list(nullptr, ctx_next, options, block, end_of_func);
         return code;
       }
 
@@ -276,12 +277,14 @@ namespace Asteria {
             // Generate code for the function body.
             cow_vector<uptr<Air_Node>> code_body;
             Analytic_Context ctx_func(1, ctx, this->m_params);
-            rocket::for_each(this->m_body, [&](const Statement& stmt) { stmt.generate_code(code_body, nullptr, ctx_func, this->m_options);  });
+            rocket::ranged_xfor(this->m_body.begin(), this->m_body.end(), [&](auto it) { it->generate_code(code_body, nullptr, ctx_func, this->m_options, false);  },
+                                                                          [&](auto it) { it->generate_code(code_body, nullptr, ctx_func, this->m_options, true);  });
             // Format the prototype string.
             cow_osstream fmtss;
             fmtss.imbue(std::locale::classic());
             fmtss << this->m_name << "(";
-            rocket::ranged_xfor(this->m_params.begin(), this->m_params.end(), [&](auto it) { fmtss << *it << ", ";  }, [&](auto it) { fmtss << *it;  });
+            rocket::ranged_xfor(this->m_params.begin(), this->m_params.end(), [&](auto it) { fmtss << *it << ", ";  },
+                                                                              [&](auto it) { fmtss << *it;  });
             fmtss <<")";
             // Initialized the function variable.
             auto target = rocket::make_refcnt<Instantiated_Function>(this->m_sloc, fmtss.extract_string(), this->m_params, rocket::move(code_body));
@@ -811,7 +814,8 @@ namespace Asteria {
 
     }  // namespace
 
-void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const Compiler_Options& options) const
+void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                              const Compiler_Options& options, bool end_of_func) const
   {
     switch(this->index()) {
     case index_expression:
@@ -819,14 +823,16 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         const auto& altr = this->m_stor.as<index_expression>();
         // Generate code for the expression.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+        // The last function call operator may be TCO'd.
+        rocket::ranged_xfor(altr.expr.begin(), altr.expr.end(), [&](auto it) { it->generate_code(code, options, tco_none, ctx);  },
+                                                                [&](auto it) { it->generate_code(code, options, end_of_func ? tco_nullify : tco_none, ctx);  });
         return;
       }
     case index_block:
       {
         const auto& altr = this->m_stor.as<index_block>();
         // Generate code for the body.
-        auto code_body = do_generate_code_block(options, ctx, altr.body);
+        auto code_body = do_generate_code_block(options, ctx, altr.body, end_of_func);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_block>(rocket::move(code_body)));
         return;
@@ -870,8 +876,8 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate inline code for the condition expression.
         rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
         // Generate code for branches.
-        auto code_true = do_generate_code_block(options, ctx, altr.branch_true);
-        auto code_false = do_generate_code_block(options, ctx, altr.branch_false);
+        auto code_true = do_generate_code_block(options, ctx, altr.branch_true, end_of_func);
+        auto code_false = do_generate_code_block(options, ctx, altr.branch_false, end_of_func);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_branch>(altr.negative, rocket::move(code_true), rocket::move(code_false)));
         return;
@@ -892,7 +898,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         for(const auto& pair : altr.clauses) {
           auto& clause = clauses.emplace_back();
           clause.code_cond = do_generate_code_expression(options, ctx_switch, pair.first);
-          clause.code_clause = do_generate_code_statement_list(&names, ctx_switch, options, pair.second);
+          clause.code_clause = do_generate_code_statement_list(&names, ctx_switch, options, pair.second, false);
           clause.names = names;
         }
         code.emplace_back(rocket::make_unique<Air_execute_switch>(rocket::move(clauses)));
@@ -902,7 +908,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
       {
         const auto& altr = this->m_stor.as<index_do_while>();
         // Generate code.
-        auto code_body = do_generate_code_block(options, ctx, altr.body);
+        auto code_body = do_generate_code_block(options, ctx, altr.body, false);
         auto code_cond = do_generate_code_expression(options, ctx, altr.cond);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_do_while>(rocket::move(code_body), altr.negative, rocket::move(code_cond)));
@@ -913,7 +919,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         const auto& altr = this->m_stor.as<index_while>();
         // Generate code.
         auto code_cond = do_generate_code_expression(options, ctx, altr.cond);
-        auto code_body = do_generate_code_block(options, ctx, altr.body);
+        auto code_body = do_generate_code_block(options, ctx, altr.body, false);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_while>(altr.negative, rocket::move(code_cond), rocket::move(code_body)));
         return;
@@ -927,7 +933,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         do_set_user_declared_reference(nullptr, ctx_for, "mapped placeholder", altr.mapped_name, Reference_Root::S_null());
         // Generate code.
         auto code_init = do_generate_code_expression(options, ctx_for, altr.init);
-        auto code_body = do_generate_code_block(options, ctx_for, altr.body);
+        auto code_body = do_generate_code_block(options, ctx_for, altr.body, false);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_for_each>(altr.key_name, altr.mapped_name, rocket::move(code_init), rocket::move(code_body)));
         return;
@@ -938,10 +944,10 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Create a fresh context for the `for` loop.
         Analytic_Context ctx_for(1, ctx);
         // Generate code.
-        auto code_init = do_generate_code_statement_list(nullptr, ctx_for, options, altr.init);
+        auto code_init = do_generate_code_statement_list(nullptr, ctx_for, options, altr.init, false);
         auto code_cond = do_generate_code_expression(options, ctx_for, altr.cond);
         auto code_step = do_generate_code_expression(options, ctx_for, altr.step);
-        auto code_body = do_generate_code_block(options, ctx_for, altr.body);
+        auto code_body = do_generate_code_block(options, ctx_for, altr.body, false);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_for>(rocket::move(code_init), rocket::move(code_cond), rocket::move(code_step), rocket::move(code_body)));
         return;
@@ -954,8 +960,9 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         do_set_user_declared_reference(nullptr, ctx_catch, "exception placeholder", altr.except_name, Reference_Root::S_null());
         ctx_catch.open_named_reference(rocket::sref("__backtrace")) /*= Reference_Root::S_null()*/;
         // Generate code.
-        auto code_try = do_generate_code_block(options, ctx, altr.body_try);
-        auto code_catch = do_generate_code_statement_list(nullptr, ctx_catch, options, altr.body_catch);
+        // The `try` block cannot be TCO'd.
+        auto code_try = do_generate_code_block(options, ctx, altr.body_try, false);
+        auto code_catch = do_generate_code_statement_list(nullptr, ctx_catch, options, altr.body_catch, end_of_func);
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_try>(rocket::move(code_try), altr.sloc, altr.except_name, rocket::move(code_catch)));
         return;

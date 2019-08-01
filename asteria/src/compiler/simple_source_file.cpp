@@ -27,6 +27,7 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const c
     if(!parser.load(tstrm, options)) {
       return parser.get_parser_error();
     }
+    const auto& body = parser.get_statements();
     // Initialize parameters of the top scope.
     Source_Location sloc(filename, 1);
     // The file is considered to be a function taking variadic arguments.
@@ -35,7 +36,8 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const c
     // Generate code.
     cow_vector<uptr<Air_Node>> code;
     Analytic_Context ctx(1, params);
-    rocket::for_each(parser.get_statements(), [&](const Statement& stmt) { stmt.generate_code(code, nullptr, ctx, options);  });
+    rocket::ranged_xfor(body.begin(), body.end(), [&](auto it) { it->generate_code(code, nullptr, ctx, options, false);  },
+                                                  [&](auto it) { it->generate_code(code, nullptr, ctx, options, true);  });
     // Accept the code.
     this->m_cptr = rocket::make_refcnt<Instantiated_Function>(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
     return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
