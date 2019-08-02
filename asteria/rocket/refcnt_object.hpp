@@ -81,7 +81,7 @@ template<typename elementT> class refcnt_object
       }
     constexpr pointer ptr() const noexcept
       {
-        return this->m_ptr;
+        return this->m_ptr.get();
       }
 
     void swap(refcnt_object& other) noexcept

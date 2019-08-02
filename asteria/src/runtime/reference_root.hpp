@@ -89,6 +89,15 @@ class Reference_Root
         return rocket::is_any_of(this->index(), { index_null, index_constant, index_temporary });
       }
 
+    bool is_variable() const noexcept
+      {
+        return this->index() == index_variable;
+      }
+    const rcobj<Variable>& get_variable() const
+      {
+        return this->m_stor.as<index_variable>().var;
+      }
+
     bool is_tail_call() const noexcept
       {
         return this->index() == index_tail_call;

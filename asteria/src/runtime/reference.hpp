@@ -114,6 +114,10 @@ class Reference
         return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
+    const rcobj<Variable>& get_variable() const
+      {
+        return this->m_root.get_variable();
+      }
     Reference& convert_to_rvalue()
       {
         if(ROCKET_EXPECT(this->m_root.is_rvalue() && this->m_mods.empty())) {

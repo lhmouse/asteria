@@ -15,12 +15,9 @@ class Evaluation_Stack
     cow_vector<Reference> m_refs;
     Reference* m_etop;
 
-    rcptr<Variable> m_lvar;
-
   public:
     Evaluation_Stack() noexcept
-      : m_refs(), m_etop(nullptr),
-        m_lvar(nullptr)
+      : m_refs(), m_etop(nullptr)
       {
       }
     ~Evaluation_Stack();
@@ -117,15 +114,6 @@ class Evaluation_Stack
           etop[-2] = rocket::move(etop[-1]);
         }
         this->m_etop = --etop;
-      }
-
-    void set_last_variable(rcptr<Variable>&& var_opt) noexcept
-      {
-        this->m_lvar = rocket::move(var_opt);
-      }
-    rcptr<Variable> release_last_variable_opt() noexcept
-      {
-        return std::exchange(this->m_lvar, nullptr);
       }
   };
 

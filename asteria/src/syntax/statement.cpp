@@ -207,11 +207,12 @@ namespace Asteria {
       public:
         Status execute(Executive_Context& ctx) const override
           {
-            // Allocate a variable.
-            auto var = do_safe_create_variable(nullptr, ctx, "variable placeholder", this->m_name);
-            ctx.stack().set_last_variable(rocket::move(var));
             // Note that the initializer must not be empty for this code.
             ctx.stack().clear_references();
+            // Allocate a variable.
+            auto var = do_safe_create_variable(nullptr, ctx, "variable placeholder", this->m_name);
+            Reference_Root::S_variable xref = { rocket::move(var) };
+            ctx.stack().push_reference(rocket::move(xref));
             return Air_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
@@ -238,10 +239,9 @@ namespace Asteria {
             // Read the value of the initializer.
             // Note that the initializer must not have been empty for this code.
             auto value = ctx.stack().get_top_reference().read();
+            // Get the variable back, then initialize it.
             ctx.stack().pop_reference();
-            // Get back the variable that has been allocated in `do_declare_variable_and_clear_stack()`.
-            auto var = ctx.stack().release_last_variable_opt();
-            ROCKET_ASSERT(var);
+            const auto& var = ctx.stack().get_top_reference().get_variable();
             var->reset(this->m_sloc, rocket::move(value), this->m_immutable);
             return Air_Node::status_next;
           }
@@ -387,7 +387,7 @@ namespace Asteria {
             for(auto it = this->m_clauses.begin(); it != target; ++it) {
               // Inject all names into this scope.
               rocket::for_each(it->names, [&](const phsh_string& name) { do_set_user_declared_reference(nullptr, ctx_body, "skipped reference",
-                                                                                                             name, Reference_Root::S_null());  });
+                                                                                                        name, Reference_Root::S_null());  });
             }
             // Execute all clauses from `*qtarget` to the end of this block.
             for(auto it = target; it != this->m_clauses.end(); ++it) {
