@@ -384,18 +384,18 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> void for_each_nonconstexpr(containerT&& container, callbackT&& callback)
+    template<typename containerT, typename callbackT> void for_each_nonconstexpr(containerT&& cont, callbackT&& callback)
       {
-        for(auto&& qelem : container) {
+        for(auto&& qelem : cont) {
           noadl::forward<callbackT>(callback)(qelem);
         }
       }
 
     }  // namespace details_utilities
 
-template<typename containerT, typename callbackT> void for_each(containerT&& container, callbackT&& callback)
+template<typename containerT, typename callbackT> void for_each(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::for_each_nonconstexpr(noadl::forward<containerT>(container), noadl::forward<callbackT>(callback));
+    return details_utilities::for_each_nonconstexpr(noadl::forward<containerT>(cont), noadl::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT> void for_each(initializer_list<elementT> init, callbackT&& callback)
   {
@@ -404,9 +404,9 @@ template<typename elementT, typename callbackT> void for_each(initializer_list<e
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> bool any_of_nonconstexpr(containerT&& container, callbackT&& callback)
+    template<typename containerT, typename callbackT> bool any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
       {
-        for(auto&& qelem : container) {
+        for(auto&& qelem : cont) {
           if(noadl::forward<callbackT>(callback)(qelem)) {
             return true;
           }
@@ -416,9 +416,9 @@ template<typename elementT, typename callbackT> void for_each(initializer_list<e
 
     }  // namespace details_utilities
 
-template<typename containerT, typename callbackT> constexpr bool any_of(containerT&& container, callbackT&& callback)
+template<typename containerT, typename callbackT> constexpr bool any_of(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::any_of_nonconstexpr(noadl::forward<containerT>(container), noadl::forward<callbackT>(callback));
+    return details_utilities::any_of_nonconstexpr(noadl::forward<containerT>(cont), noadl::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT> constexpr bool any_of(initializer_list<elementT> init, callbackT&& callback)
   {
@@ -427,9 +427,9 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
 
     namespace details_utilities {
 
-    template<typename containerT, typename callbackT> bool none_of_nonconstexpr(containerT&& container, callbackT&& callback)
+    template<typename containerT, typename callbackT> bool none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
       {
-        for(auto&& qelem : container) {
+        for(auto&& qelem : cont) {
           if(noadl::forward<callbackT>(callback)(qelem)) {
             return false;
           }
@@ -439,9 +439,9 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
 
     }  // namespace details_utilities
 
-template<typename containerT, typename callbackT> constexpr bool none_of(containerT&& container, callbackT&& callback)
+template<typename containerT, typename callbackT> constexpr bool none_of(containerT&& cont, callbackT&& callback)
   {
-    return details_utilities::none_of_nonconstexpr(noadl::forward<containerT>(container), noadl::forward<callbackT>(callback));
+    return details_utilities::none_of_nonconstexpr(noadl::forward<containerT>(cont), noadl::forward<callbackT>(callback));
   }
 template<typename elementT, typename callbackT> constexpr bool none_of(initializer_list<elementT> init, callbackT&& callback)
   {
@@ -450,9 +450,9 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
 
     namespace details_utilities {
 
-    template<typename targetT, typename containerT> bool is_any_of_nonconstexpr(targetT&& targ, containerT&& container)
+    template<typename targetT, typename containerT> bool is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
       {
-        for(auto&& qelem : container) {
+        for(auto&& qelem : cont) {
           if(noadl::forward<targetT>(targ) == qelem) {
             return true;
           }
@@ -462,9 +462,9 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
 
     }  // namespace details_utilities
 
-template<typename targetT, typename containerT> constexpr bool is_any_of(targetT&& targ, containerT&& container)
+template<typename targetT, typename containerT> constexpr bool is_any_of(targetT&& targ, containerT&& cont)
   {
-    return details_utilities::is_any_of_nonconstexpr(noadl::forward<targetT>(targ), noadl::forward<containerT>(container));
+    return details_utilities::is_any_of_nonconstexpr(noadl::forward<targetT>(targ), noadl::forward<containerT>(cont));
   }
 template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&& targ, initializer_list<elementT> init)
   {
@@ -473,9 +473,9 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&&
 
     namespace details_utilities {
 
-    template<typename targetT, typename containerT> bool is_none_of_nonconstexpr(targetT&& targ, containerT&& container)
+    template<typename targetT, typename containerT> bool is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
       {
-        for(auto&& qelem : container) {
+        for(auto&& qelem : cont) {
           if(noadl::forward<targetT>(targ) == qelem) {
             return false;
           }
@@ -485,9 +485,9 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&&
 
     }  // namespace details_utilities
 
-template<typename targetT, typename containerT> constexpr bool is_none_of(targetT&& targ, containerT&& container)
+template<typename targetT, typename containerT> constexpr bool is_none_of(targetT&& targ, containerT&& cont)
   {
-    return details_utilities::is_none_of_nonconstexpr(noadl::forward<targetT>(targ), noadl::forward<containerT>(container));
+    return details_utilities::is_none_of_nonconstexpr(noadl::forward<targetT>(targ), noadl::forward<containerT>(cont));
   }
 template<typename targetT, typename elementT> constexpr bool is_none_of(targetT&& targ, initializer_list<elementT> init)
   {
