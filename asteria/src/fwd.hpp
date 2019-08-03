@@ -110,6 +110,9 @@ using std::ptrdiff_t;
 using std::size_t;
 
 using cow_string = rocket::cow_string;
+using cow_wstring = rocket::cow_wstring;
+using cow_u16string = rocket::cow_u16string;
+using cow_u32string = rocket::cow_u32string;
 using phsh_string = rocket::prehashed_string;
 using cow_stringbuf = rocket::cow_stringbuf;
 using cow_isstream = rocket::cow_istringstream;

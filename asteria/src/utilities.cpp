@@ -20,7 +20,7 @@ std::ostream& Formatter::do_open_stream()
   {
     auto& strm = this->m_strm_opt;
     if(!strm) {
-      strm = rocket::make_unique<rocket::cow_ostringstream>();
+      strm = rocket::make_unique<cow_osstream>();
     }
     return *strm;
   }
@@ -36,7 +36,7 @@ bool are_debug_logs_enabled() noexcept
 
     namespace {
 
-    void do_ltoa_fixed(rocket::cow_string& str, long num, size_t width)
+    void do_ltoa_fixed(cow_string& str, long num, size_t width)
       {
         std::array<char, 64> sbuf;
         auto spos = sbuf.end();
@@ -63,20 +63,20 @@ bool are_debug_logs_enabled() noexcept
         "[FS\\x1C]",   "[GS\\x1D]",   "[RS\\x1E]",   "[US\\x1F]",
       };
 
-    template<typename ParamT> inline void do_append_str(rocket::cow_string& str, ParamT&& param)
+    template<typename ParamT> inline void do_append_str(cow_string& str, ParamT&& param)
       {
         str.append(rocket::forward<ParamT>(param));
       }
-    inline void do_append_str(rocket::cow_string& str, char c)
+    inline void do_append_str(cow_string& str, char c)
       {
         str.push_back(c);
       }
 
     }  // namespace
 
-bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) noexcept
+bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
   {
-    rocket::cow_string str;
+    cow_string str;
     str.reserve(1023);
     // Append the timestamp.
 #ifdef _WIN32
@@ -147,7 +147,7 @@ Runtime_Error::~Runtime_Error()
   {
   }
 
-bool throw_runtime_error(const char* func, rocket::cow_string&& msg)
+bool throw_runtime_error(const char* func, cow_string&& msg)
   {
     // Append the function signature.
     msg << "\n[thrown from native function `" << func << "(...)`]";
@@ -194,7 +194,7 @@ bool utf8_encode(char*& pos, char32_t cp)
     return true;
   }
 
-bool utf8_encode(rocket::cow_string& text, char32_t cp)
+bool utf8_encode(cow_string& text, char32_t cp)
   {
     char str[4];
     char* pos = str;
@@ -258,7 +258,7 @@ bool utf8_decode(char32_t& cp, const char*& pos, size_t avail)
     return true;
   }
 
-bool utf8_decode(char32_t& cp, const rocket::cow_string& text, size_t& offset)
+bool utf8_decode(char32_t& cp, const cow_string& text, size_t& offset)
   {
     if(offset >= text.size()) {
       return false;
@@ -294,7 +294,7 @@ bool utf16_encode(char16_t*& pos, char32_t cp)
     return true;
   }
 
-bool utf16_encode(rocket::cow_u16string& text, char32_t cp)
+bool utf16_encode(cow_u16string& text, char32_t cp)
   {
     char16_t str[2];
     char16_t* pos = str;
@@ -336,7 +336,7 @@ bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail)
     return true;
   }
 
-bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, size_t& offset)
+bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
   {
     if(offset >= text.size()) {
       return false;
@@ -391,7 +391,7 @@ bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, size_t& offse
 
     }  // namespace
 
-rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, size_t len)
+cow_string& quote(cow_string& sbuf, const char* str, size_t len)
   {
     sbuf.clear();
     // Enclose the string with double quotes, escaping characters as needed.
@@ -401,34 +401,34 @@ rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, size_t len)
     return sbuf;
   }
 
-rocket::cow_string quote(const char* str, size_t len)
+cow_string quote(const char* str, size_t len)
   {
-    rocket::cow_string sbuf;
+    cow_string sbuf;
     quote(sbuf, str, len);
     return sbuf;
   }
 
-rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str)
+cow_string& quote(cow_string& sbuf, const char* str)
   {
     return quote(sbuf, str, std::strlen(str));
   }
 
-rocket::cow_string quote(const char* str)
+cow_string quote(const char* str)
   {
     return quote(str, std::strlen(str));
   }
 
-rocket::cow_string& quote(rocket::cow_string& sbuf, const rocket::cow_string& str)
+cow_string& quote(cow_string& sbuf, const cow_string& str)
   {
     return quote(sbuf, str.data(), str.size());
   }
 
-rocket::cow_string quote(const rocket::cow_string& str)
+cow_string quote(const cow_string& str)
   {
     return quote(str.data(), str.size());
   }
 
-rocket::cow_string& pwrapln(rocket::cow_string& sbuf, size_t indent, size_t hanging)
+cow_string& pwrapln(cow_string& sbuf, size_t indent, size_t hanging)
   {
     sbuf.clear();
     if(indent != 0) {
@@ -446,9 +446,9 @@ rocket::cow_string& pwrapln(rocket::cow_string& sbuf, size_t indent, size_t hang
     return sbuf;
   }
 
-rocket::cow_string pwrapln(size_t indent, size_t hanging)
+cow_string pwrapln(size_t indent, size_t hanging)
   {
-    rocket::cow_string sbuf;
+    cow_string sbuf;
     pwrapln(sbuf, indent, hanging);
     return sbuf;
   }

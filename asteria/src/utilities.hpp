@@ -18,7 +18,7 @@ namespace Asteria {
 class Formatter
   {
   private:
-    rocket::unique_ptr<rocket::cow_ostringstream> m_strm_opt;
+    uptr<cow_osstream> m_strm_opt;
 
   public:
     Formatter() noexcept
@@ -105,7 +105,7 @@ class Formatter
       catch(...) {
         return *this;
       }
-    rocket::cow_string extract_string() noexcept
+    cow_string extract_string() noexcept
       {
         return this->m_strm_opt ? this->m_strm_opt->extract_string() : rocket::clear;
       }
@@ -114,7 +114,7 @@ class Formatter
 #define ASTERIA_XFORMAT_(...)      ((::Asteria::Formatter(), __VA_ARGS__).extract_string())
 
 extern bool are_debug_logs_enabled() noexcept;
-extern bool write_log_to_stderr(const char* file, long line, rocket::cow_string&& msg) noexcept;
+extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
 // If `are_debug_logs_enabled()` returns `true`, evaluate arguments and write the result to `std::cerr`; otherwise, do nothing.
 #define ASTERIA_DEBUG_LOG(...)     ASTERIA_AND_(ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()),  \
@@ -127,14 +127,14 @@ extern bool write_log_to_stderr(const char* file, long line, rocket::cow_string&
 class Runtime_Error : public virtual std::exception
   {
   private:
-    rocket::cow_string m_msg;
+    cow_string m_msg;
 
   public:
-    explicit Runtime_Error(const rocket::cow_string& msg) noexcept
+    explicit Runtime_Error(const cow_string& msg) noexcept
       : m_msg(msg)
       {
       }
-    explicit Runtime_Error(rocket::cow_string&& msg) noexcept
+    explicit Runtime_Error(cow_string&& msg) noexcept
       : m_msg(rocket::move(msg))
       {
       }
@@ -147,31 +147,31 @@ class Runtime_Error : public virtual std::exception
       }
   };
 
-[[noreturn]] extern bool throw_runtime_error(const char* func, rocket::cow_string&& msg);
+[[noreturn]] extern bool throw_runtime_error(const char* func, cow_string&& msg);
 
 // Evaluate arguments to create a string, then throw an exception containing this string.
 #define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
                                                             ::std::terminate())
 
 extern bool utf8_encode(char*& pos, char32_t cp);
-extern bool utf8_encode(rocket::cow_string& text, char32_t cp);
+extern bool utf8_encode(cow_string& text, char32_t cp);
 extern bool utf8_decode(char32_t& cp, const char*& pos, size_t avail);
-extern bool utf8_decode(char32_t& cp, const rocket::cow_string& text, size_t& offset);
+extern bool utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
 
 extern bool utf16_encode(char16_t*& pos, char32_t cp);
-extern bool utf16_encode(rocket::cow_u16string& text, char32_t cp);
+extern bool utf16_encode(cow_u16string& text, char32_t cp);
 extern bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail);
-extern bool utf16_decode(char32_t& cp, const rocket::cow_u16string& text, size_t& offset);
+extern bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
-extern rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str, size_t len);
-extern rocket::cow_string quote(const char* str, size_t len);
-extern rocket::cow_string& quote(rocket::cow_string& sbuf, const char* str);
-extern rocket::cow_string quote(const char* str);
-extern rocket::cow_string& quote(rocket::cow_string& sbuf, const rocket::cow_string& str);
-extern rocket::cow_string quote(const rocket::cow_string& str);
+extern cow_string& quote(cow_string& sbuf, const char* str, size_t len);
+extern cow_string quote(const char* str, size_t len);
+extern cow_string& quote(cow_string& sbuf, const char* str);
+extern cow_string quote(const char* str);
+extern cow_string& quote(cow_string& sbuf, const cow_string& str);
+extern cow_string quote(const cow_string& str);
 
-extern rocket::cow_string& pwrapln(rocket::cow_string& sbuf, size_t indent, size_t hanging);
-extern rocket::cow_string pwrapln(size_t indent, size_t hanging);
+extern cow_string& pwrapln(cow_string& sbuf, size_t indent, size_t hanging);
+extern cow_string pwrapln(size_t indent, size_t hanging);
 
 struct Wrapped_Index
   {
