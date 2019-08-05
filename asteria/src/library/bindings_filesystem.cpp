@@ -294,9 +294,9 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
 
     enum Rmlist
       {
-        rmlist_rmdir,     // a subdirectory which should be empty and can be removed.
-        rmlist_unlink,    // a plain file to be unlinked.
-        rmlist_expand,    // a subdirectory to be expanded.
+        rmlist_rmdir,     // a subdirectory which should be empty and can be removed
+        rmlist_unlink,    // a plain file to be unlinked
+        rmlist_expand,    // a subdirectory to be expanded
       };
 
     // Remove the directory recursively.
