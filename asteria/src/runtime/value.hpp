@@ -211,8 +211,8 @@ class Value
     ROCKET_PURE_FUNCTION long use_count() const noexcept;
     ROCKET_PURE_FUNCTION long gcref_split() const noexcept;
 
-    std::ostream& print(std::ostream& os, bool escape = false) const;
-    std::ostream& dump(std::ostream& os, size_t indent = 2, size_t hanging = 0) const;
+    std::ostream& print(std::ostream& ostrm, bool escape = false) const;
+    std::ostream& dump(std::ostream& ostrm, size_t indent = 2, size_t hanging = 0) const;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
   };
 
@@ -221,9 +221,9 @@ inline void swap(Value& lhs, Value& rhs) noexcept
     return lhs.swap(rhs);
   }
 
-inline std::ostream& operator<<(std::ostream& os, const Value& value)
+inline std::ostream& operator<<(std::ostream& ostrm, const Value& value)
   {
-    return value.dump(os);
+    return value.dump(ostrm);
   }
 
 }  // namespace Asteria

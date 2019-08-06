@@ -13,13 +13,13 @@
 
 namespace Asteria {
 
-Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& cbuf, const cow_string& filename)
+Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& sbuf, const cow_string& filename)
   {
     // Use default options.
     Compiler_Options options = { };
     // Tokenize the character stream.
     Token_Stream tstrm;
-    if(!tstrm.load(cbuf, filename, options)) {
+    if(!tstrm.load(sbuf, filename, options)) {
       return tstrm.get_parser_error();
     }
     // Parse tokens.
@@ -51,14 +51,14 @@ Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
     return rocket::move(err);
   }
 
-Parser_Error Simple_Source_File::reload(std::streambuf& cbuf, const cow_string& filename)
+Parser_Error Simple_Source_File::reload(std::streambuf& sbuf, const cow_string& filename)
   {
-    return this->do_throw_or_return(this->do_reload_nothrow(cbuf, filename));
+    return this->do_throw_or_return(this->do_reload_nothrow(sbuf, filename));
   }
 
-Parser_Error Simple_Source_File::reload(std::istream& cstrm, const cow_string& filename)
+Parser_Error Simple_Source_File::reload(std::istream& istrm, const cow_string& filename)
   {
-    std::istream::sentry sentry(cstrm, true);
+    std::istream::sentry sentry(istrm, true);
     if(!sentry) {
       return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
@@ -66,7 +66,7 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const cow_string& f
     opt<Parser_Error> qerr;
     std::ios_base::iostate state = std::ios_base::goodbit;
     try {
-      qerr = this->do_reload_nothrow(*(cstrm.rdbuf()), filename);
+      qerr = this->do_reload_nothrow(*(istrm.rdbuf()), filename);
       // If the source code contains errors, fail.
       if(*qerr != Parser_Error::code_success) {
         state |= std::ios_base::failbit;
@@ -75,36 +75,36 @@ Parser_Error Simple_Source_File::reload(std::istream& cstrm, const cow_string& f
       state |= std::ios_base::eofbit;
     }
     catch(...) {
-      rocket::handle_ios_exception(cstrm, state);
+      rocket::handle_ios_exception(istrm, state);
     }
     // If `eofbit` or `failbit` would cause an exception, throw it here.
     if(state) {
-      cstrm.setstate(state);
+      istrm.setstate(state);
     }
-    if(cstrm.bad()) {
+    if(istrm.bad()) {
       return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_badbit_set));
     }
     // `qerr` shall always have a value here.
-    // If the exceptional path above has been taken, `cstrm.bad()` will have been set.
+    // If the exceptional path above has been taken, `istrm.bad()` will have been set.
     return this->do_throw_or_return(rocket::move(*qerr));
   }
 
 Parser_Error Simple_Source_File::reload(const cow_string& cstr, const cow_string& filename)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.
-    cow_stringbuf cbuf;
-    cbuf.set_string(cstr);
-    return this->reload(cbuf, filename);
+    cow_stringbuf sbuf;
+    sbuf.set_string(cstr);
+    return this->reload(sbuf, filename);
   }
 
 Parser_Error Simple_Source_File::open(const cow_string& filename)
   {
     // Open the file designated by `filename`.
-    std::filebuf cbuf;
-    if(!cbuf.open(filename.c_str(), std::ios_base::in)) {
+    std::filebuf sbuf;
+    if(!sbuf.open(filename.c_str(), std::ios_base::in)) {
       return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
     }
-    return this->reload(cbuf, filename);
+    return this->reload(sbuf, filename);
   }
 
 void Simple_Source_File::clear() noexcept

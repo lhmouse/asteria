@@ -261,12 +261,12 @@ class Token
         return this->m_stor.as<index_string_literal>().value;
       }
 
-    std::ostream& print(std::ostream& os) const;
+    std::ostream& print(std::ostream& ostrm) const;
   };
 
-inline std::ostream& operator<<(std::ostream& os, const Token& token)
+inline std::ostream& operator<<(std::ostream& ostrm, const Token& token)
   {
-    return token.print(os);
+    return token.print(ostrm);
   }
 
 }  // namespace Asteria

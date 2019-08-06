@@ -28,7 +28,7 @@ class Simple_Binding_Wrapper : public Abstract_Function
     ~Simple_Binding_Wrapper() override;
 
   public:
-    std::ostream& describe(std::ostream& os) const override;
+    std::ostream& describe(std::ostream& ostrm) const override;
     Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const override;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;
   };

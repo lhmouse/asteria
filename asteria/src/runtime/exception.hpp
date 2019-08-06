@@ -65,9 +65,9 @@ class Exception : public std::exception
       }
   };
 
-inline std::ostream& operator<<(std::ostream& os, const Exception& except)
+inline std::ostream& operator<<(std::ostream& ostrm, const Exception& except)
   {
-    return os << except.get_value();
+    return ostrm << except.get_value();
   }
 
 }  // namespace Asteria

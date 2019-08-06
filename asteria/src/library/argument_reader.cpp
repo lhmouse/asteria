@@ -21,24 +21,24 @@ struct Argument_Reader::Mparam
     Tag tag;
     Gtype gtype;
 
-    std::ostream& print(std::ostream& os) const
+    std::ostream& print(std::ostream& ostrm) const
       {
         switch(this->tag) {
         case tag_optional:
           {
-            return os << '[' << Value::gtype_name_of(this->gtype) << ']';
+            return ostrm << '[' << Value::gtype_name_of(this->gtype) << ']';
           }
         case tag_required:
           {
-            return os << Value::gtype_name_of(this->gtype);
+            return ostrm << Value::gtype_name_of(this->gtype);
           }
         case tag_generic:
           {
-            return os << "<generic>";
+            return ostrm << "<generic>";
           }
         case tag_variadic:
           {
-            return os << "...";
+            return ostrm << "...";
           }
         case tag_finish:
           {
@@ -52,9 +52,9 @@ struct Argument_Reader::Mparam
 
     namespace {
 
-    inline std::ostream& operator<<(std::ostream& os, const Argument_Reader::Mparam& param)
+    inline std::ostream& operator<<(std::ostream& ostrm, const Argument_Reader::Mparam& param)
       {
-        return param.print(os);
+        return param.print(ostrm);
       }
 
     }

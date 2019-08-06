@@ -103,7 +103,7 @@ class Parser_Error
         return this->m_code;
       }
 
-    std::ostream& print(std::ostream& os) const;
+    std::ostream& print(std::ostream& ostrm) const;
     [[noreturn]] void convert_to_runtime_error_and_throw() const;
   };
 
@@ -125,9 +125,9 @@ constexpr bool operator!=(Parser_Error::Code lhs, const Parser_Error& rhs) noexc
     return lhs != rhs.code();
   }
 
-inline std::ostream& operator<<(std::ostream& os, const Parser_Error& error)
+inline std::ostream& operator<<(std::ostream& ostrm, const Parser_Error& error)
   {
-    return error.print(os);
+    return error.print(ostrm);
   }
 
 }  // namespace Asteria

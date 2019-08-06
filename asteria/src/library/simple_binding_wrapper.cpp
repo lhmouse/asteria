@@ -12,9 +12,9 @@ Simple_Binding_Wrapper::~Simple_Binding_Wrapper()
   {
   }
 
-std::ostream& Simple_Binding_Wrapper::describe(std::ostream& os) const
+std::ostream& Simple_Binding_Wrapper::describe(std::ostream& ostrm) const
   {
-    return os << this->m_desc;
+    return ostrm << this->m_desc;
   }
 
 Reference& Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const

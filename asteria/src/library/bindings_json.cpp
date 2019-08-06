@@ -20,7 +20,7 @@ namespace Asteria {
         virtual ~Indenter();
 
       public:
-        virtual std::ostream& break_line(std::ostream& cstrm) const = 0;
+        virtual std::ostream& break_line(std::ostream& ostrm) const = 0;
         virtual void increment_level() = 0;
         virtual void decrement_level() = 0;
       };
@@ -37,9 +37,9 @@ namespace Asteria {
           }
 
       public:
-        std::ostream& break_line(std::ostream& cstrm) const override
+        std::ostream& break_line(std::ostream& ostrm) const override
           {
-            return cstrm;
+            return ostrm;
           }
         void increment_level() override
           {
@@ -62,13 +62,13 @@ namespace Asteria {
           }
 
       public:
-        std::ostream& break_line(std::ostream& cstrm) const override
+        std::ostream& break_line(std::ostream& ostrm) const override
           {
-            cstrm << std::endl;
+            ostrm << std::endl;
             if(this->m_cur.empty()) {
-              return cstrm;
+              return ostrm;
             }
-            return cstrm << this->m_cur;
+            return ostrm << this->m_cur;
           }
         void increment_level() override
           {
@@ -93,13 +93,13 @@ namespace Asteria {
           }
 
       public:
-        std::ostream& break_line(std::ostream& cstrm) const override
+        std::ostream& break_line(std::ostream& ostrm) const override
           {
-            cstrm << std::endl;
+            ostrm << std::endl;
             if(this->m_cur == 0) {
-              return cstrm;
+              return ostrm;
             }
-            return cstrm << std::setfill(' ') << std::setw(static_cast<int>(rocket::min(this->m_cur, INT_MAX))) << ' ';
+            return ostrm << std::setfill(' ') << std::setw(static_cast<int>(rocket::min(this->m_cur, INT_MAX))) << ' ';
           }
         void increment_level() override
           {
@@ -111,10 +111,10 @@ namespace Asteria {
           }
       };
 
-    std::ostream& do_quote_string(std::ostream& cstrm, const G_string& str)
+    std::ostream& do_quote_string(std::ostream& ostrm, const G_string& str)
       {
         // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
-        cstrm << '\"';
+        ostrm << '\"';
         size_t offset = 0;
         while(offset < str.size()) {
           // Convert UTF-8 to UTF-16.
@@ -126,43 +126,43 @@ namespace Asteria {
           // Escape double quotes, backslashes, and control characters.
           switch(cp) {
           case '\"':
-            cstrm << "\\\"";
+            ostrm << "\\\"";
             break;
           case '\\':
-            cstrm << "\\\\";
+            ostrm << "\\\\";
             break;
           case '\b':
-            cstrm << "\\b";
+            ostrm << "\\b";
             break;
           case '\f':
-            cstrm << "\\f";
+            ostrm << "\\f";
             break;
           case '\n':
-            cstrm << "\\n";
+            ostrm << "\\n";
             break;
           case '\r':
-            cstrm << "\\r";
+            ostrm << "\\r";
             break;
           case '\t':
-            cstrm << "\\t";
+            ostrm << "\\t";
             break;
           default:
             if((0x20 <= cp) && (cp <= 0x7E)) {
               // Write printable characters as is.
-              cstrm << static_cast<char>(cp);
+              ostrm << static_cast<char>(cp);
               break;
             }
             // Encode the character in UTF-16.
             char16_t ustr[2];
             char16_t* pos = ustr;
             utf16_encode(pos, cp);
-            cstrm << std::hex << std::uppercase << std::setfill('0');
-            std::for_each(ustr, pos, [&](char16_t uch) { cstrm << "\\u" << std::setw(4) << uch;  });
+            ostrm << std::hex << std::uppercase << std::setfill('0');
+            std::for_each(ustr, pos, [&](char16_t uch) { ostrm << "\\u" << std::setw(4) << uch;  });
             break;
           }
         }
-        cstrm << '\"';
-        return cstrm;
+        ostrm << '\"';
+        return ostrm;
       }
 
     G_object::const_iterator do_find_uncensored(const G_object& object, G_object::const_iterator from)
@@ -173,26 +173,26 @@ namespace Asteria {
                                                           pair.second.is_null();  });
       }
 
-    std::ostream& do_format_scalar(std::ostream& cstrm, const Value& value)
+    std::ostream& do_format_scalar(std::ostream& ostrm, const Value& value)
       {
         if(value.is_boolean()){
           // Write `true` or `false`.
-          return cstrm << std::boolalpha << std::nouppercase << value.as_boolean();
+          return ostrm << std::boolalpha << std::nouppercase << value.as_boolean();
         }
         if(value.is_integer()) {
           // Write the integer in decimal.
-          return cstrm << std::dec << value.as_integer();
+          return ostrm << std::dec << value.as_integer();
         }
         if(value.is_real() && std::isfinite(value.as_real())) {
           // Write the real number in decimal.
-          return cstrm << std::defaultfloat << std::nouppercase << std::setprecision(17) << value.as_real();
+          return ostrm << std::defaultfloat << std::nouppercase << std::setprecision(17) << value.as_real();
         }
         if(value.is_string()) {
           // Write the quoted string.
-          return do_quote_string(cstrm, value.as_string());
+          return do_quote_string(ostrm, value.as_string());
         }
         // Anything else is censored to `null`.
-        return cstrm << "null";
+        return ostrm << "null";
       }
 
     struct S_xformat_array
@@ -209,8 +209,8 @@ namespace Asteria {
 
     G_string do_format_nonrecursive(const Value& value, Indenter& indent)
       {
-        cow_osstream cstrm;
-        cstrm.imbue(std::locale::classic());
+        cow_osstream ostrm;
+        ostrm.imbue(std::locale::classic());
         // Transform recursion to iteration using a handwritten stack.
         auto qvalue = std::addressof(value);
         cow_vector<Xformat> stack;
@@ -219,12 +219,12 @@ namespace Asteria {
           if(qvalue->is_array()){
             const auto& array = qvalue->as_array();
             // Open an array.
-            cstrm << '[';
+            ostrm << '[';
             auto cur = array.begin();
             if(cur != array.end()) {
               // Indent the body.
               indent.increment_level();
-              indent.break_line(cstrm);
+              indent.break_line(ostrm);
               // Decend into the array.
               S_xformat_array ctxa = { std::ref(array), cur };
               stack.emplace_back(rocket::move(ctxa));
@@ -232,20 +232,20 @@ namespace Asteria {
               continue;
             }
             // Write an empty array.
-            cstrm << ']';
+            ostrm << ']';
           }
           else if(qvalue->is_object()) {
             const auto& object = qvalue->as_object();
             // Open an object.
-            cstrm << '{';
+            ostrm << '{';
             auto cur = do_find_uncensored(object, object.begin());
             if(cur != object.end()) {
               // Indent the body.
               indent.increment_level();
-              indent.break_line(cstrm);
+              indent.break_line(ostrm);
               // Write the key followed by a colon.
-              do_quote_string(cstrm, cur->first);
-              cstrm << ':';
+              do_quote_string(ostrm, cur->first);
+              ostrm << ':';
               // Decend into the object.
               S_xformat_object ctxo = { std::ref(object), cur };
               stack.emplace_back(rocket::move(ctxo));
@@ -253,17 +253,17 @@ namespace Asteria {
               continue;
             }
             // Write an empty object.
-            cstrm << '}';
+            ostrm << '}';
           }
           else {
             // Just write a scalar value which is never recursive.
-            do_format_scalar(cstrm, *qvalue);
+            do_format_scalar(ostrm, *qvalue);
           }
           for(;;) {
             // Advance to the next element if any.
             if(stack.empty()) {
               // Finish the root value.
-              return cstrm.extract_string();
+              return ostrm.extract_string();
             }
             if(stack.back().index() == 0) {
               auto& ctxa = stack.mut_back().as<0>();
@@ -271,8 +271,8 @@ namespace Asteria {
               auto cur = ++(ctxa.cur);
               if(cur != ctxa.array.get().end()) {
                 // Add a separator between elements.
-                cstrm << ',';
-                indent.break_line(cstrm);
+                ostrm << ',';
+                indent.break_line(ostrm);
                 // Format the next element.
                 ctxa.cur = cur;
                 qvalue = std::addressof(*cur);
@@ -280,9 +280,9 @@ namespace Asteria {
               }
               // Unindent the body.
               indent.decrement_level();
-              indent.break_line(cstrm);
+              indent.break_line(ostrm);
               // Finish this array.
-              cstrm << ']';
+              ostrm << ']';
             }
             else {
               auto& ctxo = stack.mut_back().as<1>();
@@ -290,11 +290,11 @@ namespace Asteria {
               auto cur = do_find_uncensored(ctxo.object, ++(ctxo.cur));
               if(cur != ctxo.object.get().end()) {
                 // Add a separator between elements.
-                cstrm << ',';
-                indent.break_line(cstrm);
+                ostrm << ',';
+                indent.break_line(ostrm);
                 // Write the key followed by a colon.
-                do_quote_string(cstrm, cur->first);
-                cstrm << ':';
+                do_quote_string(ostrm, cur->first);
+                ostrm << ':';
                 // Format the next value.
                 ctxo.cur = cur;
                 qvalue = std::addressof(cur->second);
@@ -302,9 +302,9 @@ namespace Asteria {
               }
               // Unindent the body.
               indent.decrement_level();
-              indent.break_line(cstrm);
+              indent.break_line(ostrm);
               // Finish this array.
-              cstrm << '}';
+              ostrm << '}';
             }
             stack.pop_back();
           }
@@ -618,9 +618,9 @@ Value std_json_parse(const G_string& text)
     options.keywords_as_identifiers = true;
     options.integers_as_reals = true;
     // Use a `streambuf` rather than an `istream` to minimize overheads.
-    cow_stringbuf cbuf(text, std::ios_base::in);
+    cow_stringbuf sbuf(text, std::ios_base::in);
     Token_Stream tstrm;
-    if(!tstrm.load(cbuf, rocket::sref("<JSON text>"), options)) {
+    if(!tstrm.load(sbuf, rocket::sref("<JSON text>"), options)) {
       ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", text);
       return G_null();
     }

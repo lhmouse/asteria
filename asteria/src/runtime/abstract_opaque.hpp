@@ -18,13 +18,13 @@ class Abstract_Opaque : public virtual Rcbase
     ~Abstract_Opaque() override;
 
   public:
-    virtual std::ostream& describe(std::ostream& os) const = 0;
+    virtual std::ostream& describe(std::ostream& ostrm) const = 0;
     virtual Variable_Callback& enumerate_variables(Variable_Callback& callback) const = 0;
   };
 
-inline std::ostream& operator<<(std::ostream& os, const Abstract_Opaque& opaque)
+inline std::ostream& operator<<(std::ostream& ostrm, const Abstract_Opaque& opaque)
   {
-    return opaque.describe(os);
+    return opaque.describe(ostrm);
   }
 
 }  // namespace Asteria

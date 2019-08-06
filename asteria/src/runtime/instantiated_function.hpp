@@ -41,7 +41,7 @@ class Instantiated_Function : public Abstract_Function
         return this->m_params;
       }
 
-    std::ostream& describe(std::ostream& os) const override;
+    std::ostream& describe(std::ostream& ostrm) const override;
     Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const override;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;
   };

@@ -225,17 +225,17 @@ const char* Parser_Error::describe_code(Parser_Error::Code xcode) noexcept
     }
   }
 
-std::ostream& Parser_Error::print(std::ostream& os) const
+std::ostream& Parser_Error::print(std::ostream& ostrm) const
   {
-    os << std::dec << "error " << this->m_code << " at ";
+    ostrm << std::dec << "error " << this->m_code << " at ";
     if(this->m_line <= 0) {
-      os << "the end of input data";
+      ostrm << "the end of input data";
     }
     else {
-      os << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
+      ostrm << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
     }
-    os << ": " << Parser_Error::describe_code(this->m_code);
-    return os;
+    ostrm << ": " << Parser_Error::describe_code(this->m_code);
+    return ostrm;
   }
 
 void Parser_Error::convert_to_runtime_error_and_throw() const

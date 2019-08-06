@@ -20,15 +20,15 @@ class Simple_Source_File
       : m_fthr(false)
       {
       }
-    Simple_Source_File(std::streambuf& cbuf, const cow_string& filename)
+    Simple_Source_File(std::streambuf& sbuf, const cow_string& filename)
       : m_fthr(true)
       {
-        this->reload(cbuf, filename);
+        this->reload(sbuf, filename);
       }
-    Simple_Source_File(std::istream& cstrm, const cow_string& filename)
+    Simple_Source_File(std::istream& istrm, const cow_string& filename)
       : m_fthr(true)
       {
-        this->reload(cstrm, filename);
+        this->reload(istrm, filename);
       }
     Simple_Source_File(const cow_string& cstr, const cow_string& filename)
       : m_fthr(true)
@@ -42,7 +42,7 @@ class Simple_Source_File
       }
 
   private:
-    inline Parser_Error do_reload_nothrow(std::streambuf& cbuf, const cow_string& filename);
+    inline Parser_Error do_reload_nothrow(std::streambuf& sbuf, const cow_string& filename);
     inline Parser_Error do_throw_or_return(Parser_Error&& err);
 
   public:
@@ -55,8 +55,8 @@ class Simple_Source_File
         this->m_fthr = fthr;
       }
 
-    Parser_Error reload(std::streambuf& cbuf, const cow_string& filename);
-    Parser_Error reload(std::istream& cstrm, const cow_string& filename);
+    Parser_Error reload(std::streambuf& sbuf, const cow_string& filename);
+    Parser_Error reload(std::istream& istrm, const cow_string& filename);
     Parser_Error reload(const cow_string& cstr, const cow_string& filename);
     Parser_Error open(const cow_string& filename);
     void clear() noexcept;
@@ -64,9 +64,9 @@ class Simple_Source_File
     Reference execute(const Global_Context& global, cow_vector<Reference>&& args) const;
   };
 
-inline std::istream& operator>>(std::istream& is, Simple_Source_File& file)
+inline std::istream& operator>>(std::istream& istrm, Simple_Source_File& file)
   {
-    return file.reload(is, rocket::sref("<anonymous>")), is;
+    return file.reload(istrm, rocket::sref("<anonymous>")), istrm;
   }
 
 }  // namespace Asteria
