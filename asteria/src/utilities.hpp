@@ -5,13 +5,8 @@
 #define ASTERIA_UTILITIES_HPP_
 
 #include "fwd.hpp"
-#include "../rocket/compiler.h"
-#include "../rocket/utilities.hpp"
-#include "../rocket/cow_ostringstream.hpp"
-#include "../rocket/unique_ptr.hpp"
 #include <iomanip>
 #include <exception>
-#include <cstdint>
 
 namespace Asteria {
 
