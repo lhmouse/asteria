@@ -365,11 +365,10 @@ std::ostream& Value::print(std::ostream& ostrm, bool escape) const
     case gtype_object:
       {
         const auto& altr = this->m_stor.as<gtype_object>();
-        G_string kbuf;
         // { "one" = 1, "two" = 2, "three" = 3, }
         ostrm << '{';
         for(auto q = altr.begin(); q != altr.end(); ++q) {
-          ostrm << ' ' << quote(kbuf, q->first) << " = ";
+          ostrm << ' ' << quote(q->first) << " = ";
           q->second.print(ostrm, true);
           ostrm << ',';
         }
@@ -428,7 +427,6 @@ std::ostream& Value::dump(std::ostream& ostrm, size_t indent, size_t hanging) co
     case gtype_array:
       {
         const auto& altr = this->m_stor.as<gtype_array>();
-        G_string ibuf;
         // array(3) =
         //  [
         //   0 = integer 1;
@@ -436,18 +434,17 @@ std::ostream& Value::dump(std::ostream& ostrm, size_t indent, size_t hanging) co
         //   2 = integer 3;
         //  ]
         ostrm << "array(" << std::dec << altr.size() << ")";
-        ostrm << pwrapln(ibuf, indent, hanging + 1) << '[';
+        ostrm << pwrap(indent, hanging + 1) << '[';
         for(size_t i = 0; i < altr.size(); ++i) {
-          ostrm << pwrapln(ibuf, indent, hanging + indent) << std::dec << i << " = ";
+          ostrm << pwrap(indent, hanging + indent) << std::dec << i << " = ";
           altr[i].dump(ostrm, indent, hanging + indent) << ';';
         }
-        ostrm << pwrapln(ibuf, indent, hanging + 1) << ']';
+        ostrm << pwrap(indent, hanging + 1) << ']';
         return ostrm;
       }
     case gtype_object:
       {
         const auto& altr = this->m_stor.as<gtype_object>();
-        G_string ibuf, kbuf;
         // object(3) =
         //  {
         //   "one" = integer 1;
@@ -455,12 +452,12 @@ std::ostream& Value::dump(std::ostream& ostrm, size_t indent, size_t hanging) co
         //   "three" = integer 3;
         //  }
         ostrm << "object(" << std::dec << altr.size() << ")";
-        ostrm << pwrapln(ibuf, indent, hanging + 1) << '{';
+        ostrm << pwrap(indent, hanging + 1) << '{';
         for(auto q = altr.begin(); q != altr.end(); ++q) {
-          ostrm << pwrapln(ibuf, indent, hanging + indent) << quote(kbuf, q->first) << " = ";
+          ostrm << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
           q->second.dump(ostrm, indent, hanging + indent) << ';';
         }
-        ostrm << pwrapln(ibuf, indent, hanging + 1) << '}';
+        ostrm << pwrap(indent, hanging + 1) << '}';
         return ostrm;
       }
     default:

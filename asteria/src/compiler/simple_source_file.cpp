@@ -64,7 +64,7 @@ Parser_Error Simple_Source_File::reload(std::istream& istrm, const cow_string& f
     }
     // Extract characters from the stream buffer directly.
     opt<Parser_Error> qerr;
-    std::ios_base::iostate state = std::ios_base::goodbit;
+    std::ios_base::iostate state = { };
     try {
       qerr = this->do_reload_nothrow(*(istrm.rdbuf()), filename);
       // If the source code contains errors, fail.

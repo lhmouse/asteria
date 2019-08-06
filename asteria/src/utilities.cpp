@@ -389,68 +389,108 @@ bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
         "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
       };
 
+    bool do_quote(std::ios_base::iostate& state, std::streambuf& sbuf, const Quote_Wrapper& q)
+      {
+        // Insert the leading quote mark.
+        if(sbuf.sputc('\"') == EOF) {
+          state |= std::ios_base::failbit;
+          return false;
+        }
+        // Quote all bytes from the source string.
+        for(size_t i = 0; i != q.len; ++i) {
+          size_t ch = q.str[i] & 0xFF;
+          auto sq = s_quote_table[ch];
+          auto nq = std::strlen(sq);
+          // Insert this quoted sequence. Optimize the operation a little if it consists of only one character.
+          bool failed = (nq == 1) ? (sbuf.sputc(static_cast<char>(ch)) == EOF)
+                                  : (sbuf.sputn(sq, static_cast<ptrdiff_t>(nq)) != static_cast<ptrdiff_t>(nq));
+          if(failed) {
+            state |= std::ios_base::failbit;
+            return false;
+          }
+        }
+        // Insert the trailing quote mark.
+        if(sbuf.sputc('\"') == EOF) {
+          state |= std::ios_base::failbit;
+          return false;
+        }
+        // Success.
+        return true;
+      }
+
     }  // namespace
 
-cow_string& quote(cow_string& sbuf, const char* str, size_t len)
+std::ostream& operator<<(std::ostream& cstrm, const Quote_Wrapper& q)
   {
-    sbuf.clear();
-    // Enclose the string with double quotes, escaping characters as needed.
-    sbuf += '\"';
-    std::for_each(str, str + len, [&](char c) { sbuf += s_quote_table[(c & 0xFF)];  });
-    sbuf += '\"';
-    return sbuf;
+    std::ostream::sentry sentry(cstrm);
+    if(!sentry) {
+      return cstrm;
+    }
+    // Insert characters into `cstrm`.
+    std::ios_base::iostate state = { };
+    try {
+      do_quote(state, *(cstrm.rdbuf()), q);
+    }
+    catch(...) {
+      rocket::handle_ios_exception(cstrm, state);
+    }
+    // If `eofbit` or `failbit` would cause an exception, throw it here.
+    if(state) {
+      cstrm.setstate(state);
+    }
+    return cstrm;
   }
 
-cow_string quote(const char* str, size_t len)
-  {
-    cow_string sbuf;
-    quote(sbuf, str, len);
-    return sbuf;
-  }
+    namespace {
 
-cow_string& quote(cow_string& sbuf, const char* str)
-  {
-    return quote(sbuf, str, std::strlen(str));
-  }
-
-cow_string quote(const char* str)
-  {
-    return quote(str, std::strlen(str));
-  }
-
-cow_string& quote(cow_string& sbuf, const cow_string& str)
-  {
-    return quote(sbuf, str.data(), str.size());
-  }
-
-cow_string quote(const cow_string& str)
-  {
-    return quote(str.data(), str.size());
-  }
-
-cow_string& pwrapln(cow_string& sbuf, size_t indent, size_t hanging)
-  {
-    sbuf.clear();
-    if(indent != 0) {
-      // Terminate the current line.
-      sbuf = rocket::sref("\n");
-      if(hanging != 0) {
-        // Indent the next line accordingly.
-        sbuf.append(hanging, ' ');
+    bool do_pwrap(std::ios_base::iostate& state, std::streambuf& sbuf, const Paragraph_Wrapper& q)
+      {
+        if(q.indent == 0) {
+          // Write everything in a single line, separated by spaces.
+          if(sbuf.sputc(' ') == EOF) {
+            state |= std::ios_base::failbit;
+            return false;
+          }
+        }
+        else {
+          // Terminate the current line.
+          if(sbuf.sputc('\n') == EOF) {
+            state |= std::ios_base::failbit;
+            return false;
+          }
+          // Indent the next line accordingly.
+          for(size_t i = 0; i != q.hanging; ++i) {
+            if(sbuf.sputc(' ') == EOF) {
+              state |= std::ios_base::failbit;
+              return false;
+            }
+          }
+        }
+        // Success.
+        return true;
       }
-    }
-    else {
-      // Write everything in a single line, separated by spaces.
-      sbuf = rocket::sref(" ");
-    }
-    return sbuf;
-  }
 
-cow_string pwrapln(size_t indent, size_t hanging)
+    }
+
+std::ostream& operator<<(std::ostream& cstrm, const Paragraph_Wrapper& q)
   {
-    cow_string sbuf;
-    pwrapln(sbuf, indent, hanging);
-    return sbuf;
+    std::ostream::sentry sentry(cstrm);
+    if(!sentry) {
+      return cstrm;
+    }
+    // Insert characters into `cstrm`.
+    std::ios_base::iostate state = { };
+    try {
+      do_pwrap(state, *(cstrm.rdbuf()), q);
+    }
+    catch(...) {
+      rocket::handle_ios_exception(cstrm, state);
+    }
+    // If `eofbit` or `failbit` would cause an exception, throw it here.
+    if(state) {
+      cstrm.setstate(state);
+    }
+    return cstrm;
   }
 
 Wrapped_Index wrap_index(int64_t index, size_t size) noexcept

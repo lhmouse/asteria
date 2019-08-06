@@ -158,15 +158,39 @@ extern bool utf16_encode(cow_u16string& text, char32_t cp);
 extern bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail);
 extern bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
-extern cow_string& quote(cow_string& sbuf, const char* str, size_t len);
-extern cow_string quote(const char* str, size_t len);
-extern cow_string& quote(cow_string& sbuf, const char* str);
-extern cow_string quote(const char* str);
-extern cow_string& quote(cow_string& sbuf, const cow_string& str);
-extern cow_string quote(const cow_string& str);
+struct Quote_Wrapper
+  {
+    const char* str;
+    size_t len;
+  };
 
-extern cow_string& pwrapln(cow_string& sbuf, size_t indent, size_t hanging);
-extern cow_string pwrapln(size_t indent, size_t hanging);
+constexpr Quote_Wrapper quote(const char* str, size_t len) noexcept
+  {
+    return { str, len };
+  }
+inline Quote_Wrapper quote(const char* str) noexcept
+  {
+    return quote(str, std::strlen(str));
+  }
+inline Quote_Wrapper quote(const cow_string& str) noexcept
+  {
+    return quote(str.data(), str.size());
+  }
+
+extern std::ostream& operator<<(std::ostream& cstrm, const Quote_Wrapper& q);
+
+struct Paragraph_Wrapper
+  {
+    size_t indent;
+    size_t hanging;
+  };
+
+constexpr Paragraph_Wrapper pwrap(size_t indent, size_t hanging) noexcept
+  {
+    return { indent, hanging };
+  }
+
+extern std::ostream& operator<<(std::ostream& cstrm, const Paragraph_Wrapper& q);
 
 struct Wrapped_Index
   {
