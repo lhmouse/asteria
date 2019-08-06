@@ -12,20 +12,37 @@ int main()
   {
     static constexpr char s_source[] =
       R"__(
-        // tail call, proper
-        func ptc(n) {
+        var ptc;
+
+        ptc = func(n) {
           if(n <= 0) {
-            throw "boom";
+            return n;
           }
           return ptc(n-1);  // this may blow the system stack up if non-proper.
-        }
-        try {
-          ptc(2000);
-        }
-        catch(e) {
-          std.debug.dump(__backtrace);
-          assert lengthof __backtrace == 2003;  // 1 throw, 2001 frames, 1 catch
-        }
+        };
+        ptc(10000);
+
+        ptc = func(n) {
+          if(n <= 0) {
+            return& n;
+          }
+          ptc(n-1);  // this may blow the system stack up if non-proper.
+        };
+        ptc(10000);
+
+        ptc = func(n) {
+          if(n <= 0) {
+            return;
+          }
+          return ptc(n-1);  // this may blow the system stack up if non-proper.
+        };
+        ptc(10000);
+
+        ptc = func(n) {
+          return (n <= 0) ? n
+                          : ptc(n-1);  // this may blow the system stack up if non-proper.
+        };
+        ptc(10000);
       )__";
 
     cow_isstream iss(rocket::sref(s_source));
