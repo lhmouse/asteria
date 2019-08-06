@@ -100,7 +100,7 @@ namespace Asteria {
     cow_vector<uptr<Air_Node>> do_generate_code_expression(const Compiler_Options& options, const Analytic_Context& ctx, const cow_vector<Xprunit>& expr)
       {
         cow_vector<uptr<Air_Node>> code;
-        rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+        rocket::for_each(expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         return code;
       }
 
@@ -824,8 +824,8 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate code for the expression.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // The last function call operator may be TCO'd.
-        rocket::ranged_xfor(altr.expr.begin(), altr.expr.end(), [&](auto it) { it->generate_code(code, options, tco_none, ctx);  },
-                                                                [&](auto it) { it->generate_code(code, options, end_of_func ? tco_nullify : tco_none, ctx);  });
+        rocket::ranged_xfor(altr.expr.begin(), altr.expr.end(), [&](auto it) { it->generate_code(code, options, Xprunit::tco_none, ctx);  },
+                                                                [&](auto it) { it->generate_code(code, options, end_of_func ? Xprunit::tco_nullify : Xprunit::tco_none, ctx);  });
         return;
       }
     case index_block:
@@ -852,7 +852,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
             // A variable becomes visible before its initializer, where it is initialized to `null`.
             code.emplace_back(rocket::make_unique<Air_declare_variable_and_clear_stack>(pair.first));
             // Generate inline code for the initializer.
-            rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+            rocket::for_each(pair.second, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
             // Generate code to initialize the variable.
             code.emplace_back(rocket::make_unique<Air_initialize_variable>(altr.sloc, altr.immutable));
           }
@@ -874,7 +874,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the condition expression.
-        rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+        rocket::for_each(altr.cond, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Generate code for branches.
         auto code_true = do_generate_code_block(options, ctx, altr.branch_true, end_of_func);
         auto code_false = do_generate_code_block(options, ctx, altr.branch_false, end_of_func);
@@ -888,7 +888,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the condition expression.
-        rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+        rocket::for_each(altr.ctrl, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Create a fresh context for the `switch` body.
         // Note that all clauses inside a `switch` statement share the same context.
         Analytic_Context ctx_switch(1, ctx);
@@ -1030,7 +1030,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_throw>(altr.sloc));
         return;
@@ -1041,8 +1041,8 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand. Only the last operator can be TCO'd.
-        rocket::ranged_xfor(altr.expr.begin(), altr.expr.end(), [&](auto it) { it->generate_code(code, options, tco_none, ctx);  },
-                                                                [&](auto it) { it->generate_code(code, options, altr.by_ref ? tco_by_ref : tco_by_value, ctx);  });
+        rocket::ranged_xfor(altr.expr.begin(), altr.expr.end(), [&](auto it) { it->generate_code(code, options, Xprunit::tco_none, ctx);  },
+                                                                [&](auto it) { it->generate_code(code, options, altr.by_ref ? Xprunit::tco_by_ref : Xprunit::tco_by_value, ctx);  });
         if(altr.by_ref || altr.expr.empty()) {
           // Return the reference as is.
           code.emplace_back(rocket::make_unique<Air_return_status_simple>(Air_Node::status_return));
@@ -1059,7 +1059,7 @@ void Statement::generate_code(cow_vector<uptr<Air_Node>>& code, cow_vector<phsh_
         // Generate preparation code.
         code.emplace_back(rocket::make_unique<Air_execute_clear_stack>());
         // Generate inline code for the operand.
-        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, tco_none, ctx);  });
+        rocket::for_each(altr.expr, [&](const Xprunit& unit) { unit.generate_code(code, options, Xprunit::tco_none, ctx);  });
         // Encode arguments.
         code.emplace_back(rocket::make_unique<Air_execute_assert>(altr.sloc, altr.negative, altr.msg));
         return;

@@ -13,6 +13,13 @@ namespace Asteria {
 class Reference_Root
   {
   public:
+    enum TCO_Flags : uint32_t
+      {
+        tcof_by_ref    = 0b0000,
+        tcof_by_value  = 0b0001,
+        tcof_nullify   = 0b0010,
+      };
+
     struct S_null
       {
       };
@@ -32,7 +39,7 @@ class Reference_Root
       {
         Source_Location sloc;
         cow_string func;
-        TCO_Awareness tco;
+        uint32_t flags;  // See `TCO_Flags` for available combinations.
         rcobj<Abstract_Function> target;
         cow_vector<Reference> args_self;  // The last element is the `this` reference.
       };
