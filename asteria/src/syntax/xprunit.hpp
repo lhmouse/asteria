@@ -185,8 +185,7 @@ class Xprunit
         this->m_stor.swap(other.m_stor);
       }
 
-    void generate_code(cow_vector<uptr<AIR_Node>>& code,
-                       const Compiler_Options& options, TCO_Awareness tco_awareness, const Analytic_Context& ctx) const;
+    void generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& options, TCO_Awareness tco_awareness, const Analytic_Context& ctx) const;
   };
 
 inline void swap(Xprunit& lhs, Xprunit& rhs) noexcept

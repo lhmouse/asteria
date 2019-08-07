@@ -114,8 +114,11 @@ class Reference
         return this->do_unset(this->m_mods.data(), this->m_mods.size(), last);
       }
 
-    const rcobj<Variable>& get_variable() const
+    rcptr<Variable> get_variable_opt() const
       {
+        if(!this->m_root.is_variable()) {
+          return nullptr;
+        }
         return this->m_root.get_variable();
       }
     Reference& convert_to_rvalue()

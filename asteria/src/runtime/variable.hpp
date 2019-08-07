@@ -60,6 +60,11 @@ class Variable : public virtual Rcbase
         this->m_value = rocket::forward<XvalueT>(xvalue);
         this->m_immutable = immutable;
       }
+    template<typename XvalueT> void reset(XvalueT&& xvalue, bool immutable)
+      {
+        this->m_value = rocket::forward<XvalueT>(xvalue);
+        this->m_immutable = immutable;
+      }
 
     long gcref_split() const noexcept
       {

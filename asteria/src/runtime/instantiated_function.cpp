@@ -27,7 +27,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
     auto status = AIR_Node::status_next;
-    rocket::any_of(this->m_code, [&](const uptr<AIR_Node>& q) { return (status = q->execute(ctx_func)) != AIR_Node::status_next;  });
+    rocket::any_of(this->m_code, [&](const AIR_Node& node) { return (status = node.execute(ctx_func)) != AIR_Node::status_next;  });
     switch(status) {
     case AIR_Node::status_next:
       {
@@ -60,7 +60,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
   {
     // Enumerate all variables inside the function body.
-    rocket::for_each(this->m_code, [&](const uptr<AIR_Node>& q) { q->enumerate_variables(callback);  });
+    rocket::for_each(this->m_code, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
     return callback;
   }
 

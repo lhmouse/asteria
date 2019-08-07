@@ -67,8 +67,8 @@ class Statement
       };
     struct S_for_each
       {
-        phsh_string key_name;
-        phsh_string mapped_name;
+        phsh_string name_key;
+        phsh_string name_mapped;
         cow_vector<Xprunit> init;
         cow_vector<Statement> body;
       };
@@ -83,7 +83,7 @@ class Statement
       {
         cow_vector<Statement> body_try;
         Source_Location sloc;
-        phsh_string except_name;
+        phsh_string name_except;
         cow_vector<Statement> body_catch;
       };
     struct S_break
@@ -171,14 +171,17 @@ class Statement
       {
         return static_cast<Index>(this->m_stor.index());
       }
+    bool is_empty_return() const noexcept
+      {
+        return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.empty();
+      }
 
     void swap(Statement& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
       }
 
-    void generate_code(cow_vector<uptr<AIR_Node>>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                       const Compiler_Options& options, bool end_of_func) const;
+    void generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const Compiler_Options& options, bool end_of_func) const;
   };
 
 inline void swap(Statement& lhs, Statement& rhs) noexcept
