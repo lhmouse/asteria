@@ -787,7 +787,7 @@ opt<G_array> std_array_copy_keys(const opt<G_object>& source)
     }
     G_array res;
     res.reserve(source->size());
-    rocket::for_each(*source, [&](const auto& pair) { res.emplace_back(G_string(pair.first));  });
+    rocket::for_each(*source, [&](const auto& p) { res.emplace_back(G_string(p.first));  });
     return res;
   }
 
@@ -798,7 +798,7 @@ opt<G_array> std_array_copy_values(const opt<G_object>& source)
     }
     G_array res;
     res.reserve(source->size());
-    rocket::for_each(*source, [&](const auto& pair) { res.emplace_back(pair.second);  });
+    rocket::for_each(*source, [&](const auto& p) { res.emplace_back(p.second);  });
     return res;
   }
 

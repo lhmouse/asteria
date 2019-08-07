@@ -486,11 +486,11 @@ Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
       }
     case gtype_array:
       {
-        return rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& elem) { elem.enumerate_variables(callback);  }), callback;
+        return rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& e) { e.enumerate_variables(callback);  }), callback;
       }
     case gtype_object:
       {
-        return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& pair) { pair.second.enumerate_variables(callback);  }), callback;
+        return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& p) { p.second.enumerate_variables(callback);  }), callback;
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");

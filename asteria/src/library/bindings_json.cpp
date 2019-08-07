@@ -168,9 +168,9 @@ namespace Asteria {
     G_object::const_iterator do_find_uncensored(const G_object& object, G_object::const_iterator from)
       {
         return std::find_if(from, object.end(),
-                            [](const auto& pair) { return pair.second.is_boolean() || pair.second.is_integer() || pair.second.is_real() ||
-                                                          pair.second.is_string() || pair.second.is_array() || pair.second.is_object() ||
-                                                          pair.second.is_null();  });
+                            [](const auto& p) { return p.second.is_boolean() || p.second.is_integer() || p.second.is_real() ||
+                                                       p.second.is_string() || p.second.is_array() || p.second.is_object() ||
+                                                       p.second.is_null();  });
       }
 
     std::ostream& do_format_scalar(std::ostream& ostrm, const Value& value)
