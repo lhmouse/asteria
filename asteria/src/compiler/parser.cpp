@@ -1604,7 +1604,7 @@ namespace Asteria {
         if(!kpunct) {
           return false;
         }
-        cow_vector<bool> by_refs;
+        cow_vector<bool> args_by_refs;
         for(;;) {
           auto qref = do_accept_reference_specifier_opt(tstrm);
           if(!qref) {
@@ -1612,12 +1612,12 @@ namespace Asteria {
           }
           bool succ = do_accept_expression(units, tstrm);
           if(!succ) {
-            if(by_refs.empty()) {
+            if(args_by_refs.empty()) {
               break;
             }
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
-          by_refs.emplace_back(*qref);
+          args_by_refs.emplace_back(*qref);
           // Look for the separator.
           kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
           if(!kpunct) {
@@ -1628,7 +1628,7 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
-        Xprunit::S_function_call xunit = { rocket::move(sloc), rocket::move(by_refs) };
+        Xprunit::S_function_call xunit = { rocket::move(sloc), rocket::move(args_by_refs) };
         units.emplace_back(rocket::move(xunit));
         return true;
       }

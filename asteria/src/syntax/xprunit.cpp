@@ -870,16 +870,16 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       };
 
     template<typename XcallT, typename... XaddT> AIR_Node::Status do_execute_function_common(Executive_Context& ctx,
-                                                                                             const Source_Location& sloc, const cow_vector<bool>& by_refs,
+                                                                                             const Source_Location& sloc, const cow_vector<bool>& args_by_refs,
                                                                                              XcallT&& xcall, XaddT&&... xadd)
       {
         Value value;
         // Allocate the argument vector.
         cow_vector<Reference> args;
-        args.resize(by_refs.size());
+        args.resize(args_by_refs.size());
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
           // Convert the argument to an rvalue if it shouldn't be passed by reference.
-          bool by_ref = *(it - args.rbegin() + by_refs.rbegin());
+          bool by_ref = *(it - args.rbegin() + args_by_refs.rbegin());
           if(!by_ref) {
             ctx.stack().open_top_reference().convert_to_rvalue();
           }
@@ -926,19 +926,19 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
       private:
         Source_Location m_sloc;
-        cow_vector<bool> m_by_refs;
+        cow_vector<bool> m_args_by_refs;
         Xprunit::TCO_Awareness m_tco_awareness;
 
       public:
-        AIR_execute_function_call_tail(const Source_Location& sloc, const cow_vector<bool>& by_refs, Xprunit::TCO_Awareness tco_awareness)
-          : m_sloc(sloc), m_by_refs(by_refs), m_tco_awareness(tco_awareness)
+        AIR_execute_function_call_tail(const Source_Location& sloc, const cow_vector<bool>& args_by_refs, Xprunit::TCO_Awareness tco_awareness)
+          : m_sloc(sloc), m_args_by_refs(args_by_refs), m_tco_awareness(tco_awareness)
           {
           }
 
       public:
         Status execute(Executive_Context& ctx) const override
           {
-            return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_tail, this->m_tco_awareness);
+            return do_execute_function_common(ctx, this->m_sloc, this->m_args_by_refs, do_xcall_tail, this->m_tco_awareness);
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -976,18 +976,18 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
       {
       private:
         Source_Location m_sloc;
-        cow_vector<bool> m_by_refs;
+        cow_vector<bool> m_args_by_refs;
 
       public:
-        AIR_execute_function_call_plain(const Source_Location& sloc, const cow_vector<bool>& by_refs)
-          : m_sloc(sloc), m_by_refs(by_refs)
+        AIR_execute_function_call_plain(const Source_Location& sloc, const cow_vector<bool>& args_by_refs)
+          : m_sloc(sloc), m_args_by_refs(args_by_refs)
           {
           }
 
       public:
         Status execute(Executive_Context& ctx) const override
           {
-            return do_execute_function_common(ctx, this->m_sloc, this->m_by_refs, do_xcall_plain, ctx.global());
+            return do_execute_function_common(ctx, this->m_sloc, this->m_args_by_refs, do_xcall_plain, ctx.global());
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2753,10 +2753,10 @@ void Xprunit::generate_code(cow_vector<uptr<AIR_Node>>& code,
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
         if(options.proper_tail_calls && (tco_awareness != tco_none)) {
-          code.emplace_back(rocket::make_unique<AIR_execute_function_call_tail>(altr.sloc, altr.by_refs, tco_awareness));
+          code.emplace_back(rocket::make_unique<AIR_execute_function_call_tail>(altr.sloc, altr.args_by_refs, tco_awareness));
         }
         else {
-          code.emplace_back(rocket::make_unique<AIR_execute_function_call_plain>(altr.sloc, altr.by_refs));
+          code.emplace_back(rocket::make_unique<AIR_execute_function_call_plain>(altr.sloc, altr.args_by_refs));
         }
         return;
       }
