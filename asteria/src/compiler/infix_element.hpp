@@ -101,6 +101,11 @@ class Infix_Element
         return static_cast<Index>(this->m_stor.index());
       }
 
+    void swap(Infix_Element& other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     // Returns the precedence of this element.
     Precedence tell_precedence() const noexcept;
     // Moves all units into `units`.
@@ -108,6 +113,11 @@ class Infix_Element
     // Returns a reference where new units will be appended.
     cow_vector<Xprunit>& open_junction() noexcept;
   };
+
+inline void swap(Infix_Element& lhs, Infix_Element& rhs) noexcept
+  {
+    return lhs.swap(rhs);
+  }
 
 }  // namespace Asteria
 

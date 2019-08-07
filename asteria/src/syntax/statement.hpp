@@ -172,9 +172,19 @@ class Statement
         return static_cast<Index>(this->m_stor.index());
       }
 
+    void swap(Statement& other) noexcept
+      {
+        this->m_stor.swap(other.m_stor);
+      }
+
     void generate_code(cow_vector<uptr<AIR_Node>>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
                        const Compiler_Options& options, bool end_of_func) const;
   };
+
+inline void swap(Statement& lhs, Statement& rhs) noexcept
+  {
+    return lhs.swap(rhs);
+  }
 
 }  // namespace Asteria
 
