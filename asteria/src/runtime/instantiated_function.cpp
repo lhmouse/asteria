@@ -26,29 +26,29 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     Executive_Context ctx_func(1, global, stack, this->m_zvarg, this->m_params, rocket::move(self), rocket::move(args));
     stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
-    auto status = Air_Node::status_next;
-    rocket::any_of(this->m_code, [&](const uptr<Air_Node>& q) { return (status = q->execute(ctx_func)) != Air_Node::status_next;  });
+    auto status = AIR_Node::status_next;
+    rocket::any_of(this->m_code, [&](const uptr<AIR_Node>& q) { return (status = q->execute(ctx_func)) != AIR_Node::status_next;  });
     switch(status) {
-    case Air_Node::status_next:
+    case AIR_Node::status_next:
       {
         // Return `null` if the control flow reached the end of the function.
         return self = Reference_Root::S_null();
       }
-    case Air_Node::status_return:
+    case AIR_Node::status_return:
       {
         // Return the reference at the top of `stack`.
         return self = rocket::move(stack.open_top_reference());
       }
-    case Air_Node::status_break_unspec:
-    case Air_Node::status_break_switch:
-    case Air_Node::status_break_while:
-    case Air_Node::status_break_for:
+    case AIR_Node::status_break_unspec:
+    case AIR_Node::status_break_switch:
+    case AIR_Node::status_break_while:
+    case AIR_Node::status_break_for:
       {
         ASTERIA_THROW_RUNTIME_ERROR("`break` statements are not allowed outside matching `switch` or loop statements.");
       }
-    case Air_Node::status_continue_unspec:
-    case Air_Node::status_continue_while:
-    case Air_Node::status_continue_for:
+    case AIR_Node::status_continue_unspec:
+    case AIR_Node::status_continue_while:
+    case AIR_Node::status_continue_for:
       {
         ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
       }
@@ -60,7 +60,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
   {
     // Enumerate all variables inside the function body.
-    rocket::for_each(this->m_code, [&](const uptr<Air_Node>& q) { q->enumerate_variables(callback);  });
+    rocket::for_each(this->m_code, [&](const uptr<AIR_Node>& q) { q->enumerate_variables(callback);  });
     return callback;
   }
 

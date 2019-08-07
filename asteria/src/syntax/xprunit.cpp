@@ -615,22 +615,22 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         return res;
       }
 
-    cow_vector<uptr<Air_Node>> do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx,
+    cow_vector<uptr<AIR_Node>> do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx,
                                                        const cow_vector<Xprunit>& units)
       {
-        cow_vector<uptr<Air_Node>> code;
+        cow_vector<uptr<AIR_Node>> code;
         rocket::ranged_xfor(units.begin(), units.end(), [&](auto it) { it->generate_code(code, options, Xprunit::tco_none, ctx);  },
                                                         [&](auto it) { it->generate_code(code, options, tco_awareness, ctx);  });
         return code;
       }
 
-    class Air_push_literal : public virtual Air_Node
+    class AIR_push_literal : public virtual AIR_Node
       {
       private:
         Value m_value;
 
       public:
-        explicit Air_push_literal(const Value& value)
+        explicit AIR_push_literal(const Value& value)
           : m_value(value)
           {
           }
@@ -641,7 +641,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // Push the constant.
             Reference_Root::S_constant xref = { this->m_value };
             ctx.stack().push_reference(rocket::move(xref));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -701,13 +701,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_find_named_reference_global : public virtual Air_Node
+    class AIR_find_named_reference_global : public virtual AIR_Node
       {
       private:
         phsh_string m_name;
 
       public:
-        Air_find_named_reference_global(const phsh_string& name)
+        AIR_find_named_reference_global(const phsh_string& name)
           : m_name(name)
           {
           }
@@ -721,7 +721,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("The identifier `", this->m_name, "` has not been declared yet.");
             }
             ctx.stack().push_reference(*qref);
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -729,14 +729,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_find_named_reference_local : public virtual Air_Node
+    class AIR_find_named_reference_local : public virtual AIR_Node
       {
       private:
         phsh_string m_name;
         ptrdiff_t m_depth;
 
       public:
-        Air_find_named_reference_local(const phsh_string& name, ptrdiff_t depth)
+        AIR_find_named_reference_local(const phsh_string& name, ptrdiff_t depth)
           : m_name(name), m_depth(depth)
           {
           }
@@ -753,7 +753,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("The identifier `", this->m_name, "` has not been declared yet.");
             }
             ctx.stack().push_reference(*qref);
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -761,13 +761,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_push_bound_reference : public virtual Air_Node
+    class AIR_push_bound_reference : public virtual AIR_Node
       {
       private:
         Reference m_ref;
 
       public:
-        explicit Air_push_bound_reference(const Reference& ref)
+        explicit AIR_push_bound_reference(const Reference& ref)
           : m_ref(ref)
           {
           }
@@ -777,7 +777,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           {
             // Push the reference as is.
             ctx.stack().push_reference(this->m_ref);
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -786,7 +786,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_closure_function : public virtual Air_Node
+    class AIR_execute_closure_function : public virtual AIR_Node
       {
       private:
         Compiler_Options m_options;
@@ -795,7 +795,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         cow_vector<Statement> m_body;
 
       public:
-        Air_execute_closure_function(const Compiler_Options& options,
+        AIR_execute_closure_function(const Compiler_Options& options,
                                      const Source_Location& sloc, const cow_vector<phsh_string>& params, const cow_vector<Statement>& body)
           : m_options(options),
             m_sloc(sloc), m_params(params), m_body(body)
@@ -806,7 +806,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         Status execute(Executive_Context& ctx) const override
           {
             // Generate code of the function body.
-            cow_vector<uptr<Air_Node>> code_body;
+            cow_vector<uptr<AIR_Node>> code_body;
             Analytic_Context ctx_func(1, ctx, this->m_params);
             rocket::ranged_xfor(this->m_body.begin(), this->m_body.end(), [&](auto it) { it->generate_code(code_body, nullptr, ctx_func, this->m_options, false);  },
                                                                           [&](auto it) { it->generate_code(code_body, nullptr, ctx_func, this->m_options, true);  });
@@ -822,7 +822,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ASTERIA_DEBUG_LOG("New closure function: ", *target);
             Reference_Root::S_temporary xref = { G_function(rocket::move(target)) };
             ctx.stack().push_reference(rocket::move(xref));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -830,21 +830,21 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    void do_execute_subexpression(Executive_Context& ctx, const cow_vector<uptr<Air_Node>>& code, bool assign)
+    void do_execute_subexpression(Executive_Context& ctx, const cow_vector<uptr<AIR_Node>>& code, bool assign)
       {
-        rocket::for_each(code, [&](const uptr<Air_Node>& q) { q->execute(ctx);  });
+        rocket::for_each(code, [&](const uptr<AIR_Node>& q) { q->execute(ctx);  });
         ctx.stack().pop_next_reference(assign);
       }
 
-    class Air_execute_branch : public virtual Air_Node
+    class AIR_execute_branch : public virtual AIR_Node
       {
       private:
-        cow_vector<uptr<Air_Node>> m_code_true;
-        cow_vector<uptr<Air_Node>> m_code_false;
+        cow_vector<uptr<AIR_Node>> m_code_true;
+        cow_vector<uptr<AIR_Node>> m_code_false;
         bool m_assign;
 
       public:
-        Air_execute_branch(cow_vector<uptr<Air_Node>>&& code_true, cow_vector<uptr<Air_Node>>&& code_false, bool assign)
+        AIR_execute_branch(cow_vector<uptr<AIR_Node>>&& code_true, cow_vector<uptr<AIR_Node>>&& code_false, bool assign)
           : m_code_true(rocket::move(code_true)), m_code_false(rocket::move(code_false)), m_assign(assign)
           {
           }
@@ -861,7 +861,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               // Evaluate the false branch. If the branch is empty, leave the condition on the ctx.stack().
               do_execute_subexpression(ctx, this->m_code_false, this->m_assign);
             }
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -869,7 +869,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    template<typename XcallT, typename... XaddT> Air_Node::Status do_execute_function_common(Executive_Context& ctx,
+    template<typename XcallT, typename... XaddT> AIR_Node::Status do_execute_function_common(Executive_Context& ctx,
                                                                                              const Source_Location& sloc, const cow_vector<bool>& by_refs,
                                                                                              XcallT&& xcall, XaddT&&... xadd)
       {
@@ -898,7 +898,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
                                               rocket::forward<XaddT>(xadd)...);
       }
 
-    Air_Node::Status do_xcall_tail(const Source_Location& sloc, const cow_string& func,
+    AIR_Node::Status do_xcall_tail(const Source_Location& sloc, const cow_string& func,
                                    const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
                                    Xprunit::TCO_Awareness tco_awareness)
       {
@@ -919,10 +919,10 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
         Reference_Root::S_tail_call xref = { sloc, func, flags, target, rocket::move(args_self) };
         self = rocket::move(xref);
-        return Air_Node::status_return;
+        return AIR_Node::status_return;
       }
 
-    class Air_execute_function_call_tail : public virtual Air_Node
+    class AIR_execute_function_call_tail : public virtual AIR_Node
       {
       private:
         Source_Location m_sloc;
@@ -930,7 +930,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         Xprunit::TCO_Awareness m_tco_awareness;
 
       public:
-        Air_execute_function_call_tail(const Source_Location& sloc, const cow_vector<bool>& by_refs, Xprunit::TCO_Awareness tco_awareness)
+        AIR_execute_function_call_tail(const Source_Location& sloc, const cow_vector<bool>& by_refs, Xprunit::TCO_Awareness tco_awareness)
           : m_sloc(sloc), m_by_refs(by_refs), m_tco_awareness(tco_awareness)
           {
           }
@@ -946,7 +946,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    Air_Node::Status do_xcall_plain(const Source_Location& sloc, const cow_string& func,
+    AIR_Node::Status do_xcall_plain(const Source_Location& sloc, const cow_string& func,
                                     const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
                                     const Global_Context& global)
       try {
@@ -956,7 +956,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         self.finish_call(global);
         // The result will have been stored into `self`.
         ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
-        return Air_Node::status_next;
+        return AIR_Node::status_next;
       }
       catch(Exception& except) {
         ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
@@ -972,14 +972,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         throw except;
       }
 
-    class Air_execute_function_call_plain : public virtual Air_Node
+    class AIR_execute_function_call_plain : public virtual AIR_Node
       {
       private:
         Source_Location m_sloc;
         cow_vector<bool> m_by_refs;
 
       public:
-        Air_execute_function_call_plain(const Source_Location& sloc, const cow_vector<bool>& by_refs)
+        AIR_execute_function_call_plain(const Source_Location& sloc, const cow_vector<bool>& by_refs)
           : m_sloc(sloc), m_by_refs(by_refs)
           {
           }
@@ -995,13 +995,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_member_access : public virtual Air_Node
+    class AIR_execute_member_access : public virtual AIR_Node
       {
       private:
         phsh_string m_name;
 
       public:
-        explicit Air_execute_member_access(const phsh_string& name)
+        explicit AIR_execute_member_access(const phsh_string& name)
           : m_name(name)
           {
           }
@@ -1012,7 +1012,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // Append a modifier.
             Reference_Modifier::S_object_key xmod = { this->m_name };
             ctx.stack().open_top_reference().zoom_in(rocket::move(xmod));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1020,13 +1020,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_postfix_inc : public virtual Air_Node
+    class AIR_execute_operator_rpn_postfix_inc : public virtual AIR_Node
       {
       private:
         //
 
       public:
-        Air_execute_operator_rpn_postfix_inc()
+        AIR_execute_operator_rpn_postfix_inc()
           // :
           {
           }
@@ -1051,7 +1051,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Postfix increment is not defined for `", lhs, "`.");
             }
             // The operand has been modified in place. No further action needs to be taken.
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1059,13 +1059,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_postfix_dec : public virtual Air_Node
+    class AIR_execute_operator_rpn_postfix_dec : public virtual AIR_Node
       {
       private:
         //
 
       public:
-        Air_execute_operator_rpn_postfix_dec()
+        AIR_execute_operator_rpn_postfix_dec()
           // :
           {
           }
@@ -1090,7 +1090,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Postfix decrement is not defined for `", lhs, "`.");
             }
             // The operand has been modified in place. No further action needs to be taken.
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1098,13 +1098,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_postfix_subscr : public virtual Air_Node
+    class AIR_execute_operator_rpn_postfix_subscr : public virtual AIR_Node
       {
       private:
         //
 
       public:
-        Air_execute_operator_rpn_postfix_subscr()
+        AIR_execute_operator_rpn_postfix_subscr()
           // :
           {
           }
@@ -1131,7 +1131,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("The value `", rhs, "` cannot be used as a subscript.");
             }
             // The operand has been modified in place. No further action needs to be taken.
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1139,13 +1139,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_pos : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_pos : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_pos(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_pos(bool assign)
           : m_assign(assign)
           {
           }
@@ -1158,7 +1158,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // Copy the operand to create a temporary value, then return it.
             // N.B. This is one of the few operators that work on all types.
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1166,13 +1166,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_neg : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_neg : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_neg(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_neg(bool assign)
           : m_assign(assign)
           {
           }
@@ -1195,7 +1195,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1203,13 +1203,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_notb : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_notb : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_notb(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_notb(bool assign)
           : m_assign(assign)
           {
           }
@@ -1232,7 +1232,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1240,13 +1240,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_notl : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_notl : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_notl(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_notl(bool assign)
           : m_assign(assign)
           {
           }
@@ -1259,7 +1259,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // Perform logical NOT operation on the operand to create a temporary value, then return it.
             // N.B. This is one of the few operators that work on all types.
             ctx.stack().set_temporary_reference(this->m_assign, do_operator_not(rhs.test()));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1267,13 +1267,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_inc : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_inc : public virtual AIR_Node
       {
       private:
         //
 
       public:
-        Air_execute_operator_rpn_prefix_inc()
+        AIR_execute_operator_rpn_prefix_inc()
           // :
           {
           }
@@ -1296,7 +1296,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
             }
             // The operand has been modified in place. No further action needs to be taken.
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1304,13 +1304,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_dec : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_dec : public virtual AIR_Node
       {
       private:
         //
 
       public:
-        Air_execute_operator_rpn_prefix_dec()
+        AIR_execute_operator_rpn_prefix_dec()
           // :
           {
           }
@@ -1333,7 +1333,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
             }
             // The operand has been modified in place. No further action needs to be taken.
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1341,13 +1341,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_unset : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_unset : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_unset(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_unset(bool assign)
           : m_assign(assign)
           {
           }
@@ -1359,7 +1359,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             auto rhs = ctx.stack().get_top_reference().unset();
             // Unset the reference and return the old value.
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1367,13 +1367,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_lengthof : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_lengthof : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_lengthof(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_lengthof(bool assign)
           : m_assign(assign)
           {
           }
@@ -1401,7 +1401,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, G_integer(nelems));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1409,13 +1409,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_typeof : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_typeof : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_typeof(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_typeof(bool assign)
           : m_assign(assign)
           {
           }
@@ -1428,7 +1428,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // Return the type name of the operand.
             // N.B. This is one of the few operators that work on all types.
             ctx.stack().set_temporary_reference(this->m_assign, G_string(rocket::sref(rhs.gtype_name())));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1436,13 +1436,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_sqrt : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_sqrt : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_sqrt(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_sqrt(bool assign)
           : m_assign(assign)
           {
           }
@@ -1465,7 +1465,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1473,13 +1473,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_isnan : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_isnan : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_isnan(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_isnan(bool assign)
           : m_assign(assign)
           {
           }
@@ -1502,7 +1502,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1510,13 +1510,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_isinf : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_isinf : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_isinf(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_isinf(bool assign)
           : m_assign(assign)
           {
           }
@@ -1539,7 +1539,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1547,13 +1547,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_abs : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_abs : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_abs(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_abs(bool assign)
           : m_assign(assign)
           {
           }
@@ -1576,7 +1576,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1584,13 +1584,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_signb : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_signb : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_signb(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_signb(bool assign)
           : m_assign(assign)
           {
           }
@@ -1613,7 +1613,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1621,13 +1621,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_round : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_round : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_round(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_round(bool assign)
           : m_assign(assign)
           {
           }
@@ -1650,7 +1650,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1658,13 +1658,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_floor : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_floor : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_floor(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_floor(bool assign)
           : m_assign(assign)
           {
           }
@@ -1687,7 +1687,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1695,13 +1695,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_ceil : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_ceil : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_ceil(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_ceil(bool assign)
           : m_assign(assign)
           {
           }
@@ -1724,7 +1724,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1732,13 +1732,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_trunc : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_trunc : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_trunc(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_trunc(bool assign)
           : m_assign(assign)
           {
           }
@@ -1761,7 +1761,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1769,13 +1769,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_iround : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_iround : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_iround(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_iround(bool assign)
           : m_assign(assign)
           {
           }
@@ -1798,7 +1798,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1806,13 +1806,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_ifloor : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_ifloor : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_ifloor(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_ifloor(bool assign)
           : m_assign(assign)
           {
           }
@@ -1835,7 +1835,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1843,13 +1843,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_iceil : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_iceil : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_iceil(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_iceil(bool assign)
           : m_assign(assign)
           {
           }
@@ -1872,7 +1872,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1880,13 +1880,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_prefix_itrunc : public virtual Air_Node
+    class AIR_execute_operator_rpn_prefix_itrunc : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_prefix_itrunc(bool assign)
+        explicit AIR_execute_operator_rpn_prefix_itrunc(bool assign)
           : m_assign(assign)
           {
           }
@@ -1909,7 +1909,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1917,14 +1917,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_cmp_xeq : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_cmp_xeq : public virtual AIR_Node
       {
       private:
         bool m_assign;
         bool m_negative;
 
       public:
-        Air_execute_operator_rpn_infix_cmp_xeq(bool assign, bool negative)
+        AIR_execute_operator_rpn_infix_cmp_xeq(bool assign, bool negative)
           : m_assign(assign), m_negative(negative)
           {
           }
@@ -1941,7 +1941,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             auto comp = lhs.compare(rhs);
             rhs = G_boolean((comp == Value::compare_equal) != this->m_negative);
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1949,7 +1949,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_cmp_xrel : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_cmp_xrel : public virtual AIR_Node
       {
       private:
         bool m_assign;
@@ -1957,7 +1957,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         bool m_negative;
 
       public:
-        Air_execute_operator_rpn_infix_cmp_xrel(bool assign, Value::Compare expect, bool negative)
+        AIR_execute_operator_rpn_infix_cmp_xrel(bool assign, Value::Compare expect, bool negative)
           : m_assign(assign), m_expect(expect), m_negative(negative)
           {
           }
@@ -1977,7 +1977,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             }
             rhs = G_boolean((comp == this->m_expect) != this->m_negative);
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1985,13 +1985,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_cmp_3way : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_cmp_3way : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_cmp_3way(bool assign)
+        explicit AIR_execute_operator_rpn_infix_cmp_3way(bool assign)
           : m_assign(assign)
           {
           }
@@ -2019,7 +2019,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               rhs = G_integer(0);
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2027,13 +2027,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_add : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_add : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_add(bool assign)
+        explicit AIR_execute_operator_rpn_infix_add(bool assign)
           : m_assign(assign)
           {
           }
@@ -2068,7 +2068,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2076,13 +2076,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_sub : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_sub : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_sub(bool assign)
+        explicit AIR_execute_operator_rpn_infix_sub(bool assign)
           : m_assign(assign)
           {
           }
@@ -2112,7 +2112,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2120,13 +2120,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_mul : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_mul : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_mul(bool assign)
+        explicit AIR_execute_operator_rpn_infix_mul(bool assign)
           : m_assign(assign)
           {
           }
@@ -2165,7 +2165,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2173,13 +2173,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_div : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_div : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_div(bool assign)
+        explicit AIR_execute_operator_rpn_infix_div(bool assign)
           : m_assign(assign)
           {
           }
@@ -2204,7 +2204,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2212,13 +2212,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_mod : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_mod : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_mod(bool assign)
+        explicit AIR_execute_operator_rpn_infix_mod(bool assign)
           : m_assign(assign)
           {
           }
@@ -2243,7 +2243,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2251,13 +2251,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_sll : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_sll : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_sll(bool assign)
+        explicit AIR_execute_operator_rpn_infix_sll(bool assign)
           : m_assign(assign)
           {
           }
@@ -2285,7 +2285,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2293,13 +2293,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_srl : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_srl : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_srl(bool assign)
+        explicit AIR_execute_operator_rpn_infix_srl(bool assign)
           : m_assign(assign)
           {
           }
@@ -2327,7 +2327,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2335,13 +2335,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_sla : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_sla : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_sla(bool assign)
+        explicit AIR_execute_operator_rpn_infix_sla(bool assign)
           : m_assign(assign)
           {
           }
@@ -2369,7 +2369,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2377,13 +2377,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_sra : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_sra : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_sra(bool assign)
+        explicit AIR_execute_operator_rpn_infix_sra(bool assign)
           : m_assign(assign)
           {
           }
@@ -2410,7 +2410,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2418,13 +2418,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_andb : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_andb : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_andb(bool assign)
+        explicit AIR_execute_operator_rpn_infix_andb(bool assign)
           : m_assign(assign)
           {
           }
@@ -2450,7 +2450,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2458,13 +2458,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_orb : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_orb : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_orb(bool assign)
+        explicit AIR_execute_operator_rpn_infix_orb(bool assign)
           : m_assign(assign)
           {
           }
@@ -2490,7 +2490,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2498,13 +2498,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_xorb : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_xorb : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_rpn_infix_xorb(bool assign)
+        explicit AIR_execute_operator_rpn_infix_xorb(bool assign)
           : m_assign(assign)
           {
           }
@@ -2530,7 +2530,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2538,13 +2538,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_rpn_infix_assign : public virtual Air_Node
+    class AIR_execute_operator_rpn_infix_assign : public virtual AIR_Node
       {
       private:
         //
 
       public:
-        Air_execute_operator_rpn_infix_assign()
+        AIR_execute_operator_rpn_infix_assign()
           // :
           {
           }
@@ -2557,7 +2557,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             ctx.stack().pop_reference();
             // Copy the value to the LHS operand which is write-only. `altr.assign` is ignored.
             ctx.stack().set_temporary_reference(true, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2565,13 +2565,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_unnamed_array : public virtual Air_Node
+    class AIR_execute_unnamed_array : public virtual AIR_Node
       {
       private:
         size_t m_nelems;
 
       public:
-        explicit Air_execute_unnamed_array(size_t nelems)
+        explicit AIR_execute_unnamed_array(size_t nelems)
           : m_nelems(nelems)
           {
           }
@@ -2589,7 +2589,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // Push the array as a temporary.
             Reference_Root::S_temporary xref = { rocket::move(array) };
             ctx.stack().push_reference(rocket::move(xref));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2597,13 +2597,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_unnamed_object : public virtual Air_Node
+    class AIR_execute_unnamed_object : public virtual AIR_Node
       {
       private:
         cow_vector<phsh_string> m_keys;
 
       public:
-        explicit Air_execute_unnamed_object(const cow_vector<phsh_string>& keys)
+        explicit AIR_execute_unnamed_object(const cow_vector<phsh_string>& keys)
           : m_keys(keys)
           {
           }
@@ -2621,7 +2621,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
             // Push the object as a temporary.
             Reference_Root::S_temporary xref = { rocket::move(object) };
             ctx.stack().push_reference(rocket::move(xref));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2629,14 +2629,14 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_coalescence : public virtual Air_Node
+    class AIR_execute_coalescence : public virtual AIR_Node
       {
       private:
-        cow_vector<uptr<Air_Node>> m_code_null;
+        cow_vector<uptr<AIR_Node>> m_code_null;
         bool m_assign;
 
       public:
-        Air_execute_coalescence(cow_vector<uptr<Air_Node>>&& code_null, bool assign)
+        AIR_execute_coalescence(cow_vector<uptr<AIR_Node>>&& code_null, bool assign)
           : m_code_null(rocket::move(code_null)), m_assign(assign)
           {
           }
@@ -2649,7 +2649,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               // Evaluate the null branch. If the branch is empty, leave the condition on the ctx.stack().
               do_execute_subexpression(ctx, this->m_code_null, this->m_assign);
             }
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2657,13 +2657,13 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
           }
       };
 
-    class Air_execute_operator_fma : public virtual Air_Node
+    class AIR_execute_operator_fma : public virtual AIR_Node
       {
       private:
         bool m_assign;
 
       public:
-        explicit Air_execute_operator_fma(bool assign)
+        explicit AIR_execute_operator_fma(bool assign)
           : m_assign(assign)
           {
           }
@@ -2686,7 +2686,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
               ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
             }
             ctx.stack().set_temporary_reference(this->m_assign, rocket::move(rhs));
-            return Air_Node::status_next;
+            return AIR_Node::status_next;
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -2696,7 +2696,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }  // namespace
 
-void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
+void Xprunit::generate_code(cow_vector<uptr<AIR_Node>>& code,
                             const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
@@ -2704,7 +2704,7 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
       {
         const auto& altr = this->m_stor.as<index_literal>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_push_literal>(altr.value));
+        code.emplace_back(rocket::make_unique<AIR_push_literal>(altr.value));
         return;
       }
     case index_named_reference:
@@ -2719,15 +2719,15 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
                                  [&](const Abstract_Context& r) { return ++depth, (qref = r.get_named_reference_opt(altr.name)) != nullptr;  });
         if(!qref) {
           // No name has been found so far. Assume that the name will be found in the global context later.
-          code.emplace_back(rocket::make_unique<Air_find_named_reference_global>(altr.name));
+          code.emplace_back(rocket::make_unique<AIR_find_named_reference_global>(altr.name));
         }
         else if(qctx->is_analytic()) {
           // A reference declared later has been found. Record the context depth for later lookups.
-          code.emplace_back(rocket::make_unique<Air_find_named_reference_local>(altr.name, depth));
+          code.emplace_back(rocket::make_unique<AIR_find_named_reference_local>(altr.name, depth));
         }
         else {
           // A reference declared previously has been found. Bind it immediately.
-          code.emplace_back(rocket::make_unique<Air_push_bound_reference>(*qref));
+          code.emplace_back(rocket::make_unique<AIR_push_bound_reference>(*qref));
         }
         return;
       }
@@ -2735,7 +2735,7 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
       {
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_closure_function>(options, altr.sloc, altr.params, altr.body));
+        code.emplace_back(rocket::make_unique<AIR_execute_closure_function>(options, altr.sloc, altr.params, altr.body));
         return;
       }
     case index_branch:
@@ -2745,7 +2745,7 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
         auto code_true = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_true);
         auto code_false = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_false);
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_branch>(rocket::move(code_true), rocket::move(code_false), altr.assign));
+        code.emplace_back(rocket::make_unique<AIR_execute_branch>(rocket::move(code_true), rocket::move(code_false), altr.assign));
         return;
       }
     case index_function_call:
@@ -2753,10 +2753,10 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
         if(options.proper_tail_calls && (tco_awareness != tco_none)) {
-          code.emplace_back(rocket::make_unique<Air_execute_function_call_tail>(altr.sloc, altr.by_refs, tco_awareness));
+          code.emplace_back(rocket::make_unique<AIR_execute_function_call_tail>(altr.sloc, altr.by_refs, tco_awareness));
         }
         else {
-          code.emplace_back(rocket::make_unique<Air_execute_function_call_plain>(altr.sloc, altr.by_refs));
+          code.emplace_back(rocket::make_unique<AIR_execute_function_call_plain>(altr.sloc, altr.by_refs));
         }
         return;
       }
@@ -2764,7 +2764,7 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
       {
         const auto& altr = this->m_stor.as<index_member_access>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_member_access>(altr.name));
+        code.emplace_back(rocket::make_unique<AIR_execute_member_access>(altr.name));
         return;
       }
     case index_operator_rpn:
@@ -2773,227 +2773,227 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
         switch(altr.xop) {
         case xop_postfix_inc:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_inc>());
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_postfix_inc>());
             return;
           }
         case xop_postfix_dec:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_dec>());
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_postfix_dec>());
             return;
           }
         case xop_postfix_subscr:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_postfix_subscr>());
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_postfix_subscr>());
             return;
           }
         case xop_prefix_pos:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_pos>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_pos>(altr.assign));
             return;
           }
         case xop_prefix_neg:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_neg>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_neg>(altr.assign));
             return;
           }
         case xop_prefix_notb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_notb>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_notb>(altr.assign));
             return;
           }
         case xop_prefix_notl:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_notl>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_notl>(altr.assign));
             return;
           }
         case xop_prefix_inc:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_inc>());
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_inc>());
             return;
           }
         case xop_prefix_dec:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_dec>());
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_dec>());
             return;
           }
         case xop_prefix_unset:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_unset>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_unset>(altr.assign));
             return;
           }
         case xop_prefix_lengthof:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_lengthof>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_lengthof>(altr.assign));
             return;
           }
         case xop_prefix_typeof:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_typeof>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_typeof>(altr.assign));
             return;
           }
         case xop_prefix_sqrt:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_sqrt>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_sqrt>(altr.assign));
             return;
           }
         case xop_prefix_isnan:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_isnan>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_isnan>(altr.assign));
             return;
           }
         case xop_prefix_isinf:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_isinf>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_isinf>(altr.assign));
             return;
           }
         case xop_prefix_abs:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_abs>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_abs>(altr.assign));
             return;
           }
         case xop_prefix_signb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_signb>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_signb>(altr.assign));
             return;
           }
         case xop_prefix_round:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_round>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_round>(altr.assign));
             return;
           }
         case xop_prefix_floor:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_floor>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_floor>(altr.assign));
             return;
           }
         case xop_prefix_ceil:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_ceil>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_ceil>(altr.assign));
             return;
           }
         case xop_prefix_trunc:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_trunc>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_trunc>(altr.assign));
             return;
           }
         case xop_prefix_iround:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_iround>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_iround>(altr.assign));
             return;
           }
         case xop_prefix_ifloor:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_ifloor>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_ifloor>(altr.assign));
             return;
           }
         case xop_prefix_iceil:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_iceil>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_iceil>(altr.assign));
             return;
           }
         case xop_prefix_itrunc:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_prefix_itrunc>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_prefix_itrunc>(altr.assign));
             return;
           }
         case xop_infix_cmp_eq:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xeq>(altr.assign, false));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_cmp_xeq>(altr.assign, false));
             return;
           }
         case xop_infix_cmp_ne:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xeq>(altr.assign, true));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_cmp_xeq>(altr.assign, true));
             return;
           }
         case xop_infix_cmp_lt:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_less, false));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_less, false));
             return;
           }
         case xop_infix_cmp_gt:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_greater, false));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_greater, false));
             return;
           }
         case xop_infix_cmp_lte:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_greater, true));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_greater, true));
             return;
           }
         case xop_infix_cmp_gte:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_less, true));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_cmp_xrel>(altr.assign, Value::compare_less, true));
             return;
           }
         case xop_infix_cmp_3way:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_cmp_3way>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_cmp_3way>(altr.assign));
             return;
           }
         case xop_infix_add:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_add>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_add>(altr.assign));
             return;
           }
         case xop_infix_sub:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_sub>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_sub>(altr.assign));
             return;
           }
         case xop_infix_mul:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_mul>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_mul>(altr.assign));
             return;
           }
         case xop_infix_div:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_div>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_div>(altr.assign));
             return;
           }
         case xop_infix_mod:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_mod>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_mod>(altr.assign));
             return;
           }
         case xop_infix_sll:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_sll>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_sll>(altr.assign));
             return;
           }
         case xop_infix_srl:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_srl>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_srl>(altr.assign));
             return;
           }
         case xop_infix_sla:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_sla>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_sla>(altr.assign));
             return;
           }
         case xop_infix_sra:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_sra>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_sra>(altr.assign));
             return;
           }
         case xop_infix_andb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_andb>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_andb>(altr.assign));
             return;
           }
         case xop_infix_orb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_orb>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_orb>(altr.assign));
             return;
           }
         case xop_infix_xorb:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_xorb>(altr.assign));
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_xorb>(altr.assign));
             return;
           }
         case xop_infix_assign:
           {
-            code.emplace_back(rocket::make_unique<Air_execute_operator_rpn_infix_assign>());
+            code.emplace_back(rocket::make_unique<AIR_execute_operator_rpn_infix_assign>());
             return;
           }
         default:
@@ -3004,14 +3004,14 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
       {
         const auto& altr = this->m_stor.as<index_unnamed_array>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_unnamed_array>(altr.nelems));
+        code.emplace_back(rocket::make_unique<AIR_execute_unnamed_array>(altr.nelems));
         return;
       }
     case index_unnamed_object:
       {
         const auto& altr = this->m_stor.as<index_unnamed_object>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_unnamed_object>(altr.keys));
+        code.emplace_back(rocket::make_unique<AIR_execute_unnamed_object>(altr.keys));
         return;
       }
     case index_coalescence:
@@ -3020,14 +3020,14 @@ void Xprunit::generate_code(cow_vector<uptr<Air_Node>>& code,
         // Generate code.
         auto code_null = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_null);
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_coalescence>(rocket::move(code_null), altr.assign));
+        code.emplace_back(rocket::make_unique<AIR_execute_coalescence>(rocket::move(code_null), altr.assign));
         return;
       }
     case index_operator_fma:
       {
         const auto& altr = this->m_stor.as<index_operator_fma>();
         // Encode arguments.
-        code.emplace_back(rocket::make_unique<Air_execute_operator_fma>(altr.assign));
+        code.emplace_back(rocket::make_unique<AIR_execute_operator_fma>(altr.assign));
         return;
       }
     default:

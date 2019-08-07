@@ -34,7 +34,7 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& sbuf, const c
     cow_vector<phsh_string> params;
     params.emplace_back(rocket::sref("..."));
     // Generate code.
-    cow_vector<uptr<Air_Node>> code;
+    cow_vector<uptr<AIR_Node>> code;
     Analytic_Context ctx(1, params);
     rocket::ranged_xfor(body.begin(), body.end(), [&](auto it) { it->generate_code(code, nullptr, ctx, options, false);  },
                                                   [&](auto it) { it->generate_code(code, nullptr, ctx, options, true);  });

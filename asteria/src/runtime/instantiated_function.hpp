@@ -16,11 +16,11 @@ class Instantiated_Function : public Abstract_Function
     rcobj<Variadic_Arguer> m_zvarg;
     cow_vector<phsh_string> m_params;
 
-    cow_vector<uptr<Air_Node>> m_code;
+    cow_vector<uptr<AIR_Node>> m_code;
 
   public:
     Instantiated_Function(const Source_Location& sloc, const cow_string& func, const cow_vector<phsh_string>& params,
-                          cow_vector<uptr<Air_Node>>&& code)
+                          cow_vector<uptr<AIR_Node>>&& code)
       : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params),
         m_code(rocket::move(code))
       {

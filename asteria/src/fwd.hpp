@@ -76,7 +76,7 @@ class Random_Number_Generator;
 class Generational_Collector;
 class Variadic_Arguer;
 class Instantiated_Function;
-class Air_Node;
+class AIR_Node;
 class Backtrace_Frame;
 class Exception;
 

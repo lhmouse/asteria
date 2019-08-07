@@ -6,7 +6,7 @@
 
 namespace Asteria {
 
-Air_Node::~Air_Node()
+AIR_Node::~AIR_Node()
   {
   }
 

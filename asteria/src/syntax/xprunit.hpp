@@ -180,7 +180,7 @@ class Xprunit
         return static_cast<Index>(this->m_stor.index());
       }
 
-    void generate_code(cow_vector<uptr<Air_Node>>& code,
+    void generate_code(cow_vector<uptr<AIR_Node>>& code,
                        const Compiler_Options& options, TCO_Awareness tco_awareness, const Analytic_Context& ctx) const;
   };
 

@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Air_Node
+class AIR_Node
   {
   public:
     enum Status : uint8_t
@@ -25,10 +25,10 @@ class Air_Node
       };
 
   public:
-    constexpr Air_Node() noexcept
+    constexpr AIR_Node() noexcept
       {
       }
-    virtual ~Air_Node();
+    virtual ~AIR_Node();
 
   public:
     virtual Status execute(Executive_Context& ctx) const = 0;
