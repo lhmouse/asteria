@@ -215,8 +215,8 @@ template<typename... alternativesT> class variant
     static constexpr size_t alternative_size = sizeof...(alternativesT);
 
   private:
-    typename lowest_unsigned<alternative_size - 1>::type m_index;
     typename aligned_union<1, alternativesT...>::type m_stor[1];
+    typename lowest_unsigned<alternative_size - 1>::type m_index;
 
   public:
     // 23.7.3.1, constructors
