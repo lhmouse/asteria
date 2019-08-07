@@ -16,7 +16,7 @@ class Executive_Context : public Abstract_Context
 
     std::reference_wrapper<const Global_Context> m_global;
     std::reference_wrapper<Evaluation_Stack> m_stack;
-    const rcobj<Variadic_Arguer>& m_zvarg;
+    std::reference_wrapper<const rcobj<Variadic_Arguer>> m_zvarg;
 
   public:
     Executive_Context(int, const Global_Context& xglobal, Evaluation_Stack& xstack, const rcobj<Variadic_Arguer>& xzvarg,  // for functions

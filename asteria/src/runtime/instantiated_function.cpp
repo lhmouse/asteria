@@ -16,11 +16,9 @@ Instantiated_Function::~Instantiated_Function()
   {
   }
 
-void Instantiated_Function::do_compile(const Compiler_Options& options, const Source_Location& sloc, const cow_string& name,
-                                       const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts)
+rcobj<Variadic_Arguer> Instantiated_Function::do_create_zvarg(const Source_Location& sloc, const cow_string& name) const
   {
-    // Initialize the zero-ary argument getter, which also stores the source location and prototype string.
-    // The prototype should look the same with what exists in the source code.
+    // Create a zero-ary argument getter, which also stores the source location and prototype string.
     cow_string func;
     func << name << '(';
     auto epos = this->m_params.size() - 1;
@@ -31,20 +29,25 @@ void Instantiated_Function::do_compile(const Compiler_Options& options, const So
       func << this->m_params[epos];
     }
     func << ')';
-    this->m_zvarg = rocket::make_refcnt<Variadic_Arguer>(sloc, rocket::move(func));
+    return rocket::make_refcnt<Variadic_Arguer>(sloc, rocket::move(func));
+  }
+
+cow_vector<AIR_Node> Instantiated_Function::do_compile(const Compiler_Options& options, const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts) const
+  {
+    cow_vector<AIR_Node> code_func;
     // Generate code for the function body.
-    // XXX: This looks very similar to 'statement.cpp'. Can we get rid of this code duplication?
     Analytic_Context ctx_func(1, ctx_opt, this->m_params);
-    epos = stmts.size() - 1;
+    auto epos = stmts.size() - 1;
     if(epos != SIZE_MAX) {
       // Statements other than the last one cannot be the end of function.
       for(size_t i = 0; i != epos; ++i) {
-        stmts[i].generate_code(this->m_code, nullptr, ctx_func, options, stmts[i+1].is_empty_return());
+        stmts[i].generate_code(code_func, nullptr, ctx_func, options, stmts[i+1].is_empty_return());
       }
       // The last statement may be TCO'd.
-      stmts[epos].generate_code(this->m_code, nullptr, ctx_func, options, true);
+      stmts[epos].generate_code(code_func, nullptr, ctx_func, options, true);
     }
     // TODO: Insert optimization passes here.
+    return code_func;
   }
 
 std::ostream& Instantiated_Function::describe(std::ostream& ostrm) const

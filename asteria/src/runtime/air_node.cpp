@@ -85,9 +85,13 @@ namespace Asteria {
         return AIR_Node::status_next;
       }
 
-    template<typename XcallT, typename... XaddT> AIR_Node::Status do_execute_function_common(Executive_Context& ctx,
-                                                                                             const Source_Location& sloc, const cow_vector<bool>& args_by_refs,
-                                                                                             XcallT&& xcall, XaddT&&... xadd)
+    struct S_xfunction_call
+      {
+        rcobj<Abstract_Function> target;
+        cow_vector<Reference> args;
+      };
+
+    S_xfunction_call do_unpack_function_call(Executive_Context& ctx, const cow_vector<bool>& args_by_refs)
       {
         Value value;
         // Allocate the argument vector.
@@ -108,49 +112,418 @@ namespace Asteria {
         if(!value.is_function()) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", value, "` which is not a function.");
         }
-        // Call the function now.
-        return rocket::forward<XcallT>(xcall)(sloc, ctx.zvarg()->get_function_signature(),  // sloc, func,
-                                              value.as_function(), ctx.stack().open_top_reference().zoom_out(), rocket::move(args),  // target, self, args,
-                                              rocket::forward<XaddT>(xadd)...);
-      }
-
-    AIR_Node::Status do_xcall_tail(const Source_Location& sloc, const cow_string& func,
-                                   const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
-                                   uint32_t flags)
-      {
         // Pack arguments.
-        auto& args_self = args;
-        args_self.emplace_back(rocket::move(self));
-        // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
-        Reference_Root::S_tail_call xref = { sloc, func, flags, target, rocket::move(args_self) };
-        self = rocket::move(xref);
-        return AIR_Node::status_return;
+        return { rocket::move(value.mut_function()), rocket::move(args) };
       }
 
-    AIR_Node::Status do_xcall_plain(const Source_Location& sloc, const cow_string& func,
-                                    const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
-                                    const Global_Context& global)
-      try {
-        ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
-        // Call the function now.
-        target->invoke(self, global, rocket::move(args));
-        self.finish_call(global);
-        // The result will have been stored into `self`.
-        ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
-        return AIR_Node::status_next;
+    ROCKET_PURE_FUNCTION G_boolean do_operator_not(const G_boolean& rhs)
+      {
+        return !rhs;
       }
-      catch(Exception& except) {
-        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
-        // Append the current frame and rethrow the exception.
-        except.push_frame_func(sloc, func);
-        throw;
+
+    ROCKET_PURE_FUNCTION G_boolean do_operator_and(const G_boolean& lhs, const G_boolean& rhs)
+      {
+        return lhs & rhs;
       }
-      catch(const std::exception& stdex) {
-        ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
-        // Translate the exception, append the current frame, and throw the new exception.
-        Exception except(stdex);
-        except.push_frame_func(sloc, func);
-        throw except;
+
+    ROCKET_PURE_FUNCTION G_boolean do_operator_or(const G_boolean& lhs, const G_boolean& rhs)
+      {
+        return lhs | rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_boolean do_operator_xor(const G_boolean& lhs, const G_boolean& rhs)
+      {
+        return lhs ^ rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_neg(const G_integer& rhs)
+      {
+        if(rhs == INT64_MIN) {
+          ASTERIA_THROW_RUNTIME_ERROR("The opposite of `", rhs, "` cannot be represented as an `integer`.");
+        }
+        return -rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_sqrt(const G_integer& rhs)
+      {
+        return std::sqrt(G_real(rhs));
+      }
+
+    ROCKET_PURE_FUNCTION G_boolean do_operator_isinf(const G_integer& /*rhs*/)
+      {
+        return false;
+      }
+
+    ROCKET_PURE_FUNCTION G_boolean do_operator_isnan(const G_integer& /*rhs*/)
+      {
+        return false;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_abs(const G_integer& rhs)
+      {
+        if(rhs == INT64_MIN) {
+          ASTERIA_THROW_RUNTIME_ERROR("The absolute value of `", rhs, "` cannot be represented as an `integer`.");
+        }
+        return std::abs(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_signb(const G_integer& rhs)
+      {
+        return rhs >> 63;
+      }
+
+    [[noreturn]] void do_throw_integral_overflow(const char* op, const G_integer& lhs, const G_integer& rhs)
+      {
+        ASTERIA_THROW_RUNTIME_ERROR("Integral ", op, " of `", lhs, "` and `", rhs, "` would result in overflow.");
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_integer& rhs)
+      {
+        if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
+          do_throw_integral_overflow("addition", lhs, rhs);
+        }
+        return lhs + rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_sub(const G_integer& lhs, const G_integer& rhs)
+      {
+        if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
+          do_throw_integral_overflow("subtraction", lhs, rhs);
+        }
+        return lhs - rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_mul(const G_integer& lhs, const G_integer& rhs)
+      {
+        if((lhs == 0) || (rhs == 0)) {
+          return 0;
+        }
+        if((lhs == 1) || (rhs == 1)) {
+          return (lhs ^ rhs) ^ 1;
+        }
+        if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
+          do_throw_integral_overflow("multiplication", lhs, rhs);
+        }
+        if((lhs == -1) || (rhs == -1)) {
+          return (lhs ^ rhs) + 1;
+        }
+        // absolute lhs and signed rhs
+        auto m = lhs >> 63;
+        auto alhs = (lhs ^ m) - m;
+        auto srhs = (rhs ^ m) - m;
+        // `alhs` may only be positive here.
+        if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)) {
+          do_throw_integral_overflow("multiplication", lhs, rhs);
+        }
+        return alhs * srhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_div(const G_integer& lhs, const G_integer& rhs)
+      {
+        if(rhs == 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
+        }
+        if((lhs == INT64_MIN) && (rhs == -1)) {
+          do_throw_integral_overflow("division", lhs, rhs);
+        }
+        return lhs / rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_mod(const G_integer& lhs, const G_integer& rhs)
+      {
+        if(rhs == 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("The divisor for `", lhs, "` was zero.");
+        }
+        if((lhs == INT64_MIN) && (rhs == -1)) {
+          do_throw_integral_overflow("division", lhs, rhs);
+        }
+        return lhs % rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_sll(const G_integer& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        if(rhs >= 64) {
+          return 0;
+        }
+        return G_integer(static_cast<uint64_t>(lhs) << rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_srl(const G_integer& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        if(rhs >= 64) {
+          return 0;
+        }
+        return G_integer(static_cast<uint64_t>(lhs) >> rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_sla(const G_integer& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        if(lhs == 0) {
+          return 0;
+        }
+        if(rhs >= 64) {
+          ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
+        }
+        auto bc = static_cast<int>(63 - rhs);
+        auto mask_out = static_cast<uint64_t>(lhs) >> bc << bc;
+        auto mask_sbt = static_cast<uint64_t>(lhs >> 63) << bc;
+        if(mask_out != mask_sbt) {
+          ASTERIA_THROW_RUNTIME_ERROR("Arithmetic left shift of `", lhs, "` by `", rhs, "` would result in overflow.");
+        }
+        return G_integer(static_cast<uint64_t>(lhs) << rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_sra(const G_integer& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("Bit shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        if(rhs >= 64) {
+          return lhs >> 63;
+        }
+        return lhs >> rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_not(const G_integer& rhs)
+      {
+        return ~rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_and(const G_integer& lhs, const G_integer& rhs)
+      {
+        return lhs & rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_or(const G_integer& lhs, const G_integer& rhs)
+      {
+        return lhs | rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_xor(const G_integer& lhs, const G_integer& rhs)
+      {
+        return lhs ^ rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_neg(const G_real& rhs)
+      {
+        return -rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_sqrt(const G_real& rhs)
+      {
+        return std::sqrt(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_boolean do_operator_isinf(const G_real& rhs)
+      {
+        return std::isinf(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_boolean do_operator_isnan(const G_real& rhs)
+      {
+        return std::isnan(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_abs(const G_real& rhs)
+      {
+        return std::fabs(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_signb(const G_real& rhs)
+      {
+        return std::signbit(rhs) ? -1 : 0;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_round(const G_real& rhs)
+      {
+        return std::round(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_floor(const G_real& rhs)
+      {
+        return std::floor(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_ceil(const G_real& rhs)
+      {
+        return std::ceil(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_trunc(const G_real& rhs)
+      {
+        return std::trunc(rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_icast(const G_real& value)
+      {
+        if(!std::islessequal(INT64_MIN, value) || !std::islessequal(value, INT64_MAX)) {
+          ASTERIA_THROW_RUNTIME_ERROR("The `real` value `", value, "` cannot be represented as an `integer`.");
+        }
+        return G_integer(value);
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_iround(const G_real& rhs)
+      {
+        return do_icast(std::round(rhs));
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_ifloor(const G_real& rhs)
+      {
+        return do_icast(std::floor(rhs));
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_iceil(const G_real& rhs)
+      {
+        return do_icast(std::ceil(rhs));
+      }
+
+    ROCKET_PURE_FUNCTION G_integer do_operator_itrunc(const G_real& rhs)
+      {
+        return do_icast(std::trunc(rhs));
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_add(const G_real& lhs, const G_real& rhs)
+      {
+        return lhs + rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_sub(const G_real& lhs, const G_real& rhs)
+      {
+        return lhs - rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_mul(const G_real& lhs, const G_real& rhs)
+      {
+        return lhs * rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_div(const G_real& lhs, const G_real& rhs)
+      {
+        return lhs / rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_real do_operator_mod(const G_real& lhs, const G_real& rhs)
+      {
+        return std::fmod(lhs, rhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_string do_operator_add(const G_string& lhs, const G_string& rhs)
+      {
+        return lhs + rhs;
+      }
+
+    ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_string& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String duplication count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        G_string res;
+        auto nchars = lhs.size();
+        if((nchars == 0) || (rhs == 0)) {
+          return res;
+        }
+        if(nchars > res.max_size() / static_cast<uint64_t>(rhs)) {
+          ASTERIA_THROW_RUNTIME_ERROR("Duplication of `", lhs, "` up to `", rhs, "` times would result in an overlong string that cannot be allocated.");
+        }
+        auto times = static_cast<size_t>(rhs);
+        if(nchars == 1) {
+          // Fast fill.
+          res.assign(times, lhs.front());
+          return res;
+        }
+        // Reserve space for the result string.
+        auto ptr = res.assign(nchars * times, '*').mut_data();
+        // Copy the source string once.
+        std::memcpy(ptr, lhs.data(), nchars);
+        // Append the result string to itself, doubling its length, until more than half of the result string has been populated.
+        while(nchars <= res.size() / 2) {
+          std::memcpy(ptr + nchars, ptr, nchars);
+          nchars *= 2;
+        }
+        // Copy remaining characters, if any.
+        if(nchars < res.size()) {
+          std::memcpy(ptr + nchars, ptr, res.size() - nchars);
+        }
+        return res;
+      }
+
+    ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_integer& lhs, const G_string& rhs)
+      {
+        return do_operator_mul(rhs, lhs);
+      }
+
+    ROCKET_PURE_FUNCTION G_string do_operator_sll(const G_string& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        G_string res;
+        // Reserve space for the result string.
+        auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
+        if(static_cast<uint64_t>(rhs) >= lhs.size()) {
+          return res;
+        }
+        auto count = static_cast<size_t>(rhs);
+        // Copy the substring in the right.
+        std::memcpy(ptr, lhs.data() + count, lhs.size() - count);
+        return res;
+      }
+
+    ROCKET_PURE_FUNCTION G_string do_operator_srl(const G_string& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        G_string res;
+        // Reserve space for the result string.
+        auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
+        if(static_cast<uint64_t>(rhs) >= lhs.size()) {
+          return res;
+        }
+        auto count = static_cast<size_t>(rhs);
+        // Copy the substring in the left.
+        std::memcpy(ptr + count, lhs.data(), lhs.size() - count);
+        return res;
+      }
+
+    ROCKET_PURE_FUNCTION G_string do_operator_sla(const G_string& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        G_string res;
+        if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size()) {
+          ASTERIA_THROW_RUNTIME_ERROR("Shifting `", lhs, "` to the left by `", rhs, "` bytes would result in an overlong string that cannot be allocated.");
+        }
+        auto count = static_cast<size_t>(rhs);
+        // Append spaces in the right and return the result.
+        res.assign(G_string::shallow_type(lhs));
+        res.append(count, ' ');
+        return res;
+      }
+
+    ROCKET_PURE_FUNCTION G_string do_operator_sra(const G_string& lhs, const G_integer& rhs)
+      {
+        if(rhs < 0) {
+          ASTERIA_THROW_RUNTIME_ERROR("String shift count `", rhs, "` for `", lhs, "` is negative.");
+        }
+        G_string res;
+        if(static_cast<uint64_t>(rhs) >= lhs.size()) {
+          return res;
+        }
+        auto count = static_cast<size_t>(rhs);
+        // Return the substring in the left.
+        res.append(lhs.data(), lhs.size() - count);
+        return res;
       }
 
     }
@@ -201,8 +574,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_if_statement>();
         // Pick a branch basing on the condition.
-        bool cond = ctx.stack().get_top_reference().read().test() != altr.negative;
-        if(cond) {
+        if(ctx.stack().get_top_reference().read().test() != altr.negative) {
           return do_execute_block(altr.code_true, ctx);
         }
         else {
@@ -447,8 +819,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_assert_statement>();
         // Read the value to check.
-        bool cond = ctx.stack().get_top_reference().read().test() != altr.negative;
-        if(ROCKET_EXPECT(cond)) {
+        if(ROCKET_EXPECT(ctx.stack().get_top_reference().read().test() != altr.negative)) {
           // The assertion has succeeded.
           return status_next;
         }
@@ -540,8 +911,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_branch_expression>();
         // Pick a branch basing on the condition.
         // If the target branch is empty, leave the condition on the stack.
-        bool cond = ctx.stack().get_top_reference().read().test();
-        if(cond) {
+        if(ctx.stack().get_top_reference().read().test()) {
           return do_evaluate_branch(altr.code_true, ctx, altr.assign);
         }
         else {
@@ -553,8 +923,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Pick a branch basing on the condition.
         // If the target branch is empty, leave the condition on the stack.
-        bool cond = ctx.stack().get_top_reference().read().is_null();
-        if(cond) {
+        if(ctx.stack().get_top_reference().read().is_null()) {
           return do_evaluate_branch(altr.code_null, ctx, altr.assign);
         }
         else {
@@ -564,12 +933,940 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
     case index_function_call_tail:
       {
         const auto& altr = this->m_stor.as<index_function_call_tail>();
-        return do_execute_function_common(ctx, altr.sloc, altr.args_by_refs, do_xcall_tail, altr.flags);
+        // Prepare arguments.
+        auto pargs = do_unpack_function_call(ctx, altr.args_by_refs);
+        const auto& func = ctx.zvarg()->get_function_signature();
+        auto& self = ctx.stack().open_top_reference();
+        self.zoom_out();
+        // Pack arguments.
+        pargs.args.emplace_back(rocket::move(self));
+        // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
+        Reference_Root::S_tail_call xref = { altr.sloc, func, altr.flags, rocket::move(pargs.target), rocket::move(pargs.args) };
+        self = rocket::move(xref);
+        return status_return;
       }
     case index_function_call_plain:
       {
         const auto& altr = this->m_stor.as<index_function_call_plain>();
-        return do_execute_function_common(ctx, altr.sloc, altr.args_by_refs, do_xcall_plain, ctx.global());
+        // Prepare arguments.
+        auto pargs = do_unpack_function_call(ctx, altr.args_by_refs);
+        const auto& func = ctx.zvarg()->get_function_signature();
+        auto& self = ctx.stack().open_top_reference();
+        self.zoom_out();
+        try {
+          ASTERIA_DEBUG_LOG("Initiating function call at \'", altr.sloc, "\' inside `", func, "`: target = ", pargs.target);
+          // Call the function now.
+          pargs.target->invoke(self, ctx.global(), rocket::move(pargs.args));
+          self.finish_call(ctx.global());
+          // The result will have been stored into `self`.
+          ASTERIA_DEBUG_LOG("Returned from function call at \'", altr.sloc, "\' inside `", func, "`: target = ", pargs.target);
+          return status_next;
+        }
+        catch(Exception& except) {
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", except.get_value());
+          // Append the current frame and rethrow the exception.
+          except.push_frame_func(altr.sloc, func);
+          throw;
+        }
+        catch(const std::exception& stdex) {
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", stdex.what());
+          // Translate the exception, append the current frame, and throw the new exception.
+          Exception except(stdex);
+          except.push_frame_func(altr.sloc, func);
+          throw except;
+        }
+      }
+    case index_member_access:
+      {
+        const auto& altr = this->m_stor.as<index_member_access>();
+        // Append a modifier to the reference at the top.
+        Reference_Modifier::S_object_key xmod = { altr.name };
+        ctx.stack().open_top_reference().zoom_in(rocket::move(xmod));
+        return status_next;
+      }
+    case index_push_unnamed_array:
+      {
+        const auto& altr = this->m_stor.as<index_push_unnamed_array>();
+        // Pop some elements from the stack to create an array.
+        G_array array;
+        array.resize(altr.nelems);
+        for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
+          *it = ctx.stack().get_top_reference().read();
+          ctx.stack().pop_reference();
+        }
+        // Push the array as a temporary.
+        Reference_Root::S_temporary xref = { rocket::move(array) };
+        ctx.stack().push_reference(rocket::move(xref));
+        return status_next;
+      }
+    case index_push_unnamed_object:
+      {
+        const auto& altr = this->m_stor.as<index_push_unnamed_object>();
+        // Pop some elements from the stack to create an object.
+        G_object object;
+        object.reserve(altr.keys.size());
+        for(auto it = altr.keys.rbegin(); it != altr.keys.rend(); ++it) {
+          object.insert_or_assign(*it, ctx.stack().get_top_reference().read());
+          ctx.stack().pop_reference();
+        }
+        // Push the object as a temporary.
+        Reference_Root::S_temporary xref = { rocket::move(object) };
+        ctx.stack().push_reference(rocket::move(xref));
+        return status_next;
+      }
+    case index_apply_xop_inc_post:
+      {
+        // This operator is unary.
+        auto& lhs = ctx.stack().get_top_reference().open();
+        // Increment the operand and return the old value. `altr.assign` is ignored.
+        if(lhs.is_integer()) {
+          auto& reg = lhs.mut_integer();
+          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
+          reg = do_operator_add(reg, G_integer(1));
+        }
+        else if(lhs.is_real()) {
+          auto& reg = lhs.mut_real();
+          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
+          reg = do_operator_add(reg, G_real(1));
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Postfix increment is not defined for `", lhs, "`.");
+        }
+        return status_next;
+      }
+    case index_apply_xop_dec_post:
+      {
+        // This operator is unary.
+        auto& lhs = ctx.stack().get_top_reference().open();
+        // Decrement the operand and return the old value. `altr.assign` is ignored.
+        if(lhs.is_integer()) {
+          auto& reg = lhs.mut_integer();
+          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
+          reg = do_operator_sub(reg, G_integer(1));
+        }
+        else if(lhs.is_real()) {
+          auto& reg = lhs.mut_real();
+          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
+          reg = do_operator_sub(reg, G_real(1));
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Postfix decrement is not defined for `", lhs, "`.");
+        }
+        return status_next;
+      }
+    case index_apply_xop_subscr:
+      {
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        auto& lref = ctx.stack().open_top_reference();
+        // Append a reference modifier. `altr.assign` is ignored.
+        if(rhs.is_integer()) {
+          auto& reg = rhs.mut_integer();
+          Reference_Modifier::S_array_index xmod = { rocket::move(reg) };
+          lref.zoom_in(rocket::move(xmod));
+        }
+        else if(rhs.is_string()) {
+          auto& reg = rhs.mut_string();
+          Reference_Modifier::S_object_key xmod = { rocket::move(reg) };
+          lref.zoom_in(rocket::move(xmod));
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("The value `", rhs, "` cannot be used as a subscript.");
+        }
+        return status_next;
+      }
+    case index_apply_xop_pos:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_pos>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Copy the operand to create a temporary value, then return it.
+        // N.B. This is one of the few operators that work on all types.
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_neg:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_neg>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Get the opposite of the operand as a temporary value, then return it.
+        if(rhs.is_integer()) {
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_neg(reg);
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_neg(reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_notb:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_notb>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
+        if(rhs.is_boolean()) {
+          auto& reg = rhs.mut_boolean();
+          reg = do_operator_not(reg);
+        }
+        else if(rhs.is_integer()) {
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_not(reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_notl:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_notl>();
+        // This operator is unary.
+        const auto& rhs = ctx.stack().get_top_reference().read();
+        // Perform logical NOT operation on the operand to create a temporary value, then return it.
+        // N.B. This is one of the few operators that work on all types.
+        ctx.stack().set_temporary_reference(altr.assign, do_operator_not(rhs.test()));
+        return status_next;
+      }
+    case index_apply_xop_inc:
+      {
+        // This operator is unary.
+        auto& rhs = ctx.stack().get_top_reference().open();
+        // Increment the operand and return it. `altr.assign` is ignored.
+        if(rhs.is_integer()) {
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_add(reg, G_integer(1));
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_add(reg, G_real(1));
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
+        }
+        return status_next;
+      }
+    case index_apply_xop_dec:
+      {
+        // This operator is unary.
+        auto& rhs = ctx.stack().get_top_reference().open();
+        // Decrement the operand and return it. `altr.assign` is ignored.
+        if(rhs.is_integer()) {
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_sub(reg, G_integer(1));
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_sub(reg, G_real(1));
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
+        }
+        return status_next;
+      }
+    case index_apply_xop_unset:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_unset>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().unset();
+        // Unset the reference and return the old value.
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_lengthof:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_lengthof>();
+        // This operator is unary.
+        const auto& rhs = ctx.stack().get_top_reference().read();
+        // Return the number of elements in the operand.
+        size_t nelems;
+        if(rhs.is_null()) {
+          nelems = 0;
+        }
+        else if(rhs.is_string()) {
+          nelems = rhs.as_string().size();
+        }
+        else if(rhs.is_array()) {
+          nelems = rhs.as_array().size();
+        }
+        else if(rhs.is_object()) {
+          nelems = rhs.as_object().size();
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, G_integer(nelems));
+        return status_next;
+      }
+    case index_apply_xop_typeof:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_typeof>();
+        // This operator is unary.
+        const auto& rhs = ctx.stack().get_top_reference().read();
+        // Return the type name of the operand.
+        // N.B. This is one of the few operators that work on all types.
+        ctx.stack().set_temporary_reference(altr.assign, G_string(rocket::sref(rhs.gtype_name())));
+        return status_next;
+      }
+    case index_apply_xop_sqrt:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_sqrt>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Get the square root of the operand as a temporary value, then return it.
+        if(rhs.is_integer()) {
+          // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
+          rhs = do_operator_sqrt(rhs.as_integer());
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_sqrt(reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_isnan:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_isnan>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Check whether the operand is a NaN, store the result in a temporary value, then return it.
+        if(rhs.is_integer()) {
+          // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
+          rhs = do_operator_isnan(rhs.as_integer());
+        }
+        else if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
+          rhs = do_operator_isnan(rhs.as_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_isinf:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_isinf>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Check whether the operand is an infinity, store the result in a temporary value, then return it.
+        if(rhs.is_integer()) {
+          // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
+          rhs = do_operator_isinf(rhs.as_integer());
+        }
+        else if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
+          rhs = do_operator_isinf(rhs.as_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_abs:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_abs>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Get the absolute value of the operand as a temporary value, then return it.
+        if(rhs.is_integer()) {
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_abs(reg);
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_abs(reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_signb:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_signb>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Get the sign bit of the operand as a temporary value, then return it.
+        if(rhs.is_integer()) {
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_signb(reg);
+        }
+        else if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_signb(rhs.as_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_round:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_round>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Round the operand to the nearest integer as a temporary value, then return it.
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_round(reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_floor:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_floor>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it.
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_floor(reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_ceil:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_ceil>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it.
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_ceil(reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_trunc:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_trunc>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it.
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+        }
+        else if(rhs.is_real()) {
+          auto& reg = rhs.mut_real();
+          reg = do_operator_trunc(reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_iround:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_iround>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+        }
+        else if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_iround(rhs.as_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_ifloor:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_ifloor>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+        }
+        else if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_ifloor(rhs.as_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_iceil:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_iceil>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+        }
+        else if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_iceil(rhs.as_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_itrunc:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_itrunc>();
+        // This operator is unary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
+        if(rhs.is_integer()) {
+          // No conversion is required.
+          // Return `rhs` as is.
+        }
+        else if(rhs.is_real()) {
+          // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
+          rhs = do_operator_itrunc(rhs.as_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_cmp_xeq:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_cmp_xeq>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        // Report unordered operands as being unequal.
+        // N.B. This is one of the few operators that work on all types.
+        auto comp = lhs.compare(rhs);
+        rhs = G_boolean((comp == Value::compare_equal) != altr.negative);
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_cmp_xrel:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_cmp_xrel>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        // Report unordered operands as being unequal.
+        // N.B. This is one of the few operators that work on all types.
+        auto comp = lhs.compare(rhs);
+        if(comp == Value::compare_unordered) {
+          ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", rhs, "` are unordered.");
+        }
+        rhs = G_boolean((comp == altr.expect) != altr.negative);
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_cmp_3way:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_cmp_3way>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        // Report unordered operands as being unequal.
+        // N.B. This is one of the few operators that work on all types.
+        auto comp = lhs.compare(rhs);
+        if(comp == Value::compare_unordered) {
+          rhs = G_string(rocket::sref("<unordered>"));
+        }
+        else if(comp == Value::compare_less) {
+          rhs = G_integer(-1);
+        }
+        else if(comp == Value::compare_greater) {
+          rhs = G_integer(+1);
+        }
+        else {
+          rhs = G_integer(0);
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_add:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_add>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical OR'd result of both operands.
+          auto& reg = rhs.mut_boolean();
+          reg = do_operator_or(lhs.as_boolean(), reg);
+        }
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the sum of both operands.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_add(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
+          rhs = do_operator_add(lhs.convert_to_real(), rhs.convert_to_real());
+        }
+        else if(lhs.is_string() && rhs.is_string()) {
+          // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
+          auto& reg = rhs.mut_string();
+          reg = do_operator_add(lhs.as_string(), reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_sub:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_sub>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical XOR'd result of both operands.
+          auto& reg = rhs.mut_boolean();
+          reg = do_operator_xor(lhs.as_boolean(), reg);
+        }
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the difference of both operands.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_sub(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
+          rhs = do_operator_sub(lhs.convert_to_real(), rhs.convert_to_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_mul:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_mul>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical AND'd result of both operands.
+          auto& reg = rhs.mut_boolean();
+          reg = do_operator_and(lhs.as_boolean(), reg);
+        }
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the product of both operands.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_mul(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
+          rhs = do_operator_mul(lhs.convert_to_real(), rhs.convert_to_real());
+        }
+        else if(lhs.is_string() && rhs.is_integer()) {
+          // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_mul(lhs.as_string(), rhs.as_integer());
+        }
+        else if(lhs.is_integer() && rhs.is_string()) {
+          auto& reg = rhs.mut_string();
+          reg = do_operator_mul(lhs.as_integer(), reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_div:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_div>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the quotient of both operands.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_div(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
+          rhs = do_operator_div(lhs.convert_to_real(), rhs.convert_to_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_mod:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_mod>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` and `real` types, return the remainder of both operands.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_mod(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
+          rhs = do_operator_mod(lhs.convert_to_real(), rhs.convert_to_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_sll:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_sll>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_integer() && rhs.is_integer()) {
+          // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
+          // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_sll(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_string() && rhs.is_integer()) {
+          // If the LHS operand has type `string`, fill space characters in the right and discard characters from the left.
+          // The number of bytes in the LHS operand will be preserved.
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_sll(lhs.as_string(), rhs.as_integer());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_srl:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_srl>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_integer() && rhs.is_integer()) {
+          // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
+          // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_srl(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_string() && rhs.is_integer()) {
+          // If the LHS operand has type `string`, fill space characters in the left and discard characters from the right.
+          // The number of bytes in the LHS operand will be preserved.
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_srl(lhs.as_string(), rhs.as_integer());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_sla:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_sla>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_integer() && rhs.is_integer()) {
+          // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
+          // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
+          // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_sla(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_string() && rhs.is_integer()) {
+          // If the LHS operand has type `string`, fill space characters in the right.
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_sla(lhs.as_string(), rhs.as_integer());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_sra:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_sra>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_integer() && rhs.is_integer()) {
+          // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
+          // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_sra(lhs.as_integer(), reg);
+        }
+        else if(lhs.is_string() && rhs.is_integer()) {
+          // If the LHS operand has type `string`, discard characters from the right.
+          // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
+          rhs = do_operator_sra(lhs.as_string(), rhs.as_integer());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_andb:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_andb>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical AND'd result of both operands.
+          auto& reg = rhs.mut_boolean();
+          reg = do_operator_and(lhs.as_boolean(), reg);
+        }
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` type, return bitwise AND'd result of both operands.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_and(lhs.as_integer(), reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_orb:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_orb>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical OR'd result of both operands.
+          auto& reg = rhs.mut_boolean();
+          reg = do_operator_or(lhs.as_boolean(), reg);
+        }
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` type, return bitwise OR'd result of both operands.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_or(lhs.as_integer(), reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_xorb:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_xorb>();
+        // This operator is binary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_boolean() && rhs.is_boolean()) {
+          // For the `boolean` type, return the logical XOR'd result of both operands.
+          auto& reg = rhs.mut_boolean();
+          reg = do_operator_xor(lhs.as_boolean(), reg);
+        }
+        else if(lhs.is_integer() && rhs.is_integer()) {
+          // For the `integer` type, return bitwise XOR'd result of both operands.
+          auto& reg = rhs.mut_integer();
+          reg = do_operator_xor(lhs.as_integer(), reg);
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_assign:
+      {
+        // Pop the RHS operand.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        // Copy the value to the LHS operand which is write-only. `altr.assign` is ignored.
+        ctx.stack().set_temporary_reference(true, rocket::move(rhs));
+        return status_next;
+      }
+    case index_apply_xop_fma:
+      {
+        const auto& altr = this->m_stor.as<index_apply_xop_fma>();
+        // This operator is ternary.
+        auto rhs = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        auto mid = ctx.stack().get_top_reference().read();
+        ctx.stack().pop_reference();
+        const auto& lhs = ctx.stack().get_top_reference().read();
+        if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
+          // Calculate the fused multiply-add result of the operands.
+          // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
+          rhs = std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
+        }
+        else {
+          ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
+        }
+        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        return status_next;
       }
     default:
       ASTERIA_TERMINATE("An unknown AIR node type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
