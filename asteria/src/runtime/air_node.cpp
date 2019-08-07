@@ -72,6 +72,87 @@ namespace Asteria {
         return ctx.stack().get_top_reference().read();
       }
 
+    AIR_Node::Status do_evaluate_branch(const cow_vector<AIR_Node>& code, /*const*/ Executive_Context& ctx, bool assign)
+      {
+        if(code.empty()) {
+          // Do nothing.
+          return AIR_Node::status_next;
+        }
+        // Evaluate all nodes.
+        rocket::for_each(code, [&](const AIR_Node& node) { node.execute(ctx);  });
+        // Exactly one new reference will have been push onto the top.
+        ctx.stack().pop_next_reference(assign);
+        return AIR_Node::status_next;
+      }
+
+    template<typename XcallT, typename... XaddT> AIR_Node::Status do_execute_function_common(Executive_Context& ctx,
+                                                                                             const Source_Location& sloc, const cow_vector<bool>& args_by_refs,
+                                                                                             XcallT&& xcall, XaddT&&... xadd)
+      {
+        Value value;
+        // Allocate the argument vector.
+        cow_vector<Reference> args;
+        args.resize(args_by_refs.size());
+        for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
+          // Convert the argument to an rvalue if it shouldn't be passed by reference.
+          bool by_ref = *(it - args.rbegin() + args_by_refs.rbegin());
+          if(!by_ref) {
+            ctx.stack().open_top_reference().convert_to_rvalue();
+          }
+          // Fill an argument.
+          *it = rocket::move(ctx.stack().open_top_reference());
+          ctx.stack().pop_reference();
+        }
+        // Get the target reference.
+        value = ctx.stack().get_top_reference().read();
+        if(!value.is_function()) {
+          ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", value, "` which is not a function.");
+        }
+        // Call the function now.
+        return rocket::forward<XcallT>(xcall)(sloc, ctx.zvarg()->get_function_signature(),  // sloc, func,
+                                              value.as_function(), ctx.stack().open_top_reference().zoom_out(), rocket::move(args),  // target, self, args,
+                                              rocket::forward<XaddT>(xadd)...);
+      }
+
+    AIR_Node::Status do_xcall_tail(const Source_Location& sloc, const cow_string& func,
+                                   const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
+                                   uint32_t flags)
+      {
+        // Pack arguments.
+        auto& args_self = args;
+        args_self.emplace_back(rocket::move(self));
+        // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
+        Reference_Root::S_tail_call xref = { sloc, func, flags, target, rocket::move(args_self) };
+        self = rocket::move(xref);
+        return AIR_Node::status_return;
+      }
+
+    AIR_Node::Status do_xcall_plain(const Source_Location& sloc, const cow_string& func,
+                                    const rcobj<Abstract_Function>& target, Reference& self, cow_vector<Reference>&& args,
+                                    const Global_Context& global)
+      try {
+        ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+        // Call the function now.
+        target->invoke(self, global, rocket::move(args));
+        self.finish_call(global);
+        // The result will have been stored into `self`.
+        ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+        return AIR_Node::status_next;
+      }
+      catch(Exception& except) {
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
+        // Append the current frame and rethrow the exception.
+        except.push_frame_func(sloc, func);
+        throw;
+      }
+      catch(const std::exception& stdex) {
+        ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
+        // Translate the exception, append the current frame, and throw the new exception.
+        Exception except(stdex);
+        except.push_frame_func(sloc, func);
+        throw except;
+      }
+
     }
 
 AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
@@ -124,7 +205,9 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         if(cond) {
           return do_execute_block(altr.code_true, ctx);
         }
-        return do_execute_block(altr.code_false, ctx);
+        else {
+          return do_execute_block(altr.code_false, ctx);
+        }
       }
     case index_switch_statement:
       {
@@ -216,7 +299,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         Executive_Context ctx_for(1, ctx);
         // Create a variable for the key.
         auto key = ctx_for.global().create_variable();
-        key->reset(Source_Location(rocket::sref("<ranged-for>"), 0), G_null(), true);
+        key->reset(Source_Location(rocket::sref("<ranged for>"), 0), G_null(), true);
         Reference_Root::S_variable xref_key = { key };
         ctx_for.open_named_reference(altr.name_key) = rocket::move(xref_key);
         // Create the mapped reference.
@@ -398,6 +481,96 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         }
         return status_return;
       }
+    case index_push_literal:
+      {
+        const auto& altr = this->m_stor.as<index_push_literal>();
+        // Push a constant.
+        Reference_Root::S_constant xref = { altr.value };
+        ctx.stack().push_reference(rocket::move(xref));
+        return status_next;
+      }
+    case index_push_global_reference:
+      {
+        const auto& altr = this->m_stor.as<index_push_global_reference>();
+        // Look for the name in the global context.
+        auto qref = ctx.global().get_named_reference_opt(altr.name);
+        if(!qref) {
+          ASTERIA_THROW_RUNTIME_ERROR("The identifier `", altr.name, "` has not been declared yet.");
+        }
+        // Push a copy of it.
+        ctx.stack().push_reference(*qref);
+        return status_next;
+      }
+    case index_push_local_reference:
+      {
+        const auto& altr = this->m_stor.as<index_push_local_reference>();
+        // Get the context.
+        const Executive_Context* qctx = std::addressof(ctx);
+        rocket::ranged_for(size_t(0), altr.depth, [&](size_t) { qctx = qctx->get_parent_opt();  });
+        ROCKET_ASSERT(qctx);
+        // Look for the name in the target context.
+        auto qref = qctx->get_named_reference_opt(altr.name);
+        if(!qref) {
+          ASTERIA_THROW_RUNTIME_ERROR("The identifier `", altr.name, "` has not been declared yet.");
+        }
+        // Push a copy of it.
+        ctx.stack().push_reference(*qref);
+        return status_next;
+      }
+    case index_push_bound_reference:
+      {
+        const auto& altr = this->m_stor.as<index_push_bound_reference>();
+        // Push a copy of the bound reference.
+        ctx.stack().push_reference(altr.bref);
+        return status_next;
+      }
+    case index_define_function:
+      {
+        const auto& altr = this->m_stor.as<index_define_function>();
+        // Instantiate the function.
+        auto qtarget = rocket::make_refcnt<Instantiated_Function>(altr.options, altr.sloc, altr.func, std::addressof(ctx), altr.params, altr.body);
+        ASTERIA_DEBUG_LOG("New function: ", *qtarget);
+        // Push the function as a temporary.
+        Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
+        ctx.stack().push_reference(rocket::move(xref));
+        return status_next;
+      }
+    case index_branch_expression:
+      {
+        const auto& altr = this->m_stor.as<index_branch_expression>();
+        // Pick a branch basing on the condition.
+        // If the target branch is empty, leave the condition on the stack.
+        bool cond = ctx.stack().get_top_reference().read().test();
+        if(cond) {
+          return do_evaluate_branch(altr.code_true, ctx, altr.assign);
+        }
+        else {
+          return do_evaluate_branch(altr.code_false, ctx, altr.assign);
+        }
+      }
+    case index_coalescence:
+      {
+        const auto& altr = this->m_stor.as<index_coalescence>();
+        // Pick a branch basing on the condition.
+        // If the target branch is empty, leave the condition on the stack.
+        bool cond = ctx.stack().get_top_reference().read().is_null();
+        if(cond) {
+          return do_evaluate_branch(altr.code_null, ctx, altr.assign);
+        }
+        else {
+          return status_next;
+        }
+      }
+    case index_function_call_tail:
+      {
+        const auto& altr = this->m_stor.as<index_function_call_tail>();
+        return do_execute_function_common(ctx, altr.sloc, altr.args_by_refs, do_xcall_tail, altr.flags);
+      }
+    case index_function_call_plain:
+      {
+        const auto& altr = this->m_stor.as<index_function_call_plain>();
+        return do_execute_function_common(ctx, altr.sloc, altr.args_by_refs, do_xcall_plain, ctx.global());
+      }
     default:
       ASTERIA_TERMINATE("An unknown AIR node type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
@@ -496,7 +669,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
       {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
         // Descend into the bound reference.
-        altr.ref.enumerate_variables(callback);
+        altr.bref.enumerate_variables(callback);
         return callback;
       }
     case index_define_function:

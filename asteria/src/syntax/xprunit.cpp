@@ -218,7 +218,8 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     }
 
-void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx) const
+cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& options,
+                                             Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal:
@@ -227,7 +228,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
         // Encode arguments.
         AIR_Node::S_push_literal xnode = { altr.value };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_named_reference:
       {
@@ -265,7 +266,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
           AIR_Node::S_push_bound_reference xnode = { *qref };
           code.emplace_back(rocket::move(xnode));
         }
-        return;
+        return code;
       }
     case index_closure_function:
       {
@@ -273,7 +274,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
         // Encode arguments.
         AIR_Node::S_define_function xnode = { options, altr.sloc, rocket::sref("<closure>"), altr.params, altr.body };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_branch:
       {
@@ -285,7 +286,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
         // Encode arguments.
         AIR_Node::S_branch_expression xnode = { rocket::move(code_true), rocket::move(code_false), altr.assign };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_function_call:
       {
@@ -311,7 +312,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
           AIR_Node::S_function_call_plain xnode = { altr.sloc, altr.args_by_refs };
           code.emplace_back(rocket::move(xnode));
         }
-        return;
+        return code;
       }
     case index_member_access:
       {
@@ -319,7 +320,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
         // Encode arguments.
         AIR_Node::S_member_access xnode = { altr.name };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_operator_rpn:
       {
@@ -329,271 +330,271 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
           {
             AIR_Node::S_apply_xop_inc_post xnode = { };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_postfix_dec:
           {
             AIR_Node::S_apply_xop_dec_post xnode = { };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_postfix_subscr:
           {
             AIR_Node::S_apply_xop_subscr xnode = { };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_pos:
           {
             AIR_Node::S_apply_xop_pos xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_neg:
           {
             AIR_Node::S_apply_xop_neg xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_notb:
           {
             AIR_Node::S_apply_xop_notb xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_notl:
           {
             AIR_Node::S_apply_xop_notl xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_inc:
           {
             AIR_Node::S_apply_xop_inc xnode = { };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_dec:
           {
             AIR_Node::S_apply_xop_dec xnode = { };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_unset:
           {
             AIR_Node::S_apply_xop_unset xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_lengthof:
           {
             AIR_Node::S_apply_xop_lengthof xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_typeof:
           {
             AIR_Node::S_apply_xop_typeof xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_sqrt:
           {
             AIR_Node::S_apply_xop_sqrt xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_isnan:
           {
             AIR_Node::S_apply_xop_isnan xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_isinf:
           {
             AIR_Node::S_apply_xop_isinf xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_abs:
           {
             AIR_Node::S_apply_xop_abs xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_signb:
           {
             AIR_Node::S_apply_xop_signb xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_round:
           {
             AIR_Node::S_apply_xop_round xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_floor:
           {
             AIR_Node::S_apply_xop_floor xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_ceil:
           {
             AIR_Node::S_apply_xop_ceil xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_trunc:
           {
             AIR_Node::S_apply_xop_trunc xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_iround:
           {
             AIR_Node::S_apply_xop_iround xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_ifloor:
           {
             AIR_Node::S_apply_xop_ifloor xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_iceil:
           {
             AIR_Node::S_apply_xop_iceil xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_prefix_itrunc:
           {
             AIR_Node::S_apply_xop_itrunc xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_cmp_eq:
           {
             AIR_Node::S_apply_xop_cmp_xeq xnode = { false, altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_cmp_ne:
           {
             AIR_Node::S_apply_xop_cmp_xeq xnode = { true, altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_cmp_lt:
           {
             AIR_Node::S_apply_xop_cmp_xrel xnode = { Value::compare_less, false, altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_cmp_gt:
           {
             AIR_Node::S_apply_xop_cmp_xrel xnode = { Value::compare_greater, false, altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_cmp_lte:
           {
             AIR_Node::S_apply_xop_cmp_xrel xnode = { Value::compare_greater, true, altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_cmp_gte:
           {
             AIR_Node::S_apply_xop_cmp_xrel xnode = { Value::compare_less, true, altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_cmp_3way:
           {
             AIR_Node::S_apply_xop_cmp_3way xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_add:
           {
             AIR_Node::S_apply_xop_add xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_sub:
           {
             AIR_Node::S_apply_xop_sub xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_mul:
           {
             AIR_Node::S_apply_xop_mul xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_div:
           {
             AIR_Node::S_apply_xop_div xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_mod:
           {
             AIR_Node::S_apply_xop_mod xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_sll:
           {
             AIR_Node::S_apply_xop_sll xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_srl:
           {
             AIR_Node::S_apply_xop_srl xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_sla:
           {
             AIR_Node::S_apply_xop_sla xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_sra:
           {
             AIR_Node::S_apply_xop_sra xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_andb:
           {
             AIR_Node::S_apply_xop_andb xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_orb:
           {
             AIR_Node::S_apply_xop_orb xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_xorb:
           {
             AIR_Node::S_apply_xop_xorb xnode = { altr.assign };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case xop_infix_assign:
           {
             AIR_Node::S_apply_xop_assign xnode = { };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         default:
           ASTERIA_TERMINATE("An unknown operator type enumeration `", altr.xop, "` has been encountered. This is likely a bug. Please report.");
@@ -605,7 +606,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
         // Encode arguments.
         AIR_Node::S_push_unnamed_array xnode = { altr.nelems };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_unnamed_object:
       {
@@ -613,7 +614,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
         // Encode arguments.
         AIR_Node::S_push_unnamed_object xnode = { altr.keys };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_coalescence:
       {
@@ -624,7 +625,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
         // Encode arguments.
         AIR_Node::S_coalescence xnode = { rocket::move(code_null), altr.assign };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_operator_fma:
       {
@@ -632,7 +633,7 @@ void Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& 
         // Encode arguments.
         AIR_Node::S_apply_xop_fma xnode = { altr.assign };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     default:
       ASTERIA_TERMINATE("An unknown expression unit type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");

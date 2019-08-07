@@ -3,15 +3,48 @@
 
 #include "../precompiled.hpp"
 #include "instantiated_function.hpp"
-#include "../runtime/air_node.hpp"
+#include "air_node.hpp"
 #include "evaluation_stack.hpp"
 #include "executive_context.hpp"
+#include "analytic_context.hpp"
+#include "../syntax/statement.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
 Instantiated_Function::~Instantiated_Function()
   {
+  }
+
+void Instantiated_Function::do_compile(const Compiler_Options& options, const Source_Location& sloc, const cow_string& name,
+                                       const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts)
+  {
+    // Initialize the zero-ary argument getter, which also stores the source location and prototype string.
+    // The prototype should look the same with what exists in the source code.
+    cow_string func;
+    func << name << '(';
+    auto epos = this->m_params.size() - 1;
+    if(epos != SIZE_MAX) {
+      for(size_t i = 0; i != epos; ++i) {
+        func << this->m_params[i] << ", ";
+      }
+      func << this->m_params[epos];
+    }
+    func << ')';
+    this->m_zvarg = rocket::make_refcnt<Variadic_Arguer>(sloc, rocket::move(func));
+    // Generate code for the function body.
+    // XXX: This looks very similar to 'statement.cpp'. Can we get rid of this code duplication?
+    Analytic_Context ctx_func(1, ctx_opt, this->m_params);
+    epos = stmts.size() - 1;
+    if(epos != SIZE_MAX) {
+      // Statements other than the last one cannot be the end of function.
+      for(size_t i = 0; i != epos; ++i) {
+        stmts[i].generate_code(this->m_code, nullptr, ctx_func, options, stmts[i+1].is_empty_return());
+      }
+      // The last statement may be TCO'd.
+      stmts[epos].generate_code(this->m_code, nullptr, ctx_func, options, true);
+    }
+    // TODO: Insert optimization passes here.
   }
 
 std::ostream& Instantiated_Function::describe(std::ostream& ostrm) const

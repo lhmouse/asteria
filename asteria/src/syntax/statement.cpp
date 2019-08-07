@@ -90,7 +90,8 @@ namespace Asteria {
 
     }
 
-void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const Compiler_Options& options, bool end_of_func) const
+cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
+                                               Analytic_Context& ctx, const Compiler_Options& options, bool end_of_func) const
   {
     switch(this->index()) {
     case index_expression:
@@ -103,7 +104,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
           // Evaluate the expression. Its value is discarded.
           do_generate_expression_partial(code, options, end_of_func ? Xprunit::tco_nullify : Xprunit::tco_none, ctx, altr.expr);
         }
-        return;
+        return code;
       }
     case index_block:
       {
@@ -114,7 +115,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_execute_block xnode = { rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_variable:
       {
@@ -143,7 +144,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
             code.emplace_back(rocket::move(xnode_decl));
           }
         }
-        return;
+        return code;
       }
     case index_function:
       {
@@ -161,7 +162,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Initialize the function.
         AIR_Node::S_initialize_variable xnode_init = { true };
         code.emplace_back(rocket::move(xnode_init));
-        return;
+        return code;
       }
     case index_if:
       {
@@ -179,7 +180,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_if_statement xnode = { altr.negative, rocket::move(code_true), rocket::move(code_false) };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_switch:
       {
@@ -211,7 +212,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_switch_statement xnode = { rocket::move(clauses) };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_do_while:
       {
@@ -225,7 +226,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_do_while_statement xnode = { rocket::move(code_body), altr.negative, rocket::move(code_cond) };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_while:
       {
@@ -239,7 +240,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_while_statement xnode = { altr.negative, rocket::move(code_cond), rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_for_each:
       {
@@ -257,7 +258,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, rocket::move(code_init), rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_for:
       {
@@ -274,7 +275,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_for_statement xnode = { rocket::move(code_init), rocket::move(code_cond), rocket::move(code_step), rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_try:
       {
@@ -292,7 +293,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_try_statement xnode = { rocket::move(code_try), altr.sloc, altr.name_except, rocket::move(code_catch) };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_break:
       {
@@ -303,25 +304,25 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
           {
             AIR_Node::S_simple_status xnode = { AIR_Node::status_break_unspec };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case Statement::target_switch:
           {
             AIR_Node::S_simple_status xnode = { AIR_Node::status_break_switch };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case Statement::target_while:
           {
             AIR_Node::S_simple_status xnode = { AIR_Node::status_break_while };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case Statement::target_for:
           {
             AIR_Node::S_simple_status xnode = { AIR_Node::status_break_for };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         default:
           ASTERIA_TERMINATE("An unknown target scope type `", altr.target, "` has been encountered. This is likely a bug. Please report.");
@@ -336,7 +337,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
           {
             AIR_Node::S_simple_status xnode = { AIR_Node::status_continue_unspec };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case Statement::target_switch:
           {
@@ -346,13 +347,13 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
           {
             AIR_Node::S_simple_status xnode = { AIR_Node::status_continue_while };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         case Statement::target_for:
           {
             AIR_Node::S_simple_status xnode = { AIR_Node::status_continue_for };
             code.emplace_back(rocket::move(xnode));
-            return;
+            return code;
           }
         default:
           ASTERIA_TERMINATE("An unknown target scope type `", altr.target, "` has been encountered. This is likely a bug. Please report.");
@@ -367,7 +368,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_throw_statement xnode = { altr.sloc };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     case index_return:
       {
@@ -399,7 +400,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
           AIR_Node::S_return_by_value xnode_ret = { };
           code.emplace_back(rocket::move(xnode_ret));
         }
-        return;
+        return code;
       }
     case index_assert:
       {
@@ -410,7 +411,7 @@ void Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string
         // Encode arguments.
         AIR_Node::S_assert_statement xnode = { altr.sloc, altr.negative, altr.msg };
         code.emplace_back(rocket::move(xnode));
-        return;
+        return code;
       }
     default:
       ASTERIA_TERMINATE("An unknown statement type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");

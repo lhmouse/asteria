@@ -119,7 +119,7 @@ class AIR_Node
       };
     struct S_push_bound_reference
       {
-        Reference ref;
+        Reference bref;
       };
     struct S_define_function
       {
