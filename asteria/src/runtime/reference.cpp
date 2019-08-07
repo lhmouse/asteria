@@ -37,9 +37,7 @@ Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Ref
     for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, true);  // create new
-      if(!qref) {
-        ROCKET_ASSERT(false);
-      }
+      ROCKET_ASSERT(qref);
     }
     // Apply the last modifier.
     qref = last.apply_mutable_opt(*qref, true);
