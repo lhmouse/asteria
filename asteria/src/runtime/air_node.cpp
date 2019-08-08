@@ -43,7 +43,7 @@ namespace Asteria {
           const auto& frame = except.get_frame(i);
           G_object r;
           // Translate each frame into a human-readable format.
-          r.try_emplace(rocket::sref("frame"), G_string(rocket::sref(Backtrace_Frame::stringify_ftype(frame.ftype()))));
+          r.try_emplace(rocket::sref("frame"), G_string(rocket::sref(frame.what_type())));
           r.try_emplace(rocket::sref("file"), G_string(frame.file()));
           r.try_emplace(rocket::sref("line"), G_integer(frame.line()));
           r.try_emplace(rocket::sref("value"), frame.value());

@@ -147,6 +147,7 @@ pkginclude_library_HEADERS =  \
   asteria/src/library/bindings_json.hpp
 
 lib_libasteria_la_SOURCES =  \
+  asteria/src/fwd.cpp  \
   asteria/src/utilities.cpp  \
   asteria/src/llds/variable_hashset.cpp  \
   asteria/src/llds/reference_dictionary.cpp  \

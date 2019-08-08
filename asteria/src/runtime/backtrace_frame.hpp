@@ -13,35 +13,26 @@ namespace Asteria {
 
 class Backtrace_Frame
   {
-  public:
-    enum Ftype : uint8_t
-      {
-        ftype_native  = 0,
-        ftype_throw   = 1,
-        ftype_catch   = 2,
-        ftype_func    = 3,
-      };
-
-  public:
-    ROCKET_PURE_FUNCTION static const char* stringify_ftype(Ftype xftype) noexcept;
-
   private:
-    Ftype m_ftype;
+    Frame_Type m_type;
     Source_Location m_sloc;
     Value m_value;
 
   public:
-    template<typename XvalueT> Backtrace_Frame(Ftype xftype, const Source_Location& xsloc, XvalueT&& xvalue)
-      : m_ftype(xftype),
-        m_sloc(xsloc), m_value(rocket::forward<XvalueT>(xvalue))
+    template<typename XvalueT> Backtrace_Frame(Frame_Type xtype, const Source_Location& xsloc, XvalueT&& xvalue)
+      : m_type(xtype), m_sloc(xsloc), m_value(rocket::forward<XvalueT>(xvalue))
       {
       }
     ~Backtrace_Frame();
 
   public:
-    Ftype ftype() const noexcept
+    Frame_Type type() const noexcept
       {
-        return this->m_ftype;
+        return this->m_type;
+      }
+    const char* what_type() const noexcept
+      {
+        return describe_frame_type(this->m_type);
       }
     const Source_Location& location() const noexcept
       {

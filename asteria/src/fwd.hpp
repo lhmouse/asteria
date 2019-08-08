@@ -164,6 +164,17 @@ enum TCO_Aware
     tco_aware_nullify  = 3,  // The tail call is forwarded but its result is discarded.
   };
 
+// Stack frame types
+enum Frame_Type
+  {
+    frame_type_native  = 0,  // The frame could not be determined.
+    frame_type_throw   = 1,  // An exception was thrown here.
+    frame_type_catch   = 2,  // An exception was caught here.
+    frame_type_func    = 3,  // An exception propagated across a function boundary.
+  };
+
+ROCKET_PURE_FUNCTION extern const char* describe_frame_type(Frame_Type type) noexcept;
+
 // Indices of fundamental types
 enum Gtype : uint8_t
   {
