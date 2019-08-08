@@ -3,15 +3,51 @@
 
 #include "../precompiled.hpp"
 #include "instantiated_function.hpp"
-#include "../runtime/air_node.hpp"
+#include "air_node.hpp"
 #include "evaluation_stack.hpp"
 #include "executive_context.hpp"
+#include "analytic_context.hpp"
+#include "../syntax/statement.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
 
 Instantiated_Function::~Instantiated_Function()
   {
+  }
+
+rcobj<Variadic_Arguer> Instantiated_Function::do_create_zvarg(const Source_Location& sloc, const cow_string& name) const
+  {
+    // Create a zero-ary argument getter, which also stores the source location and prototype string.
+    cow_string func;
+    func << name << '(';
+    auto epos = this->m_params.size() - 1;
+    if(epos != SIZE_MAX) {
+      for(size_t i = 0; i != epos; ++i) {
+        func << this->m_params[i] << ", ";
+      }
+      func << this->m_params[epos];
+    }
+    func << ')';
+    return rocket::make_refcnt<Variadic_Arguer>(sloc, rocket::move(func));
+  }
+
+cow_vector<AIR_Node> Instantiated_Function::do_compile(const Compiler_Options& options, const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts) const
+  {
+    cow_vector<AIR_Node> code_func;
+    // Generate code for the function body.
+    Analytic_Context ctx_func(1, ctx_opt, this->m_params);
+    auto epos = stmts.size() - 1;
+    if(epos != SIZE_MAX) {
+      // Statements other than the last one cannot be the end of function.
+      for(size_t i = 0; i != epos; ++i) {
+        stmts[i].generate_code(code_func, nullptr, ctx_func, options, stmts[i+1].is_empty_return());
+      }
+      // The last statement may be TCO'd.
+      stmts[epos].generate_code(code_func, nullptr, ctx_func, options, true);
+    }
+    // TODO: Insert optimization passes here.
+    return code_func;
   }
 
 std::ostream& Instantiated_Function::describe(std::ostream& ostrm) const
@@ -27,7 +63,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
     auto status = AIR_Node::status_next;
-    rocket::any_of(this->m_code, [&](const uptr<AIR_Node>& q) { return (status = q->execute(ctx_func)) != AIR_Node::status_next;  });
+    rocket::any_of(this->m_code, [&](const AIR_Node& node) { return (status = node.execute(ctx_func)) != AIR_Node::status_next;  });
     switch(status) {
     case AIR_Node::status_next:
       {
@@ -60,7 +96,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
   {
     // Enumerate all variables inside the function body.
-    rocket::for_each(this->m_code, [&](const uptr<AIR_Node>& q) { q->enumerate_variables(callback);  });
+    rocket::for_each(this->m_code, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
     return callback;
   }
 

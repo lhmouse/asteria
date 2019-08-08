@@ -15,13 +15,8 @@ class Analytic_Context : public Abstract_Context
     const Abstract_Context* m_parent_opt;
 
   public:
-    Analytic_Context(int, const cow_vector<phsh_string>& params)  // for top-level functions
-      : m_parent_opt(nullptr)
-      {
-        this->do_prepare_function(params);
-      }
-    Analytic_Context(int, const Abstract_Context& parent, const cow_vector<phsh_string>& params)  // for closure functions
-      : m_parent_opt(&parent)
+    Analytic_Context(int, const Abstract_Context* parent_opt, const cow_vector<phsh_string>& params)  // for functions
+      : m_parent_opt(parent_opt)
       {
         this->do_prepare_function(params);
       }

@@ -13,19 +13,23 @@ namespace Asteria {
 class Instantiated_Function : public Abstract_Function
   {
   private:
-    rcobj<Variadic_Arguer> m_zvarg;
     cow_vector<phsh_string> m_params;
-
-    cow_vector<uptr<AIR_Node>> m_code;
+    rcobj<Variadic_Arguer> m_zvarg;
+    cow_vector<AIR_Node> m_code;
 
   public:
-    Instantiated_Function(const Source_Location& sloc, const cow_string& func, const cow_vector<phsh_string>& params,
-                          cow_vector<uptr<AIR_Node>>&& code)
-      : m_zvarg(Variadic_Arguer(sloc, func)), m_params(params),
-        m_code(rocket::move(code))
+    Instantiated_Function(const Compiler_Options& options, const Source_Location& sloc, const cow_string& name,
+                          const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params, const cow_vector<Statement>& stmts)
+      : m_params(params),
+        m_zvarg(this->do_create_zvarg(sloc, name)),
+        m_code(this->do_compile(options, ctx_opt, stmts))
       {
       }
     ~Instantiated_Function() override;
+
+  private:
+    rcobj<Variadic_Arguer> do_create_zvarg(const Source_Location& sloc, const cow_string& name) const;
+    cow_vector<AIR_Node> do_compile(const Compiler_Options& options, const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts) const;
 
   public:
     const Source_Location& get_source_location() const noexcept

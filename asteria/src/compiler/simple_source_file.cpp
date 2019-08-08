@@ -5,8 +5,6 @@
 #include "simple_source_file.hpp"
 #include "token_stream.hpp"
 #include "parser.hpp"
-#include "../syntax/statement.hpp"
-#include "../runtime/analytic_context.hpp"
 #include "../runtime/instantiated_function.hpp"
 #include "../utilities.hpp"
 #include <fstream>
@@ -27,19 +25,16 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& sbuf, const c
     if(!parser.load(tstrm, options)) {
       return parser.get_parser_error();
     }
-    const auto& body = parser.get_statements();
     // Initialize parameters of the top scope.
     Source_Location sloc(filename, 1);
     // The file is considered to be a function taking variadic arguments.
     cow_vector<phsh_string> params;
     params.emplace_back(rocket::sref("..."));
-    // Generate code.
-    cow_vector<uptr<AIR_Node>> code;
-    Analytic_Context ctx(1, params);
-    rocket::ranged_xfor(body.begin(), body.end(), [&](auto it) { it->generate_code(code, nullptr, ctx, options, false);  },
-                                                  [&](auto it) { it->generate_code(code, nullptr, ctx, options, true);  });
+    // Instantiate the function.
+    auto qtarget = rocket::make_refcnt<Instantiated_Function>(options, sloc, rocket::sref("<file scope>"), nullptr, params, parser.get_statements());
+    ASTERIA_DEBUG_LOG("Loaded file '", filename, "': ", *qtarget);
     // Accept the code.
-    this->m_cptr = rocket::make_refcnt<Instantiated_Function>(sloc, rocket::sref("<file scope>"), params, rocket::move(code));
+    this->m_cptr = rocket::move(qtarget);
     return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
   }
 
