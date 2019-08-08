@@ -1196,27 +1196,27 @@ namespace Asteria {
     struct Keyword_Element
       {
         Token::Keyword keyword;
-        Xprunit::Xop xop;
+        Xop xop;
       }
     constexpr s_keyword_table[] =
       {
-        { Token::keyword_unset,     Xprunit::xop_prefix_unset     },
-        { Token::keyword_lengthof,  Xprunit::xop_prefix_lengthof  },
-        { Token::keyword_typeof,    Xprunit::xop_prefix_typeof    },
-        { Token::keyword_not,       Xprunit::xop_prefix_notl      },
-        { Token::keyword_abs,       Xprunit::xop_prefix_abs       },
-        { Token::keyword_signb,     Xprunit::xop_prefix_signb     },
-        { Token::keyword_sqrt,      Xprunit::xop_prefix_sqrt      },
-        { Token::keyword_isnan,     Xprunit::xop_prefix_isnan     },
-        { Token::keyword_isinf,     Xprunit::xop_prefix_isinf     },
-        { Token::keyword_round,     Xprunit::xop_prefix_round     },
-        { Token::keyword_floor,     Xprunit::xop_prefix_floor     },
-        { Token::keyword_ceil,      Xprunit::xop_prefix_ceil      },
-        { Token::keyword_trunc,     Xprunit::xop_prefix_trunc     },
-        { Token::keyword_iround,    Xprunit::xop_prefix_iround    },
-        { Token::keyword_ifloor,    Xprunit::xop_prefix_ifloor    },
-        { Token::keyword_iceil,     Xprunit::xop_prefix_iceil     },
-        { Token::keyword_itrunc,    Xprunit::xop_prefix_itrunc    },
+        { Token::keyword_unset,     xop_unset     },
+        { Token::keyword_lengthof,  xop_lengthof  },
+        { Token::keyword_typeof,    xop_typeof    },
+        { Token::keyword_not,       xop_notl      },
+        { Token::keyword_abs,       xop_abs       },
+        { Token::keyword_signb,     xop_signb     },
+        { Token::keyword_sqrt,      xop_sqrt      },
+        { Token::keyword_isnan,     xop_isnan     },
+        { Token::keyword_isinf,     xop_isinf     },
+        { Token::keyword_round,     xop_round     },
+        { Token::keyword_floor,     xop_floor     },
+        { Token::keyword_ceil,      xop_ceil      },
+        { Token::keyword_trunc,     xop_trunc     },
+        { Token::keyword_iround,    xop_iround    },
+        { Token::keyword_ifloor,    xop_ifloor    },
+        { Token::keyword_iceil,     xop_iceil     },
+        { Token::keyword_itrunc,    xop_itrunc    },
       };
 
     constexpr bool operator==(const Keyword_Element& lhs, Token::Keyword rhs) noexcept
@@ -1227,16 +1227,16 @@ namespace Asteria {
     struct Punctuator_Element
       {
         Token::Punctuator punct;
-        Xprunit::Xop xop;
+        Xop xop;
       }
     constexpr s_punctuator_table[] =
       {
-        { Token::punctuator_add,   Xprunit::xop_prefix_pos   },
-        { Token::punctuator_sub,   Xprunit::xop_prefix_neg   },
-        { Token::punctuator_notb,  Xprunit::xop_prefix_notb  },
-        { Token::punctuator_notl,  Xprunit::xop_prefix_notl  },
-        { Token::punctuator_inc,   Xprunit::xop_prefix_inc   },
-        { Token::punctuator_dec,   Xprunit::xop_prefix_dec   },
+        { Token::punctuator_add,   xop_pos      },
+        { Token::punctuator_sub,   xop_neg      },
+        { Token::punctuator_notb,  xop_notb     },
+        { Token::punctuator_notl,  xop_notl     },
+        { Token::punctuator_inc,   xop_inc_pre  },
+        { Token::punctuator_dec,   xop_dec_pre  },
       };
 
     constexpr bool operator==(const Punctuator_Element& lhs, Token::Punctuator rhs) noexcept
@@ -1555,12 +1555,12 @@ namespace Asteria {
     struct Postfix_Operator_Element
       {
         Token::Punctuator punct;
-        Xprunit::Xop xop;
+        Xop xop;
       }
     constexpr s_postfix_operator_table[] =
       {
-        { Token::punctuator_inc,   Xprunit::xop_postfix_inc  },
-        { Token::punctuator_dec,   Xprunit::xop_postfix_dec  },
+        { Token::punctuator_inc,   xop_inc_post  },
+        { Token::punctuator_dec,   xop_dec_post  },
       };
 
     constexpr bool operator==(const Postfix_Operator_Element& lhs, Token::Punctuator rhs) noexcept
@@ -1649,7 +1649,7 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
-        Xprunit::S_operator_rpn xunit = { Xprunit::xop_postfix_subscr, false };
+        Xprunit::S_operator_rpn xunit = { xop_subscr, false };
         units.emplace_back(rocket::move(xunit));
         return true;
       }
@@ -1789,43 +1789,43 @@ namespace Asteria {
     struct Infix_Operator_Element
       {
         Token::Punctuator punct;
-        Xprunit::Xop xop;
+        Xop xop;
         bool assign;
       }
     constexpr s_infix_operator_table[] =
       {
-        { Token::punctuator_add,        Xprunit::xop_infix_add,       false  },
-        { Token::punctuator_sub,        Xprunit::xop_infix_sub,       false  },
-        { Token::punctuator_mul,        Xprunit::xop_infix_mul,       false  },
-        { Token::punctuator_div,        Xprunit::xop_infix_div,       false  },
-        { Token::punctuator_mod,        Xprunit::xop_infix_mod,       false  },
-        { Token::punctuator_andb,       Xprunit::xop_infix_andb,      false  },
-        { Token::punctuator_orb,        Xprunit::xop_infix_orb,       false  },
-        { Token::punctuator_xorb,       Xprunit::xop_infix_xorb,      false  },
-        { Token::punctuator_sla,        Xprunit::xop_infix_sla,       false  },
-        { Token::punctuator_sra,        Xprunit::xop_infix_sra,       false  },
-        { Token::punctuator_sll,        Xprunit::xop_infix_sll,       false  },
-        { Token::punctuator_srl,        Xprunit::xop_infix_srl,       false  },
-        { Token::punctuator_add_eq,     Xprunit::xop_infix_add,       true   },
-        { Token::punctuator_sub_eq,     Xprunit::xop_infix_sub,       true   },
-        { Token::punctuator_mul_eq,     Xprunit::xop_infix_mul,       true   },
-        { Token::punctuator_div_eq,     Xprunit::xop_infix_div,       true   },
-        { Token::punctuator_mod_eq,     Xprunit::xop_infix_mod,       true   },
-        { Token::punctuator_andb_eq,    Xprunit::xop_infix_andb,      true   },
-        { Token::punctuator_orb_eq,     Xprunit::xop_infix_orb,       true   },
-        { Token::punctuator_xorb_eq,    Xprunit::xop_infix_xorb,      true   },
-        { Token::punctuator_sla_eq,     Xprunit::xop_infix_sla,       true   },
-        { Token::punctuator_sra_eq,     Xprunit::xop_infix_sra,       true   },
-        { Token::punctuator_sll_eq,     Xprunit::xop_infix_sll,       true   },
-        { Token::punctuator_srl_eq,     Xprunit::xop_infix_srl,       true   },
-        { Token::punctuator_assign,     Xprunit::xop_infix_assign,    true   },
-        { Token::punctuator_cmp_eq,     Xprunit::xop_infix_cmp_eq,    false  },
-        { Token::punctuator_cmp_ne,     Xprunit::xop_infix_cmp_ne,    false  },
-        { Token::punctuator_cmp_lt,     Xprunit::xop_infix_cmp_lt,    false  },
-        { Token::punctuator_cmp_gt,     Xprunit::xop_infix_cmp_gt,    false  },
-        { Token::punctuator_cmp_lte,    Xprunit::xop_infix_cmp_lte,   false  },
-        { Token::punctuator_cmp_gte,    Xprunit::xop_infix_cmp_gte,   false  },
-        { Token::punctuator_spaceship,  Xprunit::xop_infix_cmp_3way,  false  },
+        { Token::punctuator_add,        xop_add,       false  },
+        { Token::punctuator_sub,        xop_sub,       false  },
+        { Token::punctuator_mul,        xop_mul,       false  },
+        { Token::punctuator_div,        xop_div,       false  },
+        { Token::punctuator_mod,        xop_mod,       false  },
+        { Token::punctuator_andb,       xop_andb,      false  },
+        { Token::punctuator_orb,        xop_orb,       false  },
+        { Token::punctuator_xorb,       xop_xorb,      false  },
+        { Token::punctuator_sla,        xop_sla,       false  },
+        { Token::punctuator_sra,        xop_sra,       false  },
+        { Token::punctuator_sll,        xop_sll,       false  },
+        { Token::punctuator_srl,        xop_srl,       false  },
+        { Token::punctuator_add_eq,     xop_add,       true   },
+        { Token::punctuator_sub_eq,     xop_sub,       true   },
+        { Token::punctuator_mul_eq,     xop_mul,       true   },
+        { Token::punctuator_div_eq,     xop_div,       true   },
+        { Token::punctuator_mod_eq,     xop_mod,       true   },
+        { Token::punctuator_andb_eq,    xop_andb,      true   },
+        { Token::punctuator_orb_eq,     xop_orb,       true   },
+        { Token::punctuator_xorb_eq,    xop_xorb,      true   },
+        { Token::punctuator_sla_eq,     xop_sla,       true   },
+        { Token::punctuator_sra_eq,     xop_sra,       true   },
+        { Token::punctuator_sll_eq,     xop_sll,       true   },
+        { Token::punctuator_srl_eq,     xop_srl,       true   },
+        { Token::punctuator_assign,     xop_assign,    true   },
+        { Token::punctuator_cmp_eq,     xop_cmp_eq,    false  },
+        { Token::punctuator_cmp_ne,     xop_cmp_ne,    false  },
+        { Token::punctuator_cmp_lt,     xop_cmp_lt,    false  },
+        { Token::punctuator_cmp_gt,     xop_cmp_gt,    false  },
+        { Token::punctuator_cmp_lte,    xop_cmp_lte,   false  },
+        { Token::punctuator_cmp_gte,    xop_cmp_gte,   false  },
+        { Token::punctuator_spaceship,  xop_cmp_3way,  false  },
       };
 
     constexpr bool operator==(const Infix_Operator_Element& lhs, Token::Punctuator rhs) noexcept

@@ -51,50 +51,50 @@ Precedence Infix_Element::tell_precedence() const noexcept
           return precedence_assignment;
         }
         switch(rocket::weaken_enum(altr.xop)) {
-        case Xprunit::xop_infix_mul:
-        case Xprunit::xop_infix_div:
-        case Xprunit::xop_infix_mod:
+        case xop_mul:
+        case xop_div:
+        case xop_mod:
           {
             return precedence_multiplicative;
           }
-        case Xprunit::xop_infix_add:
-        case Xprunit::xop_infix_sub:
+        case xop_add:
+        case xop_sub:
           {
             return precedence_additive;
           }
-        case Xprunit::xop_infix_sla:
-        case Xprunit::xop_infix_sra:
-        case Xprunit::xop_infix_sll:
-        case Xprunit::xop_infix_srl:
+        case xop_sla:
+        case xop_sra:
+        case xop_sll:
+        case xop_srl:
           {
             return precedence_shift;
           }
-        case Xprunit::xop_infix_cmp_lt:
-        case Xprunit::xop_infix_cmp_lte:
-        case Xprunit::xop_infix_cmp_gt:
-        case Xprunit::xop_infix_cmp_gte:
+        case xop_cmp_lt:
+        case xop_cmp_lte:
+        case xop_cmp_gt:
+        case xop_cmp_gte:
           {
             return precedence_relational;
           }
-        case Xprunit::xop_infix_cmp_eq:
-        case Xprunit::xop_infix_cmp_ne:
-        case Xprunit::xop_infix_cmp_3way:
+        case xop_cmp_eq:
+        case xop_cmp_ne:
+        case xop_cmp_3way:
           {
             return precedence_equality;
           }
-        case Xprunit::xop_infix_andb:
+        case xop_andb:
           {
             return precedence_bitwise_and;
           }
-        case Xprunit::xop_infix_xorb:
+        case xop_xorb:
           {
             return precedence_bitwise_xor;
           }
-        case Xprunit::xop_infix_orb:
+        case xop_orb:
           {
             return precedence_bitwise_or;
           }
-        case Xprunit::xop_infix_assign:
+        case xop_assign:
           {
             return precedence_assignment;
           }

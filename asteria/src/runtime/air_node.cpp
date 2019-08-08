@@ -1136,7 +1136,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         ctx.stack().set_temporary_reference(altr.assign, do_operator_not(rhs.test()));
         return air_status_next;
       }
-    case index_apply_xop_inc:
+    case index_apply_xop_inc_pre:
       {
         // This operator is unary.
         auto& rhs = ctx.stack().get_top_reference().open();
@@ -1154,7 +1154,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         }
         return air_status_next;
       }
-    case index_apply_xop_dec:
+    case index_apply_xop_dec_pre:
       {
         // This operator is unary.
         auto& rhs = ctx.stack().get_top_reference().open();
@@ -2004,8 +2004,8 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_apply_xop_neg:
     case index_apply_xop_notb:
     case index_apply_xop_notl:
-    case index_apply_xop_inc:
-    case index_apply_xop_dec:
+    case index_apply_xop_inc_pre:
+    case index_apply_xop_dec_pre:
     case index_apply_xop_unset:
     case index_apply_xop_lengthof:
     case index_apply_xop_typeof:

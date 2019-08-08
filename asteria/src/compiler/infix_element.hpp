@@ -40,7 +40,7 @@ class Infix_Element
       };
     struct S_general  // no short circuit
       {
-        Xprunit::Xop xop;
+        Xop xop;
         bool assign;
         cow_vector<Xprunit> rhs;
       };

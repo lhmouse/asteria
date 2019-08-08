@@ -175,10 +175,10 @@ class AIR_Node
       {
         bool assign;
       };
-    struct S_apply_xop_inc
+    struct S_apply_xop_inc_pre
       {
       };
-    struct S_apply_xop_dec
+    struct S_apply_xop_dec_pre
       {
       };
     struct S_apply_xop_unset
@@ -352,8 +352,8 @@ class AIR_Node
         index_apply_xop_neg          = 31,
         index_apply_xop_notb         = 32,
         index_apply_xop_notl         = 33,
-        index_apply_xop_inc          = 34,
-        index_apply_xop_dec          = 35,
+        index_apply_xop_inc_pre      = 34,
+        index_apply_xop_dec_pre      = 35,
         index_apply_xop_unset        = 36,
         index_apply_xop_lengthof     = 37,
         index_apply_xop_typeof       = 38,
@@ -424,8 +424,8 @@ class AIR_Node
         , S_apply_xop_neg          // 31,
         , S_apply_xop_notb         // 32,
         , S_apply_xop_notl         // 33,
-        , S_apply_xop_inc          // 34,
-        , S_apply_xop_dec          // 35,
+        , S_apply_xop_inc_pre      // 34,
+        , S_apply_xop_dec_pre      // 35,
         , S_apply_xop_unset        // 36,
         , S_apply_xop_lengthof     // 37,
         , S_apply_xop_typeof       // 38,
