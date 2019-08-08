@@ -57,6 +57,11 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
         ~stored_pointer()
           {
             this->reset(pointer());
+#ifdef ROCKET_DEBUG
+            if(is_trivially_destructible<pointer>::value) {
+              ::std::memset(::std::addressof(this->m_ptr), 0xF6, sizeof(this->m_ptr));
+            }
+#endif
           }
 
         stored_pointer(const stored_pointer&)
