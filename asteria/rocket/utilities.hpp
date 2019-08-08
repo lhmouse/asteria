@@ -136,16 +136,15 @@ template<typename... unusedT> struct make_void
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof((__VA_ARGS__)) || true>::type* = nullptr
 
 // The argument must be a non-const lvalue.
-template<typename argT,
-         ROCKET_ENABLE_IF(is_same<typename remove_cv<argT>::type,
-                                  argT>::value)> constexpr typename remove_reference<argT>::type&& move(argT& arg) noexcept
+template<typename argT, ROCKET_ENABLE_IF(is_same<typename remove_cv<argT>::type, argT>::value)>
+        ROCKET_ARTIFICIAL_FUNCTION constexpr typename remove_reference<argT>::type&& move(argT& arg) noexcept
   {
     return static_cast<typename remove_reference<argT>::type&&>(arg);
   }
 
 // The argument must be an lvalue.
-template<typename targetT, typename argT,
-         ROCKET_ENABLE_IF(is_lvalue_reference<argT&&>::value)> constexpr targetT&& forward(argT&& arg) noexcept
+template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_lvalue_reference<argT&&>::value)>
+        ROCKET_ARTIFICIAL_FUNCTION constexpr targetT&& forward(argT&& arg) noexcept
   {
     return static_cast<targetT&&>(arg);
   }
@@ -154,7 +153,8 @@ template<typename targetT, typename argT,
 
     using ::std::swap;
 
-    template<typename typeT> struct is_nothrow_swappable_aux : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(), ::std::declval<typeT&>()))>
+    template<typename typeT> struct is_nothrow_swappable_aux : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(),
+                                                                                                     ::std::declval<typeT&>()))>
       {
       };
 
