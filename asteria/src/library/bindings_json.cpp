@@ -350,7 +350,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         return rocket::nullopt;
       }
 
-    opt<Token::Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Token::Punctuator> accept)
+    opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Punctuator> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -387,7 +387,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         }
         if(qtok->is_punctuator()) {
           auto punct = qtok->as_punctuator();
-          if(rocket::is_any_of(punct, { Token::punctuator_add, Token::punctuator_sub })) {
+          if(rocket::is_any_of(punct, { punctuator_add, punctuator_sub })) {
             // Only `Infinity` and `NaN` are allowed.
             // Please note that the tokenizer will have merged sign symbols into adjacent number literals.
             qtok = tstrm.peek_opt(1);
@@ -398,7 +398,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
               return rocket::nullopt;
             }
             const auto& name = qtok->as_identifier();
-            bool rneg = punct == Token::punctuator_sub;
+            bool rneg = punct == punctuator_sub;
             if(name == "Infinity") {
               tstrm.shift(2);
               // Accept a signed `Infinity`.
@@ -504,10 +504,10 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         cow_vector<Xparse> stack;
         do {
           // Accept a leaf value. No other things such as closed brackets are allowed.
-          auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op, Token::punctuator_brace_op });
-          if(kpunct == Token::punctuator_bracket_op) {
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op, punctuator_brace_op });
+          if(kpunct == punctuator_bracket_op) {
             // An open bracket has been accepted.
-            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+            kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
             if(!kpunct) {
               // Descend into the new array.
               S_xparse_array ctxa = { rocket::clear };
@@ -517,16 +517,16 @@ G_string std_json_format(const Value& value, const G_integer& indent)
             // Accept an empty array.
             value = G_array();
           }
-          else if(kpunct == Token::punctuator_brace_op) {
+          else if(kpunct == punctuator_brace_op) {
             // An open brace has been accepted.
-            kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+            kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
             if(!kpunct) {
               // A key followed by a colon is expected.
               auto qkey = do_accept_key_opt(tstrm);
               if(!qkey) {
                 return rocket::nullopt;
               }
-              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+              kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
               if(!kpunct) {
                 return rocket::nullopt;
               }
@@ -557,12 +557,12 @@ G_string std_json_format(const Value& value, const G_integer& indent)
               // Append the value to its parent array.
               ctxa.array.emplace_back(rocket::move(value));
               // Look for the next element.
-              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl, Token::punctuator_comma });
+              kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl, punctuator_comma });
               if(!kpunct) {
                 return rocket::nullopt;
               }
-              if(*kpunct == Token::punctuator_comma) {
-                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+              if(*kpunct == punctuator_comma) {
+                kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
                 if(!kpunct) {
                   // The next element is expected to follow the comma.
                   break;
@@ -577,19 +577,19 @@ G_string std_json_format(const Value& value, const G_integer& indent)
               // Insert the value into its parent object.
               ctxo.object.insert_or_assign(rocket::move(ctxo.key), rocket::move(value));
               // Look for the next element.
-              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl, Token::punctuator_comma });
+              kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl, punctuator_comma });
               if(!kpunct) {
                 return rocket::nullopt;
               }
-              if(*kpunct == Token::punctuator_comma) {
-                kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+              if(*kpunct == punctuator_comma) {
+                kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
                 if(!kpunct) {
                   // The next key is expected to follow the comma.
                   auto qkey = do_accept_key_opt(tstrm);
                   if(!qkey) {
                     return rocket::nullopt;
                   }
-                  kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+                  kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
                   if(!kpunct) {
                     return rocket::nullopt;
                   }

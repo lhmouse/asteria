@@ -32,7 +32,7 @@ namespace Asteria {
         return Source_Location(qtok->file(), qtok->line());
       }
 
-    opt<Token::Keyword> do_accept_keyword_opt(Token_Stream& tstrm, std::initializer_list<Token::Keyword> accept)
+    opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, std::initializer_list<Keyword> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -51,7 +51,7 @@ namespace Asteria {
         return keyword;
       }
 
-    opt<Token::Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Token::Punctuator> accept)
+    opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, std::initializer_list<Punctuator> accept)
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
@@ -132,7 +132,7 @@ namespace Asteria {
           auto keyword = qtok->as_keyword();
           // Treat the keyword as a plain identifier and discard this token.
           tstrm.shift();
-          return rocket::sref(Token::stringify_keyword(keyword));
+          return rocket::sref(stringify_keyword(keyword));
         }
         if(qtok->is_identifier()) {
           auto name = qtok->as_identifier();
@@ -173,19 +173,19 @@ namespace Asteria {
 
     struct Literal_Element
       {
-        Token::Keyword keyword;
+        Keyword keyword;
         Value (*generator)();
       }
     const s_literal_table[] =
       {
-        { Token::keyword_null,      do_generate_null      },
-        { Token::keyword_false,     do_generate_false     },
-        { Token::keyword_true,      do_generate_true      },
-        { Token::keyword_nan,       do_generate_nan       },
-        { Token::keyword_infinity,  do_generate_infinity  },
+        { keyword_null,      do_generate_null      },
+        { keyword_false,     do_generate_false     },
+        { keyword_true,      do_generate_true      },
+        { keyword_nan,       do_generate_nan       },
+        { keyword_infinity,  do_generate_infinity  },
       };
 
-    constexpr bool operator==(const Literal_Element& lhs, Token::Keyword rhs) noexcept
+    constexpr bool operator==(const Literal_Element& lhs, Keyword rhs) noexcept
       {
         return lhs.keyword == rhs;
       }
@@ -246,12 +246,12 @@ namespace Asteria {
         if(!qtok) {
           return rocket::nullopt;
         }
-        if(qtok->is_keyword() && (qtok->as_keyword() == Token::keyword_not)) {
+        if(qtok->is_keyword() && (qtok->as_keyword() == keyword_not)) {
           // Discard this token.
           tstrm.shift();
           return true;
         }
-        if(qtok->is_punctuator() && (qtok->as_punctuator() == Token::punctuator_notl)) {
+        if(qtok->is_punctuator() && (qtok->as_punctuator() == punctuator_notl)) {
           // Discard this token.
           tstrm.shift();
           return true;
@@ -286,7 +286,7 @@ namespace Asteria {
         //   statement-list | ""
         // statement-list ::=
         //   statement statement-list-opt
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
         if(!kpunct) {
           return rocket::nullopt;
         }
@@ -298,7 +298,7 @@ namespace Asteria {
           }
           body.emplace_back(rocket::move(*qstmt));
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_statement_expected);
         }
@@ -321,7 +321,7 @@ namespace Asteria {
         //   equal-initializer | ""
         // equal-initializer ::=
         //   "=" expression
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_assign });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign });
         if(!kpunct) {
           return rocket::nullopt;
         }
@@ -332,7 +332,7 @@ namespace Asteria {
       {
         // null-statement ::=
         //   ";"
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           return rocket::nullopt;
         }
@@ -346,7 +346,7 @@ namespace Asteria {
         auto sloc = do_tell_source_location(tstrm);
         // variable-definition ::=
         //   "var" identifier equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_var });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_var });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -362,12 +362,12 @@ namespace Asteria {
           }
           vars.emplace_back(rocket::move(*qname), rocket::move(*qinit));
           // Look for the separator. The first declaration is required.
-          auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
           if(!kpunct) {
             break;
           }
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -381,7 +381,7 @@ namespace Asteria {
         auto sloc = do_tell_source_location(tstrm);
         // immutable-variable-definition ::=
         //   "const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_const });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_const });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -397,12 +397,12 @@ namespace Asteria {
           }
           vars.emplace_back(rocket::move(*qname), rocket::move(*qinit));
           // Look for the separator. The first declaration is required.
-          auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
           if(!kpunct) {
             break;
           }
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -422,14 +422,14 @@ namespace Asteria {
           for(;;) {
             names.emplace_back(rocket::move(*qname));
             // Look for the separator.
-            auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+            auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
             if(!kpunct) {
               break;
             }
             qname = do_accept_identifier_opt(tstrm);
             if(!qname) {
               // The parameter list may end with an ellipsis.
-              kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_ellipsis });
+              kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
               if(kpunct) {
                 names.emplace_back(rocket::sref("..."));
                 break;
@@ -439,7 +439,7 @@ namespace Asteria {
           }
           return rocket::move(names);
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_ellipsis });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_ellipsis });
         if(kpunct) {
           cow_vector<phsh_string> names;
           names.emplace_back(rocket::sref("..."));
@@ -452,7 +452,7 @@ namespace Asteria {
       {
         // parameter-list-declaration ::=
         //   "(" parameter-list-opt ")"
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           return rocket::nullopt;
         }
@@ -460,7 +460,7 @@ namespace Asteria {
         if(!qnames) {
           qnames.emplace();
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -473,7 +473,7 @@ namespace Asteria {
         auto sloc = do_tell_source_location(tstrm);
         // function-definition ::=
         //   "func" identifier parameter-declaration block
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_func });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -501,7 +501,7 @@ namespace Asteria {
         if(!kexpr) {
           return rocket::nullopt;
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -513,7 +513,7 @@ namespace Asteria {
       {
         // else-branch-opt ::=
         //   "else" statement | ""
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_else });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_else });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -532,7 +532,7 @@ namespace Asteria {
         //   negation | ""
         // negation ::=
         //   "!" | "not"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_if });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_if });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -540,7 +540,7 @@ namespace Asteria {
         if(!kneg) {
           kneg.emplace();
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -548,7 +548,7 @@ namespace Asteria {
         if(!qcond) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -568,7 +568,7 @@ namespace Asteria {
       {
         // case-clause ::=
         //   "case" expression ":" statement-list-opt
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_case });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_case });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -576,7 +576,7 @@ namespace Asteria {
         if(!qcond) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
         }
@@ -591,11 +591,11 @@ namespace Asteria {
       {
         // default-clause ::=
         //   "default" ":" statement-list-opt
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_default });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_default });
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
         }
@@ -625,7 +625,7 @@ namespace Asteria {
       {
         // switch-clause-list ::=
         //   switch-clause switch-clause-list-opt
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
         if(!kpunct) {
           return rocket::nullopt;
         }
@@ -637,7 +637,7 @@ namespace Asteria {
           }
           clauses.emplace_back(rocket::move(*qclause));
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_or_switch_clause_expected);
         }
@@ -652,11 +652,11 @@ namespace Asteria {
         //   "{" swtich-clause-list-opt "}"
         // switch-clause-list-opt ::=
         //   switch-clause-list | ""
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_switch });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch });
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -664,7 +664,7 @@ namespace Asteria {
         if(!qctrl) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -680,7 +680,7 @@ namespace Asteria {
       {
         // do-while-statement ::=
         //   "do" statement "while" negation-opt "(" expression ")" ";"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_do });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_do });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -688,7 +688,7 @@ namespace Asteria {
         if(!qbody) {
           throw do_make_parser_error(tstrm, Parser_Error::code_statement_expected);
         }
-        qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_while });
+        qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -696,7 +696,7 @@ namespace Asteria {
         if(!kneg) {
           kneg.emplace();
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -704,11 +704,11 @@ namespace Asteria {
         if(!qcond) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -720,7 +720,7 @@ namespace Asteria {
       {
         // while-statement ::=
         //   "while" negation-opt "(" expression ")" statement
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_while });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -728,7 +728,7 @@ namespace Asteria {
         if(!kneg) {
           kneg.emplace();
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -736,7 +736,7 @@ namespace Asteria {
         if(!qcond) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -752,7 +752,7 @@ namespace Asteria {
       {
         // for-complement-range ::=
         //   "each" identifier "," identifier ":" expression ")" statement
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_each });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_each });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -760,7 +760,7 @@ namespace Asteria {
         if(!qkname) {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_comma_expected);
         }
@@ -768,7 +768,7 @@ namespace Asteria {
         if(!qmname) {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
         }
@@ -776,7 +776,7 @@ namespace Asteria {
         if(!qinit) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -819,7 +819,7 @@ namespace Asteria {
         if(!qcond) {
           qcond.emplace();
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -827,7 +827,7 @@ namespace Asteria {
         if(!kstep) {
           kstep.emplace();
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -860,11 +860,11 @@ namespace Asteria {
       {
         // for-statement ::=
         //   "for" "(" for-complement
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_for });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_for });
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -879,14 +879,14 @@ namespace Asteria {
       {
         // break-target-opt ::=
         //   "switch" | "while" | "for" | ""
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_switch, Token::keyword_while, Token::keyword_for });
-        if(qkwrd == Token::keyword_switch) {
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch, keyword_while, keyword_for });
+        if(qkwrd == keyword_switch) {
           return jump_target_switch;
         }
-        if(qkwrd == Token::keyword_while) {
+        if(qkwrd == keyword_while) {
           return jump_target_while;
         }
-        if(qkwrd == Token::keyword_for) {
+        if(qkwrd == keyword_for) {
           return jump_target_for;
         }
         return rocket::nullopt;
@@ -896,7 +896,7 @@ namespace Asteria {
       {
         // break-statement ::=
         //   "break" break-target-opt ";"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_break });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_break });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -904,7 +904,7 @@ namespace Asteria {
         if(!qtarget) {
           qtarget.emplace();
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -916,11 +916,11 @@ namespace Asteria {
       {
         // continue-target-opt ::=
         //   "while" | "for" | ""
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_while, Token::keyword_for });
-        if(qkwrd == Token::keyword_while) {
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_while, keyword_for });
+        if(qkwrd == keyword_while) {
           return jump_target_while;
         }
-        if(qkwrd == Token::keyword_for) {
+        if(qkwrd == keyword_for) {
           return jump_target_for;
         }
         return rocket::nullopt;
@@ -930,7 +930,7 @@ namespace Asteria {
       {
         // continue-statement ::=
         //   "continue" continue-target-opt ";"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_continue });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_continue });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -938,7 +938,7 @@ namespace Asteria {
         if(!qtarget) {
           qtarget.emplace();
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -952,7 +952,7 @@ namespace Asteria {
         auto sloc = do_tell_source_location(tstrm);
         // throw-statement ::=
         //   "throw" expression ";"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_throw });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_throw });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -960,7 +960,7 @@ namespace Asteria {
         if(!kexpr) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -972,7 +972,7 @@ namespace Asteria {
       {
         // reference-specifier-opt ::=
         //   "&" | ""
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_andb });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andb });
         if(!kpunct) {
           return rocket::nullopt;
         }
@@ -983,7 +983,7 @@ namespace Asteria {
       {
         // return-statement ::=
         //   "return" reference-specifier-opt expression-opt ";"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_return });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_return });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -995,7 +995,7 @@ namespace Asteria {
         if(!kexpr) {
           kexpr.emplace();
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -1007,7 +1007,7 @@ namespace Asteria {
       {
         // assert-message ::=
         //   ":" string-literal | ""
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_colon });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
         if(!kpunct) {
           return rocket::nullopt;
         }
@@ -1024,7 +1024,7 @@ namespace Asteria {
         auto sloc = do_tell_source_location(tstrm);
         // assert-statement ::=
         //   "assert" negation-opt expression assert-message-opt ";"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_assert });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_assert });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -1040,7 +1040,7 @@ namespace Asteria {
         if(!kmsg) {
           kmsg.emplace();
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_semicol });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_semicolon_expected);
         }
@@ -1052,7 +1052,7 @@ namespace Asteria {
       {
         // try-statement ::=
         //   "try" statement "catch" "(" identifier ")" statement
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_try });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_try });
         if(!qkwrd) {
           return rocket::nullopt;
         }
@@ -1062,11 +1062,11 @@ namespace Asteria {
         }
         // Note that this is the location of the `catch` block.
         auto sloc = do_tell_source_location(tstrm);
-        qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_catch });
+        qkwrd = do_accept_keyword_opt(tstrm, { keyword_catch });
         if(!qkwrd) {
           throw do_make_parser_error(tstrm, Parser_Error::code_keyword_catch_expected);
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1074,7 +1074,7 @@ namespace Asteria {
         if(!kexcept) {
           throw do_make_parser_error(tstrm, Parser_Error::code_identifier_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -1195,51 +1195,51 @@ namespace Asteria {
 
     struct Keyword_Element
       {
-        Token::Keyword keyword;
+        Keyword keyword;
         Xop xop;
       }
     constexpr s_keyword_table[] =
       {
-        { Token::keyword_unset,     xop_unset     },
-        { Token::keyword_lengthof,  xop_lengthof  },
-        { Token::keyword_typeof,    xop_typeof    },
-        { Token::keyword_not,       xop_notl      },
-        { Token::keyword_abs,       xop_abs       },
-        { Token::keyword_signb,     xop_signb     },
-        { Token::keyword_sqrt,      xop_sqrt      },
-        { Token::keyword_isnan,     xop_isnan     },
-        { Token::keyword_isinf,     xop_isinf     },
-        { Token::keyword_round,     xop_round     },
-        { Token::keyword_floor,     xop_floor     },
-        { Token::keyword_ceil,      xop_ceil      },
-        { Token::keyword_trunc,     xop_trunc     },
-        { Token::keyword_iround,    xop_iround    },
-        { Token::keyword_ifloor,    xop_ifloor    },
-        { Token::keyword_iceil,     xop_iceil     },
-        { Token::keyword_itrunc,    xop_itrunc    },
+        { keyword_unset,     xop_unset     },
+        { keyword_lengthof,  xop_lengthof  },
+        { keyword_typeof,    xop_typeof    },
+        { keyword_not,       xop_notl      },
+        { keyword_abs,       xop_abs       },
+        { keyword_signb,     xop_signb     },
+        { keyword_sqrt,      xop_sqrt      },
+        { keyword_isnan,     xop_isnan     },
+        { keyword_isinf,     xop_isinf     },
+        { keyword_round,     xop_round     },
+        { keyword_floor,     xop_floor     },
+        { keyword_ceil,      xop_ceil      },
+        { keyword_trunc,     xop_trunc     },
+        { keyword_iround,    xop_iround    },
+        { keyword_ifloor,    xop_ifloor    },
+        { keyword_iceil,     xop_iceil     },
+        { keyword_itrunc,    xop_itrunc    },
       };
 
-    constexpr bool operator==(const Keyword_Element& lhs, Token::Keyword rhs) noexcept
+    constexpr bool operator==(const Keyword_Element& lhs, Keyword rhs) noexcept
       {
         return lhs.keyword == rhs;
       }
 
     struct Punctuator_Element
       {
-        Token::Punctuator punct;
+        Punctuator punct;
         Xop xop;
       }
     constexpr s_punctuator_table[] =
       {
-        { Token::punctuator_add,   xop_pos      },
-        { Token::punctuator_sub,   xop_neg      },
-        { Token::punctuator_notb,  xop_notb     },
-        { Token::punctuator_notl,  xop_notl     },
-        { Token::punctuator_inc,   xop_inc_pre  },
-        { Token::punctuator_dec,   xop_dec_pre  },
+        { punctuator_add,   xop_pos      },
+        { punctuator_sub,   xop_neg      },
+        { punctuator_notb,  xop_notb     },
+        { punctuator_notl,  xop_notl     },
+        { punctuator_inc,   xop_inc_pre  },
+        { punctuator_dec,   xop_dec_pre  },
       };
 
-    constexpr bool operator==(const Punctuator_Element& lhs, Token::Punctuator rhs) noexcept
+    constexpr bool operator==(const Punctuator_Element& lhs, Punctuator rhs) noexcept
       {
         return lhs.punct == rhs;
       }
@@ -1320,7 +1320,7 @@ namespace Asteria {
     bool do_accept_this(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Get the keyword `this`.
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_this });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_this });
         if(!qkwrd) {
           return false;
         }
@@ -1354,7 +1354,7 @@ namespace Asteria {
         auto sloc = do_tell_source_location(tstrm);
         // closure-function ::=
         //   "func" parameter-declaration closure-body
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_func });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
         if(!qkwrd) {
           return false;
         }
@@ -1379,7 +1379,7 @@ namespace Asteria {
         //   array-element-list | ""
         // array-element-list ::=
         //   expression ( ( "," | ";" ) array-element-list-opt | "" )
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
         if(!kpunct) {
           return false;
         }
@@ -1391,12 +1391,12 @@ namespace Asteria {
           }
           nelems += 1;
           // Look for the separator.
-          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma, Token::punctuator_semicol });
+          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
           if(!kpunct) {
             break;
           }
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
@@ -1413,7 +1413,7 @@ namespace Asteria {
         //   key-mapped-list | ""
         // key-mapped-list ::=
         //   ( string-literal | identifier ) ( "=" | ":" ) expression ( ( "," | ";" ) key-mapped-list-opt | "" )
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
         if(!kpunct) {
           return false;
         }
@@ -1428,7 +1428,7 @@ namespace Asteria {
             throw duplicate_key_error;
           }
           // Look for the initializer.
-          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_assign, Token::punctuator_colon });
+          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign, punctuator_colon });
           if(!kpunct) {
             throw do_make_parser_error(tstrm, Parser_Error::code_equals_sign_or_colon_expected);
           }
@@ -1438,12 +1438,12 @@ namespace Asteria {
           }
           keys.emplace_back(rocket::move(*qkey));
           // Look for the separator.
-          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma, Token::punctuator_semicol });
+          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma, punctuator_semicol });
           if(!kpunct) {
             break;
           }
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_brace_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_brace_expected);
         }
@@ -1456,7 +1456,7 @@ namespace Asteria {
       {
         // nested-expression ::=
         //   "(" expression ")"
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           return false;
         }
@@ -1464,7 +1464,7 @@ namespace Asteria {
         if(!succ) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -1475,11 +1475,11 @@ namespace Asteria {
       {
         // fused-multiply-add ::=
         //   "__fma" "(" expression "," expression "," expression ")"
-        auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_fma });
+        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_fma });
         if(!qkwrd) {
           return false;
         }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_open_parenthesis_expected);
         }
@@ -1487,7 +1487,7 @@ namespace Asteria {
         if(!succ) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_comma_expected);
         }
@@ -1495,7 +1495,7 @@ namespace Asteria {
         if(!succ) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_comma_expected);
         }
@@ -1503,7 +1503,7 @@ namespace Asteria {
         if(!succ) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_expected);
         }
@@ -1554,16 +1554,16 @@ namespace Asteria {
 
     struct Postfix_Operator_Element
       {
-        Token::Punctuator punct;
+        Punctuator punct;
         Xop xop;
       }
     constexpr s_postfix_operator_table[] =
       {
-        { Token::punctuator_inc,   xop_inc_post  },
-        { Token::punctuator_dec,   xop_dec_post  },
+        { punctuator_inc,   xop_inc_post  },
+        { punctuator_dec,   xop_dec_post  },
       };
 
-    constexpr bool operator==(const Postfix_Operator_Element& lhs, Token::Punctuator rhs) noexcept
+    constexpr bool operator==(const Postfix_Operator_Element& lhs, Punctuator rhs) noexcept
       {
         return lhs.punct == rhs;
       }
@@ -1600,7 +1600,7 @@ namespace Asteria {
         //   argument ( "," argument-list | "" )
         // argument ::=
         //   reference-specifier-opt expression
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
           return false;
         }
@@ -1619,12 +1619,12 @@ namespace Asteria {
           }
           args_by_refs.emplace_back(*qref);
           // Look for the separator.
-          kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_comma });
+          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
           if(!kpunct) {
             break;
           }
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_parenth_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_parenthesis_or_argument_expected);
         }
@@ -1637,7 +1637,7 @@ namespace Asteria {
       {
         // postfix-subscript ::=
         //   "[" expression "]"
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_op });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
         if(!kpunct) {
           return false;
         }
@@ -1645,7 +1645,7 @@ namespace Asteria {
         if(!succ) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_bracket_cl });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_closed_bracket_expected);
         }
@@ -1658,7 +1658,7 @@ namespace Asteria {
       {
         // postfix-member-access ::=
         //   "." ( string-literal | identifier )
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_dot });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_dot });
         if(!kpunct) {
           return false;
         }
@@ -1726,7 +1726,7 @@ namespace Asteria {
       {
         // infix-operator-ternary ::=
         //   ( "?" | "?=" ) expression ":"
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_quest, Token::punctuator_quest_eq });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_quest_eq });
         if(!kpunct) {
           return rocket::nullopt;
         }
@@ -1734,11 +1734,11 @@ namespace Asteria {
         if(!qbtrue) {
           throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
         }
-        kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_quest, Token::punctuator_colon });
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_colon });
         if(!kpunct) {
           throw do_make_parser_error(tstrm, Parser_Error::code_colon_expected);
         }
-        Infix_Element::S_ternary xelem = { *kpunct == Token::punctuator_quest_eq, rocket::move(*qbtrue), rocket::clear };
+        Infix_Element::S_ternary xelem = { *kpunct == punctuator_quest_eq, rocket::move(*qbtrue), rocket::clear };
         return rocket::move(xelem);
       }
 
@@ -1746,15 +1746,15 @@ namespace Asteria {
       {
         // infix-operator-logical-and ::=
         //   "&&" | "&&=" | "and"
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_andl, Token::punctuator_andl_eq });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andl, punctuator_andl_eq });
         if(!kpunct) {
-          auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_and });
+          auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_and });
           if(!qkwrd) {
             return rocket::nullopt;
           }
-          kpunct.emplace(Token::punctuator_andl);
+          kpunct.emplace(punctuator_andl);
         }
-        Infix_Element::S_logical_and xelem = { *kpunct == Token::punctuator_andl_eq, rocket::clear };
+        Infix_Element::S_logical_and xelem = { *kpunct == punctuator_andl_eq, rocket::clear };
         return rocket::move(xelem);
       }
 
@@ -1762,15 +1762,15 @@ namespace Asteria {
       {
         // infix-operator-logical-or ::=
         //   "||" | "||=" | "or"
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_orl, Token::punctuator_orl_eq });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_orl, punctuator_orl_eq });
         if(!kpunct) {
-          auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_or });
+          auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_or });
           if(!qkwrd) {
             return rocket::nullopt;
           }
-          kpunct.emplace(Token::punctuator_orl);
+          kpunct.emplace(punctuator_orl);
         }
-        Infix_Element::S_logical_or xelem = { *kpunct == Token::punctuator_orl_eq, rocket::clear };
+        Infix_Element::S_logical_or xelem = { *kpunct == punctuator_orl_eq, rocket::clear };
         return rocket::move(xelem);
       }
 
@@ -1778,57 +1778,57 @@ namespace Asteria {
       {
         // infix-operator-coalescence ::=
         //   "??" | "??="
-        auto kpunct = do_accept_punctuator_opt(tstrm, { Token::punctuator_coales, Token::punctuator_coales_eq });
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_coales, punctuator_coales_eq });
         if(!kpunct) {
           return rocket::nullopt;
         }
-        Infix_Element::S_coalescence xelem = { *kpunct == Token::punctuator_coales_eq, rocket::clear };
+        Infix_Element::S_coalescence xelem = { *kpunct == punctuator_coales_eq, rocket::clear };
         return rocket::move(xelem);
       }
 
     struct Infix_Operator_Element
       {
-        Token::Punctuator punct;
+        Punctuator punct;
         Xop xop;
         bool assign;
       }
     constexpr s_infix_operator_table[] =
       {
-        { Token::punctuator_add,        xop_add,       false  },
-        { Token::punctuator_sub,        xop_sub,       false  },
-        { Token::punctuator_mul,        xop_mul,       false  },
-        { Token::punctuator_div,        xop_div,       false  },
-        { Token::punctuator_mod,        xop_mod,       false  },
-        { Token::punctuator_andb,       xop_andb,      false  },
-        { Token::punctuator_orb,        xop_orb,       false  },
-        { Token::punctuator_xorb,       xop_xorb,      false  },
-        { Token::punctuator_sla,        xop_sla,       false  },
-        { Token::punctuator_sra,        xop_sra,       false  },
-        { Token::punctuator_sll,        xop_sll,       false  },
-        { Token::punctuator_srl,        xop_srl,       false  },
-        { Token::punctuator_add_eq,     xop_add,       true   },
-        { Token::punctuator_sub_eq,     xop_sub,       true   },
-        { Token::punctuator_mul_eq,     xop_mul,       true   },
-        { Token::punctuator_div_eq,     xop_div,       true   },
-        { Token::punctuator_mod_eq,     xop_mod,       true   },
-        { Token::punctuator_andb_eq,    xop_andb,      true   },
-        { Token::punctuator_orb_eq,     xop_orb,       true   },
-        { Token::punctuator_xorb_eq,    xop_xorb,      true   },
-        { Token::punctuator_sla_eq,     xop_sla,       true   },
-        { Token::punctuator_sra_eq,     xop_sra,       true   },
-        { Token::punctuator_sll_eq,     xop_sll,       true   },
-        { Token::punctuator_srl_eq,     xop_srl,       true   },
-        { Token::punctuator_assign,     xop_assign,    true   },
-        { Token::punctuator_cmp_eq,     xop_cmp_eq,    false  },
-        { Token::punctuator_cmp_ne,     xop_cmp_ne,    false  },
-        { Token::punctuator_cmp_lt,     xop_cmp_lt,    false  },
-        { Token::punctuator_cmp_gt,     xop_cmp_gt,    false  },
-        { Token::punctuator_cmp_lte,    xop_cmp_lte,   false  },
-        { Token::punctuator_cmp_gte,    xop_cmp_gte,   false  },
-        { Token::punctuator_spaceship,  xop_cmp_3way,  false  },
+        { punctuator_add,        xop_add,       false  },
+        { punctuator_sub,        xop_sub,       false  },
+        { punctuator_mul,        xop_mul,       false  },
+        { punctuator_div,        xop_div,       false  },
+        { punctuator_mod,        xop_mod,       false  },
+        { punctuator_andb,       xop_andb,      false  },
+        { punctuator_orb,        xop_orb,       false  },
+        { punctuator_xorb,       xop_xorb,      false  },
+        { punctuator_sla,        xop_sla,       false  },
+        { punctuator_sra,        xop_sra,       false  },
+        { punctuator_sll,        xop_sll,       false  },
+        { punctuator_srl,        xop_srl,       false  },
+        { punctuator_add_eq,     xop_add,       true   },
+        { punctuator_sub_eq,     xop_sub,       true   },
+        { punctuator_mul_eq,     xop_mul,       true   },
+        { punctuator_div_eq,     xop_div,       true   },
+        { punctuator_mod_eq,     xop_mod,       true   },
+        { punctuator_andb_eq,    xop_andb,      true   },
+        { punctuator_orb_eq,     xop_orb,       true   },
+        { punctuator_xorb_eq,    xop_xorb,      true   },
+        { punctuator_sla_eq,     xop_sla,       true   },
+        { punctuator_sra_eq,     xop_sra,       true   },
+        { punctuator_sll_eq,     xop_sll,       true   },
+        { punctuator_srl_eq,     xop_srl,       true   },
+        { punctuator_assign,     xop_assign,    true   },
+        { punctuator_cmp_eq,     xop_cmp_eq,    false  },
+        { punctuator_cmp_ne,     xop_cmp_ne,    false  },
+        { punctuator_cmp_lt,     xop_cmp_lt,    false  },
+        { punctuator_cmp_gt,     xop_cmp_gt,    false  },
+        { punctuator_cmp_lte,    xop_cmp_lte,   false  },
+        { punctuator_cmp_gte,    xop_cmp_gte,   false  },
+        { punctuator_spaceship,  xop_cmp_3way,  false  },
       };
 
-    constexpr bool operator==(const Infix_Operator_Element& lhs, Token::Punctuator rhs) noexcept
+    constexpr bool operator==(const Infix_Operator_Element& lhs, Punctuator rhs) noexcept
       {
         return lhs.punct == rhs;
       }
