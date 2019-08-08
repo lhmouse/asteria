@@ -235,34 +235,34 @@ namespace Asteria {
         reader.consume(tlen);
       }
 
-    inline bool do_accumulate_digit(int64_t& value, int64_t limit, uint8_t base, uint8_t dvalue) noexcept
+    inline bool do_accumulate_digit(int64_t& val, int64_t limit, uint8_t base, uint8_t dval) noexcept
       {
         if(limit >= 0) {
           // Accumulate the digit towards positive infinity.
-          if(value > (limit - dvalue) / base) {
+          if(val > (limit - dval) / base) {
             return false;
           }
-          value *= base;
-          value += dvalue;
+          val *= base;
+          val += dval;
         }
         else {
           // Accumulate the digit towards negative infinity.
-          if(value < (limit + dvalue) / base) {
+          if(val < (limit + dval) / base) {
             return false;
           }
-          value *= base;
-          value -= dvalue;
+          val *= base;
+          val -= dval;
         }
         return true;
       }
 
-    inline void do_raise(double& value, uint8_t base, int64_t exp) noexcept
+    inline void do_raise(double& val, uint8_t base, int64_t exp) noexcept
       {
         if(exp > 0) {
-          value *= std::pow(base, +exp);
+          val *= std::pow(base, +exp);
         }
         if(exp < 0) {
-          value /= std::pow(base, -exp);
+          val /= std::pow(base, -exp);
         }
       }
 
@@ -353,8 +353,8 @@ namespace Asteria {
         rend = tlen;
         // Parse the integral part.
         for(;;) {
-          auto dvalue = do_translate_digit(reader.peek(tlen));
-          if(dvalue >= rbase) {
+          auto dval = do_translate_digit(reader.peek(tlen));
+          if(dval >= rbase) {
             break;
           }
           tlen++;
@@ -375,8 +375,8 @@ namespace Asteria {
           tlen++;
           // Parse the fractional part.
           for(;;) {
-            auto dvalue = do_translate_digit(reader.peek(tlen));
-            if(dvalue >= rbase) {
+            auto dval = do_translate_digit(reader.peek(tlen));
+            if(dval >= rbase) {
               break;
             }
             tlen++;
@@ -421,13 +421,13 @@ namespace Asteria {
           }
           // Parse the exponent as an integer. The value must fit in 24 bits.
           for(;;) {
-            auto dvalue = do_translate_digit(reader.peek(tlen));
-            if(dvalue >= 10) {
+            auto dval = do_translate_digit(reader.peek(tlen));
+            if(dval >= 10) {
               break;
             }
             tlen++;
             // Accept a digit.
-            if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
+            if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
               throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
             }
             pcnt++;
@@ -452,15 +452,15 @@ namespace Asteria {
         // Is this an `integer` or a `real`?
         if(!integers_as_reals && (fcnt == 0)) {
           // The literal is an `integer` if there is no decimal point.
-          int64_t value = 0;
+          int64_t val = 0;
           // Accumulate digits from left to right.
           for(auto ri = rbegin; ri != rend; ++ri) {
-            auto dvalue = do_translate_digit(reader.peek(ri));
-            if(dvalue >= rbase) {
+            auto dval = do_translate_digit(reader.peek(ri));
+            if(dval >= rbase) {
               continue;
             }
             // Accept a digit.
-            if(!do_accumulate_digit(value, rneg ? INT64_MIN : INT64_MAX, rbase, dvalue)) {
+            if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
               throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
             }
           }
@@ -469,16 +469,16 @@ namespace Asteria {
             throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_exponent_negative);
           }
           // Raise the result.
-          if(value != 0) {
+          if(val != 0) {
             for(auto i = pexp; i != 0; --i) {
               // Append a digit zero.
-              if(!do_accumulate_digit(value, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
+              if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
                 throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
               }
             }
           }
           // Push an integer literal.
-          Token::S_integer_literal xtoken = { value };
+          Token::S_integer_literal xtoken = { val };
           do_push_token(seq, reader, tlen, rocket::move(xtoken));
           return true;
         }
@@ -491,41 +491,41 @@ namespace Asteria {
         }
         // Digits are accumulated using a 64-bit integer with no fractional part.
         // Excess significant figures are discard if the integer would overflow.
-        int64_t tvalue = 0;
+        int64_t tval = 0;
         int64_t tcnt = icnt;
         // Accumulate digits from left to right.
         for(auto ri = rbegin; ri != rend; ++ri) {
-          auto dvalue = do_translate_digit(reader.peek(ri));
-          if(dvalue >= rbase) {
+          auto dval = do_translate_digit(reader.peek(ri));
+          if(dval >= rbase) {
             continue;
           }
           // Accept a digit.
-          if(!do_accumulate_digit(tvalue, rneg ? INT64_MIN : INT64_MAX, rbase, dvalue)) {
+          if(!do_accumulate_digit(tval, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
             break;
           }
           // Nudge the decimal point to the right.
           tcnt--;
         }
         // Raise the result.
-        double value;
-        if(tvalue == 0) {
-          value = std::copysign(0.0, -rneg);
+        double val;
+        if(tval == 0) {
+          val = std::copysign(0.0, -rneg);
         }
         else {
-          value = static_cast<double>(tvalue);
-          do_raise(value, rbase, tcnt);
-          do_raise(value, pbase, pexp);
+          val = static_cast<double>(tval);
+          do_raise(val, rbase, tcnt);
+          do_raise(val, pbase, pexp);
         }
         // Check for overflow or underflow.
-        int fpcls = std::fpclassify(value);
+        int fpcls = std::fpclassify(val);
         if(fpcls == FP_INFINITE) {
           throw do_make_parser_error(reader, tlen, Parser_Error::code_real_literal_overflow);
         }
-        if((fpcls == FP_ZERO) && (tvalue != 0)) {
+        if((fpcls == FP_ZERO) && (tval != 0)) {
           throw do_make_parser_error(reader, tlen, Parser_Error::code_real_literal_underflow);
         }
         // Push a real literal.
-        Token::S_real_literal xtoken = { value };
+        Token::S_real_literal xtoken = { val };
         do_push_token(seq, reader, tlen, rocket::move(xtoken));
         return true;
       }
@@ -649,7 +649,7 @@ namespace Asteria {
         }
         // Get a string literal.
         size_t tlen = 1;
-        cow_string value;
+        cow_string val;
         for(;;) {
           // Read a character.
           auto next = reader.peek(tlen);
@@ -664,7 +664,7 @@ namespace Asteria {
           }
           if(!escapable || (next != '\\')) {
             // This character does not start an escape sequence. Copy it as is.
-            value.push_back(next);
+            val.push_back(next);
             continue;
           }
           // Translate this escape sequence.
@@ -682,57 +682,57 @@ namespace Asteria {
           case '?':
           case '/':
             {
-              value.push_back(next);
+              val.push_back(next);
               break;
             }
           case 'a':
             {
-              value.push_back('\a');
+              val.push_back('\a');
               break;
             }
           case 'b':
             {
-              value.push_back('\b');
+              val.push_back('\b');
               break;
             }
           case 'f':
             {
-              value.push_back('\f');
+              val.push_back('\f');
               break;
             }
           case 'n':
             {
-              value.push_back('\n');
+              val.push_back('\n');
               break;
             }
           case 'r':
             {
-              value.push_back('\r');
+              val.push_back('\r');
               break;
             }
           case 't':
             {
-              value.push_back('\t');
+              val.push_back('\t');
               break;
             }
           case 'v':
             {
-              value.push_back('\v');
+              val.push_back('\v');
               break;
             }
           case '0':
             {
-              value.push_back('\0');
+              val.push_back('\0');
               break;
             }
           case 'Z':
             {
-              value.push_back('\x1A');
+              val.push_back('\x1A');
               break;
             }
           case 'e':
             {
-              value.push_back('\x1B');
+              val.push_back('\x1B');
               break;
             }
           case 'U':
@@ -749,22 +749,22 @@ namespace Asteria {
                 if(digit == 0) {
                   throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_incomplete);
                 }
-                auto dvalue = do_translate_digit(digit);
-                if(dvalue >= 16) {
+                auto dval = do_translate_digit(digit);
+                if(dval >= 16) {
                   throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_invalid_hex);
                 }
                 tlen++;
                 // Accumulate this digit.
                 cp *= 16;
-                cp += dvalue;
+                cp += dval;
               }
               if(next == 'x') {
                 // Write the character verbatim.
-                value.push_back(static_cast<char>(cp));
+                val.push_back(static_cast<char>(cp));
                 break;
               }
               // Write a Unicode code point.
-              if(!utf8_encode(value, cp)) {
+              if(!utf8_encode(val, cp)) {
                 throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_utf_code_point_invalid);
               }
               break;
@@ -773,7 +773,7 @@ namespace Asteria {
             throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_unknown);
           }
         }
-        Token::S_string_literal xtoken = { rocket::move(value) };
+        Token::S_string_literal xtoken = { rocket::move(val) };
         do_push_token(seq, reader, tlen, rocket::move(xtoken));
         return true;
       }

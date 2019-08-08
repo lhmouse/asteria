@@ -72,12 +72,17 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     // Note that `*this` is overwritten before the wrapped function is called.
     cow_vector<Reference_Root::S_tail_call> rqueue;
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
-    uint32_t flags = 0;
+    TCO_Aware tco_conj = tco_aware_by_ref;
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
       auto& xroot = rqueue.emplace_back(rocket::move(this->m_root.open_tail_call()));
-      // Merge flags.
-      flags |= xroot.flags;
+      // Tell out how to forward the result.
+      if((xroot.tco_aware == tco_aware_by_val) && (tco_conj == tco_aware_by_ref)) {
+        tco_conj = tco_aware_by_val;
+      }
+      else if(xroot.tco_aware == tco_aware_nullify) {
+        tco_conj = tco_aware_nullify;
+      }
       // Unpack the function reference.
       const auto& target = xroot.target;
       // Unpack arguments.
@@ -107,13 +112,13 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         throw except;
       }
     }
-    if(flags & Reference_Root::tcof_nullify) {
-      // Return a `null`.
-      *this = Reference_Root::S_null();
-    }
-    else if(flags & Reference_Root::tcof_by_value) {
+    if(tco_conj == tco_aware_by_val) {
       // Convert the result to an rvalue if it shouldn't be passed by reference.
       this->convert_to_rvalue();
+    }
+    else if(tco_conj == tco_aware_nullify) {
+      // Return a `null`.
+      *this = Reference_Root::S_null();
     }
     return *this;
   }

@@ -41,10 +41,10 @@ cow_vector<AIR_Node> Instantiated_Function::do_compile(const Compiler_Options& o
     if(epos != SIZE_MAX) {
       // Statements other than the last one cannot be the end of function.
       for(size_t i = 0; i != epos; ++i) {
-        stmts[i].generate_code(code_func, nullptr, ctx_func, options, stmts[i+1].is_empty_return());
+        stmts[i].generate_code(code_func, nullptr, ctx_func, options, stmts[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
       }
       // The last statement may be TCO'd.
-      stmts[epos].generate_code(code_func, nullptr, ctx_func, options, true);
+      stmts[epos].generate_code(code_func, nullptr, ctx_func, options, tco_aware_nullify);
     }
     // TODO: Insert optimization passes here.
     return code_func;

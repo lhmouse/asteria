@@ -184,7 +184,7 @@ namespace Asteria {
           return ostrm << std::dec << value.as_integer();
         }
         if(value.is_real() && std::isfinite(value.as_real())) {
-          // Write the real number in decimal.
+          // Write the real in decimal.
           return ostrm << std::defaultfloat << std::nouppercase << std::setprecision(17) << value.as_real();
         }
         if(value.is_string()) {
@@ -309,13 +309,13 @@ namespace Asteria {
             stack.pop_back();
           }
         } while(true);
-      }  // namespace
+      }
     G_string do_format_nonrecursive(const Value& value, Indenter&& indent)
       {
         return do_format_nonrecursive(value, indent);
       }
 
-    }
+    }  // namespace
 
 G_string std_json_format(const Value& value, const opt<G_string>& indent)
   {
@@ -374,16 +374,16 @@ G_string std_json_format(const Value& value, const G_integer& indent)
           return rocket::nullopt;
         }
         if(qtok->is_integer_literal()) {
-          auto value = qtok->as_integer_literal();
+          auto val = qtok->as_integer_literal();
           tstrm.shift();
-          // Convert integers to real numbers, as JSON does not have an integral type.
-          return G_real(value);
+          // Convert integers to reals, as JSON does not have an integral type.
+          return G_real(val);
         }
         if(qtok->is_real_literal()) {
-          auto value = qtok->as_real_literal();
+          auto val = qtok->as_real_literal();
           tstrm.shift();
-          // This real number can be copied as is.
-          return G_real(value);
+          // This real can be copied as is.
+          return G_real(val);
         }
         if(qtok->is_punctuator()) {
           auto punct = qtok->as_punctuator();
@@ -421,10 +421,10 @@ G_string std_json_format(const Value& value, const G_integer& indent)
           return rocket::nullopt;
         }
         if(qtok->is_string_literal()) {
-          auto value = qtok->as_string_literal();
+          auto val = qtok->as_string_literal();
           tstrm.shift();
           // This string literal can be copied as is in UTF-8.
-          return G_string(rocket::move(value));
+          return G_string(rocket::move(val));
         }
         return rocket::nullopt;
       }
@@ -478,10 +478,10 @@ G_string std_json_format(const Value& value, const G_integer& indent)
           return G_string(rocket::move(name));
         }
         if(qtok->is_string_literal()) {
-          auto value = qtok->as_string_literal();
+          auto val = qtok->as_string_literal();
           tstrm.shift();
           // This string literal can be copied as is in UTF-8.
-          return G_string(rocket::move(value));
+          return G_string(rocket::move(val));
         }
         return rocket::nullopt;
       }

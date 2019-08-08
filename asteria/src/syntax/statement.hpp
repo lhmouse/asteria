@@ -182,7 +182,7 @@ class Statement
       }
 
     cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
-                                        Analytic_Context& ctx, const Compiler_Options& options, bool end_of_func) const;
+                                        Analytic_Context& ctx, const Compiler_Options& options, TCO_Aware tco_aware) const;
   };
 
 inline void swap(Statement& lhs, Statement& rhs) noexcept

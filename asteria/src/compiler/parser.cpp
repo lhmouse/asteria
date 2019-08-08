@@ -86,7 +86,7 @@ namespace Asteria {
         return name;
       }
 
-    cow_string& do_concatenate_string_literal_sequence(cow_string& value, Token_Stream& tstrm)
+    cow_string& do_concatenate_string_literal_sequence(cow_string& val, Token_Stream& tstrm)
       {
         for(;;) {
           auto qtok = tstrm.peek_opt();
@@ -97,11 +97,11 @@ namespace Asteria {
           if(!qtok->is_string_literal()) {
             break;
           }
-          value += qtok->as_string_literal();
+          val += qtok->as_string_literal();
           // Append the string literal and discard this token.
           tstrm.shift();
         }
-        return value;
+        return val;
       }
 
     opt<cow_string> do_accept_string_literal_opt(Token_Stream& tstrm)
@@ -114,11 +114,11 @@ namespace Asteria {
         if(!qtok->is_string_literal()) {
           return rocket::nullopt;
         }
-        auto value = qtok->as_string_literal();
+        auto val = qtok->as_string_literal();
         // Return the string literal and discard this token.
         tstrm.shift();
-        do_concatenate_string_literal_sequence(value, tstrm);
-        return value;
+        do_concatenate_string_literal_sequence(val, tstrm);
+        return val;
       }
 
     opt<cow_string> do_accept_json5_key_opt(Token_Stream& tstrm)
@@ -141,11 +141,11 @@ namespace Asteria {
           return name;
         }
         if(qtok->is_string_literal()) {
-          auto value = qtok->as_string_literal();
+          auto val = qtok->as_string_literal();
           // Return the string literal and discard this token.
           tstrm.shift();
-          do_concatenate_string_literal_sequence(value, tstrm);
-          return value;
+          do_concatenate_string_literal_sequence(val, tstrm);
+          return val;
         }
         return rocket::nullopt;
       }
@@ -217,23 +217,23 @@ namespace Asteria {
           return (*generator)();
         }
         if(qtok->is_integer_literal()) {
-          auto value = G_integer(qtok->as_integer_literal());
+          auto val = G_integer(qtok->as_integer_literal());
           // Copy the value and discard this token.
           tstrm.shift();
-          return value;
+          return val;
         }
         if(qtok->is_real_literal()) {
-          auto value = G_real(qtok->as_real_literal());
+          auto val = G_real(qtok->as_real_literal());
           // Copy the value and discard this token.
           tstrm.shift();
-          return value;
+          return val;
         }
         if(qtok->is_string_literal()) {
-          auto value = G_string(qtok->as_string_literal());
+          auto val = G_string(qtok->as_string_literal());
           // Copy the value and discard this token.
           tstrm.shift();
-          do_concatenate_string_literal_sequence(value, tstrm);
-          return value;
+          do_concatenate_string_literal_sequence(val, tstrm);
+          return val;
         }
         return rocket::nullopt;
       }
@@ -1308,11 +1308,11 @@ namespace Asteria {
     bool do_accept_literal(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
         // Get a literal as a `Value`.
-        auto qvalue = do_accept_literal_value_opt(tstrm);
-        if(!qvalue) {
+        auto qval = do_accept_literal_value_opt(tstrm);
+        if(!qval) {
           return false;
         }
-        Xprunit::S_literal xunit = { rocket::move(*qvalue) };
+        Xprunit::S_literal xunit = { rocket::move(*qval) };
         units.emplace_back(rocket::move(xunit));
         return true;
       }

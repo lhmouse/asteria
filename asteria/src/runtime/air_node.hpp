@@ -93,7 +93,7 @@ class AIR_Node
       };
     struct S_push_literal
       {
-        Value value;
+        Value val;
       };
     struct S_push_global_reference
       {
@@ -131,7 +131,7 @@ class AIR_Node
       {
         Source_Location sloc;
         cow_vector<bool> args_by_refs;
-        uint32_t flags;
+        TCO_Aware tco_aware;
       };
     struct S_function_call_plain
       {

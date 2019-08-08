@@ -93,7 +93,7 @@ namespace Asteria {
 
     S_xfunction_call do_unpack_function_call(Executive_Context& ctx, const cow_vector<bool>& args_by_refs)
       {
-        Value value;
+        Value val;
         // Allocate the argument vector.
         cow_vector<Reference> args;
         args.resize(args_by_refs.size());
@@ -108,12 +108,12 @@ namespace Asteria {
           ctx.stack().pop_reference();
         }
         // Get the target reference.
-        value = ctx.stack().get_top_reference().read();
-        if(!value.is_function()) {
-          ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", value, "` which is not a function.");
+        val = ctx.stack().get_top_reference().read();
+        if(!val.is_function()) {
+          ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", val, "` which is not a function.");
         }
         // Pack arguments.
-        return { rocket::move(value.mut_function()), rocket::move(args) };
+        return { rocket::move(val.mut_function()), rocket::move(args) };
       }
 
     ROCKET_PURE_FUNCTION G_boolean do_operator_not(const G_boolean& rhs)
@@ -856,7 +856,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_push_literal>();
         // Push a constant.
-        Reference_Root::S_constant xref = { altr.value };
+        Reference_Root::S_constant xref = { altr.val };
         ctx.stack().push_reference(rocket::move(xref));
         return air_status_next;
       }
@@ -941,7 +941,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // Pack arguments.
         pargs.args.emplace_back(rocket::move(self));
         // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
-        Reference_Root::S_tail_call xref = { altr.sloc, func, altr.flags, rocket::move(pargs.target), rocket::move(pargs.args) };
+        Reference_Root::S_tail_call xref = { altr.sloc, func, altr.tco_aware, rocket::move(pargs.target), rocket::move(pargs.args) };
         self = rocket::move(xref);
         return air_status_return;
       }

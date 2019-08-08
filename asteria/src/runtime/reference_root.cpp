@@ -18,11 +18,11 @@ const Value& Reference_Root::dereference_const() const
       }
     case index_constant:
       {
-        return this->m_stor.as<index_constant>().source;
+        return this->m_stor.as<index_constant>().val;
       }
     case index_temporary:
       {
-        return this->m_stor.as<index_temporary>().value;
+        return this->m_stor.as<index_temporary>().val;
       }
     case index_variable:
       {
@@ -46,11 +46,11 @@ Value& Reference_Root::dereference_mutable() const
       }
     case index_constant:
       {
-        ASTERIA_THROW_RUNTIME_ERROR("The constant `", this->m_stor.as<index_constant>().source, "` cannot be modified.");
+        ASTERIA_THROW_RUNTIME_ERROR("The constant `", this->m_stor.as<index_constant>().val, "` cannot be modified.");
       }
     case index_temporary:
       {
-        ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", this->m_stor.as<index_temporary>().value, "` cannot be modified.");
+        ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", this->m_stor.as<index_temporary>().val, "` cannot be modified.");
       }
     case index_variable:
       {
@@ -78,11 +78,11 @@ Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callba
       }
     case index_constant:
       {
-        return this->m_stor.as<index_constant>().source.enumerate_variables(callback);
+        return this->m_stor.as<index_constant>().val.enumerate_variables(callback);
       }
     case index_temporary:
       {
-        return this->m_stor.as<index_temporary>().value.enumerate_variables(callback);
+        return this->m_stor.as<index_temporary>().val.enumerate_variables(callback);
       }
     case index_variable:
       {

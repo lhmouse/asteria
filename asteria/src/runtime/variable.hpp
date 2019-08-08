@@ -16,14 +16,14 @@ class Variable : public virtual Rcbase
   private:
     Source_Location m_sloc;
     Value m_value;
-    bool m_immutable;
+    bool m_immut;
     // garbage collection support
     mutable pair<long, double> m_gcref;
 
   public:
     explicit Variable(const Source_Location& sloc) noexcept
       : m_sloc(sloc),
-        m_value(), m_immutable(true)
+        m_value(), m_immut(true)
       {
       }
     ~Variable() override;
@@ -48,22 +48,22 @@ class Variable : public virtual Rcbase
       }
     bool is_immutable() const noexcept
       {
-        return this->m_immutable;
+        return this->m_immut;
       }
     void set_immutable(bool immutable) noexcept
       {
-        this->m_immutable = immutable;
+        this->m_immut = immutable;
       }
     template<typename XvalueT> void reset(const Source_Location& sloc, XvalueT&& xvalue, bool immutable)
       {
         this->m_sloc = sloc;
         this->m_value = rocket::forward<XvalueT>(xvalue);
-        this->m_immutable = immutable;
+        this->m_immut = immutable;
       }
     template<typename XvalueT> void reset(XvalueT&& xvalue, bool immutable)
       {
         this->m_value = rocket::forward<XvalueT>(xvalue);
-        this->m_immutable = immutable;
+        this->m_immut = immutable;
       }
 
     long gcref_split() const noexcept

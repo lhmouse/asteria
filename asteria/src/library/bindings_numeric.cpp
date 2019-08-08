@@ -1078,10 +1078,10 @@ G_integer std_numeric_popcnt(const G_integer& x)
         p.exp = -1;
         while(reg != 0) {
           // Shift a digit out.
-          auto dvalue = static_cast<uint8_t>(reg % rbase);
+          auto dval = static_cast<uint8_t>(reg % rbase);
           reg /= rbase;
           // Locate the digit in uppercase.
-          int doff = dvalue * 2;
+          int doff = dval * 2;
           p.sfs[--p.bsf] = s_xdigits[doff];
           p.exp++;
         }
@@ -1243,28 +1243,28 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
 
     namespace {
 
-    bool do_check_finite(G_string& text, const G_real& value)
+    bool do_check_finite(G_string& text, const G_real& val)
       {
         // Return early in case of non-finite values.
-        int fpcls = std::fpclassify(value);
+        int fpcls = std::fpclassify(val);
         if(fpcls == FP_INFINITE) {
-          text = rocket::sref("-infinity" + !std::signbit(value));
+          text = rocket::sref("-infinity" + !std::signbit(val));
           return false;
         }
         if(fpcls == FP_NAN) {
-          text = rocket::sref("-nan" + !std::signbit(value));
+          text = rocket::sref("-nan" + !std::signbit(val));
           return false;
         }
         // Although (positive and negative) zeroes are special, we don't treat them specifically here.
         return true;
       }
 
-    Parts do_format_partial(uint8_t rbase, const G_real& value)
+    Parts do_format_partial(uint8_t rbase, const G_real& val)
       {
         Parts p;
-        // Get the absolute value of `value`.
-        p.sbt = std::signbit(value);
-        auto reg = std::fabs(value);
+        // Get the absolute value of `val`.
+        p.sbt = std::signbit(val);
+        auto reg = std::fabs(val);
         // Extract digits from left to right.
         // Note that if `value` is zero then `exp` is set to `-1`.
         p.bsf = 0;
@@ -1285,10 +1285,10 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
             while(reg != 0) {
               // Shift a digit out.
               reg *=  2;
-              auto dvalue = static_cast<uint8_t>(reg);
-              reg -= dvalue;
+              auto dval = static_cast<uint8_t>(reg);
+              reg -= dval;
               // Locate the digit in uppercase.
-              doff = dvalue * 2;
+              doff = dval * 2;
               p.sfs[p.esf++] = s_xdigits[doff];
             }
             break;
@@ -1311,10 +1311,10 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
             while(reg != 0) {
               // Shift a digit out.
               reg *= 16;
-              auto dvalue = static_cast<uint8_t>(reg);
-              reg -= dvalue;
+              auto dval = static_cast<uint8_t>(reg);
+              reg -= dval;
               // Locate the digit in uppercase.
-              doff = dvalue * 2;
+              doff = dval * 2;
               p.sfs[p.esf++] = s_xdigits[doff];
             }
             break;
@@ -1333,12 +1333,12 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
             // This result is inexact.
             for(;;) {
               // Shift a digit out.
-              auto dvalue = static_cast<uint8_t>(qdigit - qbase + 1);
-              if(dvalue != 0) {
+              auto dval = static_cast<uint8_t>(qdigit - qbase + 1);
+              if(dval != 0) {
                 reg -= *qdigit;
               }
               // Locate the digit in uppercase.
-              doff = dvalue * 2;
+              doff = dval * 2;
               p.sfs[p.esf++] = s_xdigits[doff];
               // Only the first 17 significant figures are output.
               if(p.esf - p.bsf >= 17) {
@@ -1369,9 +1369,9 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
         return p;
       }
 
-    G_string& do_format_no_exponent(G_string& text, uint8_t rbase, const G_real& value)
+    G_string& do_format_no_exponent(G_string& text, uint8_t rbase, const G_real& val)
       {
-        auto p = do_format_partial(rbase, value);
+        auto p = do_format_partial(rbase, val);
         // Write prefixes.
         do_prefix(text, rbase, p);
         int diff;
@@ -1402,36 +1402,36 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
         return text;
       }
 
-    G_string do_format_no_exponent(uint8_t rbase, const G_real& value)
+    G_string do_format_no_exponent(uint8_t rbase, const G_real& val)
       {
         G_string text;
-        if(!do_check_finite(text, value)) {
+        if(!do_check_finite(text, val)) {
           return text;
         }
-        do_format_no_exponent(text, rbase, value);
+        do_format_no_exponent(text, rbase, val);
         return text;
       }
 
-    G_string do_format_scientific_binary(uint8_t rbase, const G_real& value)
+    G_string do_format_scientific_binary(uint8_t rbase, const G_real& val)
       {
         G_string text;
-        if(!do_check_finite(text, value)) {
+        if(!do_check_finite(text, val)) {
           return text;
         }
         int fexp;
-        auto frac = std::frexp(value, &fexp);
+        auto frac = std::frexp(val, &fexp);
         do_format_no_exponent(text, rbase, frac * 2);
         do_format_exponent(text, 2, fexp - 1);
         return text;
       }
 
-    G_string do_format_scientific_decimal(const G_real& value)
+    G_string do_format_scientific_decimal(const G_real& val)
       {
         G_string text;
-        if(!do_check_finite(text, value)) {
+        if(!do_check_finite(text, val)) {
           return text;
         }
-        auto p = do_format_partial(10, value);
+        auto p = do_format_partial(10, val);
         // Write prefixes.
         do_prefix(text, 10, p);
         if(p.bsf == p.esf) {
@@ -1522,23 +1522,23 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
         return static_cast<size_t>(std::find(s_xdigits, s_xdigits + 32, c) - s_xdigits) / 2 & 0xFF;
       }
 
-    inline bool do_accumulate_digit(int64_t& value, int64_t limit, uint8_t base, uint8_t dvalue) noexcept
+    inline bool do_accumulate_digit(int64_t& value, int64_t limit, uint8_t base, uint8_t dval) noexcept
       {
         if(limit >= 0) {
           // Accumulate the digit towards positive infinity.
-          if(value > (limit - dvalue) / base) {
+          if(value > (limit - dval) / base) {
             return false;
           }
           value *= base;
-          value += dvalue;
+          value += dval;
         }
         else {
           // Accumulate the digit towards negative infinity.
-          if(value < (limit + dvalue) / base) {
+          if(value < (limit + dval) / base) {
             return false;
           }
           value *= base;
-          value -= dvalue;
+          value -= dval;
         }
         return true;
       }
@@ -1617,8 +1617,8 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
     rend = tpos;
     // Parse the integral part.
     for(;;) {
-      auto dvalue = do_translate_digit(text[tpos]);
-      if(dvalue >= rbase) {
+      auto dval = do_translate_digit(text[tpos]);
+      if(dval >= rbase) {
         break;
       }
       tpos++;
@@ -1661,13 +1661,13 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
       }
       // Parse the exponent as an integer. The value must fit in 24 bits.
       for(;;) {
-        auto dvalue = do_translate_digit(text[tpos]);
-        if(dvalue >= 10) {
+        auto dval = do_translate_digit(text[tpos]);
+        if(dval >= 10) {
           break;
         }
         tpos++;
         // Accept a digit.
-        if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
+        if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
           return rocket::nullopt;
         }
         pcnt++;
@@ -1686,15 +1686,15 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
       return rocket::nullopt;
     }
     // The literal is an `integer` if there is no decimal point.
-    int64_t value = 0;
+    int64_t val = 0;
     // Accumulate digits from left to right.
     for(auto ri = rbegin; ri != rend; ++ri) {
-      auto dvalue = do_translate_digit(text[ri]);
-      if(dvalue >= rbase) {
+      auto dval = do_translate_digit(text[ri]);
+      if(dval >= rbase) {
         continue;
       }
       // Accept a digit.
-      if(!do_accumulate_digit(value, rneg ? INT64_MIN : INT64_MAX, rbase, dvalue)) {
+      if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
         return rocket::nullopt;
       }
     }
@@ -1703,16 +1703,16 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
       return rocket::nullopt;
     }
     // Raise the result.
-    if(value != 0) {
+    if(val != 0) {
       for(auto i = pexp; i != 0; --i) {
         // Append a digit zero.
-        if(!do_accumulate_digit(value, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
+        if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
           return rocket::nullopt;
         }
       }
     }
     // Return the integer.
-    return value;
+    return val;
   }
 
 opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& saturating)
@@ -1808,8 +1808,8 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
     rend = tpos;
     // Parse the integral part.
     for(;;) {
-      auto dvalue = do_translate_digit(text[tpos]);
-      if(dvalue >= rbase) {
+      auto dval = do_translate_digit(text[tpos]);
+      if(dval >= rbase) {
         break;
       }
       tpos++;
@@ -1830,8 +1830,8 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
       tpos++;
       // Parse the fractional part.
       for(;;) {
-        auto dvalue = do_translate_digit(text[tpos]);
-        if(dvalue >= rbase) {
+        auto dval = do_translate_digit(text[tpos]);
+        if(dval >= rbase) {
           break;
         }
         tpos++;
@@ -1875,13 +1875,13 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
       }
       // Parse the exponent as an integer. The value must fit in 24 bits.
       for(;;) {
-        auto dvalue = do_translate_digit(text[tpos]);
-        if(dvalue >= 10) {
+        auto dval = do_translate_digit(text[tpos]);
+        if(dval >= 10) {
           break;
         }
         tpos++;
         // Accept a digit.
-        if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dvalue)) {
+        if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
           return rocket::nullopt;
         }
         pcnt++;
@@ -1908,39 +1908,39 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
     }
     // Digits are accumulated using a 64-bit integer with no fractional part.
     // Excess significant figures are discard if the integer would overflow.
-    int64_t tvalue = 0;
+    int64_t tval = 0;
     int64_t tcnt = icnt;
     // Accumulate digits from left to right.
     for(auto ri = rbegin; ri != rend; ++ri) {
-      auto dvalue = do_translate_digit(text[ri]);
-      if(dvalue >= rbase) {
+      auto dval = do_translate_digit(text[ri]);
+      if(dval >= rbase) {
         continue;
       }
       // Accept a digit.
-      if(!do_accumulate_digit(tvalue, rneg ? INT64_MIN : INT64_MAX, rbase, dvalue)) {
+      if(!do_accumulate_digit(tval, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
         break;
       }
       // Nudge the decimal point to the right.
       tcnt--;
     }
     // Raise the result.
-    double value;
-    if(tvalue == 0) {
-      value = std::copysign(0.0, -rneg);
+    double val;
+    if(tval == 0) {
+      val = std::copysign(0.0, -rneg);
     }
     else {
-      value = static_cast<double>(tvalue);
-      do_raise_real(value, rbase, tcnt);
-      do_raise_real(value, pbase, pexp);
+      val = static_cast<double>(tval);
+      do_raise_real(val, rbase, tcnt);
+      do_raise_real(val, pbase, pexp);
     }
     // Check for overflow or underflow.
-    int fpcls = std::fpclassify(value);
+    int fpcls = std::fpclassify(val);
     if((fpcls == FP_INFINITE) && !saturating) {
       // Make sure we return an infinity only when the string is an explicit one.
       return rocket::nullopt;
     }
     // N.B. The sign bit of a negative zero shall have been preserved.
-    return value;
+    return val;
   }
 
 void create_bindings_numeric(G_object& result, API_Version /*version*/)

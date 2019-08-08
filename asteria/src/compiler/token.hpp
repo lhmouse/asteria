@@ -134,15 +134,15 @@ class Token
       };
     struct S_integer_literal
       {
-        int64_t value;
+        int64_t val;
       };
     struct S_real_literal
       {
-        double value;
+        double val;
       };
     struct S_string_literal
       {
-        cow_string value;
+        cow_string val;
       };
 
     enum Index : uint8_t
@@ -240,7 +240,7 @@ class Token
       }
     int64_t as_integer_literal() const
       {
-        return this->m_stor.as<index_integer_literal>().value;
+        return this->m_stor.as<index_integer_literal>().val;
       }
 
     bool is_real_literal() const noexcept
@@ -249,7 +249,7 @@ class Token
       }
     double as_real_literal() const
       {
-        return this->m_stor.as<index_real_literal>().value;
+        return this->m_stor.as<index_real_literal>().val;
       }
 
     bool is_string_literal() const noexcept
@@ -258,7 +258,7 @@ class Token
       }
     const cow_string& as_string_literal() const
       {
-        return this->m_stor.as<index_string_literal>().value;
+        return this->m_stor.as<index_string_literal>().val;
       }
 
     void swap(Token& other) noexcept

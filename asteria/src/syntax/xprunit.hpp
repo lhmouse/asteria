@@ -67,17 +67,9 @@ class Xprunit
         xop_infix_assign     = 92,  // =
       };
 
-    enum TCO_Awareness : uint8_t
-      {
-        tco_none      = 0,
-        tco_by_ref    = 1,
-        tco_by_value  = 2,
-        tco_nullify   = 3,
-      };
-
     struct S_literal
       {
-        Value value;
+        Value val;
       };
     struct S_named_reference
       {
@@ -185,8 +177,8 @@ class Xprunit
         this->m_stor.swap(other.m_stor);
       }
 
-    cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& options,
-                                        TCO_Awareness tco_awareness, const Analytic_Context& ctx) const;
+    cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code,
+                                        const Compiler_Options& options, TCO_Aware tco_aware, const Analytic_Context& ctx) const;
   };
 
 inline void swap(Xprunit& lhs, Xprunit& rhs) noexcept

@@ -155,6 +155,15 @@ enum AIR_Status : uint8_t
     air_status_continue_for     = 8,
   };
 
+// Tail call optimization (TCO) awareness
+enum TCO_Aware
+  {
+    tco_aware_none     = 0,  // Tail call optimization is not allowed.
+    tco_aware_by_ref   = 1,  // The tail call is forwarded by reference.
+    tco_aware_by_val   = 2,  // The tail call is forwarded by value.
+    tco_aware_nullify  = 3,  // The tail call is forwarded but its result is discarded.
+  };
+
 // Indices of fundamental types
 enum Gtype : uint8_t
   {

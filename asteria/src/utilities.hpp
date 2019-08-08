@@ -22,80 +22,80 @@ class Formatter
     ~Formatter();
 
   private:
-    template<typename ValueT> void do_put(const ValueT& value)
+    template<typename ValT> void do_put(const ValT& val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(bool value)
+    void do_put(bool val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(char value)
+    void do_put(char val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(signed char value)
+    void do_put(signed char val)
       {
-        this->do_open_stream() << static_cast<int>(value);
+        this->do_open_stream() << static_cast<int>(val);
       }
-    void do_put(unsigned char value)
+    void do_put(unsigned char val)
       {
-        this->do_open_stream() << static_cast<unsigned>(value);
+        this->do_open_stream() << static_cast<unsigned>(val);
       }
-    void do_put(short value)
+    void do_put(short val)
       {
-        this->do_open_stream() << static_cast<int>(value);
+        this->do_open_stream() << static_cast<int>(val);
       }
-    void do_put(unsigned short value)
+    void do_put(unsigned short val)
       {
-        this->do_open_stream() << static_cast<unsigned>(value);
+        this->do_open_stream() << static_cast<unsigned>(val);
       }
-    void do_put(int value)
+    void do_put(int val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(unsigned value)
+    void do_put(unsigned val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(long value)
+    void do_put(long val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(unsigned long value)
+    void do_put(unsigned long val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(long long value)
+    void do_put(long long val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(unsigned long long value)
+    void do_put(unsigned long long val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(const char* value)
+    void do_put(const char* val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
-    void do_put(const signed char* value)
+    void do_put(const signed char* val)
       {
-        this->do_open_stream() << static_cast<const void*>(value);
+        this->do_open_stream() << static_cast<const void*>(val);
       }
-    void do_put(const unsigned char* value)
+    void do_put(const unsigned char* val)
       {
-        this->do_open_stream() << static_cast<const void*>(value);
+        this->do_open_stream() << static_cast<const void*>(val);
       }
-    void do_put(const void* value)
+    void do_put(const void* val)
       {
-        this->do_open_stream() << value;
+        this->do_open_stream() << val;
       }
     std::ostream& do_open_stream();
 
   public:
-    template<typename ValueT> Formatter& operator,(const ValueT& value) noexcept
+    template<typename ValT> Formatter& operator,(const ValT& val) noexcept
       try {
-        return this->do_put(value), *this;
+        return this->do_put(val), *this;
       }
       catch(...) {
         return *this;

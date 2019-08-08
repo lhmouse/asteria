@@ -200,7 +200,7 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
 
     namespace {
 
-    cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& options, Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx,
+    cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& options, TCO_Aware tco_aware, const Analytic_Context& ctx,
                                                  const cow_vector<Xprunit>& units)
       {
         cow_vector<AIR_Node> code;
@@ -208,25 +208,25 @@ const char* Xprunit::describe_operator(Xprunit::Xop xop) noexcept
         if(epos != SIZE_MAX) {
           // Expression units other than the last one cannot be TCO'd.
           for(size_t i = 0; i != epos; ++i) {
-            units[i].generate_code(code, options, Xprunit::tco_none, ctx);
+            units[i].generate_code(code, options, tco_aware_none, ctx);
           }
           // The last unit may be TCO'd.
-          units[epos].generate_code(code, options, tco_awareness, ctx);
+          units[epos].generate_code(code, options, tco_aware, ctx);
         }
         return code;
       }
 
     }
 
-cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& options,
-                                             Xprunit::TCO_Awareness tco_awareness, const Analytic_Context& ctx) const
+cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
+                                             const Compiler_Options& options, TCO_Aware tco_aware, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal:
       {
         const auto& altr = this->m_stor.as<index_literal>();
         // Encode arguments.
-        AIR_Node::S_push_literal xnode = { altr.value };
+        AIR_Node::S_push_literal xnode = { altr.val };
         code.emplace_back(rocket::move(xnode));
         return code;
       }
@@ -281,8 +281,8 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         const auto& altr = this->m_stor.as<index_branch>();
         // Generate code for both branches.
         // Both branches may be TCO'd.
-        auto code_true = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_true);
-        auto code_false = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_false);
+        auto code_true = do_generate_code_branch(options, tco_aware, ctx, altr.branch_true);
+        auto code_false = do_generate_code_branch(options, tco_aware, ctx, altr.branch_false);
         // Encode arguments.
         AIR_Node::S_branch_expression xnode = { rocket::move(code_true), rocket::move(code_false), altr.assign };
         code.emplace_back(rocket::move(xnode));
@@ -292,19 +292,9 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
       {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        if(options.proper_tail_calls && (tco_awareness != tco_none)) {
-          uint32_t flags = 0;
-          // Calculate TCO flags.
-          switch(rocket::weaken_enum(tco_awareness)) {
-          case tco_by_value:
-            flags |= Reference_Root::tcof_by_value;
-            break;
-          case tco_nullify:
-            flags |= Reference_Root::tcof_nullify;
-            break;
-          }
+        if(options.proper_tail_calls && (tco_aware != tco_aware_none)) {
           // Generate a tail call.
-          AIR_Node::S_function_call_tail xnode = { altr.sloc, altr.args_by_refs, flags };
+          AIR_Node::S_function_call_tail xnode = { altr.sloc, altr.args_by_refs, tco_aware };
           code.emplace_back(rocket::move(xnode));
         }
         else {
@@ -621,7 +611,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Generate code for the branch.
         // This branch may be TCO'd.
-        auto code_null = do_generate_code_branch(options, tco_awareness, ctx, altr.branch_null);
+        auto code_null = do_generate_code_branch(options, tco_aware, ctx, altr.branch_null);
         // Encode arguments.
         AIR_Node::S_coalescence xnode = { rocket::move(code_null), altr.assign };
         code.emplace_back(rocket::move(xnode));
