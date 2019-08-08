@@ -252,7 +252,7 @@ class AIR_Node
       };
     struct S_apply_xop_cmp_xrel
       {
-        Value::Compare expect;
+        Compare expect;
         bool negative;
         bool assign;
       };

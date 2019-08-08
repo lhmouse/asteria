@@ -62,7 +62,7 @@ namespace Asteria {
       {
         if(code.empty()) {
           // Return a static `null`.
-          return Value::null();
+          return null_value;
         }
         // Clear the stack.
         ctx.stack().clear_references();
@@ -601,7 +601,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           }
           // This is a `case` label.
           // Evaluate the operand and check whether it equals `value`.
-          if(value.compare(do_evaluate(ctx, code_case)) == Value::compare_equal) {
+          if(value.compare(do_evaluate(ctx, code_case)) == compare_equal) {
             tpos = i;
             break;
           }
@@ -732,7 +732,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           return air_status_next;
         }
         else {
-          ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", range.gtype_name(), "`.");
+          ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", range.what_gtype(), "`.");
         }
       }
     case index_for_statement:
@@ -1213,7 +1213,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& rhs = ctx.stack().get_top_reference().read();
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary_reference(altr.assign, G_string(rocket::sref(rhs.gtype_name())));
+        ctx.stack().set_temporary_reference(altr.assign, G_string(rocket::sref(rhs.what_gtype())));
         return air_status_next;
       }
     case index_apply_xop_sqrt:
@@ -1486,7 +1486,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
-        rhs = G_boolean((comp == Value::compare_equal) != altr.negative);
+        rhs = G_boolean((comp == compare_equal) != altr.negative);
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
@@ -1500,7 +1500,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
-        if(comp == Value::compare_unordered) {
+        if(comp == compare_unordered) {
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", rhs, "` are unordered.");
         }
         rhs = G_boolean((comp == altr.expect) != altr.negative);
@@ -1517,17 +1517,21 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
-        if(comp == Value::compare_unordered) {
-          rhs = G_string(rocket::sref("<unordered>"));
-        }
-        else if(comp == Value::compare_less) {
-          rhs = G_integer(-1);
-        }
-        else if(comp == Value::compare_greater) {
+        switch(comp) {
+        case compare_greater:
           rhs = G_integer(+1);
-        }
-        else {
+          break;
+        case compare_less:
+          rhs = G_integer(-1);
+          break;
+        case compare_equal:
           rhs = G_integer(0);
+          break;
+        case compare_unordered:
+          rhs = G_string(rocket::sref("<unordered>"));
+          break;
+        default:
+          ROCKET_ASSERT(false);
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
         return air_status_next;

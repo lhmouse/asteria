@@ -97,7 +97,7 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
       {
         for(auto it = rocket::move(begin); it != end; ++it) {
           // Compare the value using the builtin 3-way comparison operator.
-          if(it->compare(target) == Value::compare_equal) {
+          if(it->compare(target) == compare_equal) {
             return rocket::move(it);
           }
         }
@@ -448,9 +448,9 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
 
     namespace {
 
-    ROCKET_PURE_FUNCTION Value::Compare do_compare(const Global_Context& global, const opt<G_function>& comparator, const Value& lhs, const Value& rhs)
+    ROCKET_PURE_FUNCTION Compare do_compare(const Global_Context& global, const opt<G_function>& comp, const Value& lhs, const Value& rhs)
       {
-        if(!comparator) {
+        if(!comp) {
           // Perform the built-in 3-way comparison.
           return lhs.compare(rhs);
         }
@@ -460,7 +460,7 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
         do_push_argument(args, rhs);
         // Call the predictor function and compare the result with `0`.
         Reference self;
-        comparator->get().invoke(self, global, rocket::move(args));
+        comp->get().invoke(self, global, rocket::move(args));
         self.finish_call(global);
         return self.read().compare(G_integer(0));
       }
@@ -476,7 +476,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
     for(auto it = data.begin() + 1; it != data.end(); ++it) {
       // Compare the two elements.
       auto cmp = do_compare(global, comparator, it[-1], it[0]);
-      if((cmp == Value::compare_greater) || (cmp == Value::compare_unordered)) {
+      if((cmp == compare_greater) || (cmp == compare_unordered)) {
         return false;
       }
     }
@@ -498,13 +498,13 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           auto mpos = bpos + dist / 2;
           // Compare `target` with the element in the middle.
           auto cmp = do_compare(global, comparator, target, *mpos);
-          if(cmp == Value::compare_unordered) {
+          if(cmp == compare_unordered) {
             ASTERIA_THROW_RUNTIME_ERROR("The elements `", target, "` and `", *mpos, "` are unordered.");
           }
-          if(cmp == Value::compare_equal) {
+          if(cmp == compare_equal) {
             return std::make_pair(rocket::move(mpos), true);
           }
-          if(cmp == Value::compare_less) {
+          if(cmp == compare_less) {
             epos = mpos;
           }
           else {
@@ -526,7 +526,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           auto mpos = bpos + dist / 2;
           // Compare `target` with the element in the middle.
           auto cmp = do_compare(global, comparator, target, *mpos);
-          if(cmp == Value::compare_unordered) {
+          if(cmp == compare_unordered) {
             ASTERIA_THROW_RUNTIME_ERROR("The elements `", target, "` and `", *mpos, "` are unordered.");
           }
           if(rocket::forward<PredT>(pred)(cmp)) {
@@ -551,21 +551,21 @@ opt<G_integer> std_array_binary_search(const Global_Context& global, const G_arr
 
 G_integer std_array_lower_bound(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
-    auto lpos = do_bound(global, data.begin(), data.end(), comparator, target, [](Value::Compare cmp) { return cmp != Value::compare_greater;  });
+    auto lpos = do_bound(global, data.begin(), data.end(), comparator, target, [](Compare cmp) { return cmp != compare_greater;  });
     return lpos - data.begin();
   }
 
 G_integer std_array_upper_bound(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
-    auto upos = do_bound(global, data.begin(), data.end(), comparator, target, [](Value::Compare cmp) { return cmp == Value::compare_less;  });
+    auto upos = do_bound(global, data.begin(), data.end(), comparator, target, [](Compare cmp) { return cmp == compare_less;  });
     return upos - data.begin();
   }
 
 G_array std_array_equal_range(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
-    auto lpos = do_bound(global, data.begin(), pair.first, comparator, target, [](Value::Compare cmp) { return cmp != Value::compare_greater;  });
-    auto upos = do_bound(global, pair.first, data.end(), comparator, target, [](Value::Compare cmp) { return cmp == Value::compare_less;  });
+    auto lpos = do_bound(global, data.begin(), pair.first, comparator, target, [](Compare cmp) { return cmp != compare_greater;  });
+    auto upos = do_bound(global, pair.first, data.end(), comparator, target, [](Compare cmp) { return cmp == compare_less;  });
     // Store both bounds in an `array`.
     G_array res(2);
     res.mut(0) = G_integer(lpos - data.begin());
@@ -579,7 +579,7 @@ G_array std_array_equal_range(const Global_Context& global, const G_array& data,
                         G_array::iterator ibegin, G_array::iterator iend, bool unique)
       {
         for(auto ipos = ibegin; ipos != iend; ++ipos) {
-          if(unique && (do_compare(global, comparator, *ipos, opos[-1]) == Value::compare_equal)) {
+          if(unique && (do_compare(global, comparator, *ipos, opos[-1]) == compare_equal)) {
             continue;
           }
           *(opos++) = rocket::move(*ipos);
@@ -616,19 +616,19 @@ G_array std_array_equal_range(const Global_Context& global, const G_array& data,
           size_t bi;
           for(;;) {
             auto cmp = do_compare(global, comparator, *(bpos[0]), *(bpos[1]));
-            if(cmp == Value::compare_unordered) {
+            if(cmp == compare_unordered) {
               ASTERIA_THROW_RUNTIME_ERROR("The elements `", *(bpos[0]), "` and `", *(bpos[1]), "` are unordered.");
             }
             // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
-            bi = (cmp == Value::compare_greater);
+            bi = (cmp == compare_greater);
             // Move this element unless uniqueness is requested and it is equal to the previous output.
-            if(!(unique && (opos != output.begin()) && (do_compare(global, comparator, *(bpos[bi]), opos[-1]) == Value::compare_equal))) {
+            if(!(unique && (opos != output.begin()) && (do_compare(global, comparator, *(bpos[bi]), opos[-1]) == compare_equal))) {
               *(opos++) = rocket::move(*(bpos[bi]));
             }
             bpos[bi]++;
             // When uniqueness is requested, if elements from the two blocks are equal, discard the one from the second block.
             // This may exhaust the second block.
-            if(unique && (cmp == Value::compare_equal)) {
+            if(unique && (cmp == compare_equal)) {
               size_t oi = bi ^ 1;
               bpos[oi]++;
               if(bpos[oi] == bend[oi]) {
@@ -702,7 +702,7 @@ Value std_array_max_of(const Global_Context& global, const G_array& data, const 
     }
     for(auto it = qmax + 1; it != data.end(); ++it) {
       // Compare `*qmax` with the other elements, ignoring unordered elements.
-      if(do_compare(global, comparator, *qmax, *it) != Value::compare_less) {
+      if(do_compare(global, comparator, *qmax, *it) != compare_less) {
         continue;
       }
       qmax = it;
@@ -719,7 +719,7 @@ Value std_array_min_of(const Global_Context& global, const G_array& data, const 
     }
     for(auto it = qmin + 1; it != data.end(); ++it) {
       // Compare `*qmin` with the other elements, ignoring unordered elements.
-      if(do_compare(global, comparator, *qmin, *it) != Value::compare_greater) {
+      if(do_compare(global, comparator, *qmin, *it) != compare_greater) {
         continue;
       }
       qmin = it;
@@ -741,7 +741,7 @@ G_array std_array_generate(const Global_Context& global, const G_function& gener
       // Set up arguments for the user-defined generator.
       cow_vector<Reference> args;
       do_push_argument(args, G_integer(i));
-      do_push_argument(args, res.empty() ? Value::null() : res.back());
+      do_push_argument(args, res.empty() ? null_value : res.back());
       // Call the generator function and push the return value.
       Reference self;
       generator.get().invoke(self, global, rocket::move(args));

@@ -7,64 +7,6 @@
 
 namespace Asteria {
 
-const char* Value::gtype_name_of(Gtype gtype) noexcept
-  {
-    switch(gtype) {
-    case gtype_null:
-      {
-        return "null";
-      }
-    case gtype_boolean:
-      {
-        return "boolean";
-      }
-    case gtype_integer:
-      {
-        return "integer";
-      }
-    case gtype_real:
-      {
-        return "real";
-      }
-    case gtype_string:
-      {
-        return "string";
-      }
-    case gtype_opaque:
-      {
-        return "opaque";
-      }
-    case gtype_function:
-      {
-        return "function";
-      }
-    case gtype_array:
-      {
-        return "array";
-      }
-    case gtype_object:
-      {
-        return "object";
-      }
-    default:
-      return "<unknown type>";
-    }
-  }
-
-    namespace {
-
-    // These bytes should make up a `Value` that equals `null` and shall never be destroyed.
-    // Don't play with this at home.
-    constexpr std::aligned_union<0, Value>::type s_null[1] = { };
-
-    }  // namespace
-
-const Value& Value::null() noexcept
-  {
-    // This two-step cast is necessary to eliminate warnings when strict aliasing is in effect.
-    return static_cast<const Value*>(static_cast<const void*>(s_null))[0];
-  }
-
 bool Value::test() const noexcept
   {
     switch(this->gtype()) {
@@ -108,25 +50,33 @@ bool Value::test() const noexcept
 
     namespace {
 
-    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_integral<XvalueT>::value)> constexpr Value::Compare do_3way_compare(const XvalueT& lhs,
-                                                                                                                            const XvalueT& rhs) noexcept
+    template<typename ValT, ROCKET_ENABLE_IF(std::is_integral<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
       {
-        return (lhs < rhs) ? Value::compare_less
-                           : (lhs > rhs) ? Value::compare_greater
-                                         : Value::compare_equal;
+        if(lhs < rhs) {
+          return compare_less;
+        }
+        if(lhs > rhs) {
+          return compare_greater;
+        }
+        return compare_equal;
       }
-    template<typename XvalueT, ROCKET_ENABLE_IF(std::is_floating_point<XvalueT>::value)> constexpr Value::Compare do_3way_compare(const XvalueT& lhs,
-                                                                                                                                  const XvalueT& rhs) noexcept
+    template<typename ValT, ROCKET_ENABLE_IF(std::is_floating_point<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
       {
-        return std::isless(lhs, rhs) ? Value::compare_less
-                                     : std::isgreater(lhs, rhs) ? Value::compare_greater
-                                                                : std::isunordered(lhs, rhs) ? Value::compare_unordered
-                                                                                             : Value::compare_equal;
+        if(std::isless(lhs, rhs)) {
+          return compare_less;
+        }
+        if(std::isgreater(lhs, rhs)) {
+          return compare_greater;
+        }
+        if(std::isunordered(lhs, rhs)) {
+          return compare_unordered;
+        }
+        return compare_equal;
       }
 
     }  // namespace
 
-Value::Compare Value::compare(const Value& other) const noexcept
+Compare Value::compare(const Value& other) const noexcept
   {
     ///////////////////////////////////////////////////////////////////////////
     // Compare values of different types

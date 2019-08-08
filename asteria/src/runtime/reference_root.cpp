@@ -14,7 +14,7 @@ const Value& Reference_Root::dereference_const() const
     switch(this->index()) {
     case index_null:
       {
-        return Value::null();
+        return null_value;
       }
     case index_constant:
       {

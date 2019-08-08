@@ -13,14 +13,6 @@ namespace Asteria {
 class Value
   {
   public:
-    enum Compare : uint8_t
-      {
-        compare_unordered  = 0,  // 0000
-        compare_equal      = 1,  // 0001
-        compare_less       = 8,  // 1000
-        compare_greater    = 9,  // 1001
-      };
-
     using Xvariant = variant<
       ROCKET_CDR(
         , G_null      // 0,
@@ -34,11 +26,6 @@ class Value
         , G_object    // 8,
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
-
-  public:
-    // The objects returned by these functions are allocated statically and exist throughout the program.
-    ROCKET_PURE_FUNCTION static const char* gtype_name_of(Gtype gtype) noexcept;
-    ROCKET_PURE_FUNCTION static const Value& null() noexcept;
 
   private:
     Xvariant m_stor;
@@ -63,9 +50,9 @@ class Value
       {
         return static_cast<Gtype>(this->m_stor.index());
       }
-    const char* gtype_name() const noexcept
+    const char* what_gtype() const noexcept
       {
-        return Value::gtype_name_of(this->gtype());
+        return describe_gtype(static_cast<Gtype>(this->m_stor.index()));
       }
 
     bool is_null() const noexcept

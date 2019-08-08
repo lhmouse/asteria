@@ -178,7 +178,7 @@ const Value& Global_Context::get_std_member(const phsh_string& name) const
   {
     auto vstd = rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
     ROCKET_ASSERT(vstd);
-    return vstd->get_value().as_object().get_or(name, Value::null());
+    return vstd->get_value().as_object().get_or(name, null_value);
   }
 
 Value& Global_Context::open_std_member(const phsh_string& name)

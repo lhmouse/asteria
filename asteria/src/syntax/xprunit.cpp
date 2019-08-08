@@ -480,25 +480,25 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
           }
         case xop_infix_cmp_lt:
           {
-            AIR_Node::S_apply_xop_cmp_xrel xnode = { Value::compare_less, false, altr.assign };
+            AIR_Node::S_apply_xop_cmp_xrel xnode = { compare_less, false, altr.assign };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
         case xop_infix_cmp_gt:
           {
-            AIR_Node::S_apply_xop_cmp_xrel xnode = { Value::compare_greater, false, altr.assign };
+            AIR_Node::S_apply_xop_cmp_xrel xnode = { compare_greater, false, altr.assign };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
         case xop_infix_cmp_lte:
           {
-            AIR_Node::S_apply_xop_cmp_xrel xnode = { Value::compare_greater, true, altr.assign };
+            AIR_Node::S_apply_xop_cmp_xrel xnode = { compare_greater, true, altr.assign };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
         case xop_infix_cmp_gte:
           {
-            AIR_Node::S_apply_xop_cmp_xrel xnode = { Value::compare_less, true, altr.assign };
+            AIR_Node::S_apply_xop_cmp_xrel xnode = { compare_less, true, altr.assign };
             code.emplace_back(rocket::move(xnode));
             return code;
           }

@@ -189,6 +189,17 @@ enum Gtype : uint8_t
     gtype_object    = 8,
   };
 
+ROCKET_PURE_FUNCTION extern const char* describe_gtype(Gtype gtype) noexcept;
+
+// Value comparison results
+enum Compare : uint8_t
+  {
+    compare_greater    = 0x00,  // The LHS operand is greater than the RHS operand.
+    compare_less       = 0x01,  // The LHS operand is less than the RHS operand.
+    compare_equal      = 0x40,  // The LHS operand is equal to the RHS operand.
+    compare_unordered  = 0x41,  // The LHS operand is unordered with the RHS operand.
+  };
+
 // API versioning of the standard library
 enum API_Version : uint32_t
   {
@@ -221,6 +232,10 @@ struct Compiler_Options
       uint8_t bitfields_cant_have_initializers_1 = 0xFF;
     };
   };
+
+// This value is initialized statically and never destroyed.
+extern const unsigned char null_value_storage[];
+static const Value& null_value = reinterpret_cast<const Value&>(null_value_storage);
 
 }  // namespace Asteria
 
