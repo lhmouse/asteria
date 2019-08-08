@@ -5,6 +5,7 @@
 #define ASTERIA_SYNTAX_STATEMENT_HPP_
 
 #include "../fwd.hpp"
+#include "enums.hpp"
 #include "source_location.hpp"
 
 namespace Asteria {
@@ -12,14 +13,6 @@ namespace Asteria {
 class Statement
   {
   public:
-    enum Target : uint8_t
-      {
-        target_unspec  = 0,
-        target_switch  = 1,
-        target_while   = 2,
-        target_for     = 3,
-      };
-
     struct S_expression
       {
         cow_vector<Xprunit> expr;
@@ -88,11 +81,11 @@ class Statement
       };
     struct S_break
       {
-        Target target;
+        Jump_Target target;
       };
     struct S_continue
       {
-        Target target;
+        Jump_Target target;
       };
     struct S_throw
       {

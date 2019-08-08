@@ -875,19 +875,19 @@ namespace Asteria {
         return rocket::move(*qcompl);
       }
 
-    opt<Statement::Target> do_accept_break_target_opt(Token_Stream& tstrm)
+    opt<Jump_Target> do_accept_break_target_opt(Token_Stream& tstrm)
       {
         // break-target-opt ::=
         //   "switch" | "while" | "for" | ""
         auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_switch, Token::keyword_while, Token::keyword_for });
         if(qkwrd == Token::keyword_switch) {
-          return Statement::target_switch;
+          return jump_target_switch;
         }
         if(qkwrd == Token::keyword_while) {
-          return Statement::target_while;
+          return jump_target_while;
         }
         if(qkwrd == Token::keyword_for) {
-          return Statement::target_for;
+          return jump_target_for;
         }
         return rocket::nullopt;
       }
@@ -912,16 +912,16 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    opt<Statement::Target> do_accept_continue_target_opt(Token_Stream& tstrm)
+    opt<Jump_Target> do_accept_continue_target_opt(Token_Stream& tstrm)
       {
         // continue-target-opt ::=
         //   "while" | "for" | ""
         auto qkwrd = do_accept_keyword_opt(tstrm, { Token::keyword_while, Token::keyword_for });
         if(qkwrd == Token::keyword_while) {
-          return Statement::target_while;
+          return jump_target_while;
         }
         if(qkwrd == Token::keyword_for) {
-          return Statement::target_for;
+          return jump_target_for;
         }
         return rocket::nullopt;
       }

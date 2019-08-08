@@ -300,25 +300,25 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         const auto& altr = this->m_stor.as<index_break>();
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
-        case Statement::target_unspec:
+        case jump_target_unspec:
           {
             AIR_Node::S_simple_status xnode = { air_status_break_unspec };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
-        case Statement::target_switch:
+        case jump_target_switch:
           {
             AIR_Node::S_simple_status xnode = { air_status_break_switch };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
-        case Statement::target_while:
+        case jump_target_while:
           {
             AIR_Node::S_simple_status xnode = { air_status_break_while };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
-        case Statement::target_for:
+        case jump_target_for:
           {
             AIR_Node::S_simple_status xnode = { air_status_break_for };
             code.emplace_back(rocket::move(xnode));
@@ -333,23 +333,23 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         const auto& altr = this->m_stor.as<index_continue>();
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
-        case Statement::target_unspec:
+        case jump_target_unspec:
           {
             AIR_Node::S_simple_status xnode = { air_status_continue_unspec };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
-        case Statement::target_switch:
+        case jump_target_switch:
           {
             ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
           }
-        case Statement::target_while:
+        case jump_target_while:
           {
             AIR_Node::S_simple_status xnode = { air_status_continue_while };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
-        case Statement::target_for:
+        case jump_target_for:
           {
             AIR_Node::S_simple_status xnode = { air_status_continue_for };
             code.emplace_back(rocket::move(xnode));
