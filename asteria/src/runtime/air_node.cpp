@@ -14,15 +14,15 @@ namespace Asteria {
 
     namespace {
 
-    AIR_Node::Status do_execute_statement_list(Executive_Context& ctx, const cow_vector<AIR_Node>& code)
+    AIR_Status do_execute_statement_list(Executive_Context& ctx, const cow_vector<AIR_Node>& code)
       {
         // Execute all nodes sequentially.
-        auto status = AIR_Node::status_next;
-        rocket::any_of(code, [&](const AIR_Node& node) { return (status = node.execute(ctx)) != AIR_Node::status_next;  });
+        auto status = air_status_next;
+        rocket::any_of(code, [&](const AIR_Node& node) { return (status = node.execute(ctx)) != air_status_next;  });
         return status;
       }
 
-    AIR_Node::Status do_execute_block(const cow_vector<AIR_Node>& code, const Executive_Context& ctx)
+    AIR_Status do_execute_block(const cow_vector<AIR_Node>& code, const Executive_Context& ctx)
       {
         // Execute the block on a new context.
         Executive_Context ctx_body(1, ctx);
@@ -30,7 +30,7 @@ namespace Asteria {
         return status;
       }
 
-    AIR_Node::Status do_execute_catch(const cow_vector<AIR_Node>& code, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
+    AIR_Status do_execute_catch(const cow_vector<AIR_Node>& code, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
       {
         // Create a fresh context.
         Executive_Context ctx_catch(1, ctx);
@@ -72,17 +72,17 @@ namespace Asteria {
         return ctx.stack().get_top_reference().read();
       }
 
-    AIR_Node::Status do_evaluate_branch(const cow_vector<AIR_Node>& code, /*const*/ Executive_Context& ctx, bool assign)
+    AIR_Status do_evaluate_branch(const cow_vector<AIR_Node>& code, /*const*/ Executive_Context& ctx, bool assign)
       {
         if(code.empty()) {
           // Do nothing.
-          return AIR_Node::status_next;
+          return air_status_next;
         }
         // Evaluate all nodes.
         rocket::for_each(code, [&](const AIR_Node& node) { node.execute(ctx);  });
         // Exactly one new reference will have been push onto the top.
         ctx.stack().pop_next_reference(assign);
-        return AIR_Node::status_next;
+        return air_status_next;
       }
 
     struct S_xfunction_call
@@ -528,14 +528,14 @@ namespace Asteria {
 
     }
 
-AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
+AIR_Status AIR_Node::execute(Executive_Context& ctx) const
   {
     switch(this->index()) {
     case index_clear_stack:
       {
         // Clear the stack.
         ctx.stack().clear_references();
-        return status_next;
+        return air_status_next;
       }
     case index_execute_block:
       {
@@ -554,7 +554,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         ctx.open_named_reference(altr.name) = xref;
         // Push a copy of the reference onto the stack.
         ctx.stack().push_reference(rocket::move(xref));
-        return status_next;
+        return air_status_next;
       }
     case index_initialize_variable:
       {
@@ -568,7 +568,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         ROCKET_ASSERT(var);
         // Initialize it.
         var->reset(rocket::move(value), altr.immutable);
-        return status_next;
+        return air_status_next;
       }
     case index_if_statement:
       {
@@ -619,16 +619,16 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           for(size_t i = tpos; i != altr.clauses.size(); ++i) {
             const auto& code_clause = altr.clauses[i].second.first;
             auto status = do_execute_statement_list(ctx_body, code_clause);
-            if(rocket::is_any_of(status, { status_break_unspec, status_break_switch })) {
+            if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
               break;
             }
-            if(status != status_next) {
+            if(status != air_status_next) {
               // Forward any status codes unexpected to the caller.
               return status;
             }
           }
         }
-        return status_next;
+        return air_status_next;
       }
     case index_do_while_statement:
       {
@@ -636,16 +636,16 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         do {
           // Execute the body.
           auto status = do_execute_block(altr.code_body, ctx);
-          if(rocket::is_any_of(status, { status_break_unspec, status_break_while })) {
+          if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
             break;
           }
-          if(rocket::is_none_of(status, { status_next, status_continue_unspec, status_continue_while })) {
+          if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while })) {
             // Forward any status codes unexpected to the caller.
             return status;
           }
           // Check the condition after each iteration.
         } while(do_evaluate(ctx, altr.code_cond).test() != altr.negative);
-        return status_next;
+        return air_status_next;
       }
     case index_while_statement:
       {
@@ -654,15 +654,15 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         while(do_evaluate(ctx, altr.code_cond).test() != altr.negative) {
           // Execute the body.
           auto status = do_execute_block(altr.code_body, ctx);
-          if(rocket::is_any_of(status, { status_break_unspec, status_break_while })) {
+          if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
             break;
           }
-          if(rocket::is_none_of(status, { status_next, status_continue_unspec, status_continue_while })) {
+          if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while })) {
             // Forward any status codes unexpected to the caller.
             return status;
           }
         }
-        return status_next;
+        return air_status_next;
       }
     case index_for_each_statement:
       {
@@ -697,17 +697,17 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
             mapped.zoom_in(rocket::move(xmod));
             // Execute the loop body.
             auto status = do_execute_block(altr.code_body, ctx_for);
-            if(rocket::is_any_of(status, { status_break_unspec, status_break_for })) {
+            if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
               break;
             }
-            if(rocket::is_none_of(status, { status_next, status_continue_unspec, status_continue_for })) {
+            if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
               // Forward any status codes unexpected to the caller.
               return status;
             }
             // Restore the mapped reference.
             mapped.zoom_out();
           }
-          return status_next;
+          return air_status_next;
         }
         else if(range.is_object()) {
           const auto& object = range.as_object();
@@ -719,17 +719,17 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
             mapped.zoom_in(rocket::move(xmod));
             // Execute the loop body.
             auto status = do_execute_block(altr.code_body, ctx_for);
-            if(rocket::is_any_of(status, { status_break_unspec, status_break_for })) {
+            if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
               break;
             }
-            if(rocket::is_none_of(status, { status_next, status_continue_unspec, status_continue_for })) {
+            if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
               // Forward any status codes unexpected to the caller.
               return status;
             }
             // Restore the mapped reference.
             mapped.zoom_out();
           }
-          return status_next;
+          return air_status_next;
         }
         else {
           ASTERIA_THROW_RUNTIME_ERROR("The `for each` statement does not accept a range of type `", range.gtype_name(), "`.");
@@ -743,7 +743,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Execute the loop initializer.
         // XXX: Techinically it should only be a definition or an expression statement.
         auto status = do_execute_statement_list(ctx_for, altr.code_init);
-        if(status != status_next) {
+        if(status != air_status_next) {
           // Forward any status codes unexpected to the caller.
           return status;
         }
@@ -751,17 +751,17 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         while(altr.code_cond.empty() || do_evaluate(ctx_for, altr.code_cond).test()) {
           // Execute the body.
           status = do_execute_block(altr.code_body, ctx_for);
-          if(rocket::is_any_of(status, { status_break_unspec, status_break_for })) {
+          if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
             break;
           }
-          if(rocket::is_none_of(status, { status_next, status_continue_unspec, status_continue_for })) {
+          if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
             // Forward any status codes unexpected to the caller.
             return status;
           }
           // Execute the loop increment.
           do_evaluate(ctx_for, altr.code_step);
         }
-        return status_next;
+        return air_status_next;
       }
     case index_try_statement:
       {
@@ -821,7 +821,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Read the value to check.
         if(ROCKET_EXPECT(ctx.stack().get_top_reference().read().test() != altr.negative)) {
           // The assertion has succeeded.
-          return status_next;
+          return air_status_next;
         }
         // The assertion has failed.
         cow_osstream fmtss;
@@ -850,7 +850,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         if(ROCKET_UNEXPECT(ref.is_lvalue())) {
           ref.convert_to_rvalue();
         }
-        return status_return;
+        return air_status_return;
       }
     case index_push_literal:
       {
@@ -858,7 +858,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Push a constant.
         Reference_Root::S_constant xref = { altr.value };
         ctx.stack().push_reference(rocket::move(xref));
-        return status_next;
+        return air_status_next;
       }
     case index_push_global_reference:
       {
@@ -870,7 +870,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         }
         // Push a copy of it.
         ctx.stack().push_reference(*qref);
-        return status_next;
+        return air_status_next;
       }
     case index_push_local_reference:
       {
@@ -886,14 +886,14 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         }
         // Push a copy of it.
         ctx.stack().push_reference(*qref);
-        return status_next;
+        return air_status_next;
       }
     case index_push_bound_reference:
       {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
         // Push a copy of the bound reference.
         ctx.stack().push_reference(altr.bref);
-        return status_next;
+        return air_status_next;
       }
     case index_define_function:
       {
@@ -904,7 +904,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
         ctx.stack().push_reference(rocket::move(xref));
-        return status_next;
+        return air_status_next;
       }
     case index_branch_expression:
       {
@@ -927,7 +927,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           return do_evaluate_branch(altr.code_null, ctx, altr.assign);
         }
         else {
-          return status_next;
+          return air_status_next;
         }
       }
     case index_function_call_tail:
@@ -943,7 +943,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
         Reference_Root::S_tail_call xref = { altr.sloc, func, altr.flags, rocket::move(pargs.target), rocket::move(pargs.args) };
         self = rocket::move(xref);
-        return status_return;
+        return air_status_return;
       }
     case index_function_call_plain:
       {
@@ -960,7 +960,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           self.finish_call(ctx.global());
           // The result will have been stored into `self`.
           ASTERIA_DEBUG_LOG("Returned from function call at \'", altr.sloc, "\' inside `", func, "`: target = ", pargs.target);
-          return status_next;
+          return air_status_next;
         }
         catch(Exception& except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", except.get_value());
@@ -982,7 +982,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Append a modifier to the reference at the top.
         Reference_Modifier::S_object_key xmod = { altr.name };
         ctx.stack().open_top_reference().zoom_in(rocket::move(xmod));
-        return status_next;
+        return air_status_next;
       }
     case index_push_unnamed_array:
       {
@@ -997,7 +997,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Push the array as a temporary.
         Reference_Root::S_temporary xref = { rocket::move(array) };
         ctx.stack().push_reference(rocket::move(xref));
-        return status_next;
+        return air_status_next;
       }
     case index_push_unnamed_object:
       {
@@ -1012,7 +1012,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Push the object as a temporary.
         Reference_Root::S_temporary xref = { rocket::move(object) };
         ctx.stack().push_reference(rocket::move(xref));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_inc_post:
       {
@@ -1032,7 +1032,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Postfix increment is not defined for `", lhs, "`.");
         }
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_dec_post:
       {
@@ -1052,7 +1052,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Postfix decrement is not defined for `", lhs, "`.");
         }
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_subscr:
       {
@@ -1074,7 +1074,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("The value `", rhs, "` cannot be used as a subscript.");
         }
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_pos:
       {
@@ -1084,7 +1084,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_neg:
       {
@@ -1104,7 +1104,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_notb:
       {
@@ -1124,7 +1124,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_notl:
       {
@@ -1134,7 +1134,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         ctx.stack().set_temporary_reference(altr.assign, do_operator_not(rhs.test()));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_inc:
       {
@@ -1152,7 +1152,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
         }
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_dec:
       {
@@ -1170,7 +1170,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix increment is not defined for `", rhs, "`.");
         }
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_unset:
       {
@@ -1179,7 +1179,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         auto rhs = ctx.stack().get_top_reference().unset();
         // Unset the reference and return the old value.
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_lengthof:
       {
@@ -1204,7 +1204,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, G_integer(nelems));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_typeof:
       {
@@ -1214,7 +1214,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
         ctx.stack().set_temporary_reference(altr.assign, G_string(rocket::sref(rhs.gtype_name())));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_sqrt:
       {
@@ -1234,7 +1234,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_isnan:
       {
@@ -1254,7 +1254,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_isinf:
       {
@@ -1274,7 +1274,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_abs:
       {
@@ -1294,7 +1294,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_signb:
       {
@@ -1314,7 +1314,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_round:
       {
@@ -1334,7 +1334,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_floor:
       {
@@ -1354,7 +1354,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_ceil:
       {
@@ -1374,7 +1374,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_trunc:
       {
@@ -1394,7 +1394,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_iround:
       {
@@ -1414,7 +1414,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_ifloor:
       {
@@ -1434,7 +1434,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_iceil:
       {
@@ -1454,7 +1454,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_itrunc:
       {
@@ -1474,7 +1474,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_cmp_xeq:
       {
@@ -1488,7 +1488,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         auto comp = lhs.compare(rhs);
         rhs = G_boolean((comp == Value::compare_equal) != altr.negative);
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_cmp_xrel:
       {
@@ -1505,7 +1505,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         }
         rhs = G_boolean((comp == altr.expect) != altr.negative);
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_cmp_3way:
       {
@@ -1530,7 +1530,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           rhs = G_integer(0);
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_add:
       {
@@ -1562,7 +1562,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_sub:
       {
@@ -1589,7 +1589,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_mul:
       {
@@ -1625,7 +1625,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_div:
       {
@@ -1647,7 +1647,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_mod:
       {
@@ -1669,7 +1669,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_sll:
       {
@@ -1694,7 +1694,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_srl:
       {
@@ -1719,7 +1719,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_sla:
       {
@@ -1744,7 +1744,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_sra:
       {
@@ -1768,7 +1768,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_andb:
       {
@@ -1791,7 +1791,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_orb:
       {
@@ -1814,7 +1814,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_xorb:
       {
@@ -1837,7 +1837,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_assign:
       {
@@ -1846,7 +1846,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
         ctx.stack().pop_reference();
         // Copy the value to the LHS operand which is write-only. `altr.assign` is ignored.
         ctx.stack().set_temporary_reference(true, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     case index_apply_xop_fma:
       {
@@ -1866,7 +1866,7 @@ AIR_Node::Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
         }
         ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
-        return status_next;
+        return air_status_next;
       }
     default:
       ASTERIA_TERMINATE("An unknown AIR node type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");

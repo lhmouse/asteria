@@ -14,19 +14,6 @@ namespace Asteria {
 class AIR_Node
   {
   public:
-    enum Status : uint8_t
-      {
-        status_next             = 0,
-        status_return           = 1,
-        status_break_unspec     = 2,
-        status_break_switch     = 3,
-        status_break_while      = 4,
-        status_break_for        = 5,
-        status_continue_unspec  = 6,
-        status_continue_while   = 7,
-        status_continue_for     = 8,
-      };
-
     struct S_clear_stack
       {
       };
@@ -99,7 +86,7 @@ class AIR_Node
       };
     struct S_simple_status
       {
-        Status status;
+        AIR_Status status;
       };
     struct S_return_by_value
       {
@@ -500,7 +487,7 @@ class AIR_Node
         this->m_stor.swap(other.m_stor);
       }
 
-    Status execute(Executive_Context& ctx) const;
+    AIR_Status execute(Executive_Context& ctx) const;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
   };
 

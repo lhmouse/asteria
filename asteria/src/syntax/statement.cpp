@@ -302,25 +302,25 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         switch(altr.target) {
         case Statement::target_unspec:
           {
-            AIR_Node::S_simple_status xnode = { AIR_Node::status_break_unspec };
+            AIR_Node::S_simple_status xnode = { air_status_break_unspec };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
         case Statement::target_switch:
           {
-            AIR_Node::S_simple_status xnode = { AIR_Node::status_break_switch };
+            AIR_Node::S_simple_status xnode = { air_status_break_switch };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
         case Statement::target_while:
           {
-            AIR_Node::S_simple_status xnode = { AIR_Node::status_break_while };
+            AIR_Node::S_simple_status xnode = { air_status_break_while };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
         case Statement::target_for:
           {
-            AIR_Node::S_simple_status xnode = { AIR_Node::status_break_for };
+            AIR_Node::S_simple_status xnode = { air_status_break_for };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
@@ -335,7 +335,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         switch(altr.target) {
         case Statement::target_unspec:
           {
-            AIR_Node::S_simple_status xnode = { AIR_Node::status_continue_unspec };
+            AIR_Node::S_simple_status xnode = { air_status_continue_unspec };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
@@ -345,13 +345,13 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           }
         case Statement::target_while:
           {
-            AIR_Node::S_simple_status xnode = { AIR_Node::status_continue_while };
+            AIR_Node::S_simple_status xnode = { air_status_continue_while };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
         case Statement::target_for:
           {
-            AIR_Node::S_simple_status xnode = { AIR_Node::status_continue_for };
+            AIR_Node::S_simple_status xnode = { air_status_continue_for };
             code.emplace_back(rocket::move(xnode));
             return code;
           }
@@ -381,7 +381,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           AIR_Node::S_push_literal xnode_def = { G_null() };
           code.emplace_back(rocket::move(xnode_def));
           // Forward the result as is.
-          AIR_Node::S_simple_status xnode_ret = { AIR_Node::status_return };
+          AIR_Node::S_simple_status xnode_ret = { air_status_return };
           code.emplace_back(rocket::move(xnode_ret));
         }
         else if(altr.by_ref) {
@@ -389,7 +389,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           // This may be TCO'd by reference.
           do_generate_expression_partial(code, options, Xprunit::tco_by_ref, ctx, altr.expr);
           // Forward the result as is.
-          AIR_Node::S_simple_status xnode_ret = { AIR_Node::status_return };
+          AIR_Node::S_simple_status xnode_ret = { air_status_return };
           code.emplace_back(rocket::move(xnode_ret));
         }
         else {

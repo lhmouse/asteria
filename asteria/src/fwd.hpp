@@ -130,7 +130,7 @@ template<typename F, typename S> using pair = std::pair<F, S>;
 template<typename F, typename S> using cow_bivector = rocket::cow_vector<std::pair<F, S>>;
 template<typename E, size_t ...k> using array = rocket::array<E, k...>;
 
-// Fundamental Types
+// Fundamental types
 using G_null      = nullptr_t;
 using G_boolean   = bool;
 using G_integer   = int64_t;
@@ -141,7 +141,21 @@ using G_function  = rcobj<Abstract_Function>;
 using G_array     = cow_vector<Value>;
 using G_object    = cow_hashmap<phsh_string, Value, phsh_string::hash>;
 
-// Indices of Fundamental Types
+// IR status codes
+enum AIR_Status : uint8_t
+  {
+    air_status_next             = 0,
+    air_status_return           = 1,
+    air_status_break_unspec     = 2,
+    air_status_break_switch     = 3,
+    air_status_break_while      = 4,
+    air_status_break_for        = 5,
+    air_status_continue_unspec  = 6,
+    air_status_continue_while   = 7,
+    air_status_continue_for     = 8,
+  };
+
+// Indices of fundamental types
 enum Gtype : uint8_t
   {
     gtype_null      = 0,
