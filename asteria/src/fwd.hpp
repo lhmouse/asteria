@@ -166,14 +166,26 @@ enum API_Version : uint32_t
 // Options for source parsing and code generation
 struct Compiler_Options
   {
-    // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
-    bool escapable_single_quote_strings = false;
-    // Parse keywords as identifiers. [useful when parsing JSON text]
-    bool keywords_as_identifiers = false;
-    // Parse integer literals as real literals. [useful when parsing JSON text]
-    bool integers_as_reals = false;
-    // Enable proper tail calls. [commonly known as tail call optimization]
-    bool proper_tail_calls = true;
+    // These fields have a default value of `false`.
+    union {
+      struct {
+        // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
+        bool escapable_single_quote_strings : 1;
+        // Parse keywords as identifiers. [useful when parsing JSON text]
+        bool keywords_as_identifiers : 1;
+        // Parse integer literals as real literals. [useful when parsing JSON text]
+        bool integers_as_reals : 1;
+      };
+      uint8_t bitfields_cant_have_initializers_0 = 0x00;
+    };
+    // These fields have a default value of `true`.
+    union {
+      struct {
+        // Enable proper tail calls. [commonly known as tail call optimization]
+        bool proper_tail_calls : 1;
+      };
+      uint8_t bitfields_cant_have_initializers_1 = 0xFF;
+    };
   };
 
 }  // namespace Asteria
