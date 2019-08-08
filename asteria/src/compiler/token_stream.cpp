@@ -180,9 +180,9 @@ namespace Asteria {
           }
       };
 
-    inline Parser_Error do_make_parser_error(const Line_Reader& reader, size_t tlen, Parser_Error::Code code)
+    inline Parser_Error do_make_parser_error(const Line_Reader& reader, size_t tlen, Parser_Status status)
       {
-        return Parser_Error(reader.line(), reader.offset(), tlen, code);
+        return Parser_Error(reader.line(), reader.offset(), tlen, status);
       }
 
     class Tack
@@ -368,7 +368,7 @@ namespace Asteria {
         }
         // There shall be at least one digit.
         if(icnt == 0) {
-          throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_incomplete);
+          throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_incomplete);
         }
         // Check for the fractional part.
         if(reader.peek(tlen) == '.') {
@@ -390,7 +390,7 @@ namespace Asteria {
           }
           // There shall be at least one digit.
           if(fcnt == 0) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_incomplete);
+            throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_incomplete);
           }
         }
         // Check for the exponent part.
@@ -428,7 +428,7 @@ namespace Asteria {
             tlen++;
             // Accept a digit.
             if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
-              throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_exponent_overflow);
+              throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_exponent_overflow);
             }
             pcnt++;
             // Is the next character a digit separator?
@@ -438,16 +438,16 @@ namespace Asteria {
           }
           // There shall be at least one digit.
           if(pcnt == 0) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_incomplete);
+            throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_incomplete);
           }
         }
         if(reader.peek(tlen) == '`') {
-          throw do_make_parser_error(reader, tlen, Parser_Error::code_digit_separator_following_nondigit);
+          throw do_make_parser_error(reader, tlen, parser_status_digit_separator_following_nondigit);
         }
         // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
         // Since we make no use of them, we just reserve them for further use for good.
         if(do_check_cctype(reader.peek(tlen), cctype_namei | cctype_digit)) {
-          throw do_make_parser_error(reader, tlen, Parser_Error::code_numeric_literal_suffix_disallowed);
+          throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_suffix_disallowed);
         }
         // Is this an `integer` or a `real`?
         if(!integers_as_reals && (fcnt == 0)) {
@@ -461,19 +461,19 @@ namespace Asteria {
             }
             // Accept a digit.
             if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
-              throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
+              throw do_make_parser_error(reader, tlen, parser_status_integer_literal_overflow);
             }
           }
           // Negative exponents are not allowed, not even when the significant part is zero.
           if(pexp < 0) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_exponent_negative);
+            throw do_make_parser_error(reader, tlen, parser_status_integer_literal_exponent_negative);
           }
           // Raise the result.
           if(val != 0) {
             for(auto i = pexp; i != 0; --i) {
               // Append a digit zero.
               if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_integer_literal_overflow);
+                throw do_make_parser_error(reader, tlen, parser_status_integer_literal_overflow);
               }
             }
           }
@@ -519,10 +519,10 @@ namespace Asteria {
         // Check for overflow or underflow.
         int fpcls = std::fpclassify(val);
         if(fpcls == FP_INFINITE) {
-          throw do_make_parser_error(reader, tlen, Parser_Error::code_real_literal_overflow);
+          throw do_make_parser_error(reader, tlen, parser_status_real_literal_overflow);
         }
         if((fpcls == FP_ZERO) && (tval != 0)) {
-          throw do_make_parser_error(reader, tlen, Parser_Error::code_real_literal_underflow);
+          throw do_make_parser_error(reader, tlen, parser_status_real_literal_underflow);
         }
         // Push a real literal.
         Token::S_real_literal xtoken = { val };
@@ -654,7 +654,7 @@ namespace Asteria {
           // Read a character.
           auto next = reader.peek(tlen);
           if(next == 0) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_string_literal_unclosed);
+            throw do_make_parser_error(reader, tlen, parser_status_string_literal_unclosed);
           }
           tlen++;
           // Check it.
@@ -671,7 +671,7 @@ namespace Asteria {
           // Read the next charactter.
           next = reader.peek(tlen);
           if(next == 0) {
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_incomplete);
+            throw do_make_parser_error(reader, tlen, parser_status_escape_sequence_incomplete);
           }
           tlen++;
           // Translate it.
@@ -747,11 +747,11 @@ namespace Asteria {
                 // Read a hex digit.
                 auto digit = reader.peek(tlen);
                 if(digit == 0) {
-                  throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_incomplete);
+                  throw do_make_parser_error(reader, tlen, parser_status_escape_sequence_incomplete);
                 }
                 auto dval = do_translate_digit(digit);
                 if(dval >= 16) {
-                  throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_invalid_hex);
+                  throw do_make_parser_error(reader, tlen, parser_status_escape_sequence_invalid_hex);
                 }
                 tlen++;
                 // Accumulate this digit.
@@ -765,12 +765,12 @@ namespace Asteria {
               }
               // Write a Unicode code point.
               if(!utf8_encode(val, cp)) {
-                throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_utf_code_point_invalid);
+                throw do_make_parser_error(reader, tlen, parser_status_escape_utf_code_point_invalid);
               }
               break;
             }
           default:
-            throw do_make_parser_error(reader, tlen, Parser_Error::code_escape_sequence_unknown);
+            throw do_make_parser_error(reader, tlen, parser_status_escape_sequence_unknown);
           }
         }
         Token::S_string_literal xtoken = { rocket::move(val) };
@@ -905,12 +905,12 @@ bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Comp
           char32_t cp;
           auto tptr = reader.data();
           if(!utf8_decode(cp, tptr, reader.navail())) {
-            throw do_make_parser_error(reader, reader.navail(), Parser_Error::code_utf8_sequence_invalid);
+            throw do_make_parser_error(reader, reader.navail(), parser_status_utf8_sequence_invalid);
           }
           auto u8len = static_cast<size_t>(tptr - reader.data());
           // Disallow plain null characters in source data.
           if(cp == 0) {
-            throw do_make_parser_error(reader, u8len, Parser_Error::code_null_character_disallowed);
+            throw do_make_parser_error(reader, u8len, parser_status_null_character_disallowed);
           }
           // Accept this code point.
           reader.consume(u8len);
@@ -957,14 +957,14 @@ bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Comp
                            do_accept_identifier_or_keyword(seq, reader, options.keywords_as_identifiers);
           if(!token_got) {
             ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data());
-            throw do_make_parser_error(reader, 1, Parser_Error::code_token_character_unrecognized);
+            throw do_make_parser_error(reader, 1, parser_status_token_character_unrecognized);
           }
         }
         reader.rewind();
       }
       if(bcomm) {
         // A block comment may straddle multiple lines. We just mark the first line here.
-        throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), Parser_Error::code_block_comment_unclosed);
+        throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), parser_status_block_comment_unclosed);
       }
     }
     catch(const Parser_Error& error) {  // `Parser_Error` is not derived from `std::exception`. Don't play with this at home.
@@ -987,7 +987,7 @@ Parser_Error Token_Stream::get_parser_error() const noexcept
     switch(this->state()) {
     case state_empty:
       {
-        return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_no_data_loaded);
+        return Parser_Error(-1, SIZE_MAX, 0, parser_status_no_data_loaded);
       }
     case state_error:
       {
@@ -995,7 +995,7 @@ Parser_Error Token_Stream::get_parser_error() const noexcept
       }
     case state_success:
       {
-        return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
+        return Parser_Error(-1, SIZE_MAX, 0, parser_status_success);
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");

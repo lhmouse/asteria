@@ -191,8 +191,16 @@ enum Gtype : uint8_t
 
 ROCKET_PURE_FUNCTION extern const char* describe_gtype(Gtype gtype) noexcept;
 
-// Punctuators
+// Value comparison results
+enum Compare : uint8_t
+  {
+    compare_greater    = 0x00,  // The LHS operand is greater than the RHS operand.
+    compare_less       = 0x01,  // The LHS operand is less than the RHS operand.
+    compare_equal      = 0x40,  // The LHS operand is equal to the RHS operand.
+    compare_unordered  = 0x41,  // The LHS operand is unordered with the RHS operand.
+  };
 
+// Punctuators
 enum Punctuator : uint8_t
   {
     punctuator_add         =  0,  // +
@@ -255,7 +263,6 @@ enum Punctuator : uint8_t
 ROCKET_PURE_FUNCTION extern const char* stringify_punctuator(Punctuator punct) noexcept;
 
 // Keywords
-
 enum Keyword : uint8_t
   {
     keyword_var       =  0,
@@ -308,14 +315,59 @@ enum Keyword : uint8_t
 
 ROCKET_PURE_FUNCTION extern const char* stringify_keyword(Keyword kwrd) noexcept;
 
-// Value comparison results
-enum Compare : uint8_t
+// Parser status codes
+enum Parser_Status : uint32_t
   {
-    compare_greater    = 0x00,  // The LHS operand is greater than the RHS operand.
-    compare_less       = 0x01,  // The LHS operand is less than the RHS operand.
-    compare_equal      = 0x40,  // The LHS operand is equal to the RHS operand.
-    compare_unordered  = 0x41,  // The LHS operand is unordered with the RHS operand.
+    parser_status_success                                    =    0,
+    parser_status_no_data_loaded                             = 1001,
+    parser_status_istream_open_failure                       = 2001,
+    parser_status_istream_badbit_set                         = 2002,
+    parser_status_utf8_sequence_invalid                      = 2003,
+    parser_status_utf8_sequence_incomplete                   = 2004,
+    parser_status_utf_code_point_invalid                     = 2005,
+    parser_status_null_character_disallowed                  = 2006,
+    parser_status_token_character_unrecognized               = 3001,
+    parser_status_string_literal_unclosed                    = 3002,
+    parser_status_escape_sequence_unknown                    = 3003,
+    parser_status_escape_sequence_incomplete                 = 3004,
+    parser_status_escape_sequence_invalid_hex                = 3005,
+    parser_status_escape_utf_code_point_invalid              = 3006,
+    parser_status_numeric_literal_incomplete                 = 3007,
+    parser_status_numeric_literal_suffix_disallowed          = 3008,
+    parser_status_numeric_literal_exponent_overflow          = 3009,
+    parser_status_integer_literal_overflow                   = 3010,
+    parser_status_integer_literal_exponent_negative          = 3011,
+    parser_status_real_literal_overflow                      = 3012,
+    parser_status_real_literal_underflow                     = 3013,
+    parser_status_block_comment_unclosed                     = 3014,
+    parser_status_digit_separator_following_nondigit         = 3015,
+    parser_status_identifier_expected                        = 4002,
+    parser_status_semicolon_expected                         = 4003,
+    parser_status_string_literal_expected                    = 4004,
+    parser_status_statement_expected                         = 4005,
+    parser_status_equals_sign_expected                       = 4006,
+    parser_status_expression_expected                        = 4007,
+    parser_status_open_brace_expected                        = 4008,
+    parser_status_closed_brace_or_statement_expected         = 4009,
+    parser_status_open_parenthesis_expected                  = 4010,
+    parser_status_parameter_or_ellipsis_expected             = 4011,
+    parser_status_closed_parenthesis_expected                = 4012,
+    parser_status_colon_expected                             = 4013,
+    parser_status_closed_brace_or_switch_clause_expected     = 4014,
+    parser_status_keyword_while_expected                     = 4015,
+    parser_status_keyword_catch_expected                     = 4016,
+    parser_status_comma_expected                             = 4017,
+    parser_status_for_statement_initializer_expected         = 4018,
+    parser_status_semicolon_or_expression_expected           = 4019,
+    parser_status_closed_brace_expected                      = 4020,
+    parser_status_duplicate_object_key                       = 4021,
+    parser_status_closed_parenthesis_or_argument_expected    = 4022,
+    parser_status_closed_bracket_expected                    = 4023,
+    parser_status_open_brace_or_equal_initializer_expected   = 4024,
+    parser_status_equals_sign_or_colon_expected              = 4025,
   };
+
+ROCKET_PURE_FUNCTION extern const char* describe_parser_status(Parser_Status status) noexcept;
 
 // API versioning of the standard library
 enum API_Version : uint32_t

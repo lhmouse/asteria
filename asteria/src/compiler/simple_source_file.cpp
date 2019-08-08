@@ -35,12 +35,12 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& sbuf, const c
     ASTERIA_DEBUG_LOG("Loaded file '", filename, "': ", *qtarget);
     // Accept the code.
     this->m_cptr = rocket::move(qtarget);
-    return Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_success);
+    return Parser_Error(-1, SIZE_MAX, 0, parser_status_success);
   }
 
 Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
   {
-    if(this->m_fthr && (err != Parser_Error::code_success)) {
+    if(this->m_fthr && (err != parser_status_success)) {
       err.convert_to_runtime_error_and_throw();
     }
     return rocket::move(err);
@@ -55,7 +55,7 @@ Parser_Error Simple_Source_File::reload(std::istream& istrm, const cow_string& f
   {
     std::istream::sentry sentry(istrm, true);
     if(!sentry) {
-      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
+      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, parser_status_istream_open_failure));
     }
     // Extract characters from the stream buffer directly.
     opt<Parser_Error> qerr;
@@ -63,7 +63,7 @@ Parser_Error Simple_Source_File::reload(std::istream& istrm, const cow_string& f
     try {
       qerr = this->do_reload_nothrow(*(istrm.rdbuf()), filename);
       // If the source code contains errors, fail.
-      if(*qerr != Parser_Error::code_success) {
+      if(*qerr != parser_status_success) {
         state |= std::ios_base::failbit;
       }
       // N.B. `do_reload_nothrow()` shall have consumed all data, so `eofbit` is always set.
@@ -77,7 +77,7 @@ Parser_Error Simple_Source_File::reload(std::istream& istrm, const cow_string& f
       istrm.setstate(state);
     }
     if(istrm.bad()) {
-      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_badbit_set));
+      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, parser_status_istream_badbit_set));
     }
     // `qerr` shall always have a value here.
     // If the exceptional path above has been taken, `istrm.bad()` will have been set.
@@ -97,7 +97,7 @@ Parser_Error Simple_Source_File::open(const cow_string& filename)
     // Open the file designated by `filename`.
     std::filebuf sbuf;
     if(!sbuf.open(filename.c_str(), std::ios_base::in)) {
-      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, Parser_Error::code_istream_open_failure));
+      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, parser_status_istream_open_failure));
     }
     return this->reload(sbuf, filename);
   }
