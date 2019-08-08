@@ -7,7 +7,7 @@
 
 namespace Asteria {
 
-Infix_Element::Precedence Infix_Element::tell_precedence() const noexcept
+Precedence Infix_Element::tell_precedence() const noexcept
   {
     switch(this->index()) {
     case index_head:

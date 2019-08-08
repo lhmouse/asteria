@@ -1910,7 +1910,7 @@ namespace Asteria {
             throw do_make_parser_error(tstrm, Parser_Error::code_expression_expected);
           }
           // Assignment operations have the lowest precedence and group from right to left.
-          if(stack.back().tell_precedence() < Infix_Element::precedence_assignment) {
+          if(stack.back().tell_precedence() < precedence_assignment) {
             // Collapse elements that have no lower precedence and group from left to right.
             auto preced_next = qnext->tell_precedence();
             while((stack.size() >= 2) && (stack.back().tell_precedence() <= preced_next)) {

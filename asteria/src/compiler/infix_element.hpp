@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_INFIX_ELEMENT_HPP_
 
 #include "../fwd.hpp"
+#include "../syntax/enums.hpp"
 #include "../syntax/xprunit.hpp"
 
 namespace Asteria {
@@ -12,23 +13,6 @@ namespace Asteria {
 class Infix_Element
   {
   public:
-    enum Precedence : uint8_t
-      {
-        precedence_multiplicative  =  1,
-        precedence_additive        =  2,
-        precedence_shift           =  3,
-        precedence_relational      =  4,
-        precedence_equality        =  5,
-        precedence_bitwise_and     =  6,
-        precedence_bitwise_xor     =  7,
-        precedence_bitwise_or      =  8,
-        precedence_logical_and     =  9,
-        precedence_logical_or      = 10,
-        precedence_coalescence     = 11,
-        precedence_assignment      = 12,
-        precedence_lowest          = 99,
-      };
-
     struct S_head
       {
         cow_vector<Xprunit> units;
