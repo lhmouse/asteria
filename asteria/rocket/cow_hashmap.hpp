@@ -1246,23 +1246,6 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return ptr[tpos]->second;
       }
     // N.B. This is a non-standard extension.
-    template<typename ykeyT> mapped_type& mut(const ykeyT& key)
-      {
-        auto ptr = this->do_mut_table();
-        size_type tpos;
-        if(!this->m_sth.index_of(tpos, key)) {
-          this->do_throw_key_not_found();
-        }
-        return ptr[tpos]->second;
-      }
-    template<typename ykeyT> mapped_type& operator[](ykeyT&& key)
-      {
-        this->do_reserve_more(1);
-        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                               ::std::forward_as_tuple(noadl::forward<ykeyT>(key)), ::std::forward_as_tuple());
-        return result.first->get()->second;
-      }
-    // N.B. This is a non-standard extension.
     template<typename ykeyT> const mapped_type* get_ptr(const ykeyT& key) const
       {
         auto ptr = this->do_get_table();
@@ -1271,6 +1254,24 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           return nullptr;
         }
         return ::std::addressof(ptr[tpos]->second);
+      }
+
+    template<typename ykeyT> mapped_type& operator[](ykeyT&& key)
+      {
+        this->do_reserve_more(1);
+        auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
+                                                               ::std::forward_as_tuple(noadl::forward<ykeyT>(key)), ::std::forward_as_tuple());
+        return result.first->get()->second;
+      }
+    // N.B. This is a non-standard extension.
+    template<typename ykeyT> mapped_type& mut(const ykeyT& key)
+      {
+        auto ptr = this->do_mut_table();
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
+          this->do_throw_key_not_found();
+        }
+        return ptr[tpos]->second;
       }
     // N.B. This is a non-standard extension.
     template<typename ykeyT> mapped_type& mut_ptr(const ykeyT& key)

@@ -240,21 +240,6 @@ template<typename firstT, typename lastT,
     } while(++qit != last);
   }
 
-template<typename firstT, typename lastT,
-         typename funcT, typename fbackT, typename... paramsT> void ranged_xfor(firstT first, lastT last,
-                                                                                funcT&& func, fbackT&& fback, const paramsT&... params)
-  {
-    auto next = noadl::move(first);
-    if(next != last) {
-      auto qit = next;
-      while(++next != last) {
-        noadl::forward<funcT>(func)(qit, params...);
-        qit = next;
-      }
-      noadl::forward<fbackT>(fback)(qit, params...);
-    }
-  }
-
 template<typename... typesT> struct conjunction : true_type
   {
   };
