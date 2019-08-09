@@ -13,12 +13,10 @@ namespace Asteria {
 class Argument_Reader
   {
   public:
-    // This opaque struct is used to encode function prototype parameters.
-    struct Mparam;
-
     struct State
       {
-        cow_vector<Mparam> prototype;
+        cow_string history;
+        uint32_t nparams;
         bool finished;
         bool succeeded;
       };
@@ -28,11 +26,9 @@ class Argument_Reader
     ref_to<const cow_vector<Reference>> m_args;
     bool m_throw_on_failure;
 
-    // This string stores all overloads that have been tested so far.
-    // Overloads are encoded in binary formats.
-    cow_vector<Mparam> m_overloads;
-    // N.B. The contents of `m_state` can be copied elsewhere and back.
-    // Any further operations will resume from that point.
+    // `m_overloads` contains all overloads that have been tested so far.
+    cow_string m_overloads;
+    // `m_state` can be copied elsewhere and back; any further operations will resume from that point.
     State m_state;
 
   public:
@@ -50,12 +46,14 @@ class Argument_Reader
   private:
     template<typename HandlerT> inline void do_fail(HandlerT&& handler);
 
-    inline void do_record_parameter(Gtype gtype, bool required);
+    inline void do_record_parameter_optional(Gtype gtype);
+    inline void do_record_parameter_required(Gtype gtype);
     inline void do_record_parameter_generic();
-    inline void do_record_parameter_finish(bool variadic);
+    inline void do_record_parameter_variadic();
+    inline void do_record_parameter_finish();
 
     inline const Reference* do_peek_argument_opt() const;
-    inline opt<ptrdiff_t> do_check_finish_opt(bool variadic) const;
+    inline opt<size_t> do_check_finish_opt() const;
 
   public:
     const cow_string& get_name() const noexcept

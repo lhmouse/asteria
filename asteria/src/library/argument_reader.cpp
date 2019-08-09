@@ -7,58 +7,6 @@
 
 namespace Asteria {
 
-struct Argument_Reader::Mparam
-  {
-    enum Tag : uint8_t
-      {
-        tag_optional  = 0,  // optional, statically typed
-        tag_required  = 1,  // required, statically typed
-        tag_generic   = 2,  // optional, dynamically typed
-        tag_variadic  = 3,  // variadic argument placeholder
-        tag_finish    = 4,  // end of parameter list
-      };
-
-    Tag tag;
-    Gtype gtype;
-
-    std::ostream& print(std::ostream& ostrm) const
-      {
-        switch(this->tag) {
-        case tag_optional:
-          {
-            return ostrm << '[' << describe_gtype(this->gtype) << ']';
-          }
-        case tag_required:
-          {
-            return ostrm << describe_gtype(this->gtype);
-          }
-        case tag_generic:
-          {
-            return ostrm << "<generic>";
-          }
-        case tag_variadic:
-          {
-            return ostrm << "...";
-          }
-        case tag_finish:
-          {
-            ROCKET_ASSERT(false);
-          }
-        default:
-          ROCKET_ASSERT(false);
-        }
-      }
-  };
-
-    namespace {
-
-    inline std::ostream& operator<<(std::ostream& ostrm, const Argument_Reader::Mparam& param)
-      {
-        return param.print(ostrm);
-      }
-
-    }
-
 template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
   {
     if(this->m_throw_on_failure) {
@@ -67,15 +15,24 @@ template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
     this->m_state.succeeded = false;
   }
 
-void Argument_Reader::do_record_parameter(Gtype gtype, bool required)
+void Argument_Reader::do_record_parameter_required(Gtype gtype)
   {
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; no argument could be extracted any further.");
     }
-    Mparam pinfo = { };
-    pinfo.tag = required ? Mparam::tag_required : Mparam::tag_optional;
-    pinfo.gtype = gtype;
-    this->m_state.prototype.emplace_back(pinfo);
+    // Record a parameter and increment the number of parameters in total.
+    this->m_state.history << ", " << describe_gtype(gtype);
+    this->m_state.nparams++;
+  }
+
+void Argument_Reader::do_record_parameter_optional(Gtype gtype)
+  {
+    if(this->m_state.finished) {
+      ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; no argument could be extracted any further.");
+    }
+    // Record a parameter and increment the number of parameters in total.
+    this->m_state.history << ", [" << describe_gtype(gtype) << ']';
+    this->m_state.nparams++;
   }
 
 void Argument_Reader::do_record_parameter_generic()
@@ -83,25 +40,29 @@ void Argument_Reader::do_record_parameter_generic()
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; no argument could be extracted any further.");
     }
-    Mparam pinfo = { };
-    pinfo.tag = Mparam::tag_generic;
-    this->m_state.prototype.emplace_back(pinfo);
+    // Record a parameter and increment the number of parameters in total.
+    this->m_state.history << ", <generic>";
+    this->m_state.nparams++;
   }
 
-void Argument_Reader::do_record_parameter_finish(bool variadic)
+void Argument_Reader::do_record_parameter_variadic()
+  {
+    if(this->m_state.finished) {
+      ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; no argument could be extracted any further.");
+    }
+    // Terminate the parameter list.
+    this->m_state.history << ", ...";
+  }
+
+void Argument_Reader::do_record_parameter_finish()
   {
     if(this->m_state.finished) {
       ASTERIA_THROW_RUNTIME_ERROR("This argument sentry had already been finished; it cannot be finished a second time.");
     }
-    Mparam pinfo = { };
-    if(variadic) {
-      pinfo.tag = Mparam::tag_variadic;
-      this->m_state.prototype.emplace_back(pinfo);
-    }
-    pinfo.tag = Mparam::tag_finish;
-    this->m_state.prototype.emplace_back(pinfo);
-    // Append this prototype.
-    this->m_overloads.append(this->m_state.prototype.begin(), this->m_state.prototype.end());
+    // Terminate this overload.
+    this->m_state.history.push_back('\0');
+    // Append it to the overload list as a single operation.
+    this->m_overloads.append(this->m_state.history);
   }
 
 const Reference* Argument_Reader::do_peek_argument_opt() const
@@ -109,28 +70,28 @@ const Reference* Argument_Reader::do_peek_argument_opt() const
     if(!this->m_state.succeeded) {
       return nullptr;
     }
-    // Before calling this function, the parameter information must have been recorded in `m_state.prototype`.
-    auto nparams = this->m_state.prototype.size();
-    if(this->m_args.get().size() < nparams) {
-      return nullptr;
-    }
-    // Return a pointer to this argument.
-    return &(this->m_args.get().at(nparams - 1));
+    // Before calling this function, the parameter information must have been recorded.
+    auto index = this->m_state.nparams - 1;
+    // Return a pointer to the argument at `index`.
+    return this->m_args->get_ptr(index);
   }
 
-opt<ptrdiff_t> Argument_Reader::do_check_finish_opt(bool variadic) const
+opt<size_t> Argument_Reader::do_check_finish_opt() const
   {
     if(!this->m_state.succeeded) {
       return rocket::nullopt;
     }
-    // Before calling this function, a finish tag must have been recorded in `m_state.prototype`.
-    auto nparams = this->m_state.prototype.size() - 1;
-    return static_cast<ptrdiff_t>(nparams - variadic);
+    // Before calling this function, the current overload must have been finished.
+    auto index = this->m_state.nparams;
+    // Return the beginning of variadic arguments.
+    return rocket::min(index, this->m_args->size());
   }
 
 Argument_Reader& Argument_Reader::start() noexcept
   {
-    this->m_state.prototype.clear();
+    // Clear internal states.
+    this->m_state.history.clear();
+    this->m_state.nparams = 0;
     this->m_state.finished = false;
     this->m_state.succeeded = true;
     return *this;
@@ -166,7 +127,7 @@ Argument_Reader& Argument_Reader::g(Value& value)
 
 Argument_Reader& Argument_Reader::g(opt<G_boolean>& qxvalue)
   {
-    this->do_record_parameter(gtype_boolean, false);
+    this->do_record_parameter_optional(gtype_boolean);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -182,7 +143,7 @@ Argument_Reader& Argument_Reader::g(opt<G_boolean>& qxvalue)
     }
     if(!value.is_boolean()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `boolean` or `null` was expected.");  });
       return *this;
     }
@@ -193,7 +154,7 @@ Argument_Reader& Argument_Reader::g(opt<G_boolean>& qxvalue)
 
 Argument_Reader& Argument_Reader::g(opt<G_integer>& qxvalue)
   {
-    this->do_record_parameter(gtype_integer, false);
+    this->do_record_parameter_optional(gtype_integer);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -209,7 +170,7 @@ Argument_Reader& Argument_Reader::g(opt<G_integer>& qxvalue)
     }
     if(!value.is_integer()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `integer` or `null` was expected.");  });
       return *this;
     }
@@ -220,7 +181,7 @@ Argument_Reader& Argument_Reader::g(opt<G_integer>& qxvalue)
 
 Argument_Reader& Argument_Reader::g(opt<G_real>& qxvalue)
   {
-    this->do_record_parameter(gtype_real, false);
+    this->do_record_parameter_optional(gtype_real);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -236,7 +197,7 @@ Argument_Reader& Argument_Reader::g(opt<G_real>& qxvalue)
     }
     if(!value.is_convertible_to_real()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `integer`, `real` or `null` was expected.");  });
       return *this;
     }
@@ -247,7 +208,7 @@ Argument_Reader& Argument_Reader::g(opt<G_real>& qxvalue)
 
 Argument_Reader& Argument_Reader::g(opt<G_string>& qxvalue)
   {
-    this->do_record_parameter(gtype_string, false);
+    this->do_record_parameter_optional(gtype_string);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -263,7 +224,7 @@ Argument_Reader& Argument_Reader::g(opt<G_string>& qxvalue)
     }
     if(!value.is_string()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `string` or `null` was expected.");  });
       return *this;
     }
@@ -274,7 +235,7 @@ Argument_Reader& Argument_Reader::g(opt<G_string>& qxvalue)
 
 Argument_Reader& Argument_Reader::g(opt<G_opaque>& qxvalue)
   {
-    this->do_record_parameter(gtype_opaque, false);
+    this->do_record_parameter_optional(gtype_opaque);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -290,7 +251,7 @@ Argument_Reader& Argument_Reader::g(opt<G_opaque>& qxvalue)
     }
     if(!value.is_opaque()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `opaque` or `null` was expected.");  });
       return *this;
     }
@@ -301,7 +262,7 @@ Argument_Reader& Argument_Reader::g(opt<G_opaque>& qxvalue)
 
 Argument_Reader& Argument_Reader::g(opt<G_function>& qxvalue)
   {
-    this->do_record_parameter(gtype_function, false);
+    this->do_record_parameter_optional(gtype_function);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -317,7 +278,7 @@ Argument_Reader& Argument_Reader::g(opt<G_function>& qxvalue)
     }
     if(!value.is_function()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `function` or `null` was expected.");  });
       return *this;
     }
@@ -328,7 +289,7 @@ Argument_Reader& Argument_Reader::g(opt<G_function>& qxvalue)
 
 Argument_Reader& Argument_Reader::g(opt<G_array>& qxvalue)
   {
-    this->do_record_parameter(gtype_array, false);
+    this->do_record_parameter_optional(gtype_array);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -344,7 +305,7 @@ Argument_Reader& Argument_Reader::g(opt<G_array>& qxvalue)
     }
     if(!value.is_array()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `array` or `null` was expected.");  });
       return *this;
     }
@@ -355,7 +316,7 @@ Argument_Reader& Argument_Reader::g(opt<G_array>& qxvalue)
 
 Argument_Reader& Argument_Reader::g(opt<G_object>& qxvalue)
   {
-    this->do_record_parameter(gtype_object, false);
+    this->do_record_parameter_optional(gtype_object);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -371,7 +332,7 @@ Argument_Reader& Argument_Reader::g(opt<G_object>& qxvalue)
     }
     if(!value.is_object()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `object` or `null` was expected.");  });
       return *this;
     }
@@ -382,7 +343,7 @@ Argument_Reader& Argument_Reader::g(opt<G_object>& qxvalue)
 
 Argument_Reader& Argument_Reader::g(G_boolean& xvalue)
   {
-    this->do_record_parameter(gtype_boolean, true);
+    this->do_record_parameter_required(gtype_boolean);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -393,7 +354,7 @@ Argument_Reader& Argument_Reader::g(G_boolean& xvalue)
     const auto& value = karg->read();
     if(!value.is_boolean()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `boolean` was expected.");  });
       return *this;
     }
@@ -404,7 +365,7 @@ Argument_Reader& Argument_Reader::g(G_boolean& xvalue)
 
 Argument_Reader& Argument_Reader::g(G_integer& xvalue)
   {
-    this->do_record_parameter(gtype_integer, true);
+    this->do_record_parameter_required(gtype_integer);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -415,7 +376,7 @@ Argument_Reader& Argument_Reader::g(G_integer& xvalue)
     const auto& value = karg->read();
     if(!value.is_integer()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `integer` was expected.");  });
       return *this;
     }
@@ -426,7 +387,7 @@ Argument_Reader& Argument_Reader::g(G_integer& xvalue)
 
 Argument_Reader& Argument_Reader::g(G_real& xvalue)
   {
-    this->do_record_parameter(gtype_real, true);
+    this->do_record_parameter_required(gtype_real);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -437,7 +398,7 @@ Argument_Reader& Argument_Reader::g(G_real& xvalue)
     const auto& value = karg->read();
     if(!value.is_convertible_to_real()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `integer` or `real` was expected.");  });
       return *this;
     }
@@ -448,7 +409,7 @@ Argument_Reader& Argument_Reader::g(G_real& xvalue)
 
 Argument_Reader& Argument_Reader::g(G_string& xvalue)
   {
-    this->do_record_parameter(gtype_string, true);
+    this->do_record_parameter_required(gtype_string);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -459,7 +420,7 @@ Argument_Reader& Argument_Reader::g(G_string& xvalue)
     const auto& value = karg->read();
     if(!value.is_string()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `string` was expected.");  });
       return *this;
     }
@@ -470,7 +431,7 @@ Argument_Reader& Argument_Reader::g(G_string& xvalue)
 
 Argument_Reader& Argument_Reader::g(G_opaque& xvalue)
   {
-    this->do_record_parameter(gtype_opaque, true);
+    this->do_record_parameter_required(gtype_opaque);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -481,7 +442,7 @@ Argument_Reader& Argument_Reader::g(G_opaque& xvalue)
     const auto& value = karg->read();
     if(!value.is_opaque()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `opaque` was expected.");  });
       return *this;
     }
@@ -492,7 +453,7 @@ Argument_Reader& Argument_Reader::g(G_opaque& xvalue)
 
 Argument_Reader& Argument_Reader::g(G_function& xvalue)
   {
-    this->do_record_parameter(gtype_function, true);
+    this->do_record_parameter_required(gtype_function);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -503,7 +464,7 @@ Argument_Reader& Argument_Reader::g(G_function& xvalue)
     const auto& value = karg->read();
     if(!value.is_function()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `function` was expected.");  });
       return *this;
     }
@@ -514,7 +475,7 @@ Argument_Reader& Argument_Reader::g(G_function& xvalue)
 
 Argument_Reader& Argument_Reader::g(G_array& xvalue)
   {
-    this->do_record_parameter(gtype_array, true);
+    this->do_record_parameter_required(gtype_array);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -525,7 +486,7 @@ Argument_Reader& Argument_Reader::g(G_array& xvalue)
     const auto& value = karg->read();
     if(!value.is_array()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `array` was expected.");  });
       return *this;
     }
@@ -536,7 +497,7 @@ Argument_Reader& Argument_Reader::g(G_array& xvalue)
 
 Argument_Reader& Argument_Reader::g(G_object& xvalue)
   {
-    this->do_record_parameter(gtype_object, true);
+    this->do_record_parameter_required(gtype_object);
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
@@ -547,7 +508,7 @@ Argument_Reader& Argument_Reader::g(G_object& xvalue)
     const auto& value = karg->read();
     if(!value.is_object()) {
       // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args.get().data() + 1, " had type `", value.what_gtype(), "`, "
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
                                                      "but `object` was expected.");  });
       return *this;
     }
@@ -558,16 +519,16 @@ Argument_Reader& Argument_Reader::g(G_object& xvalue)
 
 bool Argument_Reader::finish()
   {
-    this->do_record_parameter_finish(false);
+    this->do_record_parameter_finish();
     // Get the number of named parameters.
-    auto qoff = this->do_check_finish_opt(false);
-    if(!qoff) {
+    auto qvoff = this->do_check_finish_opt();
+    if(!qvoff) {
       return false;
     }
     // There shall be no more arguments than parameters.
-    if(*qoff < this->m_args.get().ssize()) {
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", *qoff, "`, "
-                                                     "but got `", this->m_args.get().size(), "`).");  });
+    if(*qvoff < this->m_args->size()) {
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (got `", this->m_args->size(), "`, "
+                                                     "but expecting no more than `", *qvoff, "`).");  });
       return false;
     }
     return true;
@@ -575,67 +536,79 @@ bool Argument_Reader::finish()
 
 bool Argument_Reader::finish(cow_vector<Reference>& vargs)
   {
-    this->do_record_parameter_finish(true);
+    this->do_record_parameter_variadic();
+    this->do_record_parameter_finish();
     // Get the number of named parameters.
-    auto qoff = this->do_check_finish_opt(true);
-    if(!qoff) {
+    auto qvoff = this->do_check_finish_opt();
+    if(!qvoff) {
       return false;
     }
-    // Copy variadic arguments as is.
+    // Initialize the argument vector.
     vargs.clear();
-    if(*qoff < this->m_args.get().ssize()) {
-      std::for_each(this->m_args.get().begin() + *qoff, this->m_args.get().end(), [&](const Reference& arg) { vargs.emplace_back(arg);  });
+    // Copy variadic arguments, if any.
+    if(*qvoff < this->m_args->size()) {
+      rocket::ranged_for(*qvoff, this->m_args->size(), [&](size_t i) { vargs.emplace_back(this->m_args.get()[i]);  });
     }
     return true;
   }
 
 bool Argument_Reader::finish(cow_vector<Value>& vargs)
   {
-    this->do_record_parameter_finish(true);
+    this->do_record_parameter_variadic();
+    this->do_record_parameter_finish();
     // Get the number of named parameters.
-    auto qoff = this->do_check_finish_opt(true);
-    if(!qoff) {
+    auto qvoff = this->do_check_finish_opt();
+    if(!qvoff) {
       return false;
     }
-    // Copy variadic arguments as is.
+    // Initialize the argument vector.
     vargs.clear();
-    if(*qoff < this->m_args.get().ssize()) {
-      std::for_each(this->m_args.get().begin() + *qoff, this->m_args.get().end(), [&](const Reference& arg) { vargs.emplace_back(arg.read());  });
+    // Copy variadic arguments, if any.
+    if(*qvoff < this->m_args->size()) {
+      rocket::ranged_for(*qvoff, this->m_args->size(), [&](size_t i) { vargs.emplace_back(this->m_args.get()[i].read());  });
     }
     return true;
   }
 
 void Argument_Reader::throw_no_matching_function_call() const
   {
-    const auto& name = this->m_name;
-    const auto& args = this->m_args.get();
-    // Create a message containing arguments.
-    cow_osstream fmtss;
-    fmtss.imbue(std::locale::classic());
-    fmtss << "There was no matching overload for function call `" << name << "(";
-    rocket::ranged_xfor(args.begin(), args.end(), [&](auto it) { fmtss << it->read().what_gtype() << ", ";  }, [&](auto it) { fmtss << it->read().what_gtype();  });
-    fmtss << ")`.";
-    // If overload information is available, append the list of overloads.
-    auto qovld = this->m_overloads.begin();
-    if(qovld != this->m_overloads.end()) {
-      fmtss << "\n[list of overloads: ";
-      for(;;) {
-        auto qend = std::find_if(qovld, this->m_overloads.end(), [&](const Mparam& pinfo) { return pinfo.tag == Mparam::tag_finish;  });
-        // Append this overload.
-        fmtss << "`" << name << "(";
-        rocket::ranged_xfor(qovld, qend, [&](auto it) { fmtss << *it << ", ";  }, [&](auto it) { fmtss << *it;  });
-        fmtss << ")`";
-        // Are there more overloads?
-        qovld = qend + 1;
-        if(qovld == this->m_overloads.end()) {
-          break;
-        }
-        fmtss << ", ";
-      }
-      fmtss << "]";
+    cow_string msg;
+    // Create a message containing all arguments.
+    msg << "There was no matching overload for function call `" << this->m_name << "(";
+    if(!this->m_args->empty()) {
+      size_t rpos = 0;
+      do {
+        // Append the type of this argument.
+        msg << this->m_args.get()[rpos].read().what_gtype();
+        // Seek to the next argument.
+      } while((++rpos != this->m_args->size()) && &(msg << ", "));
     }
-    // Throw it now.
-    throw_runtime_error(__func__, fmtss.extract_string());
+    msg << ")`.";
+    // Append the list of overloads.
+    if(!this->m_overloads.empty()) {
+      // Append the header.
+      msg << "\n[list of overloads: ";
+      // Append all overloads.
+      size_t rpos = 0;
+      do {
+        // Append this overload.
+        msg << "`" << this->m_name << "(";
+        // Find the terminator of the current parameter list.
+        auto pstr = this->m_overloads.data() + rpos;
+        auto plen = std::strlen(pstr);
+        // Skip the leading `", "` if the parameter list is not empty.
+        if(plen >= 2) {
+          msg.append(pstr + 2, plen - 2);
+        }
+        msg << ")`";
+        rpos += plen;
+        // Seek to the next overload.
+      } while((++rpos != this->m_overloads.size()) && &(msg << ", "));
+      // Append the footer.
+      msg << "]";
+    }
+    // Throw the exception now.
+    throw_runtime_error(__func__, rocket::move(msg));
   }
 
 }  // namespace Asteria
