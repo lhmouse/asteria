@@ -130,7 +130,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           if(!pair.second.empty()) {
             // If an initializer is provided, we declare the variable as immutable to prevent
             // unintentional modification before the initialization is completed.
-            AIR_Node::S_declare_variable xnode_decl = { altr.sloc, true, pair.first };
+            AIR_Node::S_declare_variable xnode_decl = { true, pair.first };
             code.emplace_back(rocket::move(xnode_decl));
             // Generate code for the initializer.
             do_generate_expression_partial(code, options, tco_aware_none, ctx, pair.second);
@@ -140,7 +140,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           }
           else {
             // If no initializer is provided, this can be simplified somehow.
-            AIR_Node::S_declare_variable xnode_decl = { altr.sloc, altr.immutable, pair.first };
+            AIR_Node::S_declare_variable xnode_decl = { altr.immutable, pair.first };
             code.emplace_back(rocket::move(xnode_decl));
           }
         }
@@ -154,7 +154,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Clear the stack.
         do_generate_clear_stack(code);
         // Declare the function, which is effectively an immutable variable.
-        AIR_Node::S_declare_variable xnode_decl = { altr.sloc, true, altr.name };
+        AIR_Node::S_declare_variable xnode_decl = { true, altr.name };
         code.emplace_back(rocket::move(xnode_decl));
         // Instantiate the function body.
         AIR_Node::S_define_function xnode_defn = { options, altr.sloc, altr.name, altr.params, altr.body };

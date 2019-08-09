@@ -12,17 +12,11 @@ namespace Asteria {
 class Global_Context : public Abstract_Context
   {
   private:
-    // This is used to initialize an object of type `G_opaque` or `G_function` which does not have a default constructor.
     rcptr<Rcbase> m_placeholder;
-    // This is the global high-quality Pseudo Random Number Generator (PRNG).
     rcptr<Rcbase> m_prng;
-    // This is the global garbage collector.
-    rcptr<Rcbase> m_gcoll;
-    // This is the variable holding an object referenced as `std` in this context.
-    rcptr<Rcbase> m_vstd;
+    rcptr<Rcbase> m_stdv;
 
   public:
-    // A global context does not have a parent context.
     explicit Global_Context(API_Version version = api_version_latest)
       {
         this->initialize(version);
@@ -42,6 +36,11 @@ class Global_Context : public Abstract_Context
     // Clear all references, perform a full garbage collection, then reload the standard library.
     void initialize(API_Version version = api_version_latest);
 
+    // These are interfaces of the global garbage collector.
+    Collector* get_collector_opt(size_t gen) const;
+    rcptr<Variable> create_variable(size_t gen_hint = 0) const;
+    size_t collect_variables(size_t gen_limit = 9) const;
+
     // These are interfaces of the placeholder.
     rcobj<Placeholder> placeholder() const noexcept;
     rcobj<Abstract_Opaque> placeholder_opaque() const noexcept;
@@ -49,11 +48,6 @@ class Global_Context : public Abstract_Context
 
     // These are interfaces of the PRNG.
     uint32_t get_random_uint32() const noexcept;
-
-    // These are interfaces of the global garbage collector.
-    Collector* get_collector_opt(size_t gindex) const;
-    rcptr<Variable> create_variable(size_t ghint = 0) const;
-    size_t collect_variables(size_t glimit = 9) const;
 
     // These are interfaces of the standard library.
     const Value& get_std_member(const phsh_string& name) const;

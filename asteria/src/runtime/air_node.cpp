@@ -548,7 +548,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_declare_variable>();
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();
-        var->reset(altr.sloc, G_null(), altr.immutable);
+        var->reset(G_null(), altr.immutable);
         // Inject the variable into the current context.
         Reference_Root::S_variable xref = { rocket::move(var) };
         ctx.open_named_reference(altr.name) = xref;
@@ -671,7 +671,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         Executive_Context ctx_for(1, ctx);
         // Create a variable for the key.
         auto key = ctx_for.global().create_variable();
-        key->reset(Source_Location(rocket::sref("<ranged for>"), 0), G_null(), true);
+        key->reset(G_null(), true);
         Reference_Root::S_variable xref_key = { key };
         ctx_for.open_named_reference(altr.name_key) = rocket::move(xref_key);
         // Create the mapped reference.

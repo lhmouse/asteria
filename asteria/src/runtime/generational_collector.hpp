@@ -32,25 +32,25 @@ class Generational_Collector : public virtual Rcbase
       = delete;
 
   public:
-    size_t pool_size() const noexcept
+    size_t get_pool_size() const noexcept
       {
         return this->m_pool.size();
       }
-    size_t collector_count() const noexcept
+    size_t count_collectors() const noexcept
       {
         return this->m_colls.size();
       }
-    const Collector& collector(size_t gindex) const
+    const Collector& get_collector(size_t gen) const
       {
-        return this->m_colls.at(gindex);
+        return this->m_colls.at(gen);
       }
-    Collector& collector(size_t gindex)
+    Collector& mut_collector(size_t gen)
       {
-        return this->m_colls.mut(gindex);
+        return this->m_colls.mut(gen);
       }
 
-    rcptr<Variable> create_variable(size_t glimit);
-    size_t collect_variables(size_t glimit);
+    rcptr<Variable> create_variable(size_t gen_limit);
+    size_t collect_variables(size_t gen_limit);
   };
 
 }  // namespace Asteria

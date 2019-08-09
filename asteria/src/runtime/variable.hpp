@@ -7,23 +7,21 @@
 #include "../fwd.hpp"
 #include "rcbase.hpp"
 #include "value.hpp"
-#include "../syntax/source_location.hpp"
 
 namespace Asteria {
 
 class Variable : public virtual Rcbase
   {
   private:
-    Source_Location m_sloc;
+    // contents
     Value m_value;
     bool m_immut;
     // garbage collection support
     mutable pair<long, double> m_gcref;
 
   public:
-    explicit Variable(const Source_Location& sloc) noexcept
-      : m_sloc(sloc),
-        m_value(), m_immut(true)
+    Variable() noexcept
+      : m_value(), m_immut(true)
       {
       }
     ~Variable() override;
@@ -34,10 +32,6 @@ class Variable : public virtual Rcbase
       = delete;
 
   public:
-    const Source_Location& get_source_location() const noexcept
-      {
-        return this->m_sloc;
-      }
     const Value& get_value() const noexcept
       {
         return this->m_value;
@@ -52,12 +46,6 @@ class Variable : public virtual Rcbase
       }
     void set_immutable(bool immutable) noexcept
       {
-        this->m_immut = immutable;
-      }
-    template<typename XvalueT> void reset(const Source_Location& sloc, XvalueT&& xvalue, bool immutable)
-      {
-        this->m_sloc = sloc;
-        this->m_value = rocket::forward<XvalueT>(xvalue);
         this->m_immut = immutable;
       }
     template<typename XvalueT> void reset(XvalueT&& xvalue, bool immutable)

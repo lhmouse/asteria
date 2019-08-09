@@ -90,6 +90,8 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
         cont.enumerate_variables(callback);
       }
 
+    constexpr G_integer s_defunct_value = 0x7EEDFACECAFEBEEF;
+
     }  // namespace
 
 Collector* Collector::collect_single_opt()
@@ -125,7 +127,7 @@ Collector* Collector::collect_single_opt()
         // If `root` is the last reference to this variable, it can be marked for collection immediately.
         auto nref = root->use_count();
         if(nref <= 1) {
-          root->reset(Source_Location(rocket::sref("<defunct-1>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
+          root->reset(s_defunct_value, true);
           return false;
         }
         // Enumerate variables that are reachable from `root` indirectly.
@@ -205,7 +207,7 @@ Collector* Collector::collect_single_opt()
         if(root->get_gcref() >= 0) {
           // Overwrite the value of this variable with a scalar value to break reference cycles.
           ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
-          root->reset(Source_Location(rocket::sref("<defunct-2>"), 0), G_integer(0xFEEDFACECAFEBEEF), true);
+          root->reset(s_defunct_value, true);
           // Cache this variable if a pool is specified.
           if(output) {
             output->insert(root);

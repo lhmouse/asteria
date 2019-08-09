@@ -46,8 +46,8 @@ class Abstract_Context
         this->m_named_refs.clear();
       }
 
-    Generational_Collector* get_tied_collector_opt() const noexcept;
-    void set_tied_collector(const rcptr<Generational_Collector>& coll_opt) noexcept;
+    Generational_Collector* tied_collector_opt() const noexcept;
+    void tie_collector(const rcptr<Generational_Collector>& coll_opt) noexcept;
 
     virtual bool is_analytic() const noexcept = 0;
     virtual const Abstract_Context* get_parent_opt() const noexcept = 0;

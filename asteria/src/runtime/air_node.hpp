@@ -23,7 +23,6 @@ class AIR_Node
       };
     struct S_declare_variable
       {
-        Source_Location sloc;
         bool immutable;
         phsh_string name;
       };

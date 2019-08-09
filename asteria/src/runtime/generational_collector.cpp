@@ -13,14 +13,14 @@ Generational_Collector::~Generational_Collector()
   {
   }
 
-rcptr<Variable> Generational_Collector::create_variable(size_t glimit)
+rcptr<Variable> Generational_Collector::create_variable(size_t gen_limit)
   {
-    auto rlimit = rocket::min(glimit, this->m_colls.size() - 1);
+    auto rlimit = rocket::min(gen_limit, this->m_colls.size() - 1);
     // Get a variable from the pool.
     auto qvar = this->m_pool.erase_random_opt();
     if(ROCKET_UNEXPECT(!qvar)) {
       // Create a new one if the pool has been exhausted.
-      qvar = rocket::make_refcnt<Variable>(Source_Location(rocket::sref("<fresh>"), 0));
+      qvar = rocket::make_refcnt<Variable>();
     }
     // Track this variable.
     this->m_colls.mut(rlimit).track_variable(qvar);
@@ -28,13 +28,13 @@ rcptr<Variable> Generational_Collector::create_variable(size_t glimit)
     return qvar;
   }
 
-size_t Generational_Collector::collect_variables(size_t glimit)
+size_t Generational_Collector::collect_variables(size_t gen_limit)
   {
-    auto rlimit = rocket::min(glimit, this->m_colls.size() - 1);
+    auto rlimit = rocket::min(gen_limit, this->m_colls.size() - 1);
     // Collect variables from the newest generation to the oldest generation.
-    for(size_t gindex = 0; gindex <= rlimit; ++gindex) {
+    for(size_t gen = 0; gen <= rlimit; ++gen) {
       // Collect it.
-      this->m_colls.mut(gindex).collect_single_opt();
+      this->m_colls.mut(gen).collect_single_opt();
     }
     // Clear the variable pool.
     auto nvars = this->m_pool.size();

@@ -71,9 +71,10 @@ Global_Context::~Global_Context()
 
 void Global_Context::initialize(API_Version version)
   {
-    ///////////////////////////////////////////////////////////////////////////
-    // Initializer global objects.
-    ///////////////////////////////////////////////////////////////////////////
+    // Initialize the global garbage collector.
+    auto gcoll = rocket::make_refcnt<Generational_Collector>();
+    this->tie_collector(gcoll);
+    // Initialize global objects.
     this->clear_named_references();
     // Allocate a new placeholder.
     auto placeholder = rocket::make_refcnt<Placeholder>();
@@ -81,25 +82,19 @@ void Global_Context::initialize(API_Version version)
     // Use default seed.
     auto prng = rocket::make_refcnt<Random_Number_Generator>();
     this->m_prng = prng;
-    // Tie the collector to `*this` so a full garbage collection is performed when this context is destroyed.
-    auto gcoll = rocket::make_refcnt<Generational_Collector>();
-    this->set_tied_collector(gcoll);
-    this->m_gcoll = gcoll;
-    ///////////////////////////////////////////////////////////////////////////
     // Initialize standard library modules.
-    ///////////////////////////////////////////////////////////////////////////
 #ifdef ROCKET_DEBUG
     ROCKET_ASSERT(std::is_sorted(std::begin(s_modules), std::end(s_modules), Module_Comparator()));
 #endif
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which will be referenced as `yend[-1].version`.
-    G_object ostd;
+    G_object stdo;
     auto bmods = std::begin(s_modules) + 1;
     auto emods = std::upper_bound(bmods, std::end(s_modules), version, Module_Comparator());
     // Initialize library modules.
     for(auto q = bmods; q != emods; ++q) {
       // Create the subobject if it doesn't exist.
-      auto pair = ostd.try_emplace(rocket::sref(q->name));
+      auto pair = stdo.try_emplace(rocket::sref(q->name));
       if(pair.second) {
         ROCKET_ASSERT(pair.first->second.is_null());
         pair.first->second = G_object();
@@ -109,20 +104,48 @@ void Global_Context::initialize(API_Version version)
       ASTERIA_DEBUG_LOG("Finished initialization of standard library module: name = ", q->name);
     }
     // Set up version information.
-    auto pair = ostd.try_emplace(rocket::sref("version"));
+    auto pair = stdo.try_emplace(rocket::sref("version"));
     if(pair.second) {
       ROCKET_ASSERT(pair.first->second.is_null());
       pair.first->second = G_object();
     }
     create_bindings_version(pair.first->second.mut_object(), emods[-1].version);
-    ///////////////////////////////////////////////////////////////////////////
-    // Set the `std` variable.
-    ///////////////////////////////////////////////////////////////////////////
-    auto vstd = gcoll->create_variable(9);
-    vstd->reset(Source_Location(rocket::sref("<built-in>"), 0), rocket::move(ostd), true);
-    Reference_Root::S_variable xref = { vstd };
+    // Set the `std` variable now.
+    auto stdv = gcoll->create_variable(9);
+    stdv->reset(rocket::move(stdo), true);
+    Reference_Root::S_variable xref = { stdv };
     this->open_named_reference(rocket::sref("std")) = rocket::move(xref);
-    this->m_vstd = vstd;
+    this->m_stdv = stdv;
+  }
+
+Collector* Global_Context::get_collector_opt(size_t gen) const
+  {
+    auto coll = this->tied_collector_opt();
+    if(!coll) {
+      return nullptr;
+    }
+    if(gen >= coll->count_collectors()) {
+      return nullptr;
+    }
+    return std::addressof(coll->mut_collector(gen));
+  }
+
+rcptr<Variable> Global_Context::create_variable(size_t gen_hint) const
+  {
+    auto coll = this->tied_collector_opt();
+    if(!coll) {
+      return rocket::make_refcnt<Variable>();
+    }
+    return coll->create_variable(gen_hint);
+  }
+
+size_t Global_Context::collect_variables(size_t gen_limit) const
+  {
+    auto coll = this->tied_collector_opt();
+    if(!coll) {
+      return 0;
+    }
+    return coll->collect_variables(gen_limit);
   }
 
 rcobj<Placeholder> Global_Context::placeholder() const noexcept
@@ -153,46 +176,25 @@ uint32_t Global_Context::get_random_uint32() const noexcept
     return prng->bump();
   }
 
-Collector* Global_Context::get_collector_opt(size_t gindex) const
-  {
-    auto gcoll = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    return (gindex < gcoll->collector_count()) ? std::addressof(gcoll->collector(gindex)) : nullptr;
-  }
-
-rcptr<Variable> Global_Context::create_variable(size_t ghint) const
-  {
-    auto gcoll = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    return gcoll->create_variable(ghint);
-  }
-
-size_t Global_Context::collect_variables(size_t glimit) const
-  {
-    auto gcoll = rocket::dynamic_pointer_cast<Generational_Collector>(this->m_gcoll);
-    ROCKET_ASSERT(gcoll);
-    return gcoll->collect_variables(glimit);
-  }
-
 const Value& Global_Context::get_std_member(const phsh_string& name) const
   {
-    auto vstd = rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
-    ROCKET_ASSERT(vstd);
-    return vstd->get_value().as_object().get_or(name, null_value);
+    auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
+    ROCKET_ASSERT(stdv);
+    return stdv->get_value().as_object().get_or(name, null_value);
   }
 
 Value& Global_Context::open_std_member(const phsh_string& name)
   {
-    auto vstd = rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
-    ROCKET_ASSERT(vstd);
-    return vstd->open_value().mut_object().try_emplace(name).first->second;
+    auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
+    ROCKET_ASSERT(stdv);
+    return stdv->open_value().mut_object().try_emplace(name).first->second;
   }
 
 bool Global_Context::remove_std_member(const phsh_string& name)
   {
-    auto vstd = rocket::dynamic_pointer_cast<Variable>(this->m_vstd);
-    ROCKET_ASSERT(vstd);
-    return vstd->open_value().mut_object().erase(name);
+    auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
+    ROCKET_ASSERT(stdv);
+    return stdv->open_value().mut_object().erase(name);
   }
 
 }  // namespace Asteria
