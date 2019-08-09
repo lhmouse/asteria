@@ -69,6 +69,7 @@ class Reference;
 class Evaluation_Stack;
 class Variable;
 class Variable_Callback;
+class Tail_Call_Arguments;
 class Collector;
 class Abstract_Context;
 class Analytic_Context;

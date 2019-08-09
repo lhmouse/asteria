@@ -940,8 +940,9 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         self.zoom_out();
         // Pack arguments.
         pargs.args.emplace_back(rocket::move(self));
+        auto tca = rocket::make_refcnt<Tail_Call_Arguments>(altr.sloc, func, altr.tco_aware, rocket::move(pargs.target), rocket::move(pargs.args));
         // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
-        Reference_Root::S_tail_call xref = { altr.sloc, func, altr.tco_aware, rocket::move(pargs.target), rocket::move(pargs.args) };
+        Reference_Root::S_tail_call xref = { rocket::move(tca) };
         self = rocket::move(xref);
         return air_status_return;
       }

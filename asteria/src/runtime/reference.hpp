@@ -119,7 +119,7 @@ class Reference
         if(!this->m_root.is_variable()) {
           return nullptr;
         }
-        return this->m_root.get_variable();
+        return this->m_root.as_variable();
       }
     Reference& convert_to_rvalue()
       {

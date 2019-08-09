@@ -109,6 +109,7 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/reference.hpp  \
   asteria/src/runtime/variable.hpp  \
   asteria/src/runtime/variable_callback.hpp  \
+  asteria/src/runtime/tail_call_arguments.hpp  \
   asteria/src/runtime/collector.hpp  \
   asteria/src/runtime/backtrace_frame.hpp  \
   asteria/src/runtime/exception.hpp  \
@@ -166,6 +167,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/reference.cpp  \
   asteria/src/runtime/variable.cpp  \
   asteria/src/runtime/variable_callback.cpp  \
+  asteria/src/runtime/tail_call_arguments.cpp  \
   asteria/src/runtime/collector.cpp  \
   asteria/src/runtime/backtrace_frame.cpp  \
   asteria/src/runtime/exception.cpp  \
