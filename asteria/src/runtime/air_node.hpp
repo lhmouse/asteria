@@ -123,8 +123,8 @@ class AIR_Node
       };
     struct S_coalescence
       {
-         cow_vector<AIR_Node> code_null;
-         bool assign;
+        cow_vector<AIR_Node> code_null;
+        bool assign;
       };
     struct S_function_call_tail
       {
