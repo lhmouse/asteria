@@ -581,7 +581,7 @@ void Argument_Reader::throw_no_matching_function_call() const
         // Append the type of this argument.
         msg << this->m_args.get()[rpos].read().what_gtype();
         // Seek to the next argument.
-      } while((++rpos != this->m_args->size()) && &(msg << ", "));
+      } while((++rpos != this->m_args->size()) && (msg << ", ", true));
     }
     msg << ")`.";
     // Append the list of overloads.
@@ -603,7 +603,7 @@ void Argument_Reader::throw_no_matching_function_call() const
         msg << ")`";
         rpos += plen;
         // Seek to the next overload.
-      } while((++rpos != this->m_overloads.size()) && &(msg << ", "));
+      } while((++rpos != this->m_overloads.size()) && (msg << ", ", true));
       // Append the footer.
       msg << "]";
     }
