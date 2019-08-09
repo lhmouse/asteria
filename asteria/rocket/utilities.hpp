@@ -11,7 +11,7 @@
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
 #include <ios>  // std::ios_base, std::basic_ios<>, std::streamsize, std::streamoff
-#include <functional>  // std::hash<>, std::equal_to<>, std::reference_wrapper<>, std::ref()
+#include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <stdexcept>  // standard exceptions...
 #include <cstring>  // std::memset()
@@ -76,6 +76,7 @@ using ::std::remove_cv;
 using ::std::is_same;
 using ::std::is_trivial;
 using ::std::is_integral;
+using ::std::is_void;
 using ::std::is_trivially_default_constructible;
 using ::std::is_trivially_copy_constructible;
 using ::std::is_trivially_move_constructible;
@@ -108,9 +109,8 @@ using ::std::basic_iostream;
 using ::std::streamsize;
 using ::std::streamoff;
 
-using ::std::equal_to;
 using ::std::hash;
-using ::std::reference_wrapper;
+using ::std::equal_to;
 using ::std::pair;
 using ::std::tuple;
 
@@ -134,6 +134,10 @@ template<typename... unusedT> struct make_void
 
 #define ROCKET_ENABLE_IF_HAS_TYPE(...)       typename ::rocket::make_void<typename __VA_ARGS__>::type* = nullptr
 #define ROCKET_ENABLE_IF_HAS_VALUE(...)      typename ::std::enable_if<!sizeof((__VA_ARGS__)) || true>::type* = nullptr
+
+template<typename lhsT, typename rhsT> struct is_lvalue_assignable : is_assignable<typename add_lvalue_reference<lhsT>::type, rhsT>
+  {
+  };
 
 // The argument must be a non-const lvalue.
 template<typename argT, ROCKET_ENABLE_IF(is_same<typename remove_cv<argT>::type, argT>::value)>

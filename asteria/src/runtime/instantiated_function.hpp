@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Instantiated_Function : public Abstract_Function
+class Instantiated_Function final : public Abstract_Function
   {
   private:
     cow_vector<phsh_string> m_params;

@@ -77,8 +77,8 @@ void Global_Context::initialize(API_Version version)
     // Initialize global objects.
     this->clear_named_references();
     // Allocate a new placeholder.
-    auto placeholder = rocket::make_refcnt<Placeholder>();
-    this->m_placeholder = placeholder;
+    auto xph = rocket::make_refcnt<Placeholder>();
+    this->m_xph = xph;
     // Use default seed.
     auto prng = rocket::make_refcnt<Random_Number_Generator>();
     this->m_prng = prng;
@@ -150,23 +150,23 @@ size_t Global_Context::collect_variables(size_t gen_limit) const
 
 rcobj<Placeholder> Global_Context::placeholder() const noexcept
   {
-    auto placeholder = rocket::dynamic_pointer_cast<Placeholder>(this->m_placeholder);
-    ROCKET_ASSERT(placeholder);
-    return rocket::move(placeholder);
+    auto xph = rocket::dynamic_pointer_cast<Placeholder>(this->m_xph);
+    ROCKET_ASSERT(xph);
+    return rocket::move(xph);
   }
 
 rcobj<Abstract_Opaque> Global_Context::placeholder_opaque() const noexcept
   {
-    auto placeholder = rocket::dynamic_pointer_cast<Abstract_Opaque>(this->m_placeholder);
-    ROCKET_ASSERT(placeholder);
-    return rocket::move(placeholder);
+    auto xph = rocket::dynamic_pointer_cast<Abstract_Opaque>(this->m_xph);
+    ROCKET_ASSERT(xph);
+    return rocket::move(xph);
   }
 
 rcobj<Abstract_Function> Global_Context::placeholder_function() const noexcept
   {
-    auto placeholder = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_placeholder);
-    ROCKET_ASSERT(placeholder);
-    return rocket::move(placeholder);
+    auto xph = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_xph);
+    ROCKET_ASSERT(xph);
+    return rocket::move(xph);
   }
 
 uint32_t Global_Context::get_random_uint32() const noexcept

@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Placeholder : public Abstract_Opaque, public Abstract_Function
+class Placeholder final : public Abstract_Opaque, public Abstract_Function
   {
   public:
     Placeholder() noexcept

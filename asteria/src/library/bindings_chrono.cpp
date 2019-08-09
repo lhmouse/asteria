@@ -424,7 +424,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.chrono.utc_now"), args);
+          Argument_Reader reader(rocket::sref("std.chrono.utc_now"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -456,7 +456,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.chrono.local_now"), args);
+          Argument_Reader reader(rocket::sref("std.chrono.local_now"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -491,7 +491,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.chrono.hires_now"), args);
+          Argument_Reader reader(rocket::sref("std.chrono.hires_now"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -526,7 +526,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.chrono.steady_now"), args);
+          Argument_Reader reader(rocket::sref("std.chrono.steady_now"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -559,7 +559,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.chrono.local_from_utc"), args);
+          Argument_Reader reader(rocket::sref("std.chrono.local_from_utc"), rocket::ref(args));
           // Parse arguments.
           G_integer time_utc;
           if(reader.start().g(time_utc).finish()) {
@@ -594,7 +594,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.chrono.utc_from_local"), args);
+          Argument_Reader reader(rocket::sref("std.chrono.utc_from_local"), rocket::ref(args));
           // Parse arguments.
           G_integer time_local;
           if(reader.start().g(time_local).finish()) {
@@ -628,7 +628,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.chrono.utc_format"), args);
+          Argument_Reader reader(rocket::sref("std.chrono.utc_format"), rocket::ref(args));
           // Parse arguments.
           G_integer time_point;
           opt<G_boolean> with_ms;
@@ -666,7 +666,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.chrono.utc_parse"), args);
+          Argument_Reader reader(rocket::sref("std.chrono.utc_parse"), rocket::ref(args));
           // Parse arguments.
           G_string time_str;
           if(reader.start().g(time_str).finish()) {

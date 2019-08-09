@@ -36,7 +36,7 @@ cow_vector<AIR_Node> Instantiated_Function::do_compile(const Compiler_Options& o
   {
     cow_vector<AIR_Node> code_func;
     // Generate code for the function body.
-    Analytic_Context ctx_func(1, ctx_opt, this->m_params);
+    Analytic_Context ctx_func(rocket::ref(ctx_opt), this->m_params);
     auto epos = stmts.size() - 1;
     if(epos != SIZE_MAX) {
       // Statements other than the last one cannot be the end of function.
@@ -59,7 +59,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
   {
     // Create the stack and context for this function.
     Evaluation_Stack stack;
-    Executive_Context ctx_func(1, global, stack, this->m_zvarg, this->m_params, rocket::move(self), rocket::move(args));
+    Executive_Context ctx_func(rocket::ref(global), rocket::ref(stack), rocket::ref(this->m_zvarg), this->m_params, rocket::move(self), rocket::move(args));
     stack.reserve_references(rocket::move(args));
     // Execute AIR nodes one by one.
     auto status = air_status_next;

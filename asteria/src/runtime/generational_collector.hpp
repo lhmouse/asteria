@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-class Generational_Collector : public virtual Rcbase
+class Generational_Collector final : public virtual Rcbase
   {
   private:
     Variable_HashSet m_pool;

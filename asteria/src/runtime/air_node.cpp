@@ -25,7 +25,7 @@ namespace Asteria {
     AIR_Status do_execute_block(const cow_vector<AIR_Node>& code, const Executive_Context& ctx)
       {
         // Execute the block on a new context.
-        Executive_Context ctx_body(1, ctx);
+        Executive_Context ctx_body(rocket::ref(ctx));
         auto status = do_execute_statement_list(ctx_body, code);
         return status;
       }
@@ -33,7 +33,7 @@ namespace Asteria {
     AIR_Status do_execute_catch(const cow_vector<AIR_Node>& code, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
       {
         // Create a fresh context.
-        Executive_Context ctx_catch(1, ctx);
+        Executive_Context ctx_catch(rocket::ref(ctx));
         // Set the exception reference.
         Reference_Root::S_temporary xref_except = { except.get_value() };
         ctx_catch.open_named_reference(name_except) = rocket::move(xref_except);
@@ -609,7 +609,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         if(tpos != SIZE_MAX) {
           // Jump to the clause denoted by `tpos`.
           // Note that all clauses share the same context.
-          Executive_Context ctx_body(1, ctx);
+          Executive_Context ctx_body(rocket::ref(ctx));
           // Skip clauses that precede `tpos`.
           for(size_t i = 0; i != tpos; ++i) {
             const auto& names = altr.clauses[i].second.second;
@@ -668,7 +668,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
         // Note that the key and value references outlasts every iteration, so we have to create an outer contexts here.
-        Executive_Context ctx_for(1, ctx);
+        Executive_Context ctx_for(rocket::ref(ctx));
         // Create a variable for the key.
         auto key = ctx_for.global().create_variable();
         key->reset(G_null(), true);
@@ -739,7 +739,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_for_statement>();
         // Note that names declared in the first segment of a for-statement outlasts every iteration, so we have to create an outer contexts here.
-        Executive_Context ctx_for(1, ctx);
+        Executive_Context ctx_for(rocket::ref(ctx));
         // Execute the loop initializer.
         // XXX: Techinically it should only be a definition or an expression statement.
         auto status = do_execute_statement_list(ctx_for, altr.code_init);

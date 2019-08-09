@@ -25,7 +25,7 @@ class Argument_Reader
 
   private:
     cow_string m_name;
-    std::reference_wrapper<const cow_vector<Reference>> m_args;
+    ref_to<const cow_vector<Reference>> m_args;
     bool m_throw_on_failure;
 
     // This string stores all overloads that have been tested so far.
@@ -36,8 +36,8 @@ class Argument_Reader
     State m_state;
 
   public:
-    Argument_Reader(cow_string name, const cow_vector<Reference>& args) noexcept
-      : m_name(rocket::move(name)), m_args(args), m_throw_on_failure(false),
+    Argument_Reader(const cow_string& name, ref_to<const cow_vector<Reference>> args) noexcept
+      : m_name(name), m_args(args), m_throw_on_failure(false),
         m_overloads(), m_state()
       {
       }

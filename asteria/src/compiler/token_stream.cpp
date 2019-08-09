@@ -81,7 +81,7 @@ namespace Asteria {
     class Line_Reader
       {
       private:
-        std::reference_wrapper<std::streambuf> m_sbuf;
+        ref_to<std::streambuf> m_sbuf;
         cow_string m_file;
 
         cow_string m_str;
@@ -89,7 +89,7 @@ namespace Asteria {
         size_t m_offset;
 
       public:
-        Line_Reader(std::streambuf& xsbuf, const cow_string& xfile)
+        Line_Reader(ref_to<std::streambuf> xsbuf, const cow_string& xfile)
           : m_sbuf(xsbuf), m_file(xfile),
             m_str(), m_line(0), m_offset(0)
           {
@@ -893,7 +893,7 @@ bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Comp
       // Save the position of an unterminated block comment.
       Tack bcomm;
       // Read source code line by line.
-      Line_Reader reader(sbuf, file);
+      Line_Reader reader(rocket::ref(sbuf), file);
       while(reader.advance()) {
         // Discard the first line if it looks like a shebang.
         if((reader.line() == 1) && (reader.navail() >= 2) && (std::memcmp(reader.data(), "#!", 2) == 0)) {

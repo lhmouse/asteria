@@ -32,7 +32,7 @@ namespace Asteria {
 
     constexpr uint32_t s_init = UINT32_MAX;
 
-    class Hasher : public Abstract_Opaque
+    class Hasher final : public Abstract_Opaque
       {
       private:
         uint32_t m_reg;
@@ -94,7 +94,7 @@ G_object std_checksum_crc32_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.write"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.write"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -119,7 +119,7 @@ G_object std_checksum_crc32_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.finish"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.finish"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -149,7 +149,7 @@ G_integer std_checksum_crc32(const G_string& data)
     constexpr uint32_t s_prime = 16777619;
     constexpr uint32_t s_offset = 2166136261;
 
-    class Hasher : public Abstract_Opaque
+    class Hasher final : public Abstract_Opaque
       {
       private:
         uint32_t m_reg;
@@ -211,7 +211,7 @@ G_object std_checksum_fnv1a32_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.write"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.write"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -236,7 +236,7 @@ G_object std_checksum_fnv1a32_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.finish"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.finish"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -350,7 +350,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
     constexpr std::array<uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
 
-    class Hasher : public Abstract_Opaque
+    class Hasher final : public Abstract_Opaque
       {
       private:
         std::array<uint32_t, 4> m_regs;
@@ -582,7 +582,7 @@ G_object std_checksum_md5_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.md5_new()>.write"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.md5_new()>.write"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -607,7 +607,7 @@ G_object std_checksum_md5_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.md5_new()>.finish"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.md5_new()>.finish"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -636,7 +636,7 @@ G_string std_checksum_md5(const G_string& data)
 
     constexpr std::array<uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
 
-    class Hasher : public Abstract_Opaque
+    class Hasher final : public Abstract_Opaque
       {
       private:
         std::array<uint32_t, 5> m_regs;
@@ -892,7 +892,7 @@ G_object std_checksum_sha1_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.write"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.write"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -917,7 +917,7 @@ G_object std_checksum_sha1_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.finish"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.finish"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -946,7 +946,7 @@ G_string std_checksum_sha1(const G_string& data)
 
     constexpr std::array<uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
 
-    class Hasher : public Abstract_Opaque
+    class Hasher final : public Abstract_Opaque
       {
       private:
         std::array<uint32_t, 8> m_regs;
@@ -1172,7 +1172,7 @@ G_object std_checksum_sha256_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.write"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.write"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -1197,7 +1197,7 @@ G_object std_checksum_sha256_new()
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
-              Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.finish"), args);
+              Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.finish"), rocket::ref(args));
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
@@ -1255,7 +1255,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.crc32_new"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.crc32_new"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -1299,7 +1299,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.crc32"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.crc32"), rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
@@ -1344,7 +1344,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.fnv1a32_new"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.fnv1a32_new"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -1388,7 +1388,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.fnv1a32"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.fnv1a32"), rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
@@ -1431,7 +1431,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.md5_new"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.md5_new"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -1475,7 +1475,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.md5"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.md5"), rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
@@ -1518,7 +1518,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.sha1_new"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.sha1_new"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -1562,7 +1562,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.sha1"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.sha1"), rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
@@ -1605,7 +1605,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.sha256_new"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.sha256_new"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
@@ -1649,7 +1649,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.sha256"), args);
+          Argument_Reader reader(rocket::sref("std.checksum.sha256"), rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {

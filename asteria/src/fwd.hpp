@@ -31,10 +31,12 @@
 #include "../rocket/variant.hpp"
 #include "../rocket/optional.hpp"
 #include "../rocket/array.hpp"
+#include "../rocket/ref_to.hpp"
 
 // Macros
 #define ASTERIA_SFINAE_CONSTRUCT(...)    ROCKET_ENABLE_IF(::std::is_constructible<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
-#define ASTERIA_SFINAE_ASSIGN(...)       ROCKET_ENABLE_IF(::std::is_assignable<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
+#define ASTERIA_SFINAE_ASSIGN(...)       ROCKET_ENABLE_IF(::rocket::is_lvalue_assignable<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
+#define ASTERIA_SFINAE_CONVERT(...)      ROCKET_ENABLE_IF(::std::is_convertible<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
 
 #define ASTERIA_AND_(x_, y_)             (bool(x_) && bool(y_))
 #define ASTERIA_OR_(x_, y_)              (bool(x_) || bool(y_))
@@ -129,6 +131,7 @@ template<typename T> using opt = rocket::optional<T>;
 template<typename F, typename S> using pair = std::pair<F, S>;
 template<typename F, typename S> using cow_bivector = rocket::cow_vector<std::pair<F, S>>;
 template<typename E, size_t ...k> using array = rocket::array<E, k...>;
+template<typename E> using ref_to = rocket::ref_to<E>;
 
 // Fundamental types
 using G_null      = nullptr_t;

@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-class Variadic_Arguer : public Abstract_Function
+class Variadic_Arguer final : public Abstract_Function
   {
   private:
     Source_Location m_sloc;

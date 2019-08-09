@@ -12,7 +12,7 @@ namespace Asteria {
 // This implements the ISAAC PRNG that is both very fast and cryptographically secure.
 // The reference implementation assumes that `long` has 32 bits.
 //   https://www.burtleburtle.net/bob/rand/isaac.html
-class Random_Number_Generator : public Rcbase
+class Random_Number_Generator final : public Rcbase
   {
   private:
     // generated result

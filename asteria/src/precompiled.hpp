@@ -47,5 +47,6 @@
 #include "../rocket/variant.hpp"
 #include "../rocket/optional.hpp"
 #include "../rocket/array.hpp"
+#include "../rocket/ref_to.hpp"
 
 #endif

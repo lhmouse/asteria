@@ -1344,7 +1344,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.slice"), args);
+          Argument_Reader reader(rocket::sref("std.string.slice"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           G_integer from;
@@ -1393,7 +1393,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.replace"), args);
+          Argument_Reader reader(rocket::sref("std.string.replace"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           G_string text;
@@ -1440,7 +1440,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.compare"), args);
+          Argument_Reader reader(rocket::sref("std.string.compare"), rocket::ref(args));
           // Parse arguments.
           G_string text1;
           G_string text2;
@@ -1476,7 +1476,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.starts_with"), args);
+          Argument_Reader reader(rocket::sref("std.string.starts_with"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           G_string prefix;
@@ -1511,7 +1511,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.ends_with"), args);
+          Argument_Reader reader(rocket::sref("std.string.ends_with"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           G_string suffix;
@@ -1566,7 +1566,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.find"), args);
+          Argument_Reader reader(rocket::sref("std.string.find"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           G_string text;
@@ -1644,7 +1644,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.rfind"), args);
+          Argument_Reader reader(rocket::sref("std.string.rfind"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           G_string text;
@@ -1725,7 +1725,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.find_and_replace"), args);
+          Argument_Reader reader(rocket::sref("std.string.find_and_replace"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           G_string text;
@@ -1791,7 +1791,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.find_any_of"), args);
+          Argument_Reader reader(rocket::sref("std.string.find_any_of"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           G_string text;
@@ -1868,7 +1868,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.rfind_any_of"), args);
+          Argument_Reader reader(rocket::sref("std.string.rfind_any_of"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           G_string text;
@@ -1945,7 +1945,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.find_not_of"), args);
+          Argument_Reader reader(rocket::sref("std.string.find_not_of"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           G_string text;
@@ -2022,7 +2022,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.rfind_not_of"), args);
+          Argument_Reader reader(rocket::sref("std.string.rfind_not_of"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           G_string text;
@@ -2081,7 +2081,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.reverse"), args);
+          Argument_Reader reader(rocket::sref("std.string.reverse"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -2116,7 +2116,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.trim"), args);
+          Argument_Reader reader(rocket::sref("std.string.trim"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           opt<G_string> reject;
@@ -2152,7 +2152,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.ltrim"), args);
+          Argument_Reader reader(rocket::sref("std.string.ltrim"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           opt<G_string> reject;
@@ -2188,7 +2188,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.rtrim"), args);
+          Argument_Reader reader(rocket::sref("std.string.rtrim"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           opt<G_string> reject;
@@ -2226,7 +2226,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.lpad"), args);
+          Argument_Reader reader(rocket::sref("std.string.lpad"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           G_integer length;
@@ -2265,7 +2265,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.rpad"), args);
+          Argument_Reader reader(rocket::sref("std.string.rpad"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           G_integer length;
@@ -2301,7 +2301,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.to_upper"), args);
+          Argument_Reader reader(rocket::sref("std.string.to_upper"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -2335,7 +2335,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.to_lower"), args);
+          Argument_Reader reader(rocket::sref("std.string.to_lower"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -2375,7 +2375,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.translate"), args);
+          Argument_Reader reader(rocket::sref("std.string.translate"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           G_string inputs;
@@ -2416,7 +2416,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.explode"), args);
+          Argument_Reader reader(rocket::sref("std.string.explode"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           opt<G_string> delim;
@@ -2453,7 +2453,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.implode"), args);
+          Argument_Reader reader(rocket::sref("std.string.implode"), rocket::ref(args));
           // Parse arguments.
           G_array segments;
           opt<G_string> delim;
@@ -2491,7 +2491,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.hex_encode"), args);
+          Argument_Reader reader(rocket::sref("std.string.hex_encode"), rocket::ref(args));
           // Parse arguments.
           G_string data;
           opt<G_boolean> lowercase;
@@ -2531,7 +2531,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.hex_decode"), args);
+          Argument_Reader reader(rocket::sref("std.string.hex_decode"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -2572,7 +2572,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.base32_encode"), args);
+          Argument_Reader reader(rocket::sref("std.string.base32_encode"), rocket::ref(args));
           // Parse arguments.
           G_string data;
           opt<G_boolean> lowercase;
@@ -2611,7 +2611,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.base32_decode"), args);
+          Argument_Reader reader(rocket::sref("std.string.base32_decode"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -2649,7 +2649,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.base64_encode"), args);
+          Argument_Reader reader(rocket::sref("std.string.base64_encode"), rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
@@ -2688,7 +2688,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.base64_decode"), args);
+          Argument_Reader reader(rocket::sref("std.string.base64_decode"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -2729,7 +2729,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.utf8_encode"), args);
+          Argument_Reader reader(rocket::sref("std.string.utf8_encode"), rocket::ref(args));
           // Parse arguments.
           G_integer code_point;
           opt<G_boolean> permissive;
@@ -2782,7 +2782,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.utf8_decode"), args);
+          Argument_Reader reader(rocket::sref("std.string.utf8_decode"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           opt<G_boolean> permissive;
@@ -2821,7 +2821,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.pack8"), args);
+          Argument_Reader reader(rocket::sref("std.string.pack8"), rocket::ref(args));
           // Parse arguments.
           G_integer value;
           if(reader.start().g(value).finish()) {
@@ -2865,7 +2865,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.unpack8"), args);
+          Argument_Reader reader(rocket::sref("std.string.unpack8"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -2902,7 +2902,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.pack_16be"), args);
+          Argument_Reader reader(rocket::sref("std.string.pack_16be"), rocket::ref(args));
           // Parse arguments.
           G_integer value;
           if(reader.start().g(value).finish()) {
@@ -2950,7 +2950,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.unpack_16be"), args);
+          Argument_Reader reader(rocket::sref("std.string.unpack_16be"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -2987,7 +2987,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.pack_16le"), args);
+          Argument_Reader reader(rocket::sref("std.string.pack_16le"), rocket::ref(args));
           // Parse arguments.
           G_integer value;
           if(reader.start().g(value).finish()) {
@@ -3035,7 +3035,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.unpack_16le"), args);
+          Argument_Reader reader(rocket::sref("std.string.unpack_16le"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -3072,7 +3072,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.pack_32be"), args);
+          Argument_Reader reader(rocket::sref("std.string.pack_32be"), rocket::ref(args));
           // Parse arguments.
           G_integer value;
           if(reader.start().g(value).finish()) {
@@ -3120,7 +3120,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.unpack_32be"), args);
+          Argument_Reader reader(rocket::sref("std.string.unpack_32be"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -3157,7 +3157,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.pack_32le"), args);
+          Argument_Reader reader(rocket::sref("std.string.pack_32le"), rocket::ref(args));
           // Parse arguments.
           G_integer value;
           if(reader.start().g(value).finish()) {
@@ -3205,7 +3205,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.unpack_32le"), args);
+          Argument_Reader reader(rocket::sref("std.string.unpack_32le"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -3241,7 +3241,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.pack_64be"), args);
+          Argument_Reader reader(rocket::sref("std.string.pack_64be"), rocket::ref(args));
           // Parse arguments.
           G_integer value;
           if(reader.start().g(value).finish()) {
@@ -3288,7 +3288,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.unpack_64be"), args);
+          Argument_Reader reader(rocket::sref("std.string.unpack_64be"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
@@ -3325,7 +3325,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.pack_64le"), args);
+          Argument_Reader reader(rocket::sref("std.string.pack_64le"), rocket::ref(args));
           // Parse arguments.
           G_integer value;
           if(reader.start().g(value).finish()) {
@@ -3373,7 +3373,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.string.unpack_64le"), args);
+          Argument_Reader reader(rocket::sref("std.string.unpack_64le"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {

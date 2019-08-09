@@ -17,8 +17,7 @@ class Abstract_Context
     // of all local references, so it shall precede everything else.
     struct Cleaner { void operator()(Rcbase* base) noexcept;  };
     uptr<Rcbase, Cleaner> m_coll_opt;
-
-    // All named references (variables, parameters, etc.).
+    // This stores all named references (variables, parameters, etc.) of this context.
     Reference_Dictionary m_named_refs;
 
   public:

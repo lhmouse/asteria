@@ -29,7 +29,7 @@ namespace Asteria {
       {
       }
 
-    class Indenter_none : public Indenter
+    class Indenter_none final : public Indenter
       {
       public:
         explicit Indenter_none()
@@ -49,7 +49,7 @@ namespace Asteria {
           }
       };
 
-    class Indenter_string : public Indenter
+    class Indenter_string final : public Indenter
       {
       private:
         G_string m_add;
@@ -80,7 +80,7 @@ namespace Asteria {
           }
       };
 
-    class Indenter_spaces : public Indenter
+    class Indenter_spaces final : public Indenter
       {
       private:
         G_integer m_add;
@@ -197,13 +197,13 @@ namespace Asteria {
 
     struct S_xformat_array
       {
-        std::reference_wrapper<const G_array> array;
-        G_array::const_iterator cur;
+        ref_to<const G_array> refa;
+        G_array::const_iterator curp;
       };
     struct S_xformat_object
       {
-        std::reference_wrapper<const G_object> object;
-        G_object::const_iterator cur;
+        ref_to<const G_object> refo;
+        G_object::const_iterator curp;
       };
     using Xformat = variant<S_xformat_array, S_xformat_object>;
 
@@ -226,7 +226,7 @@ namespace Asteria {
               indent.increment_level();
               indent.break_line(ostrm);
               // Decend into the array.
-              S_xformat_array ctxa = { std::ref(array), cur };
+              S_xformat_array ctxa = { rocket::ref(array), cur };
               stack.emplace_back(rocket::move(ctxa));
               qvalue = std::addressof(*cur);
               continue;
@@ -247,7 +247,7 @@ namespace Asteria {
               do_quote_string(ostrm, cur->first);
               ostrm << ':';
               // Decend into the object.
-              S_xformat_object ctxo = { std::ref(object), cur };
+              S_xformat_object ctxo = { rocket::ref(object), cur };
               stack.emplace_back(rocket::move(ctxo));
               qvalue = std::addressof(cur->second);
               continue;
@@ -268,14 +268,14 @@ namespace Asteria {
             if(stack.back().index() == 0) {
               auto& ctxa = stack.mut_back().as<0>();
               // Advance to the next element.
-              auto cur = ++(ctxa.cur);
-              if(cur != ctxa.array.get().end()) {
+              auto curp = ++(ctxa.curp);
+              if(curp != ctxa.refa->end()) {
                 // Add a separator between elements.
                 ostrm << ',';
                 indent.break_line(ostrm);
                 // Format the next element.
-                ctxa.cur = cur;
-                qvalue = std::addressof(*cur);
+                ctxa.curp = curp;
+                qvalue = std::addressof(*curp);
                 break;
               }
               // Unindent the body.
@@ -287,17 +287,17 @@ namespace Asteria {
             else {
               auto& ctxo = stack.mut_back().as<1>();
               // Advance to the next key-value pair.
-              auto cur = do_find_uncensored(ctxo.object, ++(ctxo.cur));
-              if(cur != ctxo.object.get().end()) {
+              auto curp = do_find_uncensored(ctxo.refo, ++(ctxo.curp));
+              if(curp != ctxo.refo->end()) {
                 // Add a separator between elements.
                 ostrm << ',';
                 indent.break_line(ostrm);
                 // Write the key followed by a colon.
-                do_quote_string(ostrm, cur->first);
+                do_quote_string(ostrm, curp->first);
                 ostrm << ':';
                 // Format the next value.
-                ctxo.cur = cur;
-                qvalue = std::addressof(cur->second);
+                ctxo.curp = curp;
+                qvalue = std::addressof(curp->second);
                 break;
               }
               // Unindent the body.
@@ -668,7 +668,7 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.json.format"), args);
+          Argument_Reader reader(rocket::sref("std.json.format"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
           Value value;
@@ -725,7 +725,7 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.json.parse"), args);
+          Argument_Reader reader(rocket::sref("std.json.parse"), rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {

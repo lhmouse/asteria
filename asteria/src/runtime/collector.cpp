@@ -39,10 +39,10 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
       {
       private:
         long m_old;
-        std::reference_wrapper<long> m_ref;
+        ref_to<long> m_ref;
 
       public:
-        explicit Recursion_Sentry(long& ref) noexcept
+        explicit Recursion_Sentry(ref_to<long> ref) noexcept
           : m_old(ref), m_ref(ref)
           {
             this->m_ref++;
@@ -64,7 +64,7 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
           }
       };
 
-    template<typename FuncT> class Callback_Wrapper : public Variable_Callback
+    template<typename FuncT> class Callback_Wrapper final : public Variable_Callback
       {
       private:
         FuncT m_func;  // If `FuncT` is a reference type then this is a reference.
@@ -97,7 +97,7 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 Collector* Collector::collect_single_opt()
   {
     // Ignore recursive requests.
-    Recursion_Sentry sentry(this->m_recur);
+    Recursion_Sentry sentry(rocket::ref(this->m_recur));
     if(!sentry) {
       return nullptr;
     }

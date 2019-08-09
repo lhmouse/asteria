@@ -9,10 +9,10 @@
 
 namespace Asteria {
 
-class Global_Context : public Abstract_Context
+class Global_Context final : public Abstract_Context
   {
   private:
-    rcptr<Rcbase> m_placeholder;
+    rcptr<Rcbase> m_xph;
     rcptr<Rcbase> m_prng;
     rcptr<Rcbase> m_stdv;
 

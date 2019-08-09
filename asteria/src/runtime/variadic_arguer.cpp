@@ -15,7 +15,7 @@ std::ostream& Variadic_Arguer::describe(std::ostream& ostrm) const
 
 Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, cow_vector<Reference>&& args) const
   {
-    Argument_Reader reader(rocket::sref("<built-in>.__varg"), args);
+    Argument_Reader reader(rocket::sref("<built-in>.__varg"), rocket::ref(args));
     // Extract arguments.
     opt<G_integer> qindex;
     if(reader.start().g(qindex).finish()) {

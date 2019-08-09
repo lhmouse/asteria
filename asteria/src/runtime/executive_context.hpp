@@ -9,27 +9,32 @@
 
 namespace Asteria {
 
-class Executive_Context : public Abstract_Context
+class Executive_Context final : public Abstract_Context
   {
   private:
     const Executive_Context* m_parent_opt;
-
-    std::reference_wrapper<const Global_Context> m_global;
-    std::reference_wrapper<Evaluation_Stack> m_stack;
-    std::reference_wrapper<const rcobj<Variadic_Arguer>> m_zvarg;
+    // Store some references to the enclosing function,
+    // so they are not passed here and there upon each native call.
+    ref_to<const Global_Context> m_global;
+    ref_to<Evaluation_Stack> m_stack;
+    ref_to<const rcobj<Variadic_Arguer>> m_zvarg;
 
   public:
-    Executive_Context(int, const Global_Context& xglobal, Evaluation_Stack& xstack, const rcobj<Variadic_Arguer>& xzvarg,  // for functions
-                           const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
+    template<typename ContextT, ASTERIA_SFINAE_CONVERT(ContextT*, const Executive_Context*)> explicit Executive_Context(ref_to<ContextT> parent)  // for non-functions
+      : m_parent_opt(parent.ptr()),
+        m_global(parent->Executive_Context::m_global),
+        m_stack(parent->Executive_Context::m_stack),
+        m_zvarg(parent->Executive_Context::m_zvarg)
+      {
+      }
+    Executive_Context(ref_to<const Global_Context> xglobal, ref_to<Evaluation_Stack> xstack, ref_to<const rcobj<Variadic_Arguer>> xzvarg,  // for functions
+                      const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
       : m_parent_opt(nullptr),
-        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
+        m_global(xglobal),
+        m_stack(xstack),
+        m_zvarg(xzvarg)
       {
         this->do_prepare_function(params, rocket::move(self), rocket::move(args));
-      }
-    Executive_Context(int, const Executive_Context& parent)  // for non-functions
-      : m_parent_opt(&parent),
-        m_global(parent.m_global), m_stack(parent.m_stack), m_zvarg(parent.m_zvarg)
-      {
       }
     ~Executive_Context() override;
 

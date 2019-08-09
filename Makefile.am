@@ -59,7 +59,8 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/prehashed_string.hpp  \
   asteria/rocket/static_vector.hpp  \
   asteria/rocket/optional.hpp  \
-  asteria/rocket/array.hpp
+  asteria/rocket/array.hpp  \
+  asteria/rocket/ref_to.hpp
 
 pkginclude_rocket_platformdir = ${pkgincludedir}/rocket/platform
 pkginclude_rocket_platform_HEADERS =  \

@@ -9,20 +9,21 @@
 
 namespace Asteria {
 
-class Analytic_Context : public Abstract_Context
+class Analytic_Context final : public Abstract_Context
   {
   private:
     const Abstract_Context* m_parent_opt;
 
   public:
-    Analytic_Context(int, const Abstract_Context* parent_opt, const cow_vector<phsh_string>& params)  // for functions
+    template<typename ContextT, ASTERIA_SFINAE_CONVERT(ContextT*, const Abstract_Context*)> explicit Analytic_Context(ref_to<ContextT> parent)  // for non-functions
+      : m_parent_opt(parent.ptr())
+      {
+      }
+    Analytic_Context(const Abstract_Context* parent_opt,  // for functions
+                     const cow_vector<phsh_string>& params)
       : m_parent_opt(parent_opt)
       {
         this->do_prepare_function(params);
-      }
-    Analytic_Context(int, const Abstract_Context& parent)  // for non-functions
-      : m_parent_opt(std::addressof(parent))
-      {
       }
     ~Analytic_Context() override;
 
