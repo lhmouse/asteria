@@ -44,7 +44,7 @@ class Generational_Collector final : public virtual Rcbase
       {
         return this->m_colls.at(gen);
       }
-    Collector& mut_collector(size_t gen)
+    Collector& open_collector(size_t gen)
       {
         return this->m_colls.mut(gen);
       }

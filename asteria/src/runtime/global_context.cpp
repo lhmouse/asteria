@@ -100,7 +100,7 @@ void Global_Context::initialize(API_Version version)
         pair.first->second = G_object();
       }
       ASTERIA_DEBUG_LOG("Begin initialization of standard library module: name = ", q->name);
-      (*(q->init))(pair.first->second.mut_object(), emods[-1].version);
+      (*(q->init))(pair.first->second.open_object(), emods[-1].version);
       ASTERIA_DEBUG_LOG("Finished initialization of standard library module: name = ", q->name);
     }
     // Set up version information.
@@ -109,7 +109,7 @@ void Global_Context::initialize(API_Version version)
       ROCKET_ASSERT(pair.first->second.is_null());
       pair.first->second = G_object();
     }
-    create_bindings_version(pair.first->second.mut_object(), emods[-1].version);
+    create_bindings_version(pair.first->second.open_object(), emods[-1].version);
     // Set the `std` variable now.
     auto stdv = gcoll->create_variable(9);
     stdv->reset(rocket::move(stdo), true);
@@ -127,7 +127,7 @@ Collector* Global_Context::get_collector_opt(size_t gen) const
     if(gen >= coll->count_collectors()) {
       return nullptr;
     }
-    return std::addressof(coll->mut_collector(gen));
+    return std::addressof(coll->open_collector(gen));
   }
 
 rcptr<Variable> Global_Context::create_variable(size_t gen_hint) const
@@ -187,14 +187,14 @@ Value& Global_Context::open_std_member(const phsh_string& name)
   {
     auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
     ROCKET_ASSERT(stdv);
-    return stdv->open_value().mut_object().try_emplace(name).first->second;
+    return stdv->open_value().open_object().try_emplace(name).first->second;
   }
 
 bool Global_Context::remove_std_member(const phsh_string& name)
   {
     auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
     ROCKET_ASSERT(stdv);
-    return stdv->open_value().mut_object().erase(name);
+    return stdv->open_value().open_object().erase(name);
   }
 
 }  // namespace Asteria

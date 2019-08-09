@@ -113,7 +113,7 @@ namespace Asteria {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", val, "` which is not a function.");
         }
         // Pack arguments.
-        return { rocket::move(val.mut_function()), rocket::move(args) };
+        return { rocket::move(val.open_function()), rocket::move(args) };
       }
 
     ROCKET_PURE_FUNCTION G_boolean do_operator_not(const G_boolean& rhs)
@@ -1020,12 +1020,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto& lhs = ctx.stack().get_top_reference().open();
         // Increment the operand and return the old value. `altr.assign` is ignored.
         if(lhs.is_integer()) {
-          auto& reg = lhs.mut_integer();
+          auto& reg = lhs.open_integer();
           ctx.stack().set_temporary_reference(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
-          auto& reg = lhs.mut_real();
+          auto& reg = lhs.open_real();
           ctx.stack().set_temporary_reference(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_real(1));
         }
@@ -1040,12 +1040,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto& lhs = ctx.stack().get_top_reference().open();
         // Decrement the operand and return the old value. `altr.assign` is ignored.
         if(lhs.is_integer()) {
-          auto& reg = lhs.mut_integer();
+          auto& reg = lhs.open_integer();
           ctx.stack().set_temporary_reference(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
-          auto& reg = lhs.mut_real();
+          auto& reg = lhs.open_real();
           ctx.stack().set_temporary_reference(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_real(1));
         }
@@ -1062,12 +1062,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto& lref = ctx.stack().open_top_reference();
         // Append a reference modifier. `altr.assign` is ignored.
         if(rhs.is_integer()) {
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           Reference_Modifier::S_array_index xmod = { rocket::move(reg) };
           lref.zoom_in(rocket::move(xmod));
         }
         else if(rhs.is_string()) {
-          auto& reg = rhs.mut_string();
+          auto& reg = rhs.open_string();
           Reference_Modifier::S_object_key xmod = { rocket::move(reg) };
           lref.zoom_in(rocket::move(xmod));
         }
@@ -1093,11 +1093,11 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto rhs = ctx.stack().get_top_reference().read();
         // Get the opposite of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_neg(reg);
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_neg(reg);
         }
         else {
@@ -1113,11 +1113,11 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto rhs = ctx.stack().get_top_reference().read();
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         if(rhs.is_boolean()) {
-          auto& reg = rhs.mut_boolean();
+          auto& reg = rhs.open_boolean();
           reg = do_operator_not(reg);
         }
         else if(rhs.is_integer()) {
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_not(reg);
         }
         else {
@@ -1142,11 +1142,11 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto& rhs = ctx.stack().get_top_reference().open();
         // Increment the operand and return it. `altr.assign` is ignored.
         if(rhs.is_integer()) {
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_add(reg, G_integer(1));
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_add(reg, G_real(1));
         }
         else {
@@ -1160,11 +1160,11 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto& rhs = ctx.stack().get_top_reference().open();
         // Decrement the operand and return it. `altr.assign` is ignored.
         if(rhs.is_integer()) {
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_sub(reg, G_integer(1));
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_sub(reg, G_real(1));
         }
         else {
@@ -1227,7 +1227,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           rhs = do_operator_sqrt(rhs.as_integer());
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_sqrt(reg);
         }
         else {
@@ -1283,11 +1283,11 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto rhs = ctx.stack().get_top_reference().read();
         // Get the absolute value of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_abs(reg);
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_abs(reg);
         }
         else {
@@ -1303,7 +1303,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto rhs = ctx.stack().get_top_reference().read();
         // Get the sign bit of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_signb(reg);
         }
         else if(rhs.is_real()) {
@@ -1327,7 +1327,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_round(reg);
         }
         else {
@@ -1347,7 +1347,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_floor(reg);
         }
         else {
@@ -1367,7 +1367,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_ceil(reg);
         }
         else {
@@ -1387,7 +1387,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           // Return `rhs` as is.
         }
         else if(rhs.is_real()) {
-          auto& reg = rhs.mut_real();
+          auto& reg = rhs.open_real();
           reg = do_operator_trunc(reg);
         }
         else {
@@ -1545,12 +1545,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& lhs = ctx.stack().get_top_reference().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
-          auto& reg = rhs.mut_boolean();
+          auto& reg = rhs.open_boolean();
           reg = do_operator_or(lhs.as_boolean(), reg);
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the sum of both operands.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_add(lhs.as_integer(), reg);
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
@@ -1559,7 +1559,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         }
         else if(lhs.is_string() && rhs.is_string()) {
           // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
-          auto& reg = rhs.mut_string();
+          auto& reg = rhs.open_string();
           reg = do_operator_add(lhs.as_string(), reg);
         }
         else {
@@ -1577,12 +1577,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& lhs = ctx.stack().get_top_reference().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
-          auto& reg = rhs.mut_boolean();
+          auto& reg = rhs.open_boolean();
           reg = do_operator_xor(lhs.as_boolean(), reg);
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the difference of both operands.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_sub(lhs.as_integer(), reg);
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
@@ -1604,12 +1604,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& lhs = ctx.stack().get_top_reference().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
-          auto& reg = rhs.mut_boolean();
+          auto& reg = rhs.open_boolean();
           reg = do_operator_and(lhs.as_boolean(), reg);
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the product of both operands.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_mul(lhs.as_integer(), reg);
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
@@ -1622,7 +1622,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           rhs = do_operator_mul(lhs.as_string(), rhs.as_integer());
         }
         else if(lhs.is_integer() && rhs.is_string()) {
-          auto& reg = rhs.mut_string();
+          auto& reg = rhs.open_string();
           reg = do_operator_mul(lhs.as_integer(), reg);
         }
         else {
@@ -1640,7 +1640,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& lhs = ctx.stack().get_top_reference().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the quotient of both operands.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_div(lhs.as_integer(), reg);
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
@@ -1662,7 +1662,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& lhs = ctx.stack().get_top_reference().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the remainder of both operands.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_mod(lhs.as_integer(), reg);
         }
         else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
@@ -1685,7 +1685,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_sll(lhs.as_integer(), reg);
         }
         else if(lhs.is_string() && rhs.is_integer()) {
@@ -1710,7 +1710,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_srl(lhs.as_integer(), reg);
         }
         else if(lhs.is_string() && rhs.is_integer()) {
@@ -1736,7 +1736,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
           // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_sla(lhs.as_integer(), reg);
         }
         else if(lhs.is_string() && rhs.is_integer()) {
@@ -1760,7 +1760,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_sra(lhs.as_integer(), reg);
         }
         else if(lhs.is_string() && rhs.is_integer()) {
@@ -1783,12 +1783,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& lhs = ctx.stack().get_top_reference().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
-          auto& reg = rhs.mut_boolean();
+          auto& reg = rhs.open_boolean();
           reg = do_operator_and(lhs.as_boolean(), reg);
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` type, return bitwise AND'd result of both operands.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_and(lhs.as_integer(), reg);
         }
         else {
@@ -1806,12 +1806,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& lhs = ctx.stack().get_top_reference().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
-          auto& reg = rhs.mut_boolean();
+          auto& reg = rhs.open_boolean();
           reg = do_operator_or(lhs.as_boolean(), reg);
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` type, return bitwise OR'd result of both operands.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_or(lhs.as_integer(), reg);
         }
         else {
@@ -1829,12 +1829,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& lhs = ctx.stack().get_top_reference().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
-          auto& reg = rhs.mut_boolean();
+          auto& reg = rhs.open_boolean();
           reg = do_operator_xor(lhs.as_boolean(), reg);
         }
         else if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` type, return bitwise XOR'd result of both operands.
-          auto& reg = rhs.mut_integer();
+          auto& reg = rhs.open_integer();
           reg = do_operator_xor(lhs.as_integer(), reg);
         }
         else {

@@ -69,7 +69,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         if(!parent.is_array()) {
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
         }
-        auto& array = parent.mut_array();
+        auto& array = parent.open_array();
         auto w = wrap_index(altr.index, array.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
@@ -98,7 +98,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         if(!parent.is_object()) {
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
         }
-        auto& object = parent.mut_object();
+        auto& object = parent.open_object();
         G_object::iterator rit;
         if(!create_new) {
           rit = object.find_mut(altr.key);
@@ -130,7 +130,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         if(!parent.is_array()) {
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
         }
-        auto& array = parent.mut_array();
+        auto& array = parent.open_array();
         auto w = wrap_index(altr.index, array.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
@@ -151,7 +151,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         if(!parent.is_object()) {
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
         }
-        auto& object = parent.mut_object();
+        auto& object = parent.open_object();
         auto rit = object.find_mut(altr.key);
         if(rit == object.end()) {
           ASTERIA_DEBUG_LOG("Object member was not found: key = ", altr.key, ", parent = ", parent);

@@ -68,7 +68,7 @@ class Value
       {
         return this->m_stor.as<gtype_boolean>();
       }
-    G_boolean& mut_boolean()
+    G_boolean& open_boolean()
       {
         return this->m_stor.as<gtype_boolean>();
       }
@@ -81,7 +81,7 @@ class Value
       {
         return this->m_stor.as<gtype_integer>();
       }
-    G_integer& mut_integer()
+    G_integer& open_integer()
       {
         return this->m_stor.as<gtype_integer>();
       }
@@ -94,7 +94,7 @@ class Value
       {
         return this->m_stor.as<gtype_real>();
       }
-    G_real& mut_real()
+    G_real& open_real()
       {
         return this->m_stor.as<gtype_real>();
       }
@@ -107,7 +107,7 @@ class Value
       {
         return this->m_stor.as<gtype_string>();
       }
-    G_string& mut_string()
+    G_string& open_string()
       {
         return this->m_stor.as<gtype_string>();
       }
@@ -120,7 +120,7 @@ class Value
       {
         return this->m_stor.as<gtype_function>();
       }
-    G_function& mut_function()
+    G_function& open_function()
       {
         return this->m_stor.as<gtype_function>();
       }
@@ -133,7 +133,7 @@ class Value
       {
         return this->m_stor.as<gtype_opaque>();
       }
-    G_opaque& mut_opaque()
+    G_opaque& open_opaque()
       {
         return this->m_stor.as<gtype_opaque>();
       }
@@ -146,7 +146,7 @@ class Value
       {
         return this->m_stor.as<gtype_array>();
       }
-    G_array& mut_array()
+    G_array& open_array()
       {
         return this->m_stor.as<gtype_array>();
       }
@@ -159,7 +159,7 @@ class Value
       {
         return this->m_stor.as<gtype_object>();
       }
-    G_object& mut_object()
+    G_object& open_object()
       {
         return this->m_stor.as<gtype_object>();
       }
