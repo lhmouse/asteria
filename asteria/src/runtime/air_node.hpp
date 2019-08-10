@@ -111,7 +111,7 @@ class AIR_Node
       {
         Compiler_Options options;
         Source_Location sloc;
-        cow_string func;
+        cow_string name;
         cow_vector<phsh_string> params;
         cow_vector<Statement> body;
       };

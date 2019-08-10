@@ -871,7 +871,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_define_function>();
         // Instantiate the function.
-        auto qtarget = rocket::make_refcnt<Instantiated_Function>(altr.options, altr.sloc, altr.func, std::addressof(ctx), altr.params, altr.body);
+        auto qtarget = rocket::make_refcnt<Instantiated_Function>(altr.options, altr.sloc, altr.name, std::addressof(ctx), altr.params, altr.body);
         ASTERIA_DEBUG_LOG("New function: ", *qtarget);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
