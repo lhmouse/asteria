@@ -104,16 +104,8 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
       {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        if(options.proper_tail_calls && (tco_aware != tco_aware_none)) {
-          // Generate a tail call.
-          AIR_Node::S_function_call_tail xnode = { altr.sloc, altr.args_by_refs, tco_aware };
-          code.emplace_back(rocket::move(xnode));
-        }
-        else {
-          // Generate a plain call.
-          AIR_Node::S_function_call_plain xnode = { altr.sloc, altr.args_by_refs };
-          code.emplace_back(rocket::move(xnode));
-        }
+        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, options.proper_tail_calls ? tco_aware : tco_aware_none };
+        code.emplace_back(rocket::move(xnode));
         return code;
       }
     case index_member_access:

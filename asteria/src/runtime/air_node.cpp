@@ -85,37 +85,6 @@ namespace Asteria {
         return air_status_next;
       }
 
-    struct S_xfunction_call
-      {
-        rcobj<Abstract_Function> target;
-        cow_vector<Reference> args;
-      };
-
-    S_xfunction_call do_unpack_function_call(Executive_Context& ctx, const cow_vector<bool>& args_by_refs)
-      {
-        Value val;
-        // Allocate the argument vector.
-        cow_vector<Reference> args;
-        args.resize(args_by_refs.size());
-        for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
-          // Convert the argument to an rvalue if it shouldn't be passed by reference.
-          bool by_ref = *(it - args.rbegin() + args_by_refs.rbegin());
-          if(!by_ref) {
-            ctx.stack().open_top_reference().convert_to_rvalue();
-          }
-          // Fill an argument.
-          *it = rocket::move(ctx.stack().open_top_reference());
-          ctx.stack().pop_reference();
-        }
-        // Get the target reference.
-        val = ctx.stack().get_top_reference().read();
-        if(!val.is_function()) {
-          ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", val, "` which is not a function.");
-        }
-        // Pack arguments.
-        return { rocket::move(val.open_function()), rocket::move(args) };
-      }
-
     ROCKET_PURE_FUNCTION G_boolean do_operator_not(const G_boolean& rhs)
       {
         return !rhs;
@@ -933,51 +902,66 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           return air_status_next;
         }
       }
-    case index_function_call_tail:
+    case index_function_call:
       {
-        const auto& altr = this->m_stor.as<index_function_call_tail>();
-        // Prepare arguments.
-        auto pargs = do_unpack_function_call(ctx, altr.args_by_refs);
+        const auto& altr = this->m_stor.as<index_function_call>();
+        // Prepare the function call.
         const auto& func = ctx.zvarg()->get_function_signature();
+        Value val;
+        // Pop arguments off the stack.
+        cow_vector<Reference> args;
+        args.resize(altr.args_by_refs.size());
+        for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
+          // Convert the argument to an rvalue if it shouldn't be passed by reference.
+          bool by_ref = *(it - args.rbegin() + altr.args_by_refs.rbegin());
+          if(!by_ref) {
+            ctx.stack().open_top_reference().convert_to_rvalue();
+          }
+          // Fill an argument.
+          *it = rocket::move(ctx.stack().open_top_reference());
+          ctx.stack().pop_reference();
+        }
+        // Get the target value.
         auto& self = ctx.stack().open_top_reference();
+        val = self.read();
+        if(!val.is_function()) {
+          ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", val, "` which is not a function.");
+        }
+        const auto& target = val.as_function();
+        // Initialize the `this` reference.
         self.zoom_out();
-        // Pack arguments.
-        pargs.args.emplace_back(rocket::move(self));
-        auto tca = rocket::make_refcnt<Tail_Call_Arguments>(altr.sloc, func, altr.tco_aware, rocket::move(pargs.target), rocket::move(pargs.args));
-        // Create a TCO wrapper. The caller shall unwrap the proxy reference when appropriate.
-        Reference_Root::S_tail_call xref = { rocket::move(tca) };
-        self = rocket::move(xref);
-        return air_status_return;
-      }
-    case index_function_call_plain:
-      {
-        const auto& altr = this->m_stor.as<index_function_call_plain>();
-        // Prepare arguments.
-        auto pargs = do_unpack_function_call(ctx, altr.args_by_refs);
-        const auto& func = ctx.zvarg()->get_function_signature();
-        auto& self = ctx.stack().open_top_reference();
-        self.zoom_out();
-        try {
-          ASTERIA_DEBUG_LOG("Initiating function call at \'", altr.sloc, "\' inside `", func, "`: target = ", pargs.target);
-          // Call the function now.
-          pargs.target->invoke(self, ctx.global(), rocket::move(pargs.args));
-          self.finish_call(ctx.global());
-          // The result will have been stored into `self`.
-          ASTERIA_DEBUG_LOG("Returned from function call at \'", altr.sloc, "\' inside `", func, "`: target = ", pargs.target);
+        // Call the function now.
+        if(altr.tco_aware != tco_aware_none) {
+          // Create a TCO wrapper.
+          args.emplace_back(rocket::move(self));
+          auto tca = rocket::make_refcnt<Tail_Call_Arguments>(altr.sloc, func, altr.tco_aware, target, rocket::move(args));
+          // The caller shall unwrap the proxy reference when appropriate.
+          Reference_Root::S_tail_call xref = { rocket::move(tca) };
+          self = rocket::move(xref);
           return air_status_next;
         }
-        catch(Exception& except) {
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", except.get_value());
-          // Append the current frame and rethrow the exception.
-          except.push_frame_func(altr.sloc, func);
-          throw;
-        }
-        catch(const std::exception& stdex) {
-          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", stdex.what());
-          // Translate the exception, append the current frame, and throw the new exception.
-          Exception except(stdex);
-          except.push_frame_func(altr.sloc, func);
-          throw except;
+        else {
+          try {
+            // Perform a non-proper call.
+            ASTERIA_DEBUG_LOG("Initiating function call at \'", altr.sloc, "\' inside `", func, "`: target = ", target);
+            target->invoke(self, ctx.global(), rocket::move(args));
+            self.finish_call(ctx.global());
+            ASTERIA_DEBUG_LOG("Returned from function call at \'", altr.sloc, "\' inside `", func, "`: target = ", target);
+            return air_status_next;
+          }
+          catch(Exception& except) {
+            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", except.get_value());
+            // Append the current frame and rethrow the exception.
+            except.push_frame_func(altr.sloc, func);
+            throw;
+          }
+          catch(const std::exception& stdex) {
+            ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", stdex.what());
+            // Translate the exception, append the current frame, and throw the new exception.
+            Exception except(stdex);
+            except.push_frame_func(altr.sloc, func);
+            throw except;
+          }
         }
       }
     case index_member_access:
@@ -1996,8 +1980,7 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
         rocket::for_each(altr.code_null, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
         return callback;
       }
-    case index_function_call_tail:
-    case index_function_call_plain:
+    case index_function_call:
     case index_member_access:
     case index_push_unnamed_array:
     case index_push_unnamed_object:
