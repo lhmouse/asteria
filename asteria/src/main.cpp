@@ -71,7 +71,7 @@ int main(int argc, char** argv)
               << e << std::endl;
     for(size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {
       const auto& f = e.get_frame(i);
-      std::cerr << "  thrown from \'" << f.location() << "\' <" << f.what_type() << ">: " << f.value() << std::endl;
+      std::cerr << "  thrown from \'" << f.sloc() << "\' <" << f.what_type() << ">: " << f.value() << std::endl;
     }
     return 1;
   }

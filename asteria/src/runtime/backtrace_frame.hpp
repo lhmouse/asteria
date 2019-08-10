@@ -23,6 +23,10 @@ class Backtrace_Frame
       : m_type(xtype), m_sloc(xsloc), m_value(rocket::forward<XvalueT>(xvalue))
       {
       }
+    template<typename XvalueT> Backtrace_Frame(Frame_Type xtype, const cow_string& xfile, int64_t xline, XvalueT&& xvalue)
+      : m_type(xtype), m_sloc(xfile, xline), m_value(rocket::forward<XvalueT>(xvalue))
+      {
+      }
     ~Backtrace_Frame();
 
   public:
@@ -34,7 +38,7 @@ class Backtrace_Frame
       {
         return describe_frame_type(this->m_type);
       }
-    const Source_Location& location() const noexcept
+    const Source_Location& sloc() const noexcept
       {
         return this->m_sloc;
       }

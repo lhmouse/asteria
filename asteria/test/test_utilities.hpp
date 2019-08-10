@@ -35,7 +35,7 @@
         ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.get_value());  \
         for(::size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {  \
           const auto& f = e.get_frame(i);  \
-          ASTERIA_DEBUG_LOG("\t* thrown from \'", f.location(), "\' <", f.what_type(), ">: ", f.value());  \
+          ASTERIA_DEBUG_LOG("\t* thrown from \'", f.sloc(), "\' <", f.what_type(), ">: ", f.value());  \
         }  \
         break;  \
       }  \

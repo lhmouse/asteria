@@ -775,6 +775,8 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           // Reuse the exception object. Don't bother allocating a new one.
           except.push_frame_catch(altr.sloc);
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except);
+          // This branch must be executed inside this `catch` block.
+          // User-provided bindings may obtain the current exception using `std::current_exception`.
           return do_execute_catch(altr.code_catch, altr.name_except, except, ctx);
         }
         catch(const std::exception& stdex) {
@@ -782,6 +784,8 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           Exception except(stdex);
           except.push_frame_catch(altr.sloc);
           ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except);
+          // This branch must be executed inside this `catch` block.
+          // User-provided bindings may obtain the current exception using `std::current_exception`.
           return do_execute_catch(altr.code_catch, altr.name_except, except, ctx);
         }
       }
