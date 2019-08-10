@@ -795,29 +795,28 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
         auto value = ctx.stack().get_top_reference().read();
-        // Unpack the nested exception, if any.
-        opt<Exception> qnested;
-        // Rethrow the current exception to get its effective type.
-        auto eptr = std::current_exception();
-        if(eptr) {
-          try {
+        try {
+          // Unpack the nested exception, if any.
+          auto eptr = std::current_exception();
+          if(eptr) {
+            // Rethrow the current exception to get its effective type.
             std::rethrow_exception(eptr);
           }
-          catch(Exception& except) {
-            // Modify the exception in place. Don't bother allocating a new one.
-            except.push_frame_throw(altr.sloc, rocket::move(value));
-            throw;
-          }
-          catch(const std::exception& stdex) {
-            // Translate the exception.
-            qnested.emplace(stdex);
-          }
-        }
-        if(!qnested) {
           // If no nested exception exists, construct a fresh one.
-          qnested.emplace(altr.sloc, rocket::move(value));
+          Exception except(altr.sloc, rocket::move(value));
+          throw except;
         }
-        throw *qnested;
+        catch(Exception& except) {
+          // Modify it in place. Don't bother allocating a new one.
+          except.push_frame_throw(altr.sloc, rocket::move(value));
+          throw;
+        }
+        catch(const std::exception& stdex) {
+          // Translate the exception.
+          Exception except(stdex);
+          except.push_frame_throw(altr.sloc, rocket::move(value));
+          throw except;
+        }
       }
     case index_assert_statement:
       {
