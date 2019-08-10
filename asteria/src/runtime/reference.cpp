@@ -77,6 +77,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
       auto& tca = tca_queue.emplace_back(this->m_root.as_tail_call());
+      ROCKET_ASSERT(tca.use_count() == 2);
       // Tell out how to forward the result.
       if((tca->get_tco_awareness() == tco_aware_by_val) && (tco_conj == tco_aware_by_ref)) {
         tco_conj = tco_aware_by_val;
