@@ -11,19 +11,19 @@ namespace Asteria {
 class Parser_Error
   {
   private:
-    int64_t m_line;
+    int32_t m_line;
     size_t m_offset;
     size_t m_length;
     Parser_Status m_status;
 
   public:
-    constexpr Parser_Error(int64_t xline, size_t xoffset, size_t xlength, Parser_Status xstatus) noexcept
+    constexpr Parser_Error(int32_t xline, size_t xoffset, size_t xlength, Parser_Status xstatus) noexcept
       : m_line(xline), m_offset(xoffset), m_length(xlength), m_status(xstatus)
       {
       }
 
   public:
-    constexpr int64_t line() const noexcept
+    constexpr int32_t line() const noexcept
       {
         return this->m_line;
       }

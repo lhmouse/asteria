@@ -12,10 +12,10 @@ class Source_Location
   {
   private:
     cow_string m_file;
-    int64_t m_line;
+    int32_t m_line;
 
   public:
-    Source_Location(cow_string xfile, int64_t xline) noexcept
+    Source_Location(cow_string xfile, int32_t xline) noexcept
       : m_file(rocket::move(xfile)), m_line(xline)
       {
       }
@@ -25,7 +25,7 @@ class Source_Location
       {
         return this->m_file;
       }
-    int64_t line() const noexcept
+    int32_t line() const noexcept
       {
         return this->m_line;
       }

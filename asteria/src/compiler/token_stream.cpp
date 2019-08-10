@@ -85,7 +85,7 @@ namespace Asteria {
         cow_string m_file;
 
         cow_string m_str;
-        int64_t m_line;
+        int32_t m_line;
         size_t m_offset;
 
       public:
@@ -110,7 +110,7 @@ namespace Asteria {
             return this->m_file;
           }
 
-        int64_t line() const noexcept
+        int32_t line() const noexcept
           {
             return this->m_line;
           }
@@ -137,7 +137,11 @@ namespace Asteria {
               this->m_str.push_back(static_cast<char>(ch));
             }
             // Increment the line number if a line has been read successfully.
-            this->m_line++;
+            if(this->m_line == INT32_MAX) {
+              ASTERIA_THROW_RUNTIME_ERROR("There are too many lines in the source code.");
+            }
+            this->m_line += 1;
+            // Accept the line.
             ASTERIA_DEBUG_LOG("Read line ", std::setw(4), this->m_line, ": ", this->m_str);
             return true;
           }
@@ -188,7 +192,7 @@ namespace Asteria {
     class Tack
       {
       private:
-        int64_t m_line;
+        int32_t m_line;
         size_t m_offset;
         size_t m_length;
 
@@ -199,7 +203,7 @@ namespace Asteria {
           }
 
       public:
-        constexpr int64_t line() const noexcept
+        constexpr int32_t line() const noexcept
           {
             return this->m_line;
           }

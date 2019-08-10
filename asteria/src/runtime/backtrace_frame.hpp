@@ -23,7 +23,7 @@ class Backtrace_Frame
       : m_type(xtype), m_sloc(xsloc), m_value(rocket::forward<XvalueT>(xvalue))
       {
       }
-    template<typename XvalueT> Backtrace_Frame(Frame_Type xtype, const cow_string& xfile, int64_t xline, XvalueT&& xvalue)
+    template<typename XvalueT> Backtrace_Frame(Frame_Type xtype, const cow_string& xfile, int32_t xline, XvalueT&& xvalue)
       : m_type(xtype), m_sloc(xfile, xline), m_value(rocket::forward<XvalueT>(xvalue))
       {
       }
@@ -46,7 +46,7 @@ class Backtrace_Frame
       {
         return this->m_sloc.file();
       }
-    int64_t line() const noexcept
+    int32_t line() const noexcept
       {
         return this->m_sloc.line();
       }
