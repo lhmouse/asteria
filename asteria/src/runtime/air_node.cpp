@@ -18,7 +18,7 @@ namespace Asteria {
       {
         // Execute all nodes sequentially.
         auto status = air_status_next;
-        rocket::any_of(code, [&](const AIR_Node& node) { return (status = node.execute(ctx)) != air_status_next;  });
+        rocket::any_of(code, [&](const AIR_Node& node) { return ROCKET_UNEXPECT((status = node.execute(ctx)) != air_status_next);  });
         return status;
       }
 
