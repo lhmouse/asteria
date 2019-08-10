@@ -194,39 +194,39 @@ opt<G_object> std_filesystem_get_information(const G_string& path)
       return rocket::nullopt;
     }
     // Fill `stat`.
-    stat.insert_or_assign(rocket::sref("i_dev"),
+    stat.try_emplace(rocket::sref("i_dev"),
       G_integer(
         fbi.dwVolumeSerialNumber  // unique device id on this machine.
       ));
-    stat.insert_or_assign(rocket::sref("i_file"),
+    stat.try_emplace(rocket::sref("i_file"),
       G_integer(
         do_compose(fbi.nFileIndexHigh, fbi.nFileIndexLow)  // unique file id on this device.
       ));
-    stat.insert_or_assign(rocket::sref("n_ref"),
+    stat.try_emplace(rocket::sref("n_ref"),
       G_integer(
         fbi.nNumberOfLinks  // number of hard links to this file.
       ));
-    stat.insert_or_assign(rocket::sref("b_dir"),
+    stat.try_emplace(rocket::sref("b_dir"),
       G_boolean(
         fbi.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY  // whether this is a directory.
       ));
-    stat.insert_or_assign(rocket::sref("b_sym"),
+    stat.try_emplace(rocket::sref("b_sym"),
       G_boolean(
         fbi.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT  // whether this is a symbolic link.
       ));
-    stat.insert_or_assign(rocket::sref("n_size"),
+    stat.try_emplace(rocket::sref("n_size"),
       G_integer(
         fsi.EndOfFile.QuadPart  // number of bytes this file contains.
       ));
-    stat.insert_or_assign(rocket::sref("n_ocup"),
+    stat.try_emplace(rocket::sref("n_ocup"),
       G_integer(
         fsi.AllocationSize.QuadPart  // number of bytes this file occupies.
       ));
-    stat.insert_or_assign(rocket::sref("t_accs"),
+    stat.try_emplace(rocket::sref("t_accs"),
       G_integer(
         (do_compose(fbi.ftLastAccessTime.dwHighDateTime, fbi.ftLastAccessTime.dwLowDateTime) - 116444736000000000) / 10000  // timestamp of last access.
       ));
-    stat.insert_or_assign(rocket::sref("t_mod"),
+    stat.try_emplace(rocket::sref("t_mod"),
       G_integer(
         (do_compose(fbi.ftLastWriteTime.dwHighDateTime, fbi.ftLastWriteTime.dwLowDateTime) - 116444736000000000) / 10000  // timestamp of last modification.
       ));
@@ -236,39 +236,39 @@ opt<G_object> std_filesystem_get_information(const G_string& path)
       return rocket::nullopt;
     }
     // Fill `stat`.
-    stat.insert_or_assign(rocket::sref("i_dev"),
+    stat.try_emplace(rocket::sref("i_dev"),
       G_integer(
         stb.st_dev  // unique device id on this machine.
       ));
-    stat.insert_or_assign(rocket::sref("i_file"),
+    stat.try_emplace(rocket::sref("i_file"),
       G_integer(
         stb.st_ino  // unique file id on this device.
       ));
-    stat.insert_or_assign(rocket::sref("n_ref"),
+    stat.try_emplace(rocket::sref("n_ref"),
       G_integer(
         stb.st_nlink  // number of hard links to this file.
       ));
-    stat.insert_or_assign(rocket::sref("b_dir"),
+    stat.try_emplace(rocket::sref("b_dir"),
       G_boolean(
         S_ISDIR(stb.st_mode)  // whether this is a directory.
       ));
-    stat.insert_or_assign(rocket::sref("b_sym"),
+    stat.try_emplace(rocket::sref("b_sym"),
       G_boolean(
         S_ISLNK(stb.st_mode)  // whether this is a symbolic link.
       ));
-    stat.insert_or_assign(rocket::sref("n_size"),
+    stat.try_emplace(rocket::sref("n_size"),
       G_integer(
         stb.st_size  // number of bytes this file contains.
       ));
-    stat.insert_or_assign(rocket::sref("n_ocup"),
+    stat.try_emplace(rocket::sref("n_ocup"),
       G_integer(
         static_cast<uint64_t>(stb.st_blocks) * 512  // number of bytes this file occupies.
       ));
-    stat.insert_or_assign(rocket::sref("t_accs"),
+    stat.try_emplace(rocket::sref("t_accs"),
       G_integer(
         static_cast<int64_t>(stb.st_atim.tv_sec) * 1000 + stb.st_atim.tv_nsec / 1000000  // timestamp of last access.
       ));
-    stat.insert_or_assign(rocket::sref("t_mod"),
+    stat.try_emplace(rocket::sref("t_mod"),
       G_integer(
         static_cast<int64_t>(stb.st_mtim.tv_sec) * 1000 + stb.st_mtim.tv_nsec / 1000000  // timestamp of last modification.
       ));
@@ -520,16 +520,16 @@ opt<G_object> std_filesystem_directory_list(const G_string& path)
         utf8_encode(name, cp);
       }
       // Get the file type.
-      entry.insert_or_assign(rocket::sref("b_dir"),
+      entry.try_emplace(rocket::sref("b_dir"),
         G_boolean(
           next.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY
         ));
-      entry.insert_or_assign(rocket::sref("b_sym"),
+      entry.try_emplace(rocket::sref("b_sym"),
         G_boolean(
           next.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT
         ));
       // Insert the entry.
-      entries.insert_or_assign(rocket::move(name), rocket::move(entry));
+      entries.try_emplace(rocket::move(name), rocket::move(entry));
       // Read the next entry.
     } while(::FindNextFileW(hd, &next) != FALSE);
 #else
@@ -547,11 +547,11 @@ opt<G_object> std_filesystem_directory_list(const G_string& path)
 #  ifdef _DIRENT_HAVE_D_TYPE
       if(next->d_type != DT_UNKNOWN) {
         // Get the file type if it is available immediately.
-        entry.insert_or_assign(rocket::sref("b_dir"),
+        entry.try_emplace(rocket::sref("b_dir"),
           G_boolean(
             next->d_type == DT_DIR
           ));
-        entry.insert_or_assign(rocket::sref("b_sym"),
+        entry.try_emplace(rocket::sref("b_sym"),
           G_boolean(
             next->d_type == DT_LNK
           ));
@@ -567,17 +567,17 @@ opt<G_object> std_filesystem_directory_list(const G_string& path)
         if(::lstat(child.c_str(), &stb) != 0) {
           return rocket::nullopt;
         }
-        entry.insert_or_assign(rocket::sref("b_dir"),
+        entry.try_emplace(rocket::sref("b_dir"),
           G_boolean(
             S_ISDIR(stb.st_mode)
           ));
-        entry.insert_or_assign(rocket::sref("b_sym"),
+        entry.try_emplace(rocket::sref("b_sym"),
           G_boolean(
             S_ISLNK(stb.st_mode)
           ));
       }
       // Insert the entry.
-      entries.insert_or_assign(rocket::move(name), rocket::move(entry));
+      entries.try_emplace(rocket::move(name), rocket::move(entry));
     }
 #endif
     return rocket::move(entries);
