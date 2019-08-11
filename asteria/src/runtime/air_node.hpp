@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_AIR_NODE_HPP_
 
 #include "../fwd.hpp"
-#include "../syntax/source_location.hpp"
+#include "source_location.hpp"
 #include "value.hpp"
 #include "reference.hpp"
 

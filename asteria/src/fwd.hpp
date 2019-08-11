@@ -53,12 +53,12 @@ class Variable_HashSet;
 class Reference_Dictionary;
 
 // Syntax
-class Source_Location;
 class Xprunit;
 class Statement;
 
 // Runtime
 class Rcbase;
+class Source_Location;
 class Value;
 class Abstract_Opaque;
 class Abstract_Function;

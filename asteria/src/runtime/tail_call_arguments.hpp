@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 #include "rcbase.hpp"
-#include "../syntax/source_location.hpp"
+#include "source_location.hpp"
 
 namespace Asteria {
 

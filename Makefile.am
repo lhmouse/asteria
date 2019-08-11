@@ -93,13 +93,13 @@ pkginclude_llds_HEADERS =  \
 pkginclude_syntaxdir = ${pkgincludedir}/syntax
 pkginclude_syntax_HEADERS =  \
   asteria/src/syntax/enums.hpp  \
-  asteria/src/syntax/source_location.hpp  \
   asteria/src/syntax/xprunit.hpp  \
   asteria/src/syntax/statement.hpp
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/rcbase.hpp  \
+  asteria/src/runtime/source_location.hpp  \
   asteria/src/runtime/abstract_opaque.hpp  \
   asteria/src/runtime/abstract_function.hpp  \
   asteria/src/runtime/placeholder.hpp  \
@@ -154,10 +154,10 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/utilities.cpp  \
   asteria/src/llds/variable_hashset.cpp  \
   asteria/src/llds/reference_dictionary.cpp  \
-  asteria/src/syntax/source_location.cpp  \
   asteria/src/syntax/xprunit.cpp  \
   asteria/src/syntax/statement.cpp  \
   asteria/src/runtime/rcbase.cpp  \
+  asteria/src/runtime/source_location.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
   asteria/src/runtime/abstract_function.cpp  \
   asteria/src/runtime/placeholder.cpp  \

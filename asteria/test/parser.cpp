@@ -8,7 +8,6 @@
 #include "../src/runtime/executive_context.hpp"
 #include "../src/runtime/reference.hpp"
 #include "../src/runtime/variadic_arguer.hpp"
-#include "../src/syntax/source_location.hpp"
 #include <sstream>
 
 using namespace Asteria;

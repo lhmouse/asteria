@@ -6,9 +6,8 @@
 
 #include "../fwd.hpp"
 #include "enums.hpp"
-#include "source_location.hpp"
+#include "../runtime/source_location.hpp"
 #include "../runtime/value.hpp"
-#include "../runtime/reference.hpp"
 
 namespace Asteria {
 

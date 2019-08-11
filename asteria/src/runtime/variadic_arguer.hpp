@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "abstract_function.hpp"
 #include "reference.hpp"
-#include "../syntax/source_location.hpp"
+#include "source_location.hpp"
 
 namespace Asteria {
 
