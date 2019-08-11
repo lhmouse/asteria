@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_AIR_NODE_HPP_
 
 #include "../fwd.hpp"
-#include "source_location.hpp"
+#include "packed_sloc_str.hpp"
 #include "value.hpp"
 #include "reference.hpp"
 
@@ -68,19 +68,17 @@ class AIR_Node
     struct S_try_statement
       {
         cow_vector<AIR_Node> code_try;
-        Source_Location sloc;
-        phsh_string name_except;
+        rcobj<Packed_sloc_str> sloc_except;
         cow_vector<AIR_Node> code_catch;
       };
     struct S_throw_statement
       {
-        Source_Location sloc;
+        rcobj<Packed_sloc_str> sloc;
       };
     struct S_assert_statement
       {
-        Source_Location sloc;
+        rcobj<Packed_sloc_str> sloc_msg;
         bool negative;
-        cow_string msg;
       };
     struct S_simple_status
       {
@@ -109,8 +107,7 @@ class AIR_Node
     struct S_define_function
       {
         Compiler_Options options;
-        Source_Location sloc;
-        cow_string name;
+        rcobj<Packed_sloc_str> sloc_name;
         cow_vector<phsh_string> params;
         cow_vector<Statement> body;
       };
@@ -127,7 +124,7 @@ class AIR_Node
       };
     struct S_function_call
       {
-        Source_Location sloc;
+        rcobj<Packed_sloc_str> sloc;
         cow_vector<bool> args_by_refs;
         TCO_Aware tco_aware;
       };

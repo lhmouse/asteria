@@ -83,8 +83,10 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
     case index_closure_function:
       {
         const auto& altr = this->m_stor.as<index_closure_function>();
+        // Pack the source location and the function name.
+        auto sloc_name = rocket::make_refcnt<Packed_sloc_str>(altr.sloc, rocket::sref("<closure>"));
         // Encode arguments.
-        AIR_Node::S_define_function xnode = { options, altr.sloc, rocket::sref("<closure>"), altr.params, altr.body };
+        AIR_Node::S_define_function xnode = { options, rocket::move(sloc_name), altr.params, altr.body };
         code.emplace_back(rocket::move(xnode));
         return code;
       }
@@ -103,8 +105,10 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
     case index_function_call:
       {
         const auto& altr = this->m_stor.as<index_function_call>();
+        // Pack the source location.
+        auto sloc = rocket::make_refcnt<Packed_sloc_str>(altr.sloc, rocket::clear);
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, options.proper_tail_calls ? tco_aware : tco_aware_none };
+        AIR_Node::S_function_call xnode = { rocket::move(sloc), altr.args_by_refs, options.proper_tail_calls ? tco_aware : tco_aware_none };
         code.emplace_back(rocket::move(xnode));
         return code;
       }

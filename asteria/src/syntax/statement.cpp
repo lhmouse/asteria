@@ -156,8 +156,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Declare the function, which is effectively an immutable variable.
         AIR_Node::S_declare_variable xnode_decl = { true, altr.name };
         code.emplace_back(rocket::move(xnode_decl));
+        // Pack the source location and the function name.
+        auto sloc_name = rocket::make_refcnt<Packed_sloc_str>(altr.sloc, rocket::sref("<closure>"));
         // Instantiate the function body.
-        AIR_Node::S_define_function xnode_defn = { options, altr.sloc, altr.name, altr.params, altr.body };
+        AIR_Node::S_define_function xnode_defn = { options, rocket::move(sloc_name), altr.params, altr.body };
         code.emplace_back(rocket::move(xnode_defn));
         // Initialize the function.
         AIR_Node::S_initialize_variable xnode_init = { true };
@@ -291,11 +293,13 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         Analytic_Context ctx_catch(rocket::ref(ctx));
         do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");
         ctx_catch.open_named_reference(rocket::sref("__backtrace"));
+        // Pack the source location and the name of the exception object.
+        auto sloc_except = rocket::make_refcnt<Packed_sloc_str>(altr.sloc, altr.name_except);
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be TCO'd.
         auto code_catch = do_generate_statement_list(nullptr, ctx_catch, options, tco_aware, altr.body_catch);
         // Encode arguments.
-        AIR_Node::S_try_statement xnode = { rocket::move(code_try), altr.sloc, altr.name_except, rocket::move(code_catch) };
+        AIR_Node::S_try_statement xnode = { rocket::move(code_try), rocket::move(sloc_except), rocket::move(code_catch) };
         code.emplace_back(rocket::move(xnode));
         return code;
       }
@@ -369,8 +373,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.empty());
         do_generate_expression_partial(code, options, tco_aware_none, ctx, altr.expr);
+        // Pack the source location.
+        auto sloc = rocket::make_refcnt<Packed_sloc_str>(altr.sloc, rocket::clear);
         // Encode arguments.
-        AIR_Node::S_throw_statement xnode = { altr.sloc };
+        AIR_Node::S_throw_statement xnode = { rocket::move(sloc) };
         code.emplace_back(rocket::move(xnode));
         return code;
       }
@@ -412,8 +418,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.empty());
         do_generate_expression_partial(code, options, tco_aware_none, ctx, altr.expr);
+        // Pack the source location and the message.
+        auto sloc_msg = rocket::make_refcnt<Packed_sloc_str>(altr.sloc, altr.msg);
         // Encode arguments.
-        AIR_Node::S_assert_statement xnode = { altr.sloc, altr.negative, altr.msg };
+        AIR_Node::S_assert_statement xnode = { rocket::move(sloc_msg), altr.negative };
         code.emplace_back(rocket::move(xnode));
         return code;
       }

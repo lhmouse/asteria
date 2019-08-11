@@ -743,20 +743,20 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         }
         catch(Exception& except) {
           // Reuse the exception object. Don't bother allocating a new one.
-          except.push_frame_catch(altr.sloc);
+          except.push_frame_catch(altr.sloc_except->sloc());
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except);
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
-          return do_execute_catch(altr.code_catch, altr.name_except, except, ctx);
+          return do_execute_catch(altr.code_catch, altr.sloc_except->str(), except, ctx);
         }
         catch(const std::exception& stdex) {
           // Translate the exception.
           Exception except(stdex);
-          except.push_frame_catch(altr.sloc);
+          except.push_frame_catch(altr.sloc_except->sloc());
           ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except);
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
-          return do_execute_catch(altr.code_catch, altr.name_except, except, ctx);
+          return do_execute_catch(altr.code_catch, altr.sloc_except->str(), except, ctx);
         }
       }
     case index_throw_statement:
@@ -773,18 +773,18 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
             std::rethrow_exception(eptr);
           }
           // If no nested exception exists, construct a fresh one.
-          Exception except(altr.sloc, rocket::move(value));
+          Exception except(altr.sloc->sloc(), rocket::move(value));
           throw except;
         }
         catch(Exception& except) {
           // Modify it in place. Don't bother allocating a new one.
-          except.push_frame_throw(altr.sloc, rocket::move(value));
+          except.push_frame_throw(altr.sloc->sloc(), rocket::move(value));
           throw;
         }
         catch(const std::exception& stdex) {
           // Translate the exception.
           Exception except(stdex);
-          except.push_frame_throw(altr.sloc, rocket::move(value));
+          except.push_frame_throw(altr.sloc->sloc(), rocket::move(value));
           throw except;
         }
       }
@@ -799,12 +799,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // The assertion has failed.
         cow_osstream fmtss;
         fmtss.imbue(std::locale::classic());
-        fmtss << "Assertion failed at \'" << altr.sloc << '\'';
-        // Append the message if one is provided.
-        if(!altr.msg.empty())
-          fmtss << ": " << altr.msg;
-        else
-          fmtss << '!';
+        fmtss << "Assertion failed at \'" << altr.sloc_msg->sloc() << "\': " << altr.sloc_msg->str();
         // Throw a `Runtime_Error`.
         throw_runtime_error(__func__, fmtss.extract_string());
       }
@@ -872,7 +867,8 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_define_function>();
         // Instantiate the function.
-        auto qtarget = rocket::make_refcnt<Instantiated_Function>(altr.options, altr.sloc, altr.name, std::addressof(ctx), altr.params, altr.body);
+        auto qtarget = rocket::make_refcnt<Instantiated_Function>(altr.options, altr.sloc_name->sloc(), altr.sloc_name->str(),
+                                                                  std::addressof(ctx), altr.params, altr.body);
         ASTERIA_DEBUG_LOG("New function: ", *qtarget);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
@@ -930,36 +926,40 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& target = val.as_function();
         // Initialize the `this` reference.
         self.zoom_out();
+        // Unpack the source location.
+        const auto& sloc = altr.sloc->sloc();
         // Call the function now.
         if(altr.tco_aware != tco_aware_none) {
+          // Pack the source location and the caller signature.
+          auto sloc_func = rocket::make_refcnt<Packed_sloc_str>(sloc, func);
           // Pack arguments.
           auto args_s = rocket::move(args);
           args_s.emplace_back(rocket::move(self));
           // Create a TCO wrapper.
-          Reference_Root::S_tail_call xref = { altr.sloc, func, altr.tco_aware, target, rocket::move(args_s) };
+          Reference_Root::S_tail_call xref = { rocket::move(sloc_func), altr.tco_aware, target, rocket::move(args_s) };
           self = rocket::move(xref);
           return air_status_next;
         }
         else {
           // Perform a non-proper call.
           try {
-            ASTERIA_DEBUG_LOG("Initiating function call at \'", altr.sloc, "\' inside `", func, "`: target = ", target);
+            ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target);
             target->invoke(self, ctx.global(), rocket::move(args));
             self.finish_call(ctx.global());
-            ASTERIA_DEBUG_LOG("Returned from function call at \'", altr.sloc, "\' inside `", func, "`: target = ", target);
+            ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target);
             return air_status_next;
           }
           catch(Exception& except) {
-            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", except.get_value());
+            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
             // Append the current frame and rethrow the exception.
-            except.push_frame_func(altr.sloc, func);
+            except.push_frame_func(sloc, func);
             throw;
           }
           catch(const std::exception& stdex) {
-            ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", stdex.what());
+            ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
             // Translate the exception, append the current frame, and throw the new exception.
             Exception except(stdex);
-            except.push_frame_func(altr.sloc, func);
+            except.push_frame_func(sloc, func);
             throw except;
           }
         }

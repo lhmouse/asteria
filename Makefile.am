@@ -100,6 +100,7 @@ pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/rcbase.hpp  \
   asteria/src/runtime/source_location.hpp  \
+  asteria/src/runtime/packed_sloc_str.hpp  \
   asteria/src/runtime/abstract_opaque.hpp  \
   asteria/src/runtime/abstract_function.hpp  \
   asteria/src/runtime/placeholder.hpp  \
@@ -157,6 +158,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/syntax/statement.cpp  \
   asteria/src/runtime/rcbase.cpp  \
   asteria/src/runtime/source_location.cpp  \
+  asteria/src/runtime/packed_sloc_str.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
   asteria/src/runtime/abstract_function.cpp  \
   asteria/src/runtime/placeholder.cpp  \
