@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Variable final : public virtual Rcbase
+class Variable final : public Rcbase
   {
   private:
     // contents
