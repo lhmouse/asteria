@@ -44,6 +44,10 @@ template<typename elementT> class refcnt_object
       : m_ptr(other.m_ptr)
       {
       }
+    refcnt_object(refcnt_object&& other) noexcept
+      : m_ptr(other.m_ptr)  // We shall not leave a null pointer in `other`.
+      {
+      }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
                                                                  pointer>::value)> refcnt_object& operator=(const refcnt_object<yelementT>& other) noexcept
       {
