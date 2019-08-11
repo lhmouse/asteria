@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "packed_sloc_str.hpp"
+#include "packed_sloc_phstr.hpp"
 #include "value.hpp"
 #include "reference.hpp"
 
@@ -68,7 +69,7 @@ class AIR_Node
     struct S_try_statement
       {
         cow_vector<AIR_Node> code_try;
-        rcobj<Packed_sloc_str> sloc_except;
+        rcobj<Packed_sloc_phstr> sloc_except;
         cow_vector<AIR_Node> code_catch;
       };
     struct S_throw_statement

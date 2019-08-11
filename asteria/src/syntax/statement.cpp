@@ -294,7 +294,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");
         ctx_catch.open_named_reference(rocket::sref("__backtrace"));
         // Pack the source location and the name of the exception object.
-        auto sloc_except = rocket::make_refcnt<Packed_sloc_str>(altr.sloc, altr.name_except);
+        auto sloc_except = rocket::make_refcnt<Packed_sloc_phstr>(altr.sloc, altr.name_except);
         // Generate code for the `catch` body.
         // Unlike the `try` body, this may be TCO'd.
         auto code_catch = do_generate_statement_list(nullptr, ctx_catch, options, tco_aware, altr.body_catch);

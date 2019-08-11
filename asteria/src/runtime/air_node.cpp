@@ -747,7 +747,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except);
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
-          return do_execute_catch(altr.code_catch, altr.sloc_except->str(), except, ctx);
+          return do_execute_catch(altr.code_catch, altr.sloc_except->phstr(), except, ctx);
         }
         catch(const std::exception& stdex) {
           // Translate the exception.
@@ -756,7 +756,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except);
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
-          return do_execute_catch(altr.code_catch, altr.sloc_except->str(), except, ctx);
+          return do_execute_catch(altr.code_catch, altr.sloc_except->phstr(), except, ctx);
         }
       }
     case index_throw_statement:
