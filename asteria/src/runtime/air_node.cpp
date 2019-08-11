@@ -932,17 +932,17 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         self.zoom_out();
         // Call the function now.
         if(altr.tco_aware != tco_aware_none) {
+          // Pack arguments.
+          auto args_s = rocket::move(args);
+          args_s.emplace_back(rocket::move(self));
           // Create a TCO wrapper.
-          args.emplace_back(rocket::move(self));
-          auto tca = rocket::make_refcnt<Tail_Call_Arguments>(altr.sloc, func, altr.tco_aware, target, rocket::move(args));
-          // The caller shall unwrap the proxy reference when appropriate.
-          Reference_Root::S_tail_call xref = { rocket::move(tca) };
+          Reference_Root::S_tail_call xref = { altr.sloc, func, altr.tco_aware, target, rocket::move(args_s) };
           self = rocket::move(xref);
           return air_status_next;
         }
         else {
+          // Perform a non-proper call.
           try {
-            // Perform a non-proper call.
             ASTERIA_DEBUG_LOG("Initiating function call at \'", altr.sloc, "\' inside `", func, "`: target = ", target);
             target->invoke(self, ctx.global(), rocket::move(args));
             self.finish_call(ctx.global());

@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "value.hpp"
 #include "variable.hpp"
-#include "tail_call_arguments.hpp"
+#include "source_location.hpp"
 
 namespace Asteria {
 
@@ -31,7 +31,11 @@ class Reference_Root
       };
     struct S_tail_call
       {
-        rcobj<Tail_Call_Arguments> tca;
+        Source_Location sloc;
+        cow_string func;
+        TCO_Aware tco_aware;
+        rcobj<Abstract_Function> target;
+        cow_vector<Reference> args_self;  // The last element is the `this` reference.
       };
 
     enum Index : uint8_t
@@ -99,9 +103,13 @@ class Reference_Root
       {
         return this->index() == index_tail_call;
       }
-    const rcobj<Tail_Call_Arguments>& as_tail_call() const
+    const S_tail_call& as_tail_call() const
       {
-        return this->m_stor.as<index_tail_call>().tca;
+        return this->m_stor.as<index_tail_call>();
+      }
+    S_tail_call& open_tail_call()
+      {
+        return this->m_stor.as<index_tail_call>();
       }
 
     void swap(Reference_Root& other) noexcept

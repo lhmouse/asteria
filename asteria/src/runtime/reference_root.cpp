@@ -95,7 +95,7 @@ Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callba
       }
     case index_tail_call:
       {
-        return this->m_stor.as<index_tail_call>().tca->enumerate_variables(callback);
+        return rocket::for_each(this->m_stor.as<index_tail_call>().args_self, [&](const Reference& arg) { arg.enumerate_variables(callback);  }), callback;
       }
     default:
       ASTERIA_TERMINATE("An unknown reference root type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");

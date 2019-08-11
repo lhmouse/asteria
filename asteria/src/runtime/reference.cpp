@@ -62,37 +62,35 @@ Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Ref
 Reference& Reference::do_convert_to_temporary()
   {
     // Replace `*this` with a reference to temporary.
-    Reference_Root::S_temporary xref = { this->read() };
-    *this = rocket::move(xref);
+    Reference_Root::S_temporary xroot = { this->read() };
+    *this = rocket::move(xroot);
     return *this;
   }
 
 Reference& Reference::do_finish_call(const Global_Context& global)
   {
     // Note that `*this` is overwritten before the wrapped function is called.
-    // We must rebuild the backtrace using this queue if an exception is thrown.
-    cow_vector<rcptr<Tail_Call_Arguments>> tca_queue;
+    cow_vector<Reference_Root::S_tail_call> frames;
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     TCO_Aware tco_conj = tco_aware_by_ref;
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
-      auto& tca = tca_queue.emplace_back(this->m_root.as_tail_call());
-      ROCKET_ASSERT(tca.use_count() == 2);
+      auto& xroot = frames.emplace_back(rocket::move(this->m_root.open_tail_call()));
       // Tell out how to forward the result.
-      if((tca->get_tco_awareness() == tco_aware_by_val) && (tco_conj == tco_aware_by_ref)) {
+      if((xroot.tco_aware == tco_aware_by_val) && (tco_conj == tco_aware_by_ref)) {
         tco_conj = tco_aware_by_val;
       }
-      else if(tca->get_tco_awareness() == tco_aware_nullify) {
+      else if(xroot.tco_aware == tco_aware_nullify) {
         tco_conj = tco_aware_nullify;
       }
       // Unpack the function reference.
-      const auto& target = tca->get_target();
+      const auto& target = xroot.target;
       // Unpack arguments.
-      *this = rocket::move(tca->open_arguments_and_self().mut_back());
-      auto& args = tca->open_arguments_and_self().pop_back();
+      *this = rocket::move(xroot.args_self.mut_back());
+      auto& args = xroot.args_self.pop_back();
       // Call the function now.
-      const auto& sloc = tca->get_source_location();
-      const auto& func = tca->get_function_signature();
+      const auto& sloc = xroot.sloc;
+      const auto& func = xroot.func;
       try {
         // Unwrap the function call.
         ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
@@ -103,14 +101,14 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       catch(Exception& except) {
         ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside tail call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
         // Append all frames that have been expanded so far and rethrow the exception.
-        std::for_each(tca_queue.rbegin(), tca_queue.rend(), [&](const auto& q) { except.push_frame_func(q->get_source_location(), q->get_function_signature());  });
+        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& r) { except.push_frame_func(r.sloc, r.func);  });
         throw;
       }
       catch(const std::exception& stdex) {
         ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Exception except(stdex);
-        std::for_each(tca_queue.rbegin(), tca_queue.rend(), [&](const auto& q) { except.push_frame_func(q->get_source_location(), q->get_function_signature());  });
+        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& r) { except.push_frame_func(r.sloc, r.func);  });
         throw except;
       }
     }
