@@ -641,11 +641,10 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // Create a variable for the key.
         auto key = ctx_for.global().create_variable();
         key->reset(G_null(), true);
-        ROCKET_ASSERT(altr.names_key_mapped.size() == 2);
         Reference_Root::S_variable xref_key = { key };
-        ctx_for.open_named_reference(altr.names_key_mapped[0]) = rocket::move(xref_key);
+        ctx_for.open_named_reference(altr.name_key) = rocket::move(xref_key);
         // Create the mapped reference.
-        auto& mapped = ctx_for.open_named_reference(altr.names_key_mapped[1]);
+        auto& mapped = ctx_for.open_named_reference(altr.name_mapped);
         mapped = Reference_Root::S_null();
         // Clear the stack.
         ctx_for.stack().clear_references();
@@ -743,20 +742,20 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         }
         catch(Exception& except) {
           // Reuse the exception object. Don't bother allocating a new one.
-          except.push_frame_catch(altr.sloc_except->sloc());
+          except.push_frame_catch(altr.sloc);
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except);
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
-          return do_execute_catch(altr.code_catch, altr.sloc_except->phstr(), except, ctx);
+          return do_execute_catch(altr.code_catch, altr.name_except, except, ctx);
         }
         catch(const std::exception& stdex) {
           // Translate the exception.
           Exception except(stdex);
-          except.push_frame_catch(altr.sloc_except->sloc());
+          except.push_frame_catch(altr.sloc);
           ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except);
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
-          return do_execute_catch(altr.code_catch, altr.sloc_except->phstr(), except, ctx);
+          return do_execute_catch(altr.code_catch, altr.name_except, except, ctx);
         }
       }
     case index_throw_statement:
@@ -773,18 +772,18 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
             std::rethrow_exception(eptr);
           }
           // If no nested exception exists, construct a fresh one.
-          Exception except(altr.sloc->sloc(), rocket::move(value));
+          Exception except(altr.sloc, rocket::move(value));
           throw except;
         }
         catch(Exception& except) {
           // Modify it in place. Don't bother allocating a new one.
-          except.push_frame_throw(altr.sloc->sloc(), rocket::move(value));
+          except.push_frame_throw(altr.sloc, rocket::move(value));
           throw;
         }
         catch(const std::exception& stdex) {
           // Translate the exception.
           Exception except(stdex);
-          except.push_frame_throw(altr.sloc->sloc(), rocket::move(value));
+          except.push_frame_throw(altr.sloc, rocket::move(value));
           throw except;
         }
       }
@@ -799,7 +798,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // The assertion has failed.
         cow_osstream fmtss;
         fmtss.imbue(std::locale::classic());
-        fmtss << "Assertion failed at \'" << altr.sloc_msg->sloc() << "\': " << altr.sloc_msg->str();
+        fmtss << "Assertion failed at \'" << altr.sloc << '\'';
+        // Append the message if one is provided.
+        if(!altr.msg.empty())
+          fmtss << ": " << altr.msg;
+        else
+          fmtss << '!';
         // Throw a `Runtime_Error`.
         throw_runtime_error(__func__, fmtss.extract_string());
       }
@@ -867,8 +871,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_define_function>();
         // Instantiate the function.
-        auto qtarget = rocket::make_refcnt<Instantiated_Function>(altr.options, altr.sloc_name->sloc(), altr.sloc_name->str(),
-                                                                  std::addressof(ctx), altr.params, altr.body);
+        auto qtarget = rocket::make_refcnt<Instantiated_Function>(altr.options, altr.sloc, altr.name, std::addressof(ctx), altr.params, altr.body);
         ASTERIA_DEBUG_LOG("New function: ", *qtarget);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
@@ -906,7 +909,8 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& func = ctx.zvarg()->get_function_signature();
         Value val;
         // Pop arguments off the stack.
-        cow_vector<Reference> args(altr.args_by_refs.size());
+        cow_vector<Reference> args;
+        args.resize(altr.args_by_refs.size());
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
           // Convert the argument to an rvalue if it shouldn't be passed by reference.
           bool by_ref = *(it - args.rbegin() + altr.args_by_refs.rbegin());
@@ -926,40 +930,36 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& target = val.as_function();
         // Initialize the `this` reference.
         self.zoom_out();
-        // Unpack the source location.
-        const auto& sloc = altr.sloc->sloc();
         // Call the function now.
         if(altr.tco_aware != tco_aware_none) {
-          // Pack the source location and the caller signature.
-          auto sloc_func = rocket::make_refcnt<Packed_sloc_str>(sloc, func);
           // Pack arguments.
           auto args_s = rocket::move(args);
           args_s.emplace_back(rocket::move(self));
           // Create a TCO wrapper.
-          Reference_Root::S_tail_call xref = { rocket::move(sloc_func), altr.tco_aware, target, rocket::move(args_s) };
+          Reference_Root::S_tail_call xref = { altr.sloc, func, altr.tco_aware, target, rocket::move(args_s) };
           self = rocket::move(xref);
           return air_status_next;
         }
         else {
           // Perform a non-proper call.
           try {
-            ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target);
+            ASTERIA_DEBUG_LOG("Initiating function call at \'", altr.sloc, "\' inside `", func, "`: target = ", target);
             target->invoke(self, ctx.global(), rocket::move(args));
             self.finish_call(ctx.global());
-            ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target);
+            ASTERIA_DEBUG_LOG("Returned from function call at \'", altr.sloc, "\' inside `", func, "`: target = ", target);
             return air_status_next;
           }
           catch(Exception& except) {
-            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
+            ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", except.get_value());
             // Append the current frame and rethrow the exception.
-            except.push_frame_func(sloc, func);
+            except.push_frame_func(altr.sloc, func);
             throw;
           }
           catch(const std::exception& stdex) {
-            ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
+            ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", altr.sloc, "\' inside `", func, "`: ", stdex.what());
             // Translate the exception, append the current frame, and throw the new exception.
             Exception except(stdex);
-            except.push_frame_func(sloc, func);
+            except.push_frame_func(altr.sloc, func);
             throw except;
           }
         }
@@ -976,7 +976,8 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
         // Pop some elements from the stack to create an array.
-        G_array array(altr.nelems);
+        G_array array;
+        array.resize(altr.nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
           *it = ctx.stack().get_top_reference().read();
           ctx.stack().pop_reference();
@@ -990,7 +991,8 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_object>();
         // Pop some elements from the stack to create an object.
-        G_object object(altr.keys.size());
+        G_object object;
+        object.reserve(altr.keys.size());
         for(auto it = altr.keys.rbegin(); it != altr.keys.rend(); ++it) {
           object.insert_or_assign(*it, ctx.stack().get_top_reference().read());
           ctx.stack().pop_reference();

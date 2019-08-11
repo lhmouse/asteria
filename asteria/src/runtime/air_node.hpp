@@ -5,8 +5,7 @@
 #define ASTERIA_RUNTIME_AIR_NODE_HPP_
 
 #include "../fwd.hpp"
-#include "packed_sloc_str.hpp"
-#include "packed_sloc_phstr.hpp"
+#include "source_location.hpp"
 #include "value.hpp"
 #include "reference.hpp"
 
@@ -55,7 +54,8 @@ class AIR_Node
       };
     struct S_for_each_statement
       {
-        cow_vector<phsh_string> names_key_mapped;
+        phsh_string name_key;
+        phsh_string name_mapped;
         cow_vector<AIR_Node> code_init;
         cow_vector<AIR_Node> code_body;
       };
@@ -69,17 +69,19 @@ class AIR_Node
     struct S_try_statement
       {
         cow_vector<AIR_Node> code_try;
-        rcobj<Packed_sloc_phstr> sloc_except;
+        Source_Location sloc;
+        phsh_string name_except;
         cow_vector<AIR_Node> code_catch;
       };
     struct S_throw_statement
       {
-        rcobj<Packed_sloc_str> sloc;
+        Source_Location sloc;
       };
     struct S_assert_statement
       {
-        rcobj<Packed_sloc_str> sloc_msg;
+        Source_Location sloc;
         bool negative;
+        cow_string msg;
       };
     struct S_simple_status
       {
@@ -108,7 +110,8 @@ class AIR_Node
     struct S_define_function
       {
         Compiler_Options options;
-        rcobj<Packed_sloc_str> sloc_name;
+        Source_Location sloc;
+        cow_string name;
         cow_vector<phsh_string> params;
         cow_vector<Statement> body;
       };
@@ -125,7 +128,7 @@ class AIR_Node
       };
     struct S_function_call
       {
-        rcobj<Packed_sloc_str> sloc;
+        Source_Location sloc;
         cow_vector<bool> args_by_refs;
         TCO_Aware tco_aware;
       };

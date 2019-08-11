@@ -7,7 +7,7 @@
 #include "../fwd.hpp"
 #include "value.hpp"
 #include "variable.hpp"
-#include "packed_sloc_str.hpp"
+#include "source_location.hpp"
 
 namespace Asteria {
 
@@ -31,7 +31,8 @@ class Reference_Root
       };
     struct S_tail_call
       {
-        rcobj<Packed_sloc_str> sloc_func;
+        Source_Location sloc;
+        cow_string func;
         TCO_Aware tco_aware;
         rcobj<Abstract_Function> target;
         cow_vector<Reference> args_self;  // The last element is the `this` reference.

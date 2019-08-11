@@ -131,7 +131,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       : m_sth(hf, noadl::forward<paramsT>(params)...)
       {
       }
-    explicit basic_prehashed_string(const string_type& str, const hasher& hf = hasher())
+    basic_prehashed_string(const string_type& str, const hasher& hf = hasher())
       : m_sth(hf, str)
       {
       }
@@ -139,7 +139,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       : m_sth(hf, noadl::move(str))
       {
       }
-    template<typename paramT, ROCKET_ENABLE_IF(is_convertible<paramT&&, stringT>::value)> basic_prehashed_string(paramT&& param, const hasher& hf = hasher())
+    template<typename paramT, ROCKET_ENABLE_IF(is_convertible<paramT, string_type>::value)> basic_prehashed_string(paramT&& param, const hasher& hf = hasher())
       : m_sth(hf, noadl::forward<paramT>(param))
       {
       }

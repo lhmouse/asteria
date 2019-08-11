@@ -59,8 +59,6 @@ class Statement;
 // Runtime
 class Rcbase;
 class Source_Location;
-class Packed_sloc_str;
-class Packed_sloc_phstr;
 class Value;
 class Abstract_Opaque;
 class Abstract_Function;

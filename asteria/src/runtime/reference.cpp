@@ -89,8 +89,8 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       *this = rocket::move(xroot.args_self.mut_back());
       auto& args = xroot.args_self.pop_back();
       // Call the function now.
-      const auto& sloc = xroot.sloc_func->sloc();
-      const auto& func = xroot.sloc_func->str();
+      const auto& sloc = xroot.sloc;
+      const auto& func = xroot.func;
       try {
         // Unwrap the function call.
         ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
@@ -101,14 +101,14 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       catch(Exception& except) {
         ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside tail call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
         // Append all frames that have been expanded so far and rethrow the exception.
-        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& r) { except.push_frame_func(r.sloc_func->sloc(), r.sloc_func->str());  });
+        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& r) { except.push_frame_func(r.sloc, r.func);  });
         throw;
       }
       catch(const std::exception& stdex) {
         ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Exception except(stdex);
-        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& r) { except.push_frame_func(r.sloc_func->sloc(), r.sloc_func->str());  });
+        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& r) { except.push_frame_func(r.sloc, r.func);  });
         throw except;
       }
     }
