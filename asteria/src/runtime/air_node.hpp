@@ -54,8 +54,7 @@ class AIR_Node
       };
     struct S_for_each_statement
       {
-        phsh_string name_key;
-        phsh_string name_mapped;
+        cow_vector<phsh_string> names_key_mapped;
         cow_vector<AIR_Node> code_init;
         cow_vector<AIR_Node> code_body;
       };

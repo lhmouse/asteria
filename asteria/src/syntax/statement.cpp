@@ -249,6 +249,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         Analytic_Context ctx_for(rocket::ref(ctx));
         do_user_declare(names_opt, ctx_for, altr.name_key, "key placeholder");
         do_user_declare(names_opt, ctx_for, altr.name_mapped, "value placeholder");
+        // Pack names in a vector to make the struct smaller.
+        cow_vector<phsh_string> names_key_mapped(2);
+        names_key_mapped.mut(0) = altr.name_key;
+        names_key_mapped.mut(1) = altr.name_mapped;
         // Generate code for the range initializer.
         ROCKET_ASSERT(!altr.init.empty());
         auto code_init = do_generate_expression_partial(options, tco_aware_none, ctx_for, altr.init);
@@ -256,7 +260,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Loop statements cannot be TCO'd.
         auto code_body = do_generate_block(options, tco_aware_none, ctx_for, altr.body);
         // Encode arguments.
-        AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, rocket::move(code_init), rocket::move(code_body) };
+        AIR_Node::S_for_each_statement xnode = { rocket::move(names_key_mapped), rocket::move(code_init), rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
         return code;
       }

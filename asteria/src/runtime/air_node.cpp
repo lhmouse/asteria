@@ -641,10 +641,11 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         // Create a variable for the key.
         auto key = ctx_for.global().create_variable();
         key->reset(G_null(), true);
+        ROCKET_ASSERT(altr.names_key_mapped.size() == 2);
         Reference_Root::S_variable xref_key = { key };
-        ctx_for.open_named_reference(altr.name_key) = rocket::move(xref_key);
+        ctx_for.open_named_reference(altr.names_key_mapped[0]) = rocket::move(xref_key);
         // Create the mapped reference.
-        auto& mapped = ctx_for.open_named_reference(altr.name_mapped);
+        auto& mapped = ctx_for.open_named_reference(altr.names_key_mapped[1]);
         mapped = Reference_Root::S_null();
         // Clear the stack.
         ctx_for.stack().clear_references();
@@ -909,8 +910,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& func = ctx.zvarg()->get_function_signature();
         Value val;
         // Pop arguments off the stack.
-        cow_vector<Reference> args;
-        args.resize(altr.args_by_refs.size());
+        cow_vector<Reference> args(altr.args_by_refs.size());
         for(auto it = args.mut_rbegin(); it != args.rend(); ++it) {
           // Convert the argument to an rvalue if it shouldn't be passed by reference.
           bool by_ref = *(it - args.rbegin() + altr.args_by_refs.rbegin());
@@ -976,8 +976,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
         // Pop some elements from the stack to create an array.
-        G_array array;
-        array.resize(altr.nelems);
+        G_array array(altr.nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
           *it = ctx.stack().get_top_reference().read();
           ctx.stack().pop_reference();
@@ -991,8 +990,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_object>();
         // Pop some elements from the stack to create an object.
-        G_object object;
-        object.reserve(altr.keys.size());
+        G_object object(altr.keys.size());
         for(auto it = altr.keys.rbegin(); it != altr.keys.rend(); ++it) {
           object.insert_or_assign(*it, ctx.stack().get_top_reference().read());
           ctx.stack().pop_reference();
