@@ -44,7 +44,7 @@ template<typename elementT> class refcnt_object
       : m_ptr(other.m_ptr)
       {
       }
-    refcnt_object(refcnt_object&& other) noexcept
+    refcnt_object(const refcnt_object&& other) noexcept
       : m_ptr(other.m_ptr)  // We shall not leave a null pointer in `other`.
       {
       }
