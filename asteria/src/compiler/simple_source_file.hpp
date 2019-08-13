@@ -55,11 +55,20 @@ class Simple_Source_File
         this->m_fthr = fthr;
       }
 
+    explicit operator bool () const noexcept
+      {
+        return this->m_cptr != nullptr;
+      }
+    Simple_Source_File& clear() noexcept
+      {
+        m_cptr = nullptr;
+        return *this;
+      }
+
     Parser_Error reload(std::streambuf& sbuf, const cow_string& filename);
     Parser_Error reload(std::istream& istrm, const cow_string& filename);
     Parser_Error reload(const cow_string& cstr, const cow_string& filename);
     Parser_Error open(const cow_string& filename);
-    void clear() noexcept;
 
     Reference execute(const Global_Context& global, cow_vector<Reference>&& args) const;
   };

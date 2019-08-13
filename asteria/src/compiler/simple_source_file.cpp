@@ -102,11 +102,6 @@ Parser_Error Simple_Source_File::open(const cow_string& filename)
     return this->reload(sbuf, filename);
   }
 
-void Simple_Source_File::clear() noexcept
-  {
-    this->m_cptr = nullptr;
-  }
-
 Reference Simple_Source_File::execute(const Global_Context& global, cow_vector<Reference>&& args) const
   {
     Reference self;

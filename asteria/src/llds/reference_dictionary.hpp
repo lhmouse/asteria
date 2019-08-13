@@ -84,7 +84,7 @@ class Reference_Dictionary
       {
         return this->m_stor.size;
       }
-    void clear() noexcept
+    Reference_Dictionary& clear() noexcept
       {
         if(this->m_stor.head) {
           this->do_clear_buckets();
@@ -92,6 +92,7 @@ class Reference_Dictionary
         // Clean invalid data up.
         this->m_stor.head = nullptr;
         this->m_stor.size = 0;
+        return *this;
       }
 
     void swap(Reference_Dictionary& other) noexcept

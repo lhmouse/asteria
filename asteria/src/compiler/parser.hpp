@@ -36,9 +36,13 @@ class Parser
       {
         return static_cast<State>(this->m_stor.index());
       }
+    Parser& clear() noexcept
+      {
+        this->m_stor = nullptr;
+        return *this;
+      }
 
     bool load(Token_Stream& tstrm, const Compiler_Options& options);
-    void clear() noexcept;
 
     Parser_Error get_parser_error() const noexcept;
     const cow_vector<Statement>& get_statements() const;

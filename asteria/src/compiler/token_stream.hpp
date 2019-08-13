@@ -37,12 +37,15 @@ class Token_Stream
       {
         return static_cast<State>(this->m_stor.index());
       }
+    Token_Stream& clear() noexcept
+      {
+        this->m_stor = nullptr;
+        return *this;
+      }
 
     bool load(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& options);
-    void clear() noexcept;
 
     Parser_Error get_parser_error() const noexcept;
-    bool empty() const noexcept;
     const Token* peek_opt(size_t ahead = 0) const;
     void shift(size_t count = 1);
   };

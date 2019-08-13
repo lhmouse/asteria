@@ -83,7 +83,7 @@ class Variable_HashSet
       {
         return this->m_stor.size;
       }
-    void clear() noexcept
+    Variable_HashSet& clear() noexcept
       {
         if(this->m_stor.head) {
           this->do_clear_buckets();
@@ -91,6 +91,7 @@ class Variable_HashSet
         // Clean invalid data up.
         this->m_stor.head = nullptr;
         this->m_stor.size = 0;
+        return *this;
       }
 
     void swap(Variable_HashSet& other) noexcept

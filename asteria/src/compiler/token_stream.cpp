@@ -981,11 +981,6 @@ bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Comp
     return true;
   }
 
-void Token_Stream::clear() noexcept
-  {
-    this->m_stor = nullptr;
-  }
-
 Parser_Error Token_Stream::get_parser_error() const noexcept
   {
     switch(this->state()) {
@@ -1000,26 +995,6 @@ Parser_Error Token_Stream::get_parser_error() const noexcept
     case state_success:
       {
         return Parser_Error(-1, SIZE_MAX, 0, parser_status_success);
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
-    }
-  }
-
-bool Token_Stream::empty() const noexcept
-  {
-    switch(this->state()) {
-    case state_empty:
-      {
-        return true;
-      }
-    case state_error:
-      {
-        return true;
-      }
-    case state_success:
-      {
-        return this->m_stor.as<cow_vector<Token>>().empty();
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");

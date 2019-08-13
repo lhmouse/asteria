@@ -1948,7 +1948,9 @@ bool Parser::load(Token_Stream& tstrm, const Compiler_Options& /*options*/)
         }
         stmts.emplace_back(rocket::move(*qstmt));
       }
-      if(!tstrm.empty()) {
+      auto qtok = tstrm.peek_opt();
+      if(qtok) {
+        ASTERIA_DEBUG_LOG("Excess token: ", *qtok);
         throw do_make_parser_error(tstrm, parser_status_statement_expected);
       }
     }
@@ -1959,11 +1961,6 @@ bool Parser::load(Token_Stream& tstrm, const Compiler_Options& /*options*/)
     }
     this->m_stor = rocket::move(stmts);
     return true;
-  }
-
-void Parser::clear() noexcept
-  {
-    this->m_stor = nullptr;
   }
 
 Parser_Error Parser::get_parser_error() const noexcept

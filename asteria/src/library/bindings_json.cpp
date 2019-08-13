@@ -629,8 +629,9 @@ Value std_json_parse(const G_string& text)
       ASTERIA_DEBUG_LOG("Invalid or empty JSON text: ", text);
       return G_null();
     }
-    if(!tstrm.empty()) {
-      ASTERIA_DEBUG_LOG("Excess token: ", text);
+    auto qtok = tstrm.peek_opt();
+    if(qtok) {
+      ASTERIA_DEBUG_LOG("Excess token `", *qtok, "`: ", text);
       return G_null();
     }
     return rocket::move(*qvalue);
