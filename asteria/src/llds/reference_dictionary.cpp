@@ -21,7 +21,7 @@ void Reference_Dictionary::do_clear_buckets() const noexcept
     }
   }
 
-void Reference_Dictionary::do_enumerate(Variable_Callback& callback) const
+void Reference_Dictionary::do_enumerate_variables(Variable_Callback& callback) const
   {
     auto next = this->m_stor.head;
     while(ROCKET_EXPECT(next)) {

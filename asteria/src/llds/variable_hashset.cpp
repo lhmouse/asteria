@@ -20,7 +20,7 @@ void Variable_HashSet::do_clear_buckets() const noexcept
     }
   }
 
-void Variable_HashSet::do_enumerate(Variable_Callback& callback) const
+void Variable_HashSet::do_enumerate_variables(Variable_Callback& callback) const
   {
     auto next = this->m_stor.head;
     while(ROCKET_EXPECT(next)) {

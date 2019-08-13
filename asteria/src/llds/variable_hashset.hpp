@@ -62,7 +62,7 @@ class Variable_HashSet
 
   private:
     void do_clear_buckets() const noexcept;
-    void do_enumerate(Variable_Callback& callback) const;
+    void do_enumerate_variables(Variable_Callback& callback) const;
 
     Bucket* do_xprobe(const rcptr<Variable>& var) const noexcept;
     void do_xrelocate_but(Bucket* qxcld) noexcept;
@@ -164,7 +164,7 @@ class Variable_HashSet
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
-        this->do_enumerate(callback);
+        this->do_enumerate_variables(callback);
         return callback;
       }
   };
