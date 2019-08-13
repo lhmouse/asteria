@@ -590,40 +590,44 @@ template<typename valueT, size_t capacityT,
       {
         return static_cast<difference_type>(this->size());
       }
-    // N.B. The parameter pack is a non-standard extension.
-    template<typename... paramsT> void resize(size_type n, const paramsT&... params)
+    // N.B. The return type and the parameter pack are non-standard extensions.
+    template<typename... paramsT> static_vector& resize(size_type n, const paramsT&... params)
       {
         auto cnt_old = this->size();
-        if(cnt_old == n) {
-          return;
-        }
         if(cnt_old < n) {
           this->append(n - cnt_old, params...);
         }
-        else {
+        else if(cnt_old > n) {
           this->pop_back(cnt_old - n);
         }
         ROCKET_ASSERT(this->size() == n);
+        return *this;
       }
     static constexpr size_type capacity() noexcept
       {
         return capacityT;
       }
-    void reserve(size_type res_arg)
+    // N.B. The return type is a non-standard extension.
+    static_vector& reserve(size_type res_arg)
       {
         this->m_sth.check_size_add(0, res_arg);
         // There is nothing to do.
+        return *this;
       }
-    void shrink_to_fit() noexcept
+    // N.B. The return type is a non-standard extension.
+    static_vector& shrink_to_fit() noexcept
       {
         // There is nothing to do.
+        return *this;
       }
-    void clear() noexcept
+    // N.B. The return type is a non-standard extension.
+    static_vector& clear() noexcept
       {
         if(this->empty()) {
-          return;
+          return *this;
         }
         this->m_sth.pop_back_n_unchecked(this->m_sth.size());
+        return *this;
       }
 
     // element access

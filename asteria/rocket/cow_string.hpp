@@ -999,52 +999,57 @@ template<typename charT, typename traitsT,
       {
         return static_cast<difference_type>(this->size());
       }
-    void resize(size_type n, value_type ch = value_type())
+    // N.B. The return type is a non-standard extension.
+    basic_cow_string& resize(size_type n, value_type ch = value_type())
       {
         auto len_old = this->size();
-        if(len_old == n) {
-          return;
-        }
         if(len_old < n) {
           this->append(n - len_old, ch);
         }
-        else {
+        else if(len_old > n) {
           this->pop_back(len_old - n);
         }
         ROCKET_ASSERT(this->size() == n);
+        return *this;
       }
     size_type capacity() const noexcept
       {
         return this->m_sth.capacity();
       }
-    void reserve(size_type res_arg)
+    // N.B. The return type is a non-standard extension.
+    basic_cow_string& reserve(size_type res_arg)
       {
         auto len = this->size();
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(len, res_arg));
         // If the storage is shared with other strings, force rellocation to prevent copy-on-write upon modification.
         if(this->unique() && (this->capacity() >= cap_new)) {
-          return;
+          return *this;
         }
         this->do_reallocate(0, 0, len, cap_new);
         ROCKET_ASSERT(this->capacity() >= res_arg);
+        return *this;
       }
-    void shrink_to_fit()
+    // N.B. The return type is a non-standard extension.
+    basic_cow_string& shrink_to_fit()
       {
         auto len = this->size();
         auto cap_min = this->m_sth.round_up_capacity(len);
         // Don't increase memory usage.
         if(!this->unique() || (this->capacity() <= cap_min)) {
-          return;
+          return *this;
         }
         this->do_reallocate(0, 0, len, len);
         ROCKET_ASSERT(this->capacity() <= cap_min);
+        return *this;
       }
-    void clear() noexcept
+    // N.B. The return type is a non-standard extension.
+    basic_cow_string& clear() noexcept
       {
         if(this->empty()) {
-          return;
+          return *this;
         }
         this->do_clear();
+        return *this;
       }
     // N.B. This is a non-standard extension.
     bool unique() const noexcept

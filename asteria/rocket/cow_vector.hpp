@@ -918,53 +918,57 @@ template<typename valueT, typename allocatorT> class cow_vector
       {
         return static_cast<difference_type>(this->size());
       }
-    // N.B. The parameter pack is a non-standard extension.
-    template<typename... paramsT> void resize(size_type n, const paramsT&... params)
+    // N.B. The return type and the parameter pack are non-standard extensions.
+    template<typename... paramsT> cow_vector& resize(size_type n, const paramsT&... params)
       {
         auto cnt_old = this->size();
-        if(cnt_old == n) {
-          return;
-        }
         if(cnt_old < n) {
           this->append(n - cnt_old, params...);
         }
-        else {
+        else if(cnt_old > n) {
           this->pop_back(cnt_old - n);
         }
         ROCKET_ASSERT(this->size() == n);
+        return *this;
       }
     size_type capacity() const noexcept
       {
         return this->m_sth.capacity();
       }
-    void reserve(size_type res_arg)
+    // N.B. The return type is a non-standard extension.
+    cow_vector& reserve(size_type res_arg)
       {
         auto cnt = this->size();
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
         // If the storage is shared with other vectors, force rellocation to prevent copy-on-write upon modification.
         if(this->unique() && (this->capacity() >= cap_new)) {
-          return;
+          return *this;
         }
         this->do_reallocate(0, 0, cnt, cap_new);
         ROCKET_ASSERT(this->capacity() >= res_arg);
+        return *this;
       }
-    void shrink_to_fit()
+    // N.B. The return type is a non-standard extension.
+    cow_vector& shrink_to_fit()
       {
         auto cnt = this->size();
         auto cap_min = this->m_sth.round_up_capacity(cnt);
         // Don't increase memory usage.
         if(!this->unique() || (this->capacity() <= cap_min)) {
-          return;
+          return *this;
         }
         this->do_reallocate(0, 0, cnt, cnt);
         ROCKET_ASSERT(this->capacity() <= cap_min);
+        return *this;
       }
-    void clear() noexcept
+    // N.B. The return type is a non-standard extension.
+    cow_vector& clear() noexcept
       {
         if(this->empty()) {
-          return;
+          return *this;
         }
         this->do_clear();
+        return *this;
       }
     // N.B. This is a non-standard extension.
     bool unique() const noexcept

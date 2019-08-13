@@ -1033,34 +1033,40 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         return this->m_sth.capacity();
       }
-    void reserve(size_type res_arg)
+    // N.B. The return type is a non-standard extension.
+    cow_hashmap& reserve(size_type res_arg)
       {
         auto cnt = this->size();
         auto cap_new = this->m_sth.round_up_capacity(noadl::max(cnt, res_arg));
         // If the storage is shared with other hashmaps, force rellocation to prevent copy-on-write upon modification.
         if(this->unique() && (this->capacity() >= cap_new)) {
-          return;
+          return *this;
         }
         this->do_reallocate(0, 0, this->bucket_count(), cap_new);
         ROCKET_ASSERT(this->capacity() >= res_arg);
+        return *this;
       }
-    void shrink_to_fit()
+    // N.B. The return type is a non-standard extension.
+    cow_hashmap& shrink_to_fit()
       {
         auto cnt = this->size();
         auto cap_min = this->m_sth.round_up_capacity(cnt);
         // Don't increase memory usage.
         if(!this->unique() || (this->capacity() <= cap_min)) {
-          return;
+          return *this;
         }
         this->do_reallocate(0, 0, cnt, cnt);
         ROCKET_ASSERT(this->capacity() <= cap_min);
+        return *this;
       }
-    void clear() noexcept
+    // N.B. The return type is a non-standard extension.
+    cow_hashmap& clear() noexcept
       {
         if(this->empty()) {
-          return;
+          return *this;
         }
         this->do_clear();
+        return *this;
       }
     // N.B. This is a non-standard extension.
     bool unique() const noexcept
