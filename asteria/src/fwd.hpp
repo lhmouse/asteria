@@ -96,6 +96,7 @@ class Simple_Binding_Wrapper;
 
 // Aliases
 using std::nullptr_t;
+using std::max_align_t;
 using std::int8_t;
 using std::uint8_t;
 using std::int16_t;
