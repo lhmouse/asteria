@@ -385,6 +385,7 @@ struct Compiler_Options
   {
     // These fields have a default value of `false`.
     union {
+      int8_t why_cant_bitfields_have_initializers_zero = 0;
       struct {
         // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
         bool escapable_single_quote_strings : 1;
@@ -393,15 +394,14 @@ struct Compiler_Options
         // Parse integer literals as real literals. [useful when parsing JSON text]
         bool integers_as_reals : 1;
       };
-      uint8_t bitfields_cant_have_initializers_0 = 0x00;
     };
     // These fields have a default value of `true`.
     union {
+      int8_t why_cant_bitfields_have_initializers_one = -1;
       struct {
-        // Enable proper tail calls. [commonly known as tail call optimization]
+        // Enable proper tail calls. [more commonly known as tail call optimization]
         bool proper_tail_calls : 1;
       };
-      uint8_t bitfields_cant_have_initializers_1 = 0xFF;
     };
   };
 
