@@ -153,6 +153,10 @@ template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_lvalue_reference<a
     return static_cast<targetT&&>(arg);
   }
 
+template<typename typeT> struct remove_cvref : remove_cv<typename remove_reference<typeT>::type>
+  {
+  };
+
     namespace details_utilities {
 
     using ::std::swap;
