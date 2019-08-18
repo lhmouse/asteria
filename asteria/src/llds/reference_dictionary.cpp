@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-void Reference_Dictionary::do_clear_buckets() const noexcept
+void Reference_Dictionary::do_destroy_buckets() const noexcept
   {
     auto next = this->m_stor.head;
     while(ROCKET_EXPECT(next)) {

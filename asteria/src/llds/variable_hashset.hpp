@@ -50,7 +50,7 @@ class Variable_HashSet
     ~Variable_HashSet()
       {
         if(this->m_stor.head) {
-          this->do_clear_buckets();
+          this->do_destroy_buckets();
         }
         if(this->m_stor.bptr) {
           ::operator delete(this->m_stor.bptr);
@@ -61,7 +61,7 @@ class Variable_HashSet
       }
 
   private:
-    void do_clear_buckets() const noexcept;
+    void do_destroy_buckets() const noexcept;
     void do_enumerate_variables(Variable_Callback& callback) const;
 
     Bucket* do_xprobe(const rcptr<Variable>& var) const noexcept;
@@ -86,7 +86,7 @@ class Variable_HashSet
     Variable_HashSet& clear() noexcept
       {
         if(this->m_stor.head) {
-          this->do_clear_buckets();
+          this->do_destroy_buckets();
         }
         // Clean invalid data up.
         this->m_stor.head = nullptr;

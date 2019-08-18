@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-void Variable_HashSet::do_clear_buckets() const noexcept
+void Variable_HashSet::do_destroy_buckets() const noexcept
   {
     auto next = this->m_stor.head;
     while(ROCKET_EXPECT(next)) {

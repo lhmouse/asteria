@@ -51,7 +51,7 @@ class Reference_Dictionary
     ~Reference_Dictionary()
       {
         if(this->m_stor.head) {
-          this->do_clear_buckets();
+          this->do_destroy_buckets();
         }
         if(this->m_stor.bptr) {
           ::operator delete(this->m_stor.bptr);
@@ -62,7 +62,7 @@ class Reference_Dictionary
       }
 
   private:
-    void do_clear_buckets() const noexcept;
+    void do_destroy_buckets() const noexcept;
     void do_enumerate_variables(Variable_Callback& callback) const;
 
     Bucket* do_xprobe(const phsh_string& name) const noexcept;
@@ -87,7 +87,7 @@ class Reference_Dictionary
     Reference_Dictionary& clear() noexcept
       {
         if(this->m_stor.head) {
-          this->do_clear_buckets();
+          this->do_destroy_buckets();
         }
         // Clean invalid data up.
         this->m_stor.head = nullptr;
