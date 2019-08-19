@@ -555,12 +555,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_switch_statement>();
         // Read the value of the control expression.
         auto value = ctx.stack().get_top_reference().read();
+        // Get the number of clauses.
+        auto nclauses = altr.code_labels.size();
+        ROCKET_ASSERT(nclauses == altr.code_bodies.size());
+        ROCKET_ASSERT(nclauses == altr.names_added.size());
         // Find a target clause.
         // This is different from a C `switch` statement where `case` labels must have constant operands.
         size_t tpos = SIZE_MAX;
-        for(size_t i = 0; i != altr.clauses.size(); ++i) {
-          const auto& code_case = altr.clauses[i].first;
-          if(code_case.empty()) {
+        for(size_t i = 0; i != nclauses; ++i) {
+          const auto& code_label = altr.code_labels[i];
+          if(code_label.empty()) {
             // This is a `default` label.
             if(tpos != SIZE_MAX) {
               ASTERIA_THROW_RUNTIME_ERROR("Multiple `default` clauses have been found in this `switch` statement.");
@@ -570,7 +574,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           }
           // This is a `case` label.
           // Evaluate the operand and check whether it equals `value`.
-          if(value.compare(do_evaluate(ctx, code_case)) == compare_equal) {
+          if(value.compare(do_evaluate(ctx, code_label)) == compare_equal) {
             tpos = i;
             break;
           }
@@ -581,13 +585,13 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           Executive_Context ctx_body(rocket::ref(ctx));
           // Skip clauses that precede `tpos`.
           for(size_t i = 0; i != tpos; ++i) {
-            const auto& names = altr.clauses[i].second.second;
-            rocket::for_each(names, [&](const phsh_string& name) { ctx_body.open_named_reference(name) = Reference_Root::S_null();  });
+            const auto& names_added = altr.names_added[i];
+            rocket::for_each(names_added, [&](const phsh_string& name) { ctx_body.open_named_reference(name) = Reference_Root::S_null();  });
           }
           // Execute all clauses from `tpos`.
-          for(size_t i = tpos; i != altr.clauses.size(); ++i) {
-            const auto& code_clause = altr.clauses[i].second.first;
-            auto status = do_execute_statement_list(ctx_body, code_clause);
+          for(size_t i = tpos; i != nclauses; ++i) {
+            const auto& code_body = altr.code_bodies[i];
+            auto status = do_execute_statement_list(ctx_body, code_body);
             if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
               break;
             }
@@ -1895,11 +1899,9 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_switch_statement:
       {
         const auto& altr = this->m_stor.as<index_switch_statement>();
-        for(size_t i = 0; i != altr.clauses.size(); ++i) {
-          // Enumerate all nodes of both the label and the clause.
-          rocket::for_each(altr.clauses[i].first, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-          rocket::for_each(altr.clauses[i].second.first, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-        }
+        // Enumerate all nodes of both the label and the clause.
+        rocket::for_each(altr.code_labels, [&](const cow_vector<AIR_Node>& code_label) { rocket::for_each(code_label, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });  });
+        rocket::for_each(altr.code_bodies, [&](const cow_vector<AIR_Node>& code_label) { rocket::for_each(code_label, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });  });
         return callback;
       }
     case index_do_while_statement:

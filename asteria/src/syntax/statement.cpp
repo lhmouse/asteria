@@ -195,22 +195,19 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         Analytic_Context ctx_body(rocket::ref(ctx));
         cow_vector<phsh_string> names;
         // Generate code for all clauses.
-        cow_bivector<cow_vector<AIR_Node>, pair<cow_vector<AIR_Node>, cow_vector<phsh_string>>> clauses;
+        cow_vector<cow_vector<AIR_Node>> code_labels;
+        cow_vector<cow_vector<AIR_Node>> code_bodies;
+        cow_vector<cow_vector<phsh_string>> names_added;
         for(const auto& p : altr.clauses) {
-          // XXX: Can we make use of `std::tuple` here? No! I hate the `std::get<>()` thing!
-          cow_vector<AIR_Node> code_cond;
-          pair<cow_vector<AIR_Node>, cow_vector<phsh_string>> clause;
           // Generate code for the label.
-          do_generate_expression_partial(code_cond, options, tco_aware_none, ctx_body, p.first);
+          do_generate_expression_partial(code_labels.emplace_back(), options, tco_aware_none, ctx_body, p.first);
           // Generate code for the clause and accumulate names.
           // This cannot be TCO'd.
-          do_generate_statement_list(clause.first, std::addressof(names), ctx_body, options, tco_aware_none, p.second);
-          clause.second = names;
-          // Push this clause.
-          clauses.emplace_back(rocket::move(code_cond), rocket::move(clause));
+          do_generate_statement_list(code_bodies.emplace_back(), std::addressof(names), ctx_body, options, tco_aware_none, p.second);
+          names_added.emplace_back(names);
         }
         // Encode arguments.
-        AIR_Node::S_switch_statement xnode = { rocket::move(clauses) };
+        AIR_Node::S_switch_statement xnode = { rocket::move(code_labels), rocket::move(code_bodies), rocket::move(names_added) };
         code.emplace_back(rocket::move(xnode));
         return code;
       }

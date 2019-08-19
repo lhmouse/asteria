@@ -38,7 +38,9 @@ class AIR_Node
       };
     struct S_switch_statement
       {
-        cow_bivector<cow_vector<AIR_Node>, pair<cow_vector<AIR_Node>, cow_vector<phsh_string>>> clauses;
+        cow_vector<cow_vector<AIR_Node>> code_labels;
+        cow_vector<cow_vector<AIR_Node>> code_bodies;
+        cow_vector<cow_vector<phsh_string>> names_added;
       };
     struct S_do_while_statement
       {
