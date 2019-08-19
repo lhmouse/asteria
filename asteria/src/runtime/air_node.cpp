@@ -849,7 +849,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_push_local_reference>();
         // Get the context.
         const Executive_Context* qctx = std::addressof(ctx);
-        rocket::ranged_for(size_t(0), altr.depth, [&](size_t) { qctx = qctx->get_parent_opt();  });
+        rocket::ranged_for(uint32_t(0), altr.depth, [&](size_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
         // Look for the name in the target context.
         auto qref = qctx->get_named_reference_opt(altr.name);

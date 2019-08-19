@@ -48,7 +48,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
         const Abstract_Context* qctx = std::addressof(ctx);
-        size_t depth = 0;
+        uint32_t depth = 0;
         const Reference* qref;
         for(;;) {
           // Look for the name in the current context.

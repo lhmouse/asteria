@@ -50,7 +50,7 @@ class Xprunit
       };
     struct S_unnamed_array
       {
-        size_t nelems;
+        uint32_t nelems;
       };
     struct S_unnamed_object
       {

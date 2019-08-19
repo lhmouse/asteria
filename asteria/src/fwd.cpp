@@ -686,6 +686,10 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "Expectation failed while looking for an `=` or `:`.";
       }
+    case parser_status_too_many_array_elements:
+      {
+        return "The number of elements in this array exceeded the system limit.";
+      }
     default:
       {
         return "No description is available for this error code.";

@@ -101,7 +101,7 @@ class AIR_Node
     struct S_push_local_reference
       {
         phsh_string name;
-        size_t depth;
+        uint32_t depth;
       };
     struct S_push_bound_reference
       {
@@ -138,7 +138,7 @@ class AIR_Node
       };
     struct S_push_unnamed_array
       {
-        size_t nelems;
+        uint32_t nelems;
       };
     struct S_push_unnamed_object
       {
