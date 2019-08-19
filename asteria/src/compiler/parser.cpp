@@ -1385,13 +1385,12 @@ namespace Asteria {
         }
         uint32_t nelems = 0;
         for(;;) {
-          auto too_many_elements_error = do_make_parser_error(tstrm, parser_status_too_many_array_elements);
+          if(nelems >= INT32_MAX) {
+            throw do_make_parser_error(tstrm, parser_status_too_many_array_elements);
+          }
           bool succ = do_accept_expression(units, tstrm);
           if(!succ) {
             break;
-          }
-          if(nelems >= INT32_MAX) {
-            throw too_many_elements_error;
           }
           nelems += 1;
           // Look for the separator.
