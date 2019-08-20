@@ -107,7 +107,7 @@ class AIR_Node
       };
     struct S_push_bound_reference
       {
-        Reference bref;
+        Reference ref;
       };
     struct S_define_function
       {
@@ -243,14 +243,14 @@ class AIR_Node
       };
     struct S_apply_xop_cmp_xeq
       {
-        bool negative;
         bool assign;
+        bool negative;
       };
     struct S_apply_xop_cmp_xrel
       {
+        bool assign;
         Compare expect;
         bool negative;
-        bool assign;
       };
     struct S_apply_xop_cmp_3way
       {
@@ -481,8 +481,12 @@ class AIR_Node
         this->m_stor.swap(other.m_stor);
       }
 
-    AIR_Status execute(Executive_Context& ctx) const;
-    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
+    // Compress this IR node.
+    // Be advised that solid nodes cannot be copied or moved because they occupy variant numbers of bytes.
+    // Solidification is performed in two passes: The total number of bytes is calculated, which are allocated as a whole
+    // at the end of the first pass, where nodes are constructed in the second pass.
+    // The argument for `ipass` shall be `0` for the first pass and `1` for the second pass.
+    AVMC_Queue& solidify(AVMC_Queue& queue, uint8_t ipass) const;
   };
 
 inline void swap(AIR_Node& lhs, AIR_Node& rhs) noexcept

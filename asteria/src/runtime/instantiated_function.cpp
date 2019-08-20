@@ -32,10 +32,10 @@ rcobj<Variadic_Arguer> Instantiated_Function::do_create_zvarg(const Source_Locat
     return rocket::make_refcnt<Variadic_Arguer>(sloc, rocket::move(func));
   }
 
-cow_vector<AIR_Node> Instantiated_Function::do_compile(const Compiler_Options& options, const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts) const
+AVMC_Queue Instantiated_Function::do_generate_code(const Compiler_Options& options, const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts) const
   {
+    // Generate IR nodes for the function body.
     cow_vector<AIR_Node> code_func;
-    // Generate code for the function body.
     Analytic_Context ctx_func(rocket::ref(ctx_opt), this->m_params);
     auto epos = stmts.size() - 1;
     if(epos != SIZE_MAX) {
@@ -47,7 +47,11 @@ cow_vector<AIR_Node> Instantiated_Function::do_compile(const Compiler_Options& o
       stmts[epos].generate_code(code_func, nullptr, ctx_func, options, tco_aware_nullify);
     }
     // TODO: Insert optimization passes here.
-    return code_func;
+    // Solidify IR nodes.
+    AVMC_Queue queue;
+    rocket::for_each(code_func, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass: Reserve storage.
+    rocket::for_each(code_func, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass: Construct nodes.
+    return queue;
   }
 
 std::ostream& Instantiated_Function::describe(std::ostream& ostrm) const
@@ -61,9 +65,8 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     Evaluation_Stack stack;
     Executive_Context ctx_func(rocket::ref(global), rocket::ref(stack), rocket::ref(this->m_zvarg), this->m_params, rocket::move(self), rocket::move(args));
     stack.reserve(rocket::move(args));
-    // Execute AIR nodes one by one.
-    auto status = air_status_next;
-    rocket::any_of(this->m_code, [&](const AIR_Node& node) { return (status = node.execute(ctx_func)) != air_status_next;  });
+    // Execute the function body.
+    auto status = this->m_queue.execute(ctx_func);
     switch(status) {
     case air_status_next:
       {
@@ -95,9 +98,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
   {
-    // Enumerate all variables inside the function body.
-    rocket::for_each(this->m_code, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
-    return callback;
+    return this->m_queue.enumerate_variables(callback);
   }
 
 }  // namespace Asteria

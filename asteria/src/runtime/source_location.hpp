@@ -15,6 +15,10 @@ class Source_Location
     int32_t m_line;
 
   public:
+    Source_Location() noexcept
+      : m_file(rocket::sref("<empty>")), m_line(-1)
+      {
+      }
     Source_Location(cow_string xfile, int32_t xline) noexcept
       : m_file(rocket::move(xfile)), m_line(xline)
       {

@@ -38,6 +38,9 @@
 #define ASTERIA_SFINAE_ASSIGN(...)       ROCKET_ENABLE_IF(::rocket::is_lvalue_assignable<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
 #define ASTERIA_SFINAE_CONVERT(...)      ROCKET_ENABLE_IF(::std::is_convertible<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
 
+#define ASTERIA_VOID_T(...)              typename ::rocket::make_void<__VA_ARGS__>::type
+#define ASTERIA_VOID_OF(...)             typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
+
 #define ASTERIA_AND_(x_, y_)             (bool(x_) && bool(y_))
 #define ASTERIA_OR_(x_, y_)              (bool(x_) || bool(y_))
 #define ASTERIA_COMMA_(x_, y_)           (void(x_) ,      (y_))
@@ -51,6 +54,7 @@ class Runtime_Error;
 // Low-level Data Structure
 class Variable_HashSet;
 class Reference_Dictionary;
+class AVMC_Queue;
 
 // Syntax
 class Xprunit;
@@ -69,6 +73,7 @@ class Reference;
 class Evaluation_Stack;
 class Variable;
 class Variable_Callback;
+class Tail_Call_Arguments;
 class Collector;
 class Abstract_Context;
 class Analytic_Context;
@@ -198,10 +203,10 @@ ROCKET_PURE_FUNCTION extern const char* describe_gtype(Gtype gtype) noexcept;
 // Value comparison results
 enum Compare : uint8_t
   {
-    compare_greater    = 0x00,  // The LHS operand is greater than the RHS operand.
-    compare_less       = 0x01,  // The LHS operand is less than the RHS operand.
-    compare_equal      = 0x40,  // The LHS operand is equal to the RHS operand.
-    compare_unordered  = 0x41,  // The LHS operand is unordered with the RHS operand.
+    compare_unordered  = 0,  // The LHS operand is unordered with the RHS operand.
+    compare_less       = 1,  // The LHS operand is less than the RHS operand.
+    compare_equal      = 2,  // The LHS operand is equal to the RHS operand.
+    compare_greater    = 3,  // The LHS operand is greater than the RHS operand.
   };
 
 // Punctuators

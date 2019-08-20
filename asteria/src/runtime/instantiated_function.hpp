@@ -7,6 +7,7 @@
 #include "../fwd.hpp"
 #include "abstract_function.hpp"
 #include "variadic_arguer.hpp"
+#include "../llds/avmc_queue.hpp"
 
 namespace Asteria {
 
@@ -15,21 +16,21 @@ class Instantiated_Function final : public Abstract_Function
   private:
     cow_vector<phsh_string> m_params;
     rcobj<Variadic_Arguer> m_zvarg;
-    cow_vector<AIR_Node> m_code;
+    AVMC_Queue m_queue;
 
   public:
     Instantiated_Function(const Compiler_Options& options, const Source_Location& sloc, const cow_string& name,
                           const Abstract_Context* ctx_opt, const cow_vector<phsh_string>& params, const cow_vector<Statement>& stmts)
       : m_params(params),
         m_zvarg(this->do_create_zvarg(sloc, name)),
-        m_code(this->do_compile(options, ctx_opt, stmts))
+        m_queue(this->do_generate_code(options, ctx_opt, stmts))
       {
       }
     ~Instantiated_Function() override;
 
   private:
     rcobj<Variadic_Arguer> do_create_zvarg(const Source_Location& sloc, const cow_string& name) const;
-    cow_vector<AIR_Node> do_compile(const Compiler_Options& options, const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts) const;
+    AVMC_Queue do_generate_code(const Compiler_Options& options, const Abstract_Context* ctx_opt, const cow_vector<Statement>& stmts) const;
 
   public:
     const Source_Location& get_source_location() const noexcept
