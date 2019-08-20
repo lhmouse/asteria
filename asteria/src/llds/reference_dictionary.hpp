@@ -149,7 +149,6 @@ class Reference_Dictionary
         this->do_detach(qbkt);
         return true;
       }
-
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
         this->do_enumerate_variables(callback);

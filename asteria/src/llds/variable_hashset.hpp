@@ -162,7 +162,6 @@ class Variable_HashSet
         this->do_detach(qbkt);
         return var;
       }
-
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const
       {
         this->do_enumerate_variables(callback);
