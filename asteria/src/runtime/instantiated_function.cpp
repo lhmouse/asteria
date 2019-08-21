@@ -60,7 +60,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     // Create the stack and context for this function.
     Evaluation_Stack stack;
     Executive_Context ctx_func(rocket::ref(global), rocket::ref(stack), rocket::ref(this->m_zvarg), this->m_params, rocket::move(self), rocket::move(args));
-    stack.reserve_references(rocket::move(args));
+    stack.reserve(rocket::move(args));
     // Execute AIR nodes one by one.
     auto status = air_status_next;
     rocket::any_of(this->m_code, [&](const AIR_Node& node) { return (status = node.execute(ctx_func)) != air_status_next;  });
@@ -73,7 +73,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     case air_status_return:
       {
         // Return the reference at the top of `stack`.
-        return self = rocket::move(stack.open_top_reference());
+        return self = rocket::move(stack.open_top());
       }
     case air_status_break_unspec:
     case air_status_break_switch:

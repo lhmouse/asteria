@@ -65,11 +65,11 @@ namespace Asteria {
           return null_value;
         }
         // Clear the stack.
-        ctx.stack().clear_references();
+        ctx.stack().clear();
         // Evaluate all nodes.
         rocket::for_each(code, [&](const AIR_Node& node) { node.execute(ctx);  });
         // The result will have been pushed onto the top.
-        return ctx.stack().get_top_reference().read();
+        return ctx.stack().top().read();
       }
 
     AIR_Status do_evaluate_branch(const cow_vector<AIR_Node>& code, /*const*/ Executive_Context& ctx, bool assign)
@@ -81,7 +81,7 @@ namespace Asteria {
         // Evaluate all nodes.
         rocket::for_each(code, [&](const AIR_Node& node) { node.execute(ctx);  });
         // Exactly one new reference will have been push onto the top.
-        ctx.stack().pop_next_reference(assign);
+        ctx.stack().pop_next(assign);
         return air_status_next;
       }
 
@@ -503,7 +503,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
     case index_clear_stack:
       {
         // Clear the stack.
-        ctx.stack().clear_references();
+        ctx.stack().clear();
         return air_status_next;
       }
     case index_execute_block:
@@ -522,7 +522,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         Reference_Root::S_variable xref = { rocket::move(var) };
         ctx.open_named_reference(altr.name) = xref;
         // Push a copy of the reference onto the stack.
-        ctx.stack().push_reference(rocket::move(xref));
+        ctx.stack().push(rocket::move(xref));
         return air_status_next;
       }
     case index_initialize_variable:
@@ -530,10 +530,10 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_initialize_variable>();
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this code.
-        auto value = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
+        auto value = ctx.stack().top().read();
+        ctx.stack().pop();
         // Get the variable back.
-        auto var = ctx.stack().get_top_reference().get_variable_opt();
+        auto var = ctx.stack().top().get_variable_opt();
         ROCKET_ASSERT(var);
         // Initialize it.
         var->reset(rocket::move(value), altr.immutable);
@@ -543,7 +543,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_if_statement>();
         // Pick a branch basing on the condition.
-        if(ctx.stack().get_top_reference().read().test() != altr.negative) {
+        if(ctx.stack().top().read().test() != altr.negative) {
           return do_execute_block(altr.code_true, ctx);
         }
         else {
@@ -554,7 +554,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_switch_statement>();
         // Read the value of the control expression.
-        auto value = ctx.stack().get_top_reference().read();
+        auto value = ctx.stack().top().read();
         // Get the number of clauses.
         auto nclauses = altr.code_labels.size();
         ROCKET_ASSERT(nclauses == altr.code_bodies.size());
@@ -651,12 +651,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         auto& mapped = ctx_for.open_named_reference(altr.name_mapped);
         mapped = Reference_Root::S_null();
         // Clear the stack.
-        ctx_for.stack().clear_references();
+        ctx_for.stack().clear();
         // Evaluate the range initializer.
         ROCKET_ASSERT(!altr.code_init.empty());
         rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.execute(ctx_for);  });
         // Set the range up.
-        mapped = rocket::move(ctx_for.stack().open_top_reference());
+        mapped = rocket::move(ctx_for.stack().open_top());
         auto range = mapped.read();
         // The range value has been saved. This ensures we are immune to dangling pointers if the loop body attempts to modify it.
         // Also be advised that the mapped parameter is a reference rather than a value.
@@ -767,7 +767,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_throw_statement>();
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
-        auto value = ctx.stack().get_top_reference().read();
+        auto value = ctx.stack().top().read();
         try {
           // Unpack the nested exception, if any.
           auto eptr = std::current_exception();
@@ -795,7 +795,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_assert_statement>();
         // Read the value to check.
-        if(ROCKET_EXPECT(ctx.stack().get_top_reference().read().test() != altr.negative)) {
+        if(ROCKET_EXPECT(ctx.stack().top().read().test() != altr.negative)) {
           // The assertion has succeeded.
           return air_status_next;
         }
@@ -820,7 +820,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
     case index_return_by_value:
       {
         // The result will have been pushed onto the top.
-        auto& ref = ctx.stack().open_top_reference();
+        auto& ref = ctx.stack().open_top();
         // Convert the result to an rvalue.
         // TCO wrappers are forwarded as is.
         if(ROCKET_UNEXPECT(ref.is_lvalue())) {
@@ -833,7 +833,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_push_literal>();
         // Push a constant.
         Reference_Root::S_constant xref = { altr.val };
-        ctx.stack().push_reference(rocket::move(xref));
+        ctx.stack().push(rocket::move(xref));
         return air_status_next;
       }
     case index_push_global_reference:
@@ -845,7 +845,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("The identifier `", altr.name, "` has not been declared yet.");
         }
         // Push a copy of it.
-        ctx.stack().push_reference(*qref);
+        ctx.stack().push(*qref);
         return air_status_next;
       }
     case index_push_local_reference:
@@ -861,14 +861,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("The identifier `", altr.name, "` has not been declared yet.");
         }
         // Push a copy of it.
-        ctx.stack().push_reference(*qref);
+        ctx.stack().push(*qref);
         return air_status_next;
       }
     case index_push_bound_reference:
       {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
         // Push a copy of the bound reference.
-        ctx.stack().push_reference(altr.bref);
+        ctx.stack().push(altr.bref);
         return air_status_next;
       }
     case index_define_function:
@@ -879,7 +879,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         ASTERIA_DEBUG_LOG("New function: ", *qtarget);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
-        ctx.stack().push_reference(rocket::move(xref));
+        ctx.stack().push(rocket::move(xref));
         return air_status_next;
       }
     case index_branch_expression:
@@ -887,7 +887,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_branch_expression>();
         // Pick a branch basing on the condition.
         // If the target branch is empty, leave the condition on the stack.
-        if(ctx.stack().get_top_reference().read().test()) {
+        if(ctx.stack().top().read().test()) {
           return do_evaluate_branch(altr.code_true, ctx, altr.assign);
         }
         else {
@@ -899,7 +899,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Pick a branch basing on the condition.
         // If the target branch is empty, leave the condition on the stack.
-        if(ctx.stack().get_top_reference().read().is_null()) {
+        if(ctx.stack().top().read().is_null()) {
           return do_evaluate_branch(altr.code_null, ctx, altr.assign);
         }
         else {
@@ -919,14 +919,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           // Convert the argument to an rvalue if it shouldn't be passed by reference.
           bool by_ref = *(it - args.rbegin() + altr.args_by_refs.rbegin());
           if(!by_ref) {
-            ctx.stack().open_top_reference().convert_to_rvalue();
+            ctx.stack().open_top().convert_to_rvalue();
           }
           // Fill an argument.
-          *it = rocket::move(ctx.stack().open_top_reference());
-          ctx.stack().pop_reference();
+          *it = rocket::move(ctx.stack().open_top());
+          ctx.stack().pop();
         }
         // Get the target value.
-        auto& self = ctx.stack().open_top_reference();
+        auto& self = ctx.stack().open_top();
         val = self.read();
         if(!val.is_function()) {
           ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to invoke `", val, "` which is not a function.");
@@ -973,7 +973,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         const auto& altr = this->m_stor.as<index_member_access>();
         // Append a modifier to the reference at the top.
         Reference_Modifier::S_object_key xmod = { altr.name };
-        ctx.stack().open_top_reference().zoom_in(rocket::move(xmod));
+        ctx.stack().open_top().zoom_in(rocket::move(xmod));
         return air_status_next;
       }
     case index_push_unnamed_array:
@@ -983,12 +983,12 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         G_array array;
         array.resize(altr.nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
-          *it = ctx.stack().get_top_reference().read();
-          ctx.stack().pop_reference();
+          *it = ctx.stack().top().read();
+          ctx.stack().pop();
         }
         // Push the array as a temporary.
         Reference_Root::S_temporary xref = { rocket::move(array) };
-        ctx.stack().push_reference(rocket::move(xref));
+        ctx.stack().push(rocket::move(xref));
         return air_status_next;
       }
     case index_push_unnamed_object:
@@ -998,27 +998,27 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         G_object object;
         object.reserve(altr.keys.size());
         for(auto it = altr.keys.rbegin(); it != altr.keys.rend(); ++it) {
-          object.insert_or_assign(*it, ctx.stack().get_top_reference().read());
-          ctx.stack().pop_reference();
+          object.insert_or_assign(*it, ctx.stack().top().read());
+          ctx.stack().pop();
         }
         // Push the object as a temporary.
         Reference_Root::S_temporary xref = { rocket::move(object) };
-        ctx.stack().push_reference(rocket::move(xref));
+        ctx.stack().push(rocket::move(xref));
         return air_status_next;
       }
     case index_apply_xop_inc_post:
       {
         // This operator is unary.
-        auto& lhs = ctx.stack().get_top_reference().open();
+        auto& lhs = ctx.stack().top().open();
         // Increment the operand and return the old value. `altr.assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.open_integer();
-          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
+          ctx.stack().set_temporary(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
           auto& reg = lhs.open_real();
-          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
+          ctx.stack().set_temporary(false, rocket::move(lhs));
           reg = do_operator_add(reg, G_real(1));
         }
         else {
@@ -1029,16 +1029,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
     case index_apply_xop_dec_post:
       {
         // This operator is unary.
-        auto& lhs = ctx.stack().get_top_reference().open();
+        auto& lhs = ctx.stack().top().open();
         // Decrement the operand and return the old value. `altr.assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.open_integer();
-          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
+          ctx.stack().set_temporary(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
           auto& reg = lhs.open_real();
-          ctx.stack().set_temporary_reference(false, rocket::move(lhs));
+          ctx.stack().set_temporary(false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_real(1));
         }
         else {
@@ -1049,9 +1049,9 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
     case index_apply_xop_subscr:
       {
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        auto& lref = ctx.stack().open_top_reference();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        auto& lref = ctx.stack().open_top();
         // Append a reference modifier. `altr.assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1072,17 +1072,17 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_apply_xop_pos>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_neg:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_neg>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Get the opposite of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1095,14 +1095,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_notb:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_notb>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         if(rhs.is_boolean()) {
           auto& reg = rhs.open_boolean();
@@ -1115,23 +1115,23 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_notl:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_notl>();
         // This operator is unary.
-        const auto& rhs = ctx.stack().get_top_reference().read();
+        const auto& rhs = ctx.stack().top().read();
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary_reference(altr.assign, do_operator_not(rhs.test()));
+        ctx.stack().set_temporary(altr.assign, do_operator_not(rhs.test()));
         return air_status_next;
       }
     case index_apply_xop_inc_pre:
       {
         // This operator is unary.
-        auto& rhs = ctx.stack().get_top_reference().open();
+        auto& rhs = ctx.stack().top().open();
         // Increment the operand and return it. `altr.assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1149,7 +1149,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
     case index_apply_xop_dec_pre:
       {
         // This operator is unary.
-        auto& rhs = ctx.stack().get_top_reference().open();
+        auto& rhs = ctx.stack().top().open();
         // Decrement the operand and return it. `altr.assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1168,16 +1168,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
       {
         const auto& altr = this->m_stor.as<index_apply_xop_unset>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().unset();
+        auto rhs = ctx.stack().top().unset();
         // Unset the reference and return the old value.
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_lengthof:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_lengthof>();
         // This operator is unary.
-        const auto& rhs = ctx.stack().get_top_reference().read();
+        const auto& rhs = ctx.stack().top().read();
         // Return the number of elements in the operand.
         size_t nelems;
         if(rhs.is_null()) {
@@ -1195,24 +1195,24 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, G_integer(nelems));
+        ctx.stack().set_temporary(altr.assign, G_integer(nelems));
         return air_status_next;
       }
     case index_apply_xop_typeof:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_typeof>();
         // This operator is unary.
-        const auto& rhs = ctx.stack().get_top_reference().read();
+        const auto& rhs = ctx.stack().top().read();
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary_reference(altr.assign, G_string(rocket::sref(rhs.what_gtype())));
+        ctx.stack().set_temporary(altr.assign, G_string(rocket::sref(rhs.what_gtype())));
         return air_status_next;
       }
     case index_apply_xop_sqrt:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_sqrt>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Get the square root of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
@@ -1225,14 +1225,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_isnan:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_isnan>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Check whether the operand is a NaN, store the result in a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
@@ -1245,14 +1245,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_isinf:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_isinf>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Check whether the operand is an infinity, store the result in a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
@@ -1265,14 +1265,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_abs:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_abs>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Get the absolute value of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1285,14 +1285,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_signb:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_signb>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Get the sign bit of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1305,14 +1305,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_round:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_round>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Round the operand to the nearest integer as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1325,14 +1325,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_floor:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_floor>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1345,14 +1345,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_ceil:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_ceil>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1365,14 +1365,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_trunc:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_trunc>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1385,14 +1385,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_iround:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_iround>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1405,14 +1405,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_ifloor:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_ifloor>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1425,14 +1425,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_iceil:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_iceil>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1445,14 +1445,14 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_itrunc:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_itrunc>();
         // This operator is unary.
-        auto rhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1465,30 +1465,30 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_cmp_xeq:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_cmp_xeq>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
         rhs = G_boolean((comp == compare_equal) != altr.negative);
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_cmp_xrel:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_cmp_xrel>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
@@ -1496,16 +1496,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", rhs, "` are unordered.");
         }
         rhs = G_boolean((comp == altr.expect) != altr.negative);
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_cmp_3way:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_cmp_3way>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
@@ -1525,16 +1525,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         default:
           ROCKET_ASSERT(false);
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_add:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_add>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -1557,16 +1557,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_sub:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_sub>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -1584,16 +1584,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_mul:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_mul>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -1620,16 +1620,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_div:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_div>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the quotient of both operands.
           auto& reg = rhs.open_integer();
@@ -1642,16 +1642,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_mod:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_mod>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the remainder of both operands.
           auto& reg = rhs.open_integer();
@@ -1664,16 +1664,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_sll:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_sll>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
@@ -1689,16 +1689,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_srl:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_srl>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
@@ -1714,16 +1714,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_sla:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_sla>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
@@ -1739,16 +1739,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_sra:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_sra>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
@@ -1763,16 +1763,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_andb:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_andb>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -1786,16 +1786,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_orb:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_orb>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -1809,16 +1809,16 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_xorb:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_xorb>();
         // This operator is binary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -1832,27 +1832,27 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_assign:
       {
         // Pop the RHS operand.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
         // Copy the value to the LHS operand which is write-only. `altr.assign` is ignored.
-        ctx.stack().set_temporary_reference(true, rocket::move(rhs));
+        ctx.stack().set_temporary(true, rocket::move(rhs));
         return air_status_next;
       }
     case index_apply_xop_fma:
       {
         const auto& altr = this->m_stor.as<index_apply_xop_fma>();
         // This operator is ternary.
-        auto rhs = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        auto mid = ctx.stack().get_top_reference().read();
-        ctx.stack().pop_reference();
-        const auto& lhs = ctx.stack().get_top_reference().read();
+        auto rhs = ctx.stack().top().read();
+        ctx.stack().pop();
+        auto mid = ctx.stack().top().read();
+        ctx.stack().pop();
+        const auto& lhs = ctx.stack().top().read();
         if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Calculate the fused multiply-add result of the operands.
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
@@ -1861,7 +1861,7 @@ AIR_Status AIR_Node::execute(Executive_Context& ctx) const
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary_reference(altr.assign, rocket::move(rhs));
+        ctx.stack().set_temporary(altr.assign, rocket::move(rhs));
         return air_status_next;
       }
     default:

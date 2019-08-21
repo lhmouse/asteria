@@ -28,18 +28,18 @@ class Evaluation_Stack
       = delete;
 
   public:
-    size_t count_references() const noexcept
+    size_t size() const noexcept
       {
         return static_cast<size_t>(this->m_etop - this->m_refs.data());
       }
-    void clear_references() noexcept
+    void clear() noexcept
       {
         // We assume that `m_refs` is always owned uniquely, unless it is empty.
         auto etop = this->m_refs.mut_data();
         // Reset the top pointer without destroying references for efficiency.
         this->m_etop = etop;
       }
-    void reserve_references(cow_vector<Reference>&& refs)
+    void reserve(cow_vector<Reference>&& refs)
       {
         // This may throw allocation failure if `refs` is not unique.
         auto etop = refs.mut_data();
@@ -48,21 +48,21 @@ class Evaluation_Stack
         this->m_etop = etop;
       }
 
-    const Reference& get_top_reference() const noexcept
+    const Reference& top() const noexcept
       {
         auto etop = this->m_etop;
         ROCKET_ASSERT(etop);
         ROCKET_ASSERT(etop - this->m_refs.data() >= 1);
         return etop[-1];
       }
-    Reference& open_top_reference() noexcept
+    Reference& open_top() noexcept
       {
         auto etop = this->m_etop;
         ROCKET_ASSERT(etop);
         ROCKET_ASSERT(etop - this->m_refs.data() >= 1);
         return etop[-1];
       }
-    template<typename XrefT> Reference& push_reference(XrefT&& xref)
+    template<typename XrefT> Reference& push(XrefT&& xref)
       {
         auto etop = this->m_etop;
         if(etop && (etop < this->m_refs.data() + this->m_refs.size())) {
@@ -77,7 +77,7 @@ class Evaluation_Stack
         this->m_etop = ++etop;
         return etop[-1];
       }
-    template<typename XvalueT> Reference& set_temporary_reference(bool assign, XvalueT&& xvalue)
+    template<typename XvalueT> Reference& set_temporary(bool assign, XvalueT&& xvalue)
       {
         auto etop = this->m_etop;
         ROCKET_ASSERT(etop);
@@ -93,14 +93,14 @@ class Evaluation_Stack
         }
         return etop[-1];
       }
-    void pop_reference() noexcept
+    void pop() noexcept
       {
         auto etop = this->m_etop;
         ROCKET_ASSERT(etop);
         ROCKET_ASSERT(etop - this->m_refs.data() >= 1);
         this->m_etop = --etop;
       }
-    void pop_next_reference(bool assign)
+    void pop_next(bool assign)
       {
         auto etop = this->m_etop;
         ROCKET_ASSERT(etop);
