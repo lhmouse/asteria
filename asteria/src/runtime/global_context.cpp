@@ -120,7 +120,7 @@ void Global_Context::initialize(API_Version version)
 
 Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
   {
-    auto coll = this->tied_collector_opt();
+    auto coll = this->get_tied_collector_opt();
     if(ROCKET_UNEXPECT(!coll)) {
       // GC is disabled.
       return nullptr;
@@ -130,7 +130,7 @@ Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
 
 rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint) const
   {
-    auto coll = this->tied_collector_opt();
+    auto coll = this->get_tied_collector_opt();
     if(ROCKET_UNEXPECT(!coll)) {
       // GC is disabled.
       return rocket::make_refcnt<Variable>();
@@ -140,7 +140,7 @@ rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint) const
 
 size_t Global_Context::collect_variables(GC_Generation gc_limit) const
   {
-    auto coll = this->tied_collector_opt();
+    auto coll = this->get_tied_collector_opt();
     if(ROCKET_UNEXPECT(!coll)) {
       // GC is disabled.
       return 0;
