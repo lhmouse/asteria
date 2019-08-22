@@ -13,29 +13,51 @@ Generational_Collector::~Generational_Collector()
   {
   }
 
-rcptr<Variable> Generational_Collector::create_variable(size_t gen_limit)
+Collector Generational_Collector::* Generational_Collector::do_locate(GC_Generation gc_gen) const
   {
-    auto rlimit = rocket::min(gen_limit, this->m_colls.size() - 1);
-    // Get a variable from the pool.
-    auto qvar = this->m_pool.erase_random_opt();
-    if(ROCKET_UNEXPECT(!qvar)) {
-      // Create a new one if the pool has been exhausted.
-      qvar = rocket::make_refcnt<Variable>();
+    switch(gc_gen) {
+    case gc_generation_newest:
+      {
+        return &Generational_Collector::m_newest;
+      }
+    case gc_generation_middle:
+      {
+        return &Generational_Collector::m_middle;
+      }
+    case gc_generation_oldest:
+      {
+        return &Generational_Collector::m_oldest;
+      }
+    default:
+      ASTERIA_THROW_RUNTIME_ERROR("The GC generation `", gc_gen, "` is invalid.");
     }
-    // Track this variable.
-    this->m_colls.mut(rlimit).track_variable(qvar);
-    // Return it.
-    return qvar;
   }
 
-size_t Generational_Collector::collect_variables(size_t gen_limit)
+rcptr<Variable> Generational_Collector::create_variable(GC_Generation gc_hint)
   {
-    auto rlimit = rocket::min(gen_limit, this->m_colls.size() - 1);
-    // Collect variables from the newest generation to the oldest generation.
-    for(size_t gen = 0; gen <= rlimit; ++gen) {
-      // Collect it.
-      this->m_colls.mut(gen).collect_single_opt();
+    // Locate the collector, which will be responsible for tracking the new variable.
+    auto& coll = this->*(this->do_locate(gc_hint));
+    // Try allocating a variable from the pool.
+    auto var = this->m_pool.erase_random_opt();
+    if(ROCKET_UNEXPECT(!var)) {
+      // Create a new one if the pool has been exhausted.
+      var = rocket::make_refcnt<Variable>();
     }
+    coll.track_variable(var);
+    return var;
+  }
+
+size_t Generational_Collector::collect_variables(GC_Generation gc_limit)
+  {
+    // Collect variables from the newest generation to the oldest.
+    auto qcoll = std::addressof(this->m_newest);
+    uint32_t index = UINT32_MAX;
+    do {
+      qcoll->collect_single_opt();
+      // Move to the next generation.
+      qcoll = qcoll->get_tied_collector_opt();
+      index++;
+    } while(qcoll && (index != gc_limit));
     // Clear the variable pool.
     auto nvars = this->m_pool.size();
     this->m_pool.clear();

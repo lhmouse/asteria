@@ -14,15 +14,18 @@ namespace Asteria {
 class Generational_Collector final : public virtual Rcbase
   {
   private:
+    // Mind the order of construction and destruction.
     Variable_HashSet m_pool;
-    sso_vector<Collector, 3> m_colls;
+    Collector m_oldest;
+    Collector m_middle;
+    Collector m_newest;
 
   public:
     Generational_Collector() noexcept
+      : m_oldest(std::addressof(this->m_pool),                        nullptr,  10),
+        m_middle(std::addressof(this->m_pool), std::addressof(this->m_oldest),  50),
+        m_newest(std::addressof(this->m_pool), std::addressof(this->m_middle), 200)
       {
-        this->m_colls.emplace_back(&(this->m_pool), nullptr,                      10);
-        this->m_colls.emplace_back(&(this->m_pool), &(this->m_colls.mut_back()),  50);
-        this->m_colls.emplace_back(&(this->m_pool), &(this->m_colls.mut_back()), 500);
       }
     ~Generational_Collector() override;
 
@@ -31,26 +34,30 @@ class Generational_Collector final : public virtual Rcbase
     Generational_Collector& operator=(const Generational_Collector&)
       = delete;
 
+  private:
+    Collector Generational_Collector::* do_locate(GC_Generation gc_gen) const;
+
   public:
     size_t get_pool_size() const noexcept
       {
         return this->m_pool.size();
       }
-    size_t count_collectors() const noexcept
+    void clear_pool() noexcept
       {
-        return this->m_colls.size();
-      }
-    const Collector& get_collector(size_t gen) const
-      {
-        return this->m_colls.at(gen);
-      }
-    Collector& open_collector(size_t gen)
-      {
-        return this->m_colls.mut(gen);
+        this->m_pool.clear();
       }
 
-    rcptr<Variable> create_variable(size_t gen_limit);
-    size_t collect_variables(size_t gen_limit);
+    const Collector& get_collector(GC_Generation gc_gen) const
+      {
+        return this->*(this->do_locate(gc_gen));
+      }
+    Collector& open_collector(GC_Generation gc_gen)
+      {
+        return this->*(this->do_locate(gc_gen));
+      }
+
+    rcptr<Variable> create_variable(GC_Generation gc_hint);
+    size_t collect_variables(GC_Generation gc_limit);
   };
 
 }  // namespace Asteria
