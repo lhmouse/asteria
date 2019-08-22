@@ -111,7 +111,7 @@ void Global_Context::initialize(API_Version version)
     }
     create_bindings_version(pair.first->second.open_object(), emods[-1].version);
     // Set the `std` variable now.
-    auto stdv = gcoll->create_variable(9);
+    auto stdv = gcoll->create_variable(gc_generation_oldest);
     stdv->reset(rocket::move(stdo), true);
     Reference_Root::S_variable xref = { stdv };
     this->open_named_reference(rocket::sref("std")) = rocket::move(xref);
