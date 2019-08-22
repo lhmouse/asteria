@@ -23,8 +23,8 @@ class Generational_Collector final : public virtual Rcbase
   public:
     Generational_Collector() noexcept
       : m_oldest(std::addressof(this->m_pool),                        nullptr,  10),
-        m_middle(std::addressof(this->m_pool), std::addressof(this->m_oldest),  50),
-        m_newest(std::addressof(this->m_pool), std::addressof(this->m_middle), 200)
+        m_middle(std::addressof(this->m_pool), std::addressof(this->m_oldest),  60),
+        m_newest(std::addressof(this->m_pool), std::addressof(this->m_middle), 800)
       {
       }
     ~Generational_Collector() override;
