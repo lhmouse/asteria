@@ -760,10 +760,10 @@ namespace Asteria {
           args.emplace_back(rocket::move(self));
           // Create a TCO wrapper.
           auto tca = rocket::make_refcnt<Tail_Call_Arguments>(sloc, func, tco_aware, target, rocket::move(args));
-          // This node is part of an expression rather than a statement, so we can only return `air_status_next` here.
+          // Return it. Note that we force `air_status_return` here for value-discarding TCO.
           Reference_Root::S_tail_call xref = { rocket::move(tca) };
           self = rocket::move(xref);
-          return air_status_next;
+          return air_status_return;
         }
         // Perform a non-proper call.
         try {
