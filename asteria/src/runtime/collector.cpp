@@ -14,8 +14,9 @@ bool Collector::track_variable(const rcptr<Variable>& var)
     if(!this->m_tracked.insert(var)) {
       return false;
     }
-    if(ROCKET_UNEXPECT(this->m_counter++ >= this->m_threshold)) {
-      // Perform automatic garbage collection on `*this`.
+    this->m_counter++;
+    // Perform automatic garbage collection on `*this`.
+    if(ROCKET_UNEXPECT(this->m_counter > this->m_threshold)) {
       auto qnext = this;
       do {
         qnext = qnext->collect_single_opt();
@@ -101,9 +102,9 @@ Collector* Collector::collect_single_opt()
     if(!sentry) {
       return nullptr;
     }
+    Collector* next = nullptr;
     auto output = this->m_output_opt;
     auto tied = this->m_tied_opt;
-    bool collect_tied = false;
     // The algorithm here is basically described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     // We initialize `gcref` to zero then increment it, rather than initialize `gcref` to the reference count then decrement it.
@@ -224,7 +225,7 @@ Collector* Collector::collect_single_opt()
         tied->m_tracked.insert(root);
         // Check whether the next generation needs to be checked as well.
         if(tied->m_counter++ >= tied->m_threshold) {
-          collect_tied = true;
+          next = tied;
         }
         this->m_tracked.erase(root);
         return false;
@@ -235,7 +236,7 @@ Collector* Collector::collect_single_opt()
     this->m_staging.clear();
     this->m_counter = 0;
     ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void*>(this));
-    return collect_tied ? tied : nullptr;
+    return next;
   }
 
 }  // namespace Asteria

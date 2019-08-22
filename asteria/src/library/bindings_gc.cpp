@@ -23,7 +23,7 @@ opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_intege
       return rocket::nullopt;
     }
     // Get the current number of variables being tracked.
-    auto count = qcoll->get_tracked_variable_count();
+    auto count = qcoll->count_tracked_variables();
     return G_integer(count);
   }
 
@@ -56,7 +56,7 @@ opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_intege
     }
     // Set the threshold and return its old value.
     auto thres = qcoll->get_threshold();
-    qcoll->set_threshold(static_cast<size_t>(rocket::clamp(threshold, 0, PTRDIFF_MAX)));
+    qcoll->set_threshold(static_cast<uint32_t>(rocket::clamp(threshold, 0, UINT32_MAX)));
     return G_integer(thres);
   }
 
