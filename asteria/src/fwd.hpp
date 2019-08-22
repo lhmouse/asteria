@@ -165,7 +165,7 @@ enum AIR_Status : uint8_t
   };
 
 // Tail call optimization (TCO) awareness
-enum TCO_Aware
+enum TCO_Aware : uint8_t
   {
     tco_aware_none     = 0,  // Tail call optimization is not allowed.
     tco_aware_by_ref   = 1,  // The tail call is forwarded by reference.
@@ -174,7 +174,7 @@ enum TCO_Aware
   };
 
 // Stack frame types
-enum Frame_Type
+enum Frame_Type : uint8_t
   {
     frame_type_native  = 0,  // The frame could not be determined.
     frame_type_throw   = 1,  // An exception was thrown here.
@@ -183,6 +183,14 @@ enum Frame_Type
   };
 
 ROCKET_PURE_FUNCTION extern const char* describe_frame_type(Frame_Type type) noexcept;
+
+// Garbage collection generations
+enum GC_Generation : uint8_t
+  {
+    gc_generation_newest  = 0,
+    gc_generation_middle  = 1,
+    gc_generation_oldest  = 2,
+  };
 
 // Indices of fundamental types
 enum Gtype : uint8_t
@@ -392,7 +400,6 @@ struct Compiler_Options
   {
     // These fields have a default value of `false`.
     union {
-      int8_t why_cant_bitfields_have_initializers_zero = 0;
       struct {
         // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
         bool escapable_single_quote_strings : 1;
@@ -401,14 +408,15 @@ struct Compiler_Options
         // Parse integer literals as real literals. [useful when parsing JSON text]
         bool integers_as_reals : 1;
       };
+      int8_t why_cant_bitfields_have_initializers_zero = 0;
     };
     // These fields have a default value of `true`.
     union {
-      int8_t why_cant_bitfields_have_initializers_one = -1;
       struct {
         // Enable proper tail calls. [more commonly known as tail call optimization]
         bool proper_tail_calls : 1;
       };
+      int8_t why_cant_bitfields_have_initializers_one = -1;
     };
   };
 
