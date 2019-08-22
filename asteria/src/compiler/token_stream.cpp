@@ -192,13 +192,12 @@ namespace Asteria {
     class Tack
       {
       private:
-        int32_t m_line;
-        size_t m_offset;
-        size_t m_length;
+        int32_t m_line = 0;
+        size_t m_offset = 0;
+        size_t m_length = 0;
 
       public:
         constexpr Tack() noexcept
-          : m_line(0), m_offset(0), m_length(0)
           {
           }
 

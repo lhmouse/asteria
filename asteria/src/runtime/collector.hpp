@@ -19,15 +19,14 @@ class Collector
     Collector* m_tied_opt;
     uint32_t m_threshold;
 
-    uint32_t m_counter;
-    long m_recur;
+    uint32_t m_counter = 0;
+    long m_recur = 0;
     Variable_HashSet m_tracked;
     Variable_HashSet m_staging;
 
   public:
     Collector(Variable_HashSet* output_opt, Collector* tied_opt, uint32_t threshold) noexcept
-      : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold),
-        m_counter(0), m_recur(0)
+      : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold)
       {
       }
 

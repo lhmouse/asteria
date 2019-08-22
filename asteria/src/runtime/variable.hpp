@@ -15,13 +15,12 @@ class Variable final : public virtual Rcbase
   private:
     // contents
     Value m_value;
-    bool m_immut;
+    bool m_immut = true;
     // garbage collection support
     mutable pair<long, double> m_gcref;
 
   public:
     Variable() noexcept
-      : m_value(), m_immut(true)
       {
       }
     ~Variable() override;
