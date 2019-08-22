@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Tail_Call_Arguments final : public Rcbase
+class Tail_Call_Arguments final : public virtual Rcbase
   {
   private:
     Source_Location m_sloc;

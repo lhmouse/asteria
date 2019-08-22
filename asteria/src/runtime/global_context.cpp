@@ -171,28 +171,28 @@ rcobj<Abstract_Function> Global_Context::placeholder_function() const noexcept
 
 uint32_t Global_Context::get_random_uint32() const noexcept
   {
-    auto prng = rocket::static_pointer_cast<Random_Number_Generator>(this->m_prng);
+    auto prng = rocket::dynamic_pointer_cast<Random_Number_Generator>(this->m_prng);
     ROCKET_ASSERT(prng);
     return prng->bump();
   }
 
 const Value& Global_Context::get_std_member(const phsh_string& name) const
   {
-    auto stdv = rocket::static_pointer_cast<Variable>(this->m_stdv);
+    auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
     ROCKET_ASSERT(stdv);
     return stdv->get_value().as_object().get_or(name, null_value);
   }
 
 Value& Global_Context::open_std_member(const phsh_string& name)
   {
-    auto stdv = rocket::static_pointer_cast<Variable>(this->m_stdv);
+    auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
     ROCKET_ASSERT(stdv);
     return stdv->open_value().open_object().try_emplace(name).first->second;
   }
 
 bool Global_Context::remove_std_member(const phsh_string& name)
   {
-    auto stdv = rocket::static_pointer_cast<Variable>(this->m_stdv);
+    auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
     ROCKET_ASSERT(stdv);
     return stdv->open_value().open_object().erase(name);
   }
