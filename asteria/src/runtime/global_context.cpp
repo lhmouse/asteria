@@ -118,34 +118,34 @@ void Global_Context::initialize(API_Version version)
     this->m_stdv = stdv;
   }
 
-Collector* Global_Context::get_collector_opt(size_t gen) const
+Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
   {
     auto coll = this->tied_collector_opt();
-    if(!coll) {
+    if(ROCKET_UNEXPECT(!coll)) {
+      // GC is disabled.
       return nullptr;
     }
-    if(gen >= coll->count_collectors()) {
-      return nullptr;
-    }
-    return std::addressof(coll->open_collector(gen));
+    return std::addressof(coll->open_collector(gc_gen));
   }
 
-rcptr<Variable> Global_Context::create_variable(size_t gen_hint) const
+rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint) const
   {
     auto coll = this->tied_collector_opt();
-    if(!coll) {
+    if(ROCKET_UNEXPECT(!coll)) {
+      // GC is disabled.
       return rocket::make_refcnt<Variable>();
     }
-    return coll->create_variable(gen_hint);
+    return coll->create_variable(gc_hint);
   }
 
-size_t Global_Context::collect_variables(size_t gen_limit) const
+size_t Global_Context::collect_variables(GC_Generation gc_limit) const
   {
     auto coll = this->tied_collector_opt();
-    if(!coll) {
+    if(ROCKET_UNEXPECT(!coll)) {
+      // GC is disabled.
       return 0;
     }
-    return coll->collect_variables(gen_limit);
+    return coll->collect_variables(gc_limit);
   }
 
 rcobj<Placeholder> Global_Context::placeholder() const noexcept

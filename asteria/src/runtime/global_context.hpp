@@ -37,9 +37,9 @@ class Global_Context final : public Abstract_Context
     void initialize(API_Version version = api_version_latest);
 
     // These are interfaces of the global garbage collector.
-    Collector* get_collector_opt(size_t gen) const;
-    rcptr<Variable> create_variable(size_t gen_hint = 0) const;
-    size_t collect_variables(size_t gen_limit = 9) const;
+    Collector* get_collector_opt(GC_Generation gc_gen) const;
+    rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest) const;
+    size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest) const;
 
     // These are interfaces of the placeholder.
     rcobj<Placeholder> placeholder() const noexcept;

@@ -13,12 +13,12 @@ namespace Asteria {
 
 opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation)
   {
-    if((generation < 0) || (generation > 9)) {
+    if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<size_t>(generation);
+    auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
-    auto qcoll = global.get_collector_opt(rgen);
+    auto qcoll = global.get_collector_opt(gc_gen);
     if(!qcoll) {
       return rocket::nullopt;
     }
@@ -29,12 +29,12 @@ opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_intege
 
 opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
   {
-    if((generation < 0) || (generation > 9)) {
+    if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<size_t>(generation);
+    auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
-    auto qcoll = global.get_collector_opt(rgen);
+    auto qcoll = global.get_collector_opt(gc_gen);
     if(!qcoll) {
       return rocket::nullopt;
     }
@@ -45,27 +45,36 @@ opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_intege
 
 opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold)
   {
-    if((generation < 0) || (generation > 9)) {
+    if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return rocket::nullopt;
     }
-    auto rgen = static_cast<size_t>(generation);
+    auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
-    auto qcoll = global.get_collector_opt(rgen);
+    auto qcoll = global.get_collector_opt(gc_gen);
     if(!qcoll) {
       return rocket::nullopt;
     }
-    // Get the current threshold.
+    // Set the threshold and return its old value.
     auto thres = qcoll->get_threshold();
-    // Set a new threshold.
     qcoll->set_threshold(static_cast<size_t>(rocket::clamp(threshold, 0, PTRDIFF_MAX)));
     return G_integer(thres);
   }
 
 G_integer std_gc_collect(const Global_Context& global, const opt<G_integer>& generation_limit)
   {
-    auto rgen = static_cast<size_t>(rocket::clamp(generation_limit.value_or(9), 0, 9));
-    // Perform full garbage collection.
-    auto nvars = global.collect_variables(rgen);
+    auto gc_limit = gc_generation_oldest;
+    // Get the maximum generation to collect when `generation_limit` is specified.
+    if(generation_limit) {
+      // Clamp the generation. Unlike others, this function does not fail if `generation_limit` is out of range.
+      if(*generation_limit < gc_generation_newest) {
+        gc_limit = gc_generation_newest;
+      }
+      else if(*generation_limit < gc_generation_oldest) {
+        gc_limit = static_cast<GC_Generation>(*generation_limit);
+      }
+    }
+    // Perform garbage collection up to the generation specified.
+    auto nvars = global.collect_variables(gc_limit);
     return G_integer(nvars);
   }
 
