@@ -140,15 +140,13 @@ template<typename lhsT, typename rhsT> struct is_lvalue_assignable : is_assignab
   };
 
 // The argument must be a non-const lvalue.
-template<typename argT, ROCKET_ENABLE_IF(is_same<typename remove_cv<argT>::type, argT>::value)>
-        ROCKET_ARTIFICIAL_FUNCTION constexpr typename remove_reference<argT>::type&& move(argT& arg) noexcept
+template<typename argT, ROCKET_DISABLE_IF(is_same<const argT, argT>::value)> ROCKET_ARTIFICIAL_FUNCTION constexpr argT&& move(argT& arg) noexcept
   {
     return static_cast<typename remove_reference<argT>::type&&>(arg);
   }
 
 // The argument must be an lvalue.
-template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_lvalue_reference<argT&&>::value)>
-        ROCKET_ARTIFICIAL_FUNCTION constexpr targetT&& forward(argT&& arg) noexcept
+template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_reference<argT>::value)> ROCKET_ARTIFICIAL_FUNCTION constexpr targetT&& forward(argT&& arg) noexcept
   {
     return static_cast<targetT&&>(arg);
   }
@@ -182,25 +180,19 @@ template<typename typeT> void adl_swap(typeT& lhs, typeT& rhs) noexcept(is_nothr
     details_utilities::adl_swap_aux<typeT>(lhs, rhs);
   }
 
-template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
-                                                            : ::std::declval<rhsT>()) min(lhsT&& lhs, rhsT&& rhs)
+template<typename lhsT, typename rhsT> constexpr typename common_type<lhsT&&, rhsT&&>::type min(lhsT&& lhs, rhsT&& rhs)
   {
     return (rhs < lhs) ? noadl::forward<rhsT>(rhs)
                        : noadl::forward<lhsT>(lhs);
   }
 
-template<typename lhsT, typename rhsT> constexpr decltype(0 ? ::std::declval<lhsT>()
-                                                            : ::std::declval<rhsT>()) max(lhsT&& lhs, rhsT&& rhs)
+template<typename lhsT, typename rhsT> constexpr typename common_type<lhsT&&, rhsT&&>::type max(lhsT&& lhs, rhsT&& rhs)
   {
     return (lhs < rhs) ? noadl::forward<rhsT>(rhs)
                        : noadl::forward<lhsT>(lhs);
   }
 
-template<typename testT,
-         typename lowerT, typename upperT> constexpr decltype(0 ? ::std::declval<lowerT>()
-                                                                : 0 ? ::std::declval<upperT>()
-                                                                    : ::std::declval<testT>()) clamp(testT&& test,
-                                                                                                     lowerT&& lower, upperT&& upper)
+template<typename testT, typename lowerT, typename upperT> constexpr typename common_type<testT&&, lowerT&&, upperT&&>::type clamp(testT&& test, lowerT&& lower, upperT&& upper)
   {
     return (test < lower) ? noadl::forward<lowerT>(lower)
                           : (upper < test) ? noadl::forward<upperT>(upper)
