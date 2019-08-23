@@ -396,7 +396,26 @@ enum API_Version : uint32_t
   };
 
 // Options for source parsing and code generation
-struct Compiler_Options
+template<uint32_t... paramsT> struct Compiler_Options_template;
+template<uint32_t fragmentT> struct Compiler_Options_fragment;
+
+template<uint32_t versionT> struct Compiler_Options_template<versionT> : Compiler_Options_template<versionT, versionT>
+  {
+  };
+template<uint32_t versionT, uint32_t fragmentT> struct Compiler_Options_template<versionT, fragmentT> : Compiler_Options_template<versionT, fragmentT - 1>,
+                                                                                                        Compiler_Options_fragment<fragmentT>
+  {
+    // All members from `Compiler_Options_fragment<fragmentT>` have been brought in.
+    // This struct does not define anything by itself.
+  };
+template<uint32_t versionT> struct Compiler_Options_template<versionT, 0>
+  {
+    // This member exists in all derived structs.
+    // We would like these structs to be trivial, hence virtual bases are not an option.
+    uint8_t version = versionT;
+  };
+
+template<> struct Compiler_Options_fragment<1>
   {
     // Make single quotes behave similiar to double quotes. [useful when parsing JSON5 text]
     bool escapable_single_quotes : 1;
@@ -404,9 +423,27 @@ struct Compiler_Options
     bool keywords_as_identifiers : 1;
     // Parse integer literals as real literals. [useful when parsing JSON text]
     bool integers_as_reals : 1;
-    // Disable proper tail calls. [more commonly known as tail call optimization]
+    // Do not implement proper tail calls. [more commonly known as tail call optimization]
     bool no_proper_tail_calls : 1;
+    // Do not remove unreachable or insignificant code.
+    bool no_dead_code_elimination : 1;
+    // Do not fold constants into adjacent operators.
+    bool no_constant_folding : 1;
+
+    // Note: Please keep this struct as compact as possible.
   };
+
+template<> struct Compiler_Options_fragment<2>
+  {
+    // Note: Please keep this struct as compact as possible.
+  };
+
+// These are aliases for historical versions.
+using Compiler_Options_v1 = Compiler_Options_template<1>;
+using Compiler_Options_v2 = Compiler_Options_template<2>;
+
+// This is always an alias for the latest version.
+using Compiler_Options = Compiler_Options_v2;
 
 // This value is initialized statically and never destroyed.
 extern const unsigned char null_value_storage[];
