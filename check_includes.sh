@@ -12,4 +12,4 @@ function check_one()
 export -f check_one
 
 find -L "asteria/src/" -name "*.hpp" -print0 |  \
-  xargs -0 -P$(nproc) -I{} bash -ec 'check_one "$@"' "$0" {}
+  xargs -0 -P$(nproc) -I{} -- bash -ec 'check_one "$@"' "$0" {}

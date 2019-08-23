@@ -5,8 +5,8 @@
 #define ASTERIA_RUNTIME_TAIL_CALL_ARGUMENTS_HPP_
 
 #include "../fwd.hpp"
-#include "rcbase.hpp"
 #include "source_location.hpp"
+#include "abstract_function.hpp"
 
 namespace Asteria {
 

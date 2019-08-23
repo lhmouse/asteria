@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "parser_error.hpp"
+#include "../runtime/rcbase.hpp"
 
 namespace Asteria {
 
@@ -13,7 +14,7 @@ class Simple_Source_File
   {
   private:
     bool m_fthr;  // throw on failure
-    rcptr<Abstract_Function> m_cptr;  // note type erasure
+    rcptr<Rcbase> m_cptr;  // note type erasure
 
   public:
     Simple_Source_File() noexcept

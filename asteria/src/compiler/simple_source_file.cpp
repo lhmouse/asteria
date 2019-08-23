@@ -104,11 +104,12 @@ Parser_Error Simple_Source_File::open(const cow_string& filename)
 
 Reference Simple_Source_File::execute(const Global_Context& global, cow_vector<Reference>&& args) const
   {
-    Reference self;
-    if(!this->m_cptr) {
+    auto qtarget = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
+    if(!qtarget) {
       ASTERIA_THROW_RUNTIME_ERROR("No code has been loaded so far.");
     }
-    this->m_cptr->invoke(self, global, rocket::move(args));
+    Reference self;
+    qtarget->invoke(self, global, rocket::move(args));
     self.finish_call(global);
     return self;
   }
