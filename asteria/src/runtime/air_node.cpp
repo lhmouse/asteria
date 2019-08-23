@@ -12,6 +12,78 @@
 
 namespace Asteria {
 
+bool AIR_Node::is_unconditional_transfer() const noexcept
+  {
+    switch(this->m_stor.index()) {
+    case index_throw_statement:
+      {
+        return true;
+      }
+    case index_simple_status:
+      {
+        return this->m_stor.as<index_simple_status>().status != air_status_next;
+      }
+    case index_return_by_value:
+      {
+        return true;
+      }
+    case index_function_call:
+      {
+        return this->m_stor.as<index_function_call>().tco_aware != tco_aware_none;
+      }
+    default:
+      return false;
+    }
+  }
+
+bool AIR_Node::has_no_effect() const noexcept
+  {
+    switch(this->m_stor.index()) {
+    case index_execute_block:
+      {
+        return this->m_stor.as<index_execute_block>().code_body.empty();
+      }
+    case index_if_statement:
+      {
+        return this->m_stor.as<index_if_statement>().code_true.empty() && this->m_stor.as<index_if_statement>().code_false.empty();
+      }
+    case index_switch_statement:
+      {
+        return this->m_stor.as<index_switch_statement>().code_labels.empty();
+      }
+    case index_try_statement:
+      {
+        return this->m_stor.as<index_try_statement>().code_try.empty();
+      }
+    case index_branch_expression:
+      {
+        return this->m_stor.as<index_branch_expression>().code_true.empty() && this->m_stor.as<index_branch_expression>().code_false.empty();
+      }
+    case index_coalescence:
+      {
+        return this->m_stor.as<index_coalescence>().code_null.empty();
+      }
+    default:
+      return false;
+    }
+  }
+
+const Value* AIR_Node::get_constant_opt() const noexcept
+  {
+    switch(this->m_stor.index()) {
+    case index_push_literal:
+      {
+        return std::addressof(this->m_stor.as<index_push_literal>().val);
+      }
+    case index_push_local_reference:
+      {
+        return nullptr;  // TODO: not implemented yet
+      }
+    default:
+      return nullptr;
+    }
+  }
+
     namespace {
 
     ///////////////////////////////////////////////////////////////////////////

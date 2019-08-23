@@ -481,6 +481,14 @@ class AIR_Node
         this->m_stor.swap(other.m_stor);
       }
 
+    // Check whether this is a jump or throw statement.
+    bool is_unconditional_transfer() const noexcept;
+    // Check whether this node has no side effect, e.g. when it is the body of an empty `if` or `switch` statement.
+    bool has_no_effect() const noexcept;
+
+    // Check whether this node stores a constant that is known during translation time. This is used by constant folding.
+    const Value* get_constant_opt() const noexcept;
+
     // Compress this IR node.
     // Be advised that solid nodes cannot be copied or moved because they occupy variant numbers of bytes.
     // Solidification is performed in two passes: The total number of bytes is calculated, which are allocated as a whole
