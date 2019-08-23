@@ -56,7 +56,7 @@ AVMC_Queue Instantiated_Function::do_generate_code(const Compiler_Options& optio
 
 std::ostream& Instantiated_Function::describe(std::ostream& ostrm) const
   {
-    return ostrm << this->m_zvarg->get_function_signature() << " @ " << this->m_zvarg->get_source_location();
+    return ostrm << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
   }
 
 Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const

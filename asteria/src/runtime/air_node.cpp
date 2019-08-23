@@ -827,7 +827,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         // Initialize the `this` reference.
         self.zoom_out();
         // Call the function now.
-        const auto& func = ctx.zvarg()->get_function_signature();
+        const auto& func = ctx.zvarg()->func();
         if(tco_aware != tco_aware_none) {
           // Pack arguments for this proper tail call.
           args.emplace_back(rocket::move(self));

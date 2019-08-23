@@ -35,11 +35,11 @@ class Instantiated_Function final : public Abstract_Function
   public:
     const Source_Location& get_source_location() const noexcept
       {
-        return this->m_zvarg->get_source_location();
+        return this->m_zvarg->sloc();
       }
     const cow_string& get_function_signature() const noexcept
       {
-        return this->m_zvarg->get_function_signature();
+        return this->m_zvarg->func();
       }
     const cow_vector<phsh_string>& get_parameters() const noexcept
       {

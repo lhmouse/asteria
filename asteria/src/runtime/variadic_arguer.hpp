@@ -19,9 +19,9 @@ class Variadic_Arguer final : public Abstract_Function
     cow_vector<Reference> m_vargs;
 
   public:
-    template<typename... XvargsT> Variadic_Arguer(const Source_Location& sloc, const cow_string& func,
+    template<typename... XvargsT> Variadic_Arguer(const Source_Location& xsloc, const cow_string& xfunc,
                                                   XvargsT&&... xvargs)
-      : m_sloc(sloc), m_func(func),
+      : m_sloc(xsloc), m_func(xfunc),
         m_vargs(rocket::forward<XvargsT>(xvargs)...)
       {
       }
@@ -33,27 +33,32 @@ class Variadic_Arguer final : public Abstract_Function
       }
 
   public:
-    const Source_Location& get_source_location() const noexcept
+    const Source_Location& sloc() const noexcept
       {
         return this->m_sloc;
       }
-    const cow_string& get_source_file() const noexcept
+    const cow_string& file() const noexcept
       {
         return this->m_sloc.file();
       }
-    int64_t get_source_line() const noexcept
+    int64_t line() const noexcept
       {
         return this->m_sloc.line();
       }
-    const cow_string& get_function_signature() const noexcept
+    const cow_string& func() const noexcept
       {
         return this->m_func;
       }
-    size_t count_arguments() const noexcept
+
+    bool empty() const noexcept
+      {
+        return this->m_vargs.empty();
+      }
+    size_t size() const noexcept
       {
         return this->m_vargs.size();
       }
-    const Reference& get_argument(size_t index) const
+    const Reference& arg(size_t index) const
       {
         return this->m_vargs.at(index);
       }

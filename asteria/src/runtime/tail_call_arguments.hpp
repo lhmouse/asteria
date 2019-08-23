@@ -36,15 +36,15 @@ class Tail_Call_Arguments final : public virtual Rcbase
       = delete;
 
   public:
-    const Source_Location& get_source_location() const noexcept
+    const Source_Location& sloc() const noexcept
       {
         return this->m_sloc;
       }
-    const cow_string& get_function_signature() const noexcept
+    const cow_string& func() const noexcept
       {
         return this->m_func;
       }
-    TCO_Aware get_tco_awareness() const noexcept
+    TCO_Aware tco_aware() const noexcept
       {
         return this->m_tco_aware;
       }

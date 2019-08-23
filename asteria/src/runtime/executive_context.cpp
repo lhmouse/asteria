@@ -56,11 +56,11 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
         // Erase named arguments as well as the ellipsis.
         args.erase(0, *qelps);
         // Create a new argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(rcobj<Variadic_Arguer>(this->m_zvarg.get(), rocket::move(args)));
+        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(rcobj<Variadic_Arguer>(this->zvarg(), rocket::move(args)));
       }
       else {
         // Reference the pre-allocated zero-ary argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(this->m_zvarg.get());
+        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(this->zvarg());
       }
     }
     else {
@@ -70,11 +70,11 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
       }
       else {
         // Reference the pre-allocated zero-ary argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(this->m_zvarg.get());
+        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(this->zvarg());
       }
     }
     this->open_named_reference(rocket::sref("__this")) = rocket::move(self);
-    this->open_named_reference(rocket::sref("__func")) = do_make_constant<G_string>(this->m_zvarg.get()->get_function_signature());
+    this->open_named_reference(rocket::sref("__func")) = do_make_constant<G_string>(this->zvarg()->func());
   }
 
 }  // namespace Asteria
