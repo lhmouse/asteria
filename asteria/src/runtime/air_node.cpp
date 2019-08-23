@@ -98,7 +98,9 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         }
         // Execute the queue on a new context.
         Executive_Context ctx_next(rocket::ref(ctx));
-        return queue.execute(ctx_next);
+        auto status = queue.execute(ctx_next);
+        // Forward the status as is.
+        return status;
       }
 
     AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, /*const*/ Executive_Context& ctx)
@@ -109,7 +111,6 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         }
         // Evaluate the branch.
         auto status = queue.execute(ctx);
-        ROCKET_ASSERT(status == air_status_next);
         // Pop the result, then overwrite the top with it.
         ctx.stack().pop_next(assign);
         return status;
