@@ -956,7 +956,7 @@ bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Comp
           bool token_got = do_accept_numeric_literal(seq, reader, options.integers_as_reals) ||
                            do_accept_punctuator(seq, reader) ||
                            do_accept_string_literal(seq, reader, '\"', true) ||
-                           do_accept_string_literal(seq, reader, '\'', options.escapable_single_quote_strings) ||
+                           do_accept_string_literal(seq, reader, '\'', options.escapable_single_quotes) ||
                            do_accept_identifier_or_keyword(seq, reader, options.keywords_as_identifiers);
           if(!token_got) {
             ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data());

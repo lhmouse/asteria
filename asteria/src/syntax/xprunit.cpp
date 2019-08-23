@@ -104,7 +104,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
       {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, options.proper_tail_calls ? tco_aware : tco_aware_none };
+        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, options.no_proper_tail_calls ? tco_aware_none : tco_aware };
         code.emplace_back(rocket::move(xnode));
         return code;
       }
