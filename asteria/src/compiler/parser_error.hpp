@@ -17,6 +17,10 @@ class Parser_Error
     Parser_Status m_status;
 
   public:
+    constexpr Parser_Error(Parser_Status xstatus) noexcept
+      : m_line(-1), m_offset(0), m_length(0), m_status(xstatus)
+      {
+      }
     constexpr Parser_Error(int32_t xline, size_t xoffset, size_t xlength, Parser_Status xstatus) noexcept
       : m_line(xline), m_offset(xoffset), m_length(xlength), m_status(xstatus)
       {

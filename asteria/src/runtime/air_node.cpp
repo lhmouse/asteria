@@ -338,6 +338,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_execute_block(Executive_Context& ctx, uint32_t /*k*/, const void* p)
       {
         const auto& queue_body = pcast<SP_queues_fixed<1>>(p).queues[0];
+
         // Execute the body on a new context.
         return do_execute_block(queue_body, ctx);
       }
@@ -346,6 +347,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
       {
         const auto& immutable = k != 0;
         const auto& name = pcast<SP_name>(p).name;
+
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();
         var->reset(G_null(), immutable);
@@ -360,6 +362,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_initialize_variable(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& immutable = k != 0;
+
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
         auto value = ctx.stack().top().read();
@@ -377,6 +380,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& negative = k != 0;
         const auto& queue_true = pcast<SP_queues_fixed<2>>(p).queues[0];
         const auto& queue_false = pcast<SP_queues_fixed<2>>(p).queues[1];
+
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != negative) {
           // Execute the true branch.
@@ -391,6 +395,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& queues_labels = pcast<SP_switch>(p).queues_labels;
         const auto& queues_bodies = pcast<SP_switch>(p).queues_bodies;
         const auto& names_added = pcast<SP_switch>(p).names_added;
+
         // Read the value of the condition.
         auto value = ctx.stack().top().read();
         // Get the number of clauses.
@@ -422,6 +427,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
           // No matching clause has been found.
           return air_status_next;
         }
+
         // Jump to the clause denoted by `target`.
         // Note that all clauses share the same context.
         Executive_Context ctx_body(rocket::ref(ctx));
@@ -447,6 +453,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& queue_body = pcast<SP_queues_fixed<2>>(p).queues[0];
         const auto& negative = k != 0;
         const auto& queue_cond = pcast<SP_queues_fixed<2>>(p).queues[1];
+
         // This is the same as the `do...while` statement in C.
         for(;;) {
           // Execute the body.
@@ -473,6 +480,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& negative = k != 0;
         const auto& queue_cond = pcast<SP_queues_fixed<2>>(p).queues[0];
         const auto& queue_body = pcast<SP_queues_fixed<2>>(p).queues[1];
+
         // This is the same as the `while` statement in C.
         for(;;) {
           // Check the condition.
@@ -500,6 +508,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& name_mapped = pcast<SP_for_each>(p).name_mapped;
         const auto& queue_init = pcast<SP_for_each>(p).queue_init;
         const auto& queue_body = pcast<SP_for_each>(p).queue_body;
+
         // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
         Executive_Context ctx_for(rocket::ref(ctx));
         // Create a variable for the key.
@@ -519,6 +528,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         // Set the range up.
         mapped = rocket::move(ctx_for.stack().open_top());
         auto range = mapped.read();
+
         // The range value has been saved.
         // We are immune to dangling pointers in case the object being iterated is modified by the loop body.
         if(range.is_array()) {
@@ -580,6 +590,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& queue_cond = pcast<SP_queues_fixed<4>>(p).queues[1];
         const auto& queue_step = pcast<SP_queues_fixed<4>>(p).queues[2];
         const auto& queue_body = pcast<SP_queues_fixed<4>>(p).queues[3];
+
         // This is the same as the `for` statement in C.
         // We have to create an outer context due to the fact that names declared in the first segment outlast every iteration.
         Executive_Context ctx_for(rocket::ref(ctx));
@@ -618,6 +629,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& sloc = pcast<SP_try>(p).sloc;
         const auto& name_except = pcast<SP_try>(p).name_except;
         const auto& queue_catch = pcast<SP_try>(p).queue_catch;
+
         // This is almost identical to JavaScript.
         try {
           // Execute the `try` clause. If no exception is thrown, this will have little overhead.
@@ -645,6 +657,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_throw_statement(Executive_Context& ctx, uint32_t /*k*/, const void* p)
       {
         const auto& sloc = pcast<SP_sloc>(p).sloc;
+
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
         auto value = ctx.stack().top().read();
@@ -676,6 +689,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& sloc = pcast<SP_sloc_msg>(p).sloc;
         const auto& negative = k != 0;
         const auto& msg = pcast<SP_sloc_msg>(p).msg;
+
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != negative) {
           // When the assertion succeeds, there is nothing to do.
@@ -691,6 +705,8 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_simple_status(Executive_Context& /*ctx*/, uint32_t k, const void* /*p*/)
       {
         const auto& status = static_cast<AIR_Status>(k);
+
+        // Return the status as is.
         return status;
       }
 
@@ -709,6 +725,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_push_literal(Executive_Context& ctx, uint32_t /*k*/, const void* p)
       {
         const auto& val = pcast<Value>(p);
+
         // Push a constant.
         Reference_Root::S_constant xref = { val };
         ctx.stack().push(rocket::move(xref));
@@ -718,6 +735,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_push_global_reference(Executive_Context& ctx, uint32_t /*k*/, const void* p)
       {
         const auto& name = pcast<SP_name>(p).name;
+
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(name);
         if(!qref) {
@@ -732,6 +750,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
       {
         const auto& depth = k;
         const auto& name = pcast<SP_name>(p).name;
+
         // Get the context.
         const Executive_Context* qctx = std::addressof(ctx);
         rocket::ranged_for(uint32_t(0), depth, [&](size_t) { qctx = qctx->get_parent_opt();  });
@@ -749,6 +768,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_push_bound_reference(Executive_Context& ctx, uint32_t /*k*/, const void* p)
       {
         const auto& ref = pcast<Reference>(p);
+
         // Push a copy of the bound reference.
         ctx.stack().push(ref);
         return air_status_next;
@@ -761,6 +781,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& name = pcast<SP_func>(p).name;
         const auto& params = pcast<SP_func>(p).params;
         const auto& body = pcast<SP_func>(p).body;
+
         // Instantiate the function.
         auto qtarget = rocket::make_refcnt<Instantiated_Function>(options, sloc, name, std::addressof(ctx), params, body);
         ASTERIA_DEBUG_LOG("New function: ", *qtarget);
@@ -775,6 +796,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& assign = k != 0;
         const auto& queue_true = pcast<SP_queues_fixed<2>>(p).queues[0];
         const auto& queue_false = pcast<SP_queues_fixed<2>>(p).queues[1];
+
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != false) {
           // Evaluate the true branch.
@@ -788,6 +810,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
       {
         const auto& assign = k != 0;
         const auto& queue_null = pcast<SP_queues_fixed<1>>(p).queues[0];
+
         // Check the value of the condition.
         if(ctx.stack().top().read().is_null() != false) {
           // Evaluate the alternative.
@@ -802,6 +825,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& sloc = pcast<SP_call>(p).sloc;
         const auto& args_by_refs = pcast<SP_call>(p).args_by_refs;
         const auto& tco_aware = static_cast<TCO_Aware>(k);
+
         // Pop arguments off the stack backwards.
         cow_vector<Reference> args;
         args.resize(args_by_refs.size());
@@ -826,6 +850,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& target = val.as_function();
         // Initialize the `this` reference.
         self.zoom_out();
+
         // Call the function now.
         const auto& func = ctx.zvarg()->func();
         if(tco_aware != tco_aware_none) {
@@ -864,6 +889,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_member_access(Executive_Context& ctx, uint32_t /*k*/, const void* p)
       {
         const auto& name = pcast<SP_name>(p).name;
+
         // Append a modifier to the reference at the top.
         Reference_Modifier::S_object_key xmod = { name };
         ctx.stack().open_top().zoom_in(rocket::move(xmod));
@@ -873,6 +899,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_push_unnamed_array(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& nelems = k;
+
         // Pop elements from the stack and store them in an array backwards.
         G_array array;
         array.resize(nelems);
@@ -889,6 +916,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_push_unnamed_object(Executive_Context& ctx, uint32_t /*k*/, const void* p)
       {
         const auto& keys = pcast<SP_names>(p).names;
+
         // Pop elements from the stack and store them in an object backwards.
         G_object object;
         object.reserve(keys.size());
@@ -1380,6 +1408,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_pos(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Copy the operand to create a temporary value, then return it.
@@ -1391,6 +1420,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_neg(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Get the opposite of the operand as a temporary value, then return it.
@@ -1412,6 +1442,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_notb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
@@ -1433,6 +1464,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_notl(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         const auto& rhs = ctx.stack().top().read();
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
@@ -1482,6 +1514,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_unset(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().unset();
         // Unset the reference and return the old value.
@@ -1492,6 +1525,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         const auto& rhs = ctx.stack().top().read();
         // Return the number of elements in the operand.
@@ -1518,6 +1552,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_typeof(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         const auto& rhs = ctx.stack().top().read();
         // Return the type name of the operand.
@@ -1529,6 +1564,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Get the square root of the operand as a temporary value, then return it.
@@ -1550,6 +1586,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_isnan(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Check whether the operand is a NaN, store the result in a temporary value, then return it.
@@ -1571,6 +1608,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_isinf(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Check whether the operand is an infinity, store the result in a temporary value, then return it.
@@ -1592,6 +1630,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_abs(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Get the absolute value of the operand as a temporary value, then return it.
@@ -1613,6 +1652,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_signb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Get the sign bit of the operand as a temporary value, then return it.
@@ -1634,6 +1674,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_round(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Round the operand to the nearest integer as a temporary value, then return it.
@@ -1655,6 +1696,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_floor(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
@@ -1676,6 +1718,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_ceil(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
@@ -1697,6 +1740,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_trunc(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
@@ -1718,6 +1762,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_iround(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
@@ -1739,6 +1784,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
@@ -1760,6 +1806,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_iceil(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
@@ -1781,6 +1828,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
@@ -1804,6 +1852,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& assign = SK_xrel(k).assign != 0;
         const auto& expect = static_cast<Compare>(SK_xrel(k).expect);
         const auto& negative = SK_xrel(k).negative != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -1821,6 +1870,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         const auto& assign = SK_xrel(k).assign != 0;
         const auto& expect = static_cast<Compare>(SK_xrel(k).expect);
         const auto& negative = SK_xrel(k).negative != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -1839,6 +1889,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -1869,6 +1920,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_add(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -1902,6 +1954,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_sub(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -1930,6 +1983,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_mul(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -1967,6 +2021,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_div(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -1990,6 +2045,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_mod(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -2013,6 +2069,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_sll(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -2039,6 +2096,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_srl(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -2065,6 +2123,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_sla(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -2091,6 +2150,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_sra(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -2116,6 +2176,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_andb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -2140,6 +2201,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_orb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -2164,6 +2226,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_xorb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();
@@ -2198,6 +2261,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
     AIR_Status do_apply_xop_fma(Executive_Context& ctx, uint32_t k, const void* /*p*/)
       {
         const auto& assign = k != 0;
+
         // This operator is ternary.
         auto rhs = ctx.stack().top().read();
         ctx.stack().pop();

@@ -32,10 +32,10 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& sbuf, const c
     params.emplace_back(rocket::sref("..."));
     // Instantiate the function.
     auto qtarget = rocket::make_refcnt<Instantiated_Function>(options, sloc, rocket::sref("<file scope>"), nullptr, params, parser.get_statements());
-    ASTERIA_DEBUG_LOG("Loaded file '", filename, "': ", *qtarget);
+    ASTERIA_DEBUG_LOG("Loaded file \'", filename, "\' as `", *qtarget, "`.");
     // Accept the code.
     this->m_cptr = rocket::move(qtarget);
-    return Parser_Error(-1, SIZE_MAX, 0, parser_status_success);
+    return parser_status_success;
   }
 
 Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
@@ -55,7 +55,7 @@ Parser_Error Simple_Source_File::reload(std::istream& istrm, const cow_string& f
   {
     std::istream::sentry sentry(istrm, true);
     if(!sentry) {
-      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, parser_status_istream_open_failure));
+      return this->do_throw_or_return(parser_status_istream_open_failure);
     }
     // Extract characters from the stream buffer directly.
     opt<Parser_Error> qerr;
@@ -77,7 +77,7 @@ Parser_Error Simple_Source_File::reload(std::istream& istrm, const cow_string& f
       istrm.setstate(state);
     }
     if(istrm.bad()) {
-      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, parser_status_istream_badbit_set));
+      return this->do_throw_or_return(parser_status_istream_badbit_set);
     }
     // `qerr` shall always have a value here.
     // If the exceptional path above has been taken, `istrm.bad()` will have been set.
@@ -97,14 +97,14 @@ Parser_Error Simple_Source_File::open(const cow_string& filename)
     // Open the file designated by `filename`.
     std::filebuf sbuf;
     if(!sbuf.open(filename.c_str(), std::ios_base::in)) {
-      return this->do_throw_or_return(Parser_Error(-1, SIZE_MAX, 0, parser_status_istream_open_failure));
+      return this->do_throw_or_return(parser_status_istream_open_failure);
     }
     return this->reload(sbuf, filename);
   }
 
 Reference Simple_Source_File::execute(const Global_Context& global, cow_vector<Reference>&& args) const
   {
-    auto qtarget = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
+    auto qtarget = rocket::dynamic_pointer_cast<Instantiated_Function>(this->m_cptr);
     if(!qtarget) {
       ASTERIA_THROW_RUNTIME_ERROR("No code has been loaded so far.");
     }

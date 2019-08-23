@@ -18,7 +18,7 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return Parser_Error(-1, SIZE_MAX, 0, status);
+          return status;
         }
         return Parser_Error(qtok->line(), qtok->offset(), qtok->length(), status);
       }
@@ -27,7 +27,7 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return Source_Location(rocket::sref("<end of stream>"), -1);
+          return std::make_pair(rocket::sref("<end of stream>"), -1);
         }
         return Source_Location(qtok->file(), qtok->line());
       }
@@ -1971,7 +1971,7 @@ Parser_Error Parser::get_parser_error() const noexcept
     switch(this->state()) {
     case state_empty:
       {
-        return Parser_Error(-1, SIZE_MAX, 0, parser_status_no_data_loaded);
+        return parser_status_no_data_loaded;
       }
     case state_error:
       {
@@ -1979,7 +1979,7 @@ Parser_Error Parser::get_parser_error() const noexcept
       }
     case state_success:
       {
-        return Parser_Error(-1, SIZE_MAX, 0, parser_status_success);
+        return parser_status_success;
       }
     default:
       ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
