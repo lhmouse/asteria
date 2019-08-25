@@ -198,39 +198,46 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         return queue;
       }
 
-    rcptr<Abstract_Function> do_instantiate_function(const AIR_Node::S_define_function& p, const Abstract_Context* ctx_opt)
+    rcptr<Abstract_Function> do_instantiate_function(const AIR_Node::S_define_function& xnode, const Abstract_Context* ctx_opt)
       {
+        const auto& opts = xnode.opts;
+        const auto& sloc = xnode.sloc;
+        const auto& name = xnode.name;
+        const auto& params = xnode.params;
+        const auto& body = xnode.body;
+
         // Create the prototype string.
-        cow_string func = p.name;
+        cow_string func;
+        func << name;
         // XXX: The parameter list is only appended if the name really looks like a function.
         //      Placeholders such as `<file>` or `<native>` do not precede parameter lists.
-        auto epos = func.find_last_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
-        if((epos != cow_string::npos) && (epos == func.size() - 1)) {
+        auto epos = name.find_last_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
+        if((epos != cow_string::npos) && (epos == name.size() - 1)) {
           // Append the parameter list. Parameters are separated by commas.
           func << '(';
-          epos = p.params.size() - 1;
+          epos = params.size() - 1;
           if(epos != SIZE_MAX) {
             for(size_t i = 0; i != epos; ++i) {
-              func << p.params[i] << ", ";
+              func << params[i] << ", ";
             }
-            func << p.params[epos];
+            func << params[epos];
           }
           func << ')';
         }
         // Create the zero-ary argument getter, which serves two purposes:
         // 0) It is copied as `__varg` whenever its parent function is called with no variadic argument as an optimization.
         // 1) It provides storage for `__file`, `__line` and `__func` for its parent function.
-        auto zvarg = rocket::make_refcnt<Variadic_Arguer>(p.sloc, rocket::move(func));
+        auto zvarg = rocket::make_refcnt<Variadic_Arguer>(sloc, rocket::move(func));
 
         // Generate IR nodes for the function body.
         cow_vector<AIR_Node> code_func;
-        Analytic_Context ctx_func(ctx_opt, p.params);
-        epos = p.body.size() - 1;
+        Analytic_Context ctx_func(ctx_opt, params);
+        epos = body.size() - 1;
         if(epos != SIZE_MAX) {
           for(size_t i = 0; i != epos; ++i) {
-            p.body[i].generate_code(code_func, nullptr, ctx_func, p.opts, p.body[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
+            body[i].generate_code(code_func, nullptr, ctx_func, opts, body[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
           }
-          p.body[epos].generate_code(code_func, nullptr, ctx_func, p.opts, tco_aware_nullify);
+          body[epos].generate_code(code_func, nullptr, ctx_func, opts, tco_aware_nullify);
         }
         // TODO: Insert optimization passes here.
         // Solidify IR nodes.
@@ -238,7 +245,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         do_solidify_vector(queue, code_func);
 
         // Create the function now.
-        return rocket::make_refcnt<Instantiated_Function>(p.params, rocket::move(zvarg), rocket::move(queue));
+        return rocket::make_refcnt<Instantiated_Function>(params, rocket::move(zvarg), rocket::move(queue));
       }
 
     ///////////////////////////////////////////////////////////////////////////
