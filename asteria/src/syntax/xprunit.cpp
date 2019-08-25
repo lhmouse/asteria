@@ -12,6 +12,30 @@ namespace Asteria {
 
     namespace {
 
+    cow_string do_name_closure(int32_t line)
+      {
+        static constexpr char s_digits[] = "0123456789";
+        static constexpr char s_prefix[] = "<closure>._";
+
+        array<char, 32> sbuf;
+        auto wpos = sbuf.mut_end();
+        // Write digits backwards.
+        auto r = static_cast<uint32_t>(line);
+        do {
+          auto dval = r % 10;
+          r /= 10;
+          // Write a digit.
+          --wpos;
+          *wpos = s_digits[dval];
+        } while(r != 0);
+        // Prepend something meaningful.
+        wpos = std::copy_backward(std::begin(s_prefix),
+                                  std::end(s_prefix) - 1,
+                                  wpos);
+        // Return the formatted string.
+        return cow_string(wpos, sbuf.mut_end());
+      }
+
     cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
                                                  const cow_vector<Xprunit>& units)
       {
@@ -84,7 +108,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
       {
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Encode arguments.
-        AIR_Node::S_define_function xnode = { opts, altr.sloc, rocket::sref("<closure>"), altr.params, altr.body };
+        AIR_Node::S_define_function xnode = { opts, altr.sloc, do_name_closure(altr.sloc.line()), altr.params, altr.body };
         code.emplace_back(rocket::move(xnode));
         return code;
       }
