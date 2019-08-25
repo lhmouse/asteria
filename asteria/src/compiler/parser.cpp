@@ -1935,7 +1935,7 @@ namespace Asteria {
 
     }  // namespace
 
-bool Parser::load(Token_Stream& tstrm, const Compiler_Options& /*options*/)
+bool Parser::load(Token_Stream& tstrm, const Compiler_Options& /*opts*/)
   {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;

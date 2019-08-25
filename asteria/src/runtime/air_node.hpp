@@ -111,7 +111,7 @@ class AIR_Node
       };
     struct S_define_function
       {
-        Compiler_Options options;
+        Compiler_Options opts;
         Source_Location sloc;
         cow_string name;
         cow_vector<phsh_string> params;
@@ -495,6 +495,9 @@ class AIR_Node
     // at the end of the first pass, where nodes are constructed in the second pass.
     // The argument for `ipass` shall be `0` for the first pass and `1` for the second pass.
     AVMC_Queue& solidify(AVMC_Queue& queue, uint8_t ipass) const;
+    // Instantiate this IR node to create a function. This node must hold a value of type `S_define_function`.
+    // This function is provided merely for convenience elsewhere. It is not intended for public use.
+    rcptr<Abstract_Function> instantiate_function(const Abstract_Context* parent_opt) const;
   };
 
 inline void swap(AIR_Node& lhs, AIR_Node& rhs) noexcept

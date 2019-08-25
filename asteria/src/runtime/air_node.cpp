@@ -6,8 +6,10 @@
 #include "executive_context.hpp"
 #include "global_context.hpp"
 #include "evaluation_stack.hpp"
+#include "analytic_context.hpp"
 #include "instantiated_function.hpp"
 #include "exception.hpp"
+#include "../syntax/statement.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -189,6 +191,56 @@ const Value* AIR_Node::get_constant_opt() const noexcept
         return Details::AVMC_Appender<XnodeT>::template append<execuT>(queue, k, rocket::forward<XnodeT>(xnode));
       }
 
+    AVMC_Queue& do_solidify_vector(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
+      {
+        rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
+        rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
+        return queue;
+      }
+
+    rcptr<Abstract_Function> do_instantiate_function(const AIR_Node::S_define_function& p, const Abstract_Context* ctx_opt)
+      {
+        // Create the prototype string.
+        cow_string func = p.name;
+        // XXX: The parameter list is only appended if the name really looks like a function.
+        //      Placeholders such as `<file>` or `<native>` do not precede parameter lists.
+        auto epos = func.find_last_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
+        if((epos != cow_string::npos) && (epos == func.size() - 1)) {
+          // Append the parameter list. Parameters are separated by commas.
+          func << '(';
+          epos = p.params.size() - 1;
+          if(epos != SIZE_MAX) {
+            for(size_t i = 0; i != epos; ++i) {
+              func << p.params[i] << ", ";
+            }
+            func << p.params[epos];
+          }
+          func << ')';
+        }
+        // Create the zero-ary argument getter, which serves two purposes:
+        // 0) It is copied as `__varg` whenever its parent function is called with no variadic argument as an optimization.
+        // 1) It provides storage for `__file`, `__line` and `__func` for its parent function.
+        auto zvarg = rocket::make_refcnt<Variadic_Arguer>(p.sloc, rocket::move(func));
+
+        // Generate IR nodes for the function body.
+        cow_vector<AIR_Node> code_func;
+        Analytic_Context ctx_func(ctx_opt, p.params);
+        epos = p.body.size() - 1;
+        if(epos != SIZE_MAX) {
+          for(size_t i = 0; i != epos; ++i) {
+            p.body[i].generate_code(code_func, nullptr, ctx_func, p.opts, p.body[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
+          }
+          p.body[epos].generate_code(code_func, nullptr, ctx_func, p.opts, tco_aware_nullify);
+        }
+        // TODO: Insert optimization passes here.
+        // Solidify IR nodes.
+        AVMC_Queue queue;
+        do_solidify_vector(queue, code_func);
+
+        // Create the function now.
+        return rocket::make_refcnt<Instantiated_Function>(p.params, rocket::move(zvarg), rocket::move(queue));
+      }
+
     ///////////////////////////////////////////////////////////////////////////
     // Parameter structs and variable enumeration callbacks
     ///////////////////////////////////////////////////////////////////////////
@@ -307,11 +359,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
 
     struct SP_func
       {
-        Compiler_Options options;
-        Source_Location sloc;
-        cow_string name;
-        cow_vector<phsh_string> params;
-        cow_vector<Statement> body;
+        AIR_Node::S_define_function xnode;
 
         using contains_no_variable = std::true_type;
       };
@@ -776,14 +824,10 @@ const Value* AIR_Node::get_constant_opt() const noexcept
 
     AIR_Status do_define_function(Executive_Context& ctx, uint32_t /*k*/, const void* p)
       {
-        const auto& options = pcast<SP_func>(p).options;
-        const auto& sloc = pcast<SP_func>(p).sloc;
-        const auto& name = pcast<SP_func>(p).name;
-        const auto& params = pcast<SP_func>(p).params;
-        const auto& body = pcast<SP_func>(p).body;
+        const auto& xnode = pcast<SP_func>(p).xnode;
 
         // Instantiate the function.
-        auto qtarget = rocket::make_refcnt<Instantiated_Function>(options, sloc, name, std::addressof(ctx), params, body);
+        auto qtarget = do_instantiate_function(xnode, std::addressof(ctx));
         ASTERIA_DEBUG_LOG("New function: ", *qtarget);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
@@ -2302,9 +2346,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the body.
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 0);  });  // 1st pass
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 1);  });  // 2nd pass
+        // Encode arguments.
+        do_solidify_vector(sp.queues[0], altr.code_body);
         // Push a new node.
         return do_append<do_execute_block>(queue, 0, rocket::move(sp));
       }
@@ -2316,7 +2359,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the name.
+        // Encode arguments.
         sp.name = altr.name;
         // Push a new node.
         return do_append<do_declare_variable>(queue, altr.immutable, rocket::move(sp));
@@ -2339,12 +2382,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the true branch.
-        rocket::for_each(altr.code_true, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 0);  });  // 1st pass
-        rocket::for_each(altr.code_true, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 1);  });  // 2nd pass
-        // Solidify the false branch.
-        rocket::for_each(altr.code_false, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 0);  });  // 1st pass
-        rocket::for_each(altr.code_false, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 1);  });  // 2nd pass
+        // Encode arguments.
+        do_solidify_vector(sp.queues[0], altr.code_true);
+        do_solidify_vector(sp.queues[1], altr.code_false);
         // Push a new node.
         return do_append<do_if_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2356,19 +2396,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify all labels.
-        for(const auto& code_label : altr.code_labels) {
-          auto& queue_label = sp.queues_labels.emplace_back();
-          rocket::for_each(code_label, [&](const AIR_Node& node) { node.solidify(queue_label, 0);  });  // 1st pass
-          rocket::for_each(code_label, [&](const AIR_Node& node) { node.solidify(queue_label, 1);  });  // 2nd pass
-        }
-        // Solidify all clause bodies.
-        for(const auto& code_body : altr.code_bodies) {
-          auto& queue_body = sp.queues_bodies.emplace_back();
-          rocket::for_each(code_body, [&](const AIR_Node& node) { node.solidify(queue_body, 0);  });  // 1st pass
-          rocket::for_each(code_body, [&](const AIR_Node& node) { node.solidify(queue_body, 1);  });  // 2nd pass
-        }
-        // Solidify name lists.
+        // Encode arguments.
+        rocket::for_each(altr.code_labels, [&](const auto& code) { do_solidify_vector(sp.queues_labels.emplace_back(), code);  });
+        rocket::for_each(altr.code_bodies, [&](const auto& code) { do_solidify_vector(sp.queues_bodies.emplace_back(), code);  });
         sp.names_added = altr.names_added;
         // Push a new node.
         return do_append<do_switch_statement>(queue, 0, rocket::move(sp));
@@ -2381,12 +2411,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the body.
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 0);  });  // 1st pass
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 1);  });  // 2nd pass
-        // Solidify the condition.
-        rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 0);  });  // 1st pass
-        rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 1);  });  // 2nd pass
+        // Encode arguments.
+        do_solidify_vector(sp.queues[0], altr.code_body);
+        do_solidify_vector(sp.queues[1], altr.code_cond);
         // Push a new node.
         return do_append<do_do_while_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2398,12 +2425,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the condition.
-        rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 0);  });  // 1st pass
-        rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 1);  });  // 2nd pass
-        // Solidify the body.
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 0);  });  // 1st pass
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 1);  });  // 2nd pass
+        // Encode arguments.
+        do_solidify_vector(sp.queues[0], altr.code_cond);
+        do_solidify_vector(sp.queues[1], altr.code_body);
         // Push a new node.
         return do_append<do_while_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2415,15 +2439,11 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the name of references.
+        // Encode arguments.
         sp.name_key = altr.name_key;
         sp.name_mapped = altr.name_mapped;
-        // Solidify the range initializer.
-        rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.solidify(sp.queue_init, 0);  });  // 1st pass
-        rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.solidify(sp.queue_init, 1);  });  // 2nd pass
-        // Solidify the body.
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queue_body, 0);  });  // 1st pass
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queue_body, 1);  });  // 2nd pass
+        do_solidify_vector(sp.queue_init, altr.code_init);
+        do_solidify_vector(sp.queue_body, altr.code_body);
         // Push a new node.
         return do_append<do_for_each_statement>(queue, 0, rocket::move(sp));
       }
@@ -2435,18 +2455,11 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the initializer.
-        rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 0);  });  // 1st pass
-        rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 1);  });  // 2nd pass
-        // Solidify the condition.
-        rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 0);  });  // 1st pass
-        rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 1);  });  // 2nd pass
-        // Solidify the increment.
-        rocket::for_each(altr.code_step, [&](const AIR_Node& node) { node.solidify(sp.queues[2], 0);  });  // 1st pass
-        rocket::for_each(altr.code_step, [&](const AIR_Node& node) { node.solidify(sp.queues[2], 1);  });  // 2nd pass
-        // Solidify the body.
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queues[3], 0);  });  // 1st pass
-        rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.solidify(sp.queues[3], 1);  });  // 2nd pass
+        // Encode arguments.
+        do_solidify_vector(sp.queues[0], altr.code_init);
+        do_solidify_vector(sp.queues[1], altr.code_cond);
+        do_solidify_vector(sp.queues[2], altr.code_step);
+        do_solidify_vector(sp.queues[3], altr.code_body);
         // Push a new node.
         return do_append<do_for_statement>(queue, altr.code_cond.empty(), rocket::move(sp));
       }
@@ -2458,15 +2471,11 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the `try` clause.
-        rocket::for_each(altr.code_try, [&](const AIR_Node& node) { node.solidify(sp.queue_try, 0);  });  // 1st pass
-        rocket::for_each(altr.code_try, [&](const AIR_Node& node) { node.solidify(sp.queue_try, 1);  });  // 2nd pass
-        // Solidify `catch` parameters.
+        // Encode arguments.
+        do_solidify_vector(sp.queue_try, altr.code_try);
         sp.sloc = altr.sloc;
         sp.name_except = altr.name_except;
-        // Solidify the `catch` clause.
-        rocket::for_each(altr.code_catch, [&](const AIR_Node& node) { node.solidify(sp.queue_catch, 0);  });  // 1st pass
-        rocket::for_each(altr.code_catch, [&](const AIR_Node& node) { node.solidify(sp.queue_catch, 1);  });  // 2nd pass
+        do_solidify_vector(sp.queue_catch, altr.code_catch);
         // Push a new node.
         return do_append<do_try_statement>(queue, 0, rocket::move(sp));
       }
@@ -2478,7 +2487,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the source location.
+        // Encode arguments.
         sp.sloc = altr.sloc;
         // Push a new node.
         return do_append<do_throw_statement>(queue, 0, rocket::move(sp));
@@ -2491,7 +2500,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the source location and the message.
+        // Encode arguments.
         sp.sloc = altr.sloc;
         sp.msg = altr.msg;
         // Push a new node.
@@ -2534,7 +2543,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the name.
+        // Encode arguments.
         sp.name = altr.name;
         // Push a new node.
         return do_append<do_push_global_reference>(queue, 0, rocket::move(sp));
@@ -2547,7 +2556,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the name.
+        // Encode arguments.
         sp.name = altr.name;
         // Push a new node.
         return do_append<do_push_local_reference>(queue, altr.depth, rocket::move(sp));
@@ -2570,12 +2579,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify everything.
-        sp.options = altr.options;
-        sp.sloc = altr.sloc;
-        sp.name = altr.name;
-        sp.params = altr.params;
-        sp.body = altr.body;
+        // Encode arguments.
+        sp.xnode = altr;
         // Push a new node.
         return do_append<do_define_function>(queue, 0, rocket::move(sp));
       }
@@ -2587,12 +2592,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the true branch.
-        rocket::for_each(altr.code_true, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 0);  });  // 1st pass
-        rocket::for_each(altr.code_true, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 1);  });  // 2nd pass
-        // Solidify the false branch.
-        rocket::for_each(altr.code_false, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 0);  });  // 1st pass
-        rocket::for_each(altr.code_false, [&](const AIR_Node& node) { node.solidify(sp.queues[1], 1);  });  // 2nd pass
+        // Encode arguments.
+        do_solidify_vector(sp.queues[0], altr.code_true);
+        do_solidify_vector(sp.queues[1], altr.code_false);
         // Push a new node.
         return do_append<do_branch_expression>(queue, altr.assign, rocket::move(sp));
       }
@@ -2604,9 +2606,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the alternative.
-        rocket::for_each(altr.code_null, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 0);  });  // 1st pass
-        rocket::for_each(altr.code_null, [&](const AIR_Node& node) { node.solidify(sp.queues[0], 1);  });  // 2nd pass
+        // Encode arguments.
+        do_solidify_vector(sp.queues[0], altr.code_null);
         // Push a new node.
         return do_append<do_coalescence>(queue, altr.assign, rocket::move(sp));
       }
@@ -2618,9 +2619,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the source location.
+        // Encode arguments.
         sp.sloc = altr.sloc;
-        // Solidify the argument specifier vector.
         sp.args_by_refs = altr.args_by_refs;
         // Push a new node.
         return do_append<do_function_call>(queue, altr.tco_aware, rocket::move(sp));
@@ -2633,7 +2633,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the name.
+        // Encode arguments.
         sp.name = altr.name;
         // Push a new node.
         return do_append<do_member_access>(queue, 0, rocket::move(sp));
@@ -2656,7 +2656,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         if(ipass == 0) {
           return queue.request(sp);
         }
-        // Solidify the keys.
+        // Encode arguments.
         sp.names = altr.keys;
         // Push a new node.
         return do_append<do_push_unnamed_object>(queue, 0, rocket::move(sp));
@@ -3078,6 +3078,11 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     default:
       ASTERIA_TERMINATE("An unknown AIR node type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
     }
+  }
+
+rcptr<Abstract_Function> AIR_Node::instantiate_function(const Abstract_Context* parent_opt) const
+  {
+    return do_instantiate_function(this->m_stor.as<index_define_function>(), parent_opt);
   }
 
 }  // namespace Asteria

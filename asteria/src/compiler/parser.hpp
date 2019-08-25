@@ -42,7 +42,7 @@ class Parser
         return *this;
       }
 
-    bool load(Token_Stream& tstrm, const Compiler_Options& options);
+    bool load(Token_Stream& tstrm, const Compiler_Options& opts);
 
     Parser_Error get_parser_error() const noexcept;
     const cow_vector<Statement>& get_statements() const;

@@ -5,7 +5,7 @@
 #include "simple_source_file.hpp"
 #include "token_stream.hpp"
 #include "parser.hpp"
-#include "../runtime/instantiated_function.hpp"
+#include "../runtime/air_node.hpp"
 #include "../utilities.hpp"
 #include <fstream>
 
@@ -13,27 +13,29 @@ namespace Asteria {
 
 Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& sbuf, const cow_string& filename)
   {
-    // Use default options.
-    Compiler_Options options = { };
+    // Use default opts.
+    AIR_Node::S_define_function xnode = { };
     // Tokenize the character stream.
     Token_Stream tstrm;
-    if(!tstrm.load(sbuf, filename, options)) {
+    if(!tstrm.load(sbuf, filename, xnode.opts)) {
       return tstrm.get_parser_error();
     }
     // Parse tokens.
     Parser parser;
-    if(!parser.load(tstrm, options)) {
+    if(!parser.load(tstrm, xnode.opts)) {
       return parser.get_parser_error();
     }
-    // Initialize parameters of the top scope.
-    Source_Location sloc(filename, 1);
-    // The file is considered to be a function taking variadic arguments.
-    cow_vector<phsh_string> params;
-    params.emplace_back(rocket::sref("..."));
-    // Instantiate the function.
-    auto qtarget = rocket::make_refcnt<Instantiated_Function>(options, sloc, rocket::sref("<file scope>"), nullptr, params, parser.get_statements());
-    ASTERIA_DEBUG_LOG("Loaded file \'", filename, "\' as `", *qtarget, "`.");
-    // Accept the code.
+    // Initialize arguments for the function object.
+    xnode.sloc = std::make_pair(filename, 1);
+    xnode.name = rocket::sref("<file scope>");
+    xnode.params.emplace_back(rocket::sref("..."));
+    xnode.body = parser.get_statements();
+    // Construct an IR node so we can reuse its code somehow.
+    AIR_Node node(rocket::move(xnode));
+    ASTERIA_DEBUG_LOG("Instantiating file \'", filename, "\'...");
+    auto qtarget = node.instantiate_function(nullptr);
+    ASTERIA_DEBUG_LOG("Finished instantiating file \'", filename, "\' as `", *qtarget, "`.");
+    // Accept it.
     this->m_cptr = rocket::move(qtarget);
     return parser_status_success;
   }
@@ -104,7 +106,7 @@ Parser_Error Simple_Source_File::open(const cow_string& filename)
 
 Reference Simple_Source_File::execute(const Global_Context& global, cow_vector<Reference>&& args) const
   {
-    auto qtarget = rocket::dynamic_pointer_cast<Instantiated_Function>(this->m_cptr);
+    auto qtarget = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
     if(!qtarget) {
       ASTERIA_THROW_RUNTIME_ERROR("No code has been loaded so far.");
     }

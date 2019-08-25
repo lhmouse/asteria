@@ -43,7 +43,7 @@ class Token_Stream
         return *this;
       }
 
-    bool load(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& options);
+    bool load(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& opts);
 
     Parser_Error get_parser_error() const noexcept;
     const Token* peek_opt(size_t ahead = 0) const;

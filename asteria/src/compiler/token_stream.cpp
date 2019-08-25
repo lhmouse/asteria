@@ -885,7 +885,7 @@ namespace Asteria {
 
     }  // namespace
 
-bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& options)
+bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& opts)
   {
     // This has to be done before anything else because of possibility of exceptions.
     this->m_stor = nullptr;
@@ -953,11 +953,11 @@ bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Comp
               continue;
             }
           }
-          bool token_got = do_accept_numeric_literal(seq, reader, options.integers_as_reals) ||
+          bool token_got = do_accept_numeric_literal(seq, reader, opts.integers_as_reals) ||
                            do_accept_punctuator(seq, reader) ||
                            do_accept_string_literal(seq, reader, '\"', true) ||
-                           do_accept_string_literal(seq, reader, '\'', options.escapable_single_quotes) ||
-                           do_accept_identifier_or_keyword(seq, reader, options.keywords_as_identifiers);
+                           do_accept_string_literal(seq, reader, '\'', opts.escapable_single_quotes) ||
+                           do_accept_identifier_or_keyword(seq, reader, opts.keywords_as_identifiers);
           if(!token_got) {
             ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data());
             throw do_make_parser_error(reader, 1, parser_status_token_character_unrecognized);

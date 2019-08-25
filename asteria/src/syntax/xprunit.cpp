@@ -12,7 +12,7 @@ namespace Asteria {
 
     namespace {
 
-    cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& options, TCO_Aware tco_aware, const Analytic_Context& ctx,
+    cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
                                                  const cow_vector<Xprunit>& units)
       {
         cow_vector<AIR_Node> code;
@@ -20,10 +20,10 @@ namespace Asteria {
         if(epos != SIZE_MAX) {
           // Expression units other than the last one cannot be TCO'd.
           for(size_t i = 0; i != epos; ++i) {
-            units[i].generate_code(code, options, tco_aware_none, ctx);
+            units[i].generate_code(code, opts, tco_aware_none, ctx);
           }
           // The last unit may be TCO'd.
-          units[epos].generate_code(code, options, tco_aware, ctx);
+          units[epos].generate_code(code, opts, tco_aware, ctx);
         }
         return code;
       }
@@ -31,7 +31,7 @@ namespace Asteria {
     }
 
 cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
-                                             const Compiler_Options& options, TCO_Aware tco_aware, const Analytic_Context& ctx) const
+                                             const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
     case index_literal:
@@ -84,7 +84,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
       {
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Encode arguments.
-        AIR_Node::S_define_function xnode = { options, altr.sloc, rocket::sref("<closure>"), altr.params, altr.body };
+        AIR_Node::S_define_function xnode = { opts, altr.sloc, rocket::sref("<closure>"), altr.params, altr.body };
         code.emplace_back(rocket::move(xnode));
         return code;
       }
@@ -93,8 +93,8 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_branch>();
         // Generate code for both branches.
         // Both branches may be TCO'd.
-        auto code_true = do_generate_code_branch(options, tco_aware, ctx, altr.branch_true);
-        auto code_false = do_generate_code_branch(options, tco_aware, ctx, altr.branch_false);
+        auto code_true = do_generate_code_branch(opts, tco_aware, ctx, altr.branch_true);
+        auto code_false = do_generate_code_branch(opts, tco_aware, ctx, altr.branch_false);
         // Encode arguments.
         AIR_Node::S_branch_expression xnode = { rocket::move(code_true), rocket::move(code_false), altr.assign };
         code.emplace_back(rocket::move(xnode));
@@ -104,7 +104,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
       {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, options.no_proper_tail_calls ? tco_aware_none : tco_aware };
+        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, opts.no_proper_tail_calls ? tco_aware_none : tco_aware };
         code.emplace_back(rocket::move(xnode));
         return code;
       }
@@ -415,7 +415,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Generate code for the branch.
         // This branch may be TCO'd.
-        auto code_null = do_generate_code_branch(options, tco_aware, ctx, altr.branch_null);
+        auto code_null = do_generate_code_branch(opts, tco_aware, ctx, altr.branch_null);
         // Encode arguments.
         AIR_Node::S_coalescence xnode = { rocket::move(code_null), altr.assign };
         code.emplace_back(rocket::move(xnode));
