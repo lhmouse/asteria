@@ -214,30 +214,26 @@ DCE_Result AIR_Node::optimize_dce()
         return static_cast<const TargetT*>(p)[0];
       }
 
-        namespace Details {
-
-        template<typename XnodeT, typename = void> struct AVMC_Appender
+    template<typename XnodeT, typename = void> struct AVMC_Appender
+      {
+        // Because the wrapper function is passed as a template argument, we need 'real' function pointers.
+        // Those converted from non-capturing lambdas are not an option.
+        static Variable_Callback& enumerate_wrapper(Variable_Callback& callback, uint32_t /*k*/, const void* p)
           {
-            // Because the wrapper function is passed as a template argument, we need 'real' function pointers.
-            // Those converted from non-capturing lambdas are not an option.
-            static Variable_Callback& enumerate_wrapper(Variable_Callback& callback, uint32_t /*k*/, const void* p)
-              {
-                return static_cast<const typename std::remove_reference<XnodeT>::type*>(p)->enumerate_variables(callback);
-              }
-            template<AVMC_Queue::Executor execuT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t k, XnodeT&& xnode)
-              {
-                return queue.append<execuT, enumerate_wrapper>(k, rocket::forward<XnodeT>(xnode));
-              }
-          };
-        template<typename XnodeT> struct AVMC_Appender<XnodeT, ASTERIA_VOID_T(typename rocket::remove_cvref<XnodeT>::type::contains_no_variable)>
+            return static_cast<const typename std::remove_reference<XnodeT>::type*>(p)->enumerate_variables(callback);
+          }
+        template<AVMC_Queue::Executor execuT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t k, XnodeT&& xnode)
           {
-            template<AVMC_Queue::Executor execuT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t k, XnodeT&& xnode)
-              {
-                return queue.append<execuT>(k, rocket::forward<XnodeT>(xnode));
-              }
-          };
-
-        }  // namespace Details
+            return queue.append<execuT, enumerate_wrapper>(k, rocket::forward<XnodeT>(xnode));
+          }
+      };
+    template<typename XnodeT> struct AVMC_Appender<XnodeT, ASTERIA_VOID_T(typename rocket::remove_cvref<XnodeT>::type::contains_no_variable)>
+      {
+        template<AVMC_Queue::Executor execuT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t k, XnodeT&& xnode)
+          {
+            return queue.append<execuT>(k, rocket::forward<XnodeT>(xnode));
+          }
+      };
 
     template<AVMC_Queue::Executor execuT> AVMC_Queue& do_append(AVMC_Queue& queue, uint32_t k)
       {
@@ -245,17 +241,17 @@ DCE_Result AIR_Node::optimize_dce()
       }
     template<AVMC_Queue::Executor execuT, typename XnodeT> AVMC_Queue& do_append(AVMC_Queue& queue, uint32_t k, XnodeT&& xnode)
       {
-        return Details::AVMC_Appender<XnodeT>::template append<execuT>(queue, k, rocket::forward<XnodeT>(xnode));
+        return AVMC_Appender<XnodeT>::template append<execuT>(queue, k, rocket::forward<XnodeT>(xnode));
       }
 
-    AVMC_Queue& do_solidify_vector(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
+    AVMC_Queue& do_solidify(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
       {
         rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
         rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
         return queue;
       }
 
-    rcptr<Abstract_Function> do_instantiate_function(const AIR_Node::S_define_function& xnode, const Abstract_Context* ctx_opt)
+    rcptr<Abstract_Function> do_instantiate(const AIR_Node::S_define_function& xnode, const Abstract_Context* ctx_opt)
       {
         const auto& opts = xnode.opts;
         const auto& sloc = xnode.sloc;
@@ -301,7 +297,7 @@ DCE_Result AIR_Node::optimize_dce()
         do_optimize_dce_vector(code_func);
         // Solidify IR nodes.
         AVMC_Queue queue;
-        do_solidify_vector(queue, code_func);
+        do_solidify(queue, code_func);
 
         // Create the function now.
         return rocket::make_refcnt<Instantiated_Function>(params, rocket::move(zvarg), rocket::move(queue));
@@ -893,7 +889,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& xnode = pcast<SP_func>(p).xnode;
 
         // Instantiate the function.
-        auto qtarget = do_instantiate_function(xnode, std::addressof(ctx));
+        auto qtarget = do_instantiate(xnode, std::addressof(ctx));
         ASTERIA_DEBUG_LOG("New function: ", *qtarget);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
@@ -2413,7 +2409,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        do_solidify_vector(sp.queues[0], altr.code_body);
+        do_solidify(sp.queues[0], altr.code_body);
         // Push a new node.
         return do_append<do_execute_block>(queue, 0, rocket::move(sp));
       }
@@ -2449,8 +2445,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        do_solidify_vector(sp.queues[0], altr.code_true);
-        do_solidify_vector(sp.queues[1], altr.code_false);
+        do_solidify(sp.queues[0], altr.code_true);
+        do_solidify(sp.queues[1], altr.code_false);
         // Push a new node.
         return do_append<do_if_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2464,8 +2460,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         }
         // Encode arguments.
         for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
-          do_solidify_vector(sp.queues_labels.emplace_back(), altr.code_labels.at(i));
-          do_solidify_vector(sp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
+          do_solidify(sp.queues_labels.emplace_back(), altr.code_labels.at(i));
+          do_solidify(sp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
         }
         sp.names_added = altr.names_added;
         // Push a new node.
@@ -2480,8 +2476,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        do_solidify_vector(sp.queues[0], altr.code_body);
-        do_solidify_vector(sp.queues[1], altr.code_cond);
+        do_solidify(sp.queues[0], altr.code_body);
+        do_solidify(sp.queues[1], altr.code_cond);
         // Push a new node.
         return do_append<do_do_while_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2494,8 +2490,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        do_solidify_vector(sp.queues[0], altr.code_cond);
-        do_solidify_vector(sp.queues[1], altr.code_body);
+        do_solidify(sp.queues[0], altr.code_cond);
+        do_solidify(sp.queues[1], altr.code_body);
         // Push a new node.
         return do_append<do_while_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2510,8 +2506,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Encode arguments.
         sp.name_key = altr.name_key;
         sp.name_mapped = altr.name_mapped;
-        do_solidify_vector(sp.queue_init, altr.code_init);
-        do_solidify_vector(sp.queue_body, altr.code_body);
+        do_solidify(sp.queue_init, altr.code_init);
+        do_solidify(sp.queue_body, altr.code_body);
         // Push a new node.
         return do_append<do_for_each_statement>(queue, 0, rocket::move(sp));
       }
@@ -2524,10 +2520,10 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        do_solidify_vector(sp.queues[0], altr.code_init);
-        do_solidify_vector(sp.queues[1], altr.code_cond);
-        do_solidify_vector(sp.queues[2], altr.code_step);
-        do_solidify_vector(sp.queues[3], altr.code_body);
+        do_solidify(sp.queues[0], altr.code_init);
+        do_solidify(sp.queues[1], altr.code_cond);
+        do_solidify(sp.queues[2], altr.code_step);
+        do_solidify(sp.queues[3], altr.code_body);
         // Push a new node.
         return do_append<do_for_statement>(queue, altr.code_cond.empty(), rocket::move(sp));
       }
@@ -2540,10 +2536,10 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        do_solidify_vector(sp.queue_try, altr.code_try);
+        do_solidify(sp.queue_try, altr.code_try);
         sp.sloc = altr.sloc;
         sp.name_except = altr.name_except;
-        do_solidify_vector(sp.queue_catch, altr.code_catch);
+        do_solidify(sp.queue_catch, altr.code_catch);
         // Push a new node.
         return do_append<do_try_statement>(queue, 0, rocket::move(sp));
       }
@@ -2661,8 +2657,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        do_solidify_vector(sp.queues[0], altr.code_true);
-        do_solidify_vector(sp.queues[1], altr.code_false);
+        do_solidify(sp.queues[0], altr.code_true);
+        do_solidify(sp.queues[1], altr.code_false);
         // Push a new node.
         return do_append<do_branch_expression>(queue, altr.assign, rocket::move(sp));
       }
@@ -2675,7 +2671,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        do_solidify_vector(sp.queues[0], altr.code_null);
+        do_solidify(sp.queues[0], altr.code_null);
         // Push a new node.
         return do_append<do_coalescence>(queue, altr.assign, rocket::move(sp));
       }
@@ -3150,7 +3146,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 
 rcptr<Abstract_Function> AIR_Node::instantiate_function(const Abstract_Context* parent_opt) const
   {
-    return do_instantiate_function(this->m_stor.as<index_define_function>(), parent_opt);
+    return do_instantiate(this->m_stor.as<index_define_function>(), parent_opt);
   }
 
 }  // namespace Asteria
