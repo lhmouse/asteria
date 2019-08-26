@@ -481,13 +481,9 @@ class AIR_Node
         this->m_stor.swap(other.m_stor);
       }
 
-    // Check whether this is a jump or throw statement.
-    bool is_unconditional_transfer() const noexcept;
-    // Check whether this node has no side effect, e.g. when it is the body of an empty `if` or `switch` statement.
-    bool has_no_effect() const noexcept;
-
-    // Check whether this node stores a constant that is known during translation time. This is used by constant folding.
-    const Value* get_constant_opt() const noexcept;
+    // Perform dead code elimination on this node.
+    // This function is meant to be called recursively.
+    DCE_Result optimize_dce();
 
     // Compress this IR node.
     // Be advised that solid nodes cannot be copied or moved because they occupy variant numbers of bytes.

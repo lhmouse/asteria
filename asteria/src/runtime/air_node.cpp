@@ -14,75 +14,132 @@
 
 namespace Asteria {
 
-bool AIR_Node::is_unconditional_transfer() const noexcept
-  {
-    switch(this->m_stor.index()) {
-    case index_throw_statement:
-      {
-        return true;
-      }
-    case index_simple_status:
-      {
-        return this->m_stor.as<index_simple_status>().status != air_status_next;
-      }
-    case index_return_by_value:
-      {
-        return true;
-      }
-    case index_function_call:
-      {
-        return this->m_stor.as<index_function_call>().tco_aware != tco_aware_none;
-      }
-    default:
-      return false;
-    }
-  }
+    namespace {
 
-bool AIR_Node::has_no_effect() const noexcept
+    DCE_Result do_optimize_dce_vector(cow_vector<AIR_Node>& code)
+      {
+        size_t cur = 0;
+        while(cur != code.size()) {
+          // Run DCE on the node at `cur`.
+          auto dce = code.mut(cur).optimize_dce();
+          if(dce == dce_prune) {
+            // Erase all nodes following the current one.
+            code.erase(++cur);
+            return dce_prune;
+          }
+          if(dce == dce_empty) {
+            // Erase the empty node.
+            code.erase(cur, 1);
+            continue;
+          }
+          // Go to the next node.
+          ++cur;
+        }
+        // Check whether `code` is empty now.
+        if(cur == 0) {
+          return dce_empty;
+        }
+        // No operation can be taken.
+        return dce_none;
+      }
+
+    }
+
+DCE_Result AIR_Node::optimize_dce()
   {
     switch(this->m_stor.index()) {
     case index_execute_block:
       {
-        return this->m_stor.as<index_execute_block>().code_body.empty();
+        auto& altr = this->m_stor.as<index_execute_block>();
+        // The node has no effect if the body is empty.
+        auto dce = do_optimize_dce_vector(altr.code_body);
+        return dce;
       }
     case index_if_statement:
       {
-        return this->m_stor.as<index_if_statement>().code_true.empty() && this->m_stor.as<index_if_statement>().code_false.empty();
+        auto& altr = this->m_stor.as<index_if_statement>();
+        // The node has no effect if both branches are empty.
+        // Note that the condition is not part of this node.
+        auto dce_true = do_optimize_dce_vector(altr.code_true);
+        auto dce_false = do_optimize_dce_vector(altr.code_false);
+        if(dce_true == dce_false) {
+          return dce_true;
+        }
+        return dce_none;
       }
     case index_switch_statement:
       {
-        return this->m_stor.as<index_switch_statement>().code_labels.empty();
+        auto& altr = this->m_stor.as<index_switch_statement>();
+        // The node has no effect if there are no clauses.
+        // Note that the condition is not part of this node.
+        if(altr.code_bodies.empty()) {
+          return dce_empty;
+        }
+        for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
+          do_optimize_dce_vector(altr.code_bodies.mut(i));
+        }
+        return dce_none;
+      }
+    case index_while_statement:
+      {
+        auto& altr = this->m_stor.as<index_while_statement>();
+        // Loop statements cannot be DCE'd.
+        do_optimize_dce_vector(altr.code_body);
+        return dce_none;
+      }
+    case index_do_while_statement:
+      {
+        auto& altr = this->m_stor.as<index_do_while_statement>();
+        // Loop statements cannot be DCE'd.
+        do_optimize_dce_vector(altr.code_body);
+        return dce_none;
+      }
+    case index_for_each_statement:
+      {
+        auto& altr = this->m_stor.as<index_for_each_statement>();
+        // Loop statements cannot be DCE'd.
+        do_optimize_dce_vector(altr.code_body);
+        return dce_none;
+      }
+    case index_for_statement:
+      {
+        auto& altr = this->m_stor.as<index_for_statement>();
+        // Loop statements cannot be DCE'd.
+        do_optimize_dce_vector(altr.code_body);
+        return dce_none;
       }
     case index_try_statement:
       {
-        return this->m_stor.as<index_try_statement>().code_try.empty();
+        auto& altr = this->m_stor.as<index_try_statement>();
+        // The node has no effect if the `try` block is empty.
+        do_optimize_dce_vector(altr.code_try);
+        if(altr.code_try.empty()) {
+          return dce_empty;
+        }
+        do_optimize_dce_vector(altr.code_catch);
+        return dce_none;
       }
-    case index_branch_expression:
+    case index_throw_statement:
       {
-        return this->m_stor.as<index_branch_expression>().code_true.empty() && this->m_stor.as<index_branch_expression>().code_false.empty();
+        return dce_prune;
       }
-    case index_coalescence:
+    case index_simple_status:
       {
-        return this->m_stor.as<index_coalescence>().code_null.empty();
+        auto& altr = this->m_stor.as<index_simple_status>();
+        // The node has no effect if it equals `air_status_next`, which is effectively a no-op.
+        if(altr.status == air_status_next) {
+          return dce_empty;
+        }
+        return dce_prune;
+      }
+    case index_return_by_value:
+      {
+        return dce_prune;
       }
     default:
-      return false;
-    }
-  }
-
-const Value* AIR_Node::get_constant_opt() const noexcept
-  {
-    switch(this->m_stor.index()) {
-    case index_push_literal:
       {
-        return std::addressof(this->m_stor.as<index_push_literal>().val);
+        return dce_none;
       }
-    case index_push_local_reference:
-      {
-        return nullptr;  // TODO: not implemented yet
-      }
-    default:
-      return nullptr;
     }
   }
 
@@ -239,7 +296,9 @@ const Value* AIR_Node::get_constant_opt() const noexcept
           }
           body[epos].generate_code(code_func, nullptr, ctx_func, opts, tco_aware_nullify);
         }
+        // Optimize the IR.
         // TODO: Insert optimization passes here.
+        do_optimize_dce_vector(code_func);
         // Solidify IR nodes.
         AVMC_Queue queue;
         do_solidify_vector(queue, code_func);
@@ -687,7 +746,7 @@ const Value* AIR_Node::get_constant_opt() const noexcept
 
         // This is almost identical to JavaScript.
         try {
-          // Execute the `try` clause. If no exception is thrown, this will have little overhead.
+          // Execute the `try` block. If no exception is thrown, this will have little overhead.
           return do_execute_block(queue_try, ctx);
         }
         catch(Exception& except) {
@@ -2404,8 +2463,10 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sp);
         }
         // Encode arguments.
-        rocket::for_each(altr.code_labels, [&](const auto& code) { do_solidify_vector(sp.queues_labels.emplace_back(), code);  });
-        rocket::for_each(altr.code_bodies, [&](const auto& code) { do_solidify_vector(sp.queues_bodies.emplace_back(), code);  });
+        for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
+          do_solidify_vector(sp.queues_labels.emplace_back(), altr.code_labels.at(i));
+          do_solidify_vector(sp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
+        }
         sp.names_added = altr.names_added;
         // Push a new node.
         return do_append<do_switch_statement>(queue, 0, rocket::move(sp));
