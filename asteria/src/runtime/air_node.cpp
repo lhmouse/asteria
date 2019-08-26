@@ -16,7 +16,7 @@ namespace Asteria {
 
     namespace {
 
-    DCE_Result do_optimize_dce_vector(cow_vector<AIR_Node>& code)
+    DCE_Result do_optimize_dce(cow_vector<AIR_Node>& code)
       {
         size_t cur = 0;
         while(cur != code.size()) {
@@ -52,7 +52,7 @@ DCE_Result AIR_Node::optimize_dce()
       {
         auto& altr = this->m_stor.as<index_execute_block>();
         // The node has no effect if the body is empty.
-        auto dce = do_optimize_dce_vector(altr.code_body);
+        auto dce = do_optimize_dce(altr.code_body);
         return dce;
       }
     case index_if_statement:
@@ -60,8 +60,8 @@ DCE_Result AIR_Node::optimize_dce()
         auto& altr = this->m_stor.as<index_if_statement>();
         // The node has no effect if both branches are empty.
         // Note that the condition is not part of this node.
-        auto dce_true = do_optimize_dce_vector(altr.code_true);
-        auto dce_false = do_optimize_dce_vector(altr.code_false);
+        auto dce_true = do_optimize_dce(altr.code_true);
+        auto dce_false = do_optimize_dce(altr.code_false);
         if(dce_true == dce_false) {
           return dce_true;
         }
@@ -76,7 +76,7 @@ DCE_Result AIR_Node::optimize_dce()
           return dce_empty;
         }
         for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
-          do_optimize_dce_vector(altr.code_bodies.mut(i));
+          do_optimize_dce(altr.code_bodies.mut(i));
         }
         return dce_none;
       }
@@ -84,39 +84,39 @@ DCE_Result AIR_Node::optimize_dce()
       {
         auto& altr = this->m_stor.as<index_while_statement>();
         // Loop statements cannot be DCE'd.
-        do_optimize_dce_vector(altr.code_body);
+        do_optimize_dce(altr.code_body);
         return dce_none;
       }
     case index_do_while_statement:
       {
         auto& altr = this->m_stor.as<index_do_while_statement>();
         // Loop statements cannot be DCE'd.
-        do_optimize_dce_vector(altr.code_body);
+        do_optimize_dce(altr.code_body);
         return dce_none;
       }
     case index_for_each_statement:
       {
         auto& altr = this->m_stor.as<index_for_each_statement>();
         // Loop statements cannot be DCE'd.
-        do_optimize_dce_vector(altr.code_body);
+        do_optimize_dce(altr.code_body);
         return dce_none;
       }
     case index_for_statement:
       {
         auto& altr = this->m_stor.as<index_for_statement>();
         // Loop statements cannot be DCE'd.
-        do_optimize_dce_vector(altr.code_body);
+        do_optimize_dce(altr.code_body);
         return dce_none;
       }
     case index_try_statement:
       {
         auto& altr = this->m_stor.as<index_try_statement>();
         // The node has no effect if the `try` block is empty.
-        do_optimize_dce_vector(altr.code_try);
+        do_optimize_dce(altr.code_try);
         if(altr.code_try.empty()) {
           return dce_empty;
         }
-        do_optimize_dce_vector(altr.code_catch);
+        do_optimize_dce(altr.code_catch);
         return dce_none;
       }
     case index_throw_statement:
@@ -294,7 +294,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         // Optimize the IR.
         // TODO: Insert optimization passes here.
-        do_optimize_dce_vector(code_func);
+        do_optimize_dce(code_func);
         // Solidify IR nodes.
         AVMC_Queue queue;
         do_solidify(queue, code_func);
