@@ -2395,7 +2395,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         // There is no argument.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_clear_stack>(queue, 0);
@@ -2406,7 +2406,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to the body.
         SP_queues_fixed<1> sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         do_solidify(sp.queues[0], altr.code_body);
@@ -2419,7 +2419,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `immutable`. `p` points to the name.
         SP_name sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.name = altr.name;
@@ -2431,7 +2431,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_initialize_variable>();
         // `k` is `immutable`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_initialize_variable>(queue, altr.immutable);
@@ -2442,7 +2442,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `negative`. `p` points to the two branches.
         SP_queues_fixed<2> sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         do_solidify(sp.queues[0], altr.code_true);
@@ -2456,7 +2456,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to all clauses.
         SP_switch sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
@@ -2473,7 +2473,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `negative`. `p` points to the body and the condition.
         SP_queues_fixed<2> sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         do_solidify(sp.queues[0], altr.code_body);
@@ -2487,7 +2487,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `negative`. `p` points to the condition and the body.
         SP_queues_fixed<2> sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         do_solidify(sp.queues[0], altr.code_cond);
@@ -2501,7 +2501,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to the range initializer and the body.
         SP_for_each sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.name_key = altr.name_key;
@@ -2517,7 +2517,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` denotes whether the loop has an empty condition. `p` points to the triplet and the body.
         SP_queues_fixed<4> sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         do_solidify(sp.queues[0], altr.code_init);
@@ -2533,7 +2533,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to the clauses.
         SP_try sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         do_solidify(sp.queue_try, altr.code_try);
@@ -2549,7 +2549,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to the source location.
         SP_sloc sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.sloc = altr.sloc;
@@ -2562,7 +2562,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `negative`. `p` points to the source location and the message.
         SP_sloc_msg sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.sloc = altr.sloc;
@@ -2575,7 +2575,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_simple_status>();
         // `k` is `status`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_simple_status>(queue, altr.status);
@@ -2584,7 +2584,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         // There is no argument.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_return_by_value>(queue, 0);
@@ -2594,7 +2594,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_push_literal>();
         // `k` is unused. `p` points to a copy of `val`.
         if(ipass == 0) {
-          return queue.request(altr.val);
+          return queue.request(sizeof(altr.val));
         }
         // Push a new node.
         return do_append<do_push_literal>(queue, 0, altr.val);
@@ -2605,7 +2605,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to the name.
         SP_name sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.name = altr.name;
@@ -2618,7 +2618,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `depth`. `p` points to the name.
         SP_name sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.name = altr.name;
@@ -2630,7 +2630,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
         // `k` is unused. `p` points to a copy of `ref`.
         if(ipass == 0) {
-          return queue.request(altr.ref);
+          return queue.request(sizeof(altr.ref));
         }
         // Push a new node.
         return do_append<do_push_bound_reference>(queue, 0, altr.ref);
@@ -2641,7 +2641,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to the name, the parameter list, and the body of the function.
         SP_func sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.xnode = altr;
@@ -2654,7 +2654,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `assign`. `p` points to the two branches.
         SP_queues_fixed<2> sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         do_solidify(sp.queues[0], altr.code_true);
@@ -2668,7 +2668,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `assign`. `p` points to the alternative.
         SP_queues_fixed<1> sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         do_solidify(sp.queues[0], altr.code_null);
@@ -2681,7 +2681,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is `tco_aware`. `p` points to the source location and the argument specifier vector.
         SP_call sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.sloc = altr.sloc;
@@ -2695,7 +2695,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to the name.
         SP_name sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.name = altr.name;
@@ -2707,7 +2707,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
         // `k` is `nelems`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_push_unnamed_array>(queue, altr.nelems);
@@ -2718,7 +2718,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // `k` is unused. `p` points to the keys.
         SP_names sp;
         if(ipass == 0) {
-          return queue.request(sp);
+          return queue.request(sizeof(sp));
         }
         // Encode arguments.
         sp.names = altr.keys;
@@ -2729,7 +2729,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         // There is no argument.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_inc_post>(queue, 0);
@@ -2738,7 +2738,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         // There is no argument.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_dec_post>(queue, 0);
@@ -2747,7 +2747,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         // There is no argument.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_subscr>(queue, 0);
@@ -2757,7 +2757,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_pos>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_pos>(queue, altr.assign);
@@ -2767,7 +2767,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_neg>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_neg>(queue, altr.assign);
@@ -2777,7 +2777,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_notb>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_notb>(queue, altr.assign);
@@ -2787,7 +2787,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_notl>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_notl>(queue, altr.assign);
@@ -2796,7 +2796,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         // There is no argument.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_inc_pre>(queue, 0);
@@ -2805,7 +2805,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         // There is no argument.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_dec_pre>(queue, 0);
@@ -2815,7 +2815,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_unset>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_unset>(queue, altr.assign);
@@ -2825,7 +2825,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_lengthof>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_lengthof>(queue, altr.assign);
@@ -2835,7 +2835,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_typeof>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_typeof>(queue, altr.assign);
@@ -2845,7 +2845,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_sqrt>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_sqrt>(queue, altr.assign);
@@ -2855,7 +2855,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_isnan>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_isnan>(queue, altr.assign);
@@ -2865,7 +2865,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_isinf>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_isinf>(queue, altr.assign);
@@ -2875,7 +2875,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_abs>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_abs>(queue, altr.assign);
@@ -2885,7 +2885,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_signb>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_signb>(queue, altr.assign);
@@ -2895,7 +2895,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_round>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_round>(queue, altr.assign);
@@ -2905,7 +2905,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_floor>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_floor>(queue, altr.assign);
@@ -2915,7 +2915,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_ceil>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_ceil>(queue, altr.assign);
@@ -2925,7 +2925,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_trunc>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_trunc>(queue, altr.assign);
@@ -2935,7 +2935,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_iround>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_iround>(queue, altr.assign);
@@ -2945,7 +2945,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_ifloor>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_ifloor>(queue, altr.assign);
@@ -2955,7 +2955,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_iceil>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_iceil>(queue, altr.assign);
@@ -2965,7 +2965,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_itrunc>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_itrunc>(queue, altr.assign);
@@ -2975,7 +2975,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_cmp_xeq>();
         // `k` is `assign` and `negative`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_cmp_xeq>(queue, SK_xrel(altr.assign, compare_equal, altr.negative));
@@ -2985,7 +2985,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_cmp_xrel>();
         // `k` is `assign`, `expect` and `negative`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, altr.expect, altr.negative));
@@ -2995,7 +2995,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_cmp_3way>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_cmp_3way>(queue, altr.assign);
@@ -3005,7 +3005,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_add>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_add>(queue, altr.assign);
@@ -3015,7 +3015,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_sub>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_sub>(queue, altr.assign);
@@ -3025,7 +3025,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_mul>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_mul>(queue, altr.assign);
@@ -3035,7 +3035,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_div>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_div>(queue, altr.assign);
@@ -3045,7 +3045,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_mod>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_mod>(queue, altr.assign);
@@ -3055,7 +3055,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_sll>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_sll>(queue, altr.assign);
@@ -3065,7 +3065,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_srl>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_srl>(queue, altr.assign);
@@ -3075,7 +3075,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_sla>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_sla>(queue, altr.assign);
@@ -3085,7 +3085,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_sra>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_sra>(queue, altr.assign);
@@ -3095,7 +3095,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_andb>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_andb>(queue, altr.assign);
@@ -3105,7 +3105,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_orb>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_orb>(queue, altr.assign);
@@ -3115,7 +3115,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_xorb>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_xorb>(queue, altr.assign);
@@ -3124,7 +3124,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         // There is no argument.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_assign>(queue, 0);
@@ -3134,7 +3134,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         const auto& altr = this->m_stor.as<index_apply_xop_fma>();
         // `k` is `assign`. `p` is unused.
         if(ipass == 0) {
-          return queue.request();
+          return queue.request(0);
         }
         // Push a new node.
         return do_append<do_apply_xop_fma>(queue, altr.assign);

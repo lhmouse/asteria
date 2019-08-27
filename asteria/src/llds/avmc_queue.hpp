@@ -148,16 +148,10 @@ class AVMC_Queue
         std::swap(this->m_stor, other.m_stor);
       }
 
-    AVMC_Queue& request()
+    AVMC_Queue& request(size_t nbytes)
       {
-        // Record a node with no parameter.
-        this->do_reserve_delta(0);
-        return *this;
-      }
-    template<typename XnodeT> AVMC_Queue& request(const XnodeT& xnode)
-      {
-        // Record a node with a parameter of type `remove_cvref_t<XnodeT>`.
-        this->do_reserve_delta(sizeof(xnode));
+        // Reserve space for a node of size `nbytes`.
+        this->do_reserve_delta(nbytes);
         return *this;
       }
     template<Executor execuT> AVMC_Queue& append(uint32_t paramk)
