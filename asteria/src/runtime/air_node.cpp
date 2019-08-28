@@ -209,9 +209,9 @@ DCE_Result AIR_Node::optimize_dce()
         return queue.execute(ctx_next);
       }
 
-    template<typename TargetT> inline const TargetT& pcast(const void* p) noexcept
+    template<typename SparamT> inline const SparamT& pcast(const void* p) noexcept
       {
-        return static_cast<const TargetT*>(p)[0];
+        return static_cast<const SparamT*>(p)[0];
       }
 
     template<typename XnodeT, typename = void> struct AVMC_Appender
@@ -244,7 +244,7 @@ DCE_Result AIR_Node::optimize_dce()
         return AVMC_Appender<XnodeT>::template append<execuT>(queue, k, rocket::forward<XnodeT>(xnode));
       }
 
-    AVMC_Queue& do_solidify(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
+    AVMC_Queue& do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
       {
         rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
         rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
@@ -297,7 +297,7 @@ DCE_Result AIR_Node::optimize_dce()
         do_optimize_dce(code_func);
         // Solidify IR nodes.
         AVMC_Queue queue;
-        do_solidify(queue, code_func);
+        do_solidify_queue(queue, code_func);
 
         // Create the function now.
         return rocket::make_refcnt<Instantiated_Function>(params, rocket::move(zvarg), rocket::move(queue));
@@ -2409,7 +2409,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        do_solidify(sp.queues[0], altr.code_body);
+        do_solidify_queue(sp.queues[0], altr.code_body);
         // Push a new node.
         return do_append<do_execute_block>(queue, 0, rocket::move(sp));
       }
@@ -2445,8 +2445,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        do_solidify(sp.queues[0], altr.code_true);
-        do_solidify(sp.queues[1], altr.code_false);
+        do_solidify_queue(sp.queues[0], altr.code_true);
+        do_solidify_queue(sp.queues[1], altr.code_false);
         // Push a new node.
         return do_append<do_if_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2460,8 +2460,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         }
         // Encode arguments.
         for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
-          do_solidify(sp.queues_labels.emplace_back(), altr.code_labels.at(i));
-          do_solidify(sp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
+          do_solidify_queue(sp.queues_labels.emplace_back(), altr.code_labels.at(i));
+          do_solidify_queue(sp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
         }
         sp.names_added = altr.names_added;
         // Push a new node.
@@ -2476,8 +2476,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        do_solidify(sp.queues[0], altr.code_body);
-        do_solidify(sp.queues[1], altr.code_cond);
+        do_solidify_queue(sp.queues[0], altr.code_body);
+        do_solidify_queue(sp.queues[1], altr.code_cond);
         // Push a new node.
         return do_append<do_do_while_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2490,8 +2490,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        do_solidify(sp.queues[0], altr.code_cond);
-        do_solidify(sp.queues[1], altr.code_body);
+        do_solidify_queue(sp.queues[0], altr.code_cond);
+        do_solidify_queue(sp.queues[1], altr.code_body);
         // Push a new node.
         return do_append<do_while_statement>(queue, altr.negative, rocket::move(sp));
       }
@@ -2506,8 +2506,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Encode arguments.
         sp.name_key = altr.name_key;
         sp.name_mapped = altr.name_mapped;
-        do_solidify(sp.queue_init, altr.code_init);
-        do_solidify(sp.queue_body, altr.code_body);
+        do_solidify_queue(sp.queue_init, altr.code_init);
+        do_solidify_queue(sp.queue_body, altr.code_body);
         // Push a new node.
         return do_append<do_for_each_statement>(queue, 0, rocket::move(sp));
       }
@@ -2520,10 +2520,10 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        do_solidify(sp.queues[0], altr.code_init);
-        do_solidify(sp.queues[1], altr.code_cond);
-        do_solidify(sp.queues[2], altr.code_step);
-        do_solidify(sp.queues[3], altr.code_body);
+        do_solidify_queue(sp.queues[0], altr.code_init);
+        do_solidify_queue(sp.queues[1], altr.code_cond);
+        do_solidify_queue(sp.queues[2], altr.code_step);
+        do_solidify_queue(sp.queues[3], altr.code_body);
         // Push a new node.
         return do_append<do_for_statement>(queue, altr.code_cond.empty(), rocket::move(sp));
       }
@@ -2536,10 +2536,10 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        do_solidify(sp.queue_try, altr.code_try);
+        do_solidify_queue(sp.queue_try, altr.code_try);
         sp.sloc = altr.sloc;
         sp.name_except = altr.name_except;
-        do_solidify(sp.queue_catch, altr.code_catch);
+        do_solidify_queue(sp.queue_catch, altr.code_catch);
         // Push a new node.
         return do_append<do_try_statement>(queue, 0, rocket::move(sp));
       }
@@ -2657,8 +2657,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        do_solidify(sp.queues[0], altr.code_true);
-        do_solidify(sp.queues[1], altr.code_false);
+        do_solidify_queue(sp.queues[0], altr.code_true);
+        do_solidify_queue(sp.queues[1], altr.code_false);
         // Push a new node.
         return do_append<do_branch_expression>(queue, altr.assign, rocket::move(sp));
       }
@@ -2671,7 +2671,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        do_solidify(sp.queues[0], altr.code_null);
+        do_solidify_queue(sp.queues[0], altr.code_null);
         // Push a new node.
         return do_append<do_coalescence>(queue, altr.assign, rocket::move(sp));
       }
