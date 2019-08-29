@@ -94,17 +94,17 @@ class AVMC_Queue
     void do_append_trivial(Executor* exec, uint32_t paramk, size_t nbytes, const void* source);
     void do_append_nontrivial(ref_to<const Vtable> vtbl, uint32_t paramk, size_t nbytes, Constructor* ctor, intptr_t source);
 
-    template<Executor execuT, nullptr_t, typename XnodeT> void do_dispatch_append(std::true_type, uint32_t paramk, XnodeT&& xnode)
+    template<Executor executorT, nullptr_t, typename XnodeT> void do_dispatch_append(std::true_type, uint32_t paramk, XnodeT&& xnode)
       {
         // The parameter type is trivial and no vtable is required.
         // Append a node with a trivial parameter.
-        this->do_append_trivial(execuT, paramk, sizeof(xnode), std::addressof(xnode));
+        this->do_append_trivial(executorT, paramk, sizeof(xnode), std::addressof(xnode));
       }
-    template<Executor execuT, Enumerator* enumeraT, typename XnodeT> void do_dispatch_append(std::false_type, uint32_t paramk, XnodeT&& xnode)
+    template<Executor executorT, Enumerator* enumeratorT, typename XnodeT> void do_dispatch_append(std::false_type, uint32_t paramk, XnodeT&& xnode)
       {
         // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real' function pointers.
         // Those converted from non-capturing lambdas are not an option.
-        struct Fs
+        struct H
           {
             static void construct(uint32_t /*paramk*/, void* params, intptr_t source)
               {
@@ -120,10 +120,10 @@ class AVMC_Queue
           };
         static constexpr Vtable s_vtbl =
           {
-            Fs::destroy, execuT, enumeraT
+            H::destroy, executorT, enumeratorT
           };
         // Append a node with a non-trivial parameter.
-        this->do_append_nontrivial(rocket::ref(s_vtbl), paramk, sizeof(xnode), Fs::construct, reinterpret_cast<intptr_t>(std::addressof(xnode)));
+        this->do_append_nontrivial(rocket::ref(s_vtbl), paramk, sizeof(xnode), H::construct, reinterpret_cast<intptr_t>(std::addressof(xnode)));
       }
 
   public:
@@ -154,22 +154,22 @@ class AVMC_Queue
         this->do_reserve_delta(nbytes);
         return *this;
       }
-    template<Executor execuT> AVMC_Queue& append(uint32_t paramk)
+    template<Executor executorT> AVMC_Queue& append(uint32_t paramk)
       {
         // Append a node with no parameter.
-        this->do_append_trivial(execuT, paramk, 0, nullptr);
+        this->do_append_trivial(executorT, paramk, 0, nullptr);
         return *this;
       }
-    template<Executor execuT, typename XnodeT> AVMC_Queue& append(uint32_t paramk, XnodeT&& xnode)
+    template<Executor executorT, typename XnodeT> AVMC_Queue& append(uint32_t paramk, XnodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XnodeT>`.
-        this->do_dispatch_append<execuT, nullptr>(std::is_trivial<typename std::remove_reference<XnodeT>::type>(), paramk, rocket::forward<XnodeT>(xnode));
+        this->do_dispatch_append<executorT, nullptr>(std::is_trivial<typename std::remove_reference<XnodeT>::type>(), paramk, rocket::forward<XnodeT>(xnode));
         return *this;
       }
-    template<Executor execuT, Enumerator enumeraT, typename XnodeT> AVMC_Queue& append(uint32_t paramk, XnodeT&& xnode)
+    template<Executor executorT, Enumerator enumeratorT, typename XnodeT> AVMC_Queue& append(uint32_t paramk, XnodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XnodeT>`.
-        this->do_dispatch_append<execuT, enumeraT>(std::false_type(), paramk, rocket::forward<XnodeT>(xnode));
+        this->do_dispatch_append<executorT, enumeratorT>(std::false_type(), paramk, rocket::forward<XnodeT>(xnode));
         return *this;
       }
 
