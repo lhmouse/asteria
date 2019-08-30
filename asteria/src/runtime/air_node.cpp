@@ -2725,419 +2725,382 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Push a new node.
         return do_append<do_push_unnamed_object>(queue, 0, rocket::move(sp));
       }
-    case index_apply_xop_inc_post:
+    case index_apply_operator:
       {
-        // There is no argument.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_inc_post>(queue, 0);
-      }
-    case index_apply_xop_dec_post:
-      {
-        // There is no argument.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_dec_post>(queue, 0);
-      }
-    case index_apply_xop_subscr:
-      {
-        // There is no argument.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_subscr>(queue, 0);
-      }
-    case index_apply_xop_pos:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_pos>();
+        const auto& altr = this->m_stor.as<index_apply_operator>();
         // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
+        switch(altr.xop) {
+        case xop_inc_post:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_inc_post>(queue, 0);
+          }
+        case xop_dec_post:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_dec_post>(queue, 0);
+          }
+        case xop_subscr:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_subscr>(queue, 0);
+          }
+        case xop_pos:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_pos>(queue, altr.assign);
+          }
+        case xop_neg:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_neg>(queue, altr.assign);
+          }
+        case xop_notb:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_notb>(queue, altr.assign);
+          }
+        case xop_notl:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_notl>(queue, altr.assign);
+          }
+        case xop_inc_pre:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_inc_pre>(queue, 0);
+          }
+        case xop_dec_pre:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_dec_pre>(queue, 0);
+          }
+        case xop_unset:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_unset>(queue, altr.assign);
+          }
+        case xop_lengthof:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_lengthof>(queue, altr.assign);
+          }
+        case xop_typeof:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_typeof>(queue, altr.assign);
+          }
+        case xop_sqrt:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_sqrt>(queue, altr.assign);
+          }
+        case xop_isnan:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_isnan>(queue, altr.assign);
+          }
+        case xop_isinf:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_isinf>(queue, altr.assign);
+          }
+        case xop_abs:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_abs>(queue, altr.assign);
+          }
+        case xop_signb:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_signb>(queue, altr.assign);
+          }
+        case xop_round:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_round>(queue, altr.assign);
+          }
+        case xop_floor:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_floor>(queue, altr.assign);
+          }
+        case xop_ceil:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_ceil>(queue, altr.assign);
+          }
+        case xop_trunc:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_trunc>(queue, altr.assign);
+          }
+        case xop_iround:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_iround>(queue, altr.assign);
+          }
+        case xop_ifloor:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_ifloor>(queue, altr.assign);
+          }
+        case xop_iceil:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_iceil>(queue, altr.assign);
+          }
+        case xop_itrunc:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_itrunc>(queue, altr.assign);
+          }
+        case xop_cmp_eq:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_cmp_xeq>(queue, SK_xrel(altr.assign, compare_equal, false));
+          }
+        case xop_cmp_ne:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_cmp_xeq>(queue, SK_xrel(altr.assign, compare_equal, true));
+          }
+        case xop_cmp_lt:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, compare_less, false));
+          }
+        case xop_cmp_gt:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, compare_greater, false));
+          }
+        case xop_cmp_lte:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, compare_greater, true));
+          }
+        case xop_cmp_gte:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, compare_less, true));
+          }
+        case xop_cmp_3way:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_cmp_3way>(queue, altr.assign);
+          }
+        case xop_add:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_add>(queue, altr.assign);
+          }
+        case xop_sub:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_sub>(queue, altr.assign);
+          }
+        case xop_mul:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_mul>(queue, altr.assign);
+          }
+        case xop_div:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_div>(queue, altr.assign);
+          }
+        case xop_mod:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_mod>(queue, altr.assign);
+          }
+        case xop_sll:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_sll>(queue, altr.assign);
+          }
+        case xop_srl:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_srl>(queue, altr.assign);
+          }
+        case xop_sla:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_sla>(queue, altr.assign);
+          }
+        case xop_sra:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_sra>(queue, altr.assign);
+          }
+        case xop_andb:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_andb>(queue, altr.assign);
+          }
+        case xop_orb:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_orb>(queue, altr.assign);
+          }
+        case xop_xorb:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_xorb>(queue, altr.assign);
+          }
+        case xop_assign:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_assign>(queue, 0);
+          }
+        case xop_fma_3:
+          {
+            if(ipass == 0) {
+              return queue.request(0);
+            }
+            // Push a new node.
+            return do_append<do_apply_xop_fma>(queue, altr.assign);
+          }
+        default:
+          ASTERIA_TERMINATE("An unknown operator enumeration `", altr.xop, "` has been encountered. This is likely a bug. Please report.");
         }
-        // Push a new node.
-        return do_append<do_apply_xop_pos>(queue, altr.assign);
-      }
-    case index_apply_xop_neg:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_neg>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_neg>(queue, altr.assign);
-      }
-    case index_apply_xop_notb:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_notb>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_notb>(queue, altr.assign);
-      }
-    case index_apply_xop_notl:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_notl>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_notl>(queue, altr.assign);
-      }
-    case index_apply_xop_inc_pre:
-      {
-        // There is no argument.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_inc_pre>(queue, 0);
-      }
-    case index_apply_xop_dec_pre:
-      {
-        // There is no argument.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_dec_pre>(queue, 0);
-      }
-    case index_apply_xop_unset:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_unset>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_unset>(queue, altr.assign);
-      }
-    case index_apply_xop_lengthof:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_lengthof>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_lengthof>(queue, altr.assign);
-      }
-    case index_apply_xop_typeof:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_typeof>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_typeof>(queue, altr.assign);
-      }
-    case index_apply_xop_sqrt:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_sqrt>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_sqrt>(queue, altr.assign);
-      }
-    case index_apply_xop_isnan:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_isnan>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_isnan>(queue, altr.assign);
-      }
-    case index_apply_xop_isinf:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_isinf>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_isinf>(queue, altr.assign);
-      }
-    case index_apply_xop_abs:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_abs>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_abs>(queue, altr.assign);
-      }
-    case index_apply_xop_signb:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_signb>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_signb>(queue, altr.assign);
-      }
-    case index_apply_xop_round:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_round>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_round>(queue, altr.assign);
-      }
-    case index_apply_xop_floor:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_floor>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_floor>(queue, altr.assign);
-      }
-    case index_apply_xop_ceil:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_ceil>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_ceil>(queue, altr.assign);
-      }
-    case index_apply_xop_trunc:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_trunc>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_trunc>(queue, altr.assign);
-      }
-    case index_apply_xop_iround:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_iround>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_iround>(queue, altr.assign);
-      }
-    case index_apply_xop_ifloor:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_ifloor>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_ifloor>(queue, altr.assign);
-      }
-    case index_apply_xop_iceil:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_iceil>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_iceil>(queue, altr.assign);
-      }
-    case index_apply_xop_itrunc:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_itrunc>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_itrunc>(queue, altr.assign);
-      }
-    case index_apply_xop_cmp_xeq:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_cmp_xeq>();
-        // `k` is `assign` and `negative`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_cmp_xeq>(queue, SK_xrel(altr.assign, compare_equal, altr.negative));
-      }
-    case index_apply_xop_cmp_xrel:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_cmp_xrel>();
-        // `k` is `assign`, `expect` and `negative`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, altr.expect, altr.negative));
-      }
-    case index_apply_xop_cmp_3way:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_cmp_3way>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_cmp_3way>(queue, altr.assign);
-      }
-    case index_apply_xop_add:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_add>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_add>(queue, altr.assign);
-      }
-    case index_apply_xop_sub:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_sub>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_sub>(queue, altr.assign);
-      }
-    case index_apply_xop_mul:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_mul>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_mul>(queue, altr.assign);
-      }
-    case index_apply_xop_div:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_div>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_div>(queue, altr.assign);
-      }
-    case index_apply_xop_mod:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_mod>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_mod>(queue, altr.assign);
-      }
-    case index_apply_xop_sll:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_sll>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_sll>(queue, altr.assign);
-      }
-    case index_apply_xop_srl:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_srl>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_srl>(queue, altr.assign);
-      }
-    case index_apply_xop_sla:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_sla>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_sla>(queue, altr.assign);
-      }
-    case index_apply_xop_sra:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_sra>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_sra>(queue, altr.assign);
-      }
-    case index_apply_xop_andb:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_andb>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_andb>(queue, altr.assign);
-      }
-    case index_apply_xop_orb:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_orb>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_orb>(queue, altr.assign);
-      }
-    case index_apply_xop_xorb:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_xorb>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_xorb>(queue, altr.assign);
-      }
-    case index_apply_xop_assign:
-      {
-        // There is no argument.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_assign>(queue, 0);
-      }
-    case index_apply_xop_fma:
-      {
-        const auto& altr = this->m_stor.as<index_apply_xop_fma>();
-        // `k` is `assign`. `p` is unused.
-        if(ipass == 0) {
-          return queue.request(0);
-        }
-        // Push a new node.
-        return do_append<do_apply_xop_fma>(queue, altr.assign);
       }
     default:
       ASTERIA_TERMINATE("An unknown AIR node type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");

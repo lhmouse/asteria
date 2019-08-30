@@ -415,6 +415,7 @@ enum Xop : uint8_t
     xop_orb       = 42,  // |
     xop_xorb      = 43,  // ^
     xop_assign    = 44,  // =
+    xop_fma_3     = 45,  // __fma()
   };
 
 // Parser status codes
