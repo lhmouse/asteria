@@ -5,7 +5,6 @@
 #define ASTERIA_SYNTAX_STATEMENT_HPP_
 
 #include "../fwd.hpp"
-#include "enums.hpp"
 #include "../runtime/source_location.hpp"
 
 namespace Asteria {

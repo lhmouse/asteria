@@ -5,7 +5,6 @@
 #define ASTERIA_SYNTAX_XPRUNIT_HPP_
 
 #include "../fwd.hpp"
-#include "enums.hpp"
 #include "../runtime/source_location.hpp"
 #include "../runtime/value.hpp"
 

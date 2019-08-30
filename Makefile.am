@@ -93,7 +93,6 @@ pkginclude_llds_HEADERS =  \
 
 pkginclude_syntaxdir = ${pkgincludedir}/syntax
 pkginclude_syntax_HEADERS =  \
-  asteria/src/syntax/enums.hpp  \
   asteria/src/syntax/xprunit.hpp  \
   asteria/src/syntax/statement.hpp
 
