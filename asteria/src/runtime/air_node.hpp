@@ -245,8 +245,8 @@ class AIR_Node
 
     // Compress this IR node.
     // Be advised that solid nodes cannot be copied or moved because they occupy variant numbers of bytes.
-    // Solidification is performed in two passes: The total number of bytes is calculated, which are allocated as a whole
-    // at the end of the first pass, where nodes are constructed in the second pass.
+    // Solidification is performed as two passes: The total number of bytes is calculated, which are allocated
+    // as a whole at the end of the first pass, where nodes are constructed in the second pass.
     // The argument for `ipass` shall be `0` for the first pass and `1` for the second pass.
     AVMC_Queue& solidify(AVMC_Queue& queue, uint8_t ipass) const;
     // Instantiate this IR node to create a function. This node must hold a value of type `S_define_function`.
