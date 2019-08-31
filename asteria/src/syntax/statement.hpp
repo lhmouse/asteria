@@ -20,11 +20,11 @@ class Statement
       {
         cow_vector<Statement> body;
       };
-    struct S_variable
+    struct S_variables
       {
         Source_Location sloc;
         bool immutable;
-        cow_bivector<phsh_string, cow_vector<Xprunit>> vars;
+        cow_bivector<cow_vector<phsh_string>, cow_vector<Xprunit>> vars;
       };
     struct S_function
       {
@@ -108,7 +108,7 @@ class Statement
       {
         index_expression  =  0,
         index_block       =  1,
-        index_variable    =  2,
+        index_variables   =  2,
         index_function    =  3,
         index_if          =  4,
         index_switch      =  5,
@@ -127,7 +127,7 @@ class Statement
       ROCKET_CDR(
         , S_expression  //  0,
         , S_block       //  1,
-        , S_variable    //  2,
+        , S_variables   //  2,
         , S_function    //  3,
         , S_if          //  4,
         , S_switch      //  5,

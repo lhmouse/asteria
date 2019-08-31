@@ -62,13 +62,23 @@ null-statement ::=
 	";"
 
 variable-definition ::=
-	"var" identifier equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
+	"var" variable-declarator equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
+variable-declarator ::=
+	identifier | structured-binding-array | structured-binding-object
+structured-binding-array ::=
+	"[" identifier-list "]"
+structured-binding-object ::=
+	"{" identifier-list "}"
+identifier-list-opt ::=
+	identifier-list | ""
+identifier-list ::=
+	identifier identifier-list-opt
 equal-initializer-opt ::=
 	equal-initializer | ""
 equal-initializer ::=
 	"=" expression
 immutable-variable-definition ::=
-	"const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
+	"const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
 function-definition ::=
 	"func" identifier parameter-list-declaration block
 parameter-list-declaration ::=

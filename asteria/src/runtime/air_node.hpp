@@ -21,14 +21,15 @@ class AIR_Node
       {
         cow_vector<AIR_Node> code_body;
       };
-    struct S_declare_variable
+    struct S_declare_variables
       {
         bool immutable;
-        phsh_string name;
+        cow_vector<phsh_string> names;
       };
-    struct S_initialize_variable
+    struct S_initialize_variables
       {
         bool immutable;
+        cow_vector<phsh_string> names;
       };
     struct S_if_statement
       {
@@ -156,8 +157,8 @@ class AIR_Node
       {
         index_clear_stack            =  0,
         index_execute_block          =  1,
-        index_declare_variable       =  2,
-        index_initialize_variable    =  3,
+        index_declare_variables      =  2,
+        index_initialize_variables   =  3,
         index_if_statement           =  4,
         index_switch_statement       =  5,
         index_do_while_statement     =  6,
@@ -186,8 +187,8 @@ class AIR_Node
       ROCKET_CDR(
         , S_clear_stack            //  0,
         , S_execute_block          //  1,
-        , S_declare_variable       //  2,
-        , S_initialize_variable    //  3,
+        , S_declare_variables      //  2,
+        , S_initialize_variables   //  3,
         , S_if_statement           //  4,
         , S_switch_statement       //  5,
         , S_do_while_statement     //  6,

@@ -453,35 +453,117 @@ DCE_Result AIR_Node::optimize_dce()
         return do_execute_block(queue_body, ctx);
       }
 
-    AIR_Status do_declare_variable(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_declare_variables(Executive_Context& ctx, uint32_t k, const void* p)
       {
         const auto& immutable = k != 0;
-        const auto& name = pcast<SP_name>(p).name;
+        const auto& names = pcast<SP_names>(p).names;
 
-        // Allocate a variable and initialize it to `null`.
-        auto var = ctx.global().create_variable();
-        var->reset(G_null(), immutable);
-        // Inject the variable into the current context.
-        Reference_Root::S_variable xref = { rocket::move(var) };
-        ctx.open_named_reference(name) = xref;
-        // Push a copy of the reference onto the stack.
-        ctx.stack().push(rocket::move(xref));
+        // Allocate variables and initialize them to `null`.
+        if(ROCKET_EXPECT(names.size() == 1)) {
+          auto var = ctx.global().create_variable();
+          var->reset(G_null(), immutable);
+          // Inject the variable into the current context.
+          Reference_Root::S_variable xref = { rocket::move(var) };
+          ctx.open_named_reference(names[0]) = xref;
+          // Push a copy of the reference onto the stack.
+          ctx.stack().push(rocket::move(xref));
+        }
+        else if((names.at(0) == "[") && (names.back() == "]")) {
+          // Allocate variables for identifiers between the brackets.
+          for(size_t i = 1; i != names.size() - 1; ++i) {
+            auto var = ctx.global().create_variable();
+            var->reset(G_null(), immutable);
+            // Inject the variable into the current context.
+            Reference_Root::S_variable xref = { rocket::move(var) };
+            ctx.open_named_reference(names[i]) = xref;
+            // Push a copy of the reference onto the stack.
+            ctx.stack().push(rocket::move(xref));
+          }
+        }
+        else if((names.at(0) == "{") && (names.back() == "}")) {
+          // Allocate variables for identifiers between the braces.
+          for(size_t i = 1; i != names.size() - 1; ++i) {
+            auto var = ctx.global().create_variable();
+            var->reset(G_null(), immutable);
+            // Inject the variable into the current context.
+            Reference_Root::S_variable xref = { rocket::move(var) };
+            ctx.open_named_reference(names[i]) = xref;
+            // Push a copy of the reference onto the stack.
+            ctx.stack().push(rocket::move(xref));
+          }
+        }
+        else {
+          ROCKET_ASSERT(false);
+        }
         return air_status_next;
       }
 
-    AIR_Status do_initialize_variable(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_initialize_variables(Executive_Context& ctx, uint32_t k, const void* p)
       {
         const auto& immutable = k != 0;
+        const auto& names = pcast<SP_names>(p).names;
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
-        auto value = ctx.stack().top().read();
+        auto val = ctx.stack().top().read();
         ctx.stack().pop();
-        // Get the variable back.
-        auto var = ctx.stack().top().get_variable_opt();
-        ROCKET_ASSERT(var);
-        // Initialize it.
-        var->reset(rocket::move(value), immutable);
+        // Initialize variables.
+        if(ROCKET_EXPECT(names.size() == 1)) {
+          // Get the variable back.
+          auto var = ctx.stack().top().get_variable_opt();
+          ROCKET_ASSERT(var);
+          ROCKET_ASSERT(var->get_value().is_null());
+          ctx.stack().pop();
+          // Initialize it.
+          var->reset(rocket::move(val), immutable);
+        }
+        else if((names.at(0) == "[") && (names.back() == "]")) {
+          // Get the value to assign from.
+          if(!val.is_array()) {
+            ASTERIA_THROW_RUNTIME_ERROR("An array structured binding does not accept a value of type `", val.what_gtype(), "`.");
+          }
+          auto& array = val.open_array();
+          // Pop variables from right to left, then initialize them one by one.
+          for(size_t i = names.size() - 2; i != 0; --i) {
+            // Get the variable back.
+            auto var = ctx.stack().top().get_variable_opt();
+            ROCKET_ASSERT(var);
+            ROCKET_ASSERT(var->get_value().is_null());
+            ctx.stack().pop();
+            // Initialize it.
+            auto qelem = array.mut_ptr(i-1);
+            if(!qelem) {
+              var->set_immutable(immutable);
+              continue;
+            }
+            var->reset(rocket::move(*qelem), immutable);
+          }
+        }
+        else if((names.at(0) == "{") && (names.back() == "}")) {
+          // Get the value to assign from.
+          if(!val.is_object()) {
+            ASTERIA_THROW_RUNTIME_ERROR("An object structured binding does not accept a value of type `", val.what_gtype(), "`.");
+          }
+          auto& object = val.open_object();
+          // Pop variables from right to left, then initialize them one by one.
+          for(size_t i = names.size() - 2; i != 0; --i) {
+            // Get the variable back.
+            auto var = ctx.stack().top().get_variable_opt();
+            ROCKET_ASSERT(var);
+            ROCKET_ASSERT(var->get_value().is_null());
+            ctx.stack().pop();
+            // Initialize it.
+            auto qelem = object.mut_ptr(names[i]);
+            if(!qelem) {
+              var->set_immutable(immutable);
+              continue;
+            }
+            var->reset(rocket::move(*qelem), immutable);
+          }
+        }
+        else {
+          ROCKET_ASSERT(false);
+        }
         return air_status_next;
       }
 
@@ -2413,28 +2495,31 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Push a new node.
         return do_append<do_execute_block>(queue, 0, rocket::move(sp));
       }
-    case index_declare_variable:
+    case index_declare_variables:
       {
-        const auto& altr = this->m_stor.as<index_declare_variable>();
-        // `k` is `immutable`. `p` points to the name.
-        SP_name sp;
+        const auto& altr = this->m_stor.as<index_declare_variables>();
+        // `k` is `immutable`. `p` points to the name vector.
+        SP_names sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
         }
         // Encode arguments.
-        sp.name = altr.name;
+        sp.names = altr.names;
         // Push a new node.
-        return do_append<do_declare_variable>(queue, altr.immutable, rocket::move(sp));
+        return do_append<do_declare_variables>(queue, altr.immutable, rocket::move(sp));
       }
-    case index_initialize_variable:
+    case index_initialize_variables:
       {
-        const auto& altr = this->m_stor.as<index_initialize_variable>();
-        // `k` is `immutable`. `p` is unused.
+        const auto& altr = this->m_stor.as<index_initialize_variables>();
+        // `k` is `immutable`. `p` points to the name vector.
+        SP_names sp;
         if(ipass == 0) {
-          return queue.request(0);
+          return queue.request(sizeof(sp));
         }
+        // Encode arguments.
+        sp.names = altr.names;
         // Push a new node.
-        return do_append<do_initialize_variable>(queue, altr.immutable);
+        return do_append<do_initialize_variables>(queue, altr.immutable, rocket::move(sp));
       }
     case index_if_statement:
       {

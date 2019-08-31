@@ -117,30 +117,48 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         code.emplace_back(rocket::move(xnode));
         return code;
       }
-    case index_variable:
+    case index_variables:
       {
-        const auto& altr = this->m_stor.as<index_variable>();
+        const auto& altr = this->m_stor.as<index_variables>();
         // Declare each variable.
         for(const auto& pair : altr.vars) {
-          // Create a dummy reference for further name lookups.
-          do_user_declare(names_opt, ctx, pair.first, "variable placeholder");
+          // Create dummy references for further name lookups.
+          if(pair.first.size() == 1) {
+            // Create a single reference.
+            do_user_declare(names_opt, ctx, pair.first[0], "variable placeholder");
+          }
+          else if((pair.first.at(0) == "[") && (pair.first.back() == "]")) {
+            // Create references from left to right.
+            for(size_t i = 1; i != pair.first.size() - 1; ++i) {
+              do_user_declare(names_opt, ctx, pair.first[i], "array structed binding placeholder");
+            }
+          }
+          else if((pair.first.at(0) == "{") && (pair.first.back() == "}")) {
+            // Create references from left to right.
+            for(size_t i = 1; i != pair.first.size() - 1; ++i) {
+              do_user_declare(names_opt, ctx, pair.first[i], "object structed binding placeholder");
+            }
+          }
+          else {
+            ASTERIA_TERMINATE("A malformed variable definition has been encountered. This is likely a bug. Please report.");
+          }
           // Clear the stack.
           do_generate_clear_stack(code);
           // Declare the variable, when it will be initialized to `null`.
           if(!pair.second.empty()) {
             // If an initializer is provided, we declare the variable as immutable to prevent
             // unintentional modification before the initialization is completed.
-            AIR_Node::S_declare_variable xnode_decl = { true, pair.first };
+            AIR_Node::S_declare_variables xnode_decl = { true, pair.first };
             code.emplace_back(rocket::move(xnode_decl));
             // Generate code for the initializer.
             do_generate_expression_partial(code, opts, tco_aware_none, ctx, pair.second);
             // Initialize the variable.
-            AIR_Node::S_initialize_variable xnode_init = { altr.immutable };
+            AIR_Node::S_initialize_variables xnode_init = { altr.immutable, pair.first };
             code.emplace_back(rocket::move(xnode_init));
           }
           else {
-            // If no initializer is provided, this can be simplified somehow.
-            AIR_Node::S_declare_variable xnode_decl = { altr.immutable, pair.first };
+            // If no initializer is provided, this can be simplified a little.
+            AIR_Node::S_declare_variables xnode_decl = { altr.immutable, pair.first };
             code.emplace_back(rocket::move(xnode_decl));
           }
         }
@@ -151,16 +169,19 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         const auto& altr = this->m_stor.as<index_function>();
         // Create a dummy reference for further name lookups.
         do_user_declare(names_opt, ctx, altr.name, "function placeholder");
+        // Create a vector of only one name.
+        cow_vector<phsh_string> names;
+        names.emplace_back(altr.name);
         // Clear the stack.
         do_generate_clear_stack(code);
         // Declare the function, which is effectively an immutable variable.
-        AIR_Node::S_declare_variable xnode_decl = { true, altr.name };
+        AIR_Node::S_declare_variables xnode_decl = { true, names };
         code.emplace_back(rocket::move(xnode_decl));
         // Instantiate the function body.
         AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params, altr.body };
         code.emplace_back(rocket::move(xnode_defn));
         // Initialize the function.
-        AIR_Node::S_initialize_variable xnode_init = { true };
+        AIR_Node::S_initialize_variables xnode_init = { true, rocket::move(names) };
         code.emplace_back(rocket::move(xnode_init));
         return code;
       }
