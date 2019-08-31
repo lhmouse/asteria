@@ -519,6 +519,9 @@ DCE_Result AIR_Node::optimize_dce()
         }
         else if((names.at(0) == "[") && (names.back() == "]")) {
           // Get the value to assign from.
+          if(val.is_null()) {
+            val = G_array();
+          }
           if(!val.is_array()) {
             ASTERIA_THROW_RUNTIME_ERROR("An array structured binding does not accept a value of type `", val.what_gtype(), "`.");
           }
@@ -541,6 +544,9 @@ DCE_Result AIR_Node::optimize_dce()
         }
         else if((names.at(0) == "{") && (names.back() == "}")) {
           // Get the value to assign from.
+          if(val.is_null()) {
+            val = G_object();
+          }
           if(!val.is_object()) {
             ASTERIA_THROW_RUNTIME_ERROR("An object structured binding does not accept a value of type `", val.what_gtype(), "`.");
           }
