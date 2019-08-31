@@ -32,11 +32,12 @@
 1. First-class functions.
 2. Closure functions.
 3. Exceptions.
-4. Flexible syntax, similar to **C++** and **JavaScript**.
+4. Flexible syntax similar to **C++** and **JavaScript**.
 5. Regular grammar.
 6. Argument passing (by value or reference) determined by the **argument** rather than the **parameter**.
 7. Idempotently copyable values basing on copy-on-write.
 8. Minimal garbage collection support.
+9. Structured binding similar to **C++17**.
 
 # License
 
