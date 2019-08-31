@@ -259,6 +259,84 @@ namespace Asteria {
         return rocket::nullopt;
       }
 
+    opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
+      {
+        // identifier-list-opt ::=
+        //   identifier-list | ""
+        // identifier-list ::=
+        //   identifier identifier-list-opt
+        auto qname = do_accept_identifier_opt(tstrm);
+        if(!qname) {
+          return rocket::nullopt;
+        }
+        cow_vector<phsh_string> names;
+        for(;;) {
+          names.emplace_back(rocket::move(*qname));
+          // Look for the separator.
+          auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
+          if(!kpunct) {
+            break;
+          }
+          qname = do_accept_identifier_opt(tstrm);
+          if(!qname) {
+            throw do_make_parser_error(tstrm, parser_status_identifier_expected);
+          }
+        }
+        return rocket::move(names);
+      }
+
+    opt<cow_vector<phsh_string>> do_accept_variable_declarator_opt(Token_Stream& tstrm)
+      {
+        // variable-declarator ::=
+        //   identifier | structured-binding-array | structured-binding-object
+        // structured-binding-array ::=
+        //   "[" identifier-list "]"
+        // structured-binding-object ::=
+        //   "{" identifier-list "}"
+        auto qname = do_accept_identifier_opt(tstrm);
+        if(qname) {
+          // Accept a single identifier.
+          cow_vector<phsh_string> names;
+          names.emplace_back(rocket::move(*qname));
+          return rocket::move(names);
+        }
+        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_op });
+        if(kpunct) {
+          // Accept a list of identifiers wrapped in a pair of brackets and separated by commas.
+          // There must be at least one identifier.
+          auto qnames = do_accept_identifier_list_opt(tstrm);
+          if(!qnames) {
+            throw do_make_parser_error(tstrm, parser_status_identifier_expected);
+          }
+          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_bracket_cl });
+          if(!kpunct) {
+            throw do_make_parser_error(tstrm, parser_status_closed_bracket_expected);
+          }
+          // Make the list different from a plain, sole one.
+          qnames->insert(0, rocket::sref("["));
+          qnames->emplace_back(rocket::sref("]"));
+          return rocket::move(qnames);
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
+        if(kpunct) {
+          // Accept a list of identifiers wrapped in a pair of braces and separated by commas.
+          // There must be at least one identifier.
+          auto qnames = do_accept_identifier_list_opt(tstrm);
+          if(!qnames) {
+            throw do_make_parser_error(tstrm, parser_status_identifier_expected);
+          }
+          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+          if(!kpunct) {
+            throw do_make_parser_error(tstrm, parser_status_closed_brace_expected);
+          }
+          // Make the list different from a plain, sole one.
+          qnames->insert(0, rocket::sref("{"));
+          qnames->emplace_back(rocket::sref("}"));
+          return rocket::move(qnames);
+        }
+        return rocket::nullopt;
+      }
+
     // Accept a statement; a blockt is converted to a single statement.
     extern opt<Statement> do_accept_statement_opt(Token_Stream& tstrm);
     // Accept a statement; a non-block statement is converted to a block consisting of a single statement.
@@ -345,22 +423,22 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // variable-definition ::=
-        //   "var" identifier equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
+        //   "var" variable-declarator equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_var });
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        cow_bivector<phsh_string, cow_vector<Xprunit>> vars;
+        cow_bivector<cow_vector<phsh_string>, cow_vector<Xprunit>> vars;
         for(;;) {
-          auto qname = do_accept_identifier_opt(tstrm);
-          if(!qname) {
+          auto qnames = do_accept_variable_declarator_opt(tstrm);
+          if(!qnames) {
             throw do_make_parser_error(tstrm, parser_status_identifier_expected);
           }
           auto qinit = do_accept_equal_initializer_opt(tstrm);
           if(!qinit) {
             qinit.emplace();
           }
-          vars.emplace_back(rocket::move(*qname), rocket::move(*qinit));
+          vars.emplace_back(rocket::move(*qnames), rocket::move(*qinit));
           // Look for the separator. The first declaration is required.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
           if(!kpunct) {
@@ -371,7 +449,7 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, parser_status_semicolon_expected);
         }
-        Statement::S_variable xstmt = { rocket::move(sloc), false, rocket::move(vars) };
+        Statement::S_variables xstmt = { rocket::move(sloc), false, rocket::move(vars) };
         return rocket::move(xstmt);
       }
 
@@ -380,22 +458,22 @@ namespace Asteria {
         // Copy these parameters before reading from the stream which is destructive.
         auto sloc = do_tell_source_location(tstrm);
         // immutable-variable-definition ::=
-        //   "const" identifier equal-initailizer ( "," identifier equal-initializer | "" ) ";"
+        //   "const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_const });
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        cow_bivector<phsh_string, cow_vector<Xprunit>> vars;
+        cow_bivector<cow_vector<phsh_string>, cow_vector<Xprunit>> vars;
         for(;;) {
-          auto qname = do_accept_identifier_opt(tstrm);
-          if(!qname) {
+          auto qnames = do_accept_variable_declarator_opt(tstrm);
+          if(!qnames) {
             throw do_make_parser_error(tstrm, parser_status_identifier_expected);
           }
           auto qinit = do_accept_equal_initializer_opt(tstrm);
           if(!qinit) {
             throw do_make_parser_error(tstrm, parser_status_equals_sign_expected);
           }
-          vars.emplace_back(rocket::move(*qname), rocket::move(*qinit));
+          vars.emplace_back(rocket::move(*qnames), rocket::move(*qinit));
           // Look for the separator. The first declaration is required.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
           if(!kpunct) {
@@ -406,7 +484,7 @@ namespace Asteria {
         if(!kpunct) {
           throw do_make_parser_error(tstrm, parser_status_semicolon_expected);
         }
-        Statement::S_variable xstmt = { rocket::move(sloc), true, rocket::move(vars) };
+        Statement::S_variables xstmt = { rocket::move(sloc), true, rocket::move(vars) };
         return rocket::move(xstmt);
       }
 

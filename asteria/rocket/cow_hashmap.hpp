@@ -1280,7 +1280,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return ptr[tpos]->second;
       }
     // N.B. This is a non-standard extension.
-    template<typename ykeyT> mapped_type& mut_ptr(const ykeyT& key)
+    template<typename ykeyT> mapped_type* mut_ptr(const ykeyT& key)
       {
         auto ptr = this->do_mut_table();
         size_type tpos;
