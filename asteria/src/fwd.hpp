@@ -136,7 +136,7 @@ template<typename... P> using variant = rocket::variant<P...>;
 template<typename T> using opt = rocket::optional<T>;
 template<typename F, typename S> using pair = std::pair<F, S>;
 template<typename F, typename S> using cow_bivector = rocket::cow_vector<std::pair<F, S>>;
-template<typename E, size_t ...k> using array = rocket::array<E, k...>;
+template<typename E, size_t... k> using array = rocket::array<E, k...>;
 template<typename E> using ref_to = rocket::ref_to<E>;
 
 // Fundamental types
