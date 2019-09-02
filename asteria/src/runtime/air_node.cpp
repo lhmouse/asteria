@@ -227,7 +227,7 @@ DCE_Result AIR_Node::optimize_dce()
             return queue.append<executorT, enumerate_wrapper>(paramk, rocket::forward<XnodeT>(xnode));
           }
       };
-    template<typename XnodeT> struct AVMC_Appender<XnodeT, ASTERIA_VOID_T(typename rocket::remove_cvref<XnodeT>::type::contains_no_variable)>
+    template<typename XnodeT> struct AVMC_Appender<XnodeT, ASTERIA_VOID_T(typename rocket::remove_cvref<XnodeT>::type::nonenumerable)>
       {
         template<AVMC_Queue::Executor executorT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t paramk, XnodeT&& xnode)
           {
@@ -394,21 +394,21 @@ DCE_Result AIR_Node::optimize_dce()
       {
         phsh_string name;
 
-        using contains_no_variable = std::true_type;
+        using nonenumerable = std::true_type;
       };
 
     struct SP_names
       {
         cow_vector<phsh_string> names;
 
-        using contains_no_variable = std::true_type;
+        using nonenumerable = std::true_type;
       };
 
     struct SP_sloc
       {
         Source_Location sloc;
 
-        using contains_no_variable = std::true_type;
+        using nonenumerable = std::true_type;
       };
 
     struct SP_sloc_msg
@@ -416,14 +416,14 @@ DCE_Result AIR_Node::optimize_dce()
         Source_Location sloc;
         cow_string msg;
 
-        using contains_no_variable = std::true_type;
+        using nonenumerable = std::true_type;
       };
 
     struct SP_func
       {
         AIR_Node::S_define_function xnode;
 
-        using contains_no_variable = std::true_type;
+        using nonenumerable = std::true_type;
       };
 
     struct SP_call
@@ -431,7 +431,7 @@ DCE_Result AIR_Node::optimize_dce()
         Source_Location sloc;
         cow_vector<bool> args_by_refs;
 
-        using contains_no_variable = std::true_type;
+        using nonenumerable = std::true_type;
       };
 
     ///////////////////////////////////////////////////////////////////////////
