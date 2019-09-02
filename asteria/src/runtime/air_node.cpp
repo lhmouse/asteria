@@ -113,11 +113,14 @@ DCE_Result AIR_Node::optimize_dce()
       {
         auto& altr = this->m_stor.as<index_try_statement>();
         // The node has no effect if the `try` block is empty.
-        do_optimize_dce(altr.code_try);
-        if(altr.code_try.empty()) {
+        auto dce_try = do_optimize_dce(altr.code_try);
+        if(dce_try == dce_empty) {
           return dce_empty;
         }
-        do_optimize_dce(altr.code_catch);
+        auto dce_catch = do_optimize_dce(altr.code_catch);
+        if(dce_try == dce_catch) {
+          return dce_try;
+        }
         return dce_none;
       }
     case index_throw_statement:
