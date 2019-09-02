@@ -103,8 +103,8 @@ class AIR_Node
       };
     struct S_push_local_reference
       {
-        phsh_string name;
         uint32_t depth;
+        phsh_string name;
       };
     struct S_push_bound_reference
       {

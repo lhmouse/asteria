@@ -209,40 +209,75 @@ DCE_Result AIR_Node::optimize_dce()
         return queue.execute(ctx_next);
       }
 
-    template<typename SparamT> inline const SparamT& do_pcast(const void* params) noexcept
+    template<typename SparamT> inline const SparamT* do_pcast(const void* params) noexcept
       {
-        return static_cast<const SparamT*>(params)[0];
+        return static_cast<const SparamT*>(params);
       }
 
-    template<typename XnodeT, typename = void> struct AVMC_Appender
+    template<typename SparamT> Variable_Callback& do_pcast_enumerate(Variable_Callback& callback, uint32_t /*paramk*/, const void* params)
       {
-        // Because the wrapper function is passed as a template argument, we need 'real' function pointers.
-        // Those converted from non-capturing lambdas are not an option.
-        static Variable_Callback& enumerate_wrapper(Variable_Callback& callback, uint32_t /*paramk*/, const void* params)
-          {
-            return static_cast<const typename std::remove_reference<XnodeT>::type*>(params)->enumerate_variables(callback);
-          }
-        template<AVMC_Queue::Executor executorT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t paramk, XnodeT&& xnode)
-          {
-            return queue.append<executorT, enumerate_wrapper>(paramk, rocket::forward<XnodeT>(xnode));
-          }
-      };
-    template<typename XnodeT> struct AVMC_Appender<XnodeT, ASTERIA_VOID_T(typename rocket::remove_cvref<XnodeT>::type::nonenumerable)>
+        return do_pcast<SparamT>(params)->enumerate_variables(callback);
+      }
+
+    // This is the trait struct for parameter types that implement `enumerate_variables()`.
+    template<typename SparamT, typename = void> struct AVMC_Appender : SparamT
       {
-        template<AVMC_Queue::Executor executorT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t paramk, XnodeT&& xnode)
+        uint32_t paramk;
+
+        constexpr AVMC_Appender()
+          : SparamT(), paramk()
           {
-            return queue.append<executorT>(paramk, rocket::forward<XnodeT>(xnode));
+          }
+
+        AVMC_Queue& request(AVMC_Queue& queue) const
+          {
+            return queue.request(sizeof(SparamT));
+          }
+        template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
+          {
+            return queue.append<executorT, do_pcast_enumerate<SparamT>>(this->paramk, static_cast<SparamT&&>(*this));
           }
       };
 
-    template<AVMC_Queue::Executor executorT> AVMC_Queue& do_append(AVMC_Queue& queue, uint32_t paramk)
+    // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
+    template<typename SparamT> struct AVMC_Appender<SparamT, ASTERIA_VOID_T(typename SparamT::nonenumerable)> : SparamT
       {
-        return queue.append<executorT>(paramk);
-      }
-    template<AVMC_Queue::Executor executorT, typename XnodeT> AVMC_Queue& do_append(AVMC_Queue& queue, uint32_t paramk, XnodeT&& xnode)
+        uint32_t paramk;
+
+        constexpr AVMC_Appender()
+          : SparamT(), paramk()
+          {
+          }
+
+        AVMC_Queue& request(AVMC_Queue& queue) const
+          {
+            return queue.request(sizeof(SparamT));
+          }
+        template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
+          {
+            return queue.append<executorT>(this->paramk, static_cast<SparamT&&>(*this));
+          }
+      };
+
+    // This is the trait struct when there is no parameter.
+    template<> struct AVMC_Appender<void, void>
       {
-        return AVMC_Appender<XnodeT>::template append<executorT>(queue, paramk, rocket::forward<XnodeT>(xnode));
-      }
+        uint32_t paramk;
+
+        constexpr AVMC_Appender()
+          : paramk()
+          {
+          }
+
+        AVMC_Queue& request(AVMC_Queue& queue) const
+          {
+            return queue.request(0);
+          }
+        template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
+          {
+            return queue.append<executorT>(this->paramk);
+          }
+      };
 
     AVMC_Queue& do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
       {
@@ -447,7 +482,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_execute_block(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queue_body = do_pcast<SP_queues_fixed<1>>(params).queues[0];
+        const auto& queue_body = do_pcast<SP_queues_fixed<1>>(params)->queues[0];
 
         // Execute the body on a new context.
         return do_execute_block(queue_body, ctx);
@@ -456,7 +491,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_declare_variables(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& immutable = paramk != 0;
-        const auto& names = do_pcast<SP_names>(params).names;
+        const auto& names = do_pcast<SP_names>(params)->names;
 
         // Allocate variables and initialize them to `null`.
         if(ROCKET_EXPECT(names.size() == 1)) {
@@ -501,7 +536,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_initialize_variables(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& immutable = paramk != 0;
-        const auto& names = do_pcast<SP_names>(params).names;
+        const auto& names = do_pcast<SP_names>(params)->names;
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -576,8 +611,8 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_if_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& negative = paramk != 0;
-        const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params).queues[0];
-        const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params).queues[1];
+        const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
+        const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != negative) {
@@ -590,9 +625,9 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_switch_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queues_labels = do_pcast<SP_switch>(params).queues_labels;
-        const auto& queues_bodies = do_pcast<SP_switch>(params).queues_bodies;
-        const auto& names_added = do_pcast<SP_switch>(params).names_added;
+        const auto& queues_labels = do_pcast<SP_switch>(params)->queues_labels;
+        const auto& queues_bodies = do_pcast<SP_switch>(params)->queues_bodies;
+        const auto& names_added = do_pcast<SP_switch>(params)->names_added;
 
         // Read the value of the condition.
         auto value = ctx.stack().top().read();
@@ -648,9 +683,9 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_do_while_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
         const auto& negative = paramk != 0;
-        const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params).queues[1];
+        const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
 
         // This is the same as the `do...while` statement in C.
         for(;;) {
@@ -676,8 +711,8 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_while_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& negative = paramk != 0;
-        const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params).queues[0];
-        const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params).queues[1];
+        const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
+        const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
 
         // This is the same as the `while` statement in C.
         for(;;) {
@@ -702,10 +737,10 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_for_each_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name_key = do_pcast<SP_for_each>(params).name_key;
-        const auto& name_mapped = do_pcast<SP_for_each>(params).name_mapped;
-        const auto& queue_init = do_pcast<SP_for_each>(params).queue_init;
-        const auto& queue_body = do_pcast<SP_for_each>(params).queue_body;
+        const auto& name_key = do_pcast<SP_for_each>(params)->name_key;
+        const auto& name_mapped = do_pcast<SP_for_each>(params)->name_mapped;
+        const auto& queue_init = do_pcast<SP_for_each>(params)->queue_init;
+        const auto& queue_body = do_pcast<SP_for_each>(params)->queue_body;
 
         // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
         Executive_Context ctx_for(rocket::ref(ctx));
@@ -781,13 +816,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_for_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
+    AIR_Status do_for_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& infinite = paramk != 0;
-        const auto& queue_init = do_pcast<SP_queues_fixed<4>>(params).queues[0];
-        const auto& queue_cond = do_pcast<SP_queues_fixed<4>>(params).queues[1];
-        const auto& queue_step = do_pcast<SP_queues_fixed<4>>(params).queues[2];
-        const auto& queue_body = do_pcast<SP_queues_fixed<4>>(params).queues[3];
+        const auto& queue_init = do_pcast<SP_queues_fixed<4>>(params)->queues[0];
+        const auto& queue_cond = do_pcast<SP_queues_fixed<4>>(params)->queues[1];
+        const auto& queue_step = do_pcast<SP_queues_fixed<4>>(params)->queues[2];
+        const auto& queue_body = do_pcast<SP_queues_fixed<4>>(params)->queues[3];
 
         // This is the same as the `for` statement in C.
         // We have to create an outer context due to the fact that names declared in the first segment outlast every iteration.
@@ -796,7 +830,8 @@ DCE_Result AIR_Node::optimize_dce()
         auto status = queue_init.execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
         for(;;) {
-          if(!infinite) {
+          // This is a special case: If the condition is empty then the loop is infinite.
+          if(!queue_cond.empty()) {
             // Check the condition.
             ctx_for.stack().clear();
             status = queue_cond.execute(ctx_for);
@@ -823,10 +858,10 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_try_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queue_try = do_pcast<SP_try>(params).queue_try;
-        const auto& sloc = do_pcast<SP_try>(params).sloc;
-        const auto& name_except = do_pcast<SP_try>(params).name_except;
-        const auto& queue_catch = do_pcast<SP_try>(params).queue_catch;
+        const auto& queue_try = do_pcast<SP_try>(params)->queue_try;
+        const auto& sloc = do_pcast<SP_try>(params)->sloc;
+        const auto& name_except = do_pcast<SP_try>(params)->name_except;
+        const auto& queue_catch = do_pcast<SP_try>(params)->queue_catch;
 
         // This is almost identical to JavaScript.
         try {
@@ -854,7 +889,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_throw_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& sloc = do_pcast<SP_sloc>(params).sloc;
+        const auto& sloc = do_pcast<SP_sloc>(params)->sloc;
 
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
@@ -884,9 +919,9 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_assert_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& sloc = do_pcast<SP_sloc_msg>(params).sloc;
+        const auto& sloc = do_pcast<SP_sloc_msg>(params)->sloc;
         const auto& negative = paramk != 0;
-        const auto& msg = do_pcast<SP_sloc_msg>(params).msg;
+        const auto& msg = do_pcast<SP_sloc_msg>(params)->msg;
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != negative) {
@@ -922,7 +957,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_literal(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& val = do_pcast<Value>(params);
+        const auto& val = do_pcast<Value>(params)[0];
 
         // Push a constant.
         Reference_Root::S_constant xref = { val };
@@ -932,7 +967,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_global_reference(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name = do_pcast<SP_name>(params).name;
+        const auto& name = do_pcast<SP_name>(params)->name;
 
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(name);
@@ -947,7 +982,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_push_local_reference(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& depth = paramk;
-        const auto& name = do_pcast<SP_name>(params).name;
+        const auto& name = do_pcast<SP_name>(params)->name;
 
         // Get the context.
         const Executive_Context* qctx = std::addressof(ctx);
@@ -965,7 +1000,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_bound_reference(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& ref = do_pcast<Reference>(params);
+        const auto& ref = do_pcast<Reference>(params)[0];
 
         // Push a copy of the bound reference.
         ctx.stack().push(ref);
@@ -974,7 +1009,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_define_function(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& xnode = do_pcast<SP_func>(params).xnode;
+        const auto& xnode = do_pcast<SP_func>(params)->xnode;
 
         // Instantiate the function.
         auto qtarget = do_instantiate(xnode, std::addressof(ctx));
@@ -988,8 +1023,8 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_branch_expression(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& assign = paramk != 0;
-        const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params).queues[0];
-        const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params).queues[1];
+        const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
+        const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != false) {
@@ -1003,7 +1038,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_coalescence(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& assign = paramk != 0;
-        const auto& queue_null = do_pcast<SP_queues_fixed<1>>(params).queues[0];
+        const auto& queue_null = do_pcast<SP_queues_fixed<1>>(params)->queues[0];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().is_null() != false) {
@@ -1016,8 +1051,8 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_function_call(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& sloc = do_pcast<SP_call>(params).sloc;
-        const auto& args_by_refs = do_pcast<SP_call>(params).args_by_refs;
+        const auto& sloc = do_pcast<SP_call>(params)->sloc;
+        const auto& args_by_refs = do_pcast<SP_call>(params)->args_by_refs;
         const auto& tco_aware = static_cast<TCO_Aware>(paramk);
 
         // Pop arguments off the stack backwards.
@@ -1082,7 +1117,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_member_access(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name = do_pcast<SP_name>(params).name;
+        const auto& name = do_pcast<SP_name>(params)->name;
 
         // Append a modifier to the reference at the top.
         Reference_Modifier::S_object_key xmod = { name };
@@ -1109,7 +1144,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_unnamed_object(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& keys = do_pcast<SP_names>(params).names;
+        const auto& keys = do_pcast<SP_names>(params)->names;
 
         // Pop elements from the stack and store them in an object backwards.
         G_object object;
@@ -2481,533 +2516,602 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     switch(this->index()) {
     case index_clear_stack:
       {
-        // There is no argument.
+        const auto& altr = this->m_stor.as<index_clear_stack>();
+        // There is no parameter.
+        AVMC_Appender<void> avmcp;
         if(ipass == 0) {
-          return queue.request(0);
+          return avmcp.request(queue);
         }
+        // Encode arguments.
+        (void)altr;
         // Push a new node.
-        return do_append<do_clear_stack>(queue, 0);
+        return avmcp.output<do_clear_stack>(queue);
       }
     case index_execute_block:
       {
         const auto& altr = this->m_stor.as<index_execute_block>();
         // `paramk` is unused. `params` points to the body.
-        SP_queues_fixed<1> sp;
+        AVMC_Appender<SP_queues_fixed<1>> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        do_solidify_queue(sp.queues[0], altr.code_body);
+        do_solidify_queue(avmcp.queues[0], altr.code_body);
         // Push a new node.
-        return do_append<do_execute_block>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_execute_block>(queue);
       }
     case index_declare_variables:
       {
         const auto& altr = this->m_stor.as<index_declare_variables>();
         // `paramk` is `immutable`. `params` points to the name vector.
-        SP_names sp;
+        AVMC_Appender<SP_names> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.names = altr.names;
+        avmcp.paramk = altr.immutable;
+        avmcp.names = altr.names;
         // Push a new node.
-        return do_append<do_declare_variables>(queue, altr.immutable, rocket::move(sp));
+        return avmcp.output<do_declare_variables>(queue);
       }
     case index_initialize_variables:
       {
         const auto& altr = this->m_stor.as<index_initialize_variables>();
         // `paramk` is `immutable`. `params` points to the name vector.
-        SP_names sp;
+        AVMC_Appender<SP_names> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.names = altr.names;
+        avmcp.paramk = altr.immutable;
+        avmcp.names = altr.names;
         // Push a new node.
-        return do_append<do_initialize_variables>(queue, altr.immutable, rocket::move(sp));
+        return avmcp.output<do_initialize_variables>(queue);
       }
     case index_if_statement:
       {
         const auto& altr = this->m_stor.as<index_if_statement>();
         // `paramk` is `negative`. `params` points to the two branches.
-        SP_queues_fixed<2> sp;
+        AVMC_Appender<SP_queues_fixed<2>> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        do_solidify_queue(sp.queues[0], altr.code_true);
-        do_solidify_queue(sp.queues[1], altr.code_false);
+        avmcp.paramk = altr.negative;
+        do_solidify_queue(avmcp.queues[0], altr.code_true);
+        do_solidify_queue(avmcp.queues[1], altr.code_false);
         // Push a new node.
-        return do_append<do_if_statement>(queue, altr.negative, rocket::move(sp));
+        return avmcp.output<do_if_statement>(queue);
       }
     case index_switch_statement:
       {
         const auto& altr = this->m_stor.as<index_switch_statement>();
         // `paramk` is unused. `params` points to all clauses.
-        SP_switch sp;
+        AVMC_Appender<SP_switch> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
         for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
-          do_solidify_queue(sp.queues_labels.emplace_back(), altr.code_labels.at(i));
-          do_solidify_queue(sp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
+          do_solidify_queue(avmcp.queues_labels.emplace_back(), altr.code_labels.at(i));
+          do_solidify_queue(avmcp.queues_bodies.emplace_back(), altr.code_bodies.at(i));
         }
-        sp.names_added = altr.names_added;
+        avmcp.names_added = altr.names_added;
         // Push a new node.
-        return do_append<do_switch_statement>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_switch_statement>(queue);
       }
     case index_do_while_statement:
       {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
         // `paramk` is `negative`. `params` points to the body and the condition.
-        SP_queues_fixed<2> sp;
+        AVMC_Appender<SP_queues_fixed<2>> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        do_solidify_queue(sp.queues[0], altr.code_body);
-        do_solidify_queue(sp.queues[1], altr.code_cond);
+        do_solidify_queue(avmcp.queues[0], altr.code_body);
+        avmcp.paramk = altr.negative;
+        do_solidify_queue(avmcp.queues[1], altr.code_cond);
         // Push a new node.
-        return do_append<do_do_while_statement>(queue, altr.negative, rocket::move(sp));
+        return avmcp.output<do_do_while_statement>(queue);
       }
     case index_while_statement:
       {
         const auto& altr = this->m_stor.as<index_while_statement>();
         // `paramk` is `negative`. `params` points to the condition and the body.
-        SP_queues_fixed<2> sp;
+        AVMC_Appender<SP_queues_fixed<2>> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        do_solidify_queue(sp.queues[0], altr.code_cond);
-        do_solidify_queue(sp.queues[1], altr.code_body);
+        avmcp.paramk = altr.negative;
+        do_solidify_queue(avmcp.queues[0], altr.code_cond);
+        do_solidify_queue(avmcp.queues[1], altr.code_body);
         // Push a new node.
-        return do_append<do_while_statement>(queue, altr.negative, rocket::move(sp));
+        return avmcp.output<do_while_statement>(queue);
       }
     case index_for_each_statement:
       {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
         // `paramk` is unused. `params` points to the range initializer and the body.
-        SP_for_each sp;
+        AVMC_Appender<SP_for_each> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.name_key = altr.name_key;
-        sp.name_mapped = altr.name_mapped;
-        do_solidify_queue(sp.queue_init, altr.code_init);
-        do_solidify_queue(sp.queue_body, altr.code_body);
+        avmcp.name_key = altr.name_key;
+        avmcp.name_mapped = altr.name_mapped;
+        do_solidify_queue(avmcp.queue_init, altr.code_init);
+        do_solidify_queue(avmcp.queue_body, altr.code_body);
         // Push a new node.
-        return do_append<do_for_each_statement>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_for_each_statement>(queue);
       }
     case index_for_statement:
       {
         const auto& altr = this->m_stor.as<index_for_statement>();
-        // `paramk` denotes whether the loop has an empty condition. `params` points to the triplet and the body.
-        SP_queues_fixed<4> sp;
+        // `paramk` is unused. `params` points to the triplet and the body.
+        AVMC_Appender<SP_queues_fixed<4>> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        do_solidify_queue(sp.queues[0], altr.code_init);
-        do_solidify_queue(sp.queues[1], altr.code_cond);
-        do_solidify_queue(sp.queues[2], altr.code_step);
-        do_solidify_queue(sp.queues[3], altr.code_body);
+        do_solidify_queue(avmcp.queues[0], altr.code_init);
+        do_solidify_queue(avmcp.queues[1], altr.code_cond);
+        do_solidify_queue(avmcp.queues[2], altr.code_step);
+        do_solidify_queue(avmcp.queues[3], altr.code_body);
         // Push a new node.
-        return do_append<do_for_statement>(queue, altr.code_cond.empty(), rocket::move(sp));
+        return avmcp.output<do_for_statement>(queue);
       }
     case index_try_statement:
       {
         const auto& altr = this->m_stor.as<index_try_statement>();
         // `paramk` is unused. `params` points to the clauses.
-        SP_try sp;
+        AVMC_Appender<SP_try> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        do_solidify_queue(sp.queue_try, altr.code_try);
-        sp.sloc = altr.sloc;
-        sp.name_except = altr.name_except;
-        do_solidify_queue(sp.queue_catch, altr.code_catch);
+        do_solidify_queue(avmcp.queue_try, altr.code_try);
+        avmcp.sloc = altr.sloc;
+        avmcp.name_except = altr.name_except;
+        do_solidify_queue(avmcp.queue_catch, altr.code_catch);
         // Push a new node.
-        return do_append<do_try_statement>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_try_statement>(queue);
       }
     case index_throw_statement:
       {
         const auto& altr = this->m_stor.as<index_throw_statement>();
         // `paramk` is unused. `params` points to the source location.
-        SP_sloc sp;
+        AVMC_Appender<SP_sloc> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.sloc = altr.sloc;
+        avmcp.sloc = altr.sloc;
         // Push a new node.
-        return do_append<do_throw_statement>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_throw_statement>(queue);
       }
     case index_assert_statement:
       {
         const auto& altr = this->m_stor.as<index_assert_statement>();
         // `paramk` is `negative`. `params` points to the source location and the message.
-        SP_sloc_msg sp;
+        AVMC_Appender<SP_sloc_msg> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.sloc = altr.sloc;
-        sp.msg = altr.msg;
+        avmcp.sloc = altr.sloc;
+        avmcp.paramk = altr.negative;
+        avmcp.msg = altr.msg;
         // Push a new node.
-        return do_append<do_assert_statement>(queue, altr.negative, rocket::move(sp));
+        return avmcp.output<do_assert_statement>(queue);
       }
     case index_simple_status:
       {
         const auto& altr = this->m_stor.as<index_simple_status>();
         // `paramk` is `status`. `params` is unused.
+        AVMC_Appender<void> avmcp;
         if(ipass == 0) {
-          return queue.request(0);
+          return avmcp.request(queue);
         }
+        // Encode arguments.
+        avmcp.paramk = static_cast<uint32_t>(altr.status);
         // Push a new node.
-        return do_append<do_simple_status>(queue, altr.status);
+        return avmcp.output<do_simple_status>(queue);
       }
     case index_return_by_value:
       {
-        // There is no argument.
+        const auto& altr = this->m_stor.as<index_return_by_value>();
+        // There is no parameter.
+        AVMC_Appender<void> avmcp;
         if(ipass == 0) {
-          return queue.request(0);
+          return avmcp.request(queue);
         }
+        // Encode arguments.
+        (void)altr;
         // Push a new node.
-        return do_append<do_return_by_value>(queue, 0);
+        return avmcp.output<do_return_by_value>(queue);
       }
     case index_push_literal:
       {
         const auto& altr = this->m_stor.as<index_push_literal>();
         // `paramk` is unused. `params` points to a copy of `val`.
+        AVMC_Appender<Value> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(altr.val));
+          return avmcp.request(queue);
         }
+        // Encode arguments.
+        static_cast<Value&>(avmcp) = altr.val;
         // Push a new node.
-        return do_append<do_push_literal>(queue, 0, altr.val);
+        return avmcp.output<do_push_literal>(queue);
       }
     case index_push_global_reference:
       {
         const auto& altr = this->m_stor.as<index_push_global_reference>();
         // `paramk` is unused. `params` points to the name.
-        SP_name sp;
+        AVMC_Appender<SP_name> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.name = altr.name;
+        avmcp.name = altr.name;
         // Push a new node.
-        return do_append<do_push_global_reference>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_push_global_reference>(queue);
       }
     case index_push_local_reference:
       {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
         // `paramk` is `depth`. `params` points to the name.
-        SP_name sp;
+        AVMC_Appender<SP_name> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.name = altr.name;
+        avmcp.paramk = altr.depth;
+        avmcp.name = altr.name;
         // Push a new node.
-        return do_append<do_push_local_reference>(queue, altr.depth, rocket::move(sp));
+        return avmcp.output<do_push_local_reference>(queue);
       }
     case index_push_bound_reference:
       {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
         // `paramk` is unused. `params` points to a copy of `ref`.
+        AVMC_Appender<Reference> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(altr.ref));
+          return avmcp.request(queue);
         }
+        // Encode arguments.
+        static_cast<Reference&>(avmcp) = altr.ref;
         // Push a new node.
-        return do_append<do_push_bound_reference>(queue, 0, altr.ref);
+        return avmcp.output<do_push_bound_reference>(queue);
       }
     case index_define_function:
       {
         const auto& altr = this->m_stor.as<index_define_function>();
         // `paramk` is unused. `params` points to the name, the parameter list, and the body of the function.
-        SP_func sp;
+        AVMC_Appender<SP_func> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.xnode = altr;
+        avmcp.xnode = altr;
         // Push a new node.
-        return do_append<do_define_function>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_define_function>(queue);
       }
     case index_branch_expression:
       {
         const auto& altr = this->m_stor.as<index_branch_expression>();
         // `paramk` is `assign`. `params` points to the two branches.
-        SP_queues_fixed<2> sp;
+        AVMC_Appender<SP_queues_fixed<2>> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        do_solidify_queue(sp.queues[0], altr.code_true);
-        do_solidify_queue(sp.queues[1], altr.code_false);
+        do_solidify_queue(avmcp.queues[0], altr.code_true);
+        do_solidify_queue(avmcp.queues[1], altr.code_false);
+        avmcp.paramk = altr.assign;
         // Push a new node.
-        return do_append<do_branch_expression>(queue, altr.assign, rocket::move(sp));
+        return avmcp.output<do_branch_expression>(queue);
       }
     case index_coalescence:
       {
         const auto& altr = this->m_stor.as<index_coalescence>();
         // `paramk` is `assign`. `params` points to the alternative.
-        SP_queues_fixed<1> sp;
+        AVMC_Appender<SP_queues_fixed<1>> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        do_solidify_queue(sp.queues[0], altr.code_null);
+        do_solidify_queue(avmcp.queues[0], altr.code_null);
+        avmcp.paramk = altr.assign;
         // Push a new node.
-        return do_append<do_coalescence>(queue, altr.assign, rocket::move(sp));
+        return avmcp.output<do_coalescence>(queue);
       }
     case index_function_call:
       {
         const auto& altr = this->m_stor.as<index_function_call>();
-        // `paramk` is `tco_aware`. `params` points to the source location and the argument specifier vector.
-        SP_call sp;
+        // `paramk` is `tco_aware`. `params` points to the source location and the argument avmcp.cifier vector.
+        AVMC_Appender<SP_call> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.sloc = altr.sloc;
-        sp.args_by_refs = altr.args_by_refs;
+        avmcp.sloc = altr.sloc;
+        avmcp.args_by_refs = altr.args_by_refs;
+        avmcp.paramk = static_cast<uint32_t>(altr.tco_aware);
         // Push a new node.
-        return do_append<do_function_call>(queue, altr.tco_aware, rocket::move(sp));
+        return avmcp.output<do_function_call>(queue);
       }
     case index_member_access:
       {
         const auto& altr = this->m_stor.as<index_member_access>();
         // `paramk` is unused. `params` points to the name.
-        SP_name sp;
+        AVMC_Appender<SP_name> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.name = altr.name;
+        avmcp.name = altr.name;
         // Push a new node.
-        return do_append<do_member_access>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_member_access>(queue);
       }
     case index_push_unnamed_array:
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
         // `paramk` is `nelems`. `params` is unused.
+        AVMC_Appender<void> avmcp;
         if(ipass == 0) {
-          return queue.request(0);
+          return avmcp.request(queue);
         }
+        // Encode arguments.
+        avmcp.paramk = altr.nelems;
         // Push a new node.
-        return do_append<do_push_unnamed_array>(queue, altr.nelems);
+        return avmcp.output<do_push_unnamed_array>(queue);
       }
     case index_push_unnamed_object:
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_object>();
         // `paramk` is unused. `params` points to the keys.
-        SP_names sp;
+        AVMC_Appender<SP_names> avmcp;
         if(ipass == 0) {
-          return queue.request(sizeof(sp));
+          return avmcp.request(queue);
         }
         // Encode arguments.
-        sp.names = altr.keys;
+        avmcp.names = altr.keys;
         // Push a new node.
-        return do_append<do_push_unnamed_object>(queue, 0, rocket::move(sp));
+        return avmcp.output<do_push_unnamed_object>(queue);
       }
     case index_apply_operator:
       {
         const auto& altr = this->m_stor.as<index_apply_operator>();
         // `paramk` is `assign`. `params` is unused.
+        AVMC_Appender<void> avmcp;
         if(ipass == 0) {
-          return queue.request(0);
+          return avmcp.request(queue);
+        }
+        // Encode arguments.
+        switch(rocket::weaken_enum(altr.xop)) {
+        case xop_cmp_eq:
+          {
+            avmcp.paramk = SK_xrel(altr.assign, compare_equal, 0);
+            break;
+          }
+        case xop_cmp_ne:
+          {
+            avmcp.paramk = SK_xrel(altr.assign, compare_equal, 1);
+            break;
+          }
+        case xop_cmp_lt:
+          {
+            avmcp.paramk = SK_xrel(altr.assign, compare_less, 0);
+            break;
+          }
+        case xop_cmp_gt:
+          {
+            avmcp.paramk = SK_xrel(altr.assign, compare_greater, 0);
+            break;
+          }
+        case xop_cmp_lte:
+          {
+            avmcp.paramk = SK_xrel(altr.assign, compare_greater, 1);
+            break;
+          }
+        case xop_cmp_gte:
+          {
+            avmcp.paramk = SK_xrel(altr.assign, compare_less, 1);
+            break;
+          }
+        default:
+          {
+            avmcp.paramk = altr.assign;
+            break;
+          }
         }
         // Push a new node.
         switch(altr.xop) {
         case xop_inc_post:
           {
-            return do_append<do_apply_xop_inc_post>(queue, 0);
+            return avmcp.output<do_apply_xop_inc_post>(queue);
           }
         case xop_dec_post:
           {
-            return do_append<do_apply_xop_dec_post>(queue, 0);
+            return avmcp.output<do_apply_xop_dec_post>(queue);
           }
         case xop_subscr:
           {
-            return do_append<do_apply_xop_subscr>(queue, 0);
+            return avmcp.output<do_apply_xop_subscr>(queue);
           }
         case xop_pos:
           {
-            return do_append<do_apply_xop_pos>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_pos>(queue);
           }
         case xop_neg:
           {
-            return do_append<do_apply_xop_neg>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_neg>(queue);
           }
         case xop_notb:
           {
-            return do_append<do_apply_xop_notb>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_notb>(queue);
           }
         case xop_notl:
           {
-            return do_append<do_apply_xop_notl>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_notl>(queue);
           }
         case xop_inc_pre:
           {
-            return do_append<do_apply_xop_inc_pre>(queue, 0);
+            return avmcp.output<do_apply_xop_inc_pre>(queue);
           }
         case xop_dec_pre:
           {
-            return do_append<do_apply_xop_dec_pre>(queue, 0);
+            return avmcp.output<do_apply_xop_dec_pre>(queue);
           }
         case xop_unset:
           {
-            return do_append<do_apply_xop_unset>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_unset>(queue);
           }
         case xop_lengthof:
           {
-            return do_append<do_apply_xop_lengthof>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_lengthof>(queue);
           }
         case xop_typeof:
           {
-            return do_append<do_apply_xop_typeof>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_typeof>(queue);
           }
         case xop_sqrt:
           {
-            return do_append<do_apply_xop_sqrt>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_sqrt>(queue);
           }
         case xop_isnan:
           {
-            return do_append<do_apply_xop_isnan>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_isnan>(queue);
           }
         case xop_isinf:
           {
-            return do_append<do_apply_xop_isinf>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_isinf>(queue);
           }
         case xop_abs:
           {
-            return do_append<do_apply_xop_abs>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_abs>(queue);
           }
         case xop_signb:
           {
-            return do_append<do_apply_xop_signb>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_signb>(queue);
           }
         case xop_round:
           {
-            return do_append<do_apply_xop_round>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_round>(queue);
           }
         case xop_floor:
           {
-            return do_append<do_apply_xop_floor>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_floor>(queue);
           }
         case xop_ceil:
           {
-            return do_append<do_apply_xop_ceil>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_ceil>(queue);
           }
         case xop_trunc:
           {
-            return do_append<do_apply_xop_trunc>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_trunc>(queue);
           }
         case xop_iround:
           {
-            return do_append<do_apply_xop_iround>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_iround>(queue);
           }
         case xop_ifloor:
           {
-            return do_append<do_apply_xop_ifloor>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_ifloor>(queue);
           }
         case xop_iceil:
           {
-            return do_append<do_apply_xop_iceil>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_iceil>(queue);
           }
         case xop_itrunc:
           {
-            return do_append<do_apply_xop_itrunc>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_itrunc>(queue);
           }
         case xop_cmp_eq:
           {
-            return do_append<do_apply_xop_cmp_xeq>(queue, SK_xrel(altr.assign, compare_equal, false));
+            return avmcp.output<do_apply_xop_cmp_xeq>(queue);
           }
         case xop_cmp_ne:
           {
-            return do_append<do_apply_xop_cmp_xeq>(queue, SK_xrel(altr.assign, compare_equal, true));
+            return avmcp.output<do_apply_xop_cmp_xeq>(queue);
           }
         case xop_cmp_lt:
           {
-            return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, compare_less, false));
+            return avmcp.output<do_apply_xop_cmp_xrel>(queue);
           }
         case xop_cmp_gt:
           {
-            return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, compare_greater, false));
+            return avmcp.output<do_apply_xop_cmp_xrel>(queue);
           }
         case xop_cmp_lte:
           {
-            return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, compare_greater, true));
+            return avmcp.output<do_apply_xop_cmp_xrel>(queue);
           }
         case xop_cmp_gte:
           {
-            return do_append<do_apply_xop_cmp_xrel>(queue, SK_xrel(altr.assign, compare_less, true));
+            return avmcp.output<do_apply_xop_cmp_xrel>(queue);
           }
         case xop_cmp_3way:
           {
-            return do_append<do_apply_xop_cmp_3way>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_cmp_3way>(queue);
           }
         case xop_add:
           {
-            return do_append<do_apply_xop_add>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_add>(queue);
           }
         case xop_sub:
           {
-            return do_append<do_apply_xop_sub>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_sub>(queue);
           }
         case xop_mul:
           {
-            return do_append<do_apply_xop_mul>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_mul>(queue);
           }
         case xop_div:
           {
-            return do_append<do_apply_xop_div>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_div>(queue);
           }
         case xop_mod:
           {
-            return do_append<do_apply_xop_mod>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_mod>(queue);
           }
         case xop_sll:
           {
-            return do_append<do_apply_xop_sll>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_sll>(queue);
           }
         case xop_srl:
           {
-            return do_append<do_apply_xop_srl>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_srl>(queue);
           }
         case xop_sla:
           {
-            return do_append<do_apply_xop_sla>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_sla>(queue);
           }
         case xop_sra:
           {
-            return do_append<do_apply_xop_sra>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_sra>(queue);
           }
         case xop_andb:
           {
-            return do_append<do_apply_xop_andb>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_andb>(queue);
           }
         case xop_orb:
           {
-            return do_append<do_apply_xop_orb>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_orb>(queue);
           }
         case xop_xorb:
           {
-            return do_append<do_apply_xop_xorb>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_xorb>(queue);
           }
         case xop_assign:
           {
-            return do_append<do_apply_xop_assign>(queue, 0);
+            return avmcp.output<do_apply_xop_assign>(queue);
           }
         case xop_fma_3:
           {
-            return do_append<do_apply_xop_fma>(queue, altr.assign);
+            return avmcp.output<do_apply_xop_fma>(queue);
           }
         default:
           ASTERIA_TERMINATE("An unknown operator enumeration `", altr.xop, "` has been encountered. This is likely a bug. Please report.");

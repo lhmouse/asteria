@@ -94,7 +94,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
         }
         else if(qctx->is_analytic()) {
           // A reference declared later has been found. Record the context depth for later lookups.
-          AIR_Node::S_push_local_reference xnode = { altr.name, depth };
+          AIR_Node::S_push_local_reference xnode = { depth, altr.name };
           code.emplace_back(rocket::move(xnode));
         }
         else {
