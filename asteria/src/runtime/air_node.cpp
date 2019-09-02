@@ -298,7 +298,7 @@ DCE_Result AIR_Node::optimize_dce()
         return rocket::make_refcnt<Instantiated_Function>(params, rocket::move(zvarg), rocket::move(queue));
       }
 
-    template<typename SparamT> inline const SparamT& pcast(const void* params) noexcept
+    template<typename SparamT> inline const SparamT& do_pcast(const void* params) noexcept
       {
         return static_cast<const SparamT*>(params)[0];
       }
@@ -447,7 +447,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_execute_block(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queue_body = pcast<SP_queues_fixed<1>>(params).queues[0];
+        const auto& queue_body = do_pcast<SP_queues_fixed<1>>(params).queues[0];
 
         // Execute the body on a new context.
         return do_execute_block(queue_body, ctx);
@@ -456,7 +456,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_declare_variables(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& immutable = paramk != 0;
-        const auto& names = pcast<SP_names>(params).names;
+        const auto& names = do_pcast<SP_names>(params).names;
 
         // Allocate variables and initialize them to `null`.
         if(ROCKET_EXPECT(names.size() == 1)) {
@@ -501,7 +501,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_initialize_variables(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& immutable = paramk != 0;
-        const auto& names = pcast<SP_names>(params).names;
+        const auto& names = do_pcast<SP_names>(params).names;
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -576,8 +576,8 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_if_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& negative = paramk != 0;
-        const auto& queue_true = pcast<SP_queues_fixed<2>>(params).queues[0];
-        const auto& queue_false = pcast<SP_queues_fixed<2>>(params).queues[1];
+        const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params).queues[1];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != negative) {
@@ -590,9 +590,9 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_switch_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queues_labels = pcast<SP_switch>(params).queues_labels;
-        const auto& queues_bodies = pcast<SP_switch>(params).queues_bodies;
-        const auto& names_added = pcast<SP_switch>(params).names_added;
+        const auto& queues_labels = do_pcast<SP_switch>(params).queues_labels;
+        const auto& queues_bodies = do_pcast<SP_switch>(params).queues_bodies;
+        const auto& names_added = do_pcast<SP_switch>(params).names_added;
 
         // Read the value of the condition.
         auto value = ctx.stack().top().read();
@@ -648,9 +648,9 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_do_while_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& queue_body = pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params).queues[0];
         const auto& negative = paramk != 0;
-        const auto& queue_cond = pcast<SP_queues_fixed<2>>(params).queues[1];
+        const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params).queues[1];
 
         // This is the same as the `do...while` statement in C.
         for(;;) {
@@ -676,8 +676,8 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_while_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& negative = paramk != 0;
-        const auto& queue_cond = pcast<SP_queues_fixed<2>>(params).queues[0];
-        const auto& queue_body = pcast<SP_queues_fixed<2>>(params).queues[1];
+        const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params).queues[1];
 
         // This is the same as the `while` statement in C.
         for(;;) {
@@ -702,10 +702,10 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_for_each_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name_key = pcast<SP_for_each>(params).name_key;
-        const auto& name_mapped = pcast<SP_for_each>(params).name_mapped;
-        const auto& queue_init = pcast<SP_for_each>(params).queue_init;
-        const auto& queue_body = pcast<SP_for_each>(params).queue_body;
+        const auto& name_key = do_pcast<SP_for_each>(params).name_key;
+        const auto& name_mapped = do_pcast<SP_for_each>(params).name_mapped;
+        const auto& queue_init = do_pcast<SP_for_each>(params).queue_init;
+        const auto& queue_body = do_pcast<SP_for_each>(params).queue_body;
 
         // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
         Executive_Context ctx_for(rocket::ref(ctx));
@@ -784,10 +784,10 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_for_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& infinite = paramk != 0;
-        const auto& queue_init = pcast<SP_queues_fixed<4>>(params).queues[0];
-        const auto& queue_cond = pcast<SP_queues_fixed<4>>(params).queues[1];
-        const auto& queue_step = pcast<SP_queues_fixed<4>>(params).queues[2];
-        const auto& queue_body = pcast<SP_queues_fixed<4>>(params).queues[3];
+        const auto& queue_init = do_pcast<SP_queues_fixed<4>>(params).queues[0];
+        const auto& queue_cond = do_pcast<SP_queues_fixed<4>>(params).queues[1];
+        const auto& queue_step = do_pcast<SP_queues_fixed<4>>(params).queues[2];
+        const auto& queue_body = do_pcast<SP_queues_fixed<4>>(params).queues[3];
 
         // This is the same as the `for` statement in C.
         // We have to create an outer context due to the fact that names declared in the first segment outlast every iteration.
@@ -823,10 +823,10 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_try_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queue_try = pcast<SP_try>(params).queue_try;
-        const auto& sloc = pcast<SP_try>(params).sloc;
-        const auto& name_except = pcast<SP_try>(params).name_except;
-        const auto& queue_catch = pcast<SP_try>(params).queue_catch;
+        const auto& queue_try = do_pcast<SP_try>(params).queue_try;
+        const auto& sloc = do_pcast<SP_try>(params).sloc;
+        const auto& name_except = do_pcast<SP_try>(params).name_except;
+        const auto& queue_catch = do_pcast<SP_try>(params).queue_catch;
 
         // This is almost identical to JavaScript.
         try {
@@ -854,7 +854,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_throw_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& sloc = pcast<SP_sloc>(params).sloc;
+        const auto& sloc = do_pcast<SP_sloc>(params).sloc;
 
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
@@ -884,9 +884,9 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_assert_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& sloc = pcast<SP_sloc_msg>(params).sloc;
+        const auto& sloc = do_pcast<SP_sloc_msg>(params).sloc;
         const auto& negative = paramk != 0;
-        const auto& msg = pcast<SP_sloc_msg>(params).msg;
+        const auto& msg = do_pcast<SP_sloc_msg>(params).msg;
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != negative) {
@@ -922,7 +922,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_literal(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& val = pcast<Value>(params);
+        const auto& val = do_pcast<Value>(params);
 
         // Push a constant.
         Reference_Root::S_constant xref = { val };
@@ -932,7 +932,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_global_reference(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name = pcast<SP_name>(params).name;
+        const auto& name = do_pcast<SP_name>(params).name;
 
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(name);
@@ -947,7 +947,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_push_local_reference(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& depth = paramk;
-        const auto& name = pcast<SP_name>(params).name;
+        const auto& name = do_pcast<SP_name>(params).name;
 
         // Get the context.
         const Executive_Context* qctx = std::addressof(ctx);
@@ -965,7 +965,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_bound_reference(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& ref = pcast<Reference>(params);
+        const auto& ref = do_pcast<Reference>(params);
 
         // Push a copy of the bound reference.
         ctx.stack().push(ref);
@@ -974,7 +974,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_define_function(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& xnode = pcast<SP_func>(params).xnode;
+        const auto& xnode = do_pcast<SP_func>(params).xnode;
 
         // Instantiate the function.
         auto qtarget = do_instantiate(xnode, std::addressof(ctx));
@@ -988,8 +988,8 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_branch_expression(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& assign = paramk != 0;
-        const auto& queue_true = pcast<SP_queues_fixed<2>>(params).queues[0];
-        const auto& queue_false = pcast<SP_queues_fixed<2>>(params).queues[1];
+        const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params).queues[1];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != false) {
@@ -1003,7 +1003,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_coalescence(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
         const auto& assign = paramk != 0;
-        const auto& queue_null = pcast<SP_queues_fixed<1>>(params).queues[0];
+        const auto& queue_null = do_pcast<SP_queues_fixed<1>>(params).queues[0];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().is_null() != false) {
@@ -1016,8 +1016,8 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_function_call(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& sloc = pcast<SP_call>(params).sloc;
-        const auto& args_by_refs = pcast<SP_call>(params).args_by_refs;
+        const auto& sloc = do_pcast<SP_call>(params).sloc;
+        const auto& args_by_refs = do_pcast<SP_call>(params).args_by_refs;
         const auto& tco_aware = static_cast<TCO_Aware>(paramk);
 
         // Pop arguments off the stack backwards.
@@ -1082,7 +1082,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_member_access(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name = pcast<SP_name>(params).name;
+        const auto& name = do_pcast<SP_name>(params).name;
 
         // Append a modifier to the reference at the top.
         Reference_Modifier::S_object_key xmod = { name };
@@ -1109,7 +1109,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_unnamed_object(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& keys = pcast<SP_names>(params).names;
+        const auto& keys = do_pcast<SP_names>(params).names;
 
         // Pop elements from the stack and store them in an object backwards.
         G_object object;
