@@ -209,6 +209,11 @@ DCE_Result AIR_Node::optimize_dce()
         return queue.execute(ctx_next);
       }
 
+    template<typename SparamT> inline const SparamT& do_pcast(const void* params) noexcept
+      {
+        return static_cast<const SparamT*>(params)[0];
+      }
+
     template<typename XnodeT, typename = void> struct AVMC_Appender
       {
         // Because the wrapper function is passed as a template argument, we need 'real' function pointers.
@@ -296,11 +301,6 @@ DCE_Result AIR_Node::optimize_dce()
 
         // Create the function now.
         return rocket::make_refcnt<Instantiated_Function>(params, rocket::move(zvarg), rocket::move(queue));
-      }
-
-    template<typename SparamT> inline const SparamT& do_pcast(const void* params) noexcept
-      {
-        return static_cast<const SparamT*>(params)[0];
       }
 
     ///////////////////////////////////////////////////////////////////////////
