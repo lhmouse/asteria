@@ -33,6 +33,7 @@ namespace Asteria {
             continue;
           }
           // Go to the next node.
+          ROCKET_ASSERT(dce == dce_none);
           ++cur;
         }
         // Check whether `code` is empty now.
