@@ -213,30 +213,30 @@ DCE_Result AIR_Node::optimize_dce()
       {
         // Because the wrapper function is passed as a template argument, we need 'real' function pointers.
         // Those converted from non-capturing lambdas are not an option.
-        static Variable_Callback& enumerate_wrapper(Variable_Callback& callback, uint32_t /*k*/, const void* p)
+        static Variable_Callback& enumerate_wrapper(Variable_Callback& callback, uint32_t /*paramk*/, const void* params)
           {
-            return static_cast<const typename std::remove_reference<XnodeT>::type*>(p)->enumerate_variables(callback);
+            return static_cast<const typename std::remove_reference<XnodeT>::type*>(params)->enumerate_variables(callback);
           }
-        template<AVMC_Queue::Executor execuT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t k, XnodeT&& xnode)
+        template<AVMC_Queue::Executor executorT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t paramk, XnodeT&& xnode)
           {
-            return queue.append<execuT, enumerate_wrapper>(k, rocket::forward<XnodeT>(xnode));
+            return queue.append<executorT, enumerate_wrapper>(paramk, rocket::forward<XnodeT>(xnode));
           }
       };
     template<typename XnodeT> struct AVMC_Appender<XnodeT, ASTERIA_VOID_T(typename rocket::remove_cvref<XnodeT>::type::contains_no_variable)>
       {
-        template<AVMC_Queue::Executor execuT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t k, XnodeT&& xnode)
+        template<AVMC_Queue::Executor executorT> static AVMC_Queue& append(AVMC_Queue& queue, uint32_t paramk, XnodeT&& xnode)
           {
-            return queue.append<execuT>(k, rocket::forward<XnodeT>(xnode));
+            return queue.append<executorT>(paramk, rocket::forward<XnodeT>(xnode));
           }
       };
 
-    template<AVMC_Queue::Executor execuT> AVMC_Queue& do_append(AVMC_Queue& queue, uint32_t k)
+    template<AVMC_Queue::Executor executorT> AVMC_Queue& do_append(AVMC_Queue& queue, uint32_t paramk)
       {
-        return queue.append<execuT>(k);
+        return queue.append<executorT>(paramk);
       }
-    template<AVMC_Queue::Executor execuT, typename XnodeT> AVMC_Queue& do_append(AVMC_Queue& queue, uint32_t k, XnodeT&& xnode)
+    template<AVMC_Queue::Executor executorT, typename XnodeT> AVMC_Queue& do_append(AVMC_Queue& queue, uint32_t paramk, XnodeT&& xnode)
       {
-        return AVMC_Appender<XnodeT>::template append<execuT>(queue, k, rocket::forward<XnodeT>(xnode));
+        return AVMC_Appender<XnodeT>::template append<executorT>(queue, paramk, rocket::forward<XnodeT>(xnode));
       }
 
     AVMC_Queue& do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
@@ -298,9 +298,9 @@ DCE_Result AIR_Node::optimize_dce()
         return rocket::make_refcnt<Instantiated_Function>(params, rocket::move(zvarg), rocket::move(queue));
       }
 
-    template<typename SparamT> inline const SparamT& pcast(const void* p) noexcept
+    template<typename SparamT> inline const SparamT& pcast(const void* params) noexcept
       {
-        return static_cast<const SparamT*>(p)[0];
+        return static_cast<const SparamT*>(params)[0];
       }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -438,25 +438,25 @@ DCE_Result AIR_Node::optimize_dce()
     // Executor functions
     ///////////////////////////////////////////////////////////////////////////
 
-    AIR_Status do_clear_stack(Executive_Context& ctx, uint32_t /*k*/, const void* /*p*/)
+    AIR_Status do_clear_stack(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // Clear the stack.
         ctx.stack().clear();
         return air_status_next;
       }
 
-    AIR_Status do_execute_block(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_execute_block(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queue_body = pcast<SP_queues_fixed<1>>(p).queues[0];
+        const auto& queue_body = pcast<SP_queues_fixed<1>>(params).queues[0];
 
         // Execute the body on a new context.
         return do_execute_block(queue_body, ctx);
       }
 
-    AIR_Status do_declare_variables(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_declare_variables(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& immutable = k != 0;
-        const auto& names = pcast<SP_names>(p).names;
+        const auto& immutable = paramk != 0;
+        const auto& names = pcast<SP_names>(params).names;
 
         // Allocate variables and initialize them to `null`.
         if(ROCKET_EXPECT(names.size() == 1)) {
@@ -498,10 +498,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_initialize_variables(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_initialize_variables(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& immutable = k != 0;
-        const auto& names = pcast<SP_names>(p).names;
+        const auto& immutable = paramk != 0;
+        const auto& names = pcast<SP_names>(params).names;
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -573,11 +573,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_if_statement(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_if_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& negative = k != 0;
-        const auto& queue_true = pcast<SP_queues_fixed<2>>(p).queues[0];
-        const auto& queue_false = pcast<SP_queues_fixed<2>>(p).queues[1];
+        const auto& negative = paramk != 0;
+        const auto& queue_true = pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& queue_false = pcast<SP_queues_fixed<2>>(params).queues[1];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != negative) {
@@ -588,11 +588,11 @@ DCE_Result AIR_Node::optimize_dce()
         return do_execute_block(queue_false, ctx);
       }
 
-    AIR_Status do_switch_statement(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_switch_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queues_labels = pcast<SP_switch>(p).queues_labels;
-        const auto& queues_bodies = pcast<SP_switch>(p).queues_bodies;
-        const auto& names_added = pcast<SP_switch>(p).names_added;
+        const auto& queues_labels = pcast<SP_switch>(params).queues_labels;
+        const auto& queues_bodies = pcast<SP_switch>(params).queues_bodies;
+        const auto& names_added = pcast<SP_switch>(params).names_added;
 
         // Read the value of the condition.
         auto value = ctx.stack().top().read();
@@ -646,11 +646,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_do_while_statement(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_do_while_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& queue_body = pcast<SP_queues_fixed<2>>(p).queues[0];
-        const auto& negative = k != 0;
-        const auto& queue_cond = pcast<SP_queues_fixed<2>>(p).queues[1];
+        const auto& queue_body = pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& negative = paramk != 0;
+        const auto& queue_cond = pcast<SP_queues_fixed<2>>(params).queues[1];
 
         // This is the same as the `do...while` statement in C.
         for(;;) {
@@ -673,11 +673,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_while_statement(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_while_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& negative = k != 0;
-        const auto& queue_cond = pcast<SP_queues_fixed<2>>(p).queues[0];
-        const auto& queue_body = pcast<SP_queues_fixed<2>>(p).queues[1];
+        const auto& negative = paramk != 0;
+        const auto& queue_cond = pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& queue_body = pcast<SP_queues_fixed<2>>(params).queues[1];
 
         // This is the same as the `while` statement in C.
         for(;;) {
@@ -700,12 +700,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_for_each_statement(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_for_each_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name_key = pcast<SP_for_each>(p).name_key;
-        const auto& name_mapped = pcast<SP_for_each>(p).name_mapped;
-        const auto& queue_init = pcast<SP_for_each>(p).queue_init;
-        const auto& queue_body = pcast<SP_for_each>(p).queue_body;
+        const auto& name_key = pcast<SP_for_each>(params).name_key;
+        const auto& name_mapped = pcast<SP_for_each>(params).name_mapped;
+        const auto& queue_init = pcast<SP_for_each>(params).queue_init;
+        const auto& queue_body = pcast<SP_for_each>(params).queue_body;
 
         // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
         Executive_Context ctx_for(rocket::ref(ctx));
@@ -781,13 +781,13 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_for_statement(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_for_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& infinite = k != 0;
-        const auto& queue_init = pcast<SP_queues_fixed<4>>(p).queues[0];
-        const auto& queue_cond = pcast<SP_queues_fixed<4>>(p).queues[1];
-        const auto& queue_step = pcast<SP_queues_fixed<4>>(p).queues[2];
-        const auto& queue_body = pcast<SP_queues_fixed<4>>(p).queues[3];
+        const auto& infinite = paramk != 0;
+        const auto& queue_init = pcast<SP_queues_fixed<4>>(params).queues[0];
+        const auto& queue_cond = pcast<SP_queues_fixed<4>>(params).queues[1];
+        const auto& queue_step = pcast<SP_queues_fixed<4>>(params).queues[2];
+        const auto& queue_body = pcast<SP_queues_fixed<4>>(params).queues[3];
 
         // This is the same as the `for` statement in C.
         // We have to create an outer context due to the fact that names declared in the first segment outlast every iteration.
@@ -821,12 +821,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_try_statement(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_try_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& queue_try = pcast<SP_try>(p).queue_try;
-        const auto& sloc = pcast<SP_try>(p).sloc;
-        const auto& name_except = pcast<SP_try>(p).name_except;
-        const auto& queue_catch = pcast<SP_try>(p).queue_catch;
+        const auto& queue_try = pcast<SP_try>(params).queue_try;
+        const auto& sloc = pcast<SP_try>(params).sloc;
+        const auto& name_except = pcast<SP_try>(params).name_except;
+        const auto& queue_catch = pcast<SP_try>(params).queue_catch;
 
         // This is almost identical to JavaScript.
         try {
@@ -852,9 +852,9 @@ DCE_Result AIR_Node::optimize_dce()
         }
       }
 
-    AIR_Status do_throw_statement(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_throw_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& sloc = pcast<SP_sloc>(p).sloc;
+        const auto& sloc = pcast<SP_sloc>(params).sloc;
 
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
@@ -882,11 +882,11 @@ DCE_Result AIR_Node::optimize_dce()
         }
       }
 
-    AIR_Status do_assert_statement(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_assert_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& sloc = pcast<SP_sloc_msg>(p).sloc;
-        const auto& negative = k != 0;
-        const auto& msg = pcast<SP_sloc_msg>(p).msg;
+        const auto& sloc = pcast<SP_sloc_msg>(params).sloc;
+        const auto& negative = paramk != 0;
+        const auto& msg = pcast<SP_sloc_msg>(params).msg;
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != negative) {
@@ -900,15 +900,15 @@ DCE_Result AIR_Node::optimize_dce()
         throw_runtime_error(__func__, fmtss.extract_string());
       }
 
-    AIR_Status do_simple_status(Executive_Context& /*ctx*/, uint32_t k, const void* /*p*/)
+    AIR_Status do_simple_status(Executive_Context& /*ctx*/, uint32_t paramk, const void* /*params*/)
       {
-        const auto& status = static_cast<AIR_Status>(k);
+        const auto& status = static_cast<AIR_Status>(paramk);
 
         // Return the status as is.
         return status;
       }
 
-    AIR_Status do_return_by_value(Executive_Context& ctx, uint32_t /*k*/, const void* /*p*/)
+    AIR_Status do_return_by_value(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // The result will have been pushed onto the top.
         auto& self = ctx.stack().open_top();
@@ -920,9 +920,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_return;
       }
 
-    AIR_Status do_push_literal(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_push_literal(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& val = pcast<Value>(p);
+        const auto& val = pcast<Value>(params);
 
         // Push a constant.
         Reference_Root::S_constant xref = { val };
@@ -930,9 +930,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_global_reference(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_push_global_reference(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name = pcast<SP_name>(p).name;
+        const auto& name = pcast<SP_name>(params).name;
 
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(name);
@@ -944,10 +944,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_local_reference(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_push_local_reference(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& depth = k;
-        const auto& name = pcast<SP_name>(p).name;
+        const auto& depth = paramk;
+        const auto& name = pcast<SP_name>(params).name;
 
         // Get the context.
         const Executive_Context* qctx = std::addressof(ctx);
@@ -963,18 +963,18 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_bound_reference(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_push_bound_reference(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& ref = pcast<Reference>(p);
+        const auto& ref = pcast<Reference>(params);
 
         // Push a copy of the bound reference.
         ctx.stack().push(ref);
         return air_status_next;
       }
 
-    AIR_Status do_define_function(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_define_function(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& xnode = pcast<SP_func>(p).xnode;
+        const auto& xnode = pcast<SP_func>(params).xnode;
 
         // Instantiate the function.
         auto qtarget = do_instantiate(xnode, std::addressof(ctx));
@@ -985,11 +985,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_branch_expression(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_branch_expression(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& assign = k != 0;
-        const auto& queue_true = pcast<SP_queues_fixed<2>>(p).queues[0];
-        const auto& queue_false = pcast<SP_queues_fixed<2>>(p).queues[1];
+        const auto& assign = paramk != 0;
+        const auto& queue_true = pcast<SP_queues_fixed<2>>(params).queues[0];
+        const auto& queue_false = pcast<SP_queues_fixed<2>>(params).queues[1];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().test() != false) {
@@ -1000,10 +1000,10 @@ DCE_Result AIR_Node::optimize_dce()
         return do_evaluate_branch(queue_false, assign, ctx);
       }
 
-    AIR_Status do_coalescence(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_coalescence(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& assign = k != 0;
-        const auto& queue_null = pcast<SP_queues_fixed<1>>(p).queues[0];
+        const auto& assign = paramk != 0;
+        const auto& queue_null = pcast<SP_queues_fixed<1>>(params).queues[0];
 
         // Check the value of the condition.
         if(ctx.stack().top().read().is_null() != false) {
@@ -1014,11 +1014,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_function_call(Executive_Context& ctx, uint32_t k, const void* p)
+    AIR_Status do_function_call(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
-        const auto& sloc = pcast<SP_call>(p).sloc;
-        const auto& args_by_refs = pcast<SP_call>(p).args_by_refs;
-        const auto& tco_aware = static_cast<TCO_Aware>(k);
+        const auto& sloc = pcast<SP_call>(params).sloc;
+        const auto& args_by_refs = pcast<SP_call>(params).args_by_refs;
+        const auto& tco_aware = static_cast<TCO_Aware>(paramk);
 
         // Pop arguments off the stack backwards.
         cow_vector<Reference> args;
@@ -1080,9 +1080,9 @@ DCE_Result AIR_Node::optimize_dce()
         }
       }
 
-    AIR_Status do_member_access(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_member_access(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& name = pcast<SP_name>(p).name;
+        const auto& name = pcast<SP_name>(params).name;
 
         // Append a modifier to the reference at the top.
         Reference_Modifier::S_object_key xmod = { name };
@@ -1090,9 +1090,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_unnamed_array(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_push_unnamed_array(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& nelems = k;
+        const auto& nelems = paramk;
 
         // Pop elements from the stack and store them in an array backwards.
         G_array array;
@@ -1107,9 +1107,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_unnamed_object(Executive_Context& ctx, uint32_t /*k*/, const void* p)
+    AIR_Status do_push_unnamed_object(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
-        const auto& keys = pcast<SP_names>(p).names;
+        const auto& keys = pcast<SP_names>(params).names;
 
         // Pop elements from the stack and store them in an object backwards.
         G_object object;
@@ -1534,7 +1534,7 @@ DCE_Result AIR_Node::optimize_dce()
         return res;
       }
 
-    AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, uint32_t /*k*/, const void* /*p*/)
+    AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lhs = ctx.stack().top().open();
@@ -1555,7 +1555,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, uint32_t /*k*/, const void* /*p*/)
+    AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lhs = ctx.stack().top().open();
@@ -1576,7 +1576,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_subscr(Executive_Context& ctx, uint32_t /*k*/, const void* /*p*/)
+    AIR_Status do_apply_xop_subscr(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -1599,9 +1599,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_pos(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_pos(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1611,9 +1611,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_neg(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_neg(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1633,9 +1633,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_notb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_notb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1655,9 +1655,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_notl(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_notl(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         const auto& rhs = ctx.stack().top().read();
@@ -1667,7 +1667,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, uint32_t /*k*/, const void* /*p*/)
+    AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& rhs = ctx.stack().top().open();
@@ -1686,7 +1686,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, uint32_t /*k*/, const void* /*p*/)
+    AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& rhs = ctx.stack().top().open();
@@ -1705,9 +1705,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_unset(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_unset(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().unset();
@@ -1716,9 +1716,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         const auto& rhs = ctx.stack().top().read();
@@ -1743,9 +1743,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_typeof(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_typeof(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         const auto& rhs = ctx.stack().top().read();
@@ -1755,9 +1755,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1777,9 +1777,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_isnan(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_isnan(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1799,9 +1799,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_isinf(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_isinf(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1821,9 +1821,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_abs(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_abs(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1843,9 +1843,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_signb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_signb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1865,9 +1865,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_round(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_round(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1887,9 +1887,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_floor(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_floor(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1909,9 +1909,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_ceil(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_ceil(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1931,9 +1931,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_trunc(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_trunc(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1953,9 +1953,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_iround(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_iround(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1975,9 +1975,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -1997,9 +1997,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_iceil(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_iceil(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -2019,9 +2019,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is unary.
         auto rhs = ctx.stack().top().read();
@@ -2041,11 +2041,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = SK_xrel(k).assign != 0;
-        const auto& expect = static_cast<Compare>(SK_xrel(k).expect);
-        const auto& negative = SK_xrel(k).negative != 0;
+        const auto& assign = SK_xrel(paramk).assign != 0;
+        const auto& expect = static_cast<Compare>(SK_xrel(paramk).expect);
+        const auto& negative = SK_xrel(paramk).negative != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2059,11 +2059,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = SK_xrel(k).assign != 0;
-        const auto& expect = static_cast<Compare>(SK_xrel(k).expect);
-        const auto& negative = SK_xrel(k).negative != 0;
+        const auto& assign = SK_xrel(paramk).assign != 0;
+        const auto& expect = static_cast<Compare>(SK_xrel(paramk).expect);
+        const auto& negative = SK_xrel(paramk).negative != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2080,9 +2080,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2111,9 +2111,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_add(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_add(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2145,9 +2145,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sub(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_sub(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2174,9 +2174,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_mul(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_mul(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2212,9 +2212,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_div(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_div(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2236,9 +2236,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_mod(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_mod(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2260,9 +2260,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sll(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_sll(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2287,9 +2287,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_srl(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_srl(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2314,9 +2314,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sla(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_sla(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2341,9 +2341,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sra(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_sra(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2367,9 +2367,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_andb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_andb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2392,9 +2392,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_orb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_orb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2417,9 +2417,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_xorb(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_xorb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is binary.
         auto rhs = ctx.stack().top().read();
@@ -2442,7 +2442,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_assign(Executive_Context& ctx, uint32_t /*k*/, const void* /*p*/)
+    AIR_Status do_apply_xop_assign(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // Pop the RHS operand.
         auto rhs = ctx.stack().top().read();
@@ -2452,9 +2452,9 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_fma(Executive_Context& ctx, uint32_t k, const void* /*p*/)
+    AIR_Status do_apply_xop_fma(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
-        const auto& assign = k != 0;
+        const auto& assign = paramk != 0;
 
         // This operator is ternary.
         auto rhs = ctx.stack().top().read();
@@ -2491,7 +2491,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_execute_block:
       {
         const auto& altr = this->m_stor.as<index_execute_block>();
-        // `k` is unused. `p` points to the body.
+        // `paramk` is unused. `params` points to the body.
         SP_queues_fixed<1> sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2504,7 +2504,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_declare_variables:
       {
         const auto& altr = this->m_stor.as<index_declare_variables>();
-        // `k` is `immutable`. `p` points to the name vector.
+        // `paramk` is `immutable`. `params` points to the name vector.
         SP_names sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2517,7 +2517,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_initialize_variables:
       {
         const auto& altr = this->m_stor.as<index_initialize_variables>();
-        // `k` is `immutable`. `p` points to the name vector.
+        // `paramk` is `immutable`. `params` points to the name vector.
         SP_names sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2530,7 +2530,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_if_statement:
       {
         const auto& altr = this->m_stor.as<index_if_statement>();
-        // `k` is `negative`. `p` points to the two branches.
+        // `paramk` is `negative`. `params` points to the two branches.
         SP_queues_fixed<2> sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2544,7 +2544,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_switch_statement:
       {
         const auto& altr = this->m_stor.as<index_switch_statement>();
-        // `k` is unused. `p` points to all clauses.
+        // `paramk` is unused. `params` points to all clauses.
         SP_switch sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2561,7 +2561,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_do_while_statement:
       {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
-        // `k` is `negative`. `p` points to the body and the condition.
+        // `paramk` is `negative`. `params` points to the body and the condition.
         SP_queues_fixed<2> sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2575,7 +2575,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_while_statement:
       {
         const auto& altr = this->m_stor.as<index_while_statement>();
-        // `k` is `negative`. `p` points to the condition and the body.
+        // `paramk` is `negative`. `params` points to the condition and the body.
         SP_queues_fixed<2> sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2589,7 +2589,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_for_each_statement:
       {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
-        // `k` is unused. `p` points to the range initializer and the body.
+        // `paramk` is unused. `params` points to the range initializer and the body.
         SP_for_each sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2605,7 +2605,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_for_statement:
       {
         const auto& altr = this->m_stor.as<index_for_statement>();
-        // `k` denotes whether the loop has an empty condition. `p` points to the triplet and the body.
+        // `paramk` denotes whether the loop has an empty condition. `params` points to the triplet and the body.
         SP_queues_fixed<4> sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2621,7 +2621,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_try_statement:
       {
         const auto& altr = this->m_stor.as<index_try_statement>();
-        // `k` is unused. `p` points to the clauses.
+        // `paramk` is unused. `params` points to the clauses.
         SP_try sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2637,7 +2637,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_throw_statement:
       {
         const auto& altr = this->m_stor.as<index_throw_statement>();
-        // `k` is unused. `p` points to the source location.
+        // `paramk` is unused. `params` points to the source location.
         SP_sloc sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2650,7 +2650,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_assert_statement:
       {
         const auto& altr = this->m_stor.as<index_assert_statement>();
-        // `k` is `negative`. `p` points to the source location and the message.
+        // `paramk` is `negative`. `params` points to the source location and the message.
         SP_sloc_msg sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2664,7 +2664,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_simple_status:
       {
         const auto& altr = this->m_stor.as<index_simple_status>();
-        // `k` is `status`. `p` is unused.
+        // `paramk` is `status`. `params` is unused.
         if(ipass == 0) {
           return queue.request(0);
         }
@@ -2683,7 +2683,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_literal:
       {
         const auto& altr = this->m_stor.as<index_push_literal>();
-        // `k` is unused. `p` points to a copy of `val`.
+        // `paramk` is unused. `params` points to a copy of `val`.
         if(ipass == 0) {
           return queue.request(sizeof(altr.val));
         }
@@ -2693,7 +2693,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_global_reference:
       {
         const auto& altr = this->m_stor.as<index_push_global_reference>();
-        // `k` is unused. `p` points to the name.
+        // `paramk` is unused. `params` points to the name.
         SP_name sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2706,7 +2706,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_local_reference:
       {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
-        // `k` is `depth`. `p` points to the name.
+        // `paramk` is `depth`. `params` points to the name.
         SP_name sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2719,7 +2719,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_bound_reference:
       {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
-        // `k` is unused. `p` points to a copy of `ref`.
+        // `paramk` is unused. `params` points to a copy of `ref`.
         if(ipass == 0) {
           return queue.request(sizeof(altr.ref));
         }
@@ -2729,7 +2729,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_define_function:
       {
         const auto& altr = this->m_stor.as<index_define_function>();
-        // `k` is unused. `p` points to the name, the parameter list, and the body of the function.
+        // `paramk` is unused. `params` points to the name, the parameter list, and the body of the function.
         SP_func sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2742,7 +2742,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_branch_expression:
       {
         const auto& altr = this->m_stor.as<index_branch_expression>();
-        // `k` is `assign`. `p` points to the two branches.
+        // `paramk` is `assign`. `params` points to the two branches.
         SP_queues_fixed<2> sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2756,7 +2756,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_coalescence:
       {
         const auto& altr = this->m_stor.as<index_coalescence>();
-        // `k` is `assign`. `p` points to the alternative.
+        // `paramk` is `assign`. `params` points to the alternative.
         SP_queues_fixed<1> sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2769,7 +2769,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_function_call:
       {
         const auto& altr = this->m_stor.as<index_function_call>();
-        // `k` is `tco_aware`. `p` points to the source location and the argument specifier vector.
+        // `paramk` is `tco_aware`. `params` points to the source location and the argument specifier vector.
         SP_call sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2783,7 +2783,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_member_access:
       {
         const auto& altr = this->m_stor.as<index_member_access>();
-        // `k` is unused. `p` points to the name.
+        // `paramk` is unused. `params` points to the name.
         SP_name sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2796,7 +2796,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_unnamed_array:
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
-        // `k` is `nelems`. `p` is unused.
+        // `paramk` is `nelems`. `params` is unused.
         if(ipass == 0) {
           return queue.request(0);
         }
@@ -2806,7 +2806,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_unnamed_object:
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_object>();
-        // `k` is unused. `p` points to the keys.
+        // `paramk` is unused. `params` points to the keys.
         SP_names sp;
         if(ipass == 0) {
           return queue.request(sizeof(sp));
@@ -2819,7 +2819,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_apply_operator:
       {
         const auto& altr = this->m_stor.as<index_apply_operator>();
-        // `k` is `assign`. `p` is unused.
+        // `paramk` is `assign`. `params` is unused.
         if(ipass == 0) {
           return queue.request(0);
         }
