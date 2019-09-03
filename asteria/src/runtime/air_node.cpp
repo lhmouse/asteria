@@ -16,139 +16,6 @@ namespace Asteria {
 
     namespace {
 
-    DCE_Result do_optimize_dce(cow_vector<AIR_Node>& code)
-      {
-        size_t cur = 0;
-        while(cur != code.size()) {
-          // Run DCE on the node at `cur`.
-          auto dce = code.mut(cur).optimize_dce();
-          if(dce == dce_prune) {
-            // Erase all nodes following the current one.
-            code.erase(++cur);
-            return dce_prune;
-          }
-          if(dce == dce_empty) {
-            // Erase the empty node.
-            code.erase(cur, 1);
-            continue;
-          }
-          // Go to the next node.
-          ROCKET_ASSERT(dce == dce_none);
-          ++cur;
-        }
-        // Check whether `code` is empty now.
-        if(cur == 0) {
-          return dce_empty;
-        }
-        // No operation can be taken.
-        return dce_none;
-      }
-
-    }
-
-DCE_Result AIR_Node::optimize_dce()
-  {
-    switch(this->m_stor.index()) {
-    case index_execute_block:
-      {
-        auto& altr = this->m_stor.as<index_execute_block>();
-        // The node has no effect if the body is empty.
-        auto dce = do_optimize_dce(altr.code_body);
-        return dce;
-      }
-    case index_if_statement:
-      {
-        auto& altr = this->m_stor.as<index_if_statement>();
-        // The node has no effect if both branches are empty.
-        // Note that the condition is not part of this node.
-        auto dce_true = do_optimize_dce(altr.code_true);
-        auto dce_false = do_optimize_dce(altr.code_false);
-        if(dce_true == dce_false) {
-          return dce_true;
-        }
-        return dce_none;
-      }
-    case index_switch_statement:
-      {
-        auto& altr = this->m_stor.as<index_switch_statement>();
-        // The node has no effect if there are no clauses.
-        // Note that the condition is not part of this node.
-        if(altr.code_bodies.empty()) {
-          return dce_empty;
-        }
-        for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
-          do_optimize_dce(altr.code_bodies.mut(i));
-        }
-        return dce_none;
-      }
-    case index_while_statement:
-      {
-        auto& altr = this->m_stor.as<index_while_statement>();
-        // Loop statements cannot be DCE'd.
-        do_optimize_dce(altr.code_body);
-        return dce_none;
-      }
-    case index_do_while_statement:
-      {
-        auto& altr = this->m_stor.as<index_do_while_statement>();
-        // Loop statements cannot be DCE'd.
-        do_optimize_dce(altr.code_body);
-        return dce_none;
-      }
-    case index_for_each_statement:
-      {
-        auto& altr = this->m_stor.as<index_for_each_statement>();
-        // Loop statements cannot be DCE'd.
-        do_optimize_dce(altr.code_body);
-        return dce_none;
-      }
-    case index_for_statement:
-      {
-        auto& altr = this->m_stor.as<index_for_statement>();
-        // Loop statements cannot be DCE'd.
-        do_optimize_dce(altr.code_body);
-        return dce_none;
-      }
-    case index_try_statement:
-      {
-        auto& altr = this->m_stor.as<index_try_statement>();
-        // The node has no effect if the `try` block is empty.
-        auto dce_try = do_optimize_dce(altr.code_try);
-        if(dce_try == dce_empty) {
-          return dce_empty;
-        }
-        auto dce_catch = do_optimize_dce(altr.code_catch);
-        if(dce_try == dce_catch) {
-          return dce_try;
-        }
-        return dce_none;
-      }
-    case index_throw_statement:
-      {
-        return dce_prune;
-      }
-    case index_simple_status:
-      {
-        auto& altr = this->m_stor.as<index_simple_status>();
-        // The node has no effect if it equals `air_status_next`, which is effectively a no-op.
-        if(altr.status == air_status_next) {
-          return dce_empty;
-        }
-        return dce_prune;
-      }
-    case index_return_by_value:
-      {
-        return dce_prune;
-      }
-    default:
-      {
-        return dce_none;
-      }
-    }
-  }
-
-    namespace {
-
     ///////////////////////////////////////////////////////////////////////////
     // Auxiliary functions
     ///////////////////////////////////////////////////////////////////////////
@@ -3129,6 +2996,139 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 rcptr<Abstract_Function> AIR_Node::instantiate_function(const Abstract_Context* parent_opt) const
   {
     return do_instantiate(this->m_stor.as<index_define_function>(), parent_opt);
+  }
+
+    namespace {
+
+    DCE_Result do_optimize_dce(cow_vector<AIR_Node>& code)
+      {
+        size_t cur = 0;
+        while(cur != code.size()) {
+          // Run DCE on the node at `cur`.
+          auto dce = code.mut(cur).optimize_dce();
+          if(dce == dce_prune) {
+            // Erase all nodes following the current one.
+            code.erase(++cur);
+            return dce_prune;
+          }
+          if(dce == dce_empty) {
+            // Erase the empty node.
+            code.erase(cur, 1);
+            continue;
+          }
+          // Go to the next node.
+          ROCKET_ASSERT(dce == dce_none);
+          ++cur;
+        }
+        // Check whether `code` is empty now.
+        if(cur == 0) {
+          return dce_empty;
+        }
+        // No operation can be taken.
+        return dce_none;
+      }
+
+    }
+
+DCE_Result AIR_Node::optimize_dce()
+  {
+    switch(this->m_stor.index()) {
+    case index_execute_block:
+      {
+        auto& altr = this->m_stor.as<index_execute_block>();
+        // The node has no effect if the body is empty.
+        auto dce = do_optimize_dce(altr.code_body);
+        return dce;
+      }
+    case index_if_statement:
+      {
+        auto& altr = this->m_stor.as<index_if_statement>();
+        // The node has no effect if both branches are empty.
+        // Note that the condition is not part of this node.
+        auto dce_true = do_optimize_dce(altr.code_true);
+        auto dce_false = do_optimize_dce(altr.code_false);
+        if(dce_true == dce_false) {
+          return dce_true;
+        }
+        return dce_none;
+      }
+    case index_switch_statement:
+      {
+        auto& altr = this->m_stor.as<index_switch_statement>();
+        // The node has no effect if there are no clauses.
+        // Note that the condition is not part of this node.
+        if(altr.code_bodies.empty()) {
+          return dce_empty;
+        }
+        for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
+          do_optimize_dce(altr.code_bodies.mut(i));
+        }
+        return dce_none;
+      }
+    case index_while_statement:
+      {
+        auto& altr = this->m_stor.as<index_while_statement>();
+        // Loop statements cannot be DCE'd.
+        do_optimize_dce(altr.code_body);
+        return dce_none;
+      }
+    case index_do_while_statement:
+      {
+        auto& altr = this->m_stor.as<index_do_while_statement>();
+        // Loop statements cannot be DCE'd.
+        do_optimize_dce(altr.code_body);
+        return dce_none;
+      }
+    case index_for_each_statement:
+      {
+        auto& altr = this->m_stor.as<index_for_each_statement>();
+        // Loop statements cannot be DCE'd.
+        do_optimize_dce(altr.code_body);
+        return dce_none;
+      }
+    case index_for_statement:
+      {
+        auto& altr = this->m_stor.as<index_for_statement>();
+        // Loop statements cannot be DCE'd.
+        do_optimize_dce(altr.code_body);
+        return dce_none;
+      }
+    case index_try_statement:
+      {
+        auto& altr = this->m_stor.as<index_try_statement>();
+        // The node has no effect if the `try` block is empty.
+        auto dce_try = do_optimize_dce(altr.code_try);
+        if(dce_try == dce_empty) {
+          return dce_empty;
+        }
+        auto dce_catch = do_optimize_dce(altr.code_catch);
+        if(dce_try == dce_catch) {
+          return dce_try;
+        }
+        return dce_none;
+      }
+    case index_throw_statement:
+      {
+        return dce_prune;
+      }
+    case index_simple_status:
+      {
+        auto& altr = this->m_stor.as<index_simple_status>();
+        // The node has no effect if it equals `air_status_next`, which is effectively a no-op.
+        if(altr.status == air_status_next) {
+          return dce_empty;
+        }
+        return dce_prune;
+      }
+    case index_return_by_value:
+      {
+        return dce_prune;
+      }
+    default:
+      {
+        return dce_none;
+      }
+    }
   }
 
 }  // namespace Asteria

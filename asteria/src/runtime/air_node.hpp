@@ -240,10 +240,6 @@ class AIR_Node
         this->m_stor.swap(other.m_stor);
       }
 
-    // Perform dead code elimination on this node.
-    // This function is meant to be called recursively.
-    DCE_Result optimize_dce();
-
     // Compress this IR node.
     // Be advised that solid nodes cannot be copied or moved because they occupy variant numbers of bytes.
     // Solidification is performed as two passes: The total number of bytes is calculated, which are allocated
@@ -253,6 +249,10 @@ class AIR_Node
     // Instantiate this IR node to create a function. This node must hold a value of type `S_define_function`.
     // This function is provided merely for convenience elsewhere. It is not intended for public use.
     rcptr<Abstract_Function> instantiate_function(const Abstract_Context* parent_opt) const;
+
+    // Perform dead code elimination on this node.
+    // This function is meant to be called recursively.
+    DCE_Result optimize_dce();
   };
 
 inline void swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
