@@ -20,7 +20,12 @@ namespace Asteria {
         if(name.rdstr().starts_with("__")) {
           ASTERIA_THROW_RUNTIME_ERROR("The name `", name, "` for this ", desc, " is reserved and cannot be used.");
         }
+        // Record this name.
         if(names_opt) {
+          auto oldp = std::find(names_opt->begin(), names_opt->end(), name);
+          if(oldp != names_opt->end()) {
+            names_opt->erase(oldp);
+          }
           names_opt->emplace_back(name);
         }
         // Just ensure the name exists.
