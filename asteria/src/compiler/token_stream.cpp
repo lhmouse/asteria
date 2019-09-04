@@ -85,13 +85,12 @@ namespace Asteria {
         cow_string m_file;
 
         cow_string m_str;
-        int32_t m_line;
-        size_t m_offset;
+        int32_t m_line = 0;
+        size_t m_offset = 0;
 
       public:
         Line_Reader(ref_to<std::streambuf> xsbuf, const cow_string& xfile)
-          : m_sbuf(xsbuf), m_file(xfile),
-            m_str(), m_line(0), m_offset(0)
+          : m_sbuf(xsbuf), m_file(xfile)
           {
           }
 
