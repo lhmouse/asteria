@@ -79,10 +79,6 @@ class Variable_HashSet
       {
         return this->m_stor.head == nullptr;
       }
-    size_t size() const noexcept
-      {
-        return this->m_stor.size;
-      }
     Variable_HashSet& clear() noexcept
       {
         if(this->m_stor.head) {
@@ -99,6 +95,10 @@ class Variable_HashSet
         std::swap(this->m_stor, other.m_stor);
       }
 
+    size_t size() const noexcept
+      {
+        return this->m_stor.size;
+      }
     bool has(const rcptr<Variable>& var) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.

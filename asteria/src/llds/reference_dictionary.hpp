@@ -80,10 +80,6 @@ class Reference_Dictionary
       {
         return this->m_stor.head == nullptr;
       }
-    size_t size() const noexcept
-      {
-        return this->m_stor.size;
-      }
     Reference_Dictionary& clear() noexcept
       {
         if(this->m_stor.head) {
@@ -100,6 +96,10 @@ class Reference_Dictionary
         std::swap(this->m_stor, other.m_stor);
       }
 
+    size_t size() const noexcept
+      {
+        return this->m_stor.size;
+      }
     const Reference* get_opt(const phsh_string& name) const noexcept
       {
         // Be advised that `do_xprobe()` shall not be called when the table has not been allocated.
