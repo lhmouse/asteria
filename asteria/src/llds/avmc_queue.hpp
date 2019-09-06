@@ -172,6 +172,12 @@ class AVMC_Queue
         this->do_dispatch_append<executorT, enumeratorT>(std::false_type(), paramk, rocket::forward<XnodeT>(xnode));
         return *this;
       }
+    AVMC_Queue& append_trivial(Executor* executor, uint32_t paramk, const void* data, size_t size)
+      {
+        // Append an arbitrary function with a trivial argument.
+        this->do_append_trivial(executor, paramk, size, data);
+        return *this;
+      }
 
     AIR_Status execute(Executive_Context& ctx) const
       {
