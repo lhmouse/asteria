@@ -22,17 +22,13 @@ class Executive_Context final : public Abstract_Context
   public:
     template<typename ContextT, ASTERIA_SFINAE_CONVERT(ContextT*, const Executive_Context*)> explicit Executive_Context(ref_to<ContextT> parent)  // for non-functions
       : m_parent_opt(parent.ptr()),
-        m_global(parent->Executive_Context::m_global),
-        m_stack(parent->Executive_Context::m_stack),
-        m_zvarg(parent->Executive_Context::m_zvarg)
+        m_global(this->m_parent_opt->m_global), m_stack(this->m_parent_opt->m_stack), m_zvarg(this->m_parent_opt->m_zvarg)
       {
       }
     Executive_Context(ref_to<const Global_Context> xglobal, ref_to<Evaluation_Stack> xstack, ref_to<const rcobj<Variadic_Arguer>> xzvarg,  // for functions
                       const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
       : m_parent_opt(nullptr),
-        m_global(xglobal),
-        m_stack(xstack),
-        m_zvarg(xzvarg)
+        m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
       {
         this->do_prepare_function(params, rocket::move(self), rocket::move(args));
       }
