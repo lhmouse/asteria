@@ -48,7 +48,7 @@ class Evaluation_Stack
         this->m_etop = etop;
       }
 
-    const Reference& top() const noexcept
+    const Reference& get_top() const noexcept
       {
         auto etop = this->m_etop;
         ROCKET_ASSERT(etop);

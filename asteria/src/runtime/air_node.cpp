@@ -544,12 +544,12 @@ DCE_Result AIR_Node::optimize_dce()
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
-        auto val = ctx.stack().top().read();
+        auto val = ctx.stack().get_top().read();
         ctx.stack().pop();
         // Initialize variables.
         if(ROCKET_EXPECT(names.size() == 1)) {
           // Get the variable back.
-          auto var = ctx.stack().top().get_variable_opt();
+          auto var = ctx.stack().get_top().get_variable_opt();
           ROCKET_ASSERT(var);
           ROCKET_ASSERT(var->get_value().is_null());
           ctx.stack().pop();
@@ -568,7 +568,7 @@ DCE_Result AIR_Node::optimize_dce()
           // Pop variables from right to left, then initialize them one by one.
           for(size_t i = names.size() - 2; i != 0; --i) {
             // Get the variable back.
-            auto var = ctx.stack().top().get_variable_opt();
+            auto var = ctx.stack().get_top().get_variable_opt();
             ROCKET_ASSERT(var);
             ROCKET_ASSERT(var->get_value().is_null());
             ctx.stack().pop();
@@ -593,7 +593,7 @@ DCE_Result AIR_Node::optimize_dce()
           // Pop variables from right to left, then initialize them one by one.
           for(size_t i = names.size() - 2; i != 0; --i) {
             // Get the variable back.
-            auto var = ctx.stack().top().get_variable_opt();
+            auto var = ctx.stack().get_top().get_variable_opt();
             ROCKET_ASSERT(var);
             ROCKET_ASSERT(var->get_value().is_null());
             ctx.stack().pop();
@@ -619,7 +619,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
 
         // Check the value of the condition.
-        if(ctx.stack().top().read().test() != negative) {
+        if(ctx.stack().get_top().read().test() != negative) {
           // Execute the true branch.
           return do_execute_block(queue_true, ctx);
         }
@@ -634,7 +634,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& names_added = do_pcast<SP_switch>(params)->names_added;
 
         // Read the value of the condition.
-        auto value = ctx.stack().top().read();
+        auto value = ctx.stack().get_top().read();
         // Get the number of clauses.
         auto nclauses = queues_labels.size();
         ROCKET_ASSERT(nclauses == queues_bodies.size());
@@ -655,7 +655,7 @@ DCE_Result AIR_Node::optimize_dce()
           // Evaluate the operand and check whether it equals `value`.
           auto status = queues_labels[i].execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().top().read().compare(value) == compare_equal) {
+          if(ctx.stack().get_top().read().compare(value) == compare_equal) {
             target = i;
             break;
           }
@@ -705,7 +705,7 @@ DCE_Result AIR_Node::optimize_dce()
           ctx.stack().clear();
           status = queue_cond.execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().top().read().test() == negative) {
+          if(ctx.stack().get_top().read().test() == negative) {
             break;
           }
         }
@@ -724,7 +724,7 @@ DCE_Result AIR_Node::optimize_dce()
           ctx.stack().clear();
           auto status = queue_cond.execute(ctx);
           ROCKET_ASSERT(status == air_status_next);
-          if(ctx.stack().top().read().test() == negative) {
+          if(ctx.stack().get_top().read().test() == negative) {
             break;
           }
           // Execute the body.
@@ -840,7 +840,7 @@ DCE_Result AIR_Node::optimize_dce()
             ctx_for.stack().clear();
             status = queue_cond.execute(ctx_for);
             ROCKET_ASSERT(status == air_status_next);
-            if(ctx_for.stack().top().read().test() == false) {
+            if(ctx_for.stack().get_top().read().test() == false) {
               break;
             }
           }
@@ -897,7 +897,7 @@ DCE_Result AIR_Node::optimize_dce()
 
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
-        auto value = ctx.stack().top().read();
+        auto value = ctx.stack().get_top().read();
         try {
           // Unpack the nested exception, if any.
           auto eptr = std::current_exception();
@@ -928,7 +928,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& msg = do_pcast<SP_sloc_msg>(params)->msg;
 
         // Check the value of the condition.
-        if(ctx.stack().top().read().test() != negative) {
+        if(ctx.stack().get_top().read().test() != negative) {
           // When the assertion succeeds, there is nothing to do.
           return air_status_next;
         }
@@ -1031,7 +1031,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
 
         // Check the value of the condition.
-        if(ctx.stack().top().read().test() != false) {
+        if(ctx.stack().get_top().read().test() != false) {
           // Evaluate the true branch.
           return do_evaluate_branch(queue_true, assign, ctx);
         }
@@ -1045,7 +1045,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& queue_null = do_pcast<SP_queues_fixed<1>>(params)->queues[0];
 
         // Check the value of the condition.
-        if(ctx.stack().top().read().is_null() != false) {
+        if(ctx.stack().get_top().read().is_null() != false) {
           // Evaluate the alternative.
           return do_evaluate_branch(queue_null, assign, ctx);
         }
@@ -1137,7 +1137,7 @@ DCE_Result AIR_Node::optimize_dce()
         G_array array;
         array.resize(nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
-          *it = ctx.stack().top().read();
+          *it = ctx.stack().get_top().read();
           ctx.stack().pop();
         }
         // Push the array as a temporary.
@@ -1154,7 +1154,7 @@ DCE_Result AIR_Node::optimize_dce()
         G_object object;
         object.reserve(keys.size());
         for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
-          object.insert_or_assign(*it, ctx.stack().top().read());
+          object.insert_or_assign(*it, ctx.stack().get_top().read());
           ctx.stack().pop();
         }
         // Push the object as a temporary.
@@ -1576,7 +1576,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is unary.
-        auto& lhs = ctx.stack().top().open();
+        auto& lhs = ctx.stack().get_top().open();
         // Increment the operand and return the old value. `assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.open_integer();
@@ -1597,7 +1597,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is unary.
-        auto& lhs = ctx.stack().top().open();
+        auto& lhs = ctx.stack().get_top().open();
         // Decrement the operand and return the old value. `assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.open_integer();
@@ -1618,7 +1618,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_apply_xop_subscr(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
         auto& lref = ctx.stack().open_top();
         // Append a reference modifier. `assign` is ignored.
@@ -1643,7 +1643,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         ctx.stack().set_temporary(assign, rocket::move(rhs));
@@ -1655,7 +1655,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Get the opposite of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1677,7 +1677,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
         if(rhs.is_boolean()) {
           auto& reg = rhs.open_boolean();
@@ -1699,7 +1699,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        const auto& rhs = ctx.stack().top().read();
+        const auto& rhs = ctx.stack().get_top().read();
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
         ctx.stack().set_temporary(assign, do_operator_not(rhs.test()));
@@ -1709,7 +1709,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is unary.
-        auto& rhs = ctx.stack().top().open();
+        auto& rhs = ctx.stack().get_top().open();
         // Increment the operand and return it. `assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1728,7 +1728,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // This operator is unary.
-        auto& rhs = ctx.stack().top().open();
+        auto& rhs = ctx.stack().get_top().open();
         // Decrement the operand and return it. `assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1749,7 +1749,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().unset();
+        auto rhs = ctx.stack().get_top().unset();
         // Unset the reference and return the old value.
         ctx.stack().set_temporary(assign, rocket::move(rhs));
         return air_status_next;
@@ -1760,7 +1760,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        const auto& rhs = ctx.stack().top().read();
+        const auto& rhs = ctx.stack().get_top().read();
         // Return the number of elements in the operand.
         size_t nelems;
         if(rhs.is_null()) {
@@ -1787,7 +1787,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        const auto& rhs = ctx.stack().top().read();
+        const auto& rhs = ctx.stack().get_top().read();
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
         ctx.stack().set_temporary(assign, G_string(rocket::sref(rhs.what_gtype())));
@@ -1799,7 +1799,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Get the square root of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
@@ -1821,7 +1821,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Check whether the operand is a NaN, store the result in a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
@@ -1843,7 +1843,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Check whether the operand is an infinity, store the result in a temporary value, then return it.
         if(rhs.is_integer()) {
           // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
@@ -1865,7 +1865,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Get the absolute value of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1887,7 +1887,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Get the sign bit of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
@@ -1909,7 +1909,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Round the operand to the nearest integer as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1931,7 +1931,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1953,7 +1953,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1975,7 +1975,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Round the operand towards negative infinity as a temporary value, then return it.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -1997,7 +1997,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Round the operand to the nearest integer as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -2019,7 +2019,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -2041,7 +2041,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -2063,7 +2063,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is unary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         // Round the operand towards negative infinity as a temporary value, then return it as an `integer`.
         if(rhs.is_integer()) {
           // No conversion is required.
@@ -2087,9 +2087,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& negative = SK_xrel(paramk).negative != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
@@ -2105,9 +2105,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& negative = SK_xrel(paramk).negative != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
@@ -2124,9 +2124,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
@@ -2155,9 +2155,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -2189,9 +2189,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -2218,9 +2218,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -2256,9 +2256,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the quotient of both operands.
           auto& reg = rhs.open_integer();
@@ -2280,9 +2280,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // For the `integer` and `real` types, return the remainder of both operands.
           auto& reg = rhs.open_integer();
@@ -2304,9 +2304,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
@@ -2331,9 +2331,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
@@ -2358,9 +2358,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
           // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
@@ -2385,9 +2385,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_integer() && rhs.is_integer()) {
           // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
           // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
@@ -2411,9 +2411,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical AND'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -2436,9 +2436,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical OR'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -2461,9 +2461,9 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is binary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_boolean() && rhs.is_boolean()) {
           // For the `boolean` type, return the logical XOR'd result of both operands.
           auto& reg = rhs.open_boolean();
@@ -2484,7 +2484,7 @@ DCE_Result AIR_Node::optimize_dce()
     AIR_Status do_apply_xop_assign(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
       {
         // Pop the RHS operand.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
         // Copy the value to the LHS operand which is write-only. `assign` is ignored.
         ctx.stack().set_temporary(true, rocket::move(rhs));
@@ -2496,11 +2496,11 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& assign = paramk != 0;
 
         // This operator is ternary.
-        auto rhs = ctx.stack().top().read();
+        auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
-        auto mid = ctx.stack().top().read();
+        auto mid = ctx.stack().get_top().read();
         ctx.stack().pop();
-        const auto& lhs = ctx.stack().top().read();
+        const auto& lhs = ctx.stack().get_top().read();
         if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Calculate the fused multiply-add result of the operands.
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
