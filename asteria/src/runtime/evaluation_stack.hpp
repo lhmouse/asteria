@@ -77,18 +77,18 @@ class Evaluation_Stack
         this->m_etop = ++etop;
         return etop[-1];
       }
-    template<typename XvalueT> Reference& set_temporary(bool assign, XvalueT&& xvalue)
+    template<typename XvalT> Reference& set_temporary(bool assign, XvalT&& xval)
       {
         auto etop = this->m_etop;
         ROCKET_ASSERT(etop);
         ROCKET_ASSERT(etop - this->m_refs.data() >= 1);
         if(assign) {
           // Write the value to the top refernce.
-          etop[-1].open() = rocket::forward<XvalueT>(xvalue);
+          etop[-1].open() = rocket::forward<XvalT>(xval);
         }
         else {
           // Replace the top reference to a temporary reference to the value.
-          Reference_Root::S_temporary xref = { rocket::forward<XvalueT>(xvalue) };
+          Reference_Root::S_temporary xref = { rocket::forward<XvalT>(xval) };
           etop[-1] = rocket::move(xref);
         }
         return etop[-1];

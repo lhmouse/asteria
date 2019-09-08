@@ -14,9 +14,9 @@ Executive_Context::~Executive_Context()
 
     namespace {
 
-    template<typename XvalueT, typename... ParamsT> Reference_Root::S_constant do_make_constant(ParamsT&&... params)
+    template<typename XvalT, typename... ParamsT> Reference_Root::S_constant do_make_constant(ParamsT&&... params)
       {
-        Reference_Root::S_constant xref = { XvalueT(rocket::forward<ParamsT>(params)...) };
+        Reference_Root::S_constant xref = { XvalT(rocket::forward<ParamsT>(params)...) };
         return xref;
       }
 

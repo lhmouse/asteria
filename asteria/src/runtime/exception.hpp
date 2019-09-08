@@ -17,8 +17,8 @@ class Exception : public std::exception
     cow_vector<Backtrace_Frame> m_frames;
 
   public:
-    template<typename XvalueT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalueT&&)> Exception(const Source_Location& sloc, XvalueT&& xvalue)
-      : m_value(rocket::forward<XvalueT>(xvalue))
+    template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalT&&)> Exception(const Source_Location& sloc, XvalT&& xval)
+      : m_value(rocket::forward<XvalT>(xval))
       {
         this->m_frames.emplace_back(frame_type_throw, sloc,
                                     this->m_value);
@@ -54,10 +54,10 @@ class Exception : public std::exception
         return this->m_frames.at(i);
       }
 
-    template<typename XvalueT> Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XvalueT&& xvalue)
+    template<typename XvalT> Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XvalT&& xval)
       {
         return this->m_frames.emplace_back(frame_type_throw, sloc,
-                                           this->m_value = rocket::forward<XvalueT>(xvalue));  // The value also replaces the one in `*this`.
+                                           this->m_value = rocket::forward<XvalT>(xval));  // The value also replaces the one in `*this`.
       }
     Backtrace_Frame& push_frame_catch(const Source_Location& sloc)
       {
