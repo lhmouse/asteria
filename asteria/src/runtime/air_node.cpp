@@ -153,6 +153,34 @@ DCE_Result AIR_Node::optimize_dce()
     // Auxiliary functions
     ///////////////////////////////////////////////////////////////////////////
 
+    template<typename XvalT> Reference& do_set_temporary(Evaluation_Stack& stack, bool assign, XvalT&& xval)
+      {
+        auto& ref = stack.open_top();
+        if(assign) {
+          // Write the value to the top refernce.
+          ref.open() = rocket::forward<XvalT>(xval);
+          return ref;
+        }
+        // Replace the top reference with a temporary reference to the value.
+        Reference_Root::S_temporary xref = { rocket::forward<XvalT>(xval) };
+        return ref = rocket::move(xref);
+      }
+
+    Reference& do_discard_next(Evaluation_Stack& stack, bool assign)
+      {
+        auto& ref = stack.open_top(1);
+        if(assign) {
+          // Read a value from the top reference and write it to the one beneath it.
+          ref.open() = stack.get_top().read();
+          stack.pop();
+          return ref;
+        }
+        // Overwrite the reference beneath the top.
+        ref = rocket::move(stack.open_top());
+        stack.pop();
+        return ref;
+      }
+
     AIR_Status do_execute_block(const AVMC_Queue& queue, /*const*/ Executive_Context& ctx)
       {
         if(ROCKET_EXPECT(queue.empty())) {
@@ -175,7 +203,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Evaluate the branch.
         auto status = queue.execute(ctx);
         // Pop the result, then overwrite the top with it.
-        ctx.stack().pop_next(assign);
+        do_discard_next(ctx.stack(), assign);
         return status;
       }
 
@@ -1580,12 +1608,12 @@ DCE_Result AIR_Node::optimize_dce()
         // Increment the operand and return the old value. `assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.open_integer();
-          ctx.stack().set_temporary(false, rocket::move(lhs));
+          do_set_temporary(ctx.stack(), false, rocket::move(lhs));
           reg = do_operator_add(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
           auto& reg = lhs.open_real();
-          ctx.stack().set_temporary(false, rocket::move(lhs));
+          do_set_temporary(ctx.stack(), false, rocket::move(lhs));
           reg = do_operator_add(reg, G_real(1));
         }
         else {
@@ -1601,12 +1629,12 @@ DCE_Result AIR_Node::optimize_dce()
         // Decrement the operand and return the old value. `assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.open_integer();
-          ctx.stack().set_temporary(false, rocket::move(lhs));
+          do_set_temporary(ctx.stack(), false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
           auto& reg = lhs.open_real();
-          ctx.stack().set_temporary(false, rocket::move(lhs));
+          do_set_temporary(ctx.stack(), false, rocket::move(lhs));
           reg = do_operator_sub(reg, G_real(1));
         }
         else {
@@ -1646,7 +1674,7 @@ DCE_Result AIR_Node::optimize_dce()
         auto rhs = ctx.stack().get_top().read();
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1668,7 +1696,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix negation is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1690,7 +1718,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix bitwise NOT is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1702,7 +1730,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& rhs = ctx.stack().get_top().read();
         // Perform logical NOT operation on the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary(assign, do_operator_not(rhs.test()));
+        do_set_temporary(ctx.stack(), assign, do_operator_not(rhs.test()));
         return air_status_next;
       }
 
@@ -1751,7 +1779,7 @@ DCE_Result AIR_Node::optimize_dce()
         // This operator is unary.
         auto rhs = ctx.stack().get_top().unset();
         // Unset the reference and return the old value.
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1778,7 +1806,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `lengthof` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, G_integer(nelems));
+        do_set_temporary(ctx.stack(), assign, G_integer(nelems));
         return air_status_next;
       }
 
@@ -1790,7 +1818,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& rhs = ctx.stack().get_top().read();
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
-        ctx.stack().set_temporary(assign, G_string(rocket::sref(rhs.what_gtype())));
+        do_set_temporary(ctx.stack(), assign, G_string(rocket::sref(rhs.what_gtype())));
         return air_status_next;
       }
 
@@ -1812,7 +1840,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__sqrt` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1834,7 +1862,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isnan` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1856,7 +1884,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__isinf` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1878,7 +1906,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__abs` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1900,7 +1928,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__signb` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1922,7 +1950,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__round` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1944,7 +1972,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__floor` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1966,7 +1994,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ceil` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1988,7 +2016,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__trunc` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2010,7 +2038,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iround` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2032,7 +2060,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__ifloor` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2054,7 +2082,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__iceil` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2076,7 +2104,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Prefix `__itrunc` is not defined for `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2094,7 +2122,7 @@ DCE_Result AIR_Node::optimize_dce()
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
         rhs = G_boolean((comp == expect) != negative);
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2115,7 +2143,7 @@ DCE_Result AIR_Node::optimize_dce()
           ASTERIA_THROW_RUNTIME_ERROR("The operands `", lhs, "` and `", rhs, "` are unordered.");
         }
         rhs = G_boolean((comp == expect) != negative);
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2146,7 +2174,7 @@ DCE_Result AIR_Node::optimize_dce()
         default:
           ROCKET_ASSERT(false);
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2180,7 +2208,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix addition is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2209,7 +2237,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix subtraction is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2247,7 +2275,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix multiplication is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2271,7 +2299,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix division is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2295,7 +2323,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix modulo operation is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2322,7 +2350,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2349,7 +2377,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix logical shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2376,7 +2404,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the left is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2402,7 +2430,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix arithmetic shift to the right is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2427,7 +2455,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise AND is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2452,7 +2480,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise OR is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2477,7 +2505,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Infix bitwise XOR is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2487,7 +2515,7 @@ DCE_Result AIR_Node::optimize_dce()
         auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
         // Copy the value to the LHS operand which is write-only. `assign` is ignored.
-        ctx.stack().set_temporary(true, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), true, rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2509,7 +2537,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW_RUNTIME_ERROR("Fused multiply-add is not defined for `", lhs, "` and `", rhs, "`.");
         }
-        ctx.stack().set_temporary(assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 
