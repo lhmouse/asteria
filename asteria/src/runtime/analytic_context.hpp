@@ -30,12 +30,17 @@ class Analytic_Context final : public Abstract_Context
   private:
     void do_prepare_function(const cow_vector<phsh_string>& params);
 
+  protected:
+    bool do_is_analytic() const noexcept override;
+    const Abstract_Context* do_get_parent_opt() const noexcept override;
+    Reference* do_allocate_reference_lazy_opt(Reference_Dictionary& named_refs, const phsh_string& name) const override;
+
   public:
-    bool is_analytic() const noexcept override
+    bool is_analytic() const noexcept
       {
         return true;
       }
-    const Abstract_Context* get_parent_opt() const noexcept override
+    const Abstract_Context* get_parent_opt() const noexcept
       {
         return this->m_parent_opt;
       }

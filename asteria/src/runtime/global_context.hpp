@@ -23,12 +23,17 @@ class Global_Context final : public Abstract_Context
       }
     ~Global_Context() override;
 
+  protected:
+    bool do_is_analytic() const noexcept override;
+    const Abstract_Context* do_get_parent_opt() const noexcept override;
+    Reference* do_allocate_reference_lazy_opt(Reference_Dictionary& named_refs, const phsh_string& name) const override;
+
   public:
-    bool is_analytic() const noexcept override
+    bool is_analytic() const noexcept
       {
         return false;
       }
-    const Abstract_Context* get_parent_opt() const noexcept override
+    const Abstract_Context* get_parent_opt() const noexcept
       {
         return nullptr;
       }

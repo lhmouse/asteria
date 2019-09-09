@@ -26,6 +26,21 @@ Global_Context::~Global_Context()
   {
   }
 
+bool Global_Context::do_is_analytic() const noexcept
+  {
+    return this->is_analytic();
+  }
+
+const Abstract_Context* Global_Context::do_get_parent_opt() const noexcept
+  {
+    return this->get_parent_opt();
+  }
+
+Reference* Global_Context::do_allocate_reference_lazy_opt(Reference_Dictionary& /*named_refs*/, const phsh_string& /*name*/) const
+  {
+    return nullptr;
+  }
+
     namespace {
 
     // N.B. Please keep this list sorted by the `version` member.

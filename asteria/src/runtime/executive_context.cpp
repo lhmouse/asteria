@@ -12,16 +12,6 @@ Executive_Context::~Executive_Context()
   {
   }
 
-    namespace {
-
-    template<typename XvalT, typename... ParamsT> Reference_Root::S_constant do_make_constant(ParamsT&&... params)
-      {
-        Reference_Root::S_constant xref = { XvalT(rocket::forward<ParamsT>(params)...) };
-        return xref;
-      }
-
-    }  // namespace
-
 void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
   {
     // This is the subscript of the special pameter placeholder `...`.
@@ -42,39 +32,68 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
         ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Set the parameter.
-      if(ROCKET_EXPECT(i < args.size())) {
-        this->open_named_reference(param) = rocket::move(args.mut(i));
-      }
-      else {
+      if(ROCKET_UNEXPECT(i >= args.size())) {
         this->open_named_reference(param) = Reference_Root::S_null();
+        continue;
       }
+      this->open_named_reference(param) = rocket::move(args.mut(i));
     }
-    // Set pre-defined references.
+    if(!qelps && (args.size() > params.size())) {
+      // Disallow exceess arguments if the function is not variadic.
+      ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", params.size(), "`, but got `", args.size(), "`).");
+    }
+    // Prepare `__this` and `__varg`. This is tricky.
+    args.erase(0, rocket::min(qelps.value_or(SIZE_MAX), args.size()));
+    args.emplace_back(rocket::move(self));
+    this->m_args_self = rocket::move(args);
+  }
+
+bool Executive_Context::do_is_analytic() const noexcept
+  {
+    return this->is_analytic();
+  }
+
+const Abstract_Context* Executive_Context::do_get_parent_opt() const noexcept
+  {
+    return this->get_parent_opt();
+  }
+
+Reference* Executive_Context::do_allocate_reference_lazy_opt(Reference_Dictionary& named_refs, const phsh_string& name) const
+  {
+    // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
-    if(qelps) {
-      if(args.size() > *qelps) {
-        // Erase named arguments as well as the ellipsis.
-        args.erase(0, *qelps);
-        // Create a new argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(rcobj<Variadic_Arguer>(this->zvarg(), rocket::move(args)));
+    if(name == "__func") {
+      auto& func = named_refs.open(rocket::sref("__func"));
+      // Create a constant string of the function signature.
+      Reference_Root::S_constant xref = { G_string(this->zvarg()->func()) };
+      func = rocket::move(xref);
+      return &func;
+    }
+    if((name == "__this") || (name == "__varg")) {
+      auto& self = named_refs.open(rocket::sref("__this"));
+      auto& varg = named_refs.open(rocket::sref("__varg"));
+      // Unpack the `this` reference.
+      ROCKET_ASSERT(!this->m_args_self.empty());
+      self = rocket::move(this->m_args_self.mut_back());
+      this->m_args_self.pop_back();
+      // Initialize the variadic argument getter.
+      if(this->m_args_self.empty()) {
+        // Reference the pre-allocated zero-ary argument getter if there are variadic arguments.
+        Reference_Root::S_constant xref = { G_function(this->zvarg()) };
+        varg = rocket::move(xref);
       }
       else {
-        // Reference the pre-allocated zero-ary argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(this->zvarg());
+        // Create a new argument getter otherwise.
+        auto kvarg = rocket::make_refcnt<Variadic_Arguer>(this->zvarg(), rocket::move(this->m_args_self));
+        this->m_args_self.clear();
+        // Set it.
+        Reference_Root::S_constant xref = { G_function(rocket::move(kvarg)) };
+        varg = rocket::move(xref);
       }
+      // Return a pointer to the reference requested.
+      return (name[2] == 't') ? &self : &varg;
     }
-    else {
-      if(args.size() > params.size()) {
-        // Disallow exceess arguments if the function is not variadic.
-        ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", params.size(), "`, but got `", args.size(), "`).");
-      }
-      else {
-        // Reference the pre-allocated zero-ary argument getter.
-        this->open_named_reference(rocket::sref("__varg")) = do_make_constant<G_function>(this->zvarg());
-      }
-    }
-    this->open_named_reference(rocket::sref("__this")) = rocket::move(self);
-    this->open_named_reference(rocket::sref("__func")) = do_make_constant<G_string>(this->zvarg()->func());
+    return nullptr;
   }
 
 }  // namespace Asteria

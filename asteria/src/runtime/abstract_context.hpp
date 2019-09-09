@@ -18,7 +18,7 @@ class Abstract_Context
     struct Cleaner { void operator()(Rcbase* base) noexcept;  };
     uptr<Rcbase, Cleaner> m_coll_opt;
     // This stores all named references (variables, parameters, etc.) of this context.
-    Reference_Dictionary m_named_refs;
+    mutable Reference_Dictionary m_named_refs;
 
   public:
     Abstract_Context() noexcept
@@ -31,10 +31,29 @@ class Abstract_Context
     Abstract_Context& operator=(const Abstract_Context&)
       = delete;
 
+  protected:
+    virtual bool do_is_analytic() const noexcept = 0;
+    virtual const Abstract_Context* do_get_parent_opt() const noexcept = 0;
+    virtual Reference* do_allocate_reference_lazy_opt(Reference_Dictionary& named_refs, const phsh_string& name) const = 0;
+
   public:
+    bool is_analytic() const noexcept
+      {
+        return this->do_is_analytic();
+      }
+    const Abstract_Context* get_parent_opt() const noexcept
+      {
+        return this->do_get_parent_opt();
+      }
+
     const Reference* get_named_reference_opt(const phsh_string& name) const
       {
-        return this->m_named_refs.get_opt(name);
+        auto qref = this->m_named_refs.get_opt(name);
+        if(ROCKET_UNEXPECT(!qref)) {
+          // Initialize builtins only when needed.
+          qref = this->do_allocate_reference_lazy_opt(this->m_named_refs, name);
+        }
+        return qref;
       }
     Reference& open_named_reference(const phsh_string& name)
       {
@@ -47,9 +66,6 @@ class Abstract_Context
 
     Generational_Collector* get_tied_collector_opt() const noexcept;
     void tie_collector(const rcptr<Generational_Collector>& coll_opt) noexcept;
-
-    virtual bool is_analytic() const noexcept = 0;
-    virtual const Abstract_Context* get_parent_opt() const noexcept = 0;
   };
 
 }  // namespace Asteria
