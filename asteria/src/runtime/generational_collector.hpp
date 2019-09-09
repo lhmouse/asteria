@@ -42,9 +42,9 @@ class Generational_Collector final : public virtual Rcbase
       {
         return this->m_pool.size();
       }
-    void clear_pool() noexcept
+    Generational_Collector& clear_pool() noexcept
       {
-        this->m_pool.clear();
+        return this->m_pool.clear(), *this;
       }
 
     const Collector& get_collector(GC_Generation gc_gen) const

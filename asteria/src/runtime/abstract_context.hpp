@@ -40,9 +40,9 @@ class Abstract_Context
       {
         return this->m_named_refs.open(name);
       }
-    void clear_named_references() noexcept
+    Abstract_Context& clear_named_references() noexcept
       {
-        this->m_named_refs.clear();
+        return this->m_named_refs.clear(), *this;
       }
 
     Generational_Collector* get_tied_collector_opt() const noexcept;
