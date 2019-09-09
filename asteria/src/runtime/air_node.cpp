@@ -166,21 +166,6 @@ DCE_Result AIR_Node::optimize_dce()
         return ref = rocket::move(xref);
       }
 
-    Reference& do_discard_next(Evaluation_Stack& stack, bool assign)
-      {
-        auto& ref = stack.open_top(1);
-        if(assign) {
-          // Read a value from the top reference and write it to the one beneath it.
-          ref.open() = stack.get_top().read();
-          stack.pop();
-          return ref;
-        }
-        // Overwrite the reference beneath the top.
-        ref = rocket::move(stack.open_top());
-        stack.pop();
-        return ref;
-      }
-
     AIR_Status do_execute_block(const AVMC_Queue& queue, /*const*/ Executive_Context& ctx)
       {
         if(ROCKET_EXPECT(queue.empty())) {
@@ -200,11 +185,22 @@ DCE_Result AIR_Node::optimize_dce()
           // Leave the condition on the top of the stack.
           return air_status_next;
         }
+        if(assign) {
+          // Evaluate the branch.
+          auto status = queue.execute(ctx);
+          ROCKET_ASSERT(status == air_status_next);
+          // Read a value from the top reference and write it to the one beneath it.
+          ctx.stack().get_top(1).open() = ctx.stack().get_top().read();
+          // Discard the reference whose value has just been copied from.
+          ctx.stack().pop();
+          return air_status_next;
+        }
+        // Discard the top which will be overwritten anyway.
+        ctx.stack().pop();
         // Evaluate the branch.
         auto status = queue.execute(ctx);
-        // Pop the result, then overwrite the top with it.
-        do_discard_next(ctx.stack(), assign);
-        return status;
+        ROCKET_ASSERT(status == air_status_next);
+        return air_status_next;
       }
 
     AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
