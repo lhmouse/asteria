@@ -3,6 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "infix_element.hpp"
+#include "xprunit.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

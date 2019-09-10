@@ -4,32 +4,26 @@
 #include "../precompiled.hpp"
 #include "simple_source_file.hpp"
 #include "token_stream.hpp"
-#include "parser.hpp"
+#include "statement_sequence.hpp"
 #include "../runtime/air_node.hpp"
 #include "../utilities.hpp"
 #include <fstream>
 
 namespace Asteria {
 
-Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& sbuf, const cow_string& filename)
+Simple_Source_File& Simple_Source_File::reload(std::streambuf& sbuf, const cow_string& filename)
   {
-    // Use default opts.
+    // Use default options.
     AIR_Node::S_define_function xnode = { };
     // Tokenize the character stream.
-    Token_Stream tstrm;
-    if(!tstrm.load(sbuf, filename, xnode.opts)) {
-      return tstrm.get_parser_error();
-    }
+    Token_Stream tstrm(sbuf, filename, xnode.opts);
     // Parse tokens.
-    Parser parser;
-    if(!parser.load(tstrm, xnode.opts)) {
-      return parser.get_parser_error();
-    }
+    Statement_Sequence stmseq(tstrm, xnode.opts);
     // Initialize arguments for the function object.
     xnode.sloc = std::make_pair(filename, 1);
     xnode.name = rocket::sref("<file scope>");
     xnode.params.emplace_back(rocket::sref("..."));
-    xnode.body = parser.get_statements();
+    xnode.body = stmseq.get_statements();
     // Construct an IR node so we can reuse its code somehow.
     AIR_Node node(rocket::move(xnode));
     ASTERIA_DEBUG_LOG("Instantiating file \'", filename, "\'...");
@@ -37,56 +31,34 @@ Parser_Error Simple_Source_File::do_reload_nothrow(std::streambuf& sbuf, const c
     ASTERIA_DEBUG_LOG("Finished instantiating file \'", filename, "\' as `", *qtarget, "`.");
     // Accept it.
     this->m_cptr = rocket::move(qtarget);
-    return parser_status_success;
+    return *this;
   }
 
-Parser_Error Simple_Source_File::do_throw_or_return(Parser_Error&& err)
-  {
-    if(this->m_fthr && (err != parser_status_success)) {
-      err.convert_to_runtime_error_and_throw();
-    }
-    return rocket::move(err);
-  }
-
-Parser_Error Simple_Source_File::reload(std::streambuf& sbuf, const cow_string& filename)
-  {
-    return this->do_throw_or_return(this->do_reload_nothrow(sbuf, filename));
-  }
-
-Parser_Error Simple_Source_File::reload(std::istream& istrm, const cow_string& filename)
+Simple_Source_File& Simple_Source_File::reload(std::istream& istrm, const cow_string& filename)
   {
     std::istream::sentry sentry(istrm, true);
     if(!sentry) {
-      return this->do_throw_or_return(parser_status_istream_open_failure);
+      throw Parser_Error(parser_status_istream_input_failure);
     }
     // Extract characters from the stream buffer directly.
-    opt<Parser_Error> qerr;
     std::ios_base::iostate state = { };
     try {
-      qerr = this->do_reload_nothrow(*(istrm.rdbuf()), filename);
-      // If the source code contains errors, fail.
-      if(*qerr != parser_status_success) {
-        state |= std::ios_base::failbit;
-      }
-      // N.B. `do_reload_nothrow()` shall have consumed all data, so `eofbit` is always set.
+      this->reload(*(istrm.rdbuf()), filename);
+      // `reload()` shall have consumed all data, so `eofbit` is always set.
       state |= std::ios_base::eofbit;
     }
     catch(...) {
       rocket::handle_ios_exception(istrm, state);
+      // Don't swallow the exception.
+      throw;
     }
-    // If `eofbit` or `failbit` would cause an exception, throw it here.
     if(state) {
       istrm.setstate(state);
     }
-    if(istrm.bad()) {
-      return this->do_throw_or_return(parser_status_istream_badbit_set);
-    }
-    // `qerr` shall always have a value here.
-    // If the exceptional path above has been taken, `istrm.bad()` will have been set.
-    return this->do_throw_or_return(rocket::move(*qerr));
+    return *this;
   }
 
-Parser_Error Simple_Source_File::reload(const cow_string& cstr, const cow_string& filename)
+Simple_Source_File& Simple_Source_File::reload(const cow_string& cstr, const cow_string& filename)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.
     cow_stringbuf sbuf;
@@ -94,12 +66,12 @@ Parser_Error Simple_Source_File::reload(const cow_string& cstr, const cow_string
     return this->reload(sbuf, filename);
   }
 
-Parser_Error Simple_Source_File::open(const cow_string& filename)
+Simple_Source_File& Simple_Source_File::open(const cow_string& filename)
   {
     // Open the file designated by `filename`.
     std::filebuf sbuf;
     if(!sbuf.open(filename.c_str(), std::ios_base::in)) {
-      return this->do_throw_or_return(parser_status_istream_open_failure);
+      throw Parser_Error(parser_status_ifstream_open_failure);
     }
     return this->reload(sbuf, filename);
   }

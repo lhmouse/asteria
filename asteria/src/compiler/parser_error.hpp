@@ -5,28 +5,45 @@
 #define ASTERIA_COMPILER_PARSER_ERROR_HPP_
 
 #include "../fwd.hpp"
+#include <exception>
 
 namespace Asteria {
 
-class Parser_Error
+class Parser_Error : public virtual std::exception
   {
   private:
+    Parser_Status m_status;
     int32_t m_line;
     size_t m_offset;
     size_t m_length;
-    Parser_Status m_status;
+
+    // Create a comprehensive string that is also human-readable.
+    cow_string m_what;
 
   public:
-    constexpr Parser_Error(Parser_Status xstatus) noexcept
-      : m_line(-1), m_offset(0), m_length(0), m_status(xstatus)
+    explicit Parser_Error(Parser_Status xstatus)
+      : m_status(xstatus),
+        m_line(-1), m_offset(0), m_length(0)
       {
+        this->do_compose_message();
       }
-    constexpr Parser_Error(int32_t xline, size_t xoffset, size_t xlength, Parser_Status xstatus) noexcept
-      : m_line(xline), m_offset(xoffset), m_length(xlength), m_status(xstatus)
+    Parser_Error(Parser_Status xstatus, int32_t xline, size_t xoffset, size_t xlength)
+      : m_status(xstatus),
+        m_line(xline), m_offset(xoffset), m_length(xlength)
       {
+        this->do_compose_message();
       }
+    ~Parser_Error() override;
+
+  private:
+    void do_compose_message();
 
   public:
+    const char* what() const noexcept override
+      {
+        return this->m_what.c_str();
+      }
+
     constexpr int32_t line() const noexcept
       {
         return this->m_line;
@@ -47,9 +64,6 @@ class Parser_Error
       {
         return describe_parser_status(this->m_status);
       }
-
-    std::ostream& print(std::ostream& ostrm) const;
-    [[noreturn]] void convert_to_runtime_error_and_throw() const;
   };
 
 constexpr bool operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept
@@ -68,11 +82,6 @@ constexpr bool operator==(Parser_Status lhs, const Parser_Error& rhs) noexcept
 constexpr bool operator!=(Parser_Status lhs, const Parser_Error& rhs) noexcept
   {
     return lhs != rhs.status();
-  }
-
-inline std::ostream& operator<<(std::ostream& ostrm, const Parser_Error& error)
-  {
-    return error.print(ostrm);
   }
 
 }  // namespace Asteria

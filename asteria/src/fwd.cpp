@@ -506,13 +506,13 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "No data were loaded.";
       }
-    case parser_status_istream_open_failure:
+    case parser_status_istream_input_failure:
       {
-        return "The source stream could not be opened for reading.";
+        return "An error occurred while reading from the source character stream.";
       }
-    case parser_status_istream_badbit_set:
+    case parser_status_ifstream_open_failure:
       {
-        return "An error occurred when reading data from the source stream.";
+        return "The source file could not be opened for reading.";
       }
     case parser_status_utf8_sequence_invalid:
       {
@@ -666,10 +666,10 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "Expectation failed while looking for a `}`.";
       }
-    case parser_status_duplicate_object_key:
-      {
-        return "A duplicate key was to be created in the same object.";
-      }
+//    case parser_status_duplicate_object_key:
+//      {
+//        return "A duplicate key was to be created in the same object.";
+//      }
     case parser_status_closed_parenthesis_or_argument_expected:
       {
         return "Expectation failed while looking for a `)` or expression.";

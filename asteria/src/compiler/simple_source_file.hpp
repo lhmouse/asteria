@@ -5,7 +5,6 @@
 #define ASTERIA_COMPILER_SIMPLE_SOURCE_FILE_HPP_
 
 #include "../fwd.hpp"
-#include "parser_error.hpp"
 #include "../runtime/rcbase.hpp"
 
 namespace Asteria {
@@ -13,63 +12,47 @@ namespace Asteria {
 class Simple_Source_File
   {
   private:
-    bool m_fthr;  // throw on failure
     rcptr<Rcbase> m_cptr;  // note type erasure
 
   public:
     Simple_Source_File() noexcept
-      : m_fthr(false)
       {
       }
     Simple_Source_File(std::streambuf& sbuf, const cow_string& filename)
-      : m_fthr(true)
       {
         this->reload(sbuf, filename);
       }
     Simple_Source_File(std::istream& istrm, const cow_string& filename)
-      : m_fthr(true)
       {
         this->reload(istrm, filename);
       }
     Simple_Source_File(const cow_string& cstr, const cow_string& filename)
-      : m_fthr(true)
       {
         this->reload(cstr, filename);
       }
     explicit Simple_Source_File(const cow_string& filename)
-      : m_fthr(true)
       {
         this->open(filename);
       }
 
-  private:
-    inline Parser_Error do_reload_nothrow(std::streambuf& sbuf, const cow_string& filename);
-    inline Parser_Error do_throw_or_return(Parser_Error&& err);
-
   public:
-    bool does_throw_on_failure() const noexcept
-      {
-        return this->m_fthr;
-      }
-    void set_throw_on_failure(bool fthr = true) noexcept
-      {
-        this->m_fthr = fthr;
-      }
-
     explicit operator bool () const noexcept
       {
         return this->m_cptr != nullptr;
       }
+    bool empty() const noexcept
+      {
+        return this->m_cptr == nullptr;
+      }
     Simple_Source_File& clear() noexcept
       {
-        m_cptr = nullptr;
-        return *this;
+        return this->m_cptr.reset(), *this;
       }
 
-    Parser_Error reload(std::streambuf& sbuf, const cow_string& filename);
-    Parser_Error reload(std::istream& istrm, const cow_string& filename);
-    Parser_Error reload(const cow_string& cstr, const cow_string& filename);
-    Parser_Error open(const cow_string& filename);
+    Simple_Source_File& reload(std::streambuf& sbuf, const cow_string& filename);
+    Simple_Source_File& reload(std::istream& istrm, const cow_string& filename);
+    Simple_Source_File& reload(const cow_string& cstr, const cow_string& filename);
+    Simple_Source_File& open(const cow_string& filename);
 
     Reference execute(const Global_Context& global, cow_vector<Reference>&& args) const;
   };

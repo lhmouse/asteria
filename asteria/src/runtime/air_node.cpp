@@ -9,7 +9,7 @@
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
 #include "exception.hpp"
-#include "../syntax/statement.hpp"
+#include "../compiler/statement.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

@@ -183,9 +183,9 @@ namespace Asteria {
           }
       };
 
-    inline Parser_Error do_make_parser_error(const Line_Reader& reader, size_t tlen, Parser_Status status)
+    [[noreturn]] inline void do_throw_parser_error(Parser_Status status, const Line_Reader& reader, size_t tlen)
       {
-        return Parser_Error(reader.line(), reader.offset(), tlen, status);
+        throw Parser_Error(status, reader.line(), reader.offset(), tlen);
       }
 
     class Tack
@@ -231,9 +231,9 @@ namespace Asteria {
           }
       };
 
-    template<typename XtokenT> void do_push_token(cow_vector<Token>& seq, Line_Reader& reader, size_t tlen, XtokenT&& xtoken)
+    template<typename XtokenT> void do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XtokenT&& xtoken)
       {
-        seq.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, rocket::forward<XtokenT>(xtoken));
+        tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, rocket::forward<XtokenT>(xtoken));
         reader.consume(tlen);
       }
 
@@ -268,13 +268,13 @@ namespace Asteria {
         }
       }
 
-    bool do_may_infix_operators_follow(cow_vector<Token>& seq)
+    bool do_may_infix_operators_follow(cow_vector<Token>& tokens)
       {
-        if(seq.empty()) {
+        if(tokens.empty()) {
           // No previous token exists.
           return false;
         }
-        const auto& p = seq.back();
+        const auto& p = tokens.back();
         if(p.is_keyword()) {
           // Infix operators may follow if the keyword denotes a value or reference.
           return rocket::is_any_of(p.as_keyword(),{ keyword_null, keyword_true, keyword_false,
@@ -290,7 +290,7 @@ namespace Asteria {
         return true;
       }
 
-    bool do_accept_numeric_literal(cow_vector<Token>& seq, Line_Reader& reader, bool integers_as_reals)
+    bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool integers_as_reals)
       {
         // numeric-literal ::=
         //   number-sign-opt ( binary-literal | decimal-literal | hexadecimal-literal ) exponent-suffix-opt
@@ -330,7 +330,7 @@ namespace Asteria {
           rneg = true;
           break;
         }
-        if((tlen != 0) && do_may_infix_operators_follow(seq)) {
+        if((tlen != 0) && do_may_infix_operators_follow(tokens)) {
           return false;
         }
         if(!do_check_cctype(reader.peek(tlen), cctype_digit)) {
@@ -370,7 +370,7 @@ namespace Asteria {
         }
         // There shall be at least one digit.
         if(icnt == 0) {
-          throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_incomplete);
+          do_throw_parser_error(parser_status_numeric_literal_incomplete, reader, tlen);
         }
         // Check for the fractional part.
         if(reader.peek(tlen) == '.') {
@@ -392,7 +392,7 @@ namespace Asteria {
           }
           // There shall be at least one digit.
           if(fcnt == 0) {
-            throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_incomplete);
+            do_throw_parser_error(parser_status_numeric_literal_incomplete, reader, tlen);
           }
         }
         // Check for the exponent part.
@@ -430,7 +430,7 @@ namespace Asteria {
             tlen++;
             // Accept a digit.
             if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
-              throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_exponent_overflow);
+              do_throw_parser_error(parser_status_numeric_literal_exponent_overflow, reader, tlen);
             }
             pcnt++;
             // Is the next character a digit separator?
@@ -440,16 +440,16 @@ namespace Asteria {
           }
           // There shall be at least one digit.
           if(pcnt == 0) {
-            throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_incomplete);
+            do_throw_parser_error(parser_status_numeric_literal_incomplete, reader, tlen);
           }
         }
         if(reader.peek(tlen) == '`') {
-          throw do_make_parser_error(reader, tlen, parser_status_digit_separator_following_nondigit);
+          do_throw_parser_error(parser_status_digit_separator_following_nondigit, reader, tlen);
         }
         // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
         // Since we make no use of them, we just reserve them for further use for good.
         if(do_check_cctype(reader.peek(tlen), cctype_namei | cctype_digit)) {
-          throw do_make_parser_error(reader, tlen, parser_status_numeric_literal_suffix_disallowed);
+          do_throw_parser_error(parser_status_numeric_literal_suffix_disallowed, reader, tlen);
         }
         // Is this an `integer` or a `real`?
         if(!integers_as_reals && (fcnt == 0)) {
@@ -463,25 +463,25 @@ namespace Asteria {
             }
             // Accept a digit.
             if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
-              throw do_make_parser_error(reader, tlen, parser_status_integer_literal_overflow);
+              do_throw_parser_error(parser_status_integer_literal_overflow, reader, tlen);
             }
           }
           // Negative exponents are not allowed, not even when the significant part is zero.
           if(pexp < 0) {
-            throw do_make_parser_error(reader, tlen, parser_status_integer_literal_exponent_negative);
+            do_throw_parser_error(parser_status_integer_literal_exponent_negative, reader, tlen);
           }
           // Raise the result.
           if(val != 0) {
             for(auto i = pexp; i != 0; --i) {
               // Append a digit zero.
               if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
-                throw do_make_parser_error(reader, tlen, parser_status_integer_literal_overflow);
+                do_throw_parser_error(parser_status_integer_literal_overflow, reader, tlen);
               }
             }
           }
           // Push an integer literal.
           Token::S_integer_literal xtoken = { val };
-          do_push_token(seq, reader, tlen, rocket::move(xtoken));
+          do_push_token(tokens, reader, tlen, rocket::move(xtoken));
           return true;
         }
         // The literal is a `real` if there is a decimal point.
@@ -521,14 +521,14 @@ namespace Asteria {
         // Check for overflow or underflow.
         int fpcls = std::fpclassify(val);
         if(fpcls == FP_INFINITE) {
-          throw do_make_parser_error(reader, tlen, parser_status_real_literal_overflow);
+          do_throw_parser_error(parser_status_real_literal_overflow, reader, tlen);
         }
         if((fpcls == FP_ZERO) && (tval != 0)) {
-          throw do_make_parser_error(reader, tlen, parser_status_real_literal_underflow);
+          do_throw_parser_error(parser_status_real_literal_underflow, reader, tlen);
         }
         // Push a real literal.
         Token::S_real_literal xtoken = { val };
-        do_push_token(seq, reader, tlen, rocket::move(xtoken));
+        do_push_token(tokens, reader, tlen, rocket::move(xtoken));
         return true;
       }
 
@@ -612,7 +612,7 @@ namespace Asteria {
         { "~",     punctuator_notb        },
       };
 
-    bool do_accept_punctuator(cow_vector<Token>& seq, Line_Reader& reader)
+    bool do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
       {
 #ifdef ROCKET_DEBUG
         ROCKET_ASSERT(std::is_sorted(std::begin(s_punctuators), std::end(s_punctuators), Prefix_Comparator()));
@@ -631,14 +631,14 @@ namespace Asteria {
           if((tlen <= reader.navail()) && (std::memcmp(reader.data(), cur.first, tlen) == 0)) {
             // A punctuator has been found.
             Token::S_punctuator xtoken = { cur.second };
-            do_push_token(seq, reader, tlen, rocket::move(xtoken));
+            do_push_token(tokens, reader, tlen, rocket::move(xtoken));
             return true;
           }
           range.second--;
         }
       }
 
-    bool do_accept_string_literal(cow_vector<Token>& seq, Line_Reader& reader, char head, bool escapable)
+    bool do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, char head, bool escapable)
       {
         // string-literal ::=
         //   escape-string-literal | noescape-string-literal
@@ -656,7 +656,7 @@ namespace Asteria {
           // Read a character.
           auto next = reader.peek(tlen);
           if(next == 0) {
-            throw do_make_parser_error(reader, tlen, parser_status_string_literal_unclosed);
+            do_throw_parser_error(parser_status_string_literal_unclosed, reader, tlen);
           }
           tlen++;
           // Check it.
@@ -673,7 +673,7 @@ namespace Asteria {
           // Read the next charactter.
           next = reader.peek(tlen);
           if(next == 0) {
-            throw do_make_parser_error(reader, tlen, parser_status_escape_sequence_incomplete);
+            do_throw_parser_error(parser_status_escape_sequence_incomplete, reader, tlen);
           }
           tlen++;
           // Translate it.
@@ -749,11 +749,11 @@ namespace Asteria {
                 // Read a hex digit.
                 auto digit = reader.peek(tlen);
                 if(digit == 0) {
-                  throw do_make_parser_error(reader, tlen, parser_status_escape_sequence_incomplete);
+                  do_throw_parser_error(parser_status_escape_sequence_incomplete, reader, tlen);
                 }
                 auto dval = do_translate_digit(digit);
                 if(dval >= 16) {
-                  throw do_make_parser_error(reader, tlen, parser_status_escape_sequence_invalid_hex);
+                  do_throw_parser_error(parser_status_escape_sequence_invalid_hex, reader, tlen);
                 }
                 tlen++;
                 // Accumulate this digit.
@@ -767,16 +767,16 @@ namespace Asteria {
               }
               // Write a Unicode code point.
               if(!utf8_encode(val, cp)) {
-                throw do_make_parser_error(reader, tlen, parser_status_escape_utf_code_point_invalid);
+                do_throw_parser_error(parser_status_escape_utf_code_point_invalid, reader, tlen);
               }
               break;
             }
           default:
-            throw do_make_parser_error(reader, tlen, parser_status_escape_sequence_unknown);
+            do_throw_parser_error(parser_status_escape_sequence_unknown, reader, tlen);
           }
         }
         Token::S_string_literal xtoken = { rocket::move(val) };
-        do_push_token(seq, reader, tlen, rocket::move(xtoken));
+        do_push_token(tokens, reader, tlen, rocket::move(xtoken));
         return true;
       }
 
@@ -835,7 +835,7 @@ namespace Asteria {
         { "while",     keyword_while     },
       };
 
-    bool do_accept_identifier_or_keyword(cow_vector<Token>& seq, Line_Reader& reader, bool keywords_as_identifiers)
+    bool do_accept_identifier_or_keyword(cow_vector<Token>& tokens, Line_Reader& reader, bool keywords_as_identifiers)
       {
         // identifier ::=
         //   PCRE([A-Za-z_][A-Za-z_0-9]*)
@@ -857,7 +857,7 @@ namespace Asteria {
         if(keywords_as_identifiers) {
           // Do not check for identifiers.
           Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-          do_push_token(seq, reader, tlen, rocket::move(xtoken));
+          do_push_token(tokens, reader, tlen, rocket::move(xtoken));
           return true;
         }
 #ifdef ROCKET_DEBUG
@@ -868,14 +868,14 @@ namespace Asteria {
           if(range.first == range.second) {
             // No matching keyword has been found so far.
             Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-            do_push_token(seq, reader, tlen, rocket::move(xtoken));
+            do_push_token(tokens, reader, tlen, rocket::move(xtoken));
             return true;
           }
           const auto& cur = range.first[0];
           if((std::strlen(cur.first) == tlen) && (std::memcmp(reader.data(), cur.first, tlen) == 0)) {
             // A keyword has been found.
             Token::S_keyword xtoken = { cur.second };
-            do_push_token(seq, reader, tlen, rocket::move(xtoken));
+            do_push_token(tokens, reader, tlen, rocket::move(xtoken));
             return true;
           }
           range.first++;
@@ -884,168 +884,95 @@ namespace Asteria {
 
     }  // namespace
 
-bool Token_Stream::load(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& opts)
+Token_Stream& Token_Stream::reload(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& opts)
   {
-    // This has to be done before anything else because of possibility of exceptions.
-    this->m_stor = nullptr;
-    // Store tokens parsed here in normal order.
+    // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
-    cow_vector<Token> seq;
-    try {
-      // Save the position of an unterminated block comment.
-      Tack bcomm;
-      // Read source code line by line.
-      Line_Reader reader(rocket::ref(sbuf), file);
-      while(reader.advance()) {
-        // Discard the first line if it looks like a shebang.
-        if((reader.line() == 1) && (reader.navail() >= 2) && (std::memcmp(reader.data(), "#!", 2) == 0)) {
+    cow_vector<Token> tokens;
+    // Destroy the contents of `*this` and reuse their storage, if any.
+    tokens.swap(this->m_tokens);
+    tokens.clear();
+    // Save the position of an unterminated block comment.
+    Tack bcomm;
+    // Read source code line by line.
+    Line_Reader reader(rocket::ref(sbuf), file);
+    while(reader.advance()) {
+      // Discard the first line if it looks like a shebang.
+      if((reader.line() == 1) && (reader.navail() >= 2) && (std::memcmp(reader.data(), "#!", 2) == 0)) {
+        continue;
+      }
+      // Ensure this line is a valid UTF-8 string.
+      while(reader.navail() != 0) {
+        // Decode a code point.
+        char32_t cp;
+        auto tptr = reader.data();
+        if(!utf8_decode(cp, tptr, reader.navail())) {
+          do_throw_parser_error(parser_status_utf8_sequence_invalid, reader, reader.navail());
+        }
+        auto u8len = static_cast<size_t>(tptr - reader.data());
+        // Disallow plain null characters in source data.
+        if(cp == 0) {
+          do_throw_parser_error(parser_status_null_character_disallowed, reader, u8len);
+        }
+        // Accept this code point.
+        reader.consume(u8len);
+      }
+      reader.rewind();
+      // Break this line down into tokens.
+      while(reader.navail() != 0) {
+        // Are we inside a block comment?
+        if(bcomm) {
+          // Search for the terminator of this block comment.
+          auto tptr = std::strstr(reader.data(), "*/");
+          if(!tptr) {
+            // The block comment will not end in this line. Stop.
+            break;
+          }
+          auto tlen = static_cast<size_t>(tptr + 2 - reader.data());
+          // Finish this comment and resume from the end of it.
+          bcomm.clear();
+          reader.consume(tlen);
           continue;
         }
-        // Ensure this line is a valid UTF-8 string.
-        while(reader.navail() != 0) {
-          // Decode a code point.
-          char32_t cp;
-          auto tptr = reader.data();
-          if(!utf8_decode(cp, tptr, reader.navail())) {
-            throw do_make_parser_error(reader, reader.navail(), parser_status_utf8_sequence_invalid);
-          }
-          auto u8len = static_cast<size_t>(tptr - reader.data());
-          // Disallow plain null characters in source data.
-          if(cp == 0) {
-            throw do_make_parser_error(reader, u8len, parser_status_null_character_disallowed);
-          }
-          // Accept this code point.
-          reader.consume(u8len);
+        // Read a character.
+        if(do_check_cctype(reader.peek(), cctype_space)) {
+          // Skip a space.
+          reader.consume(1);
+          continue;
         }
-        reader.rewind();
-        // Break this line down into tokens.
-        while(reader.navail() != 0) {
-          // Are we inside a block comment?
-          if(bcomm) {
-            // Search for the terminator of this block comment.
-            auto tptr = std::strstr(reader.data(), "*/");
-            if(!tptr) {
-              // The block comment will not end in this line. Stop.
-              break;
-            }
-            auto tlen = static_cast<size_t>(tptr + 2 - reader.data());
-            // Finish this comment and resume from the end of it.
-            bcomm.clear();
-            reader.consume(tlen);
+        if(reader.peek() == '/') {
+          if(reader.peek(1) == '/') {
+            // Start a line comment. Discard all remaining characters in this line.
+            break;
+          }
+          if(reader.peek(1) == '*') {
+            // Start a block comment.
+            bcomm.set(reader, 2);
+            reader.consume(2);
             continue;
           }
-          // Read a character.
-          if(do_check_cctype(reader.peek(), cctype_space)) {
-            // Skip a space.
-            reader.consume(1);
-            continue;
-          }
-          if(reader.peek() == '/') {
-            if(reader.peek(1) == '/') {
-              // Start a line comment. Discard all remaining characters in this line.
-              break;
-            }
-            if(reader.peek(1) == '*') {
-              // Start a block comment.
-              bcomm.set(reader, 2);
-              reader.consume(2);
-              continue;
-            }
-          }
-          bool token_got = do_accept_numeric_literal(seq, reader, opts.integers_as_reals) ||
-                           do_accept_punctuator(seq, reader) ||
-                           do_accept_string_literal(seq, reader, '\"', true) ||
-                           do_accept_string_literal(seq, reader, '\'', opts.escapable_single_quotes) ||
-                           do_accept_identifier_or_keyword(seq, reader, opts.keywords_as_identifiers);
-          if(!token_got) {
-            ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data());
-            throw do_make_parser_error(reader, 1, parser_status_token_character_unrecognized);
-          }
         }
-        reader.rewind();
-      }
-      if(bcomm) {
-        // A block comment may straddle multiple lines. We just mark the first line here.
-        throw Parser_Error(bcomm.line(), bcomm.offset(), bcomm.length(), parser_status_block_comment_unclosed);
-      }
-    }
-    catch(const Parser_Error& error) {  // `Parser_Error` is not derived from `std::exception`. Don't play with this at home.
-      ASTERIA_DEBUG_LOG("Caught `Parser_Error`: ", error);
-      this->m_stor = error;
-      return false;
-    }
-    std::reverse(seq.mut_begin(), seq.mut_end());
-    this->m_stor = rocket::move(seq);
-    return true;
-  }
-
-Parser_Error Token_Stream::get_parser_error() const noexcept
-  {
-    switch(this->state()) {
-    case state_empty:
-      {
-        return parser_status_no_data_loaded;
-      }
-    case state_error:
-      {
-        return this->m_stor.as<Parser_Error>();
-      }
-    case state_success:
-      {
-        return parser_status_success;
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
-    }
-  }
-
-const Token* Token_Stream::peek_opt(size_t ahead) const
-  {
-    switch(this->state()) {
-    case state_empty:
-      {
-        ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
-      }
-    case state_error:
-      {
-        ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
-      }
-    case state_success:
-      {
-        auto& altr = this->m_stor.as<cow_vector<Token>>();
-        if(ahead >= altr.size()) {
-          return nullptr;
+        bool token_got = do_accept_numeric_literal(tokens, reader, opts.integers_as_reals) ||
+                         do_accept_punctuator(tokens, reader) ||
+                         do_accept_string_literal(tokens, reader, '\"', true) ||
+                         do_accept_string_literal(tokens, reader, '\'', opts.escapable_single_quotes) ||
+                         do_accept_identifier_or_keyword(tokens, reader, opts.keywords_as_identifiers);
+        if(!token_got) {
+          ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data());
+          do_throw_parser_error(parser_status_token_character_unrecognized, reader, 1);
         }
-        return altr.data() + (altr.size() - 1 - ahead);
       }
-    default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
+      reader.rewind();
     }
-  }
-
-void Token_Stream::shift(size_t count)
-  {
-    switch(this->state()) {
-    case state_empty:
-      {
-        ASTERIA_THROW_RUNTIME_ERROR("No data have been loaded so far.");
-      }
-    case state_error:
-      {
-        ASTERIA_THROW_RUNTIME_ERROR("The previous load operation has failed.");
-      }
-    case state_success:
-      {
-        auto& altr = this->m_stor.as<cow_vector<Token>>();
-        if(count > altr.size()) {
-          ASTERIA_THROW_RUNTIME_ERROR("There are no more tokens from this stream.");
-        }
-        altr.pop_back(count);
-        return;
-      }
-    default:
-      ASTERIA_TERMINATE("An unknown state enumeration `", this->state(), "` has been encountered. This is likely a bug. Please report.");
+    if(bcomm) {
+      // A block comment may straddle multiple lines. We just mark the first line here.
+      throw Parser_Error(parser_status_block_comment_unclosed, bcomm.line(), bcomm.offset(), bcomm.length());
     }
+    // Reverse the token sequence now.
+    std::reverse(tokens.mut_begin(), tokens.mut_end());
+    // Succeed.
+    this->m_tokens = rocket::move(tokens);
+    return *this;
   }
 
 }  // namespace Asteria

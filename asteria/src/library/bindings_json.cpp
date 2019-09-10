@@ -620,8 +620,11 @@ Value std_json_parse(const G_string& text)
     // Use a `streambuf` rather than an `istream` to minimize overheads.
     cow_stringbuf sbuf(text, std::ios_base::in);
     Token_Stream tstrm;
-    if(!tstrm.load(sbuf, rocket::sref("<JSON text>"), opts)) {
-      ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", text);
+    try {
+      tstrm.reload(sbuf, rocket::sref("<JSON text>"), opts);
+    }
+    catch(Parser_Error& except) {
+      ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", except.what(), "\n---\n", text);
       return G_null();
     }
     auto qvalue = do_json_parse_nonrecursive_opt(tstrm);

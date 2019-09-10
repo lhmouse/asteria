@@ -7,28 +7,32 @@
 
 namespace Asteria {
 
-std::ostream& Parser_Error::print(std::ostream& ostrm) const
+Parser_Error::~Parser_Error()
   {
-    // Write the status code in digital form.
-    ostrm << std::dec << "error " << this->m_status << " at ";
-    // Append the source location.
-    if(this->m_line <= 0) {
-      ostrm << "the end of input data";
-    }
-    else {
-      ostrm << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
-    }
-    // Append the status description.
-    ostrm << ": " << describe_parser_status(this->m_status);
-    return ostrm;
   }
 
-void Parser_Error::convert_to_runtime_error_and_throw() const
+void Parser_Error::do_compose_message()
   {
     cow_osstream fmtss;
     fmtss.imbue(std::locale::classic());
-    this->print(fmtss);
-    throw_runtime_error(__func__, fmtss.extract_string());
+    // Write the status code in digital form.
+    fmtss << std::dec << "error " << this->m_status << " at ";
+    // Append the source location.
+    if(this->m_line > 0) {
+      fmtss << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
+    }
+    else {
+      fmtss << "the end of input data";
+    }
+    // Append the status description.
+    fmtss << ": " << describe_parser_status(this->m_status);
+    // Set the string.
+    this->m_what = fmtss.extract_string();
   }
+
+static_assert(std::is_nothrow_copy_constructible<Parser_Error>::value, "Copy constructors of exceptions are not allow to throw exceptions.");
+static_assert(std::is_nothrow_move_constructible<Parser_Error>::value, "Move constructors of exceptions are not allow to throw exceptions.");
+static_assert(std::is_nothrow_copy_assignable<Parser_Error>::value, "Copy assignment operators of exceptions are not allow to throw exceptions.");
+static_assert(std::is_nothrow_move_assignable<Parser_Error>::value, "Move assignment operators of exceptions are not allow to throw exceptions.");
 
 }  // namespace Asteria

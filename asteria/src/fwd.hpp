@@ -56,10 +56,6 @@ class Variable_HashSet;
 class Reference_Dictionary;
 class AVMC_Queue;
 
-// Syntax
-class Xprunit;
-class Statement;
-
 // Runtime
 class Rcbase;
 class Source_Location;
@@ -91,8 +87,10 @@ class Exception;
 class Parser_Error;
 class Token;
 class Token_Stream;
+class Xprunit;
+class Statement;
 class Infix_Element;
-class Parser;
+class Statement_Sequence;
 class Simple_Source_File;
 
 // Library
@@ -423,8 +421,8 @@ enum Parser_Status : uint32_t
   {
     parser_status_success                                    =    0,
     parser_status_no_data_loaded                             = 1001,
-    parser_status_istream_open_failure                       = 2001,
-    parser_status_istream_badbit_set                         = 2002,
+    parser_status_istream_input_failure                      = 2001,
+    parser_status_ifstream_open_failure                      = 2002,
     parser_status_utf8_sequence_invalid                      = 2003,
     parser_status_utf8_sequence_incomplete                   = 2004,
     parser_status_utf_code_point_invalid                     = 2005,
@@ -463,7 +461,7 @@ enum Parser_Status : uint32_t
     parser_status_for_statement_initializer_expected         = 4018,
     parser_status_semicolon_or_expression_expected           = 4019,
     parser_status_closed_brace_expected                      = 4020,
-    parser_status_duplicate_object_key                       = 4021,
+//    parser_status_duplicate_object_key                       = 4021,
     parser_status_closed_parenthesis_or_argument_expected    = 4022,
     parser_status_closed_bracket_expected                    = 4023,
     parser_status_open_brace_or_equal_initializer_expected   = 4024,

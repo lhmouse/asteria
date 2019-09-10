@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_SYNTAX_XPRUNIT_HPP_
-#define ASTERIA_SYNTAX_XPRUNIT_HPP_
+#ifndef ASTERIA_COMPILER_XPRUNIT_HPP_
+#define ASTERIA_COMPILER_XPRUNIT_HPP_
 
 #include "../fwd.hpp"
 #include "../runtime/source_location.hpp"

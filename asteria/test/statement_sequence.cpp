@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../src/compiler/parser.hpp"
+#include "../src/compiler/statement_sequence.hpp"
 #include "../src/compiler/token_stream.hpp"
 #include "../src/runtime/global_context.hpp"
 #include "../src/runtime/executive_context.hpp"
@@ -32,10 +32,8 @@ int main()
         return typeof(e) + ":" + e;
       }
     )__");
-    Token_Stream tis;
-    ASTERIA_TEST_CHECK(tis.load(buf, rocket::sref("dummy file"), { }));
-    Parser pr;
-    ASTERIA_TEST_CHECK(pr.load(tis, { }));
-    auto code = pr.get_statements();
-    ASTERIA_TEST_CHECK(code.size() == 4);
+
+    Token_Stream tstrm(buf, rocket::sref("dummy file"), { });
+    Statement_Sequence stmseq(tstrm, { });
+    ASTERIA_TEST_CHECK(stmseq.size() == 4);
   }

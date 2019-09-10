@@ -91,11 +91,6 @@ pkginclude_llds_HEADERS =  \
   asteria/src/llds/reference_dictionary.hpp  \
   asteria/src/llds/avmc_queue.hpp
 
-pkginclude_syntaxdir = ${pkgincludedir}/syntax
-pkginclude_syntax_HEADERS =  \
-  asteria/src/syntax/xprunit.hpp  \
-  asteria/src/syntax/statement.hpp
-
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/rcbase.hpp  \
@@ -129,8 +124,10 @@ pkginclude_compiler_HEADERS =  \
   asteria/src/compiler/parser_error.hpp  \
   asteria/src/compiler/token.hpp  \
   asteria/src/compiler/token_stream.hpp  \
+  asteria/src/compiler/xprunit.hpp  \
+  asteria/src/compiler/statement.hpp  \
   asteria/src/compiler/infix_element.hpp  \
-  asteria/src/compiler/parser.hpp  \
+  asteria/src/compiler/statement_sequence.hpp  \
   asteria/src/compiler/simple_source_file.hpp
 
 pkginclude_librarydir = ${pkgincludedir}/library
@@ -155,8 +152,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/llds/variable_hashset.cpp  \
   asteria/src/llds/reference_dictionary.cpp  \
   asteria/src/llds/avmc_queue.cpp  \
-  asteria/src/syntax/xprunit.cpp  \
-  asteria/src/syntax/statement.cpp  \
   asteria/src/runtime/rcbase.cpp  \
   asteria/src/runtime/source_location.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
@@ -185,8 +180,10 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/parser_error.cpp  \
   asteria/src/compiler/token.cpp  \
   asteria/src/compiler/token_stream.cpp  \
+  asteria/src/compiler/xprunit.cpp  \
+  asteria/src/compiler/statement.cpp  \
   asteria/src/compiler/infix_element.cpp  \
-  asteria/src/compiler/parser.cpp  \
+  asteria/src/compiler/statement_sequence.cpp  \
   asteria/src/compiler/simple_source_file.cpp  \
   asteria/src/library/argument_reader.cpp  \
   asteria/src/library/simple_binding_wrapper.cpp  \
@@ -226,7 +223,7 @@ check_PROGRAMS =  \
   asteria/test/variable.test  \
   asteria/test/reference.test  \
   asteria/test/token_stream.test  \
-  asteria/test/parser.test  \
+  asteria/test/statement_sequence.test  \
   asteria/test/simple_source_file.test  \
   asteria/test/garbage_collection.test  \
   asteria/test/std_library.test  \
