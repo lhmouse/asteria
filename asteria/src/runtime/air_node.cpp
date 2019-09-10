@@ -1115,10 +1115,10 @@ DCE_Result AIR_Node::optimize_dce()
           args.emplace_back(rocket::move(self));
           // Create a TCO wrapper.
           auto tca = rocket::make_refcnt<Tail_Call_Arguments>(sloc, func, tco_aware, target, rocket::move(args));
-          // Return it. Note that we force `air_status_return` here for value-discarding TCO.
+          // Return it.
           Reference_Root::S_tail_call xref = { rocket::move(tca) };
           self = rocket::move(xref);
-          return air_status_return;
+          return air_status_next;
         }
         // Perform a non-proper call.
         try {
