@@ -117,7 +117,8 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/variadic_arguer.hpp  \
   asteria/src/runtime/evaluation_stack.hpp  \
   asteria/src/runtime/instantiated_function.hpp  \
-  asteria/src/runtime/air_node.hpp
+  asteria/src/runtime/air_node.hpp  \
+  asteria/src/runtime/simple_script.hpp
 
 pkginclude_compilerdir = ${pkgincludedir}/compiler
 pkginclude_compiler_HEADERS =  \
@@ -127,8 +128,7 @@ pkginclude_compiler_HEADERS =  \
   asteria/src/compiler/xprunit.hpp  \
   asteria/src/compiler/statement.hpp  \
   asteria/src/compiler/infix_element.hpp  \
-  asteria/src/compiler/statement_sequence.hpp  \
-  asteria/src/compiler/simple_source_file.hpp
+  asteria/src/compiler/statement_sequence.hpp
 
 pkginclude_librarydir = ${pkgincludedir}/library
 pkginclude_library_HEADERS =  \
@@ -177,6 +177,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/evaluation_stack.cpp  \
   asteria/src/runtime/instantiated_function.cpp  \
   asteria/src/runtime/air_node.cpp  \
+  asteria/src/runtime/simple_script.cpp  \
   asteria/src/compiler/parser_error.cpp  \
   asteria/src/compiler/token.cpp  \
   asteria/src/compiler/token_stream.cpp  \
@@ -184,7 +185,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/compiler/statement.cpp  \
   asteria/src/compiler/infix_element.cpp  \
   asteria/src/compiler/statement_sequence.cpp  \
-  asteria/src/compiler/simple_source_file.cpp  \
   asteria/src/library/argument_reader.cpp  \
   asteria/src/library/simple_binding_wrapper.cpp  \
   asteria/src/library/bindings_version.cpp  \
@@ -224,9 +224,8 @@ check_PROGRAMS =  \
   asteria/test/reference.test  \
   asteria/test/token_stream.test  \
   asteria/test/statement_sequence.test  \
-  asteria/test/simple_source_file.test  \
+  asteria/test/simple_script.test  \
   asteria/test/garbage_collection.test  \
-  asteria/test/std_library.test  \
   asteria/test/varg.test  \
   asteria/test/operators.test  \
   asteria/test/proper_tail_call.test  \

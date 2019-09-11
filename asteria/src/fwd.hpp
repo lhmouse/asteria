@@ -82,6 +82,7 @@ class Instantiated_Function;
 class AIR_Node;
 class Backtrace_Frame;
 class Exception;
+class Simple_Script;
 
 // Compiler
 class Parser_Error;
@@ -91,7 +92,6 @@ class Xprunit;
 class Statement;
 class Infix_Element;
 class Statement_Sequence;
-class Simple_Source_File;
 
 // Library
 class Argument_Reader;

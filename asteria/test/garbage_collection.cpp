@@ -2,8 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../src/compiler/simple_source_file.hpp"
-#include "../src/runtime/global_context.hpp"
+#include "../src/runtime/simple_script.hpp"
 
 using namespace Asteria;
 
@@ -56,9 +55,8 @@ int main()
             }
           )__")
         );
-      Simple_Source_File code(iss, rocket::sref("my_file"));
-      Global_Context global;
-      code.execute(global, { });
+      Simple_Script code(iss, rocket::sref("my_file"));
+      code.execute();
     }
     ASTERIA_TEST_CHECK(bcnt.load(std::memory_order_relaxed) == 0);
   }

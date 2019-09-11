@@ -1,8 +1,7 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#include "compiler/simple_source_file.hpp"
-#include "runtime/global_context.hpp"
+#include "runtime/simple_script.hpp"
 #include "runtime/exception.hpp"
 #include "library/bindings_chrono.hpp"
 #include "../rocket/cow_istringstream.hpp"
@@ -13,20 +12,18 @@ using namespace Asteria;
 
 int main(int argc, char** argv)
   try {
-    cow_vector<Reference> args;
+    cow_vector<Value> vargs;
     for(int i = 0; i < argc; ++i) {
-      G_string arg;
-      if(argv[i]) {
-        arg += argv[i];
-      }
-      Reference_Root::S_constant xref = { rocket::move(arg) };
-      args.emplace_back(rocket::move(xref));
+      if(argv[i])
+        vargs.emplace_back(G_string(argv[i]));
+      else
+        vargs.emplace_back(G_null());
     }
     // prepare test code.
 #if !defined(__OPTIMIZE__) || (__OPTIMIZE__ == 0)
     std::cerr << "# Input your program:" << std::endl
               << "---" << std::endl;
-    Simple_Source_File code(std::cin, rocket::sref("<stdin>"));
+    Simple_Script code(std::cin, rocket::sref("<stdin>"));
 #else
     static constexpr char src[] =
       R"_____(
@@ -44,15 +41,14 @@ int main(int argc, char** argv)
               << "---" << std::endl
               << src << std::endl
               << "---" << std::endl;;
-    Simple_Source_File code(iss, rocket::sref("my_file"));
+    Simple_Script code(iss, rocket::sref("my_file"));
 #endif
     std::cerr << std::endl
               << "---" << std::endl
               << "# Running..." << std::endl;
-    Global_Context global;
     // run it and measure the time.
     auto t1 = std_chrono_hires_now();
-    auto res = code.execute(global, rocket::move(args));
+    auto res = code.execute(rocket::move(vargs));
     auto t2 = std_chrono_hires_now();
     // print the time elapsed and the result.
     std::cerr << std::endl

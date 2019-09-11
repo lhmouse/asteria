@@ -2,8 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../src/compiler/simple_source_file.hpp"
-#include "../src/runtime/global_context.hpp"
+#include "../src/runtime/simple_script.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -23,9 +22,8 @@ int main()
         return con.value + con.const;
       )__");
 
-    Simple_Source_File code;
+    Simple_Script code;
     ASTERIA_TEST_CHECK(iss >> code);
-    Global_Context global;
-    auto res = code.execute(global, { });
+    auto res = code.execute();
     ASTERIA_TEST_CHECK(res.read().as_integer() == 90);
   }

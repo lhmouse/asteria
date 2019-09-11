@@ -2,8 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../src/compiler/simple_source_file.hpp"
-#include "../src/runtime/global_context.hpp"
+#include "../src/runtime/simple_script.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -78,7 +77,7 @@ int main()
       )__";
 
     std::istringstream iss(s_source);
-    Simple_Source_File code(iss, rocket::sref("my_file"));
+    Simple_Script code(iss, rocket::sref("my_file"));
     Global_Context global;
-    code.execute(global, { });
+    code.execute();
   }

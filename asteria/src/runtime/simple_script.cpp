@@ -2,16 +2,16 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "../precompiled.hpp"
-#include "simple_source_file.hpp"
-#include "token_stream.hpp"
-#include "statement_sequence.hpp"
-#include "../runtime/air_node.hpp"
+#include "simple_script.hpp"
+#include "air_node.hpp"
+#include "../compiler/token_stream.hpp"
+#include "../compiler/statement_sequence.hpp"
 #include "../utilities.hpp"
 #include <fstream>
 
 namespace Asteria {
 
-Simple_Source_File& Simple_Source_File::reload(std::streambuf& sbuf, const cow_string& filename)
+Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& filename)
   {
     // Use default options.
     AIR_Node::S_define_function xnode = { };
@@ -34,7 +34,7 @@ Simple_Source_File& Simple_Source_File::reload(std::streambuf& sbuf, const cow_s
     return *this;
   }
 
-Simple_Source_File& Simple_Source_File::reload(std::istream& istrm, const cow_string& filename)
+Simple_Script& Simple_Script::reload(std::istream& istrm, const cow_string& filename)
   {
     std::istream::sentry sentry(istrm, true);
     if(!sentry) {
@@ -58,7 +58,7 @@ Simple_Source_File& Simple_Source_File::reload(std::istream& istrm, const cow_st
     return *this;
   }
 
-Simple_Source_File& Simple_Source_File::reload(const cow_string& cstr, const cow_string& filename)
+Simple_Script& Simple_Script::reload(const cow_string& cstr, const cow_string& filename)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.
     cow_stringbuf sbuf;
@@ -66,7 +66,7 @@ Simple_Source_File& Simple_Source_File::reload(const cow_string& cstr, const cow
     return this->reload(sbuf, filename);
   }
 
-Simple_Source_File& Simple_Source_File::open(const cow_string& filename)
+Simple_Script& Simple_Script::reload_file(const cow_string& filename)
   {
     // Open the file designated by `filename`.
     std::filebuf sbuf;
@@ -76,16 +76,36 @@ Simple_Source_File& Simple_Source_File::open(const cow_string& filename)
     return this->reload(sbuf, filename);
   }
 
-Reference Simple_Source_File::execute(const Global_Context& global, cow_vector<Reference>&& args) const
+Reference Simple_Script::execute() const
+  {
+    // Invoke the function with no argument.
+    cow_vector<Reference> args;
+    return this->execute(rocket::move(args));
+  }
+
+Reference Simple_Script::execute(cow_vector<Reference>&& args) const
   {
     auto qtarget = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
     if(!qtarget) {
       ASTERIA_THROW_RUNTIME_ERROR("No code has been loaded so far.");
     }
+    // Call the instantiated function.
     Reference self;
-    qtarget->invoke(self, global, rocket::move(args));
-    self.finish_call(global);
+    qtarget->invoke(self, this->m_global, rocket::move(args));
+    // Unpack TCO'd calls.
+    self.finish_call(this->m_global);
     return self;
+  }
+
+Reference Simple_Script::execute(cow_vector<Value>&& vals) const
+  {
+    // Convert values to temporaries.
+    cow_vector<Reference> args(vals.size());
+    for(size_t i = 0; i != args.size(); ++i) {
+      Reference_Root::S_temporary xref = { vals[i] };
+      args.mut(i) = rocket::move(xref);
+    }
+    return this->execute(rocket::move(args));
   }
 
 }  // namespace Asteria
