@@ -646,7 +646,7 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
     // `std.json.format()`
     //===================================================================
     result.insert_or_assign(rocket::sref("format"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -696,7 +696,7 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
     // `std.json.parse()`
     //===================================================================
     result.insert_or_assign(rocket::sref("parse"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"

@@ -206,7 +206,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.exp()`
     //===================================================================
     result.insert_or_assign(rocket::sref("exp"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -240,7 +240,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.expm1()`
     //===================================================================
     result.insert_or_assign(rocket::sref("expm1"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -273,7 +273,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.pow()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pow"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -308,7 +308,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.log()`
     //===================================================================
     result.insert_or_assign(rocket::sref("log"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -342,7 +342,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.log1p()`
     //===================================================================
     result.insert_or_assign(rocket::sref("log1p"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -375,7 +375,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.sin()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sin"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -407,7 +407,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.cos()`
     //===================================================================
     result.insert_or_assign(rocket::sref("cos"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -439,7 +439,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.tan()`
     //===================================================================
     result.insert_or_assign(rocket::sref("tan"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -471,7 +471,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.asin()`
     //===================================================================
     result.insert_or_assign(rocket::sref("asin"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -503,7 +503,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.acos()`
     //===================================================================
     result.insert_or_assign(rocket::sref("acos"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -535,7 +535,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.atan()`
     //===================================================================
     result.insert_or_assign(rocket::sref("atan"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -567,7 +567,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.atan2()`
     //===================================================================
     result.insert_or_assign(rocket::sref("atan2"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -600,7 +600,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.hypot()`
     //===================================================================
     result.insert_or_assign(rocket::sref("hypot"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -636,7 +636,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.sinh()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sinh"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -668,7 +668,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.cosh()`
     //===================================================================
     result.insert_or_assign(rocket::sref("cosh"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -700,7 +700,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.tanh()`
     //===================================================================
     result.insert_or_assign(rocket::sref("tanh"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -732,7 +732,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.asinh()`
     //===================================================================
     result.insert_or_assign(rocket::sref("asinh"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -764,7 +764,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.acosh()`
     //===================================================================
     result.insert_or_assign(rocket::sref("acosh"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -796,7 +796,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.atanh()`
     //===================================================================
     result.insert_or_assign(rocket::sref("atanh"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -828,7 +828,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.erf()`
     //===================================================================
     result.insert_or_assign(rocket::sref("erf"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -860,7 +860,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.cerf()`
     //===================================================================
     result.insert_or_assign(rocket::sref("cerf"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -892,7 +892,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.gamma()`
     //===================================================================
     result.insert_or_assign(rocket::sref("gamma"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -924,7 +924,7 @@ void create_bindings_math(G_object& result, API_Version /*version*/)
     // `std.math.lgamma()`
     //===================================================================
     result.insert_or_assign(rocket::sref("lgamma"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"

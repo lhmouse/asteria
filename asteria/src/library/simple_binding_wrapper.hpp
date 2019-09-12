@@ -33,11 +33,6 @@ class Simple_Binding_Wrapper final : public Abstract_Function
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;
   };
 
-inline rcobj<Simple_Binding_Wrapper> make_simple_binding(cow_string desc, Value opaque, Simple_Binding_Wrapper::Prototype* fptr)
-  {
-    return rcobj<Simple_Binding_Wrapper>(rocket::move(desc), rocket::move(opaque), fptr);
-  }
-
 }  // namespace Asteria
 
 #endif

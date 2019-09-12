@@ -33,7 +33,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
     // `std.debug.print()`
     //===================================================================
     result.insert_or_assign(rocket::sref("print"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -69,7 +69,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
     // `std.debug.dump()`
     //===================================================================
     result.insert_or_assign(rocket::sref("dump"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"

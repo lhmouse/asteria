@@ -970,7 +970,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.get_working_directory()`
     //===================================================================
     result.insert_or_assign(rocket::sref("get_working_directory"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1002,7 +1002,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.get_information()`
     //===================================================================
     result.insert_or_assign(rocket::sref("get_information"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1055,7 +1055,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.remove_recursive()`
     //===================================================================
     result.insert_or_assign(rocket::sref("remove_recursive"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1093,7 +1093,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.move_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(rocket::sref("move_from"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1130,7 +1130,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.directory_list()`
     //===================================================================
     result.insert_or_assign(rocket::sref("directory_list"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1176,7 +1176,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.directory_create()`
     //===================================================================
     result.insert_or_assign(rocket::sref("directory_create"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1216,7 +1216,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.directory_remove()`
     //===================================================================
     result.insert_or_assign(rocket::sref("directory_remove"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1254,7 +1254,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_read()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_read"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1299,7 +1299,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_stream()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_stream"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1351,7 +1351,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_write()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_write"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1396,7 +1396,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_append()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_append"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1438,7 +1438,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_copy_from(path_new, path_old)`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_copy_from"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1477,7 +1477,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
     // `std.filesystem.file_remove()`
     //===================================================================
     result.insert_or_assign(rocket::sref("file_remove"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"

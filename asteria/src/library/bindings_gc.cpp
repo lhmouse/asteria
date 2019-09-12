@@ -84,7 +84,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
     // `std.gc.tracked_count()`
     //===================================================================
     result.insert_or_assign(rocket::sref("tracked_count"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -123,7 +123,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
     // `std.gc.get_threshold()`
     //===================================================================
     result.insert_or_assign(rocket::sref("get_threshold"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -161,7 +161,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
     // `std.gc.set_threshold()`
     //===================================================================
     result.insert_or_assign(rocket::sref("set_threshold"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -205,7 +205,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
     // `std.gc.collect()`
     //===================================================================
     result.insert_or_assign(rocket::sref("collect"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"

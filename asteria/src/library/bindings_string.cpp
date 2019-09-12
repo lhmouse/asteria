@@ -1322,7 +1322,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.slice()`
     //===================================================================
     result.insert_or_assign(rocket::sref("slice"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1362,7 +1362,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.replace_slice()`
     //===================================================================
     result.insert_or_assign(rocket::sref("replace_slice"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1418,7 +1418,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.compare()`
     //===================================================================
     result.insert_or_assign(rocket::sref("compare"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1458,7 +1458,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.starts_with()`
     //===================================================================
     result.insert_or_assign(rocket::sref("starts_with"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1493,7 +1493,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.ends_with()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ends_with"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1528,7 +1528,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.find()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1608,7 +1608,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.rfind()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1686,7 +1686,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.find_and_replace()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_and_replace"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1756,7 +1756,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.find_any_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_any_of"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1833,7 +1833,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.rfind_any_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind_any_of"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1910,7 +1910,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.find_not_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("find_not_of"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1987,7 +1987,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.rfind_not_of()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rfind_not_of"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2064,7 +2064,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.reverse()`
     //===================================================================
     result.insert_or_assign(rocket::sref("reverse"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2097,7 +2097,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.trim()`
     //===================================================================
     result.insert_or_assign(rocket::sref("trim"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2133,7 +2133,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.ltrim()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ltrim"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2169,7 +2169,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.rtrim()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rtrim"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2205,7 +2205,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.lpad()`
     //===================================================================
     result.insert_or_assign(rocket::sref("lpad"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2244,7 +2244,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.rpad()`
     //===================================================================
     result.insert_or_assign(rocket::sref("rpad"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2283,7 +2283,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.to_upper()`
     //===================================================================
     result.insert_or_assign(rocket::sref("to_upper"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2317,7 +2317,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.to_lower()`
     //===================================================================
     result.insert_or_assign(rocket::sref("to_lower"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2351,7 +2351,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.translate()`
     //===================================================================
     result.insert_or_assign(rocket::sref("translate"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2393,7 +2393,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.explode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("explode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2434,7 +2434,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.implode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("implode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2470,7 +2470,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.hex_encode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("hex_encode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2509,7 +2509,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.hex_decode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("hex_decode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2551,7 +2551,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.base32_encode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("base32_encode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2589,7 +2589,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.base32_decode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("base32_decode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2631,7 +2631,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.base64_encode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("base64_encode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2665,7 +2665,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.base64_decode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("base64_decode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2708,7 +2708,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.utf8_encode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utf8_encode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2760,7 +2760,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.utf8_decode()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utf8_decode"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2803,7 +2803,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.pack8()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack8"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2847,7 +2847,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.unpack8()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack8"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2883,7 +2883,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.pack_16be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_16be"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2928,7 +2928,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.unpack_16be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_16be"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2968,7 +2968,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.pack_16le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_16le"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3013,7 +3013,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.unpack_16le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_16le"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3053,7 +3053,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.pack_32be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_32be"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3098,7 +3098,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.unpack_32be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_32be"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3138,7 +3138,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.pack_32le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_32le"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3183,7 +3183,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.unpack_32le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_32le"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3223,7 +3223,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.pack_64be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_64be"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3267,7 +3267,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.unpack_64be()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_64be"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3306,7 +3306,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.pack_64le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("pack_64le"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3351,7 +3351,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
     // `std.string.unpack_64le()`
     //===================================================================
     result.insert_or_assign(rocket::sref("unpack_64le"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"

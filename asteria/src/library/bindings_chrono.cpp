@@ -407,7 +407,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.utc_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_now"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -439,7 +439,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.local_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("local_now"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -471,7 +471,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.hires_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("hires_now"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -506,7 +506,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.steady_now()`
     //===================================================================
     result.insert_or_assign(rocket::sref("steady_now"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -541,7 +541,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.local_from_utc()`
     //===================================================================
     result.insert_or_assign(rocket::sref("local_from_utc"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -575,7 +575,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.utc_from_local()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_from_local"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -610,7 +610,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.utc_format()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_format"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -645,7 +645,7 @@ void create_bindings_chrono(G_object& result, API_Version /*version*/)
     // `std.chrono.utc_parse()`
     //===================================================================
     result.insert_or_assign(rocket::sref("utc_parse"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"

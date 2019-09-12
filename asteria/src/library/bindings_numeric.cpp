@@ -1997,7 +1997,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.abs()`
     //===================================================================
     result.insert_or_assign(rocket::sref("abs"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2041,7 +2041,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.sign()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sign"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2081,7 +2081,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.is_finite()`
     //===================================================================
     result.insert_or_assign(rocket::sref("is_finite"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2123,7 +2123,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.is_infinity()`
     //===================================================================
     result.insert_or_assign(rocket::sref("is_infinity"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2165,7 +2165,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.is_nan()`
     //===================================================================
     result.insert_or_assign(rocket::sref("is_nan"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2206,7 +2206,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.clamp()`
     //===================================================================
     result.insert_or_assign(rocket::sref("clamp"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2254,7 +2254,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.round()`
     //===================================================================
     result.insert_or_assign(rocket::sref("round"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2294,7 +2294,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.floor()`
     //===================================================================
     result.insert_or_assign(rocket::sref("floor"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2334,7 +2334,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.ceil()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ceil"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2374,7 +2374,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.trunc()`
     //===================================================================
     result.insert_or_assign(rocket::sref("trunc"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2414,7 +2414,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.iround()`
     //===================================================================
     result.insert_or_assign(rocket::sref("iround"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2458,7 +2458,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.ifloor()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ifloor"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2502,7 +2502,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.iceil()`
     //===================================================================
     result.insert_or_assign(rocket::sref("iceil"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2546,7 +2546,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.itrunc()`
     //===================================================================
     result.insert_or_assign(rocket::sref("itrunc"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2590,7 +2590,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.random()`
     //===================================================================
     result.insert_or_assign(rocket::sref("random"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2626,7 +2626,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.sqrt()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sqrt"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2659,7 +2659,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.fma()`
     //===================================================================
     result.insert_or_assign(rocket::sref("fma"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2695,7 +2695,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.remainder()`
     //===================================================================
     result.insert_or_assign(rocket::sref("remainder"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2730,7 +2730,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.frexp()`
     //===================================================================
     result.insert_or_assign(rocket::sref("frexp"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2768,7 +2768,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.ldexp()`
     //===================================================================
     result.insert_or_assign(rocket::sref("ldexp"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2803,7 +2803,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.addm()`
     //===================================================================
     result.insert_or_assign(rocket::sref("addm"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2839,7 +2839,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.subm()`
     //===================================================================
     result.insert_or_assign(rocket::sref("subm"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2876,7 +2876,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.mulm()`
     //===================================================================
     result.insert_or_assign(rocket::sref("mulm"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2913,7 +2913,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.adds()`
     //===================================================================
     result.insert_or_assign(rocket::sref("adds"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -2958,7 +2958,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.subs()`
     //===================================================================
     result.insert_or_assign(rocket::sref("subs"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3003,7 +3003,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.muls()`
     //===================================================================
     result.insert_or_assign(rocket::sref("muls"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3048,7 +3048,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.lzcnt()`
     //===================================================================
     result.insert_or_assign(rocket::sref("lzcnt"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3082,7 +3082,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.tzcnt()`
     //===================================================================
     result.insert_or_assign(rocket::sref("tzcnt"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3116,7 +3116,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.popcnt()`
     //===================================================================
     result.insert_or_assign(rocket::sref("popcnt"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3149,7 +3149,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.format()`
     //===================================================================
     result.insert_or_assign(rocket::sref("format"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3204,7 +3204,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.parse_integer()`
     //===================================================================
     result.insert_or_assign(rocket::sref("parse_integer"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -3256,7 +3256,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
     // `std.numeric.parse_real()`
     //===================================================================
     result.insert_or_assign(rocket::sref("parse_real"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"

@@ -86,7 +86,7 @@ G_object std_checksum_crc32_new()
       ));
     r.insert_or_assign(rocket::sref("write"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.crc32_new()>.write"),
           // Opaque parameter
@@ -111,7 +111,7 @@ G_object std_checksum_crc32_new()
       ));
     r.insert_or_assign(rocket::sref("finish"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.crc32_new()>.finish"),
           // Opaque parameter
@@ -203,7 +203,7 @@ G_object std_checksum_fnv1a32_new()
       ));
     r.insert_or_assign(rocket::sref("write"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.fnv1a32_new()>.write"),
           // Opaque parameter
@@ -228,7 +228,7 @@ G_object std_checksum_fnv1a32_new()
       ));
     r.insert_or_assign(rocket::sref("finish"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.fnv1a32_new()>.finish"),
           // Opaque parameter
@@ -574,7 +574,7 @@ G_object std_checksum_md5_new()
       ));
     r.insert_or_assign(rocket::sref("write"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.md5_new()>.write"),
           // Opaque parameter
@@ -599,7 +599,7 @@ G_object std_checksum_md5_new()
       ));
     r.insert_or_assign(rocket::sref("finish"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.md5_new()>.finish"),
           // Opaque parameter
@@ -884,7 +884,7 @@ G_object std_checksum_sha1_new()
       ));
     r.insert_or_assign(rocket::sref("write"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.sha1_new()>.write"),
           // Opaque parameter
@@ -909,7 +909,7 @@ G_object std_checksum_sha1_new()
       ));
     r.insert_or_assign(rocket::sref("finish"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.sha1_new()>.finish"),
           // Opaque parameter
@@ -1164,7 +1164,7 @@ G_object std_checksum_sha256_new()
       ));
     r.insert_or_assign(rocket::sref("write"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.sha256_new()>.write"),
           // Opaque parameter
@@ -1189,7 +1189,7 @@ G_object std_checksum_sha256_new()
       ));
     r.insert_or_assign(rocket::sref("finish"),
       G_function(
-        make_simple_binding(
+        rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
           rocket::sref("<std.checksum.sha256_new()>.finish"),
           // Opaque parameter
@@ -1227,7 +1227,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.crc32_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("crc32_new"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1270,7 +1270,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.crc32()`
     //===================================================================
     result.insert_or_assign(rocket::sref("crc32"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1315,7 +1315,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.fnv1a32_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("fnv1a32_new"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1359,7 +1359,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.fnv1a32()`
     //===================================================================
     result.insert_or_assign(rocket::sref("fnv1a32"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1404,7 +1404,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.md5_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("md5_new"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1446,7 +1446,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.md5()`
     //===================================================================
     result.insert_or_assign(rocket::sref("md5"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1491,7 +1491,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.sha1_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sha1_new"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1533,7 +1533,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.sha1()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sha1"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1578,7 +1578,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.sha256_new()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sha256_new"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
@@ -1620,7 +1620,7 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     // `std.checksum.sha256()`
     //===================================================================
     result.insert_or_assign(rocket::sref("sha256"),
-      G_function(make_simple_binding(
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         rocket::sref(
           "\n"
