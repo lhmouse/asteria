@@ -5,11 +5,12 @@
 #define ASTERIA_RUNTIME_GLOBAL_CONTEXT_HPP_
 
 #include "../fwd.hpp"
+#include "rcbase.hpp"
 #include "abstract_context.hpp"
 
 namespace Asteria {
 
-class Global_Context final : public Abstract_Context
+class Global_Context final : public virtual Rcbase, public Abstract_Context
   {
   private:
     rcptr<Rcbase> m_xph;
