@@ -44,19 +44,19 @@ class Parser_Error : public virtual std::exception
         return this->m_what.c_str();
       }
 
-    constexpr int32_t line() const noexcept
+    int32_t line() const noexcept
       {
         return this->m_line;
       }
-    constexpr size_t offset() const noexcept
+    size_t offset() const noexcept
       {
         return this->m_offset;
       }
-    constexpr size_t length() const noexcept
+    size_t length() const noexcept
       {
         return this->m_length;
       }
-    constexpr Parser_Status status() const noexcept
+    Parser_Status status() const noexcept
       {
         return this->m_status;
       }
@@ -66,20 +66,20 @@ class Parser_Error : public virtual std::exception
       }
   };
 
-constexpr bool operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept
+inline bool operator==(const Parser_Error& lhs, Parser_Status rhs) noexcept
   {
     return lhs.status() == rhs;
   }
-constexpr bool operator!=(const Parser_Error& lhs, Parser_Status rhs) noexcept
+inline bool operator!=(const Parser_Error& lhs, Parser_Status rhs) noexcept
   {
     return lhs.status() != rhs;
   }
 
-constexpr bool operator==(Parser_Status lhs, const Parser_Error& rhs) noexcept
+inline bool operator==(Parser_Status lhs, const Parser_Error& rhs) noexcept
   {
     return lhs == rhs.status();
   }
-constexpr bool operator!=(Parser_Status lhs, const Parser_Error& rhs) noexcept
+inline bool operator!=(Parser_Status lhs, const Parser_Error& rhs) noexcept
   {
     return lhs != rhs.status();
   }
