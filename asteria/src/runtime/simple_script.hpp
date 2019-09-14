@@ -6,39 +6,31 @@
 
 #include "../fwd.hpp"
 #include "rcbase.hpp"
-#include "global_context.hpp"
-#include "reference.hpp"
 
 namespace Asteria {
 
 class Simple_Script
   {
   private:
-    Global_Context m_global;
     rcptr<Rcbase> m_cptr;  // note type erasure
 
   public:
-    explicit Simple_Script(API_Version version = api_version_latest)
-      : m_global(version)
+    Simple_Script()
       {
       }
-    Simple_Script(std::streambuf& sbuf, const cow_string& filename, API_Version version = api_version_latest)
-      : m_global(version)
+    Simple_Script(std::streambuf& sbuf, const cow_string& filename)
       {
         this->reload(sbuf, filename);
       }
-    Simple_Script(std::istream& istrm, const cow_string& filename, API_Version version = api_version_latest)
-      : m_global(version)
+    Simple_Script(std::istream& istrm, const cow_string& filename)
       {
         this->reload(istrm, filename);
       }
-    Simple_Script(const cow_string& cstr, const cow_string& filename, API_Version version = api_version_latest)
-      : m_global(version)
+    Simple_Script(const cow_string& cstr, const cow_string& filename)
       {
         this->reload(cstr, filename);
       }
-    explicit Simple_Script(const cow_string& filename, API_Version version = api_version_latest)
-      : m_global(version)
+    explicit Simple_Script(const cow_string& filename)
       {
         this->reload_file(filename);
       }
@@ -63,9 +55,11 @@ class Simple_Script
     Simple_Script& reload(const cow_string& cstr, const cow_string& filename);
     Simple_Script& reload_file(const cow_string& filename);
 
-    Reference execute() const;
-    Reference execute(cow_vector<Reference>&& args) const;
-    Reference execute(cow_vector<Value>&& vals) const;
+    rcptr<Abstract_Function> copy_function_opt() const noexcept;
+
+    Reference execute(const Global_Context& global, cow_vector<Reference>&& args) const;
+    Reference execute(const Global_Context& global, cow_vector<Value>&& vals) const;
+    Reference execute(const Global_Context& global) const;
   };
 
 inline std::istream& operator>>(std::istream& istrm, Simple_Script& file)

@@ -3,6 +3,7 @@
 
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
+#include "../src/runtime/global_context.hpp"
 
 using namespace Asteria;
 
@@ -27,12 +28,10 @@ void operator delete(void* ptr) noexcept
     std::free(ptr);
   }
 
-#if __cplusplus >= 201402
 void operator delete(void* ptr, size_t) noexcept
   {
     operator delete(ptr);
   }
-#endif
 
 int main()
   {
@@ -56,7 +55,8 @@ int main()
           )__")
         );
       Simple_Script code(iss, rocket::sref("my_file"));
-      code.execute();
+      Global_Context global;
+      code.execute(global);
     }
     ASTERIA_TEST_CHECK(bcnt.load(std::memory_order_relaxed) == 0);
   }

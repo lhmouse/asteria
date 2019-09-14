@@ -3,6 +3,7 @@
 
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
+#include "../src/runtime/global_context.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -65,5 +66,5 @@ int main()
     cow_isstream iss(rocket::sref(s_source));
     Simple_Script code(iss, rocket::sref("my_file"));
     Global_Context global;
-    code.execute();
+    code.execute(global);
   }

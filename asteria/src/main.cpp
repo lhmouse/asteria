@@ -2,6 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "runtime/simple_script.hpp"
+#include "runtime/global_context.hpp"
 #include "runtime/exception.hpp"
 #include "library/bindings_chrono.hpp"
 #include "../rocket/cow_istringstream.hpp"
@@ -47,8 +48,9 @@ int main(int argc, char** argv)
               << "---" << std::endl
               << "# Running..." << std::endl;
     // run it and measure the time.
+    Global_Context global;
     auto t1 = std_chrono_hires_now();
-    auto res = code.execute(rocket::move(vargs));
+    auto res = code.execute(global, rocket::move(vargs));
     auto t2 = std_chrono_hires_now();
     // print the time elapsed and the result.
     std::cerr << std::endl

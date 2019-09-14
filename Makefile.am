@@ -229,7 +229,7 @@ check_PROGRAMS =  \
   asteria/test/varg.test  \
   asteria/test/operators.test  \
   asteria/test/proper_tail_call.test  \
-  asteria/test/structed_binding.test  \
+  asteria/test/structured_binding.test  \
   asteria/test/bindings_chrono.test  \
   asteria/test/bindings_string.test  \
   asteria/test/bindings_array.test  \

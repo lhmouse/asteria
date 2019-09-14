@@ -3,6 +3,7 @@
 
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
+#include "../src/runtime/global_context.hpp"
 #include <sstream>
 
 using namespace Asteria;
@@ -24,6 +25,7 @@ int main()
 
     Simple_Script code;
     ASTERIA_TEST_CHECK(iss >> code);
-    auto res = code.execute();
+    Global_Context global;
+    auto res = code.execute(global);
     ASTERIA_TEST_CHECK(res.read().as_integer() == 90);
   }

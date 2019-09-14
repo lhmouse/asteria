@@ -76,36 +76,37 @@ Simple_Script& Simple_Script::reload_file(const cow_string& filename)
     return this->reload(sbuf, filename);
   }
 
-Reference Simple_Script::execute() const
+rcptr<Abstract_Function> Simple_Script::copy_function_opt() const noexcept
   {
-    // Invoke the function with no argument.
-    cow_vector<Reference> args;
-    return this->execute(rocket::move(args));
+    return rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
   }
 
-Reference Simple_Script::execute(cow_vector<Reference>&& args) const
+Reference Simple_Script::execute(const Global_Context& global, cow_vector<Reference>&& args) const
   {
-    auto qtarget = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
+    auto qtarget = this->copy_function_opt();
     if(!qtarget) {
       ASTERIA_THROW_RUNTIME_ERROR("No code has been loaded so far.");
     }
-    // Call the instantiated function.
     Reference self;
-    qtarget->invoke(self, this->m_global, rocket::move(args));
-    // Unpack TCO'd calls.
-    self.finish_call(this->m_global);
+    qtarget->invoke(self, global, rocket::move(args));
+    self.finish_call(global);
     return self;
   }
 
-Reference Simple_Script::execute(cow_vector<Value>&& vals) const
+Reference Simple_Script::execute(const Global_Context& global, cow_vector<Value>&& vals) const
   {
-    // Convert values to temporaries.
-    cow_vector<Reference> args(vals.size());
+    cow_vector<Reference> args;
+    args.resize(vals.size());
     for(size_t i = 0; i != args.size(); ++i) {
       Reference_Root::S_temporary xref = { vals[i] };
       args.mut(i) = rocket::move(xref);
     }
-    return this->execute(rocket::move(args));
+    return this->execute(global, rocket::move(args));
+  }
+
+Reference Simple_Script::execute(const Global_Context& global) const
+  {
+    return this->execute(global, cow_vector<Reference>());
   }
 
 }  // namespace Asteria
