@@ -121,9 +121,9 @@ class Argument_Reader
     // Terminate the argument list and finish this overload.
     // For the overload taking no argument, if there are excess arguments, the operation fails.
     // For the other overloads, excess arguments are copied into `vargs`.
-    bool finish();
     bool finish(cow_vector<Reference>& vargs);
     bool finish(cow_vector<Value>& vargs);
+    bool finish();
 
     // Throw an exception saying there are no viable overloads.
     [[noreturn]] void throw_no_matching_function_call() const;

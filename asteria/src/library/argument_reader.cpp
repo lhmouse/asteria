@@ -517,23 +517,6 @@ Argument_Reader& Argument_Reader::g(G_object& xvalue)
     return *this;
   }
 
-bool Argument_Reader::finish()
-  {
-    this->do_record_parameter_finish();
-    // Get the number of named parameters.
-    auto qvoff = this->do_check_finish_opt();
-    if(!qvoff) {
-      return false;
-    }
-    // There shall be no more arguments than parameters.
-    if(*qvoff < this->m_args->size()) {
-      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (got `", this->m_args->size(), "`, "
-                                                     "but expecting no more than `", *qvoff, "`).");  });
-      return false;
-    }
-    return true;
-  }
-
 bool Argument_Reader::finish(cow_vector<Reference>& vargs)
   {
     this->do_record_parameter_variadic();
@@ -566,6 +549,23 @@ bool Argument_Reader::finish(cow_vector<Value>& vargs)
     // Copy variadic arguments, if any.
     if(*qvoff < this->m_args->size()) {
       rocket::ranged_for(*qvoff, this->m_args->size(), [&](size_t i) { vargs.emplace_back(this->m_args.get()[i].read());  });
+    }
+    return true;
+  }
+
+bool Argument_Reader::finish()
+  {
+    this->do_record_parameter_finish();
+    // Get the number of named parameters.
+    auto qvoff = this->do_check_finish_opt();
+    if(!qvoff) {
+      return false;
+    }
+    // There shall be no more arguments than parameters.
+    if(*qvoff < this->m_args->size()) {
+      this->do_fail([&]{ ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (got `", this->m_args->size(), "`, "
+                                                     "but expecting no more than `", *qvoff, "`).");  });
+      return false;
     }
     return true;
   }
