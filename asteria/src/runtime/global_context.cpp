@@ -83,6 +83,11 @@ Reference* Global_Context::do_allocate_reference_lazy_opt(Reference_Dictionary& 
 
     }  // namespace
 
+API_Version Global_Context::max_api_version() const noexcept
+  {
+    return static_cast<API_Version>(api_version_sentinel - 1);
+  }
+
 void Global_Context::initialize(API_Version version)
   {
     // Initialize the global garbage collector.

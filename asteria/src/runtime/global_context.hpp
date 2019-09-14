@@ -39,6 +39,9 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
         return nullptr;
       }
 
+    // Get the maximum API version that is supported when this library is built.
+    // N.B. This function must not be inlined for this reason.
+    API_Version max_api_version() const noexcept;
     // Clear all references, perform a full garbage collection, then reload the standard library.
     void initialize(API_Version version = api_version_latest);
 
