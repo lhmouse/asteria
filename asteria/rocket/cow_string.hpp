@@ -783,6 +783,7 @@ template<typename charT, typename traitsT,
         if(!ptr) {
           // The storage has been deallocated.
           this->m_ptr = ::std::addressof(null_char);
+          this->m_len = 0;
           return nullptr;
         }
         ROCKET_ASSERT(this->m_sth.unique());
