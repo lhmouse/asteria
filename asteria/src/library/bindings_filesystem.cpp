@@ -730,15 +730,6 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
       ::LARGE_INTEGER fpos;
       fpos.QuadPart = roffset;
       if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
-#else
-    File hf(::open(path.c_str(), O_RDONLY));
-    if(!hf) {
-      return false;
-    }
-    // Set the file pointer when an offset is specified, even when it is an explicit zero.
-    if(offset) {
-      if(::lseek64(hf, roffset, SEEK_SET) == -1) {
-#endif
         return false;
       }
     }
@@ -750,11 +741,29 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
       // Don't read too many bytes at a time.
       data.resize(static_cast<size_t>(rlimit));
       // Read data from the offset specified.
-#ifdef _WIN32
       ::DWORD nread;
       if((::ReadFile(hf, data.mut_data(), static_cast<unsigned>(data.size()), &nread, nullptr) == FALSE) && (::GetLastError() != ERROR_HANDLE_EOF)) {
 #else
-      ::ssize_t nread = ::read(hf, data.mut_data(), data.size());
+    File hf(::open(path.c_str(), O_RDONLY));
+    if(!hf) {
+      return false;
+    }
+    for(;;) {
+      // Has the read limit been reached?
+      if(nremaining <= 0) {
+        break;
+      }
+      // Don't read too many bytes at a time.
+      data.resize(static_cast<size_t>(rlimit));
+      ::ssize_t nread;
+      if(offset) {
+        // Read data from the offset specified.
+        nread = ::pread(hf, data.mut_data(), data.size(), roffset);
+      }
+      else {
+        // Read data from the beginning.
+        nread = ::read(hf, data.mut_data(), data.size());
+      }
       if(nread < 0) {
 #endif
         return false;
