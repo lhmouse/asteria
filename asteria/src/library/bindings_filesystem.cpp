@@ -659,18 +659,19 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
         return rocket::nullopt;
       }
     }
-    // Don't read too many bytes at a time.
-    data.resize(static_cast<size_t>(rlimit));
-    // Read data from the offset specified.
-    ::DWORD nread;
-    if((::ReadFile(hf, data.mut_data(), static_cast<unsigned>(data.size()), &nread, nullptr) == FALSE) && (::GetLastError() != ERROR_HANDLE_EOF)) {
 #else
     File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
       return rocket::nullopt;
     }
+#endif
     // Don't read too many bytes at a time.
     data.resize(static_cast<size_t>(rlimit));
+#ifdef _WIN32
+    // Read data from the offset specified.
+    ::DWORD nread;
+    if((::ReadFile(hf, data.mut_data(), static_cast<unsigned>(data.size()), &nread, nullptr) == FALSE) && (::GetLastError() != ERROR_HANDLE_EOF)) {
+#else
     ::ssize_t nread;
     if(offset) {
       // Read data from the offset specified.
@@ -733,21 +734,12 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
         return false;
       }
     }
-    for(;;) {
-      // Has the read limit been reached?
-      if(nremaining <= 0) {
-        break;
-      }
-      // Don't read too many bytes at a time.
-      data.resize(static_cast<size_t>(rlimit));
-      // Read data from the offset specified.
-      ::DWORD nread;
-      if((::ReadFile(hf, data.mut_data(), static_cast<unsigned>(data.size()), &nread, nullptr) == FALSE) && (::GetLastError() != ERROR_HANDLE_EOF)) {
 #else
     File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
       return false;
     }
+#endif
     for(;;) {
       // Has the read limit been reached?
       if(nremaining <= 0) {
@@ -755,6 +747,11 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
       }
       // Don't read too many bytes at a time.
       data.resize(static_cast<size_t>(rlimit));
+#ifdef _WIN32
+      // Read data from the offset specified.
+      ::DWORD nread;
+      if((::ReadFile(hf, data.mut_data(), static_cast<unsigned>(data.size()), &nread, nullptr) == FALSE) && (::GetLastError() != ERROR_HANDLE_EOF)) {
+#else
       ::ssize_t nread;
       if(offset) {
         // Read data from the offset specified.
