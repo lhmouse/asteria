@@ -642,7 +642,7 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
     int64_t roffset = offset.value_or(0);
-    int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 1048576);
+    int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
     G_string data;
     // Open the file for reading.
 #ifdef _WIN32
@@ -716,7 +716,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
       ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
     }
     int64_t roffset = offset.value_or(0);
-    int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 1048576);
+    int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
     int64_t nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
     G_string data;
     // Open the file for reading.
