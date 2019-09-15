@@ -135,13 +135,13 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           else if((pair.first.at(0) == "[") && (pair.first.back() == "]")) {
             // Create references from left to right.
             for(size_t i = 1; i != pair.first.size() - 1; ++i) {
-              do_user_declare(names_opt, ctx, pair.first[i], "array structed binding placeholder");
+              do_user_declare(names_opt, ctx, pair.first[i], "array structured binding placeholder");
             }
           }
           else if((pair.first.at(0) == "{") && (pair.first.back() == "}")) {
             // Create references from left to right.
             for(size_t i = 1; i != pair.first.size() - 1; ++i) {
-              do_user_declare(names_opt, ctx, pair.first[i], "object structed binding placeholder");
+              do_user_declare(names_opt, ctx, pair.first[i], "object structured binding placeholder");
             }
           }
           else {

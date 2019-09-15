@@ -87,7 +87,7 @@ catch(e) {
 }
 ```
 
-### Structed Binding for Arrays
+### Structured Binding for Arrays
 
 ```
 func seq3(x) {
@@ -108,7 +108,7 @@ std.debug.print("a2 = ", a2);
 std.debug.print("a3 = ", a3);
 ```
 
-### Structed Binding for Objects
+### Structured Binding for Objects
 
 ```
 func access() {
