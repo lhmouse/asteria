@@ -337,10 +337,8 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
           // Make a pattern that will match everything.
           wpath.append(L"\\*");
           // On Windows, `FindFirstFile()` returns the first entry in the directory.
-          // Although for a non-root directory this is always '.', it could be a conventional entry when
-          // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
-          // if no file exists in such a case, `FindFirstFile()` fails and `GetLastError()` returns
-          // `ERROR_FILE_NOT_FOUND`.
+          // Although this is usually '.', it could be a conventional entry when iterating over a root directory i.e. a volume.
+          // `FindFirstFile()` can even fail if the root directory is empty, in which case `GetLastError()` returns `ERROR_FILE_NOT_FOUND`.
           ::WIN32_FIND_DATAW next;
           Directory hd(::FindFirstFileW(wpath.c_str(), &next));
           wpath.erase(wpath.size() - 2);
@@ -417,7 +415,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
             auto child = path + '/' + next->d_name;
             bool is_dir;
 #  ifdef _DIRENT_HAVE_D_TYPE
-            if(next->d_type != DT_UNKNOWN) {
+            if(ROCKET_EXPECT(next->d_type != DT_UNKNOWN)) {
               // Get the file type if it is available immediately.
               is_dir = next->d_type == DT_DIR;
             }
@@ -488,10 +486,8 @@ opt<G_object> std_filesystem_directory_list(const G_string& path)
     // Make a pattern that will match everything.
     wpath.append(L"\\*");
     // On Windows, `FindFirstFile()` returns the first entry in the directory.
-    // Although for a non-root directory this is always '.', it could be a conventional entry when
-    // iterating over a root directory i.e. a volume, hence has to be saved upon the first call;
-    // if no file exists in such a case, `FindFirstFile()` fails and `GetLastError()` returns
-    // `ERROR_FILE_NOT_FOUND`.
+    // Although this is usually '.', it could be a conventional entry when iterating over a root directory i.e. a volume.
+    // `FindFirstFile()` can even fail if the root directory is empty, in which case `GetLastError()` returns `ERROR_FILE_NOT_FOUND`.
     ::WIN32_FIND_DATAW next;
     Directory hd(::FindFirstFileW(wpath.c_str(), &next));
     wpath.erase(path.size() - 2);
@@ -655,8 +651,8 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
     if(!hf) {
       return rocket::nullopt;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
-    if(roffset != 0) {
+    // Set the file pointer when an offset is specified, even when it is an explicit zero.
+    if(offset) {
       ::LARGE_INTEGER fpos;
       fpos.QuadPart = roffset;
       if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
@@ -665,8 +661,8 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
     if(!hf) {
       return rocket::nullopt;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
-    if(roffset != 0) {
+    // Set the file pointer when an offset is specified, even when it is an explicit zero.
+    if(offset) {
       if(::lseek64(hf, roffset, SEEK_SET) == -1) {
 #endif
         return rocket::nullopt;
@@ -725,8 +721,8 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     if(!hf) {
       return false;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
-    if(roffset != 0) {
+    // Set the file pointer when an offset is specified, even when it is an explicit zero.
+    if(offset) {
       ::LARGE_INTEGER fpos;
       fpos.QuadPart = roffset;
       if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
@@ -735,8 +731,8 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     if(!hf) {
       return false;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
-    if(roffset != 0) {
+    // Set the file pointer when an offset is specified, even when it is an explicit zero.
+    if(offset) {
       if(::lseek64(hf, roffset, SEEK_SET) == -1) {
 #endif
         return false;
@@ -792,8 +788,8 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     if(!hf) {
       return false;
     }
-    // Set the file pointer unless `roffset` is zero which is meaningful when reading pipes.
-    if(roffset != 0) {
+    // Set the file pointer when an offset is specified, even when it is an explicit zero.
+    if(offset) {
       // If `roffset` is not zero, truncate the file there.
       // Otherwise, the file will have been truncate at creation.
       ::LARGE_INTEGER fpos;
@@ -815,8 +811,8 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     if(!hf) {
       return false;
     }
-    // Data will be appended to the end. There is no need to set the file pointer.
-    if(roffset != 0) {
+    // Set the file pointer when an offset is specified, even when it is an explicit zero.
+    if(offset) {
       // If `roffset` is not zero, truncate the file there.
       // Otherwise, the file will have been truncate at creation.
       if(::ftruncate64(hf, roffset) != 0) {
