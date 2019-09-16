@@ -512,8 +512,6 @@ template<> struct Compiler_Options_fragment<1>
     bool no_proper_tail_calls : 1;
     // Do not remove unreachable or insignificant code.
     bool no_dead_code_elimination : 1;
-    // Do not fold constants into adjacent operators.
-    bool no_constant_folding : 1;
 
     // Note: Please keep this struct as compact as possible.
   };
