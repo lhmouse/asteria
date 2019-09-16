@@ -658,13 +658,12 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
       if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
         return rocket::nullopt;
       }
-    }
 #else
     File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
       return rocket::nullopt;
-    }
 #endif
+    }
     // Don't read too many bytes at a time.
     data.resize(static_cast<size_t>(rlimit));
 #ifdef _WIN32
@@ -733,13 +732,12 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
       if(::SetFilePointerEx(hf, fpos, nullptr, FILE_BEGIN) == FALSE) {
         return false;
       }
-    }
 #else
     File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
       return false;
-    }
 #endif
+    }
     for(;;) {
       // Has the read limit been reached?
       if(nremaining <= 0) {
@@ -824,6 +822,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
     // Set the file pointer when an offset is specified, even when it is an explicit zero.
     if(offset) {
       // If `roffset` is not zero, truncate the file there.
+      // This also ensures it is a normal file (not a pipe or socket whatsoever).
       // Otherwise, the file will have been truncate at creation.
       if(::ftruncate64(hf, roffset) != 0) {
 #endif
