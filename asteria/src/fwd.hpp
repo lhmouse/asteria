@@ -510,6 +510,8 @@ template<> struct Compiler_Options_fragment<1>
     bool integers_as_reals : 1;
     // Do not implement proper tail calls. [more commonly known as tail call optimization]
     bool no_proper_tail_calls : 1;
+    // Suppress all optimization techniques.
+    bool no_optimization : 1;
     // Do not remove unreachable or insignificant code.
     bool no_dead_code_elimination : 1;
 

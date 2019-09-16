@@ -355,10 +355,15 @@ DCE_Result AIR_Node::optimize_dce()
           }
           body[epos].generate_code(code_func, nullptr, ctx_func, opts, tco_aware_nullify);
         }
-        // TODO: Insert more optimization passes here.
-        if(!opts.no_dead_code_elimination) {
-          // Perform DCE recursively.
-          do_optimize_dce(code_func);
+        // Optimize the body.
+        if(!opts.no_optimization) {
+          // Note that `no_optimization`, if set, suppresses ALL optimizations, even those explicitly enabled.
+
+          // TODO: Insert more optimization passes here.
+
+          if(!opts.no_dead_code_elimination) {
+            do_optimize_dce(code_func);
+          }
         }
         // Solidify IR nodes.
         AVMC_Queue queue;
