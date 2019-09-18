@@ -1,6 +1,6 @@
 Precedence (descending)    | Operators                      | Associativity
 ===========================#================================#==================
-Postfix operators          | ++   --   ()   []   .          | Left-to-right
+Postfix operators          | ++   --   ()   []   [$]   .    | Left-to-right
 ---------------------------+--------------------------------+------------------
                            | +    -    ~    !    ++    --   |
                            | unset     lengthof   typeof    |

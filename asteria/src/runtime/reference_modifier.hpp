@@ -19,16 +19,21 @@ class Reference_Modifier
       {
         phsh_string key;
       };
+    struct S_array_end
+      {
+      };
 
     enum Index : uint8_t
       {
         index_array_index  = 0,
         index_object_key   = 1,
+        index_array_end    = 2,
       };
     using Xvariant = variant<
       ROCKET_CDR(
         , S_array_index  // 0,
         , S_object_key   // 1,
+        , S_array_end    // 2,
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 

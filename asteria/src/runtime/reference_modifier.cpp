@@ -22,10 +22,11 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
         }
         const auto& array = parent.as_array();
+        // Return a pointer to the element at the given index.
         auto w = wrap_index(altr.index, array.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
-          ASTERIA_DEBUG_LOG("array subscript was out of range: index = ", altr.index, ", size = ", array.size());
+          ASTERIA_DEBUG_LOG("Array subscript was out of range: index = ", altr.index, ", size = ", array.size());
           return nullptr;
         }
         return std::addressof(array.at(w.rindex));
@@ -41,12 +42,31 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
         }
         const auto& object = parent.as_object();
+        // Return a pointer to the value with the given key.
         auto rit = object.find(altr.key);
         if(rit == object.end()) {
           ASTERIA_DEBUG_LOG("Object member was not found: key = ", altr.key, ", parent = ", parent);
           return nullptr;
         }
         return std::addressof(rit->second);
+      }
+    case index_array_end:
+      {
+        // We have to verify that the parent value is actually an `array` or `null`.
+        if(parent.is_null()) {
+          // Elements of a `null` are also `null`s.
+          return nullptr;
+        }
+        if(!parent.is_array()) {
+          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and has no past-the-end element.");
+        }
+        const auto& array = parent.as_array();
+        // Returns the last element.
+        if(array.empty()) {
+          ASTERIA_DEBUG_LOG("An attempt was made to reference the last (nonexistent) element of an empty `array`.");
+          return nullptr;
+        }
+        return std::addressof(array.back());
       }
     default:
       ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
@@ -70,11 +90,12 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
         }
         auto& array = parent.open_array();
+        // Return a pointer to the element at the given index if the index is valid; create an element if it is out of range.
         auto w = wrap_index(altr.index, array.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
           if(!create_new) {
-            ASTERIA_DEBUG_LOG("array subscript was out of range: index = ", altr.index, ", size = ", array.size());
+            ASTERIA_DEBUG_LOG("Array subscript was out of range: index = ", altr.index, ", size = ", array.size());
             return nullptr;
           }
           if(nadd > array.max_size() - array.size()) {
@@ -99,6 +120,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
         }
         auto& object = parent.open_object();
+        // Return a pointer to the value with the given key if it is found; create a value otherwise.
         G_object::iterator rit;
         if(!create_new) {
           rit = object.find_mut(altr.key);
@@ -111,6 +133,23 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           rit = object.try_emplace(altr.key).first;
         }
         return std::addressof(rit->second);
+      }
+    case index_array_end:
+      {
+        // We have to verify that the parent value is actually an `array` or `null`.
+        if(parent.is_null()) {
+          // Create elements as needed.
+          if(!create_new) {
+            return nullptr;
+          }
+          parent = G_array();
+        }
+        if(!parent.is_array()) {
+          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and has no past-the-end element.");
+        }
+        auto& array = parent.open_array();
+        // Append a new element to the end and return a pointer to it.
+        return std::addressof(array.emplace_back());
       }
     default:
       ASTERIA_TERMINATE("An unknown reference modifier type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
@@ -131,10 +170,11 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
         }
         auto& array = parent.open_array();
+        // Erase the element at the given index and return it.
         auto w = wrap_index(altr.index, array.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
-          ASTERIA_DEBUG_LOG("array subscript was out of range: index = ", altr.index, ", size = ", array.size());
+          ASTERIA_DEBUG_LOG("Array subscript was out of range: index = ", altr.index, ", size = ", array.size());
           return G_null();
         }
         auto elem = rocket::move(array.mut(w.rindex));
@@ -152,6 +192,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
           ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
         }
         auto& object = parent.open_object();
+        // Erase the value with the given key and return it.
         auto rit = object.find_mut(altr.key);
         if(rit == object.end()) {
           ASTERIA_DEBUG_LOG("Object member was not found: key = ", altr.key, ", parent = ", parent);
@@ -159,6 +200,26 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         }
         auto elem = rocket::move(rit->second);
         object.erase(rit);
+        return elem;
+      }
+    case index_array_end:
+      {
+        // We have to verify that the parent value is actually an `array` or `null`.
+        if(parent.is_null()) {
+          // There is nothing to erase.
+          return G_null();
+        }
+        if(!parent.is_array()) {
+          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and has no past-the-end element.");
+        }
+        auto& array = parent.open_array();
+        // Erase the last element and return it.
+        if(array.empty()) {
+          ASTERIA_DEBUG_LOG("An attempt was made to reference the last (nonexistent) element of an empty `array`.");
+          return nullptr;
+        }
+        auto elem = rocket::move(array.mut_back());
+        array.pop_back();
         return elem;
       }
     default:

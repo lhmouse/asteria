@@ -2604,6 +2604,15 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
+    AIR_Status do_apply_xop_enda(Executive_Context& ctx, uint32_t /*paramk*/, const void* /*params*/)
+      {
+        // This operator is unary.
+        auto& lref = ctx.stack().open_top();
+        Reference_Modifier::S_array_end xmod = { };
+        lref.zoom_in(rocket::move(xmod));
+        return air_status_next;
+      }
+
     }
 
 AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
@@ -3207,6 +3216,10 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         case xop_fma_3:
           {
             return avmcp.output<do_apply_xop_fma>(queue);
+          }
+        case xop_enda:
+          {
+            return avmcp.output<do_apply_xop_enda>(queue);
           }
         default:
           ASTERIA_TERMINATE("An unknown operator enumeration `", altr.xop, "` has been encountered. This is likely a bug. Please report.");

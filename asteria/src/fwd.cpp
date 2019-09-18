@@ -298,6 +298,10 @@ const char* stringify_punctuator(Punctuator punct) noexcept
       {
         return "...";
       }
+    case punctuator_enda:
+      {
+        return "[$]";
+      }
     default:
       return "<unknown punctuator>";
     }
