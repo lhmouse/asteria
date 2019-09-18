@@ -517,6 +517,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_execute_block(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& queue_body = do_pcast<SP_queues_fixed<1>>(params)->queues[0];
 
         // Execute the body on a new context.
@@ -525,6 +526,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_declare_variables(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& immutable = paramk != 0;
         const auto& names = do_pcast<SP_names>(params)->names;
 
@@ -570,6 +572,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_initialize_variables(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& immutable = paramk != 0;
         const auto& names = do_pcast<SP_names>(params)->names;
 
@@ -645,6 +648,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_if_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& negative = paramk != 0;
         const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
         const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
@@ -660,6 +664,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_switch_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& queues_labels = do_pcast<SP_switch>(params)->queues_labels;
         const auto& queues_bodies = do_pcast<SP_switch>(params)->queues_bodies;
         const auto& names_added = do_pcast<SP_switch>(params)->names_added;
@@ -718,6 +723,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_do_while_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
         const auto& negative = paramk != 0;
         const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
@@ -745,6 +751,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_while_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& negative = paramk != 0;
         const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
         const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
@@ -772,6 +779,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_for_each_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& name_key = do_pcast<SP_for_each>(params)->name_key;
         const auto& name_mapped = do_pcast<SP_for_each>(params)->name_mapped;
         const auto& queue_init = do_pcast<SP_for_each>(params)->queue_init;
@@ -853,6 +861,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_for_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& queue_init = do_pcast<SP_queues_fixed<4>>(params)->queues[0];
         const auto& queue_cond = do_pcast<SP_queues_fixed<4>>(params)->queues[1];
         const auto& queue_step = do_pcast<SP_queues_fixed<4>>(params)->queues[2];
@@ -893,6 +902,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_try_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& queue_try = do_pcast<SP_try>(params)->queue_try;
         const auto& sloc = do_pcast<SP_try>(params)->sloc;
         const auto& name_except = do_pcast<SP_try>(params)->name_except;
@@ -924,6 +934,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_throw_statement(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& sloc = do_pcast<SP_sloc>(params)->sloc;
 
         // Read the value to throw.
@@ -954,6 +965,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_assert_statement(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& sloc = do_pcast<SP_sloc_msg>(params)->sloc;
         const auto& negative = paramk != 0;
         const auto& msg = do_pcast<SP_sloc_msg>(params)->msg;
@@ -972,6 +984,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_simple_status(Executive_Context& /*ctx*/, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& status = static_cast<AIR_Status>(paramk);
 
         // Return the status as is.
@@ -992,6 +1005,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_literal(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& val = do_pcast<Value>(params)[0];
 
         // Push a constant.
@@ -1002,6 +1016,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_global_reference(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& name = do_pcast<SP_name>(params)->name;
 
         // Look for the name in the global context.
@@ -1016,6 +1031,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_local_reference(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& depth = paramk;
         const auto& name = do_pcast<SP_name>(params)->name;
 
@@ -1035,6 +1051,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_bound_reference(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& ref = do_pcast<Reference>(params)[0];
 
         // Push a copy of the bound reference.
@@ -1044,6 +1061,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_define_function(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& xnode = do_pcast<SP_func>(params)->xnode;
 
         // Instantiate the function.
@@ -1057,6 +1075,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_branch_expression(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
         const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
         const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
@@ -1072,6 +1091,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_coalescence(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
         const auto& queue_null = do_pcast<SP_queues_fixed<1>>(params)->queues[0];
 
@@ -1086,6 +1106,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_function_call(Executive_Context& ctx, uint32_t paramk, const void* params)
       {
+        // Unpack arguments.
         const auto& sloc = do_pcast<SP_call>(params)->sloc;
         const auto& args_by_refs = do_pcast<SP_call>(params)->args_by_refs;
         const auto& tco_aware = static_cast<TCO_Aware>(paramk);
@@ -1152,6 +1173,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_member_access(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& name = do_pcast<SP_name>(params)->name;
 
         // Append a modifier to the reference at the top.
@@ -1162,6 +1184,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_unnamed_array(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& nelems = paramk;
 
         // Pop elements from the stack and store them in an array backwards.
@@ -1179,6 +1202,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_push_unnamed_object(Executive_Context& ctx, uint32_t /*paramk*/, const void* params)
       {
+        // Unpack arguments.
         const auto& keys = do_pcast<SP_names>(params)->names;
 
         // Pop elements from the stack and store them in an object backwards.
@@ -1671,6 +1695,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_pos(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1683,6 +1708,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_neg(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1705,6 +1731,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_notb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1727,6 +1754,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_notl(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1777,6 +1805,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_unset(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1788,6 +1817,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1815,6 +1845,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_typeof(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1827,6 +1858,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1849,6 +1881,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_isnan(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1871,6 +1904,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_isinf(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1893,6 +1927,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_abs(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1915,6 +1950,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_signb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1937,6 +1973,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_round(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1959,6 +1996,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_floor(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -1981,6 +2019,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_ceil(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -2003,6 +2042,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_trunc(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -2025,6 +2065,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_iround(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -2047,6 +2088,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -2069,6 +2111,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_iceil(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -2091,6 +2134,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is unary.
@@ -2113,6 +2157,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = SK_xrel(paramk).assign != 0;
         const auto& expect = static_cast<Compare>(SK_xrel(paramk).expect);
         const auto& negative = SK_xrel(paramk).negative != 0;
@@ -2131,6 +2176,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = SK_xrel(paramk).assign != 0;
         const auto& expect = static_cast<Compare>(SK_xrel(paramk).expect);
         const auto& negative = SK_xrel(paramk).negative != 0;
@@ -2152,6 +2198,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2183,6 +2230,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_add(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2217,6 +2265,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_sub(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2246,6 +2295,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_mul(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2284,6 +2334,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_div(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2308,6 +2359,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_mod(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2332,6 +2384,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_sll(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2359,6 +2412,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_srl(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2386,6 +2440,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_sla(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2413,6 +2468,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_sra(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2439,6 +2495,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_andb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2464,6 +2521,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_orb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2489,6 +2547,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_xorb(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is binary.
@@ -2524,6 +2583,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     AIR_Status do_apply_xop_fma(Executive_Context& ctx, uint32_t paramk, const void* /*params*/)
       {
+        // Unpack arguments.
         const auto& assign = paramk != 0;
 
         // This operator is ternary.
