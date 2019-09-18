@@ -352,6 +352,19 @@ int main()
         assert i ?? "abc" == 12;
         assert null ?? "abc" == "abc";
         assert null ?? null ?? 1 ?? null ?? 2 == 1;
+
+        assert a == [1, 3];
+        assert a[$] == 3;
+        assert (a[$] = 'meow') == "meow";
+        assert a == [1, 3, 'meow'];
+        assert unset a[$] == 'meow';
+        assert a == [1, 3];
+        assert unset a[$] == 3;
+        assert a == [1];
+        assert unset a[$] == 1;
+        assert a == [];
+        assert unset a[$] == null;
+        assert a == [];
       )__";
 
     cow_isstream iss(rocket::sref(s_source));
