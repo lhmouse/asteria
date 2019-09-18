@@ -37,11 +37,7 @@ class Exception : public std::exception
         return "Asteria::Exception";
       }
 
-    const Value& get_value() const noexcept
-      {
-        return this->m_value;
-      }
-    Value& open_value()
+    const Value& value() const noexcept
       {
         return this->m_value;
       }
@@ -49,7 +45,7 @@ class Exception : public std::exception
       {
         return this->m_frames.size();
       }
-    const Backtrace_Frame& get_frame(size_t i) const
+    const Backtrace_Frame& frame(size_t i) const
       {
         return this->m_frames.at(i);
       }
@@ -70,11 +66,6 @@ class Exception : public std::exception
                                            func);  // The value is the signature of the enclosing function.
       }
   };
-
-inline std::ostream& operator<<(std::ostream& ostrm, const Exception& except)
-  {
-    return ostrm << except.get_value();
-  }
 
 }  // namespace Asteria
 

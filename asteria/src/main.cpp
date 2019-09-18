@@ -66,9 +66,9 @@ int main(int argc, char** argv)
     std::cerr << std::endl
               << "---" << std::endl
               << "# Caught `Exception`:" << std::endl
-              << e << std::endl;
+              << e.value() << std::endl;
     for(size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {
-      const auto& f = e.get_frame(i);
+      const auto& f = e.frame(i);
       std::cerr << "  thrown from \'" << f.sloc() << "\' <" << f.what_type() << ">: " << f.value() << std::endl;
     }
     return 1;

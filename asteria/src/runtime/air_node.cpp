@@ -212,7 +212,7 @@ DCE_Result AIR_Node::optimize_dce()
         Executive_Context ctx_next(rocket::ref(ctx));
         // Set the exception reference.
         {
-          Reference_Root::S_temporary xref = { except.get_value() };
+          Reference_Root::S_temporary xref = { except.value() };
           ctx_next.open_named_reference(name_except) = rocket::move(xref);
         }
         // Set backtrace frames.
@@ -220,7 +220,7 @@ DCE_Result AIR_Node::optimize_dce()
           G_array backtrace;
           G_object r;
           for(size_t i = 0; i != except.count_frames(); ++i) {
-            const auto& frame = except.get_frame(i);
+            const auto& frame = except.frame(i);
             // Translate each frame into a human-readable format.
             r.clear();
             r.try_emplace(rocket::sref("frame"), G_string(rocket::sref(frame.what_type())));
@@ -916,7 +916,7 @@ DCE_Result AIR_Node::optimize_dce()
         catch(Exception& except) {
           // Reuse the exception object. Don't bother allocating a new one.
           except.push_frame_catch(sloc);
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except);
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except.value());
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
           return do_execute_catch(queue_catch, name_except, except, ctx);
@@ -925,7 +925,7 @@ DCE_Result AIR_Node::optimize_dce()
           // Translate the exception.
           Exception except(stdex);
           except.push_frame_catch(sloc);
-          ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except);
+          ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except.value());
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
           return do_execute_catch(queue_catch, name_except, except, ctx);
@@ -1157,7 +1157,7 @@ DCE_Result AIR_Node::optimize_dce()
           return air_status_next;
         }
         catch(Exception& except) {
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.get_value());
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.value());
           // Append the current frame and rethrow the exception.
           except.push_frame_func(sloc, func);
           throw;
