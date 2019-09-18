@@ -433,13 +433,23 @@ template<typename charT, typename traitsT,
       {
         return this->m_stor.str;
       }
+    const char_type* get_cstring() const noexcept
+      {
+        return this->m_stor.str.c_str();
+      }
     void set_string(string_type str)
       {
         this->do_abandon();
         this->m_stor.str = noadl::move(str);
         this->m_stor.rewind(this->m_which);
       }
-    string_type extract_string()
+    void clear_string() noexcept
+      {
+        this->do_abandon();
+        this->m_stor.str.clear();
+        this->m_stor.rewind(this->m_which);
+      }
+    string_type extract_string() noexcept
       {
         this->do_abandon();
         auto str = noadl::move(this->m_stor.str);

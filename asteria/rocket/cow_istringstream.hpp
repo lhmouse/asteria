@@ -73,13 +73,22 @@ template<typename charT, typename traitsT,
         return &(this->m_sb);
       }
 
-    const string_type& get_string() const
+    const string_type& get_string() const noexcept
       {
         return this->rdbuf()->get_string();
+      }
+    const char_type* get_cstring() const noexcept
+      {
+        return this->rdbuf()->get_cstring();
       }
     void set_string(string_type str)
       {
         this->rdbuf()->set_string(noadl::move(str));
+        this->clear();
+      }
+    void clear_string()
+      {
+        this->rdbuf()->clear_string();
         this->clear();
       }
     string_type extract_string()
