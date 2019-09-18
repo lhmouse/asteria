@@ -38,6 +38,7 @@ Simple_Script& Simple_Script::reload(std::istream& istrm, const cow_string& file
   {
     std::istream::sentry sentry(istrm, true);
     if(!sentry) {
+      // Throw an exception if no character could be read or no stream buffer is associated.
       throw Parser_Error(parser_status_istream_input_failure);
     }
     // Extract characters from the stream buffer directly.
@@ -71,6 +72,8 @@ Simple_Script& Simple_Script::reload_file(const cow_string& filename)
     // Open the file designated by `filename`.
     std::filebuf sbuf;
     if(!sbuf.open(filename.c_str(), std::ios_base::in)) {
+      // Throw an exception if the file could not be opened.
+      // XXX: Provide details somehow?
       throw Parser_Error(parser_status_ifstream_open_failure);
     }
     return this->reload(sbuf, filename);
