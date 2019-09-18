@@ -13,8 +13,8 @@ namespace Asteria {
 
 Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& filename)
   {
-    // Use default options.
     AIR_Node::S_define_function xnode = { };
+    xnode.opts = this->m_opts;
     // Tokenize the character stream.
     Token_Stream tstrm(sbuf, filename, xnode.opts);
     // Parse tokens.

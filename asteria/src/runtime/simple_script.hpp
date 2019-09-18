@@ -12,6 +12,7 @@ namespace Asteria {
 class Simple_Script
   {
   private:
+    Compiler_Options m_opts = { };
     rcptr<Rcbase> m_cptr;  // note type erasure
 
   public:
@@ -36,6 +37,19 @@ class Simple_Script
       }
 
   public:
+    const Compiler_Options& get_options() const noexcept
+      {
+        return this->m_opts;
+      }
+    Compiler_Options& open_options() noexcept
+      {
+        return this->m_opts;
+      }
+    Simple_Script& set_options(const Compiler_Options& opts) noexcept
+      {
+        return this->m_opts = opts, *this;
+      }
+
     bool empty() const noexcept
       {
         return this->m_cptr == nullptr;
