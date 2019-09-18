@@ -367,7 +367,7 @@ bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old
         return rocket::move(count);
       }
 #else
-    opt<G_integer> do_remove_directory_recursive(const rocket::cow_string& root)
+    opt<G_integer> do_remove_directory_recursive(const cow_string& root)
       {
         G_integer count = 0;
         // This is the list of files and directories to be removed.
