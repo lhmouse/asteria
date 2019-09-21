@@ -244,4 +244,5 @@ TESTS = ${check_PROGRAMS}
 EXTRA_DIST =  \
   doc/operator-precedence.txt  \
   doc/standard-library.txt  \
-  doc/syntax.txt
+  doc/syntax.txt  \
+  doc/examples.txt
