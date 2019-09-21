@@ -147,25 +147,24 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           else {
             ASTERIA_TERMINATE("A malformed variable definition has been encountered. This is likely a bug. Please report.");
           }
-          // Clear the stack.
-          do_generate_clear_stack(code);
           // Declare the variable, when it will be initialized to `null`.
-          if(!pair.second.empty()) {
-            // If an initializer is provided, we declare the variable as immutable to prevent
-            // unintentional modification before the initialization is completed.
-            AIR_Node::S_declare_variables xnode_decl = { true, pair.first };
-            code.emplace_back(rocket::move(xnode_decl));
-            // Generate code for the initializer.
-            do_generate_expression_partial(code, opts, tco_aware_none, ctx, pair.second);
-            // Initialize the variable.
-            AIR_Node::S_initialize_variables xnode_init = { altr.immutable, pair.first };
-            code.emplace_back(rocket::move(xnode_init));
-          }
-          else {
+          if(pair.second.empty()) {
             // If no initializer is provided, this can be simplified a little.
             AIR_Node::S_declare_variables xnode_decl = { altr.immutable, pair.first };
             code.emplace_back(rocket::move(xnode_decl));
+            continue;
           }
+          // Clear the stack.
+          do_generate_clear_stack(code);
+          // If an initializer is provided, we declare the variable as immutable to prevent
+          // unintentional modification before the initialization is completed.
+          AIR_Node::S_declare_variables xnode_decl = { true, pair.first };
+          code.emplace_back(rocket::move(xnode_decl));
+          // Generate code for the initializer.
+          do_generate_expression_partial(code, opts, tco_aware_none, ctx, pair.second);
+          // Initialize the variable.
+          AIR_Node::S_initialize_variables xnode_init = { altr.immutable, pair.first };
+          code.emplace_back(rocket::move(xnode_init));
         }
         return code;
       }
@@ -177,8 +176,6 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Create a vector of only one name.
         cow_vector<phsh_string> names;
         names.emplace_back(altr.name);
-        // Clear the stack.
-        do_generate_clear_stack(code);
         // Declare the function, which is effectively an immutable variable.
         AIR_Node::S_declare_variables xnode_decl = { true, names };
         code.emplace_back(rocket::move(xnode_decl));
