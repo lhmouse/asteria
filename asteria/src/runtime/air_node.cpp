@@ -390,7 +390,7 @@ DCE_Result AIR_Node::optimize_dce()
           : paramk(0)
           {
           }
-        explicit constexpr SK_xrel(uint32_t xparamk = 0) noexcept
+        explicit constexpr SK_xrel(uint32_t xparamk) noexcept
           : paramk(xparamk)
           {
           }
