@@ -19,7 +19,7 @@ void AVMC_Queue::do_deallocate_storage() const
       // Call the destructor for this node.
       auto dtor = qnode->has_vtbl ? qnode->vtbl->dtor : nullptr;
       if(ROCKET_UNEXPECT(dtor)) {
-        (*dtor)(qnode->paramk, qnode->params);
+        (*dtor)(qnode->paramb, qnode->paramk, qnode->params);
       }
     }
     // Deallocate the storage if any.
@@ -39,7 +39,7 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
       // Call the executor function for this node.
       auto exec = qnode->has_vtbl ? qnode->vtbl->exec : qnode->exec;
       ROCKET_ASSERT(exec);
-      status = (*exec)(ctx, qnode->paramk, qnode->params);
+      status = (*exec)(ctx, qnode->paramb, qnode->paramk, qnode->params);
       if(ROCKET_UNEXPECT(status != air_status_next)) {
         // Forward any status codes unexpected to the caller.
         return;
@@ -58,7 +58,7 @@ void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
       // Call the enumerator function for this node.
       auto vnum = qnode->has_vtbl ? qnode->vtbl->vnum : nullptr;
       if(ROCKET_UNEXPECT(vnum)) {
-        (*vnum)(callback, qnode->paramk, qnode->params);
+        (*vnum)(callback, qnode->paramb, qnode->paramk, qnode->params);
       }
     }
   }
@@ -102,12 +102,13 @@ AVMC_Queue::Header* AVMC_Queue::do_check_storage_for_params(size_t nbytes)
     return qnode;
   }
 
-void AVMC_Queue::do_append_trivial(Executor* exec, uint32_t paramk, size_t nbytes, const void* source)
+void AVMC_Queue::do_append_trivial(Executor* exec, uint8_t paramb, uint32_t paramk, size_t nbytes, const void* source)
   {
     auto qnode = this->AVMC_Queue::do_check_storage_for_params(nbytes);
     auto nbytes_node = static_cast<uint32_t>(1 + qnode->nphdrs);
     // Initialize the node.
     qnode->has_vtbl = false;
+    qnode->paramb = paramb;
     qnode->paramk = paramk;
     qnode->exec = exec;
     // Copy source data if any.
@@ -118,17 +119,18 @@ void AVMC_Queue::do_append_trivial(Executor* exec, uint32_t paramk, size_t nbyte
     this->m_stor.nused += nbytes_node;
   }
 
-void AVMC_Queue::do_append_nontrivial(ref_to<const Vtable> vtbl, uint32_t paramk, size_t nbytes, Constructor* ctor, intptr_t source)
+void AVMC_Queue::do_append_nontrivial(ref_to<const Vtable> vtbl, uint8_t paramb, uint32_t paramk, size_t nbytes, Constructor* ctor, intptr_t source)
   {
     auto qnode = this->AVMC_Queue::do_check_storage_for_params(nbytes);
     auto nbytes_node = static_cast<uint32_t>(1 + qnode->nphdrs);
     // Initialize the node.
     qnode->has_vtbl = true;
+    qnode->paramb = paramb;
     qnode->paramk = paramk;
     qnode->vtbl = vtbl.ptr();
     // Invoke the constructor if any, which is subject to exceptions.
     if(ROCKET_EXPECT(ctor)) {
-      (*ctor)(paramk, qnode->params, source);
+      (*ctor)(paramb, paramk, qnode->params, source);
     }
     // Finish the initialization.
     this->m_stor.nused += nbytes_node;
