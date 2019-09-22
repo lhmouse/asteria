@@ -62,7 +62,7 @@ null-statement ::=
 	";"
 
 variable-definition ::=
-	"var" variable-declarator equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
+	"var" variable-declarator equal-initailizer-opt ( "," variable-declarator equal-initializer-opt | "" ) ";"
 variable-declarator ::=
 	identifier | structured-binding-array | structured-binding-object
 structured-binding-array ::=

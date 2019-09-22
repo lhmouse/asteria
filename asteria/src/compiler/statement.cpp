@@ -54,6 +54,7 @@ namespace Asteria {
         }
         return code;
       }
+
     cow_vector<AIR_Node> do_generate_expression_partial(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
                                                         const cow_vector<Xprunit>& units)
       {
@@ -76,6 +77,7 @@ namespace Asteria {
         }
         return code;
       }
+
     cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
                                                     const Compiler_Options& opts, TCO_Aware tco_aware, const cow_vector<Statement>& stmts)
       {
@@ -125,46 +127,65 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     case index_variables:
       {
         const auto& altr = this->m_stor.as<index_variables>();
-        // Declare each variable.
-        for(const auto& pair : altr.vars) {
+        // Get the number of variables to declare.
+        auto nvars = altr.slocs.size();
+        ROCKET_ASSERT(nvars == altr.decls.size());
+        ROCKET_ASSERT(nvars == altr.inits.size());
+        // Declare all variables from left to right.
+        for(size_t i = 0; i != nvars; ++i) {
           // Create dummy references for further name lookups.
-          if(pair.first.size() == 1) {
-            // Create a single reference.
-            do_user_declare(names_opt, ctx, pair.first[0], "variable placeholder");
-          }
-          else if((pair.first.at(0) == "[") && (pair.first.back() == "]")) {
-            // Create references from left to right.
-            for(size_t i = 1; i != pair.first.size() - 1; ++i) {
-              do_user_declare(names_opt, ctx, pair.first[i], "array structured binding placeholder");
+          for(const auto& name : altr.decls[i]) {
+            if(rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
+              continue;
             }
+            do_user_declare(names_opt, ctx, name, "variable placeholder");
           }
-          else if((pair.first.at(0) == "{") && (pair.first.back() == "}")) {
-            // Create references from left to right.
-            for(size_t i = 1; i != pair.first.size() - 1; ++i) {
-              do_user_declare(names_opt, ctx, pair.first[i], "object structured binding placeholder");
+          // Declare the variables which will have been initialized to `null`.
+          if(altr.inits[i].empty()) {
+            // If no initializer is provided, no further initialization is required.
+            for(const auto& name : altr.decls[i]) {
+              if(rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
+                continue;
+              }
+              AIR_Node::S_declare_variable xnode_decl = { altr.immutable, altr.slocs[i], name };
+              code.emplace_back(rocket::move(xnode_decl));
             }
           }
           else {
-            ASTERIA_TERMINATE("A malformed variable definition has been encountered. This is likely a bug. Please report.");
+            // Clear the stack before pushing the variables.
+            do_generate_clear_stack(code);
+            // Declare the variables as immutable before the initialization is completed.
+            for(const auto& name : altr.decls[i]) {
+              if(rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
+                continue;
+              }
+              AIR_Node::S_declare_variable xnode_decl = { true, altr.slocs[i], name };
+              code.emplace_back(rocket::move(xnode_decl));
+            }
+            // Generate code for the initializer.
+            do_generate_expression_partial(code, opts, tco_aware_none, ctx, altr.inits[i]);
+            if(altr.decls[i][0] == "[") {
+              // The number of elements does not count the leading "[" or the trailing "]".
+              ROCKET_ASSERT(altr.decls[i].back() == "]");
+              auto nelems = static_cast<uint32_t>(altr.decls[i].size() - 2);
+              // Unpack the structured binding for arrays.
+              AIR_Node::S_unpack_struct_array xnode_init = { altr.immutable, nelems };
+              code.emplace_back(rocket::move(xnode_init));
+            }
+            else if(altr.decls[i][0] == "{") {
+              // THe keys does not include the leading "{" or the trailing "}".
+              ROCKET_ASSERT(altr.decls[i].back() == "}");
+              cow_vector<phsh_string> keys(altr.decls[i].begin() + 1, altr.decls[i].end() - 1);
+              // Unpack the structured binding for objects.
+              AIR_Node::S_unpack_struct_object xnode_init = { altr.immutable, rocket::move(keys) };
+              code.emplace_back(rocket::move(xnode_init));
+            }
+            else {
+              // Initialize the variable.
+              AIR_Node::S_initialize_variable xnode_init = { altr.immutable };
+              code.emplace_back(rocket::move(xnode_init));
+            }
           }
-          // Declare the variable, when it will be initialized to `null`.
-          if(pair.second.empty()) {
-            // If no initializer is provided, this can be simplified a little.
-            AIR_Node::S_declare_variables xnode_decl = { altr.immutable, pair.first };
-            code.emplace_back(rocket::move(xnode_decl));
-            continue;
-          }
-          // Clear the stack.
-          do_generate_clear_stack(code);
-          // If an initializer is provided, we declare the variable as immutable to prevent
-          // unintentional modification before the initialization is completed.
-          AIR_Node::S_declare_variables xnode_decl = { true, pair.first };
-          code.emplace_back(rocket::move(xnode_decl));
-          // Generate code for the initializer.
-          do_generate_expression_partial(code, opts, tco_aware_none, ctx, pair.second);
-          // Initialize the variable.
-          AIR_Node::S_initialize_variables xnode_init = { altr.immutable, pair.first };
-          code.emplace_back(rocket::move(xnode_init));
         }
         return code;
       }
@@ -173,17 +194,14 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         const auto& altr = this->m_stor.as<index_function>();
         // Create a dummy reference for further name lookups.
         do_user_declare(names_opt, ctx, altr.name, "function placeholder");
-        // Create a vector of only one name.
-        cow_vector<phsh_string> names;
-        names.emplace_back(altr.name);
         // Declare the function, which is effectively an immutable variable.
-        AIR_Node::S_declare_variables xnode_decl = { true, names };
+        AIR_Node::S_declare_variable xnode_decl = { true, altr.sloc, altr.name };
         code.emplace_back(rocket::move(xnode_decl));
         // Instantiate the function body.
         AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params, altr.body };
         code.emplace_back(rocket::move(xnode_defn));
         // Initialize the function.
-        AIR_Node::S_initialize_variables xnode_init = { true, rocket::move(names) };
+        AIR_Node::S_initialize_variable xnode_init = { true };
         code.emplace_back(rocket::move(xnode_init));
         return code;
       }

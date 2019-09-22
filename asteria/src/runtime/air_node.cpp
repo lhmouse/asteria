@@ -527,125 +527,39 @@ DCE_Result AIR_Node::optimize_dce()
         return do_execute_block(queue_body, ctx);
       }
 
-    AIR_Status do_declare_variables(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_declare_variable(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
       {
         // Unpack arguments.
         const auto& immutable = paramb != 0;
-        const auto& names = do_pcast<SP_names>(params)->names;
+        const auto& name = do_pcast<SP_name>(params)->name;
 
-        // Allocate variables and initialize them to `null`.
-        if(ROCKET_EXPECT(names.size() == 1)) {
-          auto var = ctx.global().create_variable();
-          var->reset(G_null(), immutable);
-          // Inject the variable into the current context.
-          Reference_Root::S_variable xref = { rocket::move(var) };
-          ctx.open_named_reference(names[0]) = xref;
-          // Push a copy of the reference onto the stack.
-          ctx.stack().push(rocket::move(xref));
-        }
-        else if((names.at(0) == "[") && (names.back() == "]")) {
-          // Allocate variables for identifiers between the brackets.
-          for(size_t i = 1; i != names.size() - 1; ++i) {
-            auto var = ctx.global().create_variable();
-            var->reset(G_null(), immutable);
-            // Inject the variable into the current context.
-            Reference_Root::S_variable xref = { rocket::move(var) };
-            ctx.open_named_reference(names[i]) = xref;
-            // Push a copy of the reference onto the stack.
-            ctx.stack().push(rocket::move(xref));
-          }
-        }
-        else if((names.at(0) == "{") && (names.back() == "}")) {
-          // Allocate variables for identifiers between the braces.
-          for(size_t i = 1; i != names.size() - 1; ++i) {
-            auto var = ctx.global().create_variable();
-            var->reset(G_null(), immutable);
-            // Inject the variable into the current context.
-            Reference_Root::S_variable xref = { rocket::move(var) };
-            ctx.open_named_reference(names[i]) = xref;
-            // Push a copy of the reference onto the stack.
-            ctx.stack().push(rocket::move(xref));
-          }
-        }
-        else {
-          ROCKET_ASSERT(false);
-        }
+        // Allocate a variable and initialize it to `null`.
+        auto var = ctx.global().create_variable();
+        var->reset(G_null(), immutable);
+        // Inject the variable into the current context.
+        Reference_Root::S_variable xref = { rocket::move(var) };
+        ctx.open_named_reference(name) = xref;
+        // Push a copy of the reference onto the stack.
+        ctx.stack().push(rocket::move(xref));
         return air_status_next;
       }
 
-    AIR_Status do_initialize_variables(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_initialize_variable(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& immutable = paramb != 0;
-        const auto& names = do_pcast<SP_names>(params)->names;
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
         auto val = ctx.stack().get_top().read();
         ctx.stack().pop();
-        // Initialize variables.
-        if(ROCKET_EXPECT(names.size() == 1)) {
-          // Get the variable back.
-          auto var = ctx.stack().get_top().get_variable_opt();
-          ROCKET_ASSERT(var);
-          ROCKET_ASSERT(var->get_value().is_null());
-          ctx.stack().pop();
-          // Initialize it.
-          var->reset(rocket::move(val), immutable);
-        }
-        else if((names.at(0) == "[") && (names.back() == "]")) {
-          // Get the value to assign from.
-          if(val.is_null()) {
-            val = G_array();
-          }
-          if(!val.is_array()) {
-            ASTERIA_THROW_RUNTIME_ERROR("An array structured binding does not accept a value of type `", val.what_gtype(), "`.");
-          }
-          auto& array = val.open_array();
-          // Pop variables from right to left, then initialize them one by one.
-          for(size_t i = names.size() - 2; i != 0; --i) {
-            // Get the variable back.
-            auto var = ctx.stack().get_top().get_variable_opt();
-            ROCKET_ASSERT(var);
-            ROCKET_ASSERT(var->get_value().is_null());
-            ctx.stack().pop();
-            // Initialize it.
-            auto qelem = array.mut_ptr(i-1);
-            if(!qelem) {
-              var->set_immutable(immutable);
-              continue;
-            }
-            var->reset(rocket::move(*qelem), immutable);
-          }
-        }
-        else if((names.at(0) == "{") && (names.back() == "}")) {
-          // Get the value to assign from.
-          if(val.is_null()) {
-            val = G_object();
-          }
-          if(!val.is_object()) {
-            ASTERIA_THROW_RUNTIME_ERROR("An object structured binding does not accept a value of type `", val.what_gtype(), "`.");
-          }
-          auto& object = val.open_object();
-          // Pop variables from right to left, then initialize them one by one.
-          for(size_t i = names.size() - 2; i != 0; --i) {
-            // Get the variable back.
-            auto var = ctx.stack().get_top().get_variable_opt();
-            ROCKET_ASSERT(var);
-            ROCKET_ASSERT(var->get_value().is_null());
-            ctx.stack().pop();
-            // Initialize it.
-            auto qelem = object.mut_ptr(names[i]);
-            if(!qelem) {
-              var->set_immutable(immutable);
-              continue;
-            }
-            var->reset(rocket::move(*qelem), immutable);
-          }
-        }
-        else {
-          ROCKET_ASSERT(false);
-        }
+        // Get the variable back.
+        auto var = ctx.stack().get_top().get_variable_opt();
+        ROCKET_ASSERT(var);
+        ROCKET_ASSERT(var->get_value().is_null());
+        ctx.stack().pop();
+        // Initialize it.
+        var->reset(rocket::move(val), immutable);
         return air_status_next;
       }
 
@@ -2616,6 +2530,78 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
+    AIR_Status do_unpack_struct_array(Executive_Context& ctx, uint8_t paramb, uint32_t paramk, const void* /*params*/)
+      {
+        // Unpack arguments.
+        const auto& immutable = paramb != 0;
+        const auto& nelems = paramk;
+
+        // Read the value of the initializer.
+        // Note that the initializer must not have been empty for this function.
+        auto val = ctx.stack().get_top().read();
+        ctx.stack().pop();
+        // Make sure it is really an `array`.
+        if(val.is_null()) {
+          val = G_array();
+        }
+        if(!val.is_array()) {
+          ASTERIA_THROW_RUNTIME_ERROR("An array structured binding does not accept a value of type `", val.what_gtype(), "`.");
+        }
+        auto& arr = val.open_array();
+        // Pop and initialize variables from right to left.
+        for(size_t i = 0; i != nelems; ++i) {
+          // Get the variable back.
+          auto var = ctx.stack().get_top().get_variable_opt();
+          ROCKET_ASSERT(var);
+          ROCKET_ASSERT(var->get_value().is_null());
+          ctx.stack().pop();
+          // Initialize it.
+          auto index = nelems - i - 1;
+          if(index >= arr.size()) {
+            var->set_immutable(immutable);
+            continue;
+          }
+          var->reset(rocket::move(arr.mut(index)), immutable);
+        }
+        return air_status_next;
+      }
+
+    AIR_Status do_unpack_struct_object(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+      {
+        // Unpack arguments.
+        const auto& immutable = paramb != 0;
+        const auto& keys = do_pcast<SP_names>(params)->names;
+
+        // Read the value of the initializer.
+        // Note that the initializer must not have been empty for this function.
+        auto val = ctx.stack().get_top().read();
+        ctx.stack().pop();
+        // Make sure it is really an `object`.
+        if(val.is_null()) {
+          val = G_object();
+        }
+        if(!val.is_object()) {
+          ASTERIA_THROW_RUNTIME_ERROR("An object structured binding does not accept a value of type `", val.what_gtype(), "`.");
+        }
+        auto& obj = val.open_object();
+        // Pop and initialize variables from right to left.
+        for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
+          // Get the variable back.
+          auto var = ctx.stack().get_top().get_variable_opt();
+          ROCKET_ASSERT(var);
+          ROCKET_ASSERT(var->get_value().is_null());
+          ctx.stack().pop();
+          // Initialize it.
+          auto initp = obj.find_mut(*it);
+          if(initp == obj.end()) {
+            var->set_immutable(immutable);
+            continue;
+          }
+          var->reset(rocket::move(initp->second), immutable);
+        }
+        return air_status_next;
+      }
+
     }
 
 AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
@@ -2649,37 +2635,36 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Push a new node.
         return avmcp.output<do_execute_block>(queue);
       }
-    case index_declare_variables:
+    case index_declare_variable:
       {
-        const auto& altr = this->m_stor.as<index_declare_variables>();
+        const auto& altr = this->m_stor.as<index_declare_variable>();
         // `paramb` is `immutable`.
         // `paramk` is unused.
-        // `params` points to the name vector.
-        AVMC_Appender<SP_names> avmcp;
+        // `params` points to the name.
+        AVMC_Appender<SP_name> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         avmcp.paramb = altr.immutable;
-        avmcp.names = altr.names;
+        avmcp.name = altr.name;
         // Push a new node.
-        return avmcp.output<do_declare_variables>(queue);
+        return avmcp.output<do_declare_variable>(queue);
       }
-    case index_initialize_variables:
+    case index_initialize_variable:
       {
-        const auto& altr = this->m_stor.as<index_initialize_variables>();
+        const auto& altr = this->m_stor.as<index_initialize_variable>();
         // `paramb` is `immutable`.
         // `paramk` is unused.
-        // `params` points to the name vector.
-        AVMC_Appender<SP_names> avmcp;
+        // `params` is unused.
+        AVMC_Appender<void> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         avmcp.paramb = altr.immutable;
-        avmcp.names = altr.names;
         // Push a new node.
-        return avmcp.output<do_initialize_variables>(queue);
+        return avmcp.output<do_initialize_variable>(queue);
       }
     case index_if_statement:
       {
@@ -3277,6 +3262,38 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         default:
           ASTERIA_TERMINATE("An unknown operator enumeration `", altr.xop, "` has been encountered. This is likely a bug. Please report.");
         }
+      }
+    case index_unpack_struct_array:
+      {
+        const auto& altr = this->m_stor.as<index_unpack_struct_array>();
+        // `paramb` is `immutable`.
+        // `paramk` is `nelems`.
+        // `params` is unused.
+        AVMC_Appender<void> avmcp;
+        if(ipass == 0) {
+          return avmcp.request(queue);
+        }
+        // Encode arguments.
+        avmcp.paramb = altr.immutable;
+        avmcp.paramk = altr.nelems;
+        // Push a new node.
+        return avmcp.output<do_unpack_struct_array>(queue);
+      }
+    case index_unpack_struct_object:
+      {
+        const auto& altr = this->m_stor.as<index_unpack_struct_object>();
+        // `paramb` is `immutable`.
+        // `paramk` is unused.
+        // `params` points to the keys.
+        AVMC_Appender<SP_names> avmcp;
+        if(ipass == 0) {
+          return avmcp.request(queue);
+        }
+        // Encode arguments.
+        avmcp.paramb = altr.immutable;
+        avmcp.names = altr.keys;
+        // Push a new node.
+        return avmcp.output<do_unpack_struct_object>(queue);
       }
     default:
       ASTERIA_TERMINATE("An unknown AIR node type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");

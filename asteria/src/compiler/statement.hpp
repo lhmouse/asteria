@@ -22,9 +22,10 @@ class Statement
       };
     struct S_variables
       {
-        Source_Location sloc;
         bool immutable;
-        cow_bivector<cow_vector<phsh_string>, cow_vector<Xprunit>> vars;
+        cow_vector<Source_Location> slocs;
+        cow_vector<cow_vector<phsh_string>> decls;
+        cow_vector<cow_vector<Xprunit>> inits;
       };
     struct S_function
       {

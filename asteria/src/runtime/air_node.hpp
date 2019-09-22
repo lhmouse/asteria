@@ -21,15 +21,15 @@ class AIR_Node
       {
         cow_vector<AIR_Node> code_body;
       };
-    struct S_declare_variables
+    struct S_declare_variable
       {
         bool immutable;
-        cow_vector<phsh_string> names;
+        Source_Location sloc;
+        phsh_string name;
       };
-    struct S_initialize_variables
+    struct S_initialize_variable
       {
         bool immutable;
-        cow_vector<phsh_string> names;
       };
     struct S_if_statement
       {
@@ -152,13 +152,23 @@ class AIR_Node
         Xop xop;
         bool assign;
       };
+    struct S_unpack_struct_array
+      {
+        bool immutable;
+        uint32_t nelems;
+      };
+    struct S_unpack_struct_object
+      {
+        bool immutable;
+        cow_vector<phsh_string> keys;
+      };
 
     enum Index : uint8_t
       {
         index_clear_stack            =  0,
         index_execute_block          =  1,
-        index_declare_variables      =  2,
-        index_initialize_variables   =  3,
+        index_declare_variable       =  2,
+        index_initialize_variable    =  3,
         index_if_statement           =  4,
         index_switch_statement       =  5,
         index_do_while_statement     =  6,
@@ -182,13 +192,15 @@ class AIR_Node
         index_push_unnamed_array     = 24,
         index_push_unnamed_object    = 25,
         index_apply_operator         = 26,
+        index_unpack_struct_array    = 27,
+        index_unpack_struct_object   = 28,
       };
     using Xvariant = variant<
       ROCKET_CDR(
         , S_clear_stack            //  0,
         , S_execute_block          //  1,
-        , S_declare_variables      //  2,
-        , S_initialize_variables   //  3,
+        , S_declare_variable       //  2,
+        , S_initialize_variable    //  3,
         , S_if_statement           //  4,
         , S_switch_statement       //  5,
         , S_do_while_statement     //  6,
@@ -212,6 +224,8 @@ class AIR_Node
         , S_push_unnamed_array     // 24,
         , S_push_unnamed_object    // 25,
         , S_apply_operator         // 26,
+        , S_unpack_struct_array    // 27,
+        , S_unpack_struct_object   // 28,
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 

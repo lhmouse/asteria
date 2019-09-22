@@ -420,26 +420,32 @@ namespace Asteria {
 
     opt<Statement> do_accept_variable_definition_opt(Token_Stream& tstrm)
       {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
         // variable-definition ::=
-        //   "var" variable-declarator equal-initailizer-opt ( "," identifier equal-initializer-opt | "" ) ";"
+        //   "var" variable-declarator equal-initailizer-opt ( "," variable-declarator equal-initializer-opt | "" ) ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_var });
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        cow_bivector<cow_vector<phsh_string>, cow_vector<Xprunit>> vars;
+        // Each declaractor has its own source location.
+        cow_vector<Source_Location> slocs;
+        cow_vector<cow_vector<phsh_string>> decls;
+        cow_vector<cow_vector<Xprunit>> inits;
         for(;;) {
-          auto qnames = do_accept_variable_declarator_opt(tstrm);
-          if(!qnames) {
+          // Copy these parameters before reading from the stream which is destructive.
+          auto sloc = do_tell_source_location(tstrm);
+          // Accept a declarator, which may denote a single variable or a structured binding.
+          auto qdecl = do_accept_variable_declarator_opt(tstrm);
+          if(!qdecl) {
             do_throw_parser_error(parser_status_identifier_expected, tstrm);
           }
           auto qinit = do_accept_equal_initializer_opt(tstrm);
           if(!qinit) {
             qinit.emplace();
           }
-          vars.emplace_back(rocket::move(*qnames), rocket::move(*qinit));
-          // Look for the separator. The first declaration is required.
+          slocs.emplace_back(rocket::move(sloc));
+          decls.emplace_back(rocket::move(*qdecl));
+          inits.emplace_back(rocket::move(*qinit));
+          // Look for the separator.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
           if(!kpunct) {
             break;
@@ -449,32 +455,38 @@ namespace Asteria {
         if(!kpunct) {
           do_throw_parser_error(parser_status_semicolon_expected, tstrm);
         }
-        Statement::S_variables xstmt = { rocket::move(sloc), false, rocket::move(vars) };
+        Statement::S_variables xstmt = { false, rocket::move(slocs), rocket::move(decls), rocket::move(inits) };
         return rocket::move(xstmt);
       }
 
     opt<Statement> do_accept_immutable_variable_definition_opt(Token_Stream& tstrm)
       {
-        // Copy these parameters before reading from the stream which is destructive.
-        auto sloc = do_tell_source_location(tstrm);
         // immutable-variable-definition ::=
         //   "const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_const });
         if(!qkwrd) {
           return rocket::nullopt;
         }
-        cow_bivector<cow_vector<phsh_string>, cow_vector<Xprunit>> vars;
+        // Each declaractor has its own source location.
+        cow_vector<Source_Location> slocs;
+        cow_vector<cow_vector<phsh_string>> decls;
+        cow_vector<cow_vector<Xprunit>> inits;
         for(;;) {
-          auto qnames = do_accept_variable_declarator_opt(tstrm);
-          if(!qnames) {
+          // Copy these parameters before reading from the stream which is destructive.
+          auto sloc = do_tell_source_location(tstrm);
+          // Accept a declarator, which may denote a single variable or a structured binding.
+          auto qdecl = do_accept_variable_declarator_opt(tstrm);
+          if(!qdecl) {
             do_throw_parser_error(parser_status_identifier_expected, tstrm);
           }
           auto qinit = do_accept_equal_initializer_opt(tstrm);
           if(!qinit) {
             do_throw_parser_error(parser_status_equals_sign_expected, tstrm);
           }
-          vars.emplace_back(rocket::move(*qnames), rocket::move(*qinit));
-          // Look for the separator. The first declaration is required.
+          slocs.emplace_back(rocket::move(sloc));
+          decls.emplace_back(rocket::move(*qdecl));
+          inits.emplace_back(rocket::move(*qinit));
+          // Look for the separator.
           auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_comma });
           if(!kpunct) {
             break;
@@ -484,7 +496,7 @@ namespace Asteria {
         if(!kpunct) {
           do_throw_parser_error(parser_status_semicolon_expected, tstrm);
         }
-        Statement::S_variables xstmt = { rocket::move(sloc), true, rocket::move(vars) };
+        Statement::S_variables xstmt = { true, rocket::move(slocs), rocket::move(decls), rocket::move(inits) };
         return rocket::move(xstmt);
       }
 
