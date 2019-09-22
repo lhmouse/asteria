@@ -158,6 +158,10 @@ DCE_Result AIR_Node::optimize_dce()
 
     namespace {
 
+    using ParamU      = AVMC_Queue::ParamU;
+    using Executor    = AVMC_Queue::Executor;
+    using Enumerator  = AVMC_Queue::Enumerator;
+
     ///////////////////////////////////////////////////////////////////////////
     // Auxiliary functions
     ///////////////////////////////////////////////////////////////////////////
@@ -250,7 +254,7 @@ DCE_Result AIR_Node::optimize_dce()
         return static_cast<const SparamT*>(params);
       }
 
-    template<typename SparamT> Variable_Callback& do_pcast_enumerate(Variable_Callback& callback, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    template<typename SparamT> Variable_Callback& do_pcast_enumerate(Variable_Callback& callback, ParamU /*paramu*/, const void* params)
       {
         return do_pcast<SparamT>(params)->enumerate_variables(callback);
       }
@@ -258,7 +262,7 @@ DCE_Result AIR_Node::optimize_dce()
     // This is the trait struct for parameter types that implement `enumerate_variables()`.
     template<typename SparamT, typename = void> struct AVMC_Appender : SparamT
       {
-        AVMC_Queue::ParamU paramu;
+        ParamU paramu;
 
         constexpr AVMC_Appender()
           : SparamT(), paramu()
@@ -269,7 +273,7 @@ DCE_Result AIR_Node::optimize_dce()
           {
             return queue.request(sizeof(SparamT));
           }
-        template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
+        template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
           {
             return queue.append<executorT, do_pcast_enumerate<SparamT>>(this->paramu, static_cast<SparamT&&>(*this));
           }
@@ -278,7 +282,7 @@ DCE_Result AIR_Node::optimize_dce()
     // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
     template<typename SparamT> struct AVMC_Appender<SparamT, ASTERIA_VOID_T(typename SparamT::nonenumerable)> : SparamT
       {
-        AVMC_Queue::ParamU paramu;
+        ParamU paramu;
 
         constexpr AVMC_Appender()
           : SparamT(), paramu()
@@ -289,7 +293,7 @@ DCE_Result AIR_Node::optimize_dce()
           {
             return queue.request(sizeof(SparamT));
           }
-        template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
+        template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
           {
             return queue.append<executorT>(this->paramu, static_cast<SparamT&&>(*this));
           }
@@ -298,7 +302,7 @@ DCE_Result AIR_Node::optimize_dce()
     // This is the trait struct when there is no parameter.
     template<> struct AVMC_Appender<void, void>
       {
-        AVMC_Queue::ParamU paramu;
+        ParamU paramu;
 
         constexpr AVMC_Appender()
           : paramu()
@@ -309,7 +313,7 @@ DCE_Result AIR_Node::optimize_dce()
           {
             return queue.request(0);
           }
-        template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
+        template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
           {
             return queue.append<executorT>(this->paramu);
           }
@@ -488,14 +492,14 @@ DCE_Result AIR_Node::optimize_dce()
     // Executor functions
     ///////////////////////////////////////////////////////////////////////////
 
-    AIR_Status do_clear_stack(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_clear_stack(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // Clear the stack.
         ctx.stack().clear();
         return air_status_next;
       }
 
-    AIR_Status do_execute_block(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_execute_block(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& queue_body = do_pcast<Params_queues_fixed<1>>(params)->queues[0];
@@ -504,7 +508,7 @@ DCE_Result AIR_Node::optimize_dce()
         return do_execute_block(queue_body, ctx);
       }
 
-    AIR_Status do_declare_variable(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_declare_variable(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& immutable = static_cast<bool>(paramu.u8s[0]);
@@ -521,7 +525,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_initialize_variable(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_initialize_variable(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& immutable = static_cast<bool>(paramu.u8s[0]);
@@ -540,7 +544,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_if_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_if_statement(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& negative = static_cast<bool>(paramu.u8s[0]);
@@ -556,7 +560,7 @@ DCE_Result AIR_Node::optimize_dce()
         return do_execute_block(queue_false, ctx);
       }
 
-    AIR_Status do_switch_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_switch_statement(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& queues_labels = do_pcast<Params_switch>(params)->queues_labels;
@@ -615,7 +619,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_do_while_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_do_while_statement(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& queue_body = do_pcast<Params_queues_fixed<2>>(params)->queues[0];
@@ -643,7 +647,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_while_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_while_statement(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& negative = static_cast<bool>(paramu.u8s[0]);
@@ -671,7 +675,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_for_each_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_for_each_statement(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& name_key = do_pcast<Params_for_each>(params)->name_key;
@@ -753,7 +757,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_for_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_for_statement(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& queue_init = do_pcast<Params_queues_fixed<4>>(params)->queues[0];
@@ -794,7 +798,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_try_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& queue_try = do_pcast<Params_try>(params)->queue_try;
@@ -826,7 +830,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
       }
 
-    AIR_Status do_throw_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& sloc = do_pcast<Params_sloc>(params)->sloc;
@@ -857,7 +861,7 @@ DCE_Result AIR_Node::optimize_dce()
         throw except;
       }
 
-    AIR_Status do_assert_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_assert_statement(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& sloc = do_pcast<Params_sloc_msg>(params)->sloc;
@@ -876,7 +880,7 @@ DCE_Result AIR_Node::optimize_dce()
         throw_runtime_error(__func__, fmtss.extract_string());
       }
 
-    AIR_Status do_simple_status(Executive_Context& /*ctx*/, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_simple_status(Executive_Context& /*ctx*/, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& status = static_cast<AIR_Status>(paramu.u8s[0]);
@@ -885,7 +889,7 @@ DCE_Result AIR_Node::optimize_dce()
         return status;
       }
 
-    AIR_Status do_return_by_value(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_return_by_value(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // The result will have been pushed onto the top.
         auto& self = ctx.stack().open_top();
@@ -897,7 +901,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_return;
       }
 
-    AIR_Status do_push_literal(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_push_literal(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& val = do_pcast<Value>(params)[0];
@@ -908,7 +912,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_global_reference(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_push_global_reference(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& name = do_pcast<Params_name>(params)->name;
@@ -923,7 +927,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_local_reference(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_push_local_reference(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& depth = paramu.x32;
@@ -943,7 +947,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_bound_reference(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_push_bound_reference(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& ref = do_pcast<Reference>(params)[0];
@@ -953,7 +957,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_define_function(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_define_function(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& xnode = do_pcast<Params_func>(params)->xnode;
@@ -967,7 +971,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_branch_expression(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_branch_expression(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -983,7 +987,7 @@ DCE_Result AIR_Node::optimize_dce()
         return do_evaluate_branch(queue_false, assign, ctx);
       }
 
-    AIR_Status do_coalescence(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_coalescence(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -998,7 +1002,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_function_call(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_function_call(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& sloc = do_pcast<Params_call>(params)->sloc;
@@ -1067,7 +1071,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
       }
 
-    AIR_Status do_member_access(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_member_access(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& name = do_pcast<Params_name>(params)->name;
@@ -1078,7 +1082,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_unnamed_array(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_push_unnamed_array(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& nelems = paramu.x32;
@@ -1096,7 +1100,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_unnamed_object(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
+    AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& keys = do_pcast<Params_names>(params)->names;
@@ -1524,7 +1528,7 @@ DCE_Result AIR_Node::optimize_dce()
         return res;
       }
 
-    AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lhs = ctx.stack().get_top().open();
@@ -1545,7 +1549,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lhs = ctx.stack().get_top().open();
@@ -1566,7 +1570,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_subscr(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_apply_xop_subscr(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -1589,7 +1593,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_pos(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_pos(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1602,7 +1606,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_neg(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_neg(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1625,7 +1629,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_notb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_notb(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1648,7 +1652,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_notl(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_notl(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1661,7 +1665,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
@@ -1680,7 +1684,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
@@ -1699,7 +1703,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_unset(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_unset(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1711,7 +1715,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1739,7 +1743,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_typeof(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_typeof(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1752,7 +1756,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1775,7 +1779,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_isnan(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_isnan(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1798,7 +1802,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_isinf(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_isinf(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1821,7 +1825,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_abs(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_abs(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1844,7 +1848,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_signb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_signb(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1867,7 +1871,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_round(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_round(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1890,7 +1894,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_floor(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_floor(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1913,7 +1917,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_ceil(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_ceil(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1936,7 +1940,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_trunc(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_trunc(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1959,7 +1963,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_iround(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_iround(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1982,7 +1986,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2005,7 +2009,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_iceil(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_iceil(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2028,7 +2032,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2051,7 +2055,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2070,7 +2074,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2092,7 +2096,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2124,7 +2128,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_add(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_add(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2159,7 +2163,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sub(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_sub(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2189,7 +2193,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_mul(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_mul(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2228,7 +2232,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_div(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_div(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2253,7 +2257,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_mod(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_mod(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2278,7 +2282,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sll(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_sll(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2306,7 +2310,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_srl(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_srl(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2334,7 +2338,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sla(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_sla(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2362,7 +2366,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sra(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_sra(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2389,7 +2393,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_andb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_andb(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2415,7 +2419,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_orb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_orb(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2441,7 +2445,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_xorb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_xorb(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2467,7 +2471,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_assign(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_apply_xop_assign(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // Pop the RHS operand.
         auto rhs = ctx.stack().get_top().read();
@@ -2477,7 +2481,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_fma(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_fma(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -2500,7 +2504,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_enda(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_apply_xop_enda(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lref = ctx.stack().open_top();
@@ -2509,7 +2513,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_unpack_struct_array(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
+    AIR_Status do_unpack_struct_array(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& immutable = static_cast<bool>(paramu.y8s[0]);
@@ -2545,7 +2549,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_unpack_struct_object(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
+    AIR_Status do_unpack_struct_object(Executive_Context& ctx, ParamU paramu, const void* params)
       {
         // Unpack arguments.
         const auto& immutable = static_cast<bool>(paramu.u8s[0]);
