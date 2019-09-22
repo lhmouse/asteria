@@ -140,6 +140,15 @@ DCE_Result AIR_Node::optimize_dce()
       {
         return dce_prune;
       }
+    case index_function_call:
+      {
+        auto& altr = this->m_stor.as<index_function_call>();
+        // This node is part of an expression.
+        if(altr.tco_aware != tco_aware_none) {
+          return dce_prune;
+        }
+        return dce_none;
+      }
     default:
       {
         return dce_none;
@@ -198,9 +207,8 @@ DCE_Result AIR_Node::optimize_dce()
         // Discard the top which will be overwritten anyway.
         ctx.stack().pop();
         // Evaluate the branch.
-        auto status = queue.execute(ctx);
-        ROCKET_ASSERT(status == air_status_next);
-        return air_status_next;
+        // Be advised that you must forward the status code as is, because TCO'd expressions may return `air_status_return`.
+        return queue.execute(ctx);
       }
 
     AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
@@ -1032,7 +1040,9 @@ DCE_Result AIR_Node::optimize_dce()
           // Return it.
           Reference_Root::S_tail_call xref = { rocket::move(tca) };
           self = rocket::move(xref);
-          return air_status_next;
+          // Force `air_status_return` if control flow reaches the end of a function.
+          // Otherwise a null reference is returned instead of this TCO wrapper, which can then never be unpacked.
+          return air_status_return;
         }
         // Perform a non-proper call.
         try {
