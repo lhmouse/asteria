@@ -827,14 +827,11 @@ DCE_Result AIR_Node::optimize_dce()
         // Note that the operand must not have been empty for this code.
         auto value = ctx.stack().get_top().read();
         try {
-          // Unpack the nested exception, if any.
+          // Unpack nested exceptions, if any.
           auto eptr = std::current_exception();
           if(eptr) {
             std::rethrow_exception(eptr);
           }
-          // If no nested exception exists, construct a fresh one.
-          Exception except(sloc, rocket::move(value));
-          throw except;
         }
         catch(Exception& except) {
           // Modify it in place. Don't bother allocating a new one.
@@ -847,6 +844,9 @@ DCE_Result AIR_Node::optimize_dce()
           except.push_frame_throw(sloc, rocket::move(value));
           throw except;
         }
+        // If no nested exception exists, construct a fresh one.
+        Exception except(sloc, rocket::move(value));
+        throw except;
       }
 
     AIR_Status do_assert_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
