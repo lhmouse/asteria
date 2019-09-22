@@ -43,7 +43,8 @@ class Statement
     struct S_switch
       {
         cow_vector<Xprunit> ctrl;
-        cow_bivector<cow_vector<Xprunit>, cow_vector<Statement>> clauses;
+        cow_vector<cow_vector<Xprunit>> labels;
+        cow_vector<cow_vector<Statement>> bodies;
       };
     struct S_do_while
       {

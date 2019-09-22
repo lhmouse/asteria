@@ -213,20 +213,23 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Generate code for the control expression.
         ROCKET_ASSERT(!altr.ctrl.empty());
         do_generate_expression_partial(code, opts, tco_aware_none, ctx, altr.ctrl);
-        // Create a fresh context for the `switch` body.
-        // Be advised that all clauses inside a `switch` statement share the same context.
-        Analytic_Context ctx_body(rocket::ref(ctx));
-        cow_vector<phsh_string> names;
         // Generate code for all clauses.
         cow_vector<cow_vector<AIR_Node>> code_labels;
         cow_vector<cow_vector<AIR_Node>> code_bodies;
         cow_vector<cow_vector<phsh_string>> names_added;
-        for(const auto& p : altr.clauses) {
+        // Create a fresh context for the `switch` body.
+        // Be advised that all clauses inside a `switch` statement share the same context.
+        Analytic_Context ctx_body(rocket::ref(ctx));
+        cow_vector<phsh_string> names;
+        // Get the number of clauses.
+        auto nclauses = altr.labels.size();
+        ROCKET_ASSERT(nclauses == altr.bodies.size());
+        for(size_t i = 0; i != nclauses; ++i) {
           // Generate code for the label.
-          do_generate_expression_partial(code_labels.emplace_back(), opts, tco_aware_none, ctx_body, p.first);
+          do_generate_expression_partial(code_labels.emplace_back(), opts, tco_aware_none, ctx_body, altr.labels[i]);
           // Generate code for the clause and accumulate names.
           // This cannot be TCO'd.
-          do_generate_statement_list(code_bodies.emplace_back(), std::addressof(names), ctx_body, opts, tco_aware_none, p.second);
+          do_generate_statement_list(code_bodies.emplace_back(), std::addressof(names), ctx_body, opts, tco_aware_none, altr.bodies[i]);
           names_added.emplace_back(names);
         }
         // Encode arguments.

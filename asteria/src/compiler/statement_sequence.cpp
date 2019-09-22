@@ -642,86 +642,6 @@ namespace Asteria {
         return rocket::move(xstmt);
       }
 
-    opt<pair<cow_vector<Xprunit>, cow_vector<Statement>>> do_accept_case_clause_opt(Token_Stream& tstrm)
-      {
-        // case-clause ::=
-        //   "case" expression ":" statement-list-opt
-        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_case });
-        if(!qkwrd) {
-          return rocket::nullopt;
-        }
-        auto qcond = do_accept_expression_opt(tstrm);
-        if(!qcond) {
-          do_throw_parser_error(parser_status_expression_expected, tstrm);
-        }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
-        if(!kpunct) {
-          do_throw_parser_error(parser_status_colon_expected, tstrm);
-        }
-        auto qclause = do_accept_statement_as_block_opt(tstrm);
-        if(!qclause) {
-          qclause.emplace();
-        }
-        return std::make_pair(rocket::move(*qcond), rocket::move(*qclause));
-      }
-
-    opt<pair<cow_vector<Xprunit>, cow_vector<Statement>>> do_accept_default_clause_opt(Token_Stream& tstrm)
-      {
-        // default-clause ::=
-        //   "default" ":" statement-list-opt
-        auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_default });
-        if(!qkwrd) {
-          return rocket::nullopt;
-        }
-        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
-        if(!kpunct) {
-          do_throw_parser_error(parser_status_colon_expected, tstrm);
-        }
-        auto qclause = do_accept_statement_as_block_opt(tstrm);
-        if(!qclause) {
-          qclause.emplace();
-        }
-        return std::make_pair(rocket::clear, rocket::move(*qclause));
-      }
-
-    opt<pair<cow_vector<Xprunit>, cow_vector<Statement>>> do_accept_switch_clause_opt(Token_Stream& tstrm)
-      {
-        // switch-clause ::=
-        //   case-clause | default-clause
-        auto qclause = do_accept_case_clause_opt(tstrm);
-        if(qclause) {
-          return qclause;
-        }
-        qclause = do_accept_default_clause_opt(tstrm);
-        if(qclause) {
-          return qclause;
-        }
-        return qclause;
-      }
-
-    opt<cow_bivector<cow_vector<Xprunit>, cow_vector<Statement>>> do_accept_switch_clause_list_opt(Token_Stream& tstrm)
-      {
-        // switch-clause-list ::=
-        //   switch-clause switch-clause-list-opt
-        auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
-        if(!kpunct) {
-          return rocket::nullopt;
-        }
-        cow_bivector<cow_vector<Xprunit>, cow_vector<Statement>> clauses;
-        for(;;) {
-          auto qclause = do_accept_switch_clause_opt(tstrm);
-          if(!qclause) {
-            break;
-          }
-          clauses.emplace_back(rocket::move(*qclause));
-        }
-        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
-        if(!kpunct) {
-          do_throw_parser_error(parser_status_closed_brace_or_switch_clause_expected, tstrm);
-        }
-        return rocket::move(clauses);
-      }
-
     opt<Statement> do_accept_switch_statement_opt(Token_Stream& tstrm)
       {
         // switch-statement ::=
@@ -730,6 +650,10 @@ namespace Asteria {
         //   "{" swtich-clause-list-opt "}"
         // switch-clause-list-opt ::=
         //   switch-clause-list | ""
+        // switch-clause-list ::=
+        //   switch-clause switch-clause-list-opt
+        // switch-clause ::=
+        //   ( "case" expression | "default" ) ":" statement-list-opt
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch });
         if(!qkwrd) {
           return rocket::nullopt;
@@ -746,11 +670,43 @@ namespace Asteria {
         if(!kpunct) {
           do_throw_parser_error(parser_status_closed_parenthesis_expected, tstrm);
         }
-        auto qclauses = do_accept_switch_clause_list_opt(tstrm);
-        if(!qclauses) {
+        // Parse the block by hand.
+        cow_vector<cow_vector<Xprunit>> labels;
+        cow_vector<cow_vector<Statement>> bodies;
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
+        if(!kpunct) {
           do_throw_parser_error(parser_status_open_brace_expected, tstrm);
         }
-        Statement::S_switch xstmt = { rocket::move(*qctrl), rocket::move(*qclauses) };
+        for(;;) {
+          qkwrd = do_accept_keyword_opt(tstrm, { keyword_case, keyword_default });
+          if(!qkwrd) {
+            break;
+          }
+          cow_vector<Xprunit> label;
+          if(*qkwrd == keyword_case) {
+            // The `case` label requires an expression argument.
+            auto qlabel = do_accept_expression_opt(tstrm);
+            if(!qlabel) {
+              do_throw_parser_error(parser_status_expression_expected, tstrm);
+            }
+            label = rocket::move(*qlabel);
+          }
+          kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
+          if(!kpunct) {
+            do_throw_parser_error(parser_status_colon_expected, tstrm);
+          }
+          auto qbody = do_accept_statement_as_block_opt(tstrm);
+          if(!qbody) {
+            qbody.emplace();
+          }
+          labels.emplace_back(rocket::move(label));
+          bodies.emplace_back(rocket::move(*qbody));
+        }
+        kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
+        if(!kpunct) {
+          do_throw_parser_error(parser_status_closed_brace_or_switch_clause_expected, tstrm);
+        }
+        Statement::S_switch xstmt = { rocket::move(*qctrl), rocket::move(labels), rocket::move(bodies) };
         return rocket::move(xstmt);
       }
 
