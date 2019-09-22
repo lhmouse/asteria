@@ -104,13 +104,14 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     case index_expression:
       {
         const auto& altr = this->m_stor.as<index_expression>();
-        // If the expression is empty, don't bother do anything.
-        if(!altr.expr.empty()) {
-          // Clear the stack.
-          do_generate_clear_stack(code);
-          // Evaluate the expression. Its value is discarded.
-          do_generate_expression_partial(code, opts, tco_aware, ctx, altr.expr);
+        if(altr.expr.empty()) {
+          // If the expression is empty, don't bother doing anything.
+          return code;
         }
+        // Clear the stack.
+        do_generate_clear_stack(code);
+        // Evaluate the expression. Its value is discarded.
+        do_generate_expression_partial(code, opts, tco_aware, ctx, altr.expr);
         return code;
       }
     case index_block:
