@@ -242,7 +242,7 @@ DCE_Result AIR_Node::optimize_dce()
         return static_cast<const SparamT*>(params);
       }
 
-    template<typename SparamT> Variable_Callback& do_pcast_enumerate(Variable_Callback& callback, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    template<typename SparamT> Variable_Callback& do_pcast_enumerate(Variable_Callback& callback, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         return do_pcast<SparamT>(params)->enumerate_variables(callback);
       }
@@ -250,11 +250,10 @@ DCE_Result AIR_Node::optimize_dce()
     // This is the trait struct for parameter types that implement `enumerate_variables()`.
     template<typename SparamT, typename = void> struct AVMC_Appender : SparamT
       {
-        uint8_t paramb;
-        uint32_t paramk;
+        AVMC_Queue::ParamU paramu;
 
         constexpr AVMC_Appender()
-          : SparamT(), paramb(), paramk()
+          : SparamT(), paramu()
           {
           }
 
@@ -264,18 +263,17 @@ DCE_Result AIR_Node::optimize_dce()
           }
         template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
           {
-            return queue.append<executorT, do_pcast_enumerate<SparamT>>(this->paramb, this->paramk, static_cast<SparamT&&>(*this));
+            return queue.append<executorT, do_pcast_enumerate<SparamT>>(this->paramu, static_cast<SparamT&&>(*this));
           }
       };
 
     // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
     template<typename SparamT> struct AVMC_Appender<SparamT, ASTERIA_VOID_T(typename SparamT::nonenumerable)> : SparamT
       {
-        uint8_t paramb;
-        uint32_t paramk;
+        AVMC_Queue::ParamU paramu;
 
         constexpr AVMC_Appender()
-          : SparamT(), paramb(), paramk()
+          : SparamT(), paramu()
           {
           }
 
@@ -285,18 +283,17 @@ DCE_Result AIR_Node::optimize_dce()
           }
         template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
           {
-            return queue.append<executorT>(this->paramb, this->paramk, static_cast<SparamT&&>(*this));
+            return queue.append<executorT>(this->paramu, static_cast<SparamT&&>(*this));
           }
       };
 
     // This is the trait struct when there is no parameter.
     template<> struct AVMC_Appender<void, void>
       {
-        uint8_t paramb;
-        uint32_t paramk;
+        AVMC_Queue::ParamU paramu;
 
         constexpr AVMC_Appender()
-          : paramb(), paramk()
+          : paramu()
           {
           }
 
@@ -306,7 +303,7 @@ DCE_Result AIR_Node::optimize_dce()
           }
         template<AVMC_Queue::Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
           {
-            return queue.append<executorT>(this->paramb, this->paramk);
+            return queue.append<executorT>(this->paramu);
           }
       };
 
@@ -380,35 +377,7 @@ DCE_Result AIR_Node::optimize_dce()
     // Parameter structs and variable enumeration callbacks
     ///////////////////////////////////////////////////////////////////////////
 
-    union SB_xrel
-      {
-        struct {
-          uint8_t assign : 1;
-          uint8_t expect : 2;
-          uint8_t negative : 1;
-        };
-        uint8_t paramb;
-
-        constexpr SB_xrel() noexcept
-          : paramb(0)
-          {
-          }
-        explicit constexpr SB_xrel(uint8_t xparamb) noexcept
-          : paramb(xparamb)
-          {
-          }
-        constexpr SB_xrel(bool xassign, Compare xexpect, bool xnegative) noexcept
-          : assign(xassign), expect(xexpect & 0b11), negative(xnegative)
-          {
-          }
-
-        constexpr operator uint8_t () const noexcept
-          {
-            return this->paramb;
-          }
-      };
-
-    template<size_t nqsT> struct SP_queues_fixed
+    template<size_t nqsT> struct Params_queues_fixed
       {
         AVMC_Queue queues[nqsT];
 
@@ -419,7 +388,7 @@ DCE_Result AIR_Node::optimize_dce()
           }
       };
 
-    struct SP_switch
+    struct Params_switch
       {
         cow_vector<AVMC_Queue> queues_labels;
         cow_vector<AVMC_Queue> queues_bodies;
@@ -433,7 +402,7 @@ DCE_Result AIR_Node::optimize_dce()
           }
       };
 
-    struct SP_for_each
+    struct Params_for_each
       {
         phsh_string name_key;
         phsh_string name_mapped;
@@ -448,7 +417,7 @@ DCE_Result AIR_Node::optimize_dce()
           }
       };
 
-    struct SP_try
+    struct Params_try
       {
         AVMC_Queue queue_try;
         Source_Location sloc;
@@ -463,28 +432,28 @@ DCE_Result AIR_Node::optimize_dce()
           }
       };
 
-    struct SP_name
+    struct Params_name
       {
         phsh_string name;
 
         using nonenumerable = std::true_type;
       };
 
-    struct SP_names
+    struct Params_names
       {
         cow_vector<phsh_string> names;
 
         using nonenumerable = std::true_type;
       };
 
-    struct SP_sloc
+    struct Params_sloc
       {
         Source_Location sloc;
 
         using nonenumerable = std::true_type;
       };
 
-    struct SP_sloc_msg
+    struct Params_sloc_msg
       {
         Source_Location sloc;
         cow_string msg;
@@ -492,14 +461,14 @@ DCE_Result AIR_Node::optimize_dce()
         using nonenumerable = std::true_type;
       };
 
-    struct SP_func
+    struct Params_func
       {
         AIR_Node::S_define_function xnode;
 
         using nonenumerable = std::true_type;
       };
 
-    struct SP_call
+    struct Params_call
       {
         Source_Location sloc;
         cow_vector<bool> args_by_refs;
@@ -511,27 +480,27 @@ DCE_Result AIR_Node::optimize_dce()
     // Executor functions
     ///////////////////////////////////////////////////////////////////////////
 
-    AIR_Status do_clear_stack(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_clear_stack(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // Clear the stack.
         ctx.stack().clear();
         return air_status_next;
       }
 
-    AIR_Status do_execute_block(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_execute_block(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& queue_body = do_pcast<SP_queues_fixed<1>>(params)->queues[0];
+        const auto& queue_body = do_pcast<Params_queues_fixed<1>>(params)->queues[0];
 
         // Execute the body on a new context.
         return do_execute_block(queue_body, ctx);
       }
 
-    AIR_Status do_declare_variable(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_declare_variable(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& immutable = paramb != 0;
-        const auto& name = do_pcast<SP_name>(params)->name;
+        const auto& immutable = static_cast<bool>(paramu.u8s[0]);
+        const auto& name = do_pcast<Params_name>(params)->name;
 
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();
@@ -544,10 +513,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_initialize_variable(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_initialize_variable(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& immutable = paramb != 0;
+        const auto& immutable = static_cast<bool>(paramu.u8s[0]);
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -563,12 +532,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_if_statement(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_if_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& negative = paramb != 0;
-        const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
-        const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
+        const auto& negative = static_cast<bool>(paramu.u8s[0]);
+        const auto& queue_true = do_pcast<Params_queues_fixed<2>>(params)->queues[0];
+        const auto& queue_false = do_pcast<Params_queues_fixed<2>>(params)->queues[1];
 
         // Check the value of the condition.
         if(ctx.stack().get_top().read().test() != negative) {
@@ -579,12 +548,12 @@ DCE_Result AIR_Node::optimize_dce()
         return do_execute_block(queue_false, ctx);
       }
 
-    AIR_Status do_switch_statement(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_switch_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& queues_labels = do_pcast<SP_switch>(params)->queues_labels;
-        const auto& queues_bodies = do_pcast<SP_switch>(params)->queues_bodies;
-        const auto& names_added = do_pcast<SP_switch>(params)->names_added;
+        const auto& queues_labels = do_pcast<Params_switch>(params)->queues_labels;
+        const auto& queues_bodies = do_pcast<Params_switch>(params)->queues_bodies;
+        const auto& names_added = do_pcast<Params_switch>(params)->names_added;
 
         // Read the value of the condition.
         auto value = ctx.stack().get_top().read();
@@ -638,12 +607,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_do_while_statement(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_do_while_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
-        const auto& negative = paramb != 0;
-        const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
+        const auto& queue_body = do_pcast<Params_queues_fixed<2>>(params)->queues[0];
+        const auto& negative = static_cast<bool>(paramu.u8s[0]);
+        const auto& queue_cond = do_pcast<Params_queues_fixed<2>>(params)->queues[1];
 
         // This is the same as the `do...while` statement in C.
         for(;;) {
@@ -666,12 +635,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_while_statement(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_while_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& negative = paramb != 0;
-        const auto& queue_cond = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
-        const auto& queue_body = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
+        const auto& negative = static_cast<bool>(paramu.u8s[0]);
+        const auto& queue_cond = do_pcast<Params_queues_fixed<2>>(params)->queues[0];
+        const auto& queue_body = do_pcast<Params_queues_fixed<2>>(params)->queues[1];
 
         // This is the same as the `while` statement in C.
         for(;;) {
@@ -694,13 +663,13 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_for_each_statement(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_for_each_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& name_key = do_pcast<SP_for_each>(params)->name_key;
-        const auto& name_mapped = do_pcast<SP_for_each>(params)->name_mapped;
-        const auto& queue_init = do_pcast<SP_for_each>(params)->queue_init;
-        const auto& queue_body = do_pcast<SP_for_each>(params)->queue_body;
+        const auto& name_key = do_pcast<Params_for_each>(params)->name_key;
+        const auto& name_mapped = do_pcast<Params_for_each>(params)->name_mapped;
+        const auto& queue_init = do_pcast<Params_for_each>(params)->queue_init;
+        const auto& queue_body = do_pcast<Params_for_each>(params)->queue_body;
 
         // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
         Executive_Context ctx_for(rocket::ref(ctx));
@@ -776,13 +745,13 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_for_statement(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_for_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& queue_init = do_pcast<SP_queues_fixed<4>>(params)->queues[0];
-        const auto& queue_cond = do_pcast<SP_queues_fixed<4>>(params)->queues[1];
-        const auto& queue_step = do_pcast<SP_queues_fixed<4>>(params)->queues[2];
-        const auto& queue_body = do_pcast<SP_queues_fixed<4>>(params)->queues[3];
+        const auto& queue_init = do_pcast<Params_queues_fixed<4>>(params)->queues[0];
+        const auto& queue_cond = do_pcast<Params_queues_fixed<4>>(params)->queues[1];
+        const auto& queue_step = do_pcast<Params_queues_fixed<4>>(params)->queues[2];
+        const auto& queue_body = do_pcast<Params_queues_fixed<4>>(params)->queues[3];
 
         // This is the same as the `for` statement in C.
         // We have to create an outer context due to the fact that names declared in the first segment outlast every iteration.
@@ -817,13 +786,13 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_try_statement(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_try_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& queue_try = do_pcast<SP_try>(params)->queue_try;
-        const auto& sloc = do_pcast<SP_try>(params)->sloc;
-        const auto& name_except = do_pcast<SP_try>(params)->name_except;
-        const auto& queue_catch = do_pcast<SP_try>(params)->queue_catch;
+        const auto& queue_try = do_pcast<Params_try>(params)->queue_try;
+        const auto& sloc = do_pcast<Params_try>(params)->sloc;
+        const auto& name_except = do_pcast<Params_try>(params)->name_except;
+        const auto& queue_catch = do_pcast<Params_try>(params)->queue_catch;
 
         // This is almost identical to JavaScript.
         try {
@@ -849,10 +818,10 @@ DCE_Result AIR_Node::optimize_dce()
         }
       }
 
-    AIR_Status do_throw_statement(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_throw_statement(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& sloc = do_pcast<SP_sloc>(params)->sloc;
+        const auto& sloc = do_pcast<Params_sloc>(params)->sloc;
 
         // Read the value to throw.
         // Note that the operand must not have been empty for this code.
@@ -880,12 +849,12 @@ DCE_Result AIR_Node::optimize_dce()
         }
       }
 
-    AIR_Status do_assert_statement(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_assert_statement(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& sloc = do_pcast<SP_sloc_msg>(params)->sloc;
-        const auto& negative = paramb != 0;
-        const auto& msg = do_pcast<SP_sloc_msg>(params)->msg;
+        const auto& sloc = do_pcast<Params_sloc_msg>(params)->sloc;
+        const auto& negative = static_cast<bool>(paramu.u8s[0]);
+        const auto& msg = do_pcast<Params_sloc_msg>(params)->msg;
 
         // Check the value of the condition.
         if(ctx.stack().get_top().read().test() != negative) {
@@ -899,16 +868,16 @@ DCE_Result AIR_Node::optimize_dce()
         throw_runtime_error(__func__, fmtss.extract_string());
       }
 
-    AIR_Status do_simple_status(Executive_Context& /*ctx*/, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_simple_status(Executive_Context& /*ctx*/, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& status = static_cast<AIR_Status>(paramb);
+        const auto& status = static_cast<AIR_Status>(paramu.u8s[0]);
 
         // Return the status as is.
         return status;
       }
 
-    AIR_Status do_return_by_value(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_return_by_value(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // The result will have been pushed onto the top.
         auto& self = ctx.stack().open_top();
@@ -920,7 +889,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_return;
       }
 
-    AIR_Status do_push_literal(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_push_literal(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& val = do_pcast<Value>(params)[0];
@@ -931,10 +900,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_global_reference(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_push_global_reference(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& name = do_pcast<SP_name>(params)->name;
+        const auto& name = do_pcast<Params_name>(params)->name;
 
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(name);
@@ -946,11 +915,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_local_reference(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t paramk, const void* params)
+    AIR_Status do_push_local_reference(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& depth = paramk;
-        const auto& name = do_pcast<SP_name>(params)->name;
+        const auto& depth = paramu.x32;
+        const auto& name = do_pcast<Params_name>(params)->name;
 
         // Get the context.
         const Executive_Context* qctx = std::addressof(ctx);
@@ -966,7 +935,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_bound_reference(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_push_bound_reference(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& ref = do_pcast<Reference>(params)[0];
@@ -976,10 +945,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_define_function(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_define_function(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& xnode = do_pcast<SP_func>(params)->xnode;
+        const auto& xnode = do_pcast<Params_func>(params)->xnode;
 
         // Instantiate the function.
         auto qtarget = do_instantiate(xnode, std::addressof(ctx));
@@ -990,12 +959,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_branch_expression(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_branch_expression(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
-        const auto& queue_true = do_pcast<SP_queues_fixed<2>>(params)->queues[0];
-        const auto& queue_false = do_pcast<SP_queues_fixed<2>>(params)->queues[1];
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
+        const auto& queue_true = do_pcast<Params_queues_fixed<2>>(params)->queues[0];
+        const auto& queue_false = do_pcast<Params_queues_fixed<2>>(params)->queues[1];
 
         // Check the value of the condition.
         if(ctx.stack().get_top().read().test() != false) {
@@ -1006,11 +975,11 @@ DCE_Result AIR_Node::optimize_dce()
         return do_evaluate_branch(queue_false, assign, ctx);
       }
 
-    AIR_Status do_coalescence(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_coalescence(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
-        const auto& queue_null = do_pcast<SP_queues_fixed<1>>(params)->queues[0];
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
+        const auto& queue_null = do_pcast<Params_queues_fixed<1>>(params)->queues[0];
 
         // Check the value of the condition.
         if(ctx.stack().get_top().read().is_null() != false) {
@@ -1021,12 +990,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_function_call(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_function_call(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& sloc = do_pcast<SP_call>(params)->sloc;
-        const auto& args_by_refs = do_pcast<SP_call>(params)->args_by_refs;
-        const auto& tco_aware = static_cast<TCO_Aware>(paramb);
+        const auto& sloc = do_pcast<Params_call>(params)->sloc;
+        const auto& args_by_refs = do_pcast<Params_call>(params)->args_by_refs;
+        const auto& tco_aware = static_cast<TCO_Aware>(paramu.u8s[0]);
 
         // Pop arguments off the stack backwards.
         cow_vector<Reference> args;
@@ -1088,10 +1057,10 @@ DCE_Result AIR_Node::optimize_dce()
         }
       }
 
-    AIR_Status do_member_access(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_member_access(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& name = do_pcast<SP_name>(params)->name;
+        const auto& name = do_pcast<Params_name>(params)->name;
 
         // Append a modifier to the reference at the top.
         Reference_Modifier::S_object_key xmod = { name };
@@ -1099,10 +1068,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_unnamed_array(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t paramk, const void* /*params*/)
+    AIR_Status do_push_unnamed_array(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& nelems = paramk;
+        const auto& nelems = paramu.x32;
 
         // Pop elements from the stack and store them in an array backwards.
         G_array array;
@@ -1117,10 +1086,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_push_unnamed_object(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_push_unnamed_object(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& keys = do_pcast<SP_names>(params)->names;
+        const auto& keys = do_pcast<Params_names>(params)->names;
 
         // Pop elements from the stack and store them in an object backwards.
         G_object object;
@@ -1545,7 +1514,7 @@ DCE_Result AIR_Node::optimize_dce()
         return res;
       }
 
-    AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lhs = ctx.stack().get_top().open();
@@ -1566,7 +1535,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lhs = ctx.stack().get_top().open();
@@ -1587,7 +1556,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_subscr(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_subscr(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -1610,10 +1579,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_pos(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_pos(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1623,10 +1592,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_neg(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_neg(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1646,10 +1615,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_notb(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_notb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1669,10 +1638,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_notl(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_notl(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         const auto& rhs = ctx.stack().get_top().read();
@@ -1682,7 +1651,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
@@ -1701,7 +1670,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& rhs = ctx.stack().get_top().open();
@@ -1720,10 +1689,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_unset(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_unset(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().unset();
@@ -1732,10 +1701,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         const auto& rhs = ctx.stack().get_top().read();
@@ -1760,10 +1729,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_typeof(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_typeof(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         const auto& rhs = ctx.stack().get_top().read();
@@ -1773,10 +1742,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1796,10 +1765,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_isnan(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_isnan(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1819,10 +1788,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_isinf(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_isinf(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1842,10 +1811,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_abs(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_abs(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1865,10 +1834,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_signb(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_signb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1888,10 +1857,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_round(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_round(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1911,10 +1880,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_floor(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_floor(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1934,10 +1903,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_ceil(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_ceil(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1957,10 +1926,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_trunc(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_trunc(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -1980,10 +1949,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_iround(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_iround(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2003,10 +1972,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2026,10 +1995,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_iceil(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_iceil(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2049,10 +2018,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is unary.
         auto rhs = ctx.stack().get_top().read();
@@ -2072,12 +2041,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = SB_xrel(paramb).assign != 0;
-        const auto& expect = static_cast<Compare>(SB_xrel(paramb).expect);
-        const auto& negative = SB_xrel(paramb).negative != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
+        const auto& expect = static_cast<Compare>(paramu.u8s[1]);
+        const auto& negative = static_cast<bool>(paramu.u8s[2]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2091,12 +2060,12 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = SB_xrel(paramb).assign != 0;
-        const auto& expect = static_cast<Compare>(SB_xrel(paramb).expect);
-        const auto& negative = SB_xrel(paramb).negative != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
+        const auto& expect = static_cast<Compare>(paramu.u8s[1]);
+        const auto& negative = static_cast<bool>(paramu.u8s[2]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2113,10 +2082,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2145,10 +2114,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_add(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_add(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2180,10 +2149,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sub(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_sub(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2210,10 +2179,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_mul(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_mul(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2249,10 +2218,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_div(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_div(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2274,10 +2243,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_mod(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_mod(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2299,10 +2268,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sll(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_sll(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2327,10 +2296,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_srl(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_srl(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2355,10 +2324,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sla(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_sla(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2383,10 +2352,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_sra(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_sra(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2410,10 +2379,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_andb(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_andb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2436,10 +2405,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_orb(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_orb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2462,10 +2431,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_xorb(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_xorb(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is binary.
         auto rhs = ctx.stack().get_top().read();
@@ -2488,7 +2457,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_assign(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_assign(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // Pop the RHS operand.
         auto rhs = ctx.stack().get_top().read();
@@ -2498,10 +2467,10 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_fma(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_fma(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& assign = paramb != 0;
+        const auto& assign = static_cast<bool>(paramu.u8s[0]);
 
         // This operator is ternary.
         auto rhs = ctx.stack().get_top().read();
@@ -2521,7 +2490,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_enda(Executive_Context& ctx, uint8_t /*paramb*/, uint32_t /*paramk*/, const void* /*params*/)
+    AIR_Status do_apply_xop_enda(Executive_Context& ctx, AVMC_Queue::ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lref = ctx.stack().open_top();
@@ -2530,11 +2499,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_unpack_struct_array(Executive_Context& ctx, uint8_t paramb, uint32_t paramk, const void* /*params*/)
+    AIR_Status do_unpack_struct_array(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
-        const auto& immutable = paramb != 0;
-        const auto& nelems = paramk;
+        const auto& immutable = static_cast<bool>(paramu.y8s[0]);
+        const auto& nelems = paramu.y32;
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -2566,11 +2535,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_unpack_struct_object(Executive_Context& ctx, uint8_t paramb, uint32_t /*paramk*/, const void* params)
+    AIR_Status do_unpack_struct_object(Executive_Context& ctx, AVMC_Queue::ParamU paramu, const void* params)
       {
         // Unpack arguments.
-        const auto& immutable = paramb != 0;
-        const auto& keys = do_pcast<SP_names>(params)->names;
+        const auto& immutable = static_cast<bool>(paramu.u8s[0]);
+        const auto& keys = do_pcast<Params_names>(params)->names;
 
         // Read the value of the initializer.
         // Note that the initializer must not have been empty for this function.
@@ -2623,10 +2592,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_execute_block:
       {
         const auto& altr = this->m_stor.as<index_execute_block>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the body.
-        AVMC_Appender<SP_queues_fixed<1>> avmcp;
+        AVMC_Appender<Params_queues_fixed<1>> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2638,15 +2606,14 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_declare_variable:
       {
         const auto& altr = this->m_stor.as<index_declare_variable>();
-        // `paramb` is `immutable`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is unused.
         // `params` points to the name.
-        AVMC_Appender<SP_name> avmcp;
+        AVMC_Appender<Params_name> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramb = altr.immutable;
+        avmcp.paramu.u8s[0] = altr.immutable;
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_declare_variable>(queue);
@@ -2654,30 +2621,28 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_initialize_variable:
       {
         const auto& altr = this->m_stor.as<index_initialize_variable>();
-        // `paramb` is `immutable`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is `immutable`.
         // `params` is unused.
         AVMC_Appender<void> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramb = altr.immutable;
+        avmcp.paramu.u8s[0] = altr.immutable;
         // Push a new node.
         return avmcp.output<do_initialize_variable>(queue);
       }
     case index_if_statement:
       {
         const auto& altr = this->m_stor.as<index_if_statement>();
-        // `paramb` is `negative`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is `negative`.
         // `params` points to the two branches.
-        AVMC_Appender<SP_queues_fixed<2>> avmcp;
+        AVMC_Appender<Params_queues_fixed<2>> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramb = altr.negative;
+        avmcp.paramu.u8s[0] = altr.negative;
         do_solidify_queue(avmcp.queues[0], altr.code_true);
         do_solidify_queue(avmcp.queues[1], altr.code_false);
         // Push a new node.
@@ -2686,10 +2651,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_switch_statement:
       {
         const auto& altr = this->m_stor.as<index_switch_statement>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to all clauses.
-        AVMC_Appender<SP_switch> avmcp;
+        AVMC_Appender<Params_switch> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2705,16 +2669,15 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_do_while_statement:
       {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
-        // `paramb` is `negative`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is `negative`.
         // `params` points to the body and the condition.
-        AVMC_Appender<SP_queues_fixed<2>> avmcp;
+        AVMC_Appender<Params_queues_fixed<2>> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         do_solidify_queue(avmcp.queues[0], altr.code_body);
-        avmcp.paramb = altr.negative;
+        avmcp.paramu.u8s[0] = altr.negative;
         do_solidify_queue(avmcp.queues[1], altr.code_cond);
         // Push a new node.
         return avmcp.output<do_do_while_statement>(queue);
@@ -2722,15 +2685,14 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_while_statement:
       {
         const auto& altr = this->m_stor.as<index_while_statement>();
-        // `paramb` is `negative`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is `negative`.
         // `params` points to the condition and the body.
-        AVMC_Appender<SP_queues_fixed<2>> avmcp;
+        AVMC_Appender<Params_queues_fixed<2>> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramb = altr.negative;
+        avmcp.paramu.u8s[0] = altr.negative;
         do_solidify_queue(avmcp.queues[0], altr.code_cond);
         do_solidify_queue(avmcp.queues[1], altr.code_body);
         // Push a new node.
@@ -2739,10 +2701,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_for_each_statement:
       {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the range initializer and the body.
-        AVMC_Appender<SP_for_each> avmcp;
+        AVMC_Appender<Params_for_each> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2757,10 +2718,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_for_statement:
       {
         const auto& altr = this->m_stor.as<index_for_statement>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the triplet and the body.
-        AVMC_Appender<SP_queues_fixed<4>> avmcp;
+        AVMC_Appender<Params_queues_fixed<4>> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2775,10 +2735,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_try_statement:
       {
         const auto& altr = this->m_stor.as<index_try_statement>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the clauses.
-        AVMC_Appender<SP_try> avmcp;
+        AVMC_Appender<Params_try> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2793,10 +2752,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_throw_statement:
       {
         const auto& altr = this->m_stor.as<index_throw_statement>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the source location.
-        AVMC_Appender<SP_sloc> avmcp;
+        AVMC_Appender<Params_sloc> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2808,16 +2766,15 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_assert_statement:
       {
         const auto& altr = this->m_stor.as<index_assert_statement>();
-        // `paramb` is `negative`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is `negative`.
         // `params` points to the source location and the message.
-        AVMC_Appender<SP_sloc_msg> avmcp;
+        AVMC_Appender<Params_sloc_msg> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         avmcp.sloc = altr.sloc;
-        avmcp.paramb = altr.negative;
+        avmcp.paramu.u8s[0] = altr.negative;
         avmcp.msg = altr.msg;
         // Push a new node.
         return avmcp.output<do_assert_statement>(queue);
@@ -2825,15 +2782,14 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_simple_status:
       {
         const auto& altr = this->m_stor.as<index_simple_status>();
-        // `paramb` is `status`.
-        // `paramk` is unused.
+        // `paramu.u8s[0] ` is `status`.
         // `params` is unused.
         AVMC_Appender<void> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramb = altr.status;
+        avmcp.paramu.u8s[0] = altr.status;
         // Push a new node.
         return avmcp.output<do_simple_status>(queue);
       }
@@ -2853,8 +2809,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_literal:
       {
         const auto& altr = this->m_stor.as<index_push_literal>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to a copy of `val`.
         AVMC_Appender<Value> avmcp;
         if(ipass == 0) {
@@ -2868,10 +2823,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_global_reference:
       {
         const auto& altr = this->m_stor.as<index_push_global_reference>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the name.
-        AVMC_Appender<SP_name> avmcp;
+        AVMC_Appender<Params_name> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2883,15 +2837,14 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_local_reference:
       {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
-        // `paramb` is unused.
-        // `paramk` is `depth`.
+        // `paramu.x32` is `depth`.
         // `params` points to the name.
-        AVMC_Appender<SP_name> avmcp;
+        AVMC_Appender<Params_name> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramk = altr.depth;
+        avmcp.paramu.x32 = altr.depth;
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_push_local_reference>(queue);
@@ -2899,8 +2852,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_bound_reference:
       {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to a copy of `ref`.
         AVMC_Appender<Reference> avmcp;
         if(ipass == 0) {
@@ -2914,10 +2866,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_define_function:
       {
         const auto& altr = this->m_stor.as<index_define_function>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the name, the parameter list, and the body of the function.
-        AVMC_Appender<SP_func> avmcp;
+        AVMC_Appender<Params_func> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2929,60 +2880,56 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_branch_expression:
       {
         const auto& altr = this->m_stor.as<index_branch_expression>();
-        // `paramb` is `assign`.
-        // `paramk` is unused.
+        // `param.u8s[0]` is `assign`.
         // `params` points to the two branches.
-        AVMC_Appender<SP_queues_fixed<2>> avmcp;
+        AVMC_Appender<Params_queues_fixed<2>> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         do_solidify_queue(avmcp.queues[0], altr.code_true);
         do_solidify_queue(avmcp.queues[1], altr.code_false);
-        avmcp.paramb = altr.assign;
+        avmcp.paramu.u8s[0] = altr.assign;
         // Push a new node.
         return avmcp.output<do_branch_expression>(queue);
       }
     case index_coalescence:
       {
         const auto& altr = this->m_stor.as<index_coalescence>();
-        // `paramb` is `assign`.
-        // `paramk` is unused.
+        // `param.u8s[0]` is `assign`.
         // `params` points to the alternative.
-        AVMC_Appender<SP_queues_fixed<1>> avmcp;
+        AVMC_Appender<Params_queues_fixed<1>> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         do_solidify_queue(avmcp.queues[0], altr.code_null);
-        avmcp.paramb = altr.assign;
+        avmcp.paramu.u8s[0] = altr.assign;
         // Push a new node.
         return avmcp.output<do_coalescence>(queue);
       }
     case index_function_call:
       {
         const auto& altr = this->m_stor.as<index_function_call>();
-        // `paramb` is `tco_aware`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is `tco_aware`.
         // `params` points to the source location and the argument avmcp.cifier vector.
-        AVMC_Appender<SP_call> avmcp;
+        AVMC_Appender<Params_call> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.args_by_refs = altr.args_by_refs;
-        avmcp.paramb = altr.tco_aware;
+        avmcp.paramu.u8s[0] = altr.tco_aware;
         // Push a new node.
         return avmcp.output<do_function_call>(queue);
       }
     case index_member_access:
       {
         const auto& altr = this->m_stor.as<index_member_access>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the name.
-        AVMC_Appender<SP_name> avmcp;
+        AVMC_Appender<Params_name> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -2994,25 +2941,23 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_push_unnamed_array:
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
-        // `paramb` is unused.
-        // `paramk` is `nelems`.
+        // `paramu.x32` is `nelems`.
         // `params` is unused.
         AVMC_Appender<void> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramk = altr.nelems;
+        avmcp.paramu.x32 = altr.nelems;
         // Push a new node.
         return avmcp.output<do_push_unnamed_array>(queue);
       }
     case index_push_unnamed_object:
       {
         const auto& altr = this->m_stor.as<index_push_unnamed_object>();
-        // `paramb` is unused.
-        // `paramk` is unused.
+        // `paramu` is unused.
         // `params` points to the keys.
-        AVMC_Appender<SP_names> avmcp;
+        AVMC_Appender<Params_names> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
@@ -3024,8 +2969,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_apply_operator:
       {
         const auto& altr = this->m_stor.as<index_apply_operator>();
-        // `paramb` is `assign`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is `assign`. Other fields may be used depending on the operator.
         // `params` is unused.
         AVMC_Appender<void> avmcp;
         if(ipass == 0) {
@@ -3035,37 +2979,49 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         switch(rocket::weaken_enum(altr.xop)) {
         case xop_cmp_eq:
           {
-            avmcp.paramb = SB_xrel(altr.assign, compare_equal, 0);
+            avmcp.paramu.u8s[0] = altr.assign;
+            avmcp.paramu.u8s[1] = compare_equal;
+            avmcp.paramu.u8s[2] = false;
             break;
           }
         case xop_cmp_ne:
           {
-            avmcp.paramb = SB_xrel(altr.assign, compare_equal, 1);
+            avmcp.paramu.u8s[0] = altr.assign;
+            avmcp.paramu.u8s[1] = compare_equal;
+            avmcp.paramu.u8s[2] = true;
             break;
           }
         case xop_cmp_lt:
           {
-            avmcp.paramb = SB_xrel(altr.assign, compare_less, 0);
+            avmcp.paramu.u8s[0] = altr.assign;
+            avmcp.paramu.u8s[1] = compare_less;
+            avmcp.paramu.u8s[2] = false;
             break;
           }
         case xop_cmp_gt:
           {
-            avmcp.paramb = SB_xrel(altr.assign, compare_greater, 0);
+            avmcp.paramu.u8s[0] = altr.assign;
+            avmcp.paramu.u8s[1] = compare_greater;
+            avmcp.paramu.u8s[2] = false;
             break;
           }
         case xop_cmp_lte:
           {
-            avmcp.paramb = SB_xrel(altr.assign, compare_greater, 1);
+            avmcp.paramu.u8s[0] = altr.assign;
+            avmcp.paramu.u8s[1] = compare_greater;
+            avmcp.paramu.u8s[2] = true;
             break;
           }
         case xop_cmp_gte:
           {
-            avmcp.paramb = SB_xrel(altr.assign, compare_less, 1);
+            avmcp.paramu.u8s[0] = altr.assign;
+            avmcp.paramu.u8s[1] = compare_less;
+            avmcp.paramu.u8s[2] = true;
             break;
           }
         default:
           {
-            avmcp.paramb = altr.assign;
+            avmcp.paramu.u8s[0] = altr.assign;
             break;
           }
         }
@@ -3266,31 +3222,30 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_unpack_struct_array:
       {
         const auto& altr = this->m_stor.as<index_unpack_struct_array>();
-        // `paramb` is `immutable`.
-        // `paramk` is `nelems`.
+        // `paramu.y8s[0]` is `immutable`.
+        // `paramu.y32` is `nelems`.
         // `params` is unused.
         AVMC_Appender<void> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramb = altr.immutable;
-        avmcp.paramk = altr.nelems;
+        avmcp.paramu.y8s[0] = altr.immutable;
+        avmcp.paramu.y32 = altr.nelems;
         // Push a new node.
         return avmcp.output<do_unpack_struct_array>(queue);
       }
     case index_unpack_struct_object:
       {
         const auto& altr = this->m_stor.as<index_unpack_struct_object>();
-        // `paramb` is `immutable`.
-        // `paramk` is unused.
+        // `paramu.u8s[0]` is unused.
         // `params` points to the keys.
-        AVMC_Appender<SP_names> avmcp;
+        AVMC_Appender<Params_names> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramb = altr.immutable;
+        avmcp.paramu.u8s[0] = altr.immutable;
         avmcp.names = altr.keys;
         // Push a new node.
         return avmcp.output<do_unpack_struct_object>(queue);
