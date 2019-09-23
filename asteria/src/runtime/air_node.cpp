@@ -5,6 +5,7 @@
 #include "air_node.hpp"
 #include "executive_context.hpp"
 #include "global_context.hpp"
+#include "abstract_hooks.hpp"
 #include "evaluation_stack.hpp"
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
@@ -465,6 +466,14 @@ DCE_Result AIR_Node::optimize_dce()
         using nonenumerable = std::true_type;
       };
 
+    struct Params_sloc_name
+      {
+        Source_Location sloc;
+        phsh_string name;
+
+        using nonenumerable = std::true_type;
+      };
+
     struct Params_sloc_msg
       {
         Source_Location sloc;
@@ -512,10 +521,11 @@ DCE_Result AIR_Node::optimize_dce()
       {
         // Unpack arguments.
         const auto& immutable = static_cast<bool>(paramu.u8s[0]);
-        const auto& name = do_pcast<Params_name>(params)->name;
+        const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
+        const auto& name = do_pcast<Params_sloc_name>(params)->name;
 
         // Allocate a variable and initialize it to `null`.
-        auto var = ctx.global().create_variable();
+        auto var = ctx.global().create_variable(sloc, name);
         var->reset(G_null(), immutable);
         // Inject the variable into the current context.
         Reference_Root::S_variable xref = { rocket::move(var) };
@@ -686,8 +696,8 @@ DCE_Result AIR_Node::optimize_dce()
         // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
         Executive_Context ctx_for(rocket::ref(ctx));
         // Create a variable for the key.
-        auto key = ctx_for.global().create_variable();
-        key->reset(G_null(), true);
+        // Important: As long as this variable is immutable, there cannot be circular reference.
+        auto key = rocket::make_refcnt<Variable>();
         {
           Reference_Root::S_variable xref = { key };
           ctx_for.open_named_reference(name_key) = rocket::move(xref);
@@ -1048,18 +1058,26 @@ DCE_Result AIR_Node::optimize_dce()
           // Otherwise a null reference is returned instead of this TCO wrapper, which can then never be unpacked.
           return air_status_return;
         }
-        // Perform a non-proper call.
+        // Call the hook function if any.
+        auto qh = ctx.global().get_hooks_opt();
+        if(qh) {
+          qh->on_function_call(sloc, func);
+        }
         try {
+          // Perform a non-proper call.
           ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target);
           target->invoke(self, ctx.global(), rocket::move(args));
           self.finish_call(ctx.global());
           ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target);
-          return air_status_next;
         }
         catch(Exception& except) {
           ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.value());
           // Append the current frame and rethrow the exception.
           except.push_frame_func(sloc, func);
+          // Call the hook function if any.
+          if(qh) {
+            qh->on_function_except(sloc, func, except);
+          }
           throw;
         }
         catch(const std::exception& stdex) {
@@ -1067,8 +1085,17 @@ DCE_Result AIR_Node::optimize_dce()
           // Translate the exception, append the current frame, and throw the new exception.
           Exception except(stdex);
           except.push_frame_func(sloc, func);
+          // Call the hook function if any.
+          if(qh) {
+            qh->on_function_except(sloc, func, except);
+          }
           throw except;
         }
+        // Call the hook function if any.
+        if(qh) {
+          qh->on_function_return(sloc, func);
+        }
+        return air_status_next;
       }
 
     AIR_Status do_member_access(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
@@ -2620,13 +2647,14 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
       {
         const auto& altr = this->m_stor.as<index_declare_variable>();
         // `paramu.u8s[0]` is unused.
-        // `params` points to the name.
-        AVMC_Appender<Params_name> avmcp;
+        // `params` points to the source location and name.
+        AVMC_Appender<Params_sloc_name> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
         avmcp.paramu.u8s[0] = altr.immutable;
+        avmcp.sloc = altr.sloc;
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_declare_variable>(queue);

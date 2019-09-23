@@ -3,6 +3,8 @@
 
 #include "../precompiled.hpp"
 #include "reference.hpp"
+#include "global_context.hpp"
+#include "abstract_hooks.hpp"
 #include "exception.hpp"
 #include "../utilities.hpp"
 
@@ -93,6 +95,11 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       // Call the function now.
       const auto& sloc = tca->sloc();
       const auto& func = tca->func();
+      // Call the hook function if any.
+      auto qh = global.get_hooks_opt();
+      if(qh) {
+        qh->on_function_call(sloc, func);
+      }
       try {
         // Unwrap the function call.
         ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
@@ -104,6 +111,10 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside tail call at \'", sloc, "\' inside `", func, "`: ", except.value());
         // Append all frames that have been expanded so far and rethrow the exception.
         std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->func());  });
+        // Call the hook function if any.
+        if(qh) {
+          qh->on_function_except(sloc, func, except);
+        }
         throw;
       }
       catch(const std::exception& stdex) {
@@ -111,7 +122,15 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Exception except(stdex);
         std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->func());  });
+        // Call the hook function if any.
+        if(qh) {
+          qh->on_function_except(sloc, func, except);
+        }
         throw except;
+      }
+      // Call the hook function if any.
+      if(qh) {
+        qh->on_function_return(sloc, func);
       }
     }
     if(tco_conj == tco_aware_by_val) {

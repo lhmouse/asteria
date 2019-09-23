@@ -62,6 +62,7 @@ class Source_Location;
 class Value;
 class Abstract_Opaque;
 class Abstract_Function;
+class Abstract_Hooks;
 class Placeholder;
 class Reference_Root;
 class Reference_Modifier;

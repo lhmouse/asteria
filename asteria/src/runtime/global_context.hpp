@@ -13,9 +13,10 @@ namespace Asteria {
 class Global_Context final : public virtual Rcbase, public Abstract_Context
   {
   private:
-    rcptr<Rcbase> m_xph;
-    rcptr<Rcbase> m_prng;
-    rcptr<Rcbase> m_stdv;
+    rcptr<Rcbase> m_xph;  // the placeholder
+    rcptr<Rcbase> m_prng;  // the global pseudo random number generator
+    rcptr<Rcbase> m_stdv;  // the `std` variable
+    rcptr<Rcbase> m_hooks_opt;  // the hook callback dispatcher
 
   public:
     explicit Global_Context(API_Version version = api_version_latest)
@@ -47,7 +48,7 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
 
     // These are interfaces of the global garbage collector.
     Collector* get_collector_opt(GC_Generation gc_gen) const;
-    rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest) const;
+    rcptr<Variable> create_variable(const Source_Location& sloc, const phsh_string& name, GC_Generation gc_hint = gc_generation_newest) const;
     size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest) const;
 
     // These are interfaces of the placeholder.
@@ -62,6 +63,10 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
     const Value& get_std_member(const phsh_string& name) const;
     Value& open_std_member(const phsh_string& name);
     bool remove_std_member(const phsh_string& name);
+
+    // These are interfaces of the hook dispatcher.
+    rcptr<Abstract_Hooks> get_hooks_opt() const noexcept;
+    rcptr<Abstract_Hooks> set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept;
   };
 
 }  // namespace Asteria

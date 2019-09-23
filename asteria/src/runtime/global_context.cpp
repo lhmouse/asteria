@@ -6,6 +6,7 @@
 #include "placeholder.hpp"
 #include "random_number_generator.hpp"
 #include "generational_collector.hpp"
+#include "abstract_hooks.hpp"
 #include "variable.hpp"
 #include "../library/bindings_version.hpp"
 #include "../library/bindings_gc.hpp"
@@ -90,11 +91,11 @@ API_Version Global_Context::max_api_version() const noexcept
 
 void Global_Context::initialize(API_Version version)
   {
+    // Initialize global objects.
+    this->clear_named_references();
     // Initialize the global garbage collector.
     auto gcoll = rocket::make_refcnt<Generational_Collector>();
     this->tie_collector(gcoll);
-    // Initialize global objects.
-    this->clear_named_references();
     // Allocate a new placeholder.
     auto xph = rocket::make_refcnt<Placeholder>();
     this->m_xph = xph;
@@ -139,32 +140,44 @@ void Global_Context::initialize(API_Version version)
 
 Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
   {
-    auto coll = this->get_tied_collector_opt();
-    if(ROCKET_UNEXPECT(!coll)) {
-      // GC is disabled.
-      return nullptr;
+    Collector* coll = nullptr;
+    // Get the collector for generation `gc_gen`.
+    auto gcoll = this->get_tied_collector_opt();
+    if(ROCKET_EXPECT(gcoll)) {
+      coll = std::addressof(gcoll->open_collector(gc_gen));
     }
-    return std::addressof(coll->open_collector(gc_gen));
+    return coll;
   }
 
-rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint) const
+rcptr<Variable> Global_Context::create_variable(const Source_Location& sloc, const phsh_string& name, GC_Generation gc_hint) const
   {
-    auto coll = this->get_tied_collector_opt();
-    if(ROCKET_UNEXPECT(!coll)) {
-      // GC is disabled.
-      return rocket::make_refcnt<Variable>();
+    rcptr<Variable> var;
+    // Allocate a variable from the collector.
+    auto gcoll = this->get_tied_collector_opt();
+    if(ROCKET_EXPECT(gcoll)) {
+      var = gcoll->create_variable(gc_hint);
     }
-    return coll->create_variable(gc_hint);
+    // Allocate an untracked one if GC is disabled.
+    if(ROCKET_UNEXPECT(!var)) {
+      var = rocket::make_refcnt<Variable>();
+    }
+    // Call the hook function if any.
+    auto qh = this->get_hooks_opt();
+    if(qh) {
+      qh->on_variable_create(sloc, name);
+    }
+    return var;
   }
 
 size_t Global_Context::collect_variables(GC_Generation gc_limit) const
   {
-    auto coll = this->get_tied_collector_opt();
-    if(ROCKET_UNEXPECT(!coll)) {
-      // GC is disabled.
-      return 0;
+    size_t nfreed = 0;
+    // Perform garbage collection up to `gc_limit`.
+    auto gcoll = this->get_tied_collector_opt();
+    if(ROCKET_EXPECT(gcoll)) {
+      nfreed = gcoll->collect_variables(gc_limit);
     }
-    return coll->collect_variables(gc_limit);
+    return nfreed;
   }
 
 rcobj<Placeholder> Global_Context::placeholder() const noexcept
@@ -214,6 +227,16 @@ bool Global_Context::remove_std_member(const phsh_string& name)
     auto stdv = rocket::dynamic_pointer_cast<Variable>(this->m_stdv);
     ROCKET_ASSERT(stdv);
     return stdv->open_value().open_object().erase(name);
+  }
+
+rcptr<Abstract_Hooks> Global_Context::get_hooks_opt() const noexcept
+  {
+    return rocket::dynamic_pointer_cast<Abstract_Hooks>(this->m_hooks_opt);
+  }
+
+rcptr<Abstract_Hooks> Global_Context::set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
+  {
+    return rocket::dynamic_pointer_cast<Abstract_Hooks>(std::exchange(this->m_hooks_opt, rocket::move(hooks_opt)));
   }
 
 }  // namespace Asteria

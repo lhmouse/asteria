@@ -97,6 +97,7 @@ pkginclude_runtime_HEADERS =  \
   asteria/src/runtime/source_location.hpp  \
   asteria/src/runtime/abstract_opaque.hpp  \
   asteria/src/runtime/abstract_function.hpp  \
+  asteria/src/runtime/abstract_hooks.hpp  \
   asteria/src/runtime/placeholder.hpp  \
   asteria/src/runtime/value.hpp  \
   asteria/src/runtime/reference_root.hpp  \
@@ -156,6 +157,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/runtime/source_location.cpp  \
   asteria/src/runtime/abstract_opaque.cpp  \
   asteria/src/runtime/abstract_function.cpp  \
+  asteria/src/runtime/abstract_hooks.cpp  \
   asteria/src/runtime/placeholder.cpp  \
   asteria/src/runtime/value.cpp  \
   asteria/src/runtime/reference_root.cpp  \
