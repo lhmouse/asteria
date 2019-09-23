@@ -2539,12 +2539,11 @@ DCE_Result AIR_Node::optimize_dce()
           ROCKET_ASSERT(var->get_value().is_null());
           ctx.stack().pop();
           // Initialize it.
-          auto index = nelems - i - 1;
-          if(index >= arr.size()) {
-            var->set_immutable(immutable);
+          auto qelem = arr.mut_ptr(nelems - i - 1);
+          if(!qelem) {
             continue;
           }
-          var->reset(rocket::move(arr.mut(index)), immutable);
+          var->reset(rocket::move(*qelem), immutable);
         }
         return air_status_next;
       }
@@ -2575,12 +2574,12 @@ DCE_Result AIR_Node::optimize_dce()
           ROCKET_ASSERT(var->get_value().is_null());
           ctx.stack().pop();
           // Initialize it.
-          auto initp = obj.find_mut(*it);
-          if(initp == obj.end()) {
+          auto qelem = obj.mut_ptr(*it);
+          if(!qelem) {
             var->set_immutable(immutable);
             continue;
           }
-          var->reset(rocket::move(initp->second), immutable);
+          var->reset(rocket::move(*qelem), immutable);
         }
         return air_status_next;
       }
