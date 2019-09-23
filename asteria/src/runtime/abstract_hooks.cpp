@@ -11,7 +11,7 @@ Abstract_Hooks::~Abstract_Hooks()
   {
   }
 
-void Abstract_Hooks::on_variable_create(const Source_Location& /*sloc*/, const phsh_string& /*name*/)
+void Abstract_Hooks::on_variable_declare(const Source_Location& /*sloc*/, const phsh_string& /*name*/)
   {
   }
 

@@ -164,7 +164,7 @@ rcptr<Variable> Global_Context::create_variable(const Source_Location& sloc, con
     // Call the hook function if any.
     auto qh = this->get_hooks_opt();
     if(qh) {
-      qh->on_variable_create(sloc, name);
+      qh->on_variable_declare(sloc, name);
     }
     return var;
   }

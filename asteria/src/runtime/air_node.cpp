@@ -1045,12 +1045,12 @@ DCE_Result AIR_Node::optimize_dce()
         self.zoom_out();
 
         // Call the function now.
-        const auto& func = ctx.zvarg()->func();
+        const auto& inside = ctx.zvarg()->func();
         if(tco_aware != tco_aware_none) {
           // Pack arguments for this proper tail call.
           args.emplace_back(rocket::move(self));
           // Create a TCO wrapper.
-          auto tca = rocket::make_refcnt<Tail_Call_Arguments>(sloc, func, tco_aware, target, rocket::move(args));
+          auto tca = rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, tco_aware, target, rocket::move(args));
           // Return it.
           Reference_Root::S_tail_call xref = { rocket::move(tca) };
           self = rocket::move(xref);
@@ -1061,39 +1061,39 @@ DCE_Result AIR_Node::optimize_dce()
         // Call the hook function if any.
         auto qh = ctx.global().get_hooks_opt();
         if(qh) {
-          qh->on_function_call(sloc, func);
+          qh->on_function_call(sloc, inside);
         }
         try {
           // Perform a non-proper call.
-          ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", func, "`: target = ", target);
+          ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", inside, "`: target = ", target);
           target->invoke(self, ctx.global(), rocket::move(args));
           self.finish_call(ctx.global());
-          ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", func, "`: target = ", target);
+          ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", inside, "`: target = ", target);
         }
         catch(Exception& except) {
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", except.value());
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", inside, "`: ", except.value());
           // Append the current frame and rethrow the exception.
-          except.push_frame_func(sloc, func);
+          except.push_frame_func(sloc, inside);
           // Call the hook function if any.
           if(qh) {
-            qh->on_function_except(sloc, func, except);
+            qh->on_function_except(sloc, inside, except);
           }
           throw;
         }
         catch(const std::exception& stdex) {
-          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", inside, "`: ", stdex.what());
           // Translate the exception, append the current frame, and throw the new exception.
           Exception except(stdex);
-          except.push_frame_func(sloc, func);
+          except.push_frame_func(sloc, inside);
           // Call the hook function if any.
           if(qh) {
-            qh->on_function_except(sloc, func, except);
+            qh->on_function_except(sloc, inside, except);
           }
           throw except;
         }
         // Call the hook function if any.
         if(qh) {
-          qh->on_function_return(sloc, func);
+          qh->on_function_return(sloc, inside);
         }
         return air_status_next;
       }

@@ -94,43 +94,43 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       args.pop_back();
       // Call the function now.
       const auto& sloc = tca->sloc();
-      const auto& func = tca->func();
+      const auto& inside = tca->inside();
       // Call the hook function if any.
       auto qh = global.get_hooks_opt();
       if(qh) {
-        qh->on_function_call(sloc, func);
+        qh->on_function_call(sloc, inside);
       }
       try {
         // Unwrap the function call.
-        ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+        ASTERIA_DEBUG_LOG("Unpacking tail call at \'", sloc, "\' inside `", inside, "`: target = ", *target);
         target->invoke(*this, global, rocket::move(args));
         // The result will have been stored into `*this`.
-        ASTERIA_DEBUG_LOG("Returned from tail call at \'", sloc, "\' inside `", func, "`: target = ", *target);
+        ASTERIA_DEBUG_LOG("Returned from tail call at \'", sloc, "\' inside `", inside, "`: target = ", *target);
       }
       catch(Exception& except) {
-        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside tail call at \'", sloc, "\' inside `", func, "`: ", except.value());
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside tail call at \'", sloc, "\' inside `", inside, "`: ", except.value());
         // Append all frames that have been expanded so far and rethrow the exception.
-        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->func());  });
+        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
         if(qh) {
-          qh->on_function_except(sloc, func, except);
+          qh->on_function_except(sloc, inside, except);
         }
         throw;
       }
       catch(const std::exception& stdex) {
-        ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", func, "`: ", stdex.what());
+        ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", inside, "`: ", stdex.what());
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Exception except(stdex);
-        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->func());  });
+        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
         if(qh) {
-          qh->on_function_except(sloc, func, except);
+          qh->on_function_except(sloc, inside, except);
         }
         throw except;
       }
       // Call the hook function if any.
       if(qh) {
-        qh->on_function_return(sloc, func);
+        qh->on_function_return(sloc, inside);
       }
     }
     if(tco_conj == tco_aware_by_val) {

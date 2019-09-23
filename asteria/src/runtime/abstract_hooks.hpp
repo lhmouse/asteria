@@ -18,7 +18,7 @@ class Abstract_Hooks : public virtual Rcbase
     ~Abstract_Hooks() override;
 
   public:
-    virtual void on_variable_create(const Source_Location& sloc, const phsh_string& name);
+    virtual void on_variable_declare(const Source_Location& sloc, const phsh_string& name);
 
     virtual void on_function_call(const Source_Location& sloc, const phsh_string& inside);
     virtual void on_function_return(const Source_Location& sloc, const phsh_string& inside) noexcept;
