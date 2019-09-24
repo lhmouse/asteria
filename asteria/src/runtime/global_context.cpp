@@ -157,7 +157,6 @@ rcptr<Variable> Global_Context::create_variable(const Source_Location& sloc, con
     if(ROCKET_EXPECT(gcoll)) {
       var = gcoll->create_variable(gc_hint);
     }
-    // Allocate an untracked one if GC is disabled.
     if(ROCKET_UNEXPECT(!var)) {
       var = rocket::make_refcnt<Variable>();
     }

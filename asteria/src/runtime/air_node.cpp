@@ -829,7 +829,7 @@ DCE_Result AIR_Node::optimize_dce()
           // User-provided bindings may obtain the current exception using `std::current_exception`.
           return do_execute_catch(queue_catch, name_except, except, ctx);
         }
-        catch(const std::exception& stdex) {
+        catch(std::exception& stdex) {
           // Translate the exception.
           Exception except(stdex);
           except.push_frame_catch(sloc);
