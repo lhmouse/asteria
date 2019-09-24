@@ -110,7 +110,7 @@ class AIR_Node
       {
         Reference ref;
       };
-    struct S_define_function
+    struct S_instantiate_function
       {
         Compiler_Options opts;
         Source_Location sloc;
@@ -184,7 +184,7 @@ class AIR_Node
         index_push_global_reference  = 16,
         index_push_local_reference   = 17,
         index_push_bound_reference   = 18,
-        index_define_function        = 19,
+        index_instantiate_function   = 19,
         index_branch_expression      = 20,
         index_coalescence            = 21,
         index_function_call          = 22,
@@ -216,7 +216,7 @@ class AIR_Node
         , S_push_global_reference  // 16,
         , S_push_local_reference   // 17,
         , S_push_bound_reference   // 18,
-        , S_define_function        // 19,
+        , S_instantiate_function   // 19,
         , S_branch_expression      // 20,
         , S_coalescence            // 21,
         , S_function_call          // 22,
@@ -264,7 +264,7 @@ class AIR_Node
     // as a whole at the end of the first pass, where nodes are constructed in the second pass.
     // The argument for `ipass` shall be `0` for the first pass and `1` for the second pass.
     AVMC_Queue& solidify(AVMC_Queue& queue, uint8_t ipass) const;
-    // Instantiate this IR node to create a function. This node must hold a value of type `S_define_function`.
+    // Instantiate this IR node to create a function. This node must hold a value of type `S_instantiate_function`.
     // This function is provided merely for convenience elsewhere. It is not intended for public use.
     rcptr<Abstract_Function> instantiate_function(const Abstract_Context* parent_opt) const;
   };

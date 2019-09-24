@@ -108,7 +108,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
       {
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Encode arguments.
-        AIR_Node::S_define_function xnode = { opts, altr.sloc, do_name_closure(altr.sloc.line()), altr.params, altr.body };
+        AIR_Node::S_instantiate_function xnode = { opts, altr.sloc, do_name_closure(altr.sloc.line()), altr.params, altr.body };
         code.emplace_back(rocket::move(xnode));
         return code;
       }

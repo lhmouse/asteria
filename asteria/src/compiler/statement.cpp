@@ -199,7 +199,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_declare_variable xnode_decl = { true, altr.sloc, altr.name };
         code.emplace_back(rocket::move(xnode_decl));
         // Instantiate the function body.
-        AIR_Node::S_define_function xnode_defn = { opts, altr.sloc, altr.name, altr.params, altr.body };
+        AIR_Node::S_instantiate_function xnode_defn = { opts, altr.sloc, altr.name, altr.params, altr.body };
         code.emplace_back(rocket::move(xnode_defn));
         // Initialize the function.
         AIR_Node::S_initialize_variable xnode_init = { true };

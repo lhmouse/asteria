@@ -327,7 +327,7 @@ DCE_Result AIR_Node::optimize_dce()
         return queue;
       }
 
-    rcptr<Abstract_Function> do_instantiate(const AIR_Node::S_define_function& xnode, const Abstract_Context* ctx_opt)
+    rcptr<Abstract_Function> do_instantiate_function(const AIR_Node::S_instantiate_function& xnode, const Abstract_Context* ctx_opt)
       {
         const auto& opts = xnode.opts;
         const auto& sloc = xnode.sloc;
@@ -484,7 +484,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     struct Params_func
       {
-        AIR_Node::S_define_function xnode;
+        AIR_Node::S_instantiate_function xnode;
 
         using nonenumerable = std::true_type;
       };
@@ -972,13 +972,13 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_define_function(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
+    AIR_Status do_instantiate_function(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
         const auto& xnode = do_pcast<Params_func>(params)->xnode;
 
         // Instantiate the function.
-        auto qtarget = do_instantiate(xnode, std::addressof(ctx));
+        auto qtarget = do_instantiate_function(xnode, std::addressof(ctx));
         ASTERIA_DEBUG_LOG("New function: ", *qtarget);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
@@ -2909,9 +2909,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Push a new node.
         return avmcp.output<do_push_bound_reference>(queue);
       }
-    case index_define_function:
+    case index_instantiate_function:
       {
-        const auto& altr = this->m_stor.as<index_define_function>();
+        const auto& altr = this->m_stor.as<index_instantiate_function>();
         // `paramu` is unused.
         // `params` points to the name, the parameter list, and the body of the function.
         AVMC_Appender<Params_func> avmcp;
@@ -2921,7 +2921,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Encode arguments.
         avmcp.xnode = altr;
         // Push a new node.
-        return avmcp.output<do_define_function>(queue);
+        return avmcp.output<do_instantiate_function>(queue);
       }
     case index_branch_expression:
       {
@@ -3303,7 +3303,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 
 rcptr<Abstract_Function> AIR_Node::instantiate_function(const Abstract_Context* parent_opt) const
   {
-    return do_instantiate(this->m_stor.as<index_define_function>(), parent_opt);
+    return do_instantiate_function(this->m_stor.as<index_instantiate_function>(), parent_opt);
   }
 
 }  // namespace Asteria
