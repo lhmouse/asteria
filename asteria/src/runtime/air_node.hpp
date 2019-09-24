@@ -23,7 +23,6 @@ class AIR_Node
       };
     struct S_declare_variable
       {
-        bool immutable;
         Source_Location sloc;
         phsh_string name;
       };
@@ -162,6 +161,12 @@ class AIR_Node
         bool immutable;
         cow_vector<phsh_string> keys;
       };
+    struct S_define_null_variable
+      {
+        bool immutable;
+        Source_Location sloc;
+        phsh_string name;
+      };
 
     enum Index : uint8_t
       {
@@ -194,6 +199,7 @@ class AIR_Node
         index_apply_operator         = 26,
         index_unpack_struct_array    = 27,
         index_unpack_struct_object   = 28,
+        index_define_null_variable   = 29,
       };
     using Xvariant = variant<
       ROCKET_CDR(
@@ -226,6 +232,7 @@ class AIR_Node
         , S_apply_operator         // 26,
         , S_unpack_struct_array    // 27,
         , S_unpack_struct_object   // 28,
+        , S_define_null_variable   // 29,
       )>;
     static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
 

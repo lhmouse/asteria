@@ -517,16 +517,15 @@ DCE_Result AIR_Node::optimize_dce()
         return do_execute_block(queue_body, ctx);
       }
 
-    AIR_Status do_declare_variable(Executive_Context& ctx, ParamU paramu, const void* params)
+    AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
       {
         // Unpack arguments.
-        const auto& immutable = static_cast<bool>(paramu.u8s[0]);
         const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
         const auto& name = do_pcast<Params_sloc_name>(params)->name;
 
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable(sloc, name);
-        var->reset(G_null(), immutable);
+        var->reset(G_null(), true);
         // Inject the variable into the current context.
         Reference_Root::S_variable xref = { rocket::move(var) };
         ctx.open_named_reference(name) = xref;
@@ -2616,6 +2615,22 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
+    AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU paramu, const void* params)
+      {
+        // Unpack arguments.
+        const auto& immutable = static_cast<bool>(paramu.u8s[0]);
+        const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
+        const auto& name = do_pcast<Params_sloc_name>(params)->name;
+
+        // Allocate a variable and initialize it to `null`.
+        auto var = ctx.global().create_variable(sloc, name);
+        var->reset(G_null(), immutable);
+        // Inject the variable into the current context.
+        Reference_Root::S_variable xref = { rocket::move(var) };
+        ctx.open_named_reference(name) = rocket::move(xref);
+        return air_status_next;
+      }
+
     }
 
 AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
@@ -2651,14 +2666,13 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_declare_variable:
       {
         const auto& altr = this->m_stor.as<index_declare_variable>();
-        // `paramu.u8s[0]` is unused.
+        // `paramu` is unused.
         // `params` points to the source location and name.
         AVMC_Appender<Params_sloc_name> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.paramu.u8s[0] = altr.immutable;
         avmcp.sloc = altr.sloc;
         avmcp.name = altr.name;
         // Push a new node.
@@ -3284,7 +3298,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     case index_unpack_struct_object:
       {
         const auto& altr = this->m_stor.as<index_unpack_struct_object>();
-        // `paramu.u8s[0]` is unused.
+        // `paramu.u8s[0]` is `immutable`.
         // `params` points to the keys.
         AVMC_Appender<Params_names> avmcp;
         if(ipass == 0) {
@@ -3295,6 +3309,22 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.names = altr.keys;
         // Push a new node.
         return avmcp.output<do_unpack_struct_object>(queue);
+      }
+    case index_define_null_variable:
+      {
+        const auto& altr = this->m_stor.as<index_define_null_variable>();
+        // `paramu.u8s[0]` is `immutable`.
+        // `params` points to the source location and name.
+        AVMC_Appender<Params_sloc_name> avmcp;
+        if(ipass == 0) {
+          return avmcp.request(queue);
+        }
+        // Encode arguments.
+        avmcp.paramu.u8s[0] = altr.immutable;
+        avmcp.sloc = altr.sloc;
+        avmcp.name = altr.name;
+        // Push a new node.
+        return avmcp.output<do_define_null_variable>(queue);
       }
     default:
       ASTERIA_TERMINATE("An unknown AIR node type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");

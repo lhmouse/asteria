@@ -148,7 +148,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
               if(rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
                 continue;
               }
-              AIR_Node::S_declare_variable xnode_decl = { altr.immutable, altr.slocs[i], name };
+              AIR_Node::S_define_null_variable xnode_decl = { altr.immutable, altr.slocs[i], name };
               code.emplace_back(rocket::move(xnode_decl));
             }
           }
@@ -160,11 +160,12 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
               if(rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
                 continue;
               }
-              AIR_Node::S_declare_variable xnode_decl = { true, altr.slocs[i], name };
+              AIR_Node::S_declare_variable xnode_decl = { altr.slocs[i], name };
               code.emplace_back(rocket::move(xnode_decl));
             }
             // Generate code for the initializer.
             do_generate_expression_partial(code, opts, tco_aware_none, ctx, altr.inits[i]);
+            // Initialize the variables.
             if(altr.decls[i][0] == "[") {
               // The number of elements does not count the leading "[" or the trailing "]".
               ROCKET_ASSERT(altr.decls[i].back() == "]");
@@ -182,7 +183,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
               code.emplace_back(rocket::move(xnode_init));
             }
             else {
-              // Initialize the variable.
+              // Initialize the single variable.
               AIR_Node::S_initialize_variable xnode_init = { altr.immutable };
               code.emplace_back(rocket::move(xnode_init));
             }
@@ -196,7 +197,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Create a dummy reference for further name lookups.
         do_user_declare(names_opt, ctx, altr.name, "function placeholder");
         // Declare the function, which is effectively an immutable variable.
-        AIR_Node::S_declare_variable xnode_decl = { true, altr.sloc, altr.name };
+        AIR_Node::S_declare_variable xnode_decl = { altr.sloc, altr.name };
         code.emplace_back(rocket::move(xnode_decl));
         // Instantiate the function body.
         AIR_Node::S_instantiate_function xnode_defn = { opts, altr.sloc, altr.name, altr.params, altr.body };
