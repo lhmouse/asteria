@@ -323,8 +323,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
       {
         const auto& altr = this->m_stor.as<index_try>();
         // Generate code for the `try` body.
-        // This cannot be TCO'd, otherwise exceptions thrown from tail calls won't be caught.
-        auto code_try = do_generate_block(opts, tco_aware_none, ctx, altr.body_try);
+        auto code_try = do_generate_block(opts, tco_aware, ctx, altr.body_try);
         // Create a fresh context for the `catch` clause.
         Analytic_Context ctx_catch(rocket::ref(ctx));
         do_user_declare(names_opt, ctx_catch, altr.name_except, "exception placeholder");

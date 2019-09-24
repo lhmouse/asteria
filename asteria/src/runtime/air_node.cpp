@@ -819,7 +819,12 @@ DCE_Result AIR_Node::optimize_dce()
         // This is almost identical to JavaScript.
         try {
           // Execute the `try` block. If no exception is thrown, this will have little overhead.
-          return do_execute_block(queue_try, ctx);
+          auto status = do_execute_block(queue_try, ctx);
+          if(status == air_status_return) {
+            // This cannot be TCO'd, otherwise exceptions thrown from tail calls won't be caught.
+            ctx.stack().open_top().finish_call(ctx.global());
+          }
+          return status;
         }
         catch(Exception& except) {
           // Reuse the exception object. Don't bother allocating a new one.
