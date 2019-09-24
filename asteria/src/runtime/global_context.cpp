@@ -37,8 +37,9 @@ const Abstract_Context* Global_Context::do_get_parent_opt() const noexcept
     return this->get_parent_opt();
   }
 
-Reference* Global_Context::do_allocate_reference_lazy_opt(Reference_Dictionary& /*named_refs*/, const phsh_string& /*name*/) const
+Reference* Global_Context::do_allocate_reference_lazy_opt(Reference_Dictionary& /*named_refs*/, const phsh_string& name) const
   {
+    ASTERIA_DEBUG_LOG("An undeclared identifier `", name, "` has been encountered.");
     return nullptr;
   }
 
