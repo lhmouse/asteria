@@ -108,14 +108,16 @@ class Formatter
 
 #define ASTERIA_XFORMAT_(...)      ((::Asteria::Formatter(), __VA_ARGS__).extract_string())
 
-extern bool are_debug_logs_enabled() noexcept;
 extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
-// If `are_debug_logs_enabled()` returns `true`, evaluate arguments and write the result to `std::cerr`; otherwise, do nothing.
-#define ASTERIA_DEBUG_LOG(...)     ASTERIA_AND_(ROCKET_UNEXPECT(::Asteria::are_debug_logs_enabled()),  \
+// N.B. You can define this as something non-constant.
+#ifndef ASTERIA_ENABLE_DEBUG_LOGS
+#  define ASTERIA_ENABLE_DEBUG_LOGS  0
+#endif
+// Write arguments to the standard error stream, if `ASTERIA_ENABLE_DEBUG_LOGS` is defined to be a non-zero value.
+#define ASTERIA_DEBUG_LOG(...)     ASTERIA_AND_(ROCKET_UNEXPECT(ASTERIA_ENABLE_DEBUG_LOGS),  \
                                                 ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)))
-
-// Evaluate arguments and write the result to `std::cerr`, then call `std::terminate()`.
+// Write arguments to the standard error stream, then call `std::terminate()`.
 #define ASTERIA_TERMINATE(...)     ASTERIA_COMMA_(::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
                                                   ::std::terminate())
 

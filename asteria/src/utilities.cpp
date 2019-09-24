@@ -25,15 +25,6 @@ std::ostream& Formatter::do_open_stream()
     return *strm;
   }
 
-bool are_debug_logs_enabled() noexcept
-  {
-#ifdef ASTERIA_ENABLE_DEBUG_LOGS
-    return true;
-#else
-    return false;
-#endif
-  }
-
     namespace {
 
     void do_ltoa_fixed(cow_string& str, long num, size_t width)
