@@ -6,6 +6,8 @@
 #include "air_node.hpp"
 #include "evaluation_stack.hpp"
 #include "executive_context.hpp"
+#include "global_context.hpp"
+#include "abstract_hooks.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -26,8 +28,14 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     Executive_Context ctx_func(rocket::ref(global), rocket::ref(stack), rocket::ref(this->m_zvarg),
                                this->m_params, rocket::move(self), rocket::move(args));
     stack.reserve(rocket::move(args));
+    // Call the hook function if any.
+    auto qh = global.get_hooks_opt();
+    if(qh) {
+      qh->on_function_enter(this->m_zvarg->sloc(), this->m_zvarg->func());
+    }
     // Execute the function body.
     auto status = this->m_queue.execute(ctx_func);
+    // Handle the return reference.
     switch(status) {
     case air_status_next:
       {
