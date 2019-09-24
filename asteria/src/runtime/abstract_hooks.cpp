@@ -19,11 +19,11 @@ void Abstract_Hooks::on_function_call(const Source_Location& /*sloc*/, const phs
   {
   }
 
-void Abstract_Hooks::on_function_return(const Source_Location& /*sloc*/, const phsh_string& /*inside*/) noexcept
+void Abstract_Hooks::on_function_return(const Source_Location& /*sloc*/, const phsh_string& /*inside*/)
   {
   }
 
-void Abstract_Hooks::on_function_except(const Source_Location& /*sloc*/, const phsh_string& /*inside*/, const Exception& /*except*/) noexcept
+void Abstract_Hooks::on_function_except(const Source_Location& /*sloc*/, const phsh_string& /*inside*/, const Exception& /*except*/)
   {
   }
 

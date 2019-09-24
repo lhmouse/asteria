@@ -21,8 +21,8 @@ class Abstract_Hooks : public virtual Rcbase
     virtual void on_variable_declare(const Source_Location& sloc, const phsh_string& name);
 
     virtual void on_function_call(const Source_Location& sloc, const phsh_string& inside);
-    virtual void on_function_return(const Source_Location& sloc, const phsh_string& inside) noexcept;
-    virtual void on_function_except(const Source_Location& sloc, const phsh_string& inside, const Exception& except) noexcept;
+    virtual void on_function_return(const Source_Location& sloc, const phsh_string& inside);
+    virtual void on_function_except(const Source_Location& sloc, const phsh_string& inside, const Exception& except);
   };
 
 }  // namespace Asteria
