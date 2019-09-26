@@ -32,11 +32,6 @@ template<typename charT, typename traitsT = char_traits<charT>,
           {
           }
 
-        streamsize max_size() const noexcept
-          {
-            return static_cast<streamsize>(this->str.max_size());
-          }
-
         ::std::ios_base::openmode rewind(::std::ios_base::openmode which) noexcept
           {
             // Reset get and put positions.
@@ -405,27 +400,35 @@ template<typename charT, typename traitsT,
 
     int_type underflow() override
       {
-        return this->do_underflow(false);
+        return this->do_underflow(0);
       }
     int_type uflow() override
       {
-        return this->do_underflow(true);
-      }
-    streamsize xsgetn(char_type* s, streamsize n) override
-      {
-        return (n <= 0) ? 0 : static_cast<streamsize>(this->do_xsgetn(s, static_cast<size_type>(noadl::min(n, this->m_stor.max_size()))));
+        return this->do_underflow(1);
       }
     int_type pbackfail(int_type ch) override
       {
-        return traits_type::eq_int_type(ch, traits_type::eof()) ? this->do_unget_underflow() : this->do_putback(traits_type::to_char_type(ch));
+        if(traits_type::eq_int_type(ch, traits_type::eof())) {
+          return this->do_unget_underflow();
+        }
+        return this->do_putback(traits_type::to_char_type(ch));
       }
     int_type overflow(int_type ch) override
       {
         return this->do_overflow(ch);
       }
+
+    streamsize xsgetn(char_type* s, streamsize n) override
+      {
+        auto m = static_cast<streamsize>(this->m_stor.str.max_size());
+        auto r = this->do_xsgetn(s, static_cast<size_type>(noadl::clamp(n, 0, m)));
+        return static_cast<streamsize>(r);
+      }
     streamsize xsputn(const char_type* s, streamsize n) override
       {
-        return (n <= 0) ? 0 : static_cast<streamsize>(this->do_xsputn(s, static_cast<size_type>(noadl::min(n, this->m_stor.max_size()))));
+        auto m = static_cast<streamsize>(this->m_stor.str.max_size());
+        auto r = this->do_xsputn(s, static_cast<size_type>(noadl::clamp(n, 0, m)));
+        return static_cast<streamsize>(r);
       }
 
   public:
