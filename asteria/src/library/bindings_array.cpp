@@ -119,7 +119,7 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
           do_push_argument(args, *it);
           // Call the predictor function and check the return value.
           Reference self;
-          predictor.get().invoke(self, global, rocket::move(args));
+          predictor->invoke(self, global, rocket::move(args));
           self.finish_call(global);
           if(self.read().test() == match) {
             return rocket::move(it);
@@ -448,21 +448,21 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
 
     namespace {
 
-    ROCKET_PURE_FUNCTION Compare do_compare(const Global_Context& global, const opt<G_function>& comp, const Value& lhs, const Value& rhs)
+    Compare do_compare(const Global_Context& global, const G_function& comp, const Value& lhs, const Value& rhs)
       {
-        if(!comp) {
-          // Perform the built-in 3-way comparison.
-          return lhs.compare(rhs);
-        }
         // Set up arguments for the user-defined comparator.
         cow_vector<Reference> args;
         do_push_argument(args, lhs);
         do_push_argument(args, rhs);
         // Call the predictor function and compare the result with `0`.
         Reference self;
-        comp->get().invoke(self, global, rocket::move(args));
+        comp->invoke(self, global, rocket::move(args));
         self.finish_call(global);
         return self.read().compare(G_integer(0));
+      }
+    Compare do_compare(const Global_Context& global, const opt<G_function>& comp, const Value& lhs, const Value& rhs)
+      {
+        return ROCKET_UNEXPECT(comp) ? do_compare(global, *comp, lhs, rhs) : lhs.compare(rhs);
       }
 
     }  // namespace
@@ -486,7 +486,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
     namespace {
 
     template<typename IteratorT> pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
-                                                                       const opt<G_function>& comparator, const Value& target)
+                                                                  const opt<G_function>& comparator, const Value& target)
       {
         auto bpos = rocket::move(begin);
         auto epos = rocket::move(end);
@@ -744,7 +744,7 @@ G_array std_array_generate(const Global_Context& global, const G_function& gener
       do_push_argument(args, res.empty() ? null_value : res.back());
       // Call the generator function and push the return value.
       Reference self;
-      generator.get().invoke(self, global, rocket::move(args));
+      generator->invoke(self, global, rocket::move(args));
       self.finish_call(global);
       res.emplace_back(self.read());
     }

@@ -704,7 +704,7 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
         do_push_argument(args, data);
         // Call the predictor function, but discard the return value.
         Reference self;
-        callback.get().invoke(self, global, rocket::move(args));
+        callback->invoke(self, global, rocket::move(args));
       }
 
     }  // namespace

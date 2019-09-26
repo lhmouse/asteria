@@ -62,11 +62,11 @@ class Argument_Reader
       }
     size_t count_arguments() const noexcept
       {
-        return this->m_args.get().size();
+        return this->m_args->size();
       }
     const Reference& get_argument(size_t index) const
       {
-        return this->m_args.get().at(index);
+        return this->m_args->at(index);
       }
 
     bool does_throw_on_failure() const noexcept

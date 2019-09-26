@@ -120,7 +120,7 @@ namespace Asteria {
             this->m_offset = 0;
             // Buffer a line.
             for(;;) {
-              auto ch = this->m_sbuf.get().sbumpc();
+              auto ch = this->m_sbuf->sbumpc();
               if(ch == std::istream::traits_type::eof()) {
                 if(this->m_str.empty()) {
                   // Return `false` to indicate that there are no more data, when nothing has been read so far.
