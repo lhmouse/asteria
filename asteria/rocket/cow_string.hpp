@@ -2129,7 +2129,7 @@ template<typename charT, typename traitsT,
     return is;
   }
 
-extern template ::std::istream  & operator>>(::std::istream& is, cow_string& str);
+extern template ::std::istream& operator>>(::std::istream& is, cow_string& str);
 extern template ::std::wistream& operator>>(::std::wistream& is, cow_wstring& str);
 
 template<typename charT, typename traitsT,
