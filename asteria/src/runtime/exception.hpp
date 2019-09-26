@@ -34,7 +34,7 @@ class Exception : public std::exception
   public:
     const char* what() const noexcept override
       {
-        return "Asteria::Exception";
+        return "asteria exception with backtrace frames";
       }
 
     const Value& value() const noexcept
@@ -45,9 +45,9 @@ class Exception : public std::exception
       {
         return this->m_frames.size();
       }
-    const Backtrace_Frame& frame(size_t i) const
+    const Backtrace_Frame& frame(size_t index) const
       {
-        return this->m_frames.at(i);
+        return this->m_frames.at(index);
       }
 
     template<typename XvalT> Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XvalT&& xval)

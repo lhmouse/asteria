@@ -127,13 +127,10 @@ class Runtime_Error : public virtual std::exception
     cow_string m_msg;
 
   public:
-    explicit Runtime_Error(const cow_string& msg) noexcept
-      : m_msg(msg)
+    explicit Runtime_Error(cow_string&& msg)
       {
-      }
-    explicit Runtime_Error(cow_string&& msg) noexcept
-      : m_msg(rocket::move(msg))
-      {
+        this->m_msg.swap(msg);
+        this->m_msg.insert(0, "asteria runtime error: ");
       }
     ~Runtime_Error() override;
 
