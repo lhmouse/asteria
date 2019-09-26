@@ -298,7 +298,7 @@ const char* stringify_punctuator(Punctuator punct) noexcept
       {
         return "...";
       }
-    case punctuator_enda:
+    case punctuator_end_a:
       {
         return "[$]";
       }

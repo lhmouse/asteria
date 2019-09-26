@@ -282,7 +282,7 @@ enum Punctuator : uint8_t
     punctuator_coales      = 52,  // ??
     punctuator_coales_eq   = 53,  // ??=
     punctuator_ellipsis    = 54,  // ...
-    punctuator_enda        = 55,  // [$]
+    punctuator_end_a       = 55,  // [$]
   };
 
 ROCKET_PURE_FUNCTION extern const char* stringify_punctuator(Punctuator punct) noexcept;
@@ -416,7 +416,7 @@ enum Xop : uint8_t
     xop_xorb      = 43,  // ^
     xop_assign    = 44,  // =
     xop_fma_3     = 45,  // __fma()
-    xop_enda      = 46,  // [$]
+    xop_end_a     = 46,  // [$]
   };
 
 // Parser status codes
