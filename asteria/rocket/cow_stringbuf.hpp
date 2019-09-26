@@ -120,6 +120,7 @@ template<typename charT, typename traitsT,
         this->setg(nullptr, nullptr, nullptr);
         this->setp(nullptr, nullptr);
       }
+
     void do_syncg() noexcept
       {
         ROCKET_ASSERT(this->m_which & ios_base::in);
@@ -132,6 +133,7 @@ template<typename charT, typename traitsT,
         this->setg(qbase, qbase + goff, qbase + ntotal);
         this->m_stor.goff = ntotal;
       }
+
     void do_freeg() noexcept
       {
         ROCKET_ASSERT(this->m_which & ios_base::in);
@@ -141,6 +143,7 @@ template<typename charT, typename traitsT,
         this->setg(nullptr, nullptr, nullptr);
         this->m_stor.goff = goff;
       }
+
     void do_syncp()
       {
         ROCKET_ASSERT(this->m_which & ios_base::out);
@@ -158,6 +161,7 @@ template<typename charT, typename traitsT,
         this->setg(nullptr, nullptr, nullptr);
         this->m_stor.goff = goff;
       }
+
     void do_syncgp()
       {
         ROCKET_ASSERT(this->m_which & ios_base::in);
@@ -176,6 +180,7 @@ template<typename charT, typename traitsT,
         this->setg(qbase, qbase + goff, qbase + ntotal);
         this->m_stor.goff = ntotal;
       }
+
     void do_freegp() noexcept
       {
         ROCKET_ASSERT(this->m_which & ios_base::out);
@@ -244,15 +249,15 @@ template<typename charT, typename traitsT,
         // Return the absolute offset (from the beginning of the string).
         return absoff;
       }
-    streamsize do_estimate_ahead() const
+
+    streamsize do_estimate_how_many_see() const
       {
         if(!(this->m_which & ios_base::in)) {
           // Nothing can be read.
           return -1;
         }
-        // Get the number of bytes available in and after the get area.
-        auto goff = this->m_stor.goff - static_cast<size_type>(this->egptr() - this->gptr());
-        return static_cast<streamsize>(this->m_stor.str.size() - goff);
+        // Get the number of bytes available after the get area.
+        return static_cast<streamsize>(this->m_stor.str.size() - this->m_stor.goff);
       }
 
     int_type do_underflow(bool bump)
@@ -274,20 +279,6 @@ template<typename charT, typename traitsT,
         // Return the character at the beginning of the get area.
         return traits_type::to_int_type(c);
       }
-    size_type do_xsgetn(char_type* s, size_type n)
-      {
-        if(!(this->m_which & ios_base::in)) {
-          // Nothing can be read.
-          return 0;
-        }
-        // Invalidate the get area for direct access to the string.
-        this->do_freeg();
-        // Copy some characters and advance the get position.
-        auto r = this->m_stor.str.copy(s, this->m_stor.goff, n);
-        this->m_stor.goff += r;
-        // Return the number of characters that have been copied.
-        return r;
-      }
 
     int_type do_unget_underflow()
       {
@@ -308,6 +299,7 @@ template<typename charT, typename traitsT,
         // Return the character at the beginning of the get area.
         return traits_type::to_int_type(c);
       }
+
     int_type do_putback(char_type c)
       {
         if(!(this->m_which & ios_base::in)) {
@@ -362,6 +354,22 @@ template<typename charT, typename traitsT,
         // Return the character that has just been written.
         return ch;
       }
+
+    size_type do_xsgetn(char_type* s, size_type n)
+      {
+        if(!(this->m_which & ios_base::in)) {
+          // Nothing can be read.
+          return 0;
+        }
+        // Invalidate the get area for direct access to the string.
+        this->do_freeg();
+        // Copy some characters and advance the get position.
+        auto r = this->m_stor.str.copy(s, this->m_stor.goff, n);
+        this->m_stor.goff += r;
+        // Return the number of characters that have been copied.
+        return r;
+      }
+
     size_type do_xsputn(const char_type* s, size_type n)
       {
         if(!(this->m_which & ios_base::out)) {
@@ -393,11 +401,11 @@ template<typename charT, typename traitsT,
       {
         return this->do_seekoff(static_cast<off_type>(pos), ios_base::beg, which);
       }
+
     streamsize showmanyc() override
       {
-        return this->do_estimate_ahead();
+        return this->do_estimate_how_many_see();
       }
-
     int_type underflow() override
       {
         return this->do_underflow(0);
