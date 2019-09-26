@@ -114,13 +114,13 @@ template<typename charT, typename traitsT,
     ~basic_cow_stringbuf() override;
 
   private:
+    // Get/put buffer operations
     void do_abandon() noexcept
       {
         // Abandon the get and put areas.
         this->setg(nullptr, nullptr, nullptr);
         this->setp(nullptr, nullptr);
       }
-
     void do_syncg() noexcept
       {
         ROCKET_ASSERT(this->m_which & ios_base::in);
@@ -133,7 +133,6 @@ template<typename charT, typename traitsT,
         this->setg(qbase, qbase + goff, qbase + ntotal);
         this->m_stor.goff = ntotal;
       }
-
     void do_freeg() noexcept
       {
         ROCKET_ASSERT(this->m_which & ios_base::in);
@@ -143,7 +142,6 @@ template<typename charT, typename traitsT,
         this->setg(nullptr, nullptr, nullptr);
         this->m_stor.goff = goff;
       }
-
     void do_syncp()
       {
         ROCKET_ASSERT(this->m_which & ios_base::out);
@@ -161,7 +159,6 @@ template<typename charT, typename traitsT,
         this->setg(nullptr, nullptr, nullptr);
         this->m_stor.goff = goff;
       }
-
     void do_syncgp()
       {
         ROCKET_ASSERT(this->m_which & ios_base::in);
@@ -180,7 +177,6 @@ template<typename charT, typename traitsT,
         this->setg(qbase, qbase + goff, qbase + ntotal);
         this->m_stor.goff = ntotal;
       }
-
     void do_freegp() noexcept
       {
         ROCKET_ASSERT(this->m_which & ios_base::out);
@@ -196,6 +192,7 @@ template<typename charT, typename traitsT,
         this->m_stor.goff = goff;
       }
 
+    // Stream positioning
     off_type do_seekoff(off_type off, ios_base::seekdir dir, ios_base::openmode which)
       {
         // Validate arguments.
@@ -250,6 +247,7 @@ template<typename charT, typename traitsT,
         return absoff;
       }
 
+    // Character I/O functions
     streamsize do_estimate_how_many_see() const
       {
         if(!(this->m_which & ios_base::in)) {
@@ -259,7 +257,6 @@ template<typename charT, typename traitsT,
         // Get the number of bytes available after the get area.
         return static_cast<streamsize>(this->m_stor.str.size() - this->m_stor.goff);
       }
-
     int_type do_underflow(bool bump)
       {
         if(!(this->m_which & ios_base::in)) {
@@ -279,7 +276,6 @@ template<typename charT, typename traitsT,
         // Return the character at the beginning of the get area.
         return traits_type::to_int_type(c);
       }
-
     int_type do_unget_underflow()
       {
         if(!(this->m_which & ios_base::in)) {
@@ -299,7 +295,6 @@ template<typename charT, typename traitsT,
         // Return the character at the beginning of the get area.
         return traits_type::to_int_type(c);
       }
-
     int_type do_putback(char_type c)
       {
         if(!(this->m_which & ios_base::in)) {
@@ -323,7 +318,6 @@ template<typename charT, typename traitsT,
         // Return the character at the beginning of the get area.
         return traits_type::to_int_type(c);
       }
-
     int_type do_overflow(int_type ch)
       {
         if(!(this->m_which & ios_base::out)) {
@@ -355,6 +349,7 @@ template<typename charT, typename traitsT,
         return ch;
       }
 
+    // Stream I/O functions
     size_type do_xsgetn(char_type* s, size_type n)
       {
         if(!(this->m_which & ios_base::in)) {
@@ -369,7 +364,6 @@ template<typename charT, typename traitsT,
         // Return the number of characters that have been copied.
         return r;
       }
-
     size_type do_xsputn(const char_type* s, size_type n)
       {
         if(!(this->m_which & ios_base::out)) {
