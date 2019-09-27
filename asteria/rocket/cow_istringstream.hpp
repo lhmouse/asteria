@@ -81,15 +81,17 @@ template<typename charT, typename traitsT,
       {
         return this->rdbuf()->get_cstring();
       }
-    void set_string(string_type str)
+    basic_cow_istringstream& set_string(string_type str)
       {
         this->rdbuf()->set_string(noadl::move(str));
         this->clear();
+        return *this;
       }
-    void clear_string()
+    basic_cow_istringstream& clear_string()
       {
         this->rdbuf()->clear_string();
         this->clear();
+        return *this;
       }
     string_type extract_string()
       {
