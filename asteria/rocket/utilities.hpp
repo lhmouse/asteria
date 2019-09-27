@@ -10,7 +10,7 @@
 #include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
-#include <ios>  // std::ios_base, std::basic_ios<>, std::streamsize, std::streamoff
+#include <iosfwd>  // std::ios_base, std::basic_ios<>, std::streamsize, std::streamoff
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <stdexcept>  // standard exceptions...
