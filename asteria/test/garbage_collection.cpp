@@ -40,21 +40,19 @@ int main()
 
     bcnt.store(0, std::memory_order_relaxed);
     {
-      cow_isstream iss(
-        rocket::sref(
-          R"__(
-            var g;
-            func leak() {
-              var f;
-              f = func() { return f; };
-              g = f;
-            }
-            for(var i = 0; i < 1000000; ++i) {
-              leak();
-            }
-          )__")
-        );
-      Simple_Script code(iss, rocket::sref("my_file"));
+      rocket::cow_stringbuf buf(rocket::sref(
+        R"__(
+          var g;
+          func leak() {
+            var f;
+            f = func() { return f; };
+            g = f;
+          }
+          for(var i = 0; i < 1000000; ++i) {
+            leak();
+          }
+        )__"));
+      Simple_Script code(buf, rocket::sref("my_file"));
       Global_Context global;
       code.execute(global);
     }

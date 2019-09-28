@@ -18,8 +18,6 @@
 #include <climits>
 #include "../rocket/preprocessor_utilities.h"
 #include "../rocket/cow_string.hpp"
-#include "../rocket/cow_istringstream.hpp"
-#include "../rocket/cow_ostringstream.hpp"
 #include "../rocket/cow_vector.hpp"
 #include "../rocket/cow_hashmap.hpp"
 #include "../rocket/static_vector.hpp"
@@ -32,6 +30,7 @@
 #include "../rocket/optional.hpp"
 #include "../rocket/array.hpp"
 #include "../rocket/ref_to.hpp"
+#include "../rocket/tinyfmt_str.hpp"
 
 // Macros
 #define ASTERIA_SFINAE_CONSTRUCT(...)    ROCKET_ENABLE_IF(::std::is_constructible<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
@@ -122,8 +121,8 @@ using cow_u16string = rocket::cow_u16string;
 using cow_u32string = rocket::cow_u32string;
 using phsh_string = rocket::prehashed_string;
 using cow_stringbuf = rocket::cow_stringbuf;
-using cow_isstream = rocket::cow_istringstream;
-using cow_osstream = rocket::cow_ostringstream;
+using tinyfmt_str = rocket::tinyfmt_str;
+using tinyfmt = rocket::tinyfmt;
 
 template<typename E, typename D = std::default_delete<const E>> using uptr = rocket::unique_ptr<E, D>;
 template<typename E> using rcptr = rocket::refcnt_ptr<E>;
@@ -424,12 +423,11 @@ enum Parser_Status : uint32_t
   {
     parser_status_success                                    =    0,
     parser_status_no_data_loaded                             = 1001,
-    parser_status_istream_input_failure                      = 2001,
-    parser_status_ifstream_open_failure                      = 2002,
-    parser_status_utf8_sequence_invalid                      = 2003,
-    parser_status_utf8_sequence_incomplete                   = 2004,
-    parser_status_utf_code_point_invalid                     = 2005,
-    parser_status_null_character_disallowed                  = 2006,
+    parser_status_ifstream_open_failure                      = 2001,
+    parser_status_utf8_sequence_invalid                      = 2002,
+    parser_status_utf8_sequence_incomplete                   = 2003,
+    parser_status_utf_code_point_invalid                     = 2004,
+    parser_status_null_character_disallowed                  = 2005,
     parser_status_token_character_unrecognized               = 3001,
     parser_status_string_literal_unclosed                    = 3002,
     parser_status_escape_sequence_unknown                    = 3003,

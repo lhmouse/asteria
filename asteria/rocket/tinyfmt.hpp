@@ -6,6 +6,7 @@
 
 #include "utilities.hpp"
 #include "throw.hpp"
+#include <streambuf>  // std::basic_streambuf
 
 namespace rocket {
 

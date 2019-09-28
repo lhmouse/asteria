@@ -63,7 +63,7 @@ class Variadic_Arguer final : public Abstract_Function
         return this->m_vargs.at(index);
       }
 
-    std::ostream& describe(std::ostream& ostrm) const override;
+    tinyfmt& describe(tinyfmt& fmt) const override;
     Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const override;
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const override;
   };

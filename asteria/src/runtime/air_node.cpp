@@ -888,10 +888,9 @@ DCE_Result AIR_Node::optimize_dce()
           return air_status_next;
         }
         // Throw a `Runtime_Error`.
-        cow_osstream fmtss;
-        fmtss.imbue(std::locale::classic());
-        fmtss << "Assertion failed at \'" << sloc << "\': " << msg;
-        throw_runtime_error(__func__, fmtss.extract_string());
+        tinyfmt_str fmt;
+        fmt << "Assertion failed at \'" << sloc << "\': " << msg;
+        throw_runtime_error(__func__, fmt.extract_string());
       }
 
     AIR_Status do_simple_status(Executive_Context& /*ctx*/, ParamU paramu, const void* /*params*/)

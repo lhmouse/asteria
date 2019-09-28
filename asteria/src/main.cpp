@@ -5,8 +5,8 @@
 #include "runtime/global_context.hpp"
 #include "runtime/exception.hpp"
 #include "library/bindings_chrono.hpp"
-#include "../rocket/cow_istringstream.hpp"
 #include <iostream>
+#include <sstream>
 #include <iomanip>
 
 using namespace Asteria;
@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 #if !defined(__OPTIMIZE__) || (__OPTIMIZE__ == 0)
     std::cerr << "# Input your program:" << std::endl
               << "---" << std::endl;
-    Simple_Script code(std::cin, rocket::sref("<stdin>"));
+    Simple_Script code(std::cin.rdbuf()[0], rocket::sref("<stdin>"));
 #else
     static constexpr char src[] =
       R"_____(
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
         }
         return fib(30);
       )_____";
-    cow_isstream iss(rocket::sref(src));
+    std::istringstream iss(src);
     std::cerr << "# Source code:" << std::endl
               << "---" << std::endl
               << src << std::endl
@@ -57,7 +57,6 @@ int main(int argc, char** argv)
               << "---" << std::endl
               << "# Finished in " << std::fixed << std::setprecision(3) << (t2 - t1) << " ms:" << std::endl
               << "---" << std::endl;
-    std::cout << res.read() << std::endl;
     // finish.
     return 0;
   }
@@ -65,12 +64,7 @@ int main(int argc, char** argv)
     // print the exception.
     std::cerr << std::endl
               << "---" << std::endl
-              << "# Caught `Exception`:" << std::endl
-              << e.value() << std::endl;
-    for(size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {
-      const auto& f = e.frame(i);
-      std::cerr << "  thrown from \'" << f.sloc() << "\' <" << f.what_type() << ">: " << f.value() << std::endl;
-    }
+              << "# Caught `Exception`:" << std::endl;
     return 1;
   }
   catch(std::exception& e) {

@@ -4,13 +4,12 @@
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
-#include <sstream>
 
 using namespace Asteria;
 
 int main()
   {
-    static constexpr char s_source[] =
+    rocket::cow_stringbuf buf(rocket::sref(
       R"__(
         func lt_1ups(x, y) {
           return ((y == 0) ? __abs(x) : __abs(1-x/y)) <= 0x1.0p-52;
@@ -116,10 +115,9 @@ int main()
         assert std.math.hypot(+nan, -infinity) == infinity;
         assert std.math.hypot(nan, 1, infinity) == infinity;
         assert __isnan std.math.hypot(nan, 1, nan);
-      )__";
+      )__"));
 
-    cow_isstream iss(rocket::sref(s_source));
-    Simple_Script code(iss, rocket::sref("my_file"));
+    Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }

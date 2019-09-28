@@ -16,9 +16,9 @@ Instantiated_Function::~Instantiated_Function()
   {
   }
 
-std::ostream& Instantiated_Function::describe(std::ostream& ostrm) const
+tinyfmt& Instantiated_Function::describe(tinyfmt& fmt) const
   {
-    return ostrm << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
+    return fmt << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
   }
 
 Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const

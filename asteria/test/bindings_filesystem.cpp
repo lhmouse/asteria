@@ -4,13 +4,12 @@
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
-#include <sstream>
 
 using namespace Asteria;
 
 int main()
   {
-    static constexpr char s_source[] =
+    rocket::cow_stringbuf buf(rocket::sref(
       R"__(
         const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
         // We presume these random strings will never match any real files.
@@ -96,10 +95,9 @@ int main()
         assert std.filesystem.directory_create(fname) == 1;
         assert std.filesystem.file_remove(fname) == null;
         assert std.filesystem.directory_remove(fname) == 1;
-      )__";
+      )__"));
 
-    cow_isstream iss(rocket::sref(s_source));
-    Simple_Script code(iss, rocket::sref("my_file"));
+    Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }

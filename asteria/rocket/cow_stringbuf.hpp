@@ -32,7 +32,7 @@ template<typename charT, typename traitsT = char_traits<charT>,
           {
           }
 
-        ::std::ios_base::openmode rewind(::std::ios_base::openmode which) noexcept
+        ios_base::openmode rewind(ios_base::openmode which) noexcept
           {
             // Reset get and put positions.
             this->goff = 0;

@@ -9,6 +9,7 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
+#include "tinyfmt.hpp"
 
 namespace rocket {
 
@@ -298,10 +299,10 @@ template<typename elementT, typename deleterT> void swap(unique_ptr<elementT, de
   }
 
 template<typename charT, typename traitsT,
-         typename elementT, typename deleterT> basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+         typename elementT, typename deleterT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                                                          const unique_ptr<elementT, deleterT>& rhs)
   {
-    return os << rhs.get();
+    return fmt << rhs.get();
   }
 
 template<typename targetT, typename sourceT> unique_ptr<targetT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept

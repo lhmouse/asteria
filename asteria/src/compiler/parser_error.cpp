@@ -13,21 +13,20 @@ Parser_Error::~Parser_Error()
 
 void Parser_Error::do_compose_message()
   {
-    cow_osstream fmtss;
-    fmtss.imbue(std::locale::classic());
+    tinyfmt_str fmt;
     // Write the status code in digital form.
-    fmtss << std::dec << "error " << this->m_status << " at ";
+    fmt << "error " << this->m_status << " at ";
     // Append the source location.
     if(this->m_line > 0) {
-      fmtss << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
+      fmt << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
     }
     else {
-      fmtss << "the end of input data";
+      fmt << "the end of input data";
     }
     // Append the status description.
-    fmtss << ": " << describe_parser_status(this->m_status);
+    fmt << ": " << describe_parser_status(this->m_status);
     // Set the string.
-    this->m_what = fmtss.extract_string();
+    this->m_what = fmt.extract_string();
   }
 
 static_assert(std::is_nothrow_copy_constructible<Parser_Error>::value, "Copy constructors of exceptions are not allow to throw exceptions.");

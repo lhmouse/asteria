@@ -6,9 +6,9 @@
 
 namespace Asteria {
 
-std::ostream& Source_Location::print(std::ostream& ostrm) const
+tinyfmt& Source_Location::print(tinyfmt& fmt) const
   {
-    return ostrm << this->m_file << ':' << this->m_line;
+    return fmt << this->m_file << ':' << this->m_line;
   }
 
 }  // namespace Asteria

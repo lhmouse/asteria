@@ -510,10 +510,6 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "No data were loaded.";
       }
-    case parser_status_istream_input_failure:
-      {
-        return "An error occurred while reading from the source character stream.";
-      }
     case parser_status_ifstream_open_failure:
       {
         return "The source file could not be opened for reading.";

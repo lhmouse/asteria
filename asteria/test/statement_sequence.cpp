@@ -7,31 +7,30 @@
 #include "../src/runtime/executive_context.hpp"
 #include "../src/runtime/reference.hpp"
 #include "../src/runtime/variadic_arguer.hpp"
-#include <sstream>
 
 using namespace Asteria;
 
 int main()
   {
-    std::stringbuf buf(R"__(
-      func third() {
-        const f = func(p) = p + "ow";
-        throw f("me");
-      }
-      func second() {
-        return third();
-      }
-      func first() {
-        return second();
-      }
-      try {
-        first();
-      }
-      catch(e) {
-        return typeof(e) + ":" + e;
-      }
-    )__");
-
+    rocket::cow_stringbuf buf(rocket::sref(
+      R"__(
+        func third() {
+          const f = func(p) = p + "ow";
+          throw f("me");
+        }
+        func second() {
+          return third();
+        }
+        func first() {
+          return second();
+        }
+        try {
+          first();
+        }
+        catch(e) {
+          return typeof(e) + ":" + e;
+        }
+      )__"));
     Token_Stream tstrm(buf, rocket::sref("dummy file"), { });
     Statement_Sequence stmseq(tstrm, { });
     ASTERIA_TEST_CHECK(stmseq.size() == 4);

@@ -4,13 +4,12 @@
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
-#include <sstream>
 
 using namespace Asteria;
 
 int main()
   {
-    static constexpr char s_source[] =
+    rocket::cow_stringbuf buf(rocket::sref(
       R"__(
         assert std.json.format(null) == "null";
         assert std.json.format(true) == "true";
@@ -75,10 +74,9 @@ int main()
           r = [r];
         }
         assert std.json.format(r) == '[' * depth + ']' * depth;
-      )__";
+      )__"));
 
-    std::istringstream iss(s_source);
-    Simple_Script code(iss, rocket::sref("my_file"));
+    Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }

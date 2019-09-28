@@ -249,130 +249,130 @@ long Value::gcref_split() const noexcept
     }
   }
 
-std::ostream& Value::print(std::ostream& ostrm, bool escape) const
+tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
   {
     switch(this->gtype()) {
     case gtype_null:
       {
         // null
-        return ostrm << "null";
+        return fmt << "null";
       }
     case gtype_boolean:
       {
         // true
-        return ostrm << std::boolalpha << std::nouppercase << this->m_stor.as<gtype_boolean>();
+        return fmt << this->m_stor.as<gtype_boolean>();
       }
     case gtype_integer:
       {
         // 42
-        return ostrm << std::dec << this->m_stor.as<gtype_integer>();
+        return fmt << this->m_stor.as<gtype_integer>();
       }
     case gtype_real:
       {
         // 123.456
-        return ostrm << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<gtype_real>();
+        return fmt << this->m_stor.as<gtype_real>();
       }
     case gtype_string:
       {
         const auto& altr = this->m_stor.as<gtype_string>();
         if(!escape) {
           // hello
-          ostrm << altr;
+          fmt << altr;
         }
         else {
           // "hello"
-          ostrm << quote(altr);
+          fmt << quote(altr);
         }
-        return ostrm;
+        return fmt;
       }
     case gtype_opaque:
       {
         const auto& altr = this->m_stor.as<gtype_opaque>();
         // <opaque> [[`my opaque`]]
-        ostrm << "<opaque> [[`" << altr << "`]]";
-        return ostrm;
+        fmt << "<opaque> [[`" << altr << "`]]";
+        return fmt;
       }
     case gtype_function:
       {
         const auto& altr = this->m_stor.as<gtype_function>();
         // <function> [[`my function`]]
-        ostrm << "<function> [[`" << altr << "`]]";
-        return ostrm;
+        fmt << "<function> [[`" << altr << "`]]";
+        return fmt;
       }
     case gtype_array:
       {
         const auto& altr = this->m_stor.as<gtype_array>();
         // [ 1, 2, 3, ]
-        ostrm << '[';
+        fmt << '[';
         for(size_t i = 0; i < altr.size(); ++i) {
-          ostrm << ' ';
-          altr[i].print(ostrm, true);
-          ostrm << ',';
+          fmt << ' ';
+          altr[i].print(fmt, true);
+          fmt << ',';
         }
-        ostrm << " ]";
-        return ostrm;
+        fmt << " ]";
+        return fmt;
       }
     case gtype_object:
       {
         const auto& altr = this->m_stor.as<gtype_object>();
         // { "one" = 1, "two" = 2, "three" = 3, }
-        ostrm << '{';
+        fmt << '{';
         for(auto q = altr.begin(); q != altr.end(); ++q) {
-          ostrm << ' ' << quote(q->first) << " = ";
-          q->second.print(ostrm, true);
-          ostrm << ',';
+          fmt << ' ' << quote(q->first) << " = ";
+          q->second.print(fmt, true);
+          fmt << ',';
         }
-        ostrm << " }";
-        return ostrm;
+        fmt << " }";
+        return fmt;
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
     }
   }
 
-std::ostream& Value::dump(std::ostream& ostrm, size_t indent, size_t hanging) const
+tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
   {
     switch(this->gtype()) {
     case gtype_null:
       {
         // null
-        return ostrm << "null";
+        return fmt << "null";
       }
     case gtype_boolean:
       {
         // boolean true
-        return ostrm << "boolean " << std::boolalpha << std::nouppercase << this->m_stor.as<gtype_boolean>();
+        return fmt << "boolean " << this->m_stor.as<gtype_boolean>();
       }
     case gtype_integer:
       {
         // integer 42
-        return ostrm << "integer " << std::dec << this->m_stor.as<gtype_integer>();
+        return fmt << "integer " << this->m_stor.as<gtype_integer>();
       }
     case gtype_real:
       {
         // real 123.456
-        return ostrm << "real " << std::defaultfloat << std::nouppercase << std::setprecision(17) << this->m_stor.as<gtype_real>();
+        return fmt << "real " << this->m_stor.as<gtype_real>();
       }
     case gtype_string:
       {
         const auto& altr = this->m_stor.as<gtype_string>();
         // string(5) "hello"
-        ostrm << "string(" << std::dec << altr.size() << ") " << quote(altr);
-        return ostrm;
+        fmt << "string(" << altr.size() << ") " << quote(altr);
+        return fmt;
       }
     case gtype_opaque:
       {
         const auto& altr = this->m_stor.as<gtype_opaque>();
         // opaque("typeid") [[`my opaque`]]
-        ostrm << "opaque(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
-        return ostrm;
+        fmt << "opaque(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
+        return fmt;
       }
     case gtype_function:
       {
         const auto& altr = this->m_stor.as<gtype_function>();
         // function("typeid") [[`my function`]]
-        ostrm << "function(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
-        return ostrm;
+        fmt << "function(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
+        return fmt;
       }
     case gtype_array:
       {
@@ -383,14 +383,14 @@ std::ostream& Value::dump(std::ostream& ostrm, size_t indent, size_t hanging) co
         //   1 = integer 2;
         //   2 = integer 3;
         //  ]
-        ostrm << "array(" << std::dec << altr.size() << ")";
-        ostrm << pwrap(indent, hanging + 1) << '[';
+        fmt << "array(" << altr.size() << ")";
+        fmt << pwrap(indent, hanging + 1) << '[';
         for(size_t i = 0; i < altr.size(); ++i) {
-          ostrm << pwrap(indent, hanging + indent) << std::dec << i << " = ";
-          altr[i].dump(ostrm, indent, hanging + indent) << ';';
+          fmt << pwrap(indent, hanging + indent) << i << " = ";
+          altr[i].dump(fmt, indent, hanging + indent) << ';';
         }
-        ostrm << pwrap(indent, hanging + 1) << ']';
-        return ostrm;
+        fmt << pwrap(indent, hanging + 1) << ']';
+        return fmt;
       }
     case gtype_object:
       {
@@ -401,14 +401,14 @@ std::ostream& Value::dump(std::ostream& ostrm, size_t indent, size_t hanging) co
         //   "two" = integer 2;
         //   "three" = integer 3;
         //  }
-        ostrm << "object(" << std::dec << altr.size() << ")";
-        ostrm << pwrap(indent, hanging + 1) << '{';
+        fmt << "object(" << altr.size() << ")";
+        fmt << pwrap(indent, hanging + 1) << '{';
         for(auto q = altr.begin(); q != altr.end(); ++q) {
-          ostrm << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
-          q->second.dump(ostrm, indent, hanging + indent) << ';';
+          fmt << pwrap(indent, hanging + indent) << quote(q->first) << " = ";
+          q->second.dump(fmt, indent, hanging + indent) << ';';
         }
-        ostrm << pwrap(indent, hanging + 1) << '}';
-        return ostrm;
+        fmt << pwrap(indent, hanging + 1) << '}';
+        return fmt;
       }
     default:
       ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");

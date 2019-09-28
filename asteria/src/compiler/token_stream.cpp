@@ -121,7 +121,7 @@ namespace Asteria {
             // Buffer a line.
             for(;;) {
               auto ch = this->m_sbuf->sbumpc();
-              if(ch == std::istream::traits_type::eof()) {
+              if(ch == std::ios::traits_type::eof()) {
                 if(this->m_str.empty()) {
                   // Return `false` to indicate that there are no more data, when nothing has been read so far.
                   return false;
@@ -141,7 +141,7 @@ namespace Asteria {
             }
             this->m_line += 1;
             // Accept the line.
-            ASTERIA_DEBUG_LOG("Read line ", std::setw(4), this->m_line, ": ", this->m_str);
+            ASTERIA_DEBUG_LOG("Read line ", this->m_line, "\t: ", this->m_str);
             return true;
           }
 

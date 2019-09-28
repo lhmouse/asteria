@@ -11,9 +11,9 @@ Placeholder::~Placeholder()
   {
   }
 
-std::ostream& Placeholder::describe(std::ostream& ostrm) const
+tinyfmt& Placeholder::describe(tinyfmt& fmt) const
   {
-    return ostrm << "<placeholder for uninitialized values>";
+    return fmt << "<placeholder for uninitialized values>";
   }
 
 Reference& Placeholder::invoke(Reference& /*self*/, const Global_Context& /*global*/, cow_vector<Reference>&& /*args*/) const
