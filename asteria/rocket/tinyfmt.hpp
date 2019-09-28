@@ -36,7 +36,6 @@ template<typename charT, typename traitsT = char_traits<charT>> class basic_tiny
     extern long xformat_Qi(char* str, signed long long value) noexcept;
     extern long xformat_Qu(char* str, unsigned long long value) noexcept;
     extern long xformat_Qf(char* str, double value) noexcept;
-    extern long xformat_Tf(char* str, long double value) noexcept;
 
     }
 
@@ -309,14 +308,6 @@ template<typename charT, typename traitsT> class basic_tinyfmt
         // Format the value reversely.
         char str[32];
         long n = details_tinyfmt::xformat_Qf(str, value);
-        details_tinyfmt::xformat_write(*this, str, n);
-        return *this;
-      }
-    basic_tinyfmt& operator<<(long double value)
-      {
-        // Format the value reversely.
-        char str[32];
-        long n = details_tinyfmt::xformat_Tf(str, value);
         details_tinyfmt::xformat_write(*this, str, n);
         return *this;
       }
