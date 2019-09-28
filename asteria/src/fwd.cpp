@@ -670,10 +670,10 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "Expectation failed while looking for a `}`.";
       }
-//    case parser_status_duplicate_object_key:
-//      {
-//        return "A duplicate key was to be created in the same object.";
-//      }
+    case parser_status_too_many_array_elements:
+      {
+        return "The number of elements in this array exceeded the system limit.";
+      }
     case parser_status_closed_parenthesis_or_argument_expected:
       {
         return "Expectation failed while looking for a `)` or expression.";
@@ -689,10 +689,6 @@ const char* describe_parser_status(Parser_Status status) noexcept
     case parser_status_equals_sign_or_colon_expected:
       {
         return "Expectation failed while looking for an `=` or `:`.";
-      }
-    case parser_status_too_many_array_elements:
-      {
-        return "The number of elements in this array exceeded the system limit.";
       }
     default:
       {

@@ -464,12 +464,11 @@ enum Parser_Status : uint32_t
     parser_status_for_statement_initializer_expected         = 4018,
     parser_status_semicolon_or_expression_expected           = 4019,
     parser_status_closed_brace_expected                      = 4020,
-//    parser_status_duplicate_object_key                       = 4021,
+    parser_status_too_many_array_elements                    = 4021,
     parser_status_closed_parenthesis_or_argument_expected    = 4022,
     parser_status_closed_bracket_expected                    = 4023,
     parser_status_open_brace_or_equal_initializer_expected   = 4024,
     parser_status_equals_sign_or_colon_expected              = 4025,
-    parser_status_too_many_array_elements                    = 4026,
   };
 
 ROCKET_PURE_FUNCTION extern const char* describe_parser_status(Parser_Status status) noexcept;
