@@ -11,7 +11,7 @@
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
 #include <limits>  // std::numeric_limits<>
-#include <iosfwd>  // std::ios_base, std::basic_ios<>, std::streamsize, std::streamoff
+#include <iosfwd>  // std::streamsize, std::streamoff, std::streambuf, std::ios_base
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <stdexcept>  // standard exceptions...
@@ -105,14 +105,14 @@ using ::std::bidirectional_iterator_tag;
 using ::std::random_access_iterator_tag;
 
 using ::std::char_traits;
+using ::std::streamsize;
+using ::std::streamoff;
 using ::std::basic_streambuf;
 using ::std::ios_base;
 using ::std::basic_ios;
 using ::std::basic_istream;
 using ::std::basic_ostream;
 using ::std::basic_iostream;
-using ::std::streamsize;
-using ::std::streamoff;
 
 using ::std::hash;
 using ::std::equal_to;

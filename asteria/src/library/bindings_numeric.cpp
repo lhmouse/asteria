@@ -606,7 +606,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
 
     namespace {
 
-    constexpr double s_decbounds[]
+    constexpr double s_decbnd_dbl[]
       {
                0,         0,  3.0e-324,  4.0e-324,  5.0e-324,  6.0e-324,  7.0e-324,  8.0e-324,  9.0e-324,
         1.0e-323,  2.0e-323,  3.0e-323,  4.0e-323,  5.0e-323,  6.0e-323,  7.0e-323,  8.0e-323,  9.0e-323,
@@ -1322,14 +1322,14 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
         case 10:
           {
             // The value has to be finite.
-            // Calculate the exponent using binary search. Note that the first two elements of `s_decbounds` are zeroes.
-            auto qdigit = std::upper_bound(s_decbounds, s_decbounds + 5697, reg) - 1;
-            if(qdigit < s_decbounds + 2) {
+            // Calculate the exponent using binary search. Note that the first two elements of `s_decbnd_dbl` are zeroes.
+            auto qdigit = std::upper_bound(s_decbnd_dbl, s_decbnd_dbl + 5697, reg) - 1;
+            if(qdigit < s_decbnd_dbl + 2) {
               break;
             }
-            int doff = static_cast<int>(qdigit - s_decbounds) / 9;
+            int doff = static_cast<int>(qdigit - s_decbnd_dbl) / 9;
             p.exp = doff - 324;
-            auto qbase = s_decbounds + doff * 9;
+            auto qbase = s_decbnd_dbl + doff * 9;
             // This result is inexact.
             for(;;) {
               // Shift a digit out.
@@ -1345,7 +1345,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
                 break;
               }
               // Calculate the next digit.
-              if(qbase == s_decbounds) {
+              if(qbase == s_decbnd_dbl) {
                 break;
               }
               qbase -= 9;

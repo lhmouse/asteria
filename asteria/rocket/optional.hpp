@@ -6,6 +6,7 @@
 
 #include "compiler.h"
 #include "static_vector.hpp"
+#include "tinyfmt.hpp"
 
 namespace rocket {
 
@@ -263,10 +264,10 @@ template<typename valueT> constexpr bool operator!=(const valueT& lhs,
   }
 
 template<typename charT, typename traitsT,
-         typename valueT> basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+         typename valueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                                     const optional<valueT>& rhs)
   {
-    return rhs ? (os << *rhs) : (os << "<nullopt>");
+    return rhs ? (fmt << *rhs) : (fmt << "<nullopt>");
   }
 
 }  // namespace rocket

@@ -16,11 +16,11 @@ Formatter::~Formatter()
   {
   }
 
-std::ostream& Formatter::do_open_stream()
+tinyfmt& Formatter::do_open_stream()
   {
-    auto& strm = this->m_strm_opt;
+    auto& strm = this->m_strm;
     if(!strm) {
-      strm = rocket::make_unique<cow_osstream>();
+      strm = rocket::make_unique<tinyfmt_str>();
     }
     return *strm;
   }
@@ -380,108 +380,42 @@ bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
         "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
       };
 
-    bool do_quote(std::ios_base::iostate& state, std::streambuf& sbuf, const Quote_Wrapper& q)
-      {
-        // Insert the leading quote mark.
-        if(sbuf.sputc('\"') == EOF) {
-          state |= std::ios_base::failbit;
-          return false;
-        }
-        // Quote all bytes from the source string.
-        for(size_t i = 0; i != q.len; ++i) {
-          size_t ch = q.str[i] & 0xFF;
-          auto sq = s_quote_table[ch];
-          auto nq = std::strlen(sq);
-          // Insert this quoted sequence. Optimize the operation a little if it consists of only one character.
-          bool failed = (nq == 1) ? (sbuf.sputc(static_cast<char>(ch)) == EOF)
-                                  : (sbuf.sputn(sq, static_cast<ptrdiff_t>(nq)) != static_cast<ptrdiff_t>(nq));
-          if(failed) {
-            state |= std::ios_base::failbit;
-            return false;
-          }
-        }
-        // Insert the trailing quote mark.
-        if(sbuf.sputc('\"') == EOF) {
-          state |= std::ios_base::failbit;
-          return false;
-        }
-        // Success.
-        return true;
-      }
-
     }  // namespace
 
-std::ostream& operator<<(std::ostream& cstrm, const Quote_Wrapper& q)
+tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
   {
-    std::ostream::sentry sentry(cstrm);
-    if(!sentry) {
-      return cstrm;
+    // Insert the leading quote mark.
+    fmt.put('\"');
+    // Quote all bytes from the source string.
+    for(size_t i = 0; i != q.len; ++i) {
+      size_t ch = q.str[i] & 0xFF;
+      auto sq = s_quote_table[ch];
+      // Insert this quoted sequence. Optimize the operation a little if it consists of only one character.
+      auto nq = static_cast<std::streamsize>(std::strlen(sq));
+      if(nq == 1)
+        fmt.put(*sq);
+      else
+        fmt.write(sq, nq);
     }
-    // Insert characters into `cstrm`.
-    std::ios_base::iostate state = { };
-    try {
-      do_quote(state, *(cstrm.rdbuf()), q);
-    }
-    catch(...) {
-      rocket::handle_ios_exception(cstrm, state);
-    }
-    // If `eofbit` or `failbit` would cause an exception, throw it here.
-    if(state) {
-      cstrm.setstate(state);
-    }
-    return cstrm;
+    // Insert the trailing quote mark.
+    fmt.put('\"');
+    return fmt;
   }
 
-    namespace {
-
-    bool do_pwrap(std::ios_base::iostate& state, std::streambuf& sbuf, const Paragraph_Wrapper& q)
-      {
-        if(q.indent == 0) {
-          // Write everything in a single line, separated by spaces.
-          if(sbuf.sputc(' ') == EOF) {
-            state |= std::ios_base::failbit;
-            return false;
-          }
-        }
-        else {
-          // Terminate the current line.
-          if(sbuf.sputc('\n') == EOF) {
-            state |= std::ios_base::failbit;
-            return false;
-          }
-          // Indent the next line accordingly.
-          for(size_t i = 0; i != q.hanging; ++i) {
-            if(sbuf.sputc(' ') == EOF) {
-              state |= std::ios_base::failbit;
-              return false;
-            }
-          }
-        }
-        // Success.
-        return true;
-      }
-
-    }
-
-std::ostream& operator<<(std::ostream& cstrm, const Paragraph_Wrapper& q)
+tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
   {
-    std::ostream::sentry sentry(cstrm);
-    if(!sentry) {
-      return cstrm;
+    if(q.indent == 0) {
+      // Write everything in a single line, separated by spaces.
+      fmt.put(' ');
     }
-    // Insert characters into `cstrm`.
-    std::ios_base::iostate state = { };
-    try {
-      do_pwrap(state, *(cstrm.rdbuf()), q);
+    else {
+      // Terminate the current line.
+      fmt.put('\n');
+      // Indent the next line accordingly.
+      for(size_t i = 0; i != q.hanging; ++i)
+        fmt.put(' ');
     }
-    catch(...) {
-      rocket::handle_ios_exception(cstrm, state);
-    }
-    // If `eofbit` or `failbit` would cause an exception, throw it here.
-    if(state) {
-      cstrm.setstate(state);
-    }
-    return cstrm;
+    return fmt;
   }
 
 Wrapped_Index wrap_index(int64_t index, size_t size) noexcept

@@ -10,6 +10,7 @@
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
 #include "reference_counter.hpp"
+#include "tinyfmt.hpp"
 
 namespace rocket {
 
@@ -416,10 +417,10 @@ template<typename elementT> void swap(refcnt_ptr<elementT>& lhs, refcnt_ptr<elem
   }
 
 template<typename charT, typename traitsT,
-         typename elementT> basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+         typename elementT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                                       const refcnt_ptr<elementT>& rhs)
   {
-    return os << rhs.get();
+    return fmt << rhs.get();
   }
 
 template<typename targetT, typename sourceT> refcnt_ptr<targetT> static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept

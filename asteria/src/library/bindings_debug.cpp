@@ -11,19 +11,17 @@ namespace Asteria {
 
 bool std_debug_print(const cow_vector<Value>& values)
   {
-    cow_osstream fmtss;
-    fmtss.imbue(std::locale::classic());
-    rocket::for_each(values, std::bind(&Value::print, std::placeholders::_1, std::ref(fmtss), false));
-    bool succ = write_log_to_stderr(__FILE__, __LINE__, fmtss.extract_string());
+    tinyfmt_str fmt;
+    rocket::for_each(values, std::bind(&Value::print, std::placeholders::_1, std::ref(fmt), false));
+    bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     return succ;
   }
 
 bool std_debug_dump(const Value& value, const opt<G_integer>& indent)
   {
-    cow_osstream fmtss;
-    fmtss.imbue(std::locale::classic());
-    value.dump(fmtss, static_cast<size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
-    bool succ = write_log_to_stderr(__FILE__, __LINE__, fmtss.extract_string());
+    tinyfmt_str fmt;
+    value.dump(fmt, static_cast<size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
+    bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     return succ;
   }
 

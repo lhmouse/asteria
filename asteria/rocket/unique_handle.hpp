@@ -8,6 +8,7 @@
 #include "assert.hpp"
 #include "allocator_utilities.hpp"
 #include "utilities.hpp"
+#include "tinyfmt.hpp"
 
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.
@@ -225,10 +226,10 @@ template<typename handleT, typename closerT> void swap(unique_handle<handleT, cl
   }
 
 template<typename charT, typename traitsT,
-         typename handleT, typename closerT> basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+         typename handleT, typename closerT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                                                        const unique_handle<handleT, closerT>& rhs)
   {
-    return os << rhs.get();
+    return fmt << rhs.get();
   }
 
 }  // namespace rocket

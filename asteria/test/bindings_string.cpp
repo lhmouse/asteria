@@ -4,13 +4,12 @@
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
-#include <sstream>
 
 using namespace Asteria;
 
 int main()
   {
-    static constexpr char s_source[] =
+    rocket::cow_stringbuf buf(rocket::sref(
       R"__(
         assert std.string.slice("hello", 0) == "hello";
         assert std.string.slice("hello", 1) == "ello";
@@ -276,10 +275,9 @@ int main()
         assert std.string.pack_64le(0x123456789ABCDEF0) == "\xF0\xDE\xBC\x9A\x78\x56\x34\x12";
         assert std.string.pack_64le([ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ]) == "\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E";
         assert std.string.unpack_64le("\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E") == [ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ];
-      )__";
+      )__"));
 
-    cow_isstream iss(rocket::sref(s_source));
-    Simple_Script code(iss, rocket::sref("my_file"));
+    Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }

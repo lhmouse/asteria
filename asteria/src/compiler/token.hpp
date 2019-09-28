@@ -158,7 +158,7 @@ class Token
         this->m_stor.swap(other.m_stor);
       }
 
-    std::ostream& print(std::ostream& ostrm) const;
+    tinyfmt& print(tinyfmt& fmt) const;
   };
 
 inline void swap(Token& lhs, Token& rhs) noexcept
@@ -166,9 +166,9 @@ inline void swap(Token& lhs, Token& rhs) noexcept
     return lhs.swap(rhs);
   }
 
-inline std::ostream& operator<<(std::ostream& ostrm, const Token& token)
+inline tinyfmt& operator<<(tinyfmt& fmt, const Token& token)
   {
-    return token.print(ostrm);
+    return token.print(fmt);
   }
 
 }  // namespace Asteria

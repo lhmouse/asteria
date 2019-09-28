@@ -34,31 +34,6 @@ Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& fil
     return *this;
   }
 
-Simple_Script& Simple_Script::reload(std::istream& istrm, const cow_string& filename)
-  {
-    std::istream::sentry sentry(istrm, true);
-    if(!sentry) {
-      // Throw an exception if no character could be read or no stream buffer is associated.
-      throw Parser_Error(parser_status_istream_input_failure);
-    }
-    // Extract characters from the stream buffer directly.
-    std::ios_base::iostate state = { };
-    try {
-      this->reload(*(istrm.rdbuf()), filename);
-      // `reload()` shall have consumed all data, so `eofbit` is always set.
-      state |= std::ios_base::eofbit;
-    }
-    catch(...) {
-      rocket::handle_ios_exception(istrm, state);
-      // Don't swallow the exception.
-      throw;
-    }
-    if(state) {
-      istrm.setstate(state);
-    }
-    return *this;
-  }
-
 Simple_Script& Simple_Script::reload(const cow_string& cstr, const cow_string& filename)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.

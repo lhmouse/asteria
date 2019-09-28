@@ -4,7 +4,6 @@
 #ifndef ROCKET_PREHASHED_STRING_HPP_
 #define ROCKET_PREHASHED_STRING_HPP_
 
-#include <iosfwd>  // std::basic_ostream<>
 #include "compiler.h"
 #include "cow_string.hpp"
 
@@ -368,10 +367,10 @@ template<typename stringT, typename hashT> void swap(basic_prehashed_string<stri
   }
 
 template<typename charT, typename traitsT,
-         typename stringT, typename hashT> basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+         typename stringT, typename hashT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                                                      const basic_prehashed_string<stringT, hashT>& str)
   {
-    return os << str.rdstr();
+    return fmt << str.rdstr();
   }
 
 }  // namespace rocket

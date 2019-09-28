@@ -8,9 +8,9 @@
 
 namespace Asteria {
 
-std::ostream& Variadic_Arguer::describe(std::ostream& ostrm) const
+tinyfmt& Variadic_Arguer::describe(tinyfmt& fmt) const
   {
-    return ostrm << "<built-in>.__varg([index]) @ " << this->m_sloc;
+    return fmt << "<built-in>.__varg([index]) @ " << this->m_sloc;
   }
 
 Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, cow_vector<Reference>&& args) const

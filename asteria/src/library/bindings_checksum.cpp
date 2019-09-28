@@ -44,9 +44,9 @@ namespace Asteria {
           }
 
       public:
-        std::ostream& describe(std::ostream& ostrm) const override
+        tinyfmt& describe(tinyfmt& fmt) const override
           {
-            return ostrm << "CRC-32 hasher";
+            return fmt << "CRC-32 hasher";
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -161,9 +161,9 @@ G_integer std_checksum_crc32(const G_string& data)
           }
 
       public:
-        std::ostream& describe(std::ostream& ostrm) const override
+        tinyfmt& describe(tinyfmt& fmt) const override
           {
-            return ostrm << "FNV-1a hasher (32-bit)";
+            return fmt << "FNV-1a hasher (32-bit)";
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -472,9 +472,9 @@ G_integer std_checksum_fnv1a32(const G_string& data)
           }
 
       public:
-        std::ostream& describe(std::ostream& ostrm) const override
+        tinyfmt& describe(tinyfmt& fmt) const override
           {
-            return ostrm << "MD5 hasher";
+            return fmt << "MD5 hasher";
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -782,9 +782,9 @@ G_string std_checksum_md5(const G_string& data)
           }
 
       public:
-        std::ostream& describe(std::ostream& ostrm) const override
+        tinyfmt& describe(tinyfmt& fmt) const override
           {
-            return ostrm << "SHA-1 hasher";
+            return fmt << "SHA-1 hasher";
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {
@@ -1062,9 +1062,9 @@ G_string std_checksum_sha1(const G_string& data)
           }
 
       public:
-        std::ostream& describe(std::ostream& ostrm) const override
+        tinyfmt& describe(tinyfmt& fmt) const override
           {
-            return ostrm << "SHA-256 hasher";
+            return fmt << "SHA-256 hasher";
           }
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const override
           {

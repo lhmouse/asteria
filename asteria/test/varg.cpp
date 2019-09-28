@@ -4,13 +4,12 @@
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
-#include <sstream>
 
 using namespace Asteria;
 
 int main()
   {
-    static constexpr char s_source[] =
+    rocket::cow_stringbuf buf(rocket::sref(
       R"__(
         func binary(a, b, ...) {
           var narg = __varg();
@@ -24,10 +23,8 @@ int main()
           binary(1,2,3,4),     // [ 2, 4 ]
           binary(1,2,3,4,5),   // [ 3, 4 ]
         ];
-      )__";
-
-    cow_isstream iss(rocket::sref(s_source));
-    Simple_Script code(iss, rocket::sref("my_file"));
+      )__"));
+    Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;
     auto res = code.execute(global);
     const auto& array = res.read().as_array();
@@ -43,8 +40,10 @@ int main()
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(0).as_integer() == 3);
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(1).as_integer() == 4);
 
-    iss.clear();
-    iss.set_string(rocket::sref("return __varg('meow', 42, true);"));
-    code.reload(iss, rocket::sref("erroneous_file"));
+    buf.set_string(rocket::sref(
+      R"__(
+        return __varg('meow', 42, true);
+      )__"));
+    code.reload(buf, rocket::sref("erroneous_file"));
     ASTERIA_TEST_CHECK_CATCH(code.execute(global));
   }

@@ -18,14 +18,14 @@ class Abstract_Function : public virtual Rcbase
     ~Abstract_Function() override;
 
   public:
-    virtual std::ostream& describe(std::ostream& ostrm) const = 0;
+    virtual tinyfmt& describe(tinyfmt& fmt) const = 0;
     virtual Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const = 0;
     virtual Variable_Callback& enumerate_variables(Variable_Callback& callback) const = 0;
   };
 
-inline std::ostream& operator<<(std::ostream& ostrm, const Abstract_Function& func)
+inline tinyfmt& operator<<(tinyfmt& fmt, const Abstract_Function& func)
   {
-    return func.describe(ostrm);
+    return func.describe(fmt);
   }
 
 }  // namespace Asteria

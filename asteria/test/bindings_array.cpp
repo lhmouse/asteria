@@ -4,13 +4,12 @@
 #include "test_utilities.hpp"
 #include "../src/runtime/simple_script.hpp"
 #include "../src/runtime/global_context.hpp"
-#include <sstream>
 
 using namespace Asteria;
 
 int main()
   {
-    static constexpr char s_source[] =
+    rocket::cow_stringbuf buf(rocket::sref(
       R"__(
         assert std.array.slice([0,1,2,3,4], 0) == [0,1,2,3,4];
         assert std.array.slice([0,1,2,3,4], 1) == [1,2,3,4];
@@ -204,10 +203,9 @@ int main()
 
         assert std.array.copy_values(null) == null;
         assert std.array.sort(std.array.copy_values({a:1,b:2,c:3,d:4})) == [1,2,3,4];
-      )__";
+      )__"));
 
-    cow_isstream iss(rocket::sref(s_source));
-    Simple_Script code(iss, rocket::sref("my_file"));
+    Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }

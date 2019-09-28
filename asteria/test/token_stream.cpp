@@ -4,21 +4,20 @@
 #include "test_utilities.hpp"
 #include "../src/compiler/token_stream.hpp"
 #include "../src/compiler/token.hpp"
-#include <sstream>
 
 using namespace Asteria;
 
 int main()
   {
     Token_Stream ts;
-    std::stringbuf buf(
+    rocket::cow_stringbuf buf(rocket::sref(
       R"__(#!some shebang
         hh+++
         if <<<->>>>>"\u55b5b喵"/
         * - 0x01`7.8`4p+4  // comments
         .false/*more
         comments*/;/*yet more*/-42e13
-      )__");
+      )__"));
     ts.reload(buf, rocket::sref("dummy_file"), { });
     ASTERIA_TEST_CHECK(buf.sgetc() == std::char_traits<char>::eof());
 

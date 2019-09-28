@@ -128,10 +128,10 @@ template<typename elementT> void swap(refcnt_object<elementT>& lhs, refcnt_objec
   }
 
 template<typename charT, typename traitsT,
-         typename elementT> basic_ostream<charT, traitsT>& operator<<(basic_ostream<charT, traitsT>& os,
+         typename elementT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                                       const refcnt_object<elementT>& rhs)
   {
-    return os << rhs.get();
+    return fmt << rhs.get();
   }
 
 

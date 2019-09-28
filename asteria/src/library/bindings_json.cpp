@@ -20,7 +20,7 @@ namespace Asteria {
         virtual ~Indenter();
 
       public:
-        virtual std::ostream& break_line(std::ostream& ostrm) const = 0;
+        virtual tinyfmt& break_line(tinyfmt& fmt) const = 0;
         virtual void increment_level() = 0;
         virtual void decrement_level() = 0;
       };
@@ -37,9 +37,9 @@ namespace Asteria {
           }
 
       public:
-        std::ostream& break_line(std::ostream& ostrm) const override
+        tinyfmt& break_line(tinyfmt& fmt) const override
           {
-            return ostrm;
+            return fmt;
           }
         void increment_level() override
           {
@@ -52,23 +52,19 @@ namespace Asteria {
     class Indenter_string final : public Indenter
       {
       private:
-        G_string m_add;
-        G_string m_cur;
+        cow_string m_add;
+        cow_string m_cur;
 
       public:
-        explicit Indenter_string(G_string add)
-          : m_add(rocket::move(add)), m_cur()
+        explicit Indenter_string(const cow_string& add)
+          : m_add(add), m_cur(rocket::sref("\n"))
           {
           }
 
       public:
-        std::ostream& break_line(std::ostream& ostrm) const override
+        tinyfmt& break_line(tinyfmt& fmt) const override
           {
-            ostrm << std::endl;
-            if(this->m_cur.empty()) {
-              return ostrm;
-            }
-            return ostrm << this->m_cur;
+            return fmt << this->m_cur;
           }
         void increment_level() override
           {
@@ -76,30 +72,26 @@ namespace Asteria {
           }
         void decrement_level() override
           {
-            this->m_cur.erase(this->m_cur.size() - this->m_add.size());
+            this->m_cur.pop_back(this->m_add.size());
           }
       };
 
     class Indenter_spaces final : public Indenter
       {
       private:
-        G_integer m_add;
-        G_integer m_cur;
+        size_t m_add;
+        size_t m_cur;
 
       public:
-        explicit Indenter_spaces(G_integer add)
-          : m_add(add), m_cur()
+        explicit Indenter_spaces(size_t add)
+          : m_add(add), m_cur(0)
           {
           }
 
       public:
-        std::ostream& break_line(std::ostream& ostrm) const override
+        tinyfmt& break_line(tinyfmt& fmt) const override
           {
-            ostrm << std::endl;
-            if(this->m_cur == 0) {
-              return ostrm;
-            }
-            return ostrm << std::setfill(' ') << std::setw(static_cast<int>(rocket::min(this->m_cur, INT_MAX))) << ' ';
+            return fmt << pwrap(this->m_add, this->m_cur);
           }
         void increment_level() override
           {
@@ -111,10 +103,10 @@ namespace Asteria {
           }
       };
 
-    std::ostream& do_quote_string(std::ostream& ostrm, const G_string& str)
+    tinyfmt& do_quote_string(tinyfmt& fmt, const G_string& str)
       {
         // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
-        ostrm << '\"';
+        fmt << '\"';
         size_t offset = 0;
         while(offset < str.size()) {
           // Convert UTF-8 to UTF-16.
@@ -126,43 +118,48 @@ namespace Asteria {
           // Escape double quotes, backslashes, and control characters.
           switch(cp) {
           case '\"':
-            ostrm << "\\\"";
+            fmt << "\\\"";
             break;
           case '\\':
-            ostrm << "\\\\";
+            fmt << "\\\\";
             break;
           case '\b':
-            ostrm << "\\b";
+            fmt << "\\b";
             break;
           case '\f':
-            ostrm << "\\f";
+            fmt << "\\f";
             break;
           case '\n':
-            ostrm << "\\n";
+            fmt << "\\n";
             break;
           case '\r':
-            ostrm << "\\r";
+            fmt << "\\r";
             break;
           case '\t':
-            ostrm << "\\t";
+            fmt << "\\t";
             break;
           default:
             if((0x20 <= cp) && (cp <= 0x7E)) {
               // Write printable characters as is.
-              ostrm << static_cast<char>(cp);
+              fmt << static_cast<char>(cp);
               break;
             }
             // Encode the character in UTF-16.
             char16_t ustr[2];
-            char16_t* pos = ustr;
-            utf16_encode(pos, cp);
-            ostrm << std::hex << std::uppercase << std::setfill('0');
-            std::for_each(ustr, pos, [&](char16_t uch) { ostrm << "\\u" << std::setw(4) << uch;  });
+            char16_t* epos = ustr;
+            utf16_encode(epos, cp);
+            for(auto p = ustr; p != epos; ++p) {
+              fmt << "\\u";
+              uintptr_t reg = *p;
+              int shr = 16;
+              while((shr -= 4) >= 0)
+                fmt << "0123456789ABCDEF"[(reg >> shr) & 0xF];
+            }
             break;
           }
         }
-        ostrm << '\"';
-        return ostrm;
+        fmt << '\"';
+        return fmt;
       }
 
     G_object::const_iterator do_find_uncensored(const G_object& object, G_object::const_iterator from)
@@ -173,26 +170,26 @@ namespace Asteria {
                                                        p.second.is_null();  });
       }
 
-    std::ostream& do_format_scalar(std::ostream& ostrm, const Value& value)
+    tinyfmt& do_format_scalar(tinyfmt& fmt, const Value& value)
       {
         if(value.is_boolean()){
           // Write `true` or `false`.
-          return ostrm << std::boolalpha << std::nouppercase << value.as_boolean();
+          return fmt << value.as_boolean();
         }
         if(value.is_integer()) {
           // Write the integer in decimal.
-          return ostrm << std::dec << value.as_integer();
+          return fmt << value.as_integer();
         }
         if(value.is_real() && std::isfinite(value.as_real())) {
           // Write the real in decimal.
-          return ostrm << std::defaultfloat << std::nouppercase << std::setprecision(17) << value.as_real();
+          return fmt << value.as_real();
         }
         if(value.is_string()) {
           // Write the quoted string.
-          return do_quote_string(ostrm, value.as_string());
+          return do_quote_string(fmt, value.as_string());
         }
         // Anything else is censored to `null`.
-        return ostrm << "null";
+        return fmt << "null";
       }
 
     struct S_xformat_array
@@ -209,8 +206,7 @@ namespace Asteria {
 
     G_string do_format_nonrecursive(const Value& value, Indenter& indent)
       {
-        cow_osstream ostrm;
-        ostrm.imbue(std::locale::classic());
+        tinyfmt_str fmt;
         // Transform recursion to iteration using a handwritten stack.
         auto qvalue = std::addressof(value);
         cow_vector<Xformat> stack;
@@ -219,12 +215,12 @@ namespace Asteria {
           if(qvalue->is_array()){
             const auto& array = qvalue->as_array();
             // Open an array.
-            ostrm << '[';
+            fmt << '[';
             auto cur = array.begin();
             if(cur != array.end()) {
               // Indent the body.
               indent.increment_level();
-              indent.break_line(ostrm);
+              indent.break_line(fmt);
               // Decend into the array.
               S_xformat_array ctxa = { rocket::ref(array), cur };
               stack.emplace_back(rocket::move(ctxa));
@@ -232,20 +228,20 @@ namespace Asteria {
               continue;
             }
             // Write an empty array.
-            ostrm << ']';
+            fmt << ']';
           }
           else if(qvalue->is_object()) {
             const auto& object = qvalue->as_object();
             // Open an object.
-            ostrm << '{';
+            fmt << '{';
             auto cur = do_find_uncensored(object, object.begin());
             if(cur != object.end()) {
               // Indent the body.
               indent.increment_level();
-              indent.break_line(ostrm);
+              indent.break_line(fmt);
               // Write the key followed by a colon.
-              do_quote_string(ostrm, cur->first);
-              ostrm << ':';
+              do_quote_string(fmt, cur->first);
+              fmt << ':';
               // Decend into the object.
               S_xformat_object ctxo = { rocket::ref(object), cur };
               stack.emplace_back(rocket::move(ctxo));
@@ -253,17 +249,17 @@ namespace Asteria {
               continue;
             }
             // Write an empty object.
-            ostrm << '}';
+            fmt << '}';
           }
           else {
             // Just write a scalar value which is never recursive.
-            do_format_scalar(ostrm, *qvalue);
+            do_format_scalar(fmt, *qvalue);
           }
           for(;;) {
             // Advance to the next element if any.
             if(stack.empty()) {
               // Finish the root value.
-              return ostrm.extract_string();
+              return fmt.extract_string();
             }
             if(stack.back().index() == 0) {
               auto& ctxa = stack.mut_back().as<0>();
@@ -271,8 +267,8 @@ namespace Asteria {
               auto curp = ++(ctxa.curp);
               if(curp != ctxa.refa->end()) {
                 // Add a separator between elements.
-                ostrm << ',';
-                indent.break_line(ostrm);
+                fmt << ',';
+                indent.break_line(fmt);
                 // Format the next element.
                 ctxa.curp = curp;
                 qvalue = std::addressof(*curp);
@@ -280,9 +276,9 @@ namespace Asteria {
               }
               // Unindent the body.
               indent.decrement_level();
-              indent.break_line(ostrm);
+              indent.break_line(fmt);
               // Finish this array.
-              ostrm << ']';
+              fmt << ']';
             }
             else {
               auto& ctxo = stack.mut_back().as<1>();
@@ -290,11 +286,11 @@ namespace Asteria {
               auto curp = do_find_uncensored(ctxo.refo, ++(ctxo.curp));
               if(curp != ctxo.refo->end()) {
                 // Add a separator between elements.
-                ostrm << ',';
-                indent.break_line(ostrm);
+                fmt << ',';
+                indent.break_line(fmt);
                 // Write the key followed by a colon.
-                do_quote_string(ostrm, curp->first);
-                ostrm << ':';
+                do_quote_string(fmt, curp->first);
+                fmt << ':';
                 // Format the next value.
                 ctxo.curp = curp;
                 qvalue = std::addressof(curp->second);
@@ -302,9 +298,9 @@ namespace Asteria {
               }
               // Unindent the body.
               indent.decrement_level();
-              indent.break_line(ostrm);
+              indent.break_line(fmt);
               // Finish this array.
-              ostrm << '}';
+              fmt << '}';
             }
             stack.pop_back();
           }
@@ -328,7 +324,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0) ? do_format_nonrecursive(value, Indenter_none())
-                         : do_format_nonrecursive(value, Indenter_spaces(rocket::min(indent, 10)));
+                         : do_format_nonrecursive(value, Indenter_spaces(static_cast<size_t>(rocket::min(indent, 10))));
   }
 
     namespace {
@@ -611,16 +607,16 @@ G_string std_json_format(const Value& value, const G_integer& indent)
 
 Value std_json_parse(const G_string& text)
   {
-    // Tokenize source data.
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric literals and comments.
     Compiler_Options opts = { };
     opts.escapable_single_quotes = true;
     opts.keywords_as_identifiers = true;
     opts.integers_as_reals = true;
-    // Use a `streambuf` rather than an `istream` to minimize overheads.
-    cow_stringbuf sbuf(text, std::ios_base::in);
+    // Tokenize source data.
     Token_Stream tstrm;
     try {
+      // Use a `streambuf` rather than an `istream` to minimize overheads.
+      cow_stringbuf sbuf(text, std::ios_base::in);
       tstrm.reload(sbuf, rocket::sref("<JSON text>"), opts);
     }
     catch(Parser_Error& except) {

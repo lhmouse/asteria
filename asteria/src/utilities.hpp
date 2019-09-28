@@ -5,7 +5,6 @@
 #define ASTERIA_UTILITIES_HPP_
 
 #include "fwd.hpp"
-#include <iomanip>
 #include <exception>
 
 namespace Asteria {
@@ -13,7 +12,7 @@ namespace Asteria {
 class Formatter
   {
   private:
-    uptr<cow_osstream> m_strm_opt;
+    uptr<tinyfmt_str> m_strm;
 
   public:
     Formatter() noexcept
@@ -90,19 +89,20 @@ class Formatter
       {
         this->do_open_stream() << val;
       }
-    std::ostream& do_open_stream();
+    tinyfmt& do_open_stream();
 
   public:
-    template<typename ValT> Formatter& operator,(const ValT& val) noexcept
-      try {
+    template<typename ValT> Formatter& operator,(const ValT& val)
+      {
         return this->do_put(val), *this;
-      }
-      catch(...) {
-        return *this;
       }
     cow_string extract_string() noexcept
       {
-        return this->m_strm_opt ? this->m_strm_opt->extract_string() : rocket::clear;
+        const auto& strm = this->m_strm;
+        if(!strm) {
+          return rocket::sref("");
+        }
+        return strm->extract_string();
       }
   };
 
@@ -176,7 +176,7 @@ inline Quote_Wrapper quote(const cow_string& str) noexcept
     return quote(str.data(), str.size());
   }
 
-extern std::ostream& operator<<(std::ostream& cstrm, const Quote_Wrapper& q);
+extern tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q);
 
 struct Paragraph_Wrapper
   {
@@ -189,7 +189,7 @@ constexpr Paragraph_Wrapper pwrap(size_t indent, size_t hanging) noexcept
     return { indent, hanging };
   }
 
-extern std::ostream& operator<<(std::ostream& cstrm, const Paragraph_Wrapper& q);
+extern tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q);
 
 struct Wrapped_Index
   {
