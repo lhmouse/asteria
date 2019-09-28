@@ -10,6 +10,7 @@
 #include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
+#include <limits>  // std::numeric_limits<>
 #include <iosfwd>  // std::ios_base, std::basic_ios<>, std::streamsize, std::streamoff
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
@@ -38,6 +39,7 @@ using ::std::uint32_t;
 using ::std::int64_t;
 using ::std::uint64_t;
 using ::std::initializer_list;
+using ::std::numeric_limits;
 using ::std::type_info;
 using ::std::nothrow_t;
 
@@ -87,6 +89,9 @@ using ::std::underlying_type;
 using ::std::is_array;
 using ::std::is_base_of;
 using ::std::aligned_union;
+using ::std::is_signed;
+using ::std::make_signed;
+using ::std::make_unsigned;
 
 using ::std::allocator;
 using ::std::allocator_traits;
