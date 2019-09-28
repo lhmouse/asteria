@@ -32,6 +32,8 @@ namespace rocket {
 template<typename charT, typename traitsT = char_traits<charT>,
          typename allocatorT = allocator<charT>> class basic_cow_string;
 
+template<typename charT, typename traitsT> class basic_tinyfmt;
+
     namespace details_cow_string {
 
     template<typename charT, typename traitsT> class shallow
@@ -2248,6 +2250,13 @@ extern template ::std::istream& getline(::std::istream& is, cow_string& str, cha
 extern template ::std::istream& getline(::std::istream& is, cow_string& str);
 extern template ::std::wistream& getline(::std::wistream& is, cow_wstring& str, wchar_t delim);
 extern template ::std::wistream& getline(::std::wistream& is, cow_wstring& str);
+
+template<typename charT, typename traitsT,
+         typename allocatorT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                                        const basic_cow_string<charT, traitsT, allocatorT>& str)
+  {
+    return fmt.write(str.c_str(), str.ssize());
+  }
 
 }  // namespace rocket
 
