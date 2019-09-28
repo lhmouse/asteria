@@ -60,7 +60,10 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/static_vector.hpp  \
   asteria/rocket/optional.hpp  \
   asteria/rocket/array.hpp  \
-  asteria/rocket/ref_to.hpp
+  asteria/rocket/ref_to.hpp  \
+  asteria/rocket/tinyfmt.hpp  \
+  asteria/rocket/tinyfmt_str.hpp  \
+  asteria/rocket/tinyfmt_file.hpp
 
 pkginclude_rocket_platformdir = ${pkgincludedir}/rocket/platform
 pkginclude_rocket_platform_HEADERS =  \
@@ -75,7 +78,10 @@ lib_librocket_la_SOURCES =  \
   asteria/rocket/cow_stringbuf.cpp  \
   asteria/rocket/cow_istringstream.cpp  \
   asteria/rocket/cow_ostringstream.cpp  \
-  asteria/rocket/cow_stringstream.cpp
+  asteria/rocket/cow_stringstream.cpp  \
+  asteria/rocket/tinyfmt.cpp  \
+  asteria/rocket/tinyfmt_str.cpp  \
+  asteria/rocket/tinyfmt_file.cpp
 
 lib_librocket_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp
