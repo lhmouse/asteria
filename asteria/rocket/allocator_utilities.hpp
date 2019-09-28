@@ -43,7 +43,7 @@ namespace rocket {
 
     }  // namespace details_allocator_utilities
 
-template<typename allocatorT> struct allocator_wrapper_base_for : conditional<std::is_final<allocatorT>::value,
+template<typename allocatorT> struct allocator_wrapper_base_for : conditional<is_final<allocatorT>::value,
                                                                               details_allocator_utilities::final_wrapper<allocatorT>,
                                                                               allocatorT>
   {

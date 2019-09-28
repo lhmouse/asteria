@@ -45,7 +45,7 @@ template<typename charT, typename traitsT = char_traits<charT>,
           : m_ptr(ptr), m_len(traitsT::length(ptr))
           {
           }
-        constexpr shallow(const charT* ptr, std::size_t len) noexcept
+        constexpr shallow(const charT* ptr, size_t len) noexcept
           : m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))
           {
           }
