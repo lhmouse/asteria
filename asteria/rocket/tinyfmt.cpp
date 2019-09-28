@@ -35,7 +35,7 @@ namespace rocket {
           }
       };
 
-    }
+    }  // namespace
 
     namespace details_tinyfmt {
 
@@ -147,17 +147,16 @@ namespace rocket {
         return xapp;
       }
 
-    long xformat_Qf(char* str, double value) noexcept
+    }  // namespace details_tinyfmt
+
+    namespace {
+
+    constexpr double s_dblbounds[]
       {
 return std::sprintf(str, "%f", value);
       }
 
-    long xformat_Tf(char* str, long double value) noexcept
-      {
-return std::sprintf(str, "%Lf", value);
-      }
-
-    }
+    }  // namespace
 
 template class basic_tinyfmt<char>;
 template class basic_tinyfmt<wchar_t>;
