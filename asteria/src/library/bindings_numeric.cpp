@@ -433,16 +433,16 @@ G_integer std_numeric_popcnt(const G_integer& x)
         // Get the absolute value of `value` without causing overflow.
         auto m = static_cast<uint64_t>(value >> 63);
         p.sbt = m;
-        auto reg = (static_cast<uint64_t>(value) ^ m) - m;
+        auto ireg = (static_cast<uint64_t>(value) ^ m) - m;
         // Extract digits from right to left.
         // Note that if `value` is zero then `exp` is set to `-1`.
         p.bsf = 64;
         p.esf = 64;
         p.exp = -1;
-        while(reg != 0) {
+        while(ireg != 0) {
           // Shift a digit out.
-          auto dval = static_cast<uint8_t>(reg % rbase);
-          reg /= rbase;
+          auto dval = static_cast<uint8_t>(ireg % rbase);
+          ireg /= rbase;
           // Locate the digit in uppercase.
           int doff = dval * 2;
           p.sfs[--p.bsf] = s_xdigits[doff];
@@ -1264,7 +1264,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
         Parts p;
         // Get the absolute value of `val`.
         p.sbt = std::signbit(val);
-        auto reg = static_cast<long double>(std::fabs(val));
+        auto freg = static_cast<long double>(std::fabs(val));
         // Extract digits from left to right.
         // Note that if `value` is zero then `exp` is set to `-1`.
         p.bsf = 0;
@@ -1275,18 +1275,18 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           {
             // Break the value into fractional and exponential parts. Be advised, unlike scientific notation,
             // `frexp()` returns a fraction in `[0.5,1.0)`, so the exponent has to be normalized by hand.
-            if(reg == 0) {
+            if(freg == 0) {
               break;
             }
             int doff;
-            reg = std::frexp(reg, &doff);
+            freg = std::frexp(freg, &doff);
             p.exp = doff - 1;
             // The result is exact.
-            while(reg != 0) {
+            while(freg != 0) {
               // Shift a digit out.
-              reg *=  2;
-              auto dval = static_cast<uint8_t>(reg);
-              reg -= dval;
+              freg *=  2;
+              auto dval = static_cast<uint8_t>(freg);
+              freg -= dval;
               // Locate the digit in uppercase.
               doff = dval * 2;
               p.sfs[p.esf++] = s_xdigits[doff];
@@ -1297,22 +1297,22 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           {
             // Break the value into fractional and exponential parts. Be advised, unlike scientific notation,
             // `frexp()` returns a fraction in `[0.5,1.0)`, so the exponent has to be normalized by hand.
-            if(reg == 0) {
+            if(freg == 0) {
               break;
             }
             int doff;
-            reg = std::frexp(reg, &doff);
+            freg = std::frexp(freg, &doff);
             p.exp = doff - 1;
             // Since `frexp()` returns an exponent of base 2, we divide it by 4 (which equals `log2(16)`),
             // rounding towards negative infinity, to get the exponent of base 16.
-            reg = std::ldexp(reg, (p.exp & 3) - 3);
+            freg = std::ldexp(freg, (p.exp & 3) - 3);
             p.exp >>= 2;
             // The result is exact.
-            while(reg != 0) {
+            while(freg != 0) {
               // Shift a digit out.
-              reg *= 16;
-              auto dval = static_cast<uint8_t>(reg);
-              reg -= dval;
+              freg *= 16;
+              auto dval = static_cast<uint8_t>(freg);
+              freg -= dval;
               // Locate the digit in uppercase.
               doff = dval * 2;
               p.sfs[p.esf++] = s_xdigits[doff];
@@ -1323,7 +1323,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           {
             // The value has to be finite.
             // Calculate the exponent using binary search. Note that the first two elements of `s_decbnd_dbl` are zeroes.
-            auto qdigit = std::upper_bound(s_decbnd_dbl, s_decbnd_dbl + 5697, reg) - 1;
+            auto qdigit = std::upper_bound(s_decbnd_dbl, s_decbnd_dbl + 5697, freg) - 1;
             if(qdigit < s_decbnd_dbl + 2) {
               break;
             }
@@ -1335,7 +1335,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
               // Shift a digit out.
               auto dval = static_cast<uint8_t>(qdigit - qbase + 1);
               if(dval != 0) {
-                reg -= *qdigit;
+                freg -= *qdigit;
               }
               // Locate the digit in uppercase.
               doff = dval * 2;
@@ -1349,7 +1349,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
                 break;
               }
               qbase -= 9;
-              qdigit = std::upper_bound(qbase, qbase + 9, reg) - 1;
+              qdigit = std::upper_bound(qbase, qbase + 9, freg) - 1;
             }
             // Remove trailing zeroes.
             for(;;) {

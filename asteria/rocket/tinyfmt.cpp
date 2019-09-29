@@ -58,10 +58,10 @@ namespace rocket {
         // Write a `0x` prefix.
         xapp << '0' << 'x';
         // Write the pointer as a hexadecimal string;
-        auto reg = reinterpret_cast<uintptr_t>(value);
+        auto ireg = reinterpret_cast<uintptr_t>(value);
         int shr = numeric_limits<uintptr_t>::digits;
         while((shr -= 4) >= 0)
-          xapp << "0123456789ABCDEF"[(reg >> shr) & 0xF];
+          xapp << "0123456789ABCDEF"[(ireg >> shr) & 0xF];
         return xapp;
       }
 
@@ -76,9 +76,9 @@ namespace rocket {
         char temp[23];
         uint8_t t = 0;
         // Write all digits in reverse order.
-        auto reg = value;
-        while(reg != 0)
-          temp[t++] = "0123456789"[reg % 10], reg /= 10;
+        auto ireg = value;
+        while(ireg != 0)
+          temp[t++] = "0123456789"[ireg % 10], ireg /= 10;
         // Ensure there is at least a zero digit.
         if(t == 0)
           temp[t++] = '0';
@@ -784,8 +784,8 @@ namespace rocket {
         uint8_t t = 0;
         int exp = 0;
         // Calculate the exponent using binary search. Note that the first two elements of `s_decbnd_dbl` are zeroes.
-        auto reg = static_cast<long double>(::std::fabs(value));
-        auto qdigit = ::std::upper_bound(s_decbnd_dbl, s_decbnd_dbl + 5697, reg) - 1;
+        auto freg = static_cast<long double>(::std::fabs(value));
+        auto qdigit = ::std::upper_bound(s_decbnd_dbl, s_decbnd_dbl + 5697, freg) - 1;
         if(qdigit >= s_decbnd_dbl + 2) {
           // Extract all digits.
           int doff = static_cast<int>(qdigit - s_decbnd_dbl) / 9;
@@ -796,7 +796,7 @@ namespace rocket {
             // Shift a digit out.
             auto dval = static_cast<uint8_t>(qdigit - qbase + 1);
             if(dval != 0)
-              reg -= *qdigit;
+              freg -= *qdigit;
             // Output a digit.
             temp[t++] = "0123456789"[dval];
             // Only the first 17 significant figures are output.
@@ -806,7 +806,7 @@ namespace rocket {
             if(qbase == s_decbnd_dbl)
               break;
             qbase -= 9;
-            qdigit = ::std::upper_bound(qbase, qbase + 9, reg) - 1;
+            qdigit = ::std::upper_bound(qbase, qbase + 9, freg) - 1;
           }
           // Remove trailing zeroes.
           while((t != 0) && (temp[t-1] == '0'))
