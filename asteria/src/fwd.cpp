@@ -506,10 +506,6 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "The operation succeeded.";
       }
-    case parser_status_no_data_loaded :
-      {
-        return "No data were loaded.";
-      }
     case parser_status_ifstream_open_failure:
       {
         return "The source file could not be opened for reading.";
