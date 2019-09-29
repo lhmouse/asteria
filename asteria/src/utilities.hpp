@@ -12,7 +12,7 @@ namespace Asteria {
 class Formatter
   {
   private:
-    uptr<tinyfmt_str> m_strm;
+    uptr<tinyfmt_str> m_fmt;
 
   public:
     Formatter() noexcept
@@ -98,11 +98,11 @@ class Formatter
       }
     cow_string extract_string() noexcept
       {
-        const auto& strm = this->m_strm;
-        if(!strm) {
+        const auto& fmt = this->m_fmt;
+        if(!fmt) {
           return rocket::sref("");
         }
-        return strm->extract_string();
+        return fmt->extract_string();
       }
   };
 
