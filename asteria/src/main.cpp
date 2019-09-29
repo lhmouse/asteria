@@ -37,12 +37,12 @@ int main(int argc, char** argv)
         }
         return fib(30);
       )_____";
-    std::istringstream iss(src);
     std::cerr << "# Source code:" << std::endl
               << "---" << std::endl
               << src << std::endl
-              << "---" << std::endl;;
-    Simple_Script code(iss, rocket::sref("my_file"));
+              << "---" << std::endl;
+    cow_stringbuf sbuf(rocket::sref(src));
+    Simple_Script code(sbuf, rocket::sref("my_file"));
 #endif
     std::cerr << std::endl
               << "---" << std::endl
