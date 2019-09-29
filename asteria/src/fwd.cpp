@@ -504,187 +504,187 @@ const char* describe_parser_status(Parser_Status status) noexcept
     switch(status) {
     case parser_status_success:
       {
-        return "The operation succeeded.";
+        return "operation succeeded";
       }
     case parser_status_ifstream_open_failure:
       {
-        return "The source file could not be opened for reading.";
+        return "error opening source file";
       }
     case parser_status_utf8_sequence_invalid:
       {
-        return "An invalid UTF-8 byte sequence was encountered.";
+        return "UTF-8 sequence invalid";
       }
     case parser_status_utf8_sequence_incomplete:
       {
-        return "An incomplete UTF-8 byte sequence was encountered.";
+        return "UTF-8 sequence incomplete";
       }
     case parser_status_utf_code_point_invalid:
       {
-        return "A UTF-8 byte sequence could not be decoded to a valid UTF code point.";
+        return "UTF code point invalid";
       }
     case parser_status_null_character_disallowed:
       {
-        return "Null characters are not allowed in source data.";
+        return "null character disallowed";
       }
     case parser_status_token_character_unrecognized:
       {
-        return "The character could not form a valid token.";
+        return "character invalid in source code";
       }
     case parser_status_string_literal_unclosed:
       {
-        return "The string literal was not properly terminated.";
+        return "string literal unclosed";
       }
     case parser_status_escape_sequence_unknown:
       {
-        return "An invalid escape sequence was encountered.";
+        return "escape sequence invalid";
       }
     case parser_status_escape_sequence_incomplete:
       {
-        return "An incomplete escape sequence was encountered.";
+        return "escape sequence incomplete";
       }
     case parser_status_escape_sequence_invalid_hex:
       {
-        return "An invalid hexadecimal digit was encountered.";
+        return "hexadecimal digit expected";
       }
     case parser_status_escape_utf_code_point_invalid:
       {
-        return "The value of this escaped UTF code point was reserved or out of range.";
+        return "UTF code point value invalid";
       }
     case parser_status_numeric_literal_incomplete:
       {
-        return "This numeric literal was incomplete.";
+        return "numeric literal incomplete";
       }
     case parser_status_numeric_literal_suffix_disallowed:
       {
-        return "This numeric literal was not terminated properly.";
+        return "numeric literal suffix disallowed";
       }
     case parser_status_numeric_literal_exponent_overflow:
       {
-        return "The exponent of this numeric literal was too large.";
+        return "numeric literal exponent too large";
       }
     case parser_status_integer_literal_overflow:
       {
-        return "This integer literal was too large and could not be represented.";
+        return "integer literal exponent too large";
       }
     case parser_status_integer_literal_exponent_negative:
       {
-        return "The exponent of this integer literal was negative.";
+        return "integer literal exponent negative";
       }
     case parser_status_real_literal_overflow:
       {
-        return "The value of this real literal was so large that would yield infinity.";
+        return "real literal overflowed to infinity";
       }
     case parser_status_real_literal_underflow:
       {
-        return "The value of this real literal was so small that would yield zero.";
+        return "real literal truncated to zero";
       }
     case parser_status_block_comment_unclosed:
       {
-        return "A block comment was not properly terminated.";
+        return "block comment unclosed";
       }
     case parser_status_digit_separator_following_nondigit:
       {
-        return "A digit separator must follow a digit.";
+        return "digit separator not following a digit";
       }
     case parser_status_identifier_expected:
       {
-        return "Expectation failed while looking for an identifier.";
+        return "identifier expected";
       }
     case parser_status_semicolon_expected:
       {
-        return "Expectation failed while looking for a `;`.";
+        return "`;` expected";
       }
     case parser_status_string_literal_expected:
       {
-        return "Expectation failed while looking for a string literal.";
+        return "string literal expected";
       }
     case parser_status_statement_expected:
       {
-        return "Expectation failed while looking for a statement.";
+        return "statement expected";
       }
     case parser_status_equals_sign_expected:
       {
-        return "Expectation failed while looking for an `=`.";
+        return "`=` expected";
       }
     case parser_status_expression_expected:
       {
-        return "Expectation failed while looking for an expression.";
+        return "expression expected";
       }
     case parser_status_open_brace_expected:
       {
-        return "Expectation failed while looking for an `{`.";
+        return "`{` expected";
       }
     case parser_status_closed_brace_or_statement_expected:
       {
-        return "Expectation failed while looking for a `}` or statement.";
+        return "`}` or statement expected";
       }
     case parser_status_open_parenthesis_expected:
       {
-        return "Expectation failed while looking for an `(`.";
+        return "`(` expected";
       }
     case parser_status_parameter_or_ellipsis_expected:
       {
-        return "Expectation failed while looking for an identifier or `...`.";
+        return "identifier or `...` expected";
       }
     case parser_status_closed_parenthesis_expected:
       {
-        return "Expectation failed while looking for a `)`.";
+        return "`)` expected";
       }
     case parser_status_colon_expected:
       {
-        return "Expectation failed while looking for a `:`.";
+        return "`:` expected";
       }
     case parser_status_closed_brace_or_switch_clause_expected:
       {
-        return "Expectation failed while looking for a `}`, `case` clause or `default` clause.";
+        return "`}`, `case` or `default` expected";
       }
     case parser_status_keyword_while_expected:
       {
-        return "Expectation failed while looking for a `while`.";
+        return "`while` expected";
       }
     case parser_status_keyword_catch_expected:
       {
-        return "Expectation failed while looking for a `catch`.";
+        return "`catch` expected";
       }
     case parser_status_comma_expected:
       {
-        return "Expectation failed while looking for a `,`.";
+        return "`,` expected";
       }
     case parser_status_for_statement_initializer_expected:
       {
-        return "Expectation failed while looking for an `each`, `;`, variable definition or expression statement.";
+        return "`each`, `;`, variable definition or expression statement expected";
       }
     case parser_status_semicolon_or_expression_expected:
       {
-        return "Expectation failed while looking for a `;` or expression.";
+        return "`;` or expression expected";
       }
     case parser_status_closed_brace_expected:
       {
-        return "Expectation failed while looking for a `}`.";
+        return "`}` expected";
       }
     case parser_status_too_many_array_elements:
       {
-        return "The number of elements in this array exceeded the system limit.";
+        return "array elements too many";
       }
     case parser_status_closed_parenthesis_or_argument_expected:
       {
-        return "Expectation failed while looking for a `)` or expression.";
+        return "`)` or expression expected";
       }
     case parser_status_closed_bracket_expected:
       {
-        return "Expectation failed while looking for a `]`.";
+        return "`]` expected";
       }
     case parser_status_open_brace_or_equal_initializer_expected:
       {
-        return "Expectation failed while looking for an `{` or `=`.";
+        return "`{` or `=` expected";
       }
     case parser_status_equals_sign_or_colon_expected:
       {
-        return "Expectation failed while looking for an `=` or `:`.";
+        return "`=` or `:` expected";
       }
     default:
       {
-        return "No description is available for this error code.";
+        return "<unknown parser error>";
       }
     }
   }
