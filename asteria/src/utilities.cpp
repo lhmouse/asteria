@@ -446,24 +446,22 @@ Wrapped_Index wrap_index(int64_t index, size_t size) noexcept
 uint64_t generate_random_seed() noexcept
   {
     // Get the system time of very high resolution.
-    int64_t tp;
+    int64_t source;
 #ifdef _WIN32
     ::LARGE_INTEGER li;
     ::QueryPerformanceCounter(&li);
-    tp = li.QuadPart;
+    source = li.QuadPart;
 #else
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    tp = static_cast<int64_t>(ts.tv_sec) * 1000000000 + ts.tv_nsec;
+    source = static_cast<int64_t>(ts.tv_sec) * 1000000000 + ts.tv_nsec;
 #endif
     // Hash it using FNV-1a to erase sensitive information.
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
-    // The timestamp is read in little-endian byte order.
+    // The source is read in little-endian byte order.
     uint64_t seed = 0xCBF29CE484222325;
     for(int i = 0; i < 8; ++i) {
-      auto byte = static_cast<unsigned char>(tp >> i * 8);
-      seed = (seed ^ byte) * 0x100000001B3;
-    }
+      seed = (seed ^ (source & 0xFF)) * 0x100000001B3, source >>= 8;
     return seed;
   }
 
