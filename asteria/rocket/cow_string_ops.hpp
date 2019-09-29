@@ -7,6 +7,7 @@
 #include "cow_string.hpp"
 #include <istream>  // std::streamsize, std::ios_base, std::basic_istream<>
 #include <ostream>  // std::basic_ostream<>
+#include <locale>  // std::isspace<>
 
 namespace rocket {
 
