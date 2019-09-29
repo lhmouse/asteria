@@ -96,6 +96,9 @@ using ::std::make_signed;
 using ::std::is_unsigned;
 using ::std::make_unsigned;
 using ::std::is_final;
+using ::std::is_enum;
+using ::std::is_class;
+using ::std::is_union;
 
 using ::std::allocator;
 using ::std::allocator_traits;

@@ -317,11 +317,18 @@ template<typename charT, typename traitsT> class basic_tinyfmt
 template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>::~basic_tinyfmt()
   = default;
 
-// Rvalue inserter
-template<typename charT, typename traitsT,
-         typename valueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>&& strm, valueT&& value)
+// Inserter for enumeraions
+template<typename charT, typename traitsT, typename valueT,
+         ROCKET_ENABLE_IF(is_enum<valueT>::value)> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
   {
-    return strm << noadl::forward<valueT>(value);
+    return fmt << static_cast<typename underlying_type<valueT>::type>(value);
+  }
+
+// Inserter for rvalues
+template<typename charT, typename traitsT,
+         typename valueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>&& fmt, valueT&& value)
+  {
+    return fmt << noadl::forward<valueT>(value);
   }
 
 extern template class basic_tinyfmt<char>;

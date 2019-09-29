@@ -18,11 +18,11 @@ Formatter::~Formatter()
 
 tinyfmt& Formatter::do_open_stream()
   {
-    auto& strm = this->m_strm;
-    if(!strm) {
-      strm = rocket::make_unique<tinyfmt_str>();
+    auto& fmt = this->m_fmt;
+    if(!fmt) {
+      fmt = rocket::make_unique<tinyfmt_str>();
     }
-    return *strm;
+    return *fmt;
   }
 
     namespace {
