@@ -2,6 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "tinyfmt.hpp"
+#include "assert.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -785,7 +786,7 @@ namespace rocket {
         int exp = 0;
         // Calculate the exponent using binary search. Note that the first two elements of `s_decbnd_dbl` are zeroes.
         auto freg = static_cast<long double>(::std::fabs(value));
-        auto qdigit = ::std::upper_bound(s_decbnd_dbl, s_decbnd_dbl + 5697, freg) - 1;
+        auto qdigit = ::std::upper_bound(::std::begin(s_decbnd_dbl), ::std::end(s_decbnd_dbl), freg) - 1;
         if(qdigit >= s_decbnd_dbl + 2) {
           // Extract all digits.
           int doff = static_cast<int>(qdigit - s_decbnd_dbl) / 9;

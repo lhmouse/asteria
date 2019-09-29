@@ -1323,7 +1323,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           {
             // The value has to be finite.
             // Calculate the exponent using binary search. Note that the first two elements of `s_decbnd_dbl` are zeroes.
-            auto qdigit = std::upper_bound(s_decbnd_dbl, s_decbnd_dbl + 5697, freg) - 1;
+            auto qdigit = std::upper_bound(::std::begin(s_decbnd_dbl), ::std::end(s_decbnd_dbl), freg) - 1;
             if(qdigit < s_decbnd_dbl + 2) {
               break;
             }
