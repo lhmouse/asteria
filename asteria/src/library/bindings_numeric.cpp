@@ -1264,7 +1264,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
         Parts p;
         // Get the absolute value of `val`.
         p.sbt = std::signbit(val);
-        auto reg = std::fabs(val);
+        auto reg = static_cast<long double>(std::fabs(val));
         // Extract digits from left to right.
         // Note that if `value` is zero then `exp` is set to `-1`.
         p.bsf = 0;

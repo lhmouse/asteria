@@ -784,7 +784,7 @@ namespace rocket {
         uint8_t t = 0;
         int exp = 0;
         // Calculate the exponent using binary search. Note that the first two elements of `s_decbnd_dbl` are zeroes.
-        auto reg = ::std::fabs(value);
+        auto reg = static_cast<long double>(::std::fabs(value));
         auto qdigit = ::std::upper_bound(s_decbnd_dbl, s_decbnd_dbl + 5697, reg) - 1;
         if(qdigit >= s_decbnd_dbl + 2) {
           // Extract all digits.
