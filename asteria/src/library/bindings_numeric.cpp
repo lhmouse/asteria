@@ -1381,18 +1381,18 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           text.append(static_cast<unsigned>(-diff), '0');
           text.append(p.sfs + p.bsf, p.sfs + p.esf);
         }
-        else if((diff -= p.esf - p.bsf) <= 0) {
-          // If the decimal point appears in the middle of significant figures, write digits as two parts.
-          text.append(p.sfs + p.bsf, p.sfs + p.esf + diff);
-          text.push_back('.');
-          text.append(p.sfs + p.esf + diff, p.sfs + p.esf);
-        }
-        else {
+        else if((diff -= p.esf - p.bsf) >= 0) {
           // If all significant figures are from the integral part, write all significant figures,
           // append zeroes when necesssary, then terminate the string with a decimal point.
           text.append(p.sfs + p.bsf, p.sfs + p.esf);
           text.append(static_cast<unsigned>(diff), '0');
           text.push_back('.');
+        }
+        else {
+          // If the decimal point appears in the middle of significant figures, write digits as two parts.
+          text.append(p.sfs + p.bsf, p.sfs + p.esf + diff);
+          text.push_back('.');
+          text.append(p.sfs + p.esf + diff, p.sfs + p.esf);
         }
         // The string will always contain a decimal point.
         // Append a zero digit if there is no fractional part.
