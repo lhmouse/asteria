@@ -8,7 +8,6 @@
 #include "compiler.h"
 
 #include <type_traits>  // so many...
-#include <iterator>  // std::iterator_traits<>
 #include <utility>  // std::swap()
 #include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>
 #include <new>  // placement new
@@ -17,7 +16,6 @@
 #include <ios>  // std::streamsize, std::streamoff, std::basic_streambuf<>, std::char_traits<>, std::ios_base
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
-#include <stdexcept>  // standard exceptions...
 #include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
 
