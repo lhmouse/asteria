@@ -855,15 +855,14 @@ namespace rocket {
           // Initiate the exponent.
           xapp << 'e';
           t = 0;
-          // Write the exponent in reverse order.
           auto ireg = static_cast<unsigned>(exp);
           if(exp < 0)
             xapp << '-', ireg = -ireg;
           else
             xapp << '+';
+          // Write the exponent in reverse order. Ensure there are at least two digits.
           while(ireg != 0)
             temp[t++] = "0123456789"[ireg % 10], ireg /= 10;
-          // Ensure there are at least two digits.
           while(t < 2)
             temp[t++] = '0';
           // Append exponent figures.
