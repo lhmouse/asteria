@@ -4,9 +4,6 @@
 #ifndef ROCKET_COW_STRING_HPP_
 #define ROCKET_COW_STRING_HPP_
 
-#include <string>  // std::char_traits<>
-#include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
-#include <cstring>  // std::memset()
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
@@ -14,6 +11,8 @@
 #include "allocator_utilities.hpp"
 #include "reference_counter.hpp"
 #include "tinyfmt.hpp"
+#include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
+#include <cstring>  // std::memset()
 
 /* Differences from `std::basic_string`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.

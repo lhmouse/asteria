@@ -4,13 +4,13 @@
 #ifndef ROCKET_STATIC_VECTOR_HPP_
 #define ROCKET_STATIC_VECTOR_HPP_
 
-#include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
-#include <cstring>  // std::memset()
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
+#include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
+#include <cstring>  // std::memset()
 
 /* Differences from `std::vector`:
  * 1. The storage of elements are allocated inside the vector object, which eliminates dynamic allocation.

@@ -4,7 +4,8 @@
 #ifndef ROCKET_COMPILER_H_
 #define ROCKET_COMPILER_H_
 
-#define ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_ 1
+#define ROCKET_DETAILS_PLATFORM_COMPILER_IMPLEMENTATION_  1
+// Clang may pretend to be GCC or MSVC so has to be checked very first.
 #if defined(__clang__)
 #  include "platform/compiler_clang.h"
 #elif defined(__GNUC__)

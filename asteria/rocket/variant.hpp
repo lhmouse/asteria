@@ -4,10 +4,10 @@
 #ifndef ROCKET_VARIANT_HPP_
 #define ROCKET_VARIANT_HPP_
 
-#include <cstring>  // std::memset()
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"
+#include <cstring>  // std::memset()
 
 namespace rocket {
 

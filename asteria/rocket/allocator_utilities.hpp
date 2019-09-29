@@ -4,8 +4,8 @@
 #ifndef ROCKET_ALLOCATOR_UTILITIES_HPP_
 #define ROCKET_ALLOCATOR_UTILITIES_HPP_
 
-#include <type_traits>  // std::conditional<>, std::false_type, std::true_type
 #include "utilities.hpp"
+#include <type_traits>  // std::conditional<>, std::false_type, std::true_type
 
 namespace rocket {
 

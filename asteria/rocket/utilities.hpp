@@ -4,6 +4,9 @@
 #ifndef ROCKET_UTILITIES_HPP_
 #define ROCKET_UTILITIES_HPP_
 
+// This must be the first header as it defines some macros that interact with the standard library.
+#include "compiler.h"
+
 #include <type_traits>  // so many...
 #include <iterator>  // std::iterator_traits<>
 #include <utility>  // std::swap()
@@ -11,13 +14,12 @@
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
 #include <limits>  // std::numeric_limits<>
-#include <iosfwd>  // std::streamsize, std::streamoff, std::streambuf, std::ios_base
+#include <ios>  // std::streamsize, std::streamoff, std::basic_streambuf<>, std::char_traits<>, std::ios_base
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <stdexcept>  // standard exceptions...
 #include <cstring>  // std::memset()
 #include <cstddef>  // std::size_t, std::ptrdiff_t
-#include "compiler.h"
 
 namespace rocket {
 
@@ -91,7 +93,9 @@ using ::std::is_base_of;
 using ::std::aligned_union;
 using ::std::is_signed;
 using ::std::make_signed;
+using ::std::is_unsigned;
 using ::std::make_unsigned;
+using ::std::is_final;
 
 using ::std::allocator;
 using ::std::allocator_traits;
@@ -104,7 +108,6 @@ using ::std::forward_iterator_tag;
 using ::std::bidirectional_iterator_tag;
 using ::std::random_access_iterator_tag;
 
-using ::std::char_traits;
 using ::std::streamsize;
 using ::std::streamoff;
 using ::std::basic_streambuf;
@@ -113,6 +116,7 @@ using ::std::basic_ios;
 using ::std::basic_istream;
 using ::std::basic_ostream;
 using ::std::basic_iostream;
+using ::std::char_traits;
 
 using ::std::hash;
 using ::std::equal_to;
@@ -373,9 +377,8 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
 
     template<typename containerT, typename callbackT> void for_each_nonconstexpr(containerT&& cont, callbackT&& callback)
       {
-        for(auto&& qelem : cont) {
+        for(auto&& qelem : cont)
           noadl::forward<callbackT>(callback)(qelem);
-        }
       }
 
     }  // namespace details_utilities
@@ -393,11 +396,9 @@ template<typename elementT, typename callbackT> void for_each(initializer_list<e
 
     template<typename containerT, typename callbackT> bool any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
       {
-        for(auto&& qelem : cont) {
-          if(noadl::forward<callbackT>(callback)(qelem)) {
+        for(auto&& qelem : cont)
+          if(noadl::forward<callbackT>(callback)(qelem))
             return true;
-          }
-        }
         return false;
       }
 
@@ -416,11 +417,9 @@ template<typename elementT, typename callbackT> constexpr bool any_of(initialize
 
     template<typename containerT, typename callbackT> bool none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
       {
-        for(auto&& qelem : cont) {
-          if(noadl::forward<callbackT>(callback)(qelem)) {
+        for(auto&& qelem : cont)
+          if(noadl::forward<callbackT>(callback)(qelem))
             return false;
-          }
-        }
         return true;
       }
 
@@ -439,11 +438,9 @@ template<typename elementT, typename callbackT> constexpr bool none_of(initializ
 
     template<typename targetT, typename containerT> bool is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
       {
-        for(auto&& qelem : cont) {
-          if(noadl::forward<targetT>(targ) == qelem) {
+        for(auto&& qelem : cont)
+          if(noadl::forward<targetT>(targ) == qelem)
             return true;
-          }
-        }
         return false;
       }
 
@@ -462,11 +459,9 @@ template<typename targetT, typename elementT> constexpr bool is_any_of(targetT&&
 
     template<typename targetT, typename containerT> bool is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
       {
-        for(auto&& qelem : cont) {
-          if(noadl::forward<targetT>(targ) == qelem) {
+        for(auto&& qelem : cont)
+          if(noadl::forward<targetT>(targ) == qelem)
             return false;
-          }
-        }
         return true;
       }
 

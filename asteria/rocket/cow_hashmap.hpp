@@ -4,9 +4,6 @@
 #ifndef ROCKET_COW_HASHMAP_HPP_
 #define ROCKET_COW_HASHMAP_HPP_
 
-#include <iterator>  // std::iterator_traits<>, std::forward_iterator_tag
-#include <tuple>  // std::forward_as_tuple()
-#include <cstring>  // std::memset()
 #include "compiler.h"
 #include "assert.hpp"
 #include "throw.hpp"
@@ -14,6 +11,9 @@
 #include "allocator_utilities.hpp"
 #include "hash_table_utilities.hpp"
 #include "reference_counter.hpp"
+#include <iterator>  // std::iterator_traits<>, std::forward_iterator_tag
+#include <tuple>  // std::forward_as_tuple()
+#include <cstring>  // std::memset()
 
 /* Differences from `std::unordered_map`:
  * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
