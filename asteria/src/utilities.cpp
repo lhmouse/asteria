@@ -460,7 +460,7 @@ uint64_t generate_random_seed() noexcept
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
     // The source is read in little-endian byte order.
     uint64_t seed = 0xCBF29CE484222325;
-    for(int i = 0; i < 8; ++i) {
+    for(int i = 0; i < 8; ++i)
       seed = (seed ^ (source & 0xFF)) * 0x100000001B3, source >>= 8;
     return seed;
   }
