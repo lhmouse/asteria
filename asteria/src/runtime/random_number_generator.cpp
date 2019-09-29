@@ -5,7 +5,7 @@
 #include "random_number_generator.hpp"
 #include "../utilities.hpp"
 #ifdef _WIN32
-#  include <minwindef.h>  // so many...
+#  include <windef.h>  // so many...
 #  include <ntsecapi.h>  // RtlGenRandom()
 #else
 #  include <fcntl.h>  // open()

@@ -7,7 +7,8 @@
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
 #ifdef _WIN32
-#  include <windows.h>
+#  include <windef.h>
+#  include <winbase.h>
 #else
 #  include <time.h>
 #endif

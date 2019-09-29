@@ -4,7 +4,8 @@
 #include "precompiled.hpp"
 #include "utilities.hpp"
 #ifdef _WIN32
-#  include <windows.h>  // ::SYSTEMTIME, ::GetSystemTime()
+#  include <windef.h>  // so many...
+#  include <winbase.h>  // ::SYSTEMTIME, ::GetSystemTime()
 #else
 #  include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
 #endif

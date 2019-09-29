@@ -8,7 +8,8 @@
 #include "../runtime/global_context.hpp"
 #include "../utilities.hpp"
 #ifdef _WIN32
-#  include <windows.h>  // ::CreateFile(), ::CloseHandle(), ::GetFileInformationByHandleEx(),
+#  include <windef.h>
+#  include <winbase.h>  // ::CreateFile(), ::CloseHandle(), ::GetFileInformationByHandleEx(),
                         // ::FindFirstFile(), ::FindNextFile(), ::CreateDirectory(), ::RemoveDirectory(),
                         // ::ReadFile(), ::WriteFile(), ::DeleteFile()
 #else
