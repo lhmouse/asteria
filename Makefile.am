@@ -227,7 +227,7 @@ bin_PROGRAMS =  \
   bin/asteria
 
 bin_asteria_SOURCES =  \
-  asteria/src/main.cpp
+  asteria/src/repl.cpp
 
 check_HEADERS =  \
   asteria/test/test_utilities.hpp
