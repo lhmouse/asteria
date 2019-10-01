@@ -62,11 +62,11 @@ template<typename charT, typename traitsT> class basic_tinyfmt_file : public bas
 
     bool is_open() const
       {
-        return this->rdbuf()->is_open();
+        return this->m_sb.is_open();
       }
     basic_tinyfmt_file& open(const char* filename, ios_base::openmode which = ios_base::out)
       {
-        if(!this->rdbuf()->open(filename, which)) {
+        if(!this->m_sb.open(filename, which)) {
           noadl::sprintf_and_throw<runtime_error>("basic_tinyfmt_file: An error occurred while opening file '%s' with mode `%ld`.",
                                                   filename, static_cast<long>(which));
         }
@@ -74,7 +74,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt_file : public bas
       }
     basic_tinyfmt_file& close()
       {
-        if(!this->rdbuf()->close()) {
+        if(!this->m_sb.close()) {
           noadl::sprintf_and_throw<runtime_error>("basic_tinyfmt_file: An error occurred while closing the file.");
         }
         return *this;

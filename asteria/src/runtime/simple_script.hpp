@@ -23,6 +23,10 @@ class Simple_Script
       {
         this->reload(sbuf, filename);
       }
+    Simple_Script(std::streambuf* sbuf_opt, const cow_string& filename)
+      {
+        this->reload(sbuf_opt, filename);
+      }
     Simple_Script(const cow_string& cstr, const cow_string& filename)
       {
         this->reload(cstr, filename);
@@ -61,7 +65,8 @@ class Simple_Script
       }
 
     Simple_Script& reload(std::streambuf& sbuf, const cow_string& filename);
-    Simple_Script& reload(const cow_string& cstr, const cow_string& filename);
+    Simple_Script& reload(std::streambuf* sbuf_opt, const cow_string& filename);
+    Simple_Script& reload(const cow_string& str, const cow_string& filename);
     Simple_Script& reload_file(const cow_string& filename);
 
     rcptr<Abstract_Function> copy_function_opt() const noexcept;

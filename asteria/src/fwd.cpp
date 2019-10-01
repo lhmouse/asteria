@@ -524,7 +524,11 @@ const char* describe_parser_status(Parser_Status status) noexcept
       }
     case parser_status_null_character_disallowed:
       {
-        return "null character disallowed";
+        return "null character disallowed in source code";
+      }
+    case parser_status_null_streambuf_pointer:
+      {
+        return "null streambuf pointer";
       }
     case parser_status_token_character_unrecognized:
       {

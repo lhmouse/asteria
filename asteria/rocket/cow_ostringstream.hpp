@@ -75,27 +75,27 @@ template<typename charT, typename traitsT,
 
     const string_type& get_string() const noexcept
       {
-        return this->rdbuf()->get_string();
+        return this->m_sb.get_string();
       }
     const char_type* get_cstring() const noexcept
       {
-        return this->rdbuf()->get_cstring();
+        return this->m_sb.get_cstring();
       }
     basic_cow_ostringstream& set_string(string_type str)
       {
-        this->rdbuf()->set_string(noadl::move(str));
+        this->m_sb.set_string(noadl::move(str));
         this->clear();
         return *this;
       }
     basic_cow_ostringstream& clear_string()
       {
-        this->rdbuf()->clear_string();
+        this->m_sb.clear_string();
         this->clear();
         return *this;
       }
     string_type extract_string()
       {
-        auto str = this->rdbuf()->extract_string();
+        auto str = this->m_sb.extract_string();
         this->clear();
         return str;
       }

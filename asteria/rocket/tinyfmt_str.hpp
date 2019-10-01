@@ -75,23 +75,23 @@ template<typename charT, typename traitsT,
 
     const string_type& get_string() const noexcept
       {
-        return this->rdbuf()->get_string();
+        return this->m_sb.get_string();
       }
     const char_type* get_cstring() const noexcept
       {
-        return this->rdbuf()->get_cstring();
+        return this->m_sb.get_cstring();
       }
     basic_tinyfmt_str& set_string(string_type str)
       {
-        return this->rdbuf()->set_string(noadl::move(str)), *this;
+        return this->m_sb.set_string(noadl::move(str)), *this;
       }
     basic_tinyfmt_str& clear_string()
       {
-        return this->rdbuf()->clear_string(), *this;
+        return this->m_sb.clear_string(), *this;
       }
     string_type extract_string()
       {
-        return this->rdbuf()->extract_string();
+        return this->m_sb.extract_string();
       }
 
     void swap(basic_tinyfmt_str& other)

@@ -24,7 +24,7 @@ int main(int argc, char** argv)
 #if !defined(__OPTIMIZE__) || (__OPTIMIZE__ == 0)
     std::cerr << "# Input your program:" << std::endl
               << "---" << std::endl;
-    Simple_Script code(std::cin.rdbuf()[0], rocket::sref("<stdin>"));
+    Simple_Script code(std::cin.rdbuf(), rocket::sref("<stdin>"));
 #else
     static constexpr char src[] =
       R"_____(

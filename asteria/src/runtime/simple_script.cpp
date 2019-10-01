@@ -34,6 +34,17 @@ Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& fil
     return *this;
   }
 
+Simple_Script& Simple_Script::reload(std::streambuf* sbuf_opt, const cow_string& filename)
+  {
+    // Read from `*sbuf_opt` if it is valid.
+    if(!sbuf_opt) {
+      // Throw an exception if no streambuf is associated. `std::istream::sentry` would set the badbit
+      // (which does not necessarily throw an exception), but we throw an exception always.
+      throw Parser_Error(parser_status_null_streambuf_pointer);
+    }
+    return this->reload(*sbuf_opt, filename);
+  }
+
 Simple_Script& Simple_Script::reload(const cow_string& cstr, const cow_string& filename)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.
