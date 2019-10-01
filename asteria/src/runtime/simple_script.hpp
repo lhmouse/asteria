@@ -27,9 +27,9 @@ class Simple_Script
       {
         this->reload(sbuf_opt, filename);
       }
-    Simple_Script(const cow_string& cstr, const cow_string& filename)
+    Simple_Script(const cow_string& str, const cow_string& filename)
       {
-        this->reload(cstr, filename);
+        this->reload(str, filename);
       }
     explicit Simple_Script(const cow_string& filename)
       {

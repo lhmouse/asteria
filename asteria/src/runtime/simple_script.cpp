@@ -45,11 +45,11 @@ Simple_Script& Simple_Script::reload(std::streambuf* sbuf_opt, const cow_string&
     return this->reload(*sbuf_opt, filename);
   }
 
-Simple_Script& Simple_Script::reload(const cow_string& cstr, const cow_string& filename)
+Simple_Script& Simple_Script::reload(const cow_string& str, const cow_string& filename)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.
     cow_stringbuf sbuf;
-    sbuf.set_string(cstr);
+    sbuf.set_string(str);
     return this->reload(sbuf, filename);
   }
 
