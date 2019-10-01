@@ -1,10 +1,10 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_RCBASE_HPP_
-#define ASTERIA_RUNTIME_RCBASE_HPP_
+#ifndef ASTERIA_RCBASE_HPP_
+#define ASTERIA_RCBASE_HPP_
 
-#include "../fwd.hpp"
+#include "fwd.hpp"
 
 namespace Asteria {
 

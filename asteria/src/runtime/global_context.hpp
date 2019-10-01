@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_GLOBAL_CONTEXT_HPP_
 
 #include "../fwd.hpp"
-#include "rcbase.hpp"
+#include "../rcbase.hpp"
 #include "abstract_context.hpp"
 
 namespace Asteria {

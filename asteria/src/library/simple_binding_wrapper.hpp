@@ -5,8 +5,8 @@
 #define ASTERIA_LIBRARY_SIMPLE_BINDING_WRAPPER_HPP_
 
 #include "../fwd.hpp"
-#include "../runtime/abstract_function.hpp"
-#include "../runtime/value.hpp"
+#include "../value.hpp"
+#include "../abstract_function.hpp"
 
 namespace Asteria {
 

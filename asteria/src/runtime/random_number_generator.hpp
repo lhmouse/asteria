@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_RANDOM_NUMBER_GENERATOR_HPP_
 
 #include "../fwd.hpp"
-#include "rcbase.hpp"
+#include "../rcbase.hpp"
 
 namespace Asteria {
 

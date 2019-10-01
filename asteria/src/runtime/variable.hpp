@@ -5,8 +5,8 @@
 #define ASTERIA_RUNTIME_VARIABLE_HPP_
 
 #include "../fwd.hpp"
-#include "rcbase.hpp"
-#include "value.hpp"
+#include "../rcbase.hpp"
+#include "../value.hpp"
 
 namespace Asteria {
 

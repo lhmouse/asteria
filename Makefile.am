@@ -91,7 +91,13 @@ lib_librocket_la_CXXFLAGS =  \
 pkginclude_HEADERS =  \
   asteria/src/precompiled.hpp  \
   asteria/src/fwd.hpp  \
-  asteria/src/utilities.hpp
+  asteria/src/utilities.hpp  \
+  asteria/src/rcbase.hpp  \
+  asteria/src/abstract_opaque.hpp  \
+  asteria/src/abstract_function.hpp  \
+  asteria/src/value.hpp  \
+  asteria/src/source_location.hpp  \
+  asteria/src/placeholder.hpp
 
 pkginclude_lldsdir = ${pkgincludedir}/llds
 pkginclude_llds_HEADERS =  \
@@ -101,13 +107,7 @@ pkginclude_llds_HEADERS =  \
 
 pkginclude_runtimedir = ${pkgincludedir}/runtime
 pkginclude_runtime_HEADERS =  \
-  asteria/src/runtime/rcbase.hpp  \
-  asteria/src/runtime/source_location.hpp  \
-  asteria/src/runtime/abstract_opaque.hpp  \
-  asteria/src/runtime/abstract_function.hpp  \
   asteria/src/runtime/abstract_hooks.hpp  \
-  asteria/src/runtime/placeholder.hpp  \
-  asteria/src/runtime/value.hpp  \
   asteria/src/runtime/reference_root.hpp  \
   asteria/src/runtime/reference_modifier.hpp  \
   asteria/src/runtime/reference.hpp  \
@@ -158,16 +158,16 @@ pkginclude_library_HEADERS =  \
 lib_libasteria_la_SOURCES =  \
   asteria/src/fwd.cpp  \
   asteria/src/utilities.cpp  \
+  asteria/src/rcbase.cpp  \
+  asteria/src/abstract_opaque.cpp  \
+  asteria/src/abstract_function.cpp  \
+  asteria/src/value.cpp  \
+  asteria/src/source_location.cpp  \
+  asteria/src/placeholder.cpp  \
   asteria/src/llds/variable_hashset.cpp  \
   asteria/src/llds/reference_dictionary.cpp  \
   asteria/src/llds/avmc_queue.cpp  \
-  asteria/src/runtime/rcbase.cpp  \
-  asteria/src/runtime/source_location.cpp  \
-  asteria/src/runtime/abstract_opaque.cpp  \
-  asteria/src/runtime/abstract_function.cpp  \
   asteria/src/runtime/abstract_hooks.cpp  \
-  asteria/src/runtime/placeholder.cpp  \
-  asteria/src/runtime/value.cpp  \
   asteria/src/runtime/reference_root.cpp  \
   asteria/src/runtime/reference_modifier.cpp  \
   asteria/src/runtime/reference.cpp  \

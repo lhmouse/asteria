@@ -3,7 +3,7 @@
 
 #include "../precompiled.hpp"
 #include "reference_modifier.hpp"
-#include "value.hpp"
+#include "../value.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

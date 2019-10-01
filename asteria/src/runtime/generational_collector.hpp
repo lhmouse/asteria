@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_GENERATIONAL_COLLECTOR_HPP_
 
 #include "../fwd.hpp"
-#include "rcbase.hpp"
+#include "../rcbase.hpp"
 #include "collector.hpp"
 #include "../llds/variable_hashset.hpp"
 

@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_ABSTRACT_HOOKS_HPP_
 
 #include "../fwd.hpp"
-#include "rcbase.hpp"
+#include "../rcbase.hpp"
 
 namespace Asteria {
 

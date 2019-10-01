@@ -5,8 +5,8 @@
 #define ASTERIA_RUNTIME_BACKTRACE_FRAME_HPP_
 
 #include "../fwd.hpp"
-#include "value.hpp"
-#include "source_location.hpp"
+#include "../value.hpp"
+#include "../source_location.hpp"
 #include <exception>
 
 namespace Asteria {

@@ -2,7 +2,7 @@
 // Copyleft 2018, LH_Mouse. All wrongs reserved.
 
 #include "test_utilities.hpp"
-#include "../src/runtime/value.hpp"
+#include "../src/value.hpp"
 #include <cmath>
 
 using namespace Asteria;

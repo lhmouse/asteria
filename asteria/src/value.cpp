@@ -1,9 +1,9 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.hpp"
+#include "precompiled.hpp"
 #include "value.hpp"
-#include "../utilities.hpp"
+#include "utilities.hpp"
 
 namespace Asteria {
 

@@ -5,7 +5,7 @@
 #define ASTERIA_COMPILER_STATEMENT_HPP_
 
 #include "../fwd.hpp"
-#include "../runtime/source_location.hpp"
+#include "../source_location.hpp"
 
 namespace Asteria {
 

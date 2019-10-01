@@ -1,12 +1,12 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#include "../precompiled.hpp"
-#include "rcbase.hpp"
+#include "precompiled.hpp"
+#include "abstract_opaque.hpp"
 
 namespace Asteria {
 
-Rcbase::~Rcbase()
+Abstract_Opaque::~Abstract_Opaque()
   {
   }
 

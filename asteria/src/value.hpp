@@ -1,10 +1,10 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_VALUE_HPP_
-#define ASTERIA_RUNTIME_VALUE_HPP_
+#ifndef ASTERIA_VALUE_HPP_
+#define ASTERIA_VALUE_HPP_
 
-#include "../fwd.hpp"
+#include "fwd.hpp"
 #include "abstract_opaque.hpp"
 #include "abstract_function.hpp"
 

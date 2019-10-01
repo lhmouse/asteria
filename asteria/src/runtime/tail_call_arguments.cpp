@@ -3,8 +3,8 @@
 
 #include "../precompiled.hpp"
 #include "tail_call_arguments.hpp"
-#include "abstract_function.hpp"
 #include "reference.hpp"
+#include "../abstract_function.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {

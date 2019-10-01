@@ -6,7 +6,7 @@
 
 #include "../fwd.hpp"
 #include "../runtime/reference.hpp"
-#include "../runtime/value.hpp"
+#include "../value.hpp"
 
 namespace Asteria {
 

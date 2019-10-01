@@ -5,7 +5,7 @@
 #define ASTERIA_RUNTIME_SIMPLE_SCRIPT_HPP_
 
 #include "../fwd.hpp"
-#include "rcbase.hpp"
+#include "../rcbase.hpp"
 
 namespace Asteria {
 

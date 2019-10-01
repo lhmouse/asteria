@@ -5,8 +5,8 @@
 #define ASTERIA_COMPILER_XPRUNIT_HPP_
 
 #include "../fwd.hpp"
-#include "../runtime/source_location.hpp"
-#include "../runtime/value.hpp"
+#include "../value.hpp"
+#include "../source_location.hpp"
 
 namespace Asteria {
 

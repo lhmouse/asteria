@@ -3,11 +3,11 @@
 
 #include "../precompiled.hpp"
 #include "global_context.hpp"
-#include "placeholder.hpp"
 #include "random_number_generator.hpp"
 #include "generational_collector.hpp"
 #include "abstract_hooks.hpp"
 #include "variable.hpp"
+#include "../placeholder.hpp"
 #include "../library/bindings_version.hpp"
 #include "../library/bindings_gc.hpp"
 #include "../library/bindings_debug.hpp"
