@@ -59,7 +59,7 @@ class Token
 
   private:
     cow_string m_file;
-    int32_t m_line;
+    long m_line;
     size_t m_offset;
     size_t m_length;
     Xvariant m_stor;
@@ -77,7 +77,7 @@ class Token
       {
         return this->m_file;
       }
-    int32_t line() const noexcept
+    long line() const noexcept
       {
         return this->m_line;
       }

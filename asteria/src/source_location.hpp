@@ -12,14 +12,14 @@ class Source_Location
   {
   private:
     cow_string m_file;
-    int32_t m_line;
+    long m_line;
 
   public:
     Source_Location() noexcept
       : m_file(rocket::sref("<empty>")), m_line(-1)
       {
       }
-    Source_Location(cow_string xfile, int32_t xline) noexcept
+    Source_Location(cow_string xfile, long xline) noexcept
       : m_file(rocket::move(xfile)), m_line(xline)
       {
       }
@@ -37,7 +37,7 @@ class Source_Location
       {
         return this->m_file;
       }
-    int32_t line() const noexcept
+    long line() const noexcept
       {
         return this->m_line;
       }

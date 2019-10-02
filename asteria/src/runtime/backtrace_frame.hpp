@@ -46,7 +46,7 @@ class Backtrace_Frame
       {
         return this->m_sloc.file();
       }
-    int32_t line() const noexcept
+    long line() const noexcept
       {
         return this->m_sloc.line();
       }

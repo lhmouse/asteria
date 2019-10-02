@@ -13,7 +13,7 @@ class Parser_Error : public virtual std::exception
   {
   private:
     Parser_Status m_status;
-    int32_t m_line;
+    long m_line;
     size_t m_offset;
     size_t m_length;
 
@@ -27,7 +27,7 @@ class Parser_Error : public virtual std::exception
       {
         this->do_compose_message();
       }
-    Parser_Error(Parser_Status xstatus, int32_t xline, size_t xoffset, size_t xlength)
+    Parser_Error(Parser_Status xstatus, long xline, size_t xoffset, size_t xlength)
       : m_status(xstatus),
         m_line(xline), m_offset(xoffset), m_length(xlength)
       {
@@ -44,7 +44,7 @@ class Parser_Error : public virtual std::exception
         return this->m_what.c_str();
       }
 
-    int32_t line() const noexcept
+    long line() const noexcept
       {
         return this->m_line;
       }

@@ -41,7 +41,7 @@ class Variadic_Arguer final : public Abstract_Function
       {
         return this->m_sloc.file();
       }
-    int64_t line() const noexcept
+    long line() const noexcept
       {
         return this->m_sloc.line();
       }

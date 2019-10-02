@@ -85,7 +85,7 @@ namespace Asteria {
         cow_string m_file;
 
         cow_string m_str;
-        int32_t m_line = 0;
+        long m_line = 0;
         size_t m_offset = 0;
 
       public:
@@ -109,7 +109,7 @@ namespace Asteria {
             return this->m_file;
           }
 
-        int32_t line() const noexcept
+        long line() const noexcept
           {
             return this->m_line;
           }
@@ -191,7 +191,7 @@ namespace Asteria {
     class Tack
       {
       private:
-        int32_t m_line = 0;
+        long m_line = 0;
         size_t m_offset = 0;
         size_t m_length = 0;
 
@@ -201,7 +201,7 @@ namespace Asteria {
           }
 
       public:
-        constexpr int32_t line() const noexcept
+        constexpr long line() const noexcept
           {
             return this->m_line;
           }

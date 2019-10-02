@@ -12,28 +12,11 @@ namespace Asteria {
 
     namespace {
 
-    cow_string do_name_closure(int32_t line)
+    cow_string do_name_closure(long line)
       {
-        static constexpr char s_digits[] = "0123456789";
-        static constexpr char s_prefix[] = "<closure>._";
-
-        array<char, 32> sbuf;
-        auto wpos = sbuf.mut_end();
-        // Write digits backwards.
-        auto r = static_cast<uint32_t>(line);
-        do {
-          auto dval = r % 10;
-          r /= 10;
-          // Write a digit.
-          --wpos;
-          *wpos = s_digits[dval];
-        } while(r != 0);
-        // Prepend something meaningful.
-        wpos = std::copy_backward(std::begin(s_prefix),
-                                  std::end(s_prefix) - 1,
-                                  wpos);
-        // Return the formatted string.
-        return cow_string(wpos, sbuf.mut_end());
+        tinyfmt_str fmt;
+        fmt << "<closure>._" << line;
+        return fmt.extract_string();
       }
 
     cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
