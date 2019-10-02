@@ -14,6 +14,17 @@ template<typename charT, typename traitsT = char_traits<charT>> class basic_tiny
 
     namespace details_tinyfmt {
 
+    inline const char* stringify_dir(ios_base::seekdir dir) noexcept
+      {
+        // Stringify the direction.
+        if(dir == ios_base::beg)
+          return "the beginning";
+        else if(dir == ios_base::end)
+          return "the end";
+        else
+          return "the current position";
+      }
+
     template<typename charT, typename traitsT, size_t nmaxT> void xformat_write(basic_tinyfmt<charT, traitsT>& fmt, const char (&str)[nmaxT], long n)
       {
         // Widen and write all characters.
@@ -22,7 +33,7 @@ template<typename charT, typename traitsT = char_traits<charT>> class basic_tiny
           wstr[i] = traitsT::to_char_type(static_cast<unsigned char>(str[i]));
         fmt.write(wstr, n);
       }
-    template<typename traitsT, size_t nmaxT> void xformat_write(basic_tinyfmt<char, traitsT>& fmt, const char (&str)[nmaxT], long n)
+    template<typename traitsT, size_t nmaxT> inline void xformat_write(basic_tinyfmt<char, traitsT>& fmt, const char (&str)[nmaxT], long n)
       {
         // Write all characters verbatim.
         fmt.write(str, n);
@@ -128,17 +139,9 @@ template<typename charT, typename traitsT> class basic_tinyfmt
       {
         auto rpos = this->do_check_buf().pubseekoff(off, dir, ios_base::out);
         if(rpos == pos_type(off_type(-1))) {
-          // Stringify the direction.
-          const char* dir_str;
-          if(dir == ios_base::beg)
-            dir_str = "the beginning";
-          else if(dir == ios_base::end)
-            dir_str = "the end";
-          else
-            dir_str = "the current position";
           // Throw an exception on failure, unlike `std::ostream`.
           noadl::sprintf_and_throw<runtime_error>("basic_tinyfmt: The seek operation by `%lld` characters relative to %s failed.",
-                                                  static_cast<long long>(off), dir_str);
+                                                  static_cast<long long>(off), details_tinyfmt::stringify_dir(dir));
         }
         return *this;
       }
