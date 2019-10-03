@@ -41,7 +41,8 @@ int main(int argc, char** argv)
               << "---" << std::endl
               << src << std::endl
               << "---" << std::endl;
-    cow_stringbuf sbuf(rocket::sref(src));
+    cow_stringbuf sbuf;
+    sbuf.set_string(rocket::sref(src), std::ios_base::in);
     Simple_Script code(sbuf, rocket::sref("my_file"));
 #endif
     std::cerr << std::endl
