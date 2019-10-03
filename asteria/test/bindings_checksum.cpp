@@ -9,7 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_stringbuf buf(rocket::sref(
+    rocket::cow_stringbuf buf;
+    buf.set_string(rocket::sref(
       R"__(
         const s = "abcdefg";
         var h;
@@ -275,7 +276,7 @@ int main()
           // simple
           assert std.checksum.sha256(s * k) == v;
         }
-      )__"));
+      )__"), std::ios_base::in);
 
     Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;

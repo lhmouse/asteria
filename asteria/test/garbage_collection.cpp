@@ -40,7 +40,8 @@ int main()
 
     bcnt.store(0, std::memory_order_relaxed);
     {
-      rocket::cow_stringbuf buf(rocket::sref(
+      rocket::cow_stringbuf buf;
+      buf.set_string(rocket::sref(
         R"__(
           var g;
           func leak() {
@@ -51,7 +52,7 @@ int main()
           for(var i = 0; i < 1000000; ++i) {
             leak();
           }
-        )__"));
+        )__"), std::ios_base::in);
       Simple_Script code(buf, rocket::sref("my_file"));
       Global_Context global;
       code.execute(global);

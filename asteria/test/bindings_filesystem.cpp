@@ -9,7 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_stringbuf buf(rocket::sref(
+    rocket::cow_stringbuf buf;
+    buf.set_string(rocket::sref(
       R"__(
         const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
         // We presume these random strings will never match any real files.
@@ -95,7 +96,7 @@ int main()
         assert std.filesystem.directory_create(fname) == 1;
         assert std.filesystem.file_remove(fname) == null;
         assert std.filesystem.directory_remove(fname) == 1;
-      )__"));
+      )__"), std::ios_base::in);
 
     Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;

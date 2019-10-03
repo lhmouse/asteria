@@ -612,22 +612,26 @@ Value std_json_parse(const G_string& text)
     opts.escapable_single_quotes = true;
     opts.keywords_as_identifiers = true;
     opts.integers_as_reals = true;
-    // Tokenize source data.
+    // Tokenize the source string.
     Token_Stream tstrm;
     try {
       // Use a `streambuf` rather than an `istream` to minimize overheads.
-      cow_stringbuf sbuf(text, std::ios_base::in);
+      cow_stringbuf sbuf;
+      sbuf.set_string(text, std::ios_base::in);
+      // Note the tokenizer throws an exception upon failure.
       tstrm.reload(sbuf, rocket::sref("<JSON text>"), opts);
     }
     catch(Parser_Error& except) {
       ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", except.what(), "\n---\n", text);
       return G_null();
     }
+    // Parse tokens.
     auto qvalue = do_json_parse_nonrecursive_opt(tstrm);
     if(!qvalue) {
       ASTERIA_DEBUG_LOG("Invalid or empty JSON text: ", text);
       return G_null();
     }
+    // Check whether all tokens have been consumed.
     auto qtok = tstrm.peek_opt();
     if(qtok) {
       ASTERIA_DEBUG_LOG("Excess token `", *qtok, "`: ", text);

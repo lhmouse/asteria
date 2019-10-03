@@ -27,24 +27,17 @@ template<typename charT, typename traitsT = char_traits<charT>,
           : str(), goff(0), poff(0)
           {
           }
-        explicit storage(string_type xstr) noexcept(is_nothrow_move_constructible<string_type>::value)
-          : str(noadl::move(xstr)), goff(0), poff(0)
-          {
-          }
 
-        ios_base::openmode rewind(ios_base::openmode which) noexcept
+        void rewind(ios_base::openmode which) noexcept
           {
             // Reset get and put positions.
             this->goff = 0;
             this->poff = 0;
             // Handle versatile stream modes.
-            if(which & ios_base::trunc) {
+            if(which & ios_base::trunc)
               this->str.clear();
-            }
-            if(which & ios_base::ate) {
+            if(which & ios_base::ate)
               this->poff = this->str.size();
-            }
-            return which;
           }
 
         void swap(storage& other) noexcept(is_nothrow_swappable<string_type>::value)
@@ -79,26 +72,24 @@ template<typename charT, typename traitsT,
     static constexpr size_type npos = string_type::npos;
 
   private:
-    ios_base::openmode m_which;
     details_cow_stringbuf::storage<string_type> m_stor;
+    ios_base::openmode m_which;
 
   public:
     basic_cow_stringbuf()
-      : m_which(ios_base::in | ios_base::out), m_stor()
+      : m_stor(),
+        m_which()
       {
       }
     explicit basic_cow_stringbuf(ios_base::openmode which)
-      : m_which(which), m_stor()
+      : m_stor(),
+        m_which(which)
       {
-        this->m_stor.rewind(which);
-      }
-    explicit basic_cow_stringbuf(string_type str, ios_base::openmode which = ios_base::in | ios_base::out)
-      : m_which(which), m_stor(noadl::move(str))
-      {
-        this->m_stor.rewind(which);
+        this->m_stor.rewind(this->m_which);
       }
     basic_cow_stringbuf(basic_cow_stringbuf&& other)
-      : m_which(other.m_which), m_stor(noadl::move(other.m_stor))
+      : m_stor(noadl::move(other.m_stor)),
+        m_which(other.m_which)
       {
         other.do_abandon();
         this->imbue(other.getloc());
@@ -237,12 +228,10 @@ template<typename charT, typename traitsT,
           return -1;
         }
         // Set get and put positions as requested.
-        if(seekg) {
+        if(seekg)
           this->m_stor.goff = static_cast<size_type>(absoff);
-        }
-        if(seekp) {
+        if(seekp)
           this->m_stor.poff = static_cast<size_type>(absoff);
-        }
         // Return the absolute offset (from the beginning of the string).
         return absoff;
       }
@@ -341,9 +330,8 @@ template<typename charT, typename traitsT,
           this->m_stor.poff += 1;
           // Set up the put area for efficiency.
           // N.B. This would be unnecessary if we were using unbuffered I/O.
-          if(ROCKET_UNEXPECT(this->m_stor.poff != this->m_stor.str.size())) {
+          if(ROCKET_UNEXPECT(this->m_stor.poff != this->m_stor.str.size()))
             this->do_syncp();
-          }
         }
         // Return the character that has just been written.
         return ch;
@@ -442,22 +430,33 @@ template<typename charT, typename traitsT,
       {
         return this->m_stor.str.c_str();
       }
-    void set_string(string_type str)
+    void set_string(const string_type& str, ios_base::openmode which)
       {
+        this->m_stor.str = str;
+        this->m_which = which;
         this->do_abandon();
+        this->m_stor.rewind(this->m_which);
+      }
+    void set_string(string_type&& str, ios_base::openmode which)
+      {
         this->m_stor.str = noadl::move(str);
+        this->m_which = which;
+        this->do_abandon();
         this->m_stor.rewind(this->m_which);
       }
-    void clear_string() noexcept
+    void clear_string(ios_base::openmode which) noexcept
       {
-        this->do_abandon();
         this->m_stor.str.clear();
+        this->m_which = which;
+        this->do_abandon();
         this->m_stor.rewind(this->m_which);
       }
-    string_type extract_string() noexcept
+    string_type extract_string(ios_base::openmode which) noexcept
       {
+        string_type str;
+        this->m_stor.str.swap(str);
+        this->m_which = which;
         this->do_abandon();
-        auto str = noadl::move(this->m_stor.str);
         this->m_stor.rewind(this->m_which);
         return str;
       }

@@ -9,7 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_stringbuf buf(rocket::sref(
+    rocket::cow_stringbuf buf;
+    buf.set_string(rocket::sref(
       R"__(
         assert std.numeric.abs(+42) == 42;
         assert std.numeric.abs(-42) == 42;
@@ -482,7 +483,7 @@ int main()
         assert std.numeric.parse_real(" 0e1000000") == 0;
         assert std.numeric.parse_real("+0e1000000") == 0;
         assert std.numeric.parse_real("-0e1000000") == 0;
-      )__"));
+      )__"), std::ios_base::in);
 
     Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;

@@ -9,7 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_stringbuf buf(rocket::sref(
+    rocket::cow_stringbuf buf;
+    buf.set_string(rocket::sref(
       R"__(
         func lt_1ups(x, y) {
           return ((y == 0) ? __abs(x) : __abs(1-x/y)) <= 0x1.0p-52;
@@ -115,7 +116,7 @@ int main()
         assert std.math.hypot(+nan, -infinity) == infinity;
         assert std.math.hypot(nan, 1, infinity) == infinity;
         assert __isnan std.math.hypot(nan, 1, nan);
-      )__"));
+      )__"), std::ios_base::in);
 
     Simple_Script code(buf, rocket::sref("my_file"));
     Global_Context global;

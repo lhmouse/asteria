@@ -49,7 +49,8 @@ Simple_Script& Simple_Script::reload(const cow_string& str, const cow_string& fi
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.
     cow_stringbuf sbuf;
-    sbuf.set_string(str);
+    sbuf.set_string(str, std::ios_base::in);
+    // If `set_string()` fails it will have thrown an exception.
     return this->reload(sbuf, filename);
   }
 

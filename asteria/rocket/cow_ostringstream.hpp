@@ -48,10 +48,17 @@ template<typename charT, typename traitsT,
         m_sb(which | ios_base::out)
       {
       }
-    explicit basic_cow_ostringstream(string_type str, ios_base::openmode which = ios_base::out)
+    explicit basic_cow_ostringstream(const string_type& str, ios_base::openmode which = ios_base::out)
       : stream_type(&(this->m_sb)),
-        m_sb(noadl::move(str), which | ios_base::out)
+        m_sb()
       {
+        this->m_sb.set_string(str, which | ios_base::out);
+      }
+    explicit basic_cow_ostringstream(string_type&& str, ios_base::openmode which = ios_base::out)
+      : stream_type(&(this->m_sb)),
+        m_sb()
+      {
+        this->m_sb.set_string(noadl::move(str), which | ios_base::out);
       }
     basic_cow_ostringstream(basic_cow_ostringstream&& other) noexcept
       : stream_type(static_cast<stream_type&&>(other)),
@@ -81,21 +88,27 @@ template<typename charT, typename traitsT,
       {
         return this->m_sb.get_cstring();
       }
-    basic_cow_ostringstream& set_string(string_type str)
+    basic_cow_ostringstream& set_string(const string_type& str, ios_base::openmode which = ios_base::out)
       {
-        this->m_sb.set_string(noadl::move(str));
+        this->m_sb.set_string(str, which | ios_base::out);
         this->clear();
         return *this;
       }
-    basic_cow_ostringstream& clear_string()
+    basic_cow_ostringstream& set_string(string_type&& str, ios_base::openmode which = ios_base::out)
       {
-        this->m_sb.clear_string();
+        this->m_sb.set_string(noadl::move(str), which | ios_base::out);
         this->clear();
         return *this;
       }
-    string_type extract_string()
+    basic_cow_ostringstream& clear_string(ios_base::openmode which = ios_base::out)
       {
-        auto str = this->m_sb.extract_string();
+        this->m_sb.clear_string(which | ios_base::out);
+        this->clear();
+        return *this;
+      }
+    string_type extract_string(ios_base::openmode which = ios_base::out)
+      {
+        auto str = this->m_sb.extract_string(which | ios_base::out);
         this->clear();
         return str;
       }
