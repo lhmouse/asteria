@@ -237,7 +237,7 @@ template<typename charT, typename traitsT,
       }
 
     // Character I/O functions
-    streamsize do_estimate_how_many_see() const
+    streamsize do_showmanyc() const
       {
         if(!(this->m_which & ios_base::in)) {
           // Nothing can be read.
@@ -386,7 +386,7 @@ template<typename charT, typename traitsT,
 
     streamsize showmanyc() override
       {
-        return this->do_estimate_how_many_see();
+        return this->do_showmanyc();
       }
     int_type underflow() override
       {
