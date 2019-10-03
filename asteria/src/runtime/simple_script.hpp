@@ -19,21 +19,13 @@ class Simple_Script
     Simple_Script()
       {
       }
-    Simple_Script(std::streambuf& sbuf, const cow_string& filename)
+    Simple_Script(std::streambuf& sbuf, const cow_string& name)
       {
-        this->reload(sbuf, filename);
+        this->reload(sbuf, name);
       }
-    Simple_Script(std::streambuf* sbuf_opt, const cow_string& filename)
+    Simple_Script(std::streambuf* sbuf_opt, const cow_string& name)
       {
-        this->reload(sbuf_opt, filename);
-      }
-    Simple_Script(const cow_string& str, const cow_string& filename)
-      {
-        this->reload_string(str, filename);
-      }
-    explicit Simple_Script(const cow_string& filename)
-      {
-        this->reload_file(filename);
+        this->reload(sbuf_opt, name);
       }
 
   public:
@@ -64,10 +56,10 @@ class Simple_Script
         return this->m_cptr != nullptr;
       }
 
-    Simple_Script& reload(std::streambuf& sbuf, const cow_string& filename);
-    Simple_Script& reload(std::streambuf* sbuf_opt, const cow_string& filename);
-    Simple_Script& reload_string(const cow_string& str, const cow_string& filename);
-    Simple_Script& reload_file(const cow_string& filename);
+    Simple_Script& reload(std::streambuf& sbuf, const cow_string& name);
+    Simple_Script& reload(std::streambuf* sbuf_opt, const cow_string& name);
+    Simple_Script& reload_string(const cow_string& code, const cow_string& name);
+    Simple_Script& reload_file(const cow_string& path);
 
     rcptr<Abstract_Function> copy_function_opt() const noexcept;
 

@@ -11,59 +11,56 @@
 
 namespace Asteria {
 
-Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& filename)
+Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& name)
   {
     AIR_Node::S_instantiate_function xnode = { };
     xnode.opts = this->m_opts;
     // Tokenize the character stream.
-    Token_Stream tstrm(sbuf, filename, xnode.opts);
+    Token_Stream tstrm(sbuf, name, xnode.opts);
     // Parse tokens.
     Statement_Sequence stmseq(tstrm, xnode.opts);
     // Initialize arguments for the function object.
-    xnode.sloc = std::make_pair(filename, 1);
+    xnode.sloc = std::make_pair(name, 1);
     xnode.name = rocket::sref("<file scope>");
     xnode.params.emplace_back(rocket::sref("..."));
     xnode.body = stmseq.get_statements();
     // Construct an IR node so we can reuse its code somehow.
     AIR_Node node(rocket::move(xnode));
-    ASTERIA_DEBUG_LOG("Instantiating file \'", filename, "\'...");
+    ASTERIA_DEBUG_LOG("Instantiating code from \'", name, "\'...");
     auto qtarget = node.instantiate_function(nullptr);
-    ASTERIA_DEBUG_LOG("Finished instantiating file \'", filename, "\' as `", *qtarget, "`.");
+    ASTERIA_DEBUG_LOG("Finished instantiating code from \'", name, "\' as `", *qtarget, "`.");
     // Accept it.
     this->m_cptr = rocket::move(qtarget);
     return *this;
   }
 
-Simple_Script& Simple_Script::reload(std::streambuf* sbuf_opt, const cow_string& filename)
+Simple_Script& Simple_Script::reload(std::streambuf* sbuf_opt, const cow_string& name)
   {
     // Read from `*sbuf_opt` if it is valid.
+    // Throw an exception if no streambuf is associated.
     if(!sbuf_opt) {
-      // Throw an exception if no streambuf is associated. `std::istream::sentry` would set the badbit
-      // (which does not necessarily throw an exception), but we throw an exception always.
       throw Parser_Error(parser_status_null_streambuf_pointer);
     }
-    return this->reload(*sbuf_opt, filename);
+    return this->reload(*sbuf_opt, name);
   }
 
-Simple_Script& Simple_Script::reload_string(const cow_string& str, const cow_string& filename)
+Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.
     cow_stringbuf sbuf;
-    sbuf.set_string(str, std::ios_base::in);
-    // If `set_string()` fails it will have thrown an exception.
-    return this->reload(sbuf, filename);
+    sbuf.set_string(code, std::ios_base::in);
+    return this->reload(sbuf, name);
   }
 
-Simple_Script& Simple_Script::reload_file(const cow_string& filename)
+Simple_Script& Simple_Script::reload_file(const cow_string& path)
   {
-    // Open the file designated by `filename`.
+    // Open the file designated by `path`.
+    // Throw an exception if the file could not be opened.
     std::filebuf sbuf;
-    if(!sbuf.open(filename.c_str(), std::ios_base::in)) {
-      // Throw an exception if the file could not be opened.
-      // XXX: Provide details somehow?
+    if(!sbuf.open(path.c_str(), std::ios_base::in)) {
       throw Parser_Error(parser_status_ifstream_open_failure);
     }
-    return this->reload(sbuf, filename);
+    return this->reload(sbuf, path);
   }
 
 rcptr<Abstract_Function> Simple_Script::copy_function_opt() const noexcept
