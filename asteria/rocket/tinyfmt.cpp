@@ -785,7 +785,7 @@ namespace rocket {
         uint8_t t = 0;
         int exp = 0;
         // Calculate the exponent using binary search. Note that the first two elements of `s_decbnd_dbl` are zeroes.
-        auto freg = static_cast<long double>(::std::fabs(value));
+        auto freg = ::std::fabs(value);
         auto qdigit = ::std::upper_bound(::std::begin(s_decbnd_dbl), ::std::end(s_decbnd_dbl), freg) - 1;
         if(qdigit >= s_decbnd_dbl + 2) {
           // Extract all digits.
@@ -814,7 +814,7 @@ namespace rocket {
             --t;
         }
         // Behave like the `%g` specifier of `printf()`.
-        if((-4 <= exp) && (exp <= +5)) {
+        if((-4 <= exp) && (exp < 17)) {
           // Write the number with no exponent.
           int diff = exp + 1;
           if(diff <= 0) {
