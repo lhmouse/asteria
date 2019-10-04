@@ -307,7 +307,7 @@ template<typename charT, typename traitsT,
         // Return the character at the beginning of the get area.
         return traits_type::to_int_type(c);
       }
-    int_type do_overflow(int_type ch)
+    int_type do_overflow(char_type c)
       {
         if(!(this->m_which & ios_base::out)) {
           // Nothing can be written.
@@ -315,26 +315,22 @@ template<typename charT, typename traitsT,
         }
         // Invalidate the get and put areas for direct access to the string.
         this->do_freegp();
-        if(traits_type::eq_int_type(ch, traits_type::eof())) {
-          // There is nothing to write, so succeed.
-          return traits_type::not_eof(char_type());
-        }
         if(this->m_which & ios_base::app) {
           // Always append to the string, ignoring the value of `poff`.
-          this->m_stor.str.push_back(traits_type::to_char_type(ch));
+          this->m_stor.str.push_back(c);
           this->m_stor.poff = this->m_stor.str.size();
         }
         else {
           // Write the character and bump the put position.
-          this->m_stor.str.replace(this->m_stor.poff, 1, 1, traits_type::to_char_type(ch));
-          this->m_stor.poff += 1;
+          this->m_stor.str.replace(this->m_stor.poff, 1, 1, c);
+          this->m_stor.poff++;
           // Set up the put area for efficiency.
           // N.B. This would be unnecessary if we were using unbuffered I/O.
-          if(ROCKET_UNEXPECT(this->m_stor.poff != this->m_stor.str.size()))
+          if(this->m_stor.poff != this->m_stor.str.size())
             this->do_syncp();
         }
         // Return the character that has just been written.
-        return ch;
+        return traits_type::to_int_type(c);
       }
 
     // Stream I/O functions
@@ -398,14 +394,17 @@ template<typename charT, typename traitsT,
       }
     int_type pbackfail(int_type ch) override
       {
-        if(traits_type::eq_int_type(ch, traits_type::eof())) {
+        if(traits_type::eq_int_type(ch, traits_type::eof()))
           return this->do_unget_underflow();
-        }
-        return this->do_putback(traits_type::to_char_type(ch));
+        else
+          return this->do_putback(traits_type::to_char_type(ch));
       }
     int_type overflow(int_type ch) override
       {
-        return this->do_overflow(ch);
+        if(traits_type::eq_int_type(ch, traits_type::eof()))
+          return traits_type::not_eof(ch);
+        else
+          return this->do_overflow(traits_type::to_char_type(ch));
       }
 
     streamsize xsgetn(char_type* s, streamsize n) override
