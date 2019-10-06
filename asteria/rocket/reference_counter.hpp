@@ -11,6 +11,8 @@
 
 namespace rocket {
 
+template<typename valueT = long> class reference_counter;
+
 template<typename valueT> class reference_counter
   {
   private:
@@ -63,12 +65,10 @@ template<typename valueT> class reference_counter
       {
         auto old = this->m_nref.load(::std::memory_order_relaxed);
         for(;;) {
-          if(old == 0) {
+          if(old == 0)
             return false;
-          }
-          if(this->m_nref.compare_exchange_weak(old, old + 1, ::std::memory_order_relaxed)) {
+          if(this->m_nref.compare_exchange_weak(old, old + 1, ::std::memory_order_relaxed))
             break;
-          }
         }
         return true;
       }
@@ -84,6 +84,8 @@ template<typename valueT> class reference_counter
         return old == 1;
       }
   };
+
+template class reference_counter<long>;
 
 }  // namespace rocket
 
