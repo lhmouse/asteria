@@ -45,5 +45,6 @@
 #include "../rocket/array.hpp"
 #include "../rocket/ref_to.hpp"
 #include "../rocket/tinyfmt.hpp"
+#include "../rocket/atomic_flag.hpp"
 
 #endif
