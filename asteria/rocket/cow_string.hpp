@@ -10,7 +10,6 @@
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
 #include "reference_counter.hpp"
-#include "tinyfmt.hpp"
 #include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
 #include <cstring>  // std::memset()
 
@@ -29,6 +28,7 @@ namespace rocket {
 template<typename charT, typename traitsT = char_traits<charT>,
          typename allocatorT = allocator<charT>> class basic_cow_string;
 
+// Please keep this declaration up to date.
 template<typename charT, typename traitsT> class basic_tinyfmt;
 
     namespace details_cow_string {
