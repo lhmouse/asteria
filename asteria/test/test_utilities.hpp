@@ -7,7 +7,6 @@
 #include "../src/fwd.hpp"
 #include "../src/runtime/exception.hpp"
 #include "../src/utilities.hpp"
-#include <iostream>  // std::cerr, operator<< ()
 
 #define ASTERIA_TEST_CHECK(expr_)  \
     do {  \
@@ -16,10 +15,8 @@
         break;  \
       }  \
       /* failure */  \
-      ::std::cerr << "ASTERIA_TEST_CHECK() failed: " << #expr_ << '\n'  \
-                  << "  File: " << __FILE__ << '\n'  \
-                  << "  Line: " << __LINE__ << '\n'  \
-                  << ::std::flush;  \
+      ::std::fprintf(stderr, "ASTERIA_TEST_CHECK() failed: %s\n  at %s:%ld\n",  \
+                             #expr_, __FILE__, static_cast<long>(__LINE__));  \
       ::std::terminate();  \
       /* unreachable */  \
     } while(false)
@@ -33,10 +30,6 @@
       catch(::Asteria::Exception& e) {  \
         /* success */  \
         ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.value());  \
-        for(::size_t i = e.count_frames() - 1; i != SIZE_MAX; --i) {  \
-          const auto& f = e.frame(i);  \
-          ASTERIA_DEBUG_LOG("\t* thrown from \'", f.sloc(), "\' <", f.what_type(), ">: ", f.value());  \
-        }  \
         break;  \
       }  \
       catch(::Asteria::Runtime_Error& e) {  \
@@ -49,10 +42,8 @@
         ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());  \
         break;  \
       }  \
-      ::std::cerr << "ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: " << #expr_ << '\n'  \
-                  << "  File: " << __FILE__ << '\n'  \
-                  << "  Line: " << __LINE__ << '\n'  \
-                  << ::std::flush;  \
+      ::std::fprintf(stderr, "ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: %s\n  at %s:%ld\n",  \
+                             #expr_, __FILE__, static_cast<long>(__LINE__));  \
       ::std::terminate();  \
       /* unreachable */  \
     } while(false)
