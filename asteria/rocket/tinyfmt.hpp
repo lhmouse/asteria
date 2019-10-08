@@ -68,13 +68,6 @@ template<typename charT, typename traitsT> class basic_tinyfmt
   private:
     streambuf_type* m_sb;
 
-  public:
-    explicit basic_tinyfmt(streambuf_type* sb)
-      : m_sb(sb)
-      {
-      }
-    virtual ~basic_tinyfmt();
-
   protected:
     // These protected functions are provided in alignment with `std::ostream`.
     basic_tinyfmt(basic_tinyfmt&& /*other*/) noexcept
@@ -93,6 +86,13 @@ template<typename charT, typename traitsT> class basic_tinyfmt
       {
         return ::std::exchange(this->m_sb, sb);
       }
+
+  public:
+    explicit basic_tinyfmt(streambuf_type* sb)
+      : m_sb(sb)
+      {
+      }
+    virtual ~basic_tinyfmt();
 
   private:
     streambuf_type& do_check_buf() const
