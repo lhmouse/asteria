@@ -47,6 +47,7 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/unique_handle.hpp  \
   asteria/rocket/reference_counter.hpp  \
   asteria/rocket/cow_string.hpp  \
+  asteria/rocket/tinybuf.hpp  \
   asteria/rocket/cow_stringbuf.hpp  \
   asteria/rocket/cow_string_ops.hpp  \
   asteria/rocket/cow_istringstream.hpp  \
@@ -77,6 +78,7 @@ lib_librocket_la_SOURCES =  \
   asteria/rocket/assert.cpp  \
   asteria/rocket/throw.cpp  \
   asteria/rocket/cow_string.cpp  \
+  asteria/rocket/tinybuf.cpp  \
   asteria/rocket/cow_stringbuf.cpp  \
   asteria/rocket/cow_string_ops.cpp  \
   asteria/rocket/cow_istringstream.cpp  \
