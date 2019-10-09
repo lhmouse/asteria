@@ -189,9 +189,9 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
       while((next = ::readdir(hd)) != nullptr) {
         // Skip special entries.
         if(next->d_name[0] == '.') {
-          if(next->d_name[1] == 0)
+          if(next->d_name[1] == 0)  // "."
             continue;
-          if((next->d_name[1] == '.') && (next->d_name[2] == 0))
+          if((next->d_name[1] == '.') && (next->d_name[2] == 0))  // ".."
             continue;
         }
         // Get the name and type of this entry.
