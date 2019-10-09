@@ -518,10 +518,6 @@ template<typename... alternativesT> class variant
       }
   };
 
-#if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
-template<typename... alternativesT> constexpr size_t variant<alternativesT...>::alternative_size;
-#endif
-
 template<typename... alternativesT> void swap(variant<alternativesT...>& lhs, variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);

@@ -31,6 +31,7 @@
 #include "../rocket/array.hpp"
 #include "../rocket/ref_to.hpp"
 #include "../rocket/tinyfmt_str.hpp"
+#include "../rocket/tinyfmt_file.hpp"
 
 // Macros
 #define ASTERIA_SFINAE_CONSTRUCT(...)    ROCKET_ENABLE_IF(::std::is_constructible<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
@@ -120,9 +121,12 @@ using cow_wstring = rocket::cow_wstring;
 using cow_u16string = rocket::cow_u16string;
 using cow_u32string = rocket::cow_u32string;
 using phsh_string = rocket::prehashed_string;
-using cow_stringbuf = rocket::cow_stringbuf;
-using tinyfmt_str = rocket::tinyfmt_str;
+using tinybuf = rocket::tinybuf;
+using tinybuf_str = rocket::tinybuf_str;
+using tinybuf_file = rocket::tinybuf_file;
 using tinyfmt = rocket::tinyfmt;
+using tinyfmt_str = rocket::tinyfmt_str;
+using tinyfmt_file = rocket::tinyfmt_file;
 
 template<typename E, typename D = std::default_delete<const E>> using uptr = rocket::unique_ptr<E, D>;
 template<typename E> using rcptr = rocket::refcnt_ptr<E>;
@@ -427,7 +431,6 @@ enum Parser_Status : uint32_t
     parser_status_utf8_sequence_incomplete                   = 1003,
     parser_status_utf_code_point_invalid                     = 1004,
     parser_status_null_character_disallowed                  = 1005,
-    parser_status_null_streambuf_pointer                     = 1006,
     parser_status_token_character_unrecognized               = 2001,
     parser_status_string_literal_unclosed                    = 2002,
     parser_status_escape_sequence_unknown                    = 2003,

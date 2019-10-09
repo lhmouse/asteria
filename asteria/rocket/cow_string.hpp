@@ -1759,17 +1759,6 @@ template<typename charT, typename traitsT,
       }
   };
 
-#if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
-template<typename charT, typename traitsT,
-         typename allocatorT> constexpr typename basic_cow_string<charT, traitsT,
-                                                                  allocatorT>::size_type basic_cow_string<charT, traitsT,
-                                                                                                          allocatorT>::npos;
-template<typename charT, typename traitsT,
-         typename allocatorT> constexpr typename basic_cow_string<charT, traitsT,
-                                                                  allocatorT>::value_type basic_cow_string<charT, traitsT,
-                                                                                                           allocatorT>::null_char;
-#endif
-
 template<typename charT, typename traitsT,
          typename allocatorT> struct basic_cow_string<charT, traitsT, allocatorT>::hash
   {
@@ -2081,7 +2070,7 @@ template<typename charT, typename traitsT,
          typename allocatorT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                                         const basic_cow_string<charT, traitsT, allocatorT>& str)
   {
-    return fmt.write(str.c_str(), str.ssize());
+    return fmt.write(str.c_str(), str.size());
   }
 
 }  // namespace rocket

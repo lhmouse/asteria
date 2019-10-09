@@ -13,7 +13,7 @@
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
 #include <limits>  // std::numeric_limits<>
-#include <ios>  // std::streamsize, std::streamoff, std::basic_streambuf<>, std::char_traits<>, std::ios_base
+#include <string>  // std::char_traits<>
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <cstring>  // std::memset()
@@ -97,6 +97,8 @@ using ::std::is_final;
 using ::std::is_enum;
 using ::std::is_class;
 using ::std::is_union;
+using ::std::is_scalar;
+using ::std::is_arithmetic;
 
 using ::std::allocator;
 using ::std::allocator_traits;
@@ -109,14 +111,6 @@ using ::std::forward_iterator_tag;
 using ::std::bidirectional_iterator_tag;
 using ::std::random_access_iterator_tag;
 
-using ::std::streamsize;
-using ::std::streamoff;
-using ::std::basic_streambuf;
-using ::std::ios_base;
-using ::std::basic_ios;
-using ::std::basic_istream;
-using ::std::basic_ostream;
-using ::std::basic_iostream;
 using ::std::char_traits;
 
 using ::std::hash;
@@ -207,24 +201,6 @@ template<typename testT, typename lowerT, typename upperT> constexpr typename co
     return (test < lower) ? noadl::forward<lowerT>(lower)
                           : (upper < test) ? noadl::forward<upperT>(upper)
                                            : noadl::forward<testT>(test);
-  }
-
-template<typename charT, typename traitsT> void handle_ios_exception(basic_ios<charT, traitsT>& ios, ios_base::iostate& state)
-  {
-    // Set `ios_base::badbit` without causing `ios_base::failure` to be thrown.
-    // Catch-then-ignore is **very** inefficient notwithstanding, it cannot be made more portable.
-    try {
-      ios.setstate(ios_base::badbit);
-    }
-    catch(...) {
-      // Ignore this exception.
-    }
-    // Rethrow the **original** exception, if `ios_base::badbit` has been turned on in `os.exceptions()`.
-    if(ios.exceptions() & ios_base::badbit) {
-      throw;
-    }
-    // Clear the badbit as it need not be set a second time.
-    state &= ~ios_base::badbit;
   }
 
 template<typename firstT, typename lastT,

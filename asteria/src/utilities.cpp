@@ -8,19 +8,6 @@
 
 namespace Asteria {
 
-Formatter::~Formatter()
-  {
-  }
-
-tinyfmt& Formatter::do_open_stream()
-  {
-    auto& fmt = this->m_fmt;
-    if(!fmt) {
-      fmt = rocket::make_unique<tinyfmt_str>();
-    }
-    return *fmt;
-  }
-
     namespace {
 
     void do_ltoa_fixed(cow_string& str, long num, size_t width)
@@ -29,7 +16,7 @@ tinyfmt& Formatter::do_open_stream()
         auto spos = sbuf.end();
         // Write digits from the right to the left.
         long reg = num;
-        for(size_t i = 0; i < width; ++i) {
+        for(size_t i = 0; i != width; ++i) {
           long d = reg % 10;
           reg /= 10;
           *--spos = static_cast<char>('0' + d);
@@ -38,7 +25,7 @@ tinyfmt& Formatter::do_open_stream()
         str.append(spos, sbuf.end());
       }
 
-    constexpr char s_cntrl_reps[][16] =
+    constexpr char s_ctrl_reps[][16] =
       {
         "[NUL\\x00]",  "[SOH\\x01]",  "[STX\\x02]",  "[ETX\\x03]",
         "[EOT\\x04]",  "[ENQ\\x05]",  "[ACK\\x06]",  "[BEL\\x07]",
@@ -94,16 +81,13 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
     // Neutralize control characters and indent paragraphs.
     for(char c : msg) {
       // Control characters are ['\x00','\x1F'] and '\x7F'.
-      size_t uch = c & 0xFF;
-      if(uch == 0x7F) {
+      size_t ch = c & 0xFF;
+      if(ch == 0x7F)
         do_append_str(str, "[DEL\\x7F]");
-        continue;
-      }
-      if(uch <= 0x1F) {
-        do_append_str(str, s_cntrl_reps[uch]);
-        continue;
-      }
-      do_append_str(str, c);
+      else if(ch <= 0x1F)
+        do_append_str(str, s_ctrl_reps[ch]);
+      else
+        do_append_str(str, c);
     };
     // Terminate the message with a line feed.
     do_append_str(str, '\n');
@@ -362,20 +346,20 @@ bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
 tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
   {
     // Insert the leading quote mark.
-    fmt.put('\"');
+    fmt << '\"';
     // Quote all bytes from the source string.
     for(size_t i = 0; i != q.len; ++i) {
       size_t ch = q.str[i] & 0xFF;
-      auto sq = s_quote_table[ch];
-      // Insert this quoted sequence. Optimize the operation a little if it consists of only one character.
-      auto nq = static_cast<std::streamsize>(std::strlen(sq));
-      if(nq == 1)
-        fmt.put(*sq);
+      // Insert this quoted sequence.
+      // Optimize the operation a little if it consists of only one character.
+      const auto& sq = s_quote_table[ch];
+      if(ROCKET_EXPECT(sq[1] == 0))
+        fmt << sq[0];
       else
-        fmt.write(sq, nq);
+        fmt << sq;
     }
     // Insert the trailing quote mark.
-    fmt.put('\"');
+    fmt << '\"';
     return fmt;
   }
 
@@ -383,14 +367,14 @@ tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q)
   {
     if(q.indent == 0) {
       // Write everything in a single line, separated by spaces.
-      fmt.put(' ');
+      fmt << ' ';
     }
     else {
       // Terminate the current line.
-      fmt.put('\n');
+      fmt << '\n';
       // Indent the next line accordingly.
       for(size_t i = 0; i != q.hanging; ++i)
-        fmt.put(' ');
+        fmt << ' ';
     }
     return fmt;
   }

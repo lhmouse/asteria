@@ -275,15 +275,12 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
     case gtype_string:
       {
         const auto& altr = this->m_stor.as<gtype_string>();
-        if(!escape) {
+        if(!escape)
           // hello
-          fmt << altr;
-        }
-        else {
+          return fmt << altr;
+        else
           // "hello"
-          fmt << quote(altr);
-        }
-        return fmt;
+          return fmt << quote(altr);
       }
     case gtype_opaque:
       {

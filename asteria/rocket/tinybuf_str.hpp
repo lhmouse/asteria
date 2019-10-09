@@ -29,15 +29,13 @@ template<typename charT, typename traitsT,
     using off_type   = typename buffer_type::off_type;
     using size_type  = typename string_type::size_type;
 
-    static constexpr size_type npos = string_type::npos;
-
   private:
     string_type m_str;
     size_type m_off;
     open_mode m_mode;
 
   public:
-    constexpr basic_tinybuf_str() noexcept
+    basic_tinybuf_str() noexcept
       : m_str(), m_off(),
         m_mode()
       {
@@ -47,7 +45,7 @@ template<typename charT, typename traitsT,
         m_mode(mode)
       {
       }
-    template<typename xstrT> basic_tinybuf_str(xstrT&& xstr, open_mode mode)
+    template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode)
       : m_str(noadl::forward<xstrT>(xstr)), m_off(),
         m_mode(mode)
       {
@@ -205,13 +203,6 @@ template<typename charT, typename traitsT,
       }
   };
 
-#if !(defined(__cpp_inline_variables) && (__cpp_inline_variables >= 201606))
-template<typename charT, typename traitsT,
-         typename allocatorT> constexpr typename basic_tinybuf_str<charT, traitsT,
-                                                                   allocatorT>::size_type basic_tinybuf_str<charT, traitsT,
-                                                                                                            allocatorT>::npos;
-#endif
-
 template<typename charT, typename traitsT,
          typename allocatorT> basic_tinybuf_str<charT, traitsT, allocatorT>::~basic_tinybuf_str()
   = default;
@@ -226,8 +217,8 @@ template<typename charT, typename traitsT,
 extern template class basic_tinybuf_str<char>;
 extern template class basic_tinybuf_str<wchar_t>;
 
-using tinybuf_str  = basic_tinybuf_str<char>;
-using wtinybuf_str = basic_tinybuf_str<wchar_t>;
+using tinybuf_str   = basic_tinybuf_str<char>;
+using wtinybuf_str  = basic_tinybuf_str<wchar_t>;
 
 }  // namespace rocket
 

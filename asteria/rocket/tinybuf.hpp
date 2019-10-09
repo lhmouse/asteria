@@ -59,11 +59,11 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
     char_type* m_pend = nullptr;
 
   protected:
-    constexpr basic_tinybuf() noexcept
+    basic_tinybuf() noexcept
       = default;
-    constexpr basic_tinybuf(const basic_tinybuf&) noexcept
+    basic_tinybuf(const basic_tinybuf&) noexcept
       = default;
-    constexpr basic_tinybuf& operator=(const basic_tinybuf&) noexcept
+    basic_tinybuf& operator=(const basic_tinybuf&) noexcept
       = default;
 
   public:
@@ -131,7 +131,7 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
           // Synchronize the get and put areas.
           return this->do_flush(this->m_gcur, this->m_gend, this->m_pcur, this->m_pend);
       }
-    off_type seek(off_type off, seek_dir dir = tinybuf_base::seek_set)
+    off_type seek(off_type off, seek_dir dir)
       {
         // Reposition the stream, which might invalidate the get and put areas.
         return this->do_seek(off, dir);
@@ -216,7 +216,7 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
 template<typename charT, typename traitsT> basic_tinybuf<charT, traitsT>::~basic_tinybuf()
   = default;
 
-template<typename charT, typename traitsT> void swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs)
+template<typename charT, typename traitsT> void swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }
@@ -224,8 +224,8 @@ template<typename charT, typename traitsT> void swap(basic_tinybuf<charT, traits
 extern template class basic_tinybuf<char>;
 extern template class basic_tinybuf<wchar_t>;
 
-using tinybuf  = basic_tinybuf<char>;
-using wtinybuf = basic_tinybuf<wchar_t>;
+using tinybuf   = basic_tinybuf<char>;
+using wtinybuf  = basic_tinybuf<wchar_t>;
 
 }  // namespace rocket
 

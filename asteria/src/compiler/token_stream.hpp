@@ -18,9 +18,9 @@ class Token_Stream
     Token_Stream() noexcept
       {
       }
-    Token_Stream(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& opts)
+    Token_Stream(tinybuf& cbuf, const cow_string& file, const Compiler_Options& opts)
       {
-        this->reload(sbuf, file, opts);
+        this->reload(cbuf, file, opts);
       }
 
   public:
@@ -54,7 +54,7 @@ class Token_Stream
     // This function parses characters from the input streambuf and fills tokens into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
     // This function throws a `Parser_Error` upon failure.
-    Token_Stream& reload(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& opts);
+    Token_Stream& reload(tinybuf& cbuf, const cow_string& file, const Compiler_Options& opts);
   };
 
 }  // namespace Asteria

@@ -59,6 +59,7 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/ref_to.hpp  \
   asteria/rocket/tinybuf.hpp  \
   asteria/rocket/tinybuf_str.hpp  \
+  asteria/rocket/tinybuf_file.hpp  \
   asteria/rocket/tinynumput.hpp  \
   asteria/rocket/tinyfmt.hpp  \
   asteria/rocket/tinyfmt_str.hpp  \
@@ -77,6 +78,7 @@ lib_librocket_la_SOURCES =  \
   asteria/rocket/cow_string.cpp  \
   asteria/rocket/tinybuf.cpp  \
   asteria/rocket/tinybuf_str.cpp  \
+  asteria/rocket/tinybuf_file.cpp  \
   asteria/rocket/tinynumput.cpp  \
   asteria/rocket/tinyfmt.cpp  \
   asteria/rocket/tinyfmt_str.cpp  \

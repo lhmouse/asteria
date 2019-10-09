@@ -12,97 +12,16 @@ namespace Asteria {
 class Formatter
   {
   private:
-    uptr<tinyfmt_str> m_fmt;
-
-  public:
-    Formatter() noexcept
-      {
-      }
-    ~Formatter();
-
-  private:
-    template<typename ValT> void do_put(const ValT& val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(bool val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(char val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(signed char val)
-      {
-        this->do_open_stream() << static_cast<int>(val);
-      }
-    void do_put(unsigned char val)
-      {
-        this->do_open_stream() << static_cast<unsigned>(val);
-      }
-    void do_put(short val)
-      {
-        this->do_open_stream() << static_cast<int>(val);
-      }
-    void do_put(unsigned short val)
-      {
-        this->do_open_stream() << static_cast<unsigned>(val);
-      }
-    void do_put(int val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(unsigned val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(long val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(unsigned long val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(long long val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(unsigned long long val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(const char* val)
-      {
-        this->do_open_stream() << val;
-      }
-    void do_put(const signed char* val)
-      {
-        this->do_open_stream() << static_cast<const void*>(val);
-      }
-    void do_put(const unsigned char* val)
-      {
-        this->do_open_stream() << static_cast<const void*>(val);
-      }
-    void do_put(const void* val)
-      {
-        this->do_open_stream() << val;
-      }
-    tinyfmt& do_open_stream();
+    tinyfmt_str m_fmt;
 
   public:
     template<typename ValT> Formatter& operator,(const ValT& val)
       {
-        return this->do_put(val), *this;
+        return (this->m_fmt << val), *this;
       }
     cow_string extract_string() noexcept
       {
-        const auto& fmt = this->m_fmt;
-        if(!fmt) {
-          return rocket::sref("");
-        }
-        return fmt->extract_string();
+        return this->m_fmt.extract_string();
       }
   };
 

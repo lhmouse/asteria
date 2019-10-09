@@ -34,16 +34,6 @@ Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& nam
     return *this;
   }
 
-Simple_Script& Simple_Script::reload(std::streambuf* sbuf_opt, const cow_string& name)
-  {
-    // Read from `*sbuf_opt` if it is valid.
-    // Throw an exception if no streambuf is associated.
-    if(!sbuf_opt) {
-      throw Parser_Error(parser_status_null_streambuf_pointer);
-    }
-    return this->reload(*sbuf_opt, name);
-  }
-
 Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name)
   {
     // Use a `streambuf` in place of an `istream` to minimize overheads.

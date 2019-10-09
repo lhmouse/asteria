@@ -19,13 +19,9 @@ class Simple_Script
     Simple_Script()
       {
       }
-    Simple_Script(std::streambuf& sbuf, const cow_string& name)
+    Simple_Script(tinybuf& cbuf, const cow_string& name)
       {
-        this->reload(sbuf, name);
-      }
-    Simple_Script(std::streambuf* sbuf_opt, const cow_string& name)
-      {
-        this->reload(sbuf_opt, name);
+        this->reload(cbuf, name);
       }
 
   public:
@@ -46,18 +42,16 @@ class Simple_Script
       {
         return this->m_cptr == nullptr;
       }
+    explicit operator bool () const noexcept
+      {
+        return this->m_cptr != nullptr;
+      }
     Simple_Script& clear() noexcept
       {
         return this->m_cptr.reset(), *this;
       }
 
-    explicit operator bool () const noexcept
-      {
-        return this->m_cptr != nullptr;
-      }
-
-    Simple_Script& reload(std::streambuf& sbuf, const cow_string& name);
-    Simple_Script& reload(std::streambuf* sbuf_opt, const cow_string& name);
+    Simple_Script& reload(tinybuf& cbuf, const cow_string& name);
     Simple_Script& reload_string(const cow_string& code, const cow_string& name);
     Simple_Script& reload_file(const cow_string& path);
 
