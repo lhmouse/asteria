@@ -8,8 +8,8 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/collector.hpp"
 #include "../utilities.hpp"
-#ifdef _WIN32
-#  include <intrin.h>
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+#  include <x86intrin.h>
 #endif
 
 namespace Asteria {
@@ -345,70 +345,46 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
 
 G_integer std_numeric_lzcnt(const G_integer& x)
   {
-#if defined(_WIN64) || defined(_M_ARM)
-    unsigned long index;
-    if(!::_BitScanReverse64(&index, static_cast<uint64_t>(x))) {
+#if defined(__GNUC__)
+#  if defined(__LZCNT__)
+    return G_integer(::_lzcnt_u64(static_cast<uint64_t>(x)));
+#  else
+    if(x == 0)
       return 64;
-    }
-    return 63 - index;
-#elif defined(_WIN32)
-    unsigned long index;
-    if(!::_BitScanReverse(&index, static_cast<uint32_t>(x >> 32))) {
-      // Scan the lower half.
-      if(!::_BitScanReverse(&index, static_cast<uint32_t>(x))) {
-        return 64;
-      }
-      return 63 - index;
-    }
-    return 31 - index;
-#elif defined(__GNUC__)
-    if(x == 0) {
-      return 64;
-    }
-    return static_cast<unsigned>(__builtin_clzll(static_cast<uint64_t>(x)));
+    else
+      return __builtin_clzll(static_cast<uint64_t>(x));
+#  endif
 #else
-#  error Please implement `lzcnt` for this platform.
+#  error Please implement `lzcnt()` for this platform.
 #endif
   }
 
 G_integer std_numeric_tzcnt(const G_integer& x)
   {
-#if defined(_WIN64) || defined(_M_ARM)
-    unsigned long index;
-    if(!::_BitScanForward64(&index, static_cast<uint64_t>(x))) {
+#if defined(__GNUC__)
+#  if defined(__BMI__)
+    return G_integer(::_tzcnt_u64(static_cast<uint64_t>(x)));
+#  else
+    if(x == 0)
       return 64;
-    }
-    return index;
-#elif defined(_WIN32)
-    unsigned long index;
-    if(!::_BitScanForward(&index, static_cast<uint32_t>(x))) {
-      // Scan the higher half.
-      if(!::_BitScanForward(&index, static_cast<uint32_t>(x >> 32))) {
-        return 64;
-      }
-      return 32 + index;
-    }
-    return index;
-#elif defined(__GNUC__)
-    if(x == 0) {
-      return 64;
-    }
-    return static_cast<unsigned>(__builtin_ctzll(static_cast<uint64_t>(x)));
+    else
+      return __builtin_ctzll(static_cast<uint64_t>(x));
+#  endif
 #else
-#  error Please implement `lzcnt` for this platform.
+#  error Please implement `tzcnt()` for this platform.
 #endif
   }
 
 G_integer std_numeric_popcnt(const G_integer& x)
   {
-#if defined(_WIN64) || defined(_M_ARM)
-    return static_cast<long long>(__popcnt64(static_cast<uint64_t>(x)));
-#elif defined(_WIN32)
-    return __popcnt(static_cast<uint32_t>(x >> 32)) + __popcnt(static_cast<uint32_t>(x));
-#elif defined(__GNUC__)
-    return static_cast<unsigned>(__builtin_popcountll(static_cast<uint64_t>(x)));
+#if defined(__GNUC__)
+#  if defined(__POPCNT__)
+    return G_integer(::_mm_popcnt_u64(static_cast<uint64_t>(x)));
+#  else
+    return __builtin_popcountll(static_cast<uint64_t>(x));
+#  endif
 #else
-#  error Please implement `lzcnt` for this platform.
+#  error Please implement `popcnt()` for this platform.
 #endif
   }
 

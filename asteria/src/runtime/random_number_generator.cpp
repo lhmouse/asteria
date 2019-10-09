@@ -4,13 +4,8 @@
 #include "../precompiled.hpp"
 #include "random_number_generator.hpp"
 #include "../utilities.hpp"
-#ifdef _WIN32
-#  include <windef.h>  // so many...
-#  include <ntsecapi.h>  // RtlGenRandom()
-#else
-#  include <fcntl.h>  // open()
-#  include <unistd.h>  // read()
-#endif
+#include <fcntl.h>  // ::open()
+#include <unistd.h>  // ::read()
 
 namespace Asteria {
 
@@ -65,9 +60,7 @@ void Random_Number_Generator::do_update() noexcept
 
     bool do_read_random_device(void* data, size_t size) noexcept
       {
-#ifdef _WIN32
-        return ::RtlGenRandom(data, static_cast<uint32_t>(size));
-#else
+        std::memset(data, 'x', size);
         int fd = ::open("/dev/urandom", O_RDONLY);
         if(fd == -1) {
           return false;
@@ -75,7 +68,6 @@ void Random_Number_Generator::do_update() noexcept
         auto nread = ::read(fd, data, size);
         ::close(fd);
         return nread > 0;
-#endif
       }
 
     class Scrambler

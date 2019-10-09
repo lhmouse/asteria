@@ -6,51 +6,21 @@
 #include "argument_reader.hpp"
 #include "simple_binding_wrapper.hpp"
 #include "../utilities.hpp"
-#ifdef _WIN32
-#  include <windef.h>
-#  include <winbase.h>
-#else
-#  include <time.h>
-#endif
+#include <time.h>
 
 namespace Asteria {
 
 G_integer std_chrono_utc_now()
   {
-#ifdef _WIN32
-    // Get UTC time from the system.
-    ::FILETIME ft_u;
-    ::GetSystemTimeAsFileTime(&ft_u);
-    ::ULARGE_INTEGER ti;
-    ti.LowPart = ft_u.dwLowDateTime;
-    ti.HighPart = ft_u.dwHighDateTime;
-    // Convert it to the number of milliseconds.
-    // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    return static_cast<int64_t>(ti.QuadPart - 116444736000000000) / 10000;
-#else
     // Get UTC time from the system.
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
     // Convert it to the number of milliseconds.
     return static_cast<int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
-#endif
   }
 
 G_integer std_chrono_local_now()
   {
-#ifdef _WIN32
-    // Get local time from the system.
-    ::FILETIME ft_u;
-    ::GetSystemTimeAsFileTime(&ft_u);
-    ::FILETIME ft_l;
-    ::FileTimeToLocalFileTime(&ft_u, &ft_l);
-    ::ULARGE_INTEGER ti;
-    ti.LowPart = ft_l.dwLowDateTime;
-    ti.HighPart = ft_l.dwHighDateTime;
-    // Convert it to the number of milliseconds.
-    // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    return static_cast<int64_t>(ti.QuadPart - 116444736000000000) / 10000;
-#else
     // Get local time and GMT offset from the system.
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
@@ -58,112 +28,68 @@ G_integer std_chrono_local_now()
     ::localtime_r(&(ts.tv_sec), &tr);
     // Convert it to the number of milliseconds.
     return (static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff) * 1000 + ts.tv_nsec / 1000000;
-#endif
   }
 
 G_real std_chrono_hires_now()
   {
-#ifdef _WIN32
-    // Read the performance counter.
-    // The performance counter frequency has to be obtained only once.
-    static std::atomic<int64_t> s_freq;
-    ::LARGE_INTEGER ti;
-    auto freq = s_freq.load(std::memory_order_relaxed);
-    if(ROCKET_UNEXPECT(freq == 0)) {
-      ::QueryPerformanceFrequency(&ti);
-      freq = ti.QuadPart;
-      s_freq.store(freq, std::memory_order_relaxed);
-    }
-    ::QueryPerformanceCounter(&ti);
-    // Convert it to the number of milliseconds.
-    // Add a random offset to the result to help debugging.
-    return static_cast<double>(ti.QuadPart) / static_cast<double>(freq) + 0x987654321;
-#else
     // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
     // Convert it to the number of milliseconds.
     // Add a random offset to the result to help debugging.
     return static_cast<double>(ts.tv_sec) * 1000 + static_cast<double>(ts.tv_nsec) / 1000000 + 0x987654321;
-#endif
   }
 
 G_integer std_chrono_steady_now()
   {
-#ifdef _WIN32
-    // Get the system tick count.
-    // Add a random offset to the result to help debugging.
-    return static_cast<int64_t>(::GetTickCount64()) + 0x123456789;
-#else
     // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
     // Convert it to the number of milliseconds.
     // Add a random offset to the result to help debugging.
     return static_cast<int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000 + 0x123456789;
-#endif
   }
 
 G_integer std_chrono_local_from_utc(const G_integer& time_utc)
   {
     // Handle special time values.
-    if(time_utc <= -11644473600000) {
+    if(time_utc <= -11644473600000)
       return INT64_MIN;
-    }
-    if(time_utc >= 253370764800000) {
+    if(time_utc >= 253370764800000)
       return INT64_MAX;
-    }
     // Calculate the local time.
-    G_integer time_local;
-#ifdef _WIN32
-    ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
-    ::GetDynamicTimeZoneInformation(&dtz);
-    time_local = time_utc + dtz.Bias * -60000;
-#else
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    time_local = time_utc + tr.tm_gmtoff * 1000;
-#endif
+    int64_t time_local = time_utc + tr.tm_gmtoff * 1000;
     // Handle results that are out of the finite range.
-    if(time_local <= -11644473600000) {
+    if(time_local <= -11644473600000)
       return INT64_MIN;
-    }
-    if(time_local >= 253370764800000) {
+    if(time_local >= 253370764800000)
       return INT64_MAX;
-    }
-    return time_local;
+    else
+      return time_local;
   }
 
 G_integer std_chrono_utc_from_local(const G_integer& time_local)
   {
     // Handle special time values.
-    if(time_local <= -11644473600000) {
+    if(time_local <= -11644473600000)
       return INT64_MIN;
-    }
-    if(time_local >= 253370764800000) {
+    if(time_local >= 253370764800000)
       return INT64_MAX;
-    }
     // Calculate the UTC time.
-    G_integer time_utc;
-#ifdef _WIN32
-    ::DYNAMIC_TIME_ZONE_INFORMATION dtz;
-    ::GetDynamicTimeZoneInformation(&dtz);
-    time_utc = time_local - dtz.Bias * -60000;
-#else
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    time_utc = time_local - tr.tm_gmtoff * 1000;
-#endif
+    int64_t time_utc = time_local - tr.tm_gmtoff * 1000;
     // Handle results that are out of the finite range.
-    if(time_utc <= -11644473600000) {
+    if(time_utc <= -11644473600000)
       return INT64_MIN;
-    }
-    if(time_utc >= 253370764800000) {
+    if(time_utc >= 253370764800000)
       return INT64_MAX;
-    }
-    return time_utc;
+    else
+      return time_utc;
   }
 
     namespace {
@@ -202,9 +128,8 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
         // Read digits forwards.
         for(size_t i = 0; i < width; ++i) {
           char c = p[i];
-          if((c < '0') || ('9' < c)) {
+          if((c < '0') || ('9' < c))
             return false;
-          }
           reg *= 10;
           reg += static_cast<uint32_t>(c - '0');
         }
@@ -218,9 +143,8 @@ G_integer std_chrono_utc_from_local(const G_integer& time_local)
       {
         // Read a character.
         char c = p[0];
-        if(rocket::is_none_of(c, accept)) {
+        if(rocket::is_none_of(c, accept))
           return false;
-        }
         // Succeed.
         p += 1;
         return true;
@@ -233,42 +157,13 @@ G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
     // Deal with special time points.
-    if(time_point <= -11644473600000) {
+    if(time_point <= -11644473600000)
       return rocket::sref(s_min_str[pms]);
-    }
-    if(time_point >= 253370764800000) {
+    if(time_point >= 253370764800000)
       return rocket::sref(s_max_str[pms]);
-    }
     // Write the string backwards.
     char wbuf[32];
     char* qwt = wbuf;
-#ifdef _WIN32
-    // Convert the time point to Windows NT time.
-    // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    ::ULARGE_INTEGER ti;
-    ti.QuadPart = static_cast<uint64_t>(time_point) * 10000 + 116444736000000000;
-    ::FILETIME ft;
-    ft.dwLowDateTime = ti.LowPart;
-    ft.dwHighDateTime = ti.HighPart;
-    ::SYSTEMTIME st;
-    ::FileTimeToSystemTime(&ft, &st);
-    // Write fields backwards.
-    if(pms) {
-      do_rput(qwt, st.wMilliseconds, 3);
-      do_rput(qwt, '.');
-    }
-    do_rput(qwt, st.wSecond, 2);
-    do_rput(qwt, ':');
-    do_rput(qwt, st.wMinute, 2);
-    do_rput(qwt, ':');
-    do_rput(qwt, st.wHour, 2);
-    do_rput(qwt, ' ');
-    do_rput(qwt, st.wDay, 2);
-    do_rput(qwt, '-');
-    do_rput(qwt, st.wMonth, 2);
-    do_rput(qwt, '-');
-    do_rput(qwt, st.wYear, 4);
-#else
     // Write fields backwards.
     // Get the second and millisecond parts.
     // Note that the number of seconds shall be rounded towards negative infinity.
@@ -291,7 +186,6 @@ G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>
     do_rput(qwt, tr.tm_mon + 1, 2);
     do_rput(qwt, '-');
     do_rput(qwt, tr.tm_year + 1900, 4);
-#endif
     return G_string(std::make_reverse_iterator(qwt), std::make_reverse_iterator(wbuf));
   }
 
@@ -309,87 +203,42 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
       return rocket::nullopt;
     }
     const char* qend = qrd + n;
-    // The millisecond part is optional so we have to declare some intermediate results here.
-    bool succ;
-    G_integer time_point;
-#ifdef _WIN32
-    // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
-    ::SYSTEMTIME st;
-    succ = do_getx(qrd, st.wYear, 4) &&
-           do_getx(qrd, { '-', '/' }) &&
-           do_getx(qrd, st.wMonth, 2) &&
-           do_getx(qrd, { '-', '/' }) &&
-           do_getx(qrd, st.wDay, 2) &&
-           do_getx(qrd, { ' ', 'T' }) &&
-           do_getx(qrd, st.wHour, 2) &&
-           do_getx(qrd, { ':' }) &&
-           do_getx(qrd, st.wMinute, 2) &&
-           do_getx(qrd, { ':' }) &&
-           do_getx(qrd, st.wSecond, 2);
-    if(!succ) {
-      return rocket::nullopt;
-    }
-    if(st.wYear < 1600) {
-      return INT64_MIN;
-    }
-    if(st.wYear > 9998) {
-      return INT64_MAX;
-    }
-    // Assemble the parts, assuming the millisecond field is zero..
-    st.wMilliseconds = 0;
-    ::FILETIME ft;
-    if(!::SystemTimeToFileTime(&st, &ft)) {
-      return rocket::nullopt;
-    }
-    ::ULARGE_INTEGER ti;
-    ti.LowPart = ft.dwLowDateTime;
-    ti.HighPart = ft.dwHighDateTime;
-    // Convert it to the number of milliseconds.
-    // `116444736000000000` = duration from `1601-01-01` to `1970-01-01` in 100 nanoseconds.
-    time_point = static_cast<int64_t>(ti.QuadPart - 116444736000000000) / 10000;
-#else
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
     ::tm tr;
-    succ = do_getx(qrd, tr.tm_year, 4) &&
-           do_getx(qrd, { '-', '/' }) &&
-           do_getx(qrd, tr.tm_mon, 2) &&
-           do_getx(qrd, { '-', '/' }) &&
-           do_getx(qrd, tr.tm_mday, 2) &&
-           do_getx(qrd, { ' ', 'T' }) &&
-           do_getx(qrd, tr.tm_hour, 2) &&
-           do_getx(qrd, { ':' }) &&
-           do_getx(qrd, tr.tm_min, 2) &&
-           do_getx(qrd, { ':' }) &&
-           do_getx(qrd, tr.tm_sec, 2);
-    if(!succ) {
+    bool succ = do_getx(qrd, tr.tm_year, 4) &&
+                do_getx(qrd, { '-', '/' }) &&
+                do_getx(qrd, tr.tm_mon, 2) &&
+                do_getx(qrd, { '-', '/' }) &&
+                do_getx(qrd, tr.tm_mday, 2) &&
+                do_getx(qrd, { ' ', 'T' }) &&
+                do_getx(qrd, tr.tm_hour, 2) &&
+                do_getx(qrd, { ':' }) &&
+                do_getx(qrd, tr.tm_min, 2) &&
+                do_getx(qrd, { ':' }) &&
+                do_getx(qrd, tr.tm_sec, 2);
+    if(!succ)
       return rocket::nullopt;
-    }
-    if(tr.tm_year < 1600) {
+    if(tr.tm_year < 1600)
       return INT64_MIN;
-    }
-    if(tr.tm_year > 9998) {
+    if(tr.tm_year > 9998)
       return INT64_MAX;
-    }
     // Assemble the parts without milliseconds.
     tr.tm_year -= 1900;
     tr.tm_mon -= 1;
     tr.tm_isdst = 0;
     ::time_t tp = ::timegm(&tr);
-    if(tp == static_cast<::time_t>(-1)) {
+    if(tp == static_cast<::time_t>(-1))
       return rocket::nullopt;
-    }
     // Convert it to the number of milliseconds.
-    time_point = static_cast<int64_t>(tp) * 1000;
-#endif
+    auto time_point = static_cast<int64_t>(tp) * 1000;
     // Parse the subsecond part if any.
     if(do_getx(qrd, { '.', ',' })) {
       // Parse milliseconds backwards.
       double r = 0;
       while(qend > qrd) {
         char c = *--qend;
-        if((c < '0') || ('9' < c)) {
+        if((c < '0') || ('9' < c))
           return rocket::nullopt;
-        }
         r += c - '0';
         r /= 10;
       }

@@ -3,13 +3,8 @@
 
 #include "precompiled.hpp"
 #include "utilities.hpp"
-#ifdef _WIN32
-#  include <windef.h>  // so many...
-#  include <winbase.h>  // ::SYSTEMTIME, ::GetSystemTime()
-#else
-#  include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
-#endif
-#include <cstdio>  // std::fwrite()
+#include <time.h>  // ::timespec, ::clock_gettime(), ::localtime()
+#include <stdio.h>  // ::fwrite(), stderr
 
 namespace Asteria {
 
@@ -71,24 +66,6 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
     cow_string str;
     str.reserve(1023);
     // Append the timestamp.
-#ifdef _WIN32
-    ::SYSTEMTIME st;
-    ::GetSystemTime(&st);
-    // YYYY-MM-DD hh:mm:ss.sss
-    do_ltoa_fixed(str, st.wYear, 4);
-    do_append_str(str, '-');
-    do_ltoa_fixed(str, st.wMonth, 2);
-    do_append_str(str, '-');
-    do_ltoa_fixed(str, st.wDay, 2);
-    do_append_str(str, ' ');
-    do_ltoa_fixed(str, st.wHour, 2);
-    do_append_str(str, ':');
-    do_ltoa_fixed(str, st.wMinute, 2);
-    do_append_str(str, ':');
-    do_ltoa_fixed(str, st.wSecond, 2);
-    do_append_str(str, '.');
-    do_ltoa_fixed(str, st.wMilliseconds, 3);
-#else
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
     ::tm tr;
@@ -106,8 +83,7 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
     do_append_str(str, ':');
     do_ltoa_fixed(str, tr.tm_sec, 2);
     do_append_str(str, '.');
-    do_ltoa_fixed(str, static_cast<long>(ts.tv_nsec / 1000000), 3);
-#endif
+    do_ltoa_fixed(str, ts.tv_nsec / 1000000, 3);
     // Append the file name and line number.
     do_append_str(str, " @@ ");
     do_append_str(str, file);
@@ -132,7 +108,7 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
     // Terminate the message with a line feed.
     do_append_str(str, '\n');
     // Write the string now. Note that the string cannot be empty.
-    return std::fwrite(str.data(), str.size(), 1, stderr) == 1;
+    return ::fwrite(str.data(), str.size(), 1, stderr) == 1;
   }
 
 Runtime_Error::~Runtime_Error()
@@ -447,16 +423,9 @@ Wrapped_Index wrap_index(int64_t index, size_t size) noexcept
 uint64_t generate_random_seed() noexcept
   {
     // Get the system time of very high resolution.
-    int64_t source;
-#ifdef _WIN32
-    ::LARGE_INTEGER li;
-    ::QueryPerformanceCounter(&li);
-    source = li.QuadPart;
-#else
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    source = static_cast<int64_t>(ts.tv_sec) * 1000000000 + ts.tv_nsec;
-#endif
+    uint64_t source = static_cast<uint32_t>(ts.tv_nsec);
     // Hash it using FNV-1a to erase sensitive information.
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
     // The source is read in little-endian byte order.
