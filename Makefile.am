@@ -47,13 +47,6 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/unique_handle.hpp  \
   asteria/rocket/reference_counter.hpp  \
   asteria/rocket/cow_string.hpp  \
-  asteria/rocket/tinybuf.hpp  \
-  asteria/rocket/tinybuf_str.hpp  \
-  asteria/rocket/cow_stringbuf.hpp  \
-  asteria/rocket/cow_string_ops.hpp  \
-  asteria/rocket/cow_istringstream.hpp  \
-  asteria/rocket/cow_ostringstream.hpp  \
-  asteria/rocket/cow_stringstream.hpp  \
   asteria/rocket/cow_vector.hpp  \
   asteria/rocket/cow_hashmap.hpp  \
   asteria/rocket/unique_ptr.hpp  \
@@ -64,6 +57,9 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/optional.hpp  \
   asteria/rocket/array.hpp  \
   asteria/rocket/ref_to.hpp  \
+  asteria/rocket/tinybuf.hpp  \
+  asteria/rocket/tinybuf_str.hpp  \
+  asteria/rocket/tinynumput.hpp  \
   asteria/rocket/tinyfmt.hpp  \
   asteria/rocket/tinyfmt_str.hpp  \
   asteria/rocket/tinyfmt_file.hpp  \
@@ -81,11 +77,7 @@ lib_librocket_la_SOURCES =  \
   asteria/rocket/cow_string.cpp  \
   asteria/rocket/tinybuf.cpp  \
   asteria/rocket/tinybuf_str.cpp  \
-  asteria/rocket/cow_stringbuf.cpp  \
-  asteria/rocket/cow_string_ops.cpp  \
-  asteria/rocket/cow_istringstream.cpp  \
-  asteria/rocket/cow_ostringstream.cpp  \
-  asteria/rocket/cow_stringstream.cpp  \
+  asteria/rocket/tinynumput.cpp  \
   asteria/rocket/tinyfmt.cpp  \
   asteria/rocket/tinyfmt_str.cpp  \
   asteria/rocket/tinyfmt_file.cpp
