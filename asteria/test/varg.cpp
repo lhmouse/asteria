@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_stringbuf buf;
-    buf.set_string(rocket::sref(
+    tinybuf_str sbuf;
+    sbuf.set_string(rocket::sref(
       R"__(
         func binary(a, b, ...) {
           var narg = __varg();
@@ -24,8 +24,8 @@ int main()
           binary(1,2,3,4),     // [ 2, 4 ]
           binary(1,2,3,4,5),   // [ 3, 4 ]
         ];
-      )__"), std::ios_base::in);
-    Simple_Script code(buf, rocket::sref("my_file"));
+      )__"), tinybuf::open_read);
+    Simple_Script code(sbuf, rocket::sref("my_file"));
     Global_Context global;
     auto res = code.execute(global);
     const auto& array = res.read().as_array();
@@ -41,10 +41,10 @@ int main()
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(0).as_integer() == 3);
     ASTERIA_TEST_CHECK(array.at(4).as_array().at(1).as_integer() == 4);
 
-    buf.set_string(rocket::sref(
+    sbuf.set_string(rocket::sref(
       R"__(
         return __varg('meow', 42, true);
-      )__"), std::ios_base::in);
-    code.reload(buf, rocket::sref("erroneous_file"));
+      )__"), tinybuf::open_read);
+    code.reload(sbuf, rocket::sref("erroneous_file"));
     ASTERIA_TEST_CHECK_CATCH(code.execute(global));
   }

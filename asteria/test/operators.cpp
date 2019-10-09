@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_stringbuf buf;
-    buf.set_string(rocket::sref(
+    tinybuf_str sbuf;
+    sbuf.set_string(rocket::sref(
       R"__(
         var b = false, i = 12, r = 8.5, s = "a";
         var a = [ 1, 2, 3 ];
@@ -365,8 +365,8 @@ int main()
         assert a == [];
         assert unset a[$] == null;
         assert a == [];
-      )__"), std::ios_base::in);
-    Simple_Script code(buf, rocket::sref("my_file"));
+      )__"), tinybuf::open_read);
+    Simple_Script code(sbuf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }

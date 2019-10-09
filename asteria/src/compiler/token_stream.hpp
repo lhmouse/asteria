@@ -51,7 +51,7 @@ class Token_Stream
         return *this;
       }
 
-    // This function parses characters from the input streambuf and fills tokens into `*this`.
+    // This function parses characters from the input stream and fills tokens into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
     // This function throws a `Parser_Error` upon failure.
     Token_Stream& reload(tinybuf& cbuf, const cow_string& file, const Compiler_Options& opts);

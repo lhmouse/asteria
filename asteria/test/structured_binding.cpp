@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_stringbuf buf;
-    buf.set_string(rocket::sref(
+    tinybuf_str sbuf;
+    sbuf.set_string(rocket::sref(
       R"__(
         func make_array() {
           return [ 42, "hello", true ];
@@ -61,8 +61,8 @@ int main()
           var { nonexistent_again } = make_object();
           assert nonexistent_again == null;
         }
-      )__"), std::ios_base::in);
-    Simple_Script code(buf, rocket::sref("my_file"));
+      )__"), tinybuf::open_read);
+    Simple_Script code(sbuf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }

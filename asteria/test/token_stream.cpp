@@ -10,17 +10,17 @@ using namespace Asteria;
 int main()
   {
     Token_Stream ts;
-    rocket::cow_stringbuf buf;
-    buf.set_string(rocket::sref(
+    tinybuf_str sbuf;
+    sbuf.set_string(rocket::sref(
       R"__(#!some shebang
         hh+++
         if <<<->>>>>"\u55b5b喵"/
         * - 0x01`7.8`4p+4  // comments
         .false/*more
         comments*/;/*yet more*/-42e13
-      )__"), std::ios_base::in);
-    ts.reload(buf, rocket::sref("dummy_file"), { });
-    ASTERIA_TEST_CHECK(buf.sgetc() == std::char_traits<char>::eof());
+      )__"), tinybuf::open_read);
+    ts.reload(sbuf, rocket::sref("dummy_file"), { });
+    ASTERIA_TEST_CHECK(sbuf.get() == EOF);
 
     auto p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);

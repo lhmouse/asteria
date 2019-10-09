@@ -27,7 +27,7 @@ template<typename charT, typename traitsT,
     using open_mode  = typename buffer_type::open_mode;
     using int_type   = typename buffer_type::int_type;
     using off_type   = typename buffer_type::off_type;
-    using size_type  = typename string_type::size_type;
+    using size_type  = typename buffer_type::size_type;
 
   private:
     string_type m_str;
@@ -58,7 +58,23 @@ template<typename charT, typename traitsT,
       = default;
 
   protected:
-    void do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/) override
+    off_type do_fortell() const override
+      {
+        if(!(this->m_mode & tinybuf_base::open_read)) {
+          // Read access is not enabled.
+          return -1;
+        }
+        // Calculate the number of characters after the get area.
+        auto navail = this->m_str.size() - this->m_off;
+        if(navail == 0) {
+          // If no more characters are available, return -1.
+          // Don't return 0 in this case, as it indicates the number of characters is unknown.
+          return -1;
+        }
+        // Return the precise number of characters available.
+        return static_cast<off_type>(navail);
+      }
+    basic_tinybuf_str& do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/) override
       {
         if(gcur) {
           // If the get area exists, update the offset and clear it.
@@ -67,6 +83,7 @@ template<typename charT, typename traitsT,
           gend = nullptr;
         }
         // Notice that we don't use the put area.
+        return *this;
       }
     off_type do_seek(off_type off, seek_dir dir) override
       {
@@ -97,22 +114,6 @@ template<typename charT, typename traitsT,
         // Return the absolute offset.
         return abs;
       }
-    off_type do_predict() const override
-      {
-        if(!(this->m_mode & tinybuf_base::open_read)) {
-          // Read access is not enabled.
-          return -1;
-        }
-        // Calculate the number of characters after the get area.
-        auto navail = this->m_str.size() - this->m_off;
-        if(navail == 0) {
-          // If no more characters are available, return -1.
-          // Don't return 0 in this case, as it indicates the number of characters is unknown.
-          return -1;
-        }
-        // Return the precise number of characters available.
-        return static_cast<off_type>(navail);
-      }
 
     int_type do_underflow(const char_type*& gcur, const char_type*& gend, bool peek) override
       {
@@ -133,10 +134,9 @@ template<typename charT, typename traitsT,
         // Set the new get area. Exclude the first character if `peek` is not set.
         gcur = gbase + !peek;
         gend = gbase + navail;
-        // Return the first character that has been read.
         return traits_type::to_int_type(gbase[0]);
       }
-    void do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd) override
+    basic_tinybuf_str& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd) override
       {
         if(!(this->m_mode & tinybuf_base::open_write)) {
           // Write access is not enabled.
@@ -149,11 +149,13 @@ template<typename charT, typename traitsT,
           // If `open_append` is in effect, always append to the end.
           this->m_str.append(sadd, nadd);
           this->m_off = this->m_str.size();
-          return;
         }
-        // Replace the substring from `m_off`.
-        this->m_str.replace(this->m_off, nadd, sadd, nadd);
-        this->m_off += nadd;
+        else {
+          // Replace the substring from `m_off`.
+          this->m_str.replace(this->m_off, nadd, sadd, nadd);
+          this->m_off += nadd;
+        }
+        return *this;
       }
 
   public:

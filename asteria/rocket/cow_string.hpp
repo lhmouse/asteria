@@ -663,8 +663,8 @@ template<typename charT, typename traitsT,
 
     using shallow_type   = details_cow_string::shallow<charT, traitsT>;
 
-    static constexpr size_type npos        = size_type(-1);
-    static constexpr value_type null_char  = { };
+    static constexpr size_type npos = size_type(-1);
+    static const value_type null_char;
 
     // hash support
     struct hash;
@@ -1760,6 +1760,11 @@ template<typename charT, typename traitsT,
   };
 
 template<typename charT, typename traitsT,
+         typename allocatorT> const typename basic_cow_string<charT, traitsT,
+                                                              allocatorT>::value_type basic_cow_string<charT, traitsT,
+                                                                                                       allocatorT>::null_char = { };
+
+template<typename charT, typename traitsT,
          typename allocatorT> struct basic_cow_string<charT, traitsT, allocatorT>::hash
   {
     using result_type    = size_t;
@@ -2070,7 +2075,7 @@ template<typename charT, typename traitsT,
          typename allocatorT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                                         const basic_cow_string<charT, traitsT, allocatorT>& str)
   {
-    return fmt.write(str.c_str(), str.size());
+    return fmt.put(str.c_str(), str.size());
   }
 
 }  // namespace rocket

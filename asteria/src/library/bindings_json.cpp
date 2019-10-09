@@ -615,10 +615,8 @@ Value std_json_parse(const G_string& text)
     // Tokenize the source string.
     Token_Stream tstrm;
     try {
-      // Use a `streambuf` rather than an `istream` to minimize overheads.
-      cow_stringbuf sbuf;
-      sbuf.set_string(text, std::ios_base::in);
-      // Note the tokenizer throws an exception upon failure.
+      tinybuf_str sbuf;
+      sbuf.set_string(text, tinybuf::open_read);
       tstrm.reload(sbuf, rocket::sref("<JSON text>"), opts);
     }
     catch(Parser_Error& except) {

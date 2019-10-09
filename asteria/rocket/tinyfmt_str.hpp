@@ -22,15 +22,13 @@ template<typename charT, typename traitsT,
 
     using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
     using buffer_type   = basic_tinybuf_str<charT, traitsT>;
-    using string_type   = basic_cow_string<charT, traitsT, allocatorT>;
+    using string_type   = typename buffer_type::string_type;
 
     using seek_dir   = typename buffer_type::seek_dir;
     using open_mode  = typename buffer_type::open_mode;
     using int_type   = typename buffer_type::int_type;
     using off_type   = typename buffer_type::off_type;
-    using size_type  = typename string_type::size_type;
-
-    static constexpr size_type npos = string_type::npos;
+    using size_type  = typename buffer_type::size_type;
 
   private:
     mutable buffer_type m_buf;
@@ -56,7 +54,7 @@ template<typename charT, typename traitsT,
       = default;
 
   public:
-    buffer_type& get_buffer() const noexcept override
+    buffer_type& get_buffer() const override
       {
         return this->m_buf;
       }

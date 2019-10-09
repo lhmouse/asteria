@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::cow_stringbuf buf;
-    buf.set_string(rocket::sref(
+    tinybuf_str sbuf;
+    sbuf.set_string(rocket::sref(
       R"__(
         assert std.chrono.utc_format(std.numeric.integer_min) == "1601-01-01 00:00:00";
         assert std.chrono.utc_format(std.numeric.integer_min, true) == "1601-01-01 00:00:00.000";
@@ -38,9 +38,9 @@ int main()
         s = "invalid";
         t = std.chrono.utc_parse(s);
         assert t == null;
-      )__"), std::ios_base::in);
+      )__"), tinybuf::open_read);
 
-    Simple_Script code(buf, rocket::sref("my_file"));
+    Simple_Script code(sbuf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }

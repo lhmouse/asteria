@@ -7,11 +7,10 @@
 #include "../compiler/token_stream.hpp"
 #include "../compiler/statement_sequence.hpp"
 #include "../utilities.hpp"
-#include <fstream>
 
 namespace Asteria {
 
-Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& name)
+Simple_Script& Simple_Script::reload(tinybuf& sbuf, const cow_string& name)
   {
     AIR_Node::S_instantiate_function xnode = { };
     xnode.opts = this->m_opts;
@@ -36,20 +35,15 @@ Simple_Script& Simple_Script::reload(std::streambuf& sbuf, const cow_string& nam
 
 Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name)
   {
-    // Use a `streambuf` in place of an `istream` to minimize overheads.
-    cow_stringbuf sbuf;
-    sbuf.set_string(code, std::ios_base::in);
+    tinybuf_str sbuf;
+    sbuf.set_string(code, tinybuf::open_read);
     return this->reload(sbuf, name);
   }
 
 Simple_Script& Simple_Script::reload_file(const cow_string& path)
   {
-    // Open the file designated by `path`.
-    // Throw an exception if the file could not be opened.
-    std::filebuf sbuf;
-    if(!sbuf.open(path.c_str(), std::ios_base::in)) {
-      throw Parser_Error(parser_status_ifstream_open_failure);
-    }
+    tinybuf_file sbuf;
+    sbuf.open(path.c_str(), tinybuf::open_read);
     return this->reload(sbuf, path);
   }
 

@@ -9,6 +9,12 @@
 #include "tinybuf.hpp"
 #include "tinynumput.hpp"
 
+/* Differences from `std::basic_ostream`:
+ * 1. Locales are not supported.
+ * 2. Formatting is not supported.
+ * 3. The stream is stateless. Exceptions are preferred when reporting errors.
+ */
+
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>> class basic_tinyfmt;
@@ -55,11 +61,11 @@ template<typename charT, typename traitsT> class basic_tinyfmt
       }
     basic_tinyfmt& put(char_type c)
       {
-        return this->get_buffer().putc(c), *this;
+        return this->get_buffer().put(c), *this;
       }
-    basic_tinyfmt& write(const char_type* s, size_type n)
+    basic_tinyfmt& put(const char_type* s, size_type n)
       {
-        return this->get_buffer().putn(s, n), *this;
+        return this->get_buffer().put(s, n), *this;
       }
   };
 
@@ -72,7 +78,7 @@ template<typename charT, typename traitsT,
   {
     // Insert the character as is.
     auto& buf = fmt.get_buffer();
-    buf.putc(c);
+    buf.put(c);
     return fmt;
   }
 template<typename charT, typename traitsT,
@@ -80,7 +86,7 @@ template<typename charT, typename traitsT,
   {
     // Insert the sequence as is.
     auto& buf = fmt.get_buffer();
-    buf.putn(s, traitsT::length(s));
+    buf.put(s, traitsT::length(s));
     return fmt;
   }
 
@@ -89,14 +95,14 @@ template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operat
   {
     // Widen all characters and insert them.
     auto& buf = fmt.get_buffer();
-    noadl::for_each(nump, [&](char c) { buf.putc(traitsT::to_char_type(static_cast<unsigned char>(c)));  });
+    noadl::for_each(nump, [&](char c) { buf.put(traitsT::to_char_type(static_cast<unsigned char>(c)));  });
     return fmt;
   }
 inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const tinynumput& nump)
   {
     // Optimize it a bit if no conversion is required.
     auto& buf = fmt.get_buffer();
-    buf.putn(nump.data(), nump.size());
+    buf.put(nump.data(), nump.size());
     return fmt;
   }
 

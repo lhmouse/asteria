@@ -42,11 +42,11 @@ namespace Asteria {
 
     inline bool do_check_cctype(char c, uint8_t mask) noexcept
       {
-        int index = c & 0x7F;
-        if(index != c) {
+        size_t ch = c & 0x7F;
+        if(ch != static_cast<uint8_t>(c))
           return false;
-        }
-        return s_cctypes[index] & mask;
+        else
+          return s_cctypes[ch] & mask;
       }
 
     constexpr uint8_t s_digits[128] =
@@ -71,17 +71,17 @@ namespace Asteria {
 
     inline uint8_t do_translate_digit(char c) noexcept
       {
-        int index = c & 0x7F;
-        if(index != c) {
+        size_t ch = c & 0x7F;
+        if(ch != static_cast<uint8_t>(c))
           return 0xFF;
-        }
-        return s_digits[index];
+        else
+          return s_digits[ch];
       }
 
     class Line_Reader
       {
       private:
-        ref_to<std::streambuf> m_sbuf;
+        ref_to<tinybuf> m_sbuf;
         cow_string m_file;
 
         cow_string m_str;
@@ -89,7 +89,7 @@ namespace Asteria {
         size_t m_offset = 0;
 
       public:
-        Line_Reader(ref_to<std::streambuf> xsbuf, const cow_string& xfile)
+        Line_Reader(ref_to<tinybuf> xsbuf, const cow_string& xfile)
           : m_sbuf(xsbuf), m_file(xfile)
           {
           }
@@ -100,7 +100,7 @@ namespace Asteria {
           = delete;
 
       public:
-        std::streambuf& sbuf() const noexcept
+        tinybuf& sbuf() const noexcept
           {
             return this->m_sbuf;
           }
@@ -108,11 +108,11 @@ namespace Asteria {
           {
             return this->m_file;
           }
-
         long line() const noexcept
           {
             return this->m_line;
           }
+
         bool advance()
           {
             // Clear the current line buffer.
@@ -120,26 +120,28 @@ namespace Asteria {
             this->m_offset = 0;
             // Buffer a line.
             for(;;) {
-              auto ch = this->m_sbuf->sbumpc();
-              if(ch == std::ios::traits_type::eof()) {
+              int ch = this->m_sbuf->get();
+              if(ch == EOF) {
+                // When the EOF is encountered, ...
                 if(this->m_str.empty()) {
-                  // Return `false` to indicate that there are no more data, when nothing has been read so far.
+                  // ... if the last line is empty, fail; ...
                   return false;
                 }
-                // If the last line doesn't end with an LF, accept it anyway.
+                // ... otherwise, accept the last line which does not end in an LF anyway.
                 break;
               }
               if(ch == '\n') {
-                // Accept a line.
+                // Accept a line without the LF.
                 break;
               }
+              // Push the character to the line buffer.
               this->m_str.push_back(static_cast<char>(ch));
             }
             // Increment the line number if a line has been read successfully.
             if(this->m_line == INT32_MAX) {
               ASTERIA_THROW_RUNTIME_ERROR("There are too many lines in the source code.");
             }
-            this->m_line += 1;
+            this->m_line++;
             // Accept the line.
             ASTERIA_DEBUG_LOG("Read line ", this->m_line, "\t: ", this->m_str);
             return true;
@@ -885,7 +887,7 @@ namespace Asteria {
 
     }  // namespace
 
-Token_Stream& Token_Stream::reload(std::streambuf& sbuf, const cow_string& file, const Compiler_Options& opts)
+Token_Stream& Token_Stream::reload(tinybuf& sbuf, const cow_string& file, const Compiler_Options& opts)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.

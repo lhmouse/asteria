@@ -74,17 +74,26 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
       {
         return this->do_underflow(this->m_gcur, this->m_gend, peek);
       }
-    void do_call_overflow(const char_type* sadd, size_type nadd)
+    basic_tinybuf& do_call_overflow(const char_type* sadd, size_type nadd)
       {
         return this->do_overflow(this->m_pcur, this->m_pend, sadd, nadd);
       }
 
   protected:
+    // * Estimates how many characters are available for non-blocking reads.
+    // * Returns `0` if the number is unknown.
+    //   Returns `-1` if no character is available.
+    // The default implementation indicates an unknown number.
+    virtual off_type do_fortell() const
+      {
+        return 0;
+      }
     // * Synchronizes the get and put areas with the external device.
     // * Throws an exception on failure.
     // The default implementation does nothing.
-    virtual void do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/, char_type*& /*pcur*/, char_type*& /*pend*/)
+    virtual basic_tinybuf& do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/, char_type*& /*pcur*/, char_type*& /*pend*/)
       {
+        return *this;
       }
     // * Sets the stream position.
     // * Returns its absolute value.
@@ -93,14 +102,6 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
     virtual off_type do_seek(off_type /*off*/, seek_dir /*dir*/)
       {
         noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf: This stream is not seekable.");
-      }
-    // * Estimates how many characters are available for non-blocking reads.
-    // * Returns `0` if the number is unknown.
-    //   Returns `-1` if no character is available.
-    // The default implementation indicates an unknown number.
-    virtual off_type do_predict() const
-      {
-        return 0;
       }
 
     // * Reads data from the external device into the get area and discards it unless `peek` is set.
@@ -116,17 +117,26 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
     // * Throws an exception on failure.
     // This function may reallocate the put area as needed.
     // The default implementation fails.
-    virtual void do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* /*sadd*/, size_type /*nadd*/)
+    virtual basic_tinybuf& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* /*sadd*/, size_type /*nadd*/)
       {
         noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf: This stream is not writable.");
       }
 
   public:
-    void flush()
+    off_type fortell() const
+      {
+        if(ROCKET_EXPECT(this->m_gcur != this->m_gend))
+          // Return the number of characters in the get area.
+          return this->m_gend - this->m_gcur;
+        else
+          // Return the number of characters after the get area.
+          return this->do_fortell();
+      }
+    basic_tinybuf& flush()
       {
         if(ROCKET_EXPECT(!this->m_gcur && !this->m_pcur))
           // Don't bother do anything if neither the get area nor the put area exists.
-          return;
+          return *this;
         else
           // Synchronize the get and put areas.
           return this->do_flush(this->m_gcur, this->m_gend, this->m_pcur, this->m_pend);
@@ -136,17 +146,8 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
         // Reposition the stream, which might invalidate the get and put areas.
         return this->do_seek(off, dir);
       }
-    off_type predict() const
-      {
-        if(ROCKET_EXPECT(this->m_gcur != this->m_gend))
-          // Return the number of characters in the get area.
-          return this->m_gend - this->m_gcur;
-        else
-          // Return the number of characters after the get area.
-          return this->do_predict();
-      }
 
-    int_type peekc()
+    int_type peek()
       {
         if(ROCKET_EXPECT(this->m_gcur != this->m_gend))
           // Return the first character in the get area.
@@ -155,7 +156,7 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
           // Try populating the get area.
           return this->do_call_underflow(true);
       }
-    int_type getc()
+    int_type get()
       {
         if(ROCKET_EXPECT(this->m_gcur != this->m_gend))
           // Return and discard the first character in the get area.
@@ -164,44 +165,45 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
           // Try populating the get area and discard the first character.
           return this->do_call_underflow(false);
       }
-    size_type getn(char_type* s, size_type n)
+    size_type get(char_type* s, size_type n)
       {
-        auto m = static_cast<size_type>(this->m_gend - this->m_gcur);
-        if(ROCKET_UNEXPECT(m == 0)) {
+        auto k = static_cast<size_type>(this->m_gend - this->m_gcur);
+        if(ROCKET_UNEXPECT(k == 0)) {
           // If the get area is empty, try populating it.
           if(traits_type::eq_int_type(this->do_call_underflow(true), traits_type::eof())) {
             // Report EOF.
             return 0;
           }
-          m = static_cast<size_type>(this->m_gend - this->m_gcur);
-          ROCKET_ASSERT(m != 0);
+          k = static_cast<size_type>(this->m_gend - this->m_gcur);
+          ROCKET_ASSERT(k != 0);
         }
+        // Don't read past the end of the get area.
+        k = noadl::min(k, n);
         // Consume some characters from the get area.
-        m = noadl::min(m, n);
-        traits_type::copy(s, this->m_gcur, m);
-        this->m_gcur += m;
-        return m;
+        traits_type::copy(s, this->m_gcur, k);
+        this->m_gcur += k;
+        return k;
       }
-    void putc(char_type c)
+    basic_tinybuf& put(char_type c)
       {
         if(ROCKET_EXPECT(this->m_pcur != this->m_pend))
           // Append a character to the put area.
-          return traits_type::assign(this->m_pcur++[0], c), void(0);
+          return traits_type::assign(this->m_pcur++[0], c), *this;
         else
           // Evict data from the put area followed by the character specified.
           return this->do_call_overflow(::std::addressof(c), 1);
       }
-    void putn(const char_type* s, size_type n)
+    basic_tinybuf& put(const char_type* s, size_type n)
       {
-        auto m = static_cast<size_type>(this->m_pend - this->m_pcur);
-        if(ROCKET_UNEXPECT(n >= m)) {
+        auto k = static_cast<size_type>(this->m_pend - this->m_pcur);
+        if(ROCKET_UNEXPECT(n >= k)) {
           // If there is no enough room in the put area, evict its contents, followed by the string specified.
-          this->do_call_overflow(s, n);
-          return;
+          return this->do_call_overflow(s, n);
         }
         // Append the string to the put area.
-        traits_type::copy(this->m_pcur, s, m);
-        this->m_pcur += m;
+        traits_type::copy(this->m_pcur, s, k);
+        this->m_pcur += k;
+        return *this;
       }
 
     void swap(basic_tinybuf& other) noexcept

@@ -506,10 +506,6 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "operation succeeded";
       }
-    case parser_status_ifstream_open_failure:
-      {
-        return "error opening source file";
-      }
     case parser_status_utf8_sequence_invalid:
       {
         return "UTF-8 sequence invalid";
