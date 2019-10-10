@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
-AM_CPPFLAGS = -pipe -pthread -Wall -Wextra \
-  -D_POSIX_SOURCE -D_DEFAULT_SOURCE -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
+AM_CPPFLAGS = -pipe -pthread -Wall -Wextra  \
+  -D_FILE_OFFSET_BITS=64 -D_POSIX_SOURCE -D_DEFAULT_SOURCE -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
   -f{inline-limit=2400,strict-{aliasing,overflow},merge-all-constants}  \
   -fno-{math-errno,trapping-math,devirtualize-speculatively}  \
   -Werror={{,sign-}conversion,write-strings,return-type}  \

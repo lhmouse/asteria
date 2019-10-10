@@ -429,9 +429,8 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       // If `roffset` is not zero, truncate the file there.
       // This also ensures it is a normal file (not a pipe or socket whatsoever).
       // Otherwise, the file will have been truncate at creation.
-      if(::ftruncate64(hf, roffset) != 0) {
+      if(::ftruncate(hf, roffset) != 0)
         return false;
-      }
     }
     for(;;) {
       // Have all data been written successfully?
