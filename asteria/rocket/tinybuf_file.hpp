@@ -10,15 +10,15 @@
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>,
-         typename allocatorT = allocator<charT>> class basic_tinybuf_file;
+         typename allocT = allocator<charT>> class basic_tinybuf_file;
 
 template<typename charT, typename traitsT,
-         typename allocatorT> class basic_tinybuf_file : public basic_tinybuf<charT, traitsT>
+         typename allocT> class basic_tinybuf_file : public basic_tinybuf<charT, traitsT>
   {
   public:
     using char_type       = charT;
     using traits_type     = traitsT;
-    using allocator_type  = allocatorT;
+    using allocator_type  = allocT;
 
     using buffer_type  = basic_tinybuf<charT, traitsT>;
     using handle_type  = int;
@@ -192,12 +192,12 @@ std::terminate();
   };
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_tinybuf_file<charT, traitsT, allocatorT>::~basic_tinybuf_file()
+         typename allocT> basic_tinybuf_file<charT, traitsT, allocT>::~basic_tinybuf_file()
   = default;
 
 template<typename charT, typename traitsT,
-         typename allocatorT> void swap(basic_tinybuf_file<charT, traitsT, allocatorT>& lhs,
-                                        basic_tinybuf_file<charT, traitsT, allocatorT>& rhs)
+         typename allocT> void swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs,
+                                    basic_tinybuf_file<charT, traitsT, allocT>& rhs)
   {
     return lhs.swap(rhs);
   }

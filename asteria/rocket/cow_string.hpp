@@ -26,7 +26,7 @@
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>,
-         typename allocatorT = allocator<charT>> class basic_cow_string;
+         typename allocT = allocator<charT>> class basic_cow_string;
 
 // Please keep this declaration up to date.
 template<typename charT, typename traitsT> class basic_tinyfmt;
@@ -48,7 +48,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           : m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))
           {
           }
-        template<typename allocatorT> explicit shallow(const basic_cow_string<charT, traitsT, allocatorT>& str) noexcept
+        template<typename allocT> explicit shallow(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
           : m_ptr(str.c_str()), m_len(str.length())
           {
           }
@@ -74,9 +74,9 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           }
       };
 
-    template<typename allocatorT> struct basic_storage : storage_header
+    template<typename allocT> struct basic_storage : storage_header
       {
-        using allocator_type   = allocatorT;
+        using allocator_type   = allocT;
         using value_type       = typename allocator_type::value_type;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
 
@@ -107,10 +107,10 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           = delete;
       };
 
-    template<typename allocatorT, typename traitsT> class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
+    template<typename allocT, typename traitsT> class storage_handle : private allocator_wrapper_base_for<allocT>::type
       {
       public:
-        using allocator_type   = allocatorT;
+        using allocator_type   = allocT;
         using traits_type      = traitsT;
         using value_type       = typename allocator_type::value_type;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
@@ -633,23 +633,23 @@ template<typename charT> constexpr details_cow_string::shallow<charT, char_trait
     return details_cow_string::shallow<charT, char_traits<charT>>(ptr, len);
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> details_cow_string::shallow<charT, traitsT> sref(const basic_cow_string<charT, traitsT, allocatorT>& str) noexcept
+         typename allocT> details_cow_string::shallow<charT, traitsT> sref(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
   {
     return details_cow_string::shallow<charT, traitsT>(str);
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> class basic_cow_string
+         typename allocT> class basic_cow_string
   {
     static_assert(!is_array<charT>::value, "`charT` must not be an array type.");
     static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
-    static_assert(is_same<typename allocatorT::value_type, charT>::value, "`allocatorT::value_type` must denote the same type as `charT`.");
+    static_assert(is_same<typename allocT::value_type, charT>::value, "`allocT::value_type` must denote the same type as `charT`.");
 
   public:
     // types
     using value_type      = charT;
     using traits_type     = traitsT;
-    using allocator_type  = allocatorT;
+    using allocator_type  = allocT;
 
     using size_type        = typename allocator_traits<allocator_type>::size_type;
     using difference_type  = typename allocator_traits<allocator_type>::difference_type;
@@ -1760,12 +1760,12 @@ template<typename charT, typename traitsT,
   };
 
 template<typename charT, typename traitsT,
-         typename allocatorT> const typename basic_cow_string<charT, traitsT,
-                                                              allocatorT>::value_type basic_cow_string<charT, traitsT,
-                                                                                                       allocatorT>::null_char = { };
+         typename allocT> const typename basic_cow_string<charT, traitsT,
+                                                          allocT>::value_type basic_cow_string<charT, traitsT,
+                                                                                               allocT>::null_char = { };
 
 template<typename charT, typename traitsT,
-         typename allocatorT> struct basic_cow_string<charT, traitsT, allocatorT>::hash
+         typename allocT> struct basic_cow_string<charT, traitsT, allocT>::hash
   {
     using result_type    = size_t;
     using argument_type  = basic_cow_string;
@@ -1791,35 +1791,35 @@ using cow_u16string  = basic_cow_string<char16_t>;
 using cow_u32string  = basic_cow_string<char32_t>;
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                                                     const basic_cow_string<charT, traitsT, allocatorT>& rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT> operator+(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                                             const basic_cow_string<charT, traitsT, allocT>& rhs)
   {
     auto res = lhs;
     res.append(rhs);
     return res;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT>&& operator+(basic_cow_string<charT, traitsT, allocatorT>&& lhs,
-                                                                       basic_cow_string<charT, traitsT, allocatorT>&& rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT>&& operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
+                                                               basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
     return (ROCKET_EXPECT(lhs.size() + rhs.size() <= lhs.capacity())) ? noadl::move(lhs.append(rhs)) : noadl::move(rhs.insert(0, lhs));
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                                                     const charT* rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT> operator+(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                                             const charT* rhs)
   {
     auto res = lhs;
     res.append(rhs);
     return res;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT> operator+(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                                                     charT rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT> operator+(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                                             charT rhs)
   {
     auto res = lhs;
     res.push_back(rhs);
@@ -1827,18 +1827,18 @@ template<typename charT, typename traitsT,
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT> operator+(const charT* lhs,
-                                                                     const basic_cow_string<charT, traitsT, allocatorT>& rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT> operator+(const charT* lhs,
+                                                             const basic_cow_string<charT, traitsT, allocT>& rhs)
   {
     auto res = rhs;
     res.insert(0, lhs);
     return res;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT> operator+(charT lhs,
-                                                                     const basic_cow_string<charT, traitsT, allocatorT>& rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT> operator+(charT lhs,
+                                                             const basic_cow_string<charT, traitsT, allocT>& rhs)
   {
     auto res = rhs;
     res.insert(0, 1, lhs);
@@ -1846,234 +1846,234 @@ template<typename charT, typename traitsT,
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT>&& operator+(basic_cow_string<charT, traitsT, allocatorT>&& lhs,
-                                                                       const charT* rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT>&& operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
+                                                               const charT* rhs)
   {
     // Append `rhs` to `lhs`.
     return noadl::move(lhs.append(rhs));
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT>&& operator+(basic_cow_string<charT, traitsT, allocatorT>&& lhs,
-                                                                       charT rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT>&& operator+(basic_cow_string<charT, traitsT, allocT>&& lhs,
+                                                               charT rhs)
   {
     // Append `rhs` to `lhs`.
     return noadl::move(lhs.append(1, rhs));
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT>&& operator+(const charT* lhs,
-                                                                       basic_cow_string<charT, traitsT, allocatorT>&& rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT>&& operator+(const charT* lhs,
+                                                               basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
     // Prepend `lhs` to `rhs`.
     return noadl::move(rhs.insert(0, lhs));
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_cow_string<charT, traitsT,
-                                               allocatorT>&& operator+(charT lhs,
-                                                                       basic_cow_string<charT, traitsT, allocatorT>&& rhs)
+         typename allocT> basic_cow_string<charT, traitsT,
+                                           allocT>&& operator+(charT lhs,
+                                                               basic_cow_string<charT, traitsT, allocT>&& rhs)
   {
     // Prepend `lhs` to `rhs`.
     return noadl::move(rhs.insert(0, 1, lhs));
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator==(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator==(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) == 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator!=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs.data(), rhs.size()) != 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                             const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator<(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                         const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) < 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                             const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator>(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                         const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) > 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) <= 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.data(), rhs.size()) >= 0;
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator==(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              const charT* rhs) noexcept
+         typename allocT> bool operator==(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          const charT* rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) == 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator!=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              const charT* rhs) noexcept
+         typename allocT> bool operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          const charT* rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) != 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                             const charT* rhs) noexcept
+         typename allocT> bool operator<(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                         const charT* rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) < 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                             const charT* rhs) noexcept
+         typename allocT> bool operator>(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                         const charT* rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) > 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              const charT* rhs) noexcept
+         typename allocT> bool operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          const charT* rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) <= 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              const charT* rhs) noexcept
+         typename allocT> bool operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          const charT* rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs, traitsT::length(rhs)) >= 0;
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator==(const charT* lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator==(const charT* lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) == 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator!=(const charT* lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator!=(const charT* lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) != 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<(const charT* lhs,
-                                             const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator<(const charT* lhs,
+                                         const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) < 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>(const charT* lhs,
-                                             const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator>(const charT* lhs,
+                                         const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) > 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<=(const charT* lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator<=(const charT* lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) <= 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>=(const charT* lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator>=(const charT* lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs, traitsT::length(lhs), rhs.data(), rhs.size()) >= 0;
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator==(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              details_cow_string::shallow<charT, traitsT> rhs) noexcept
+         typename allocT> bool operator==(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          details_cow_string::shallow<charT, traitsT> rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) == 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator!=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              details_cow_string::shallow<charT, traitsT> rhs) noexcept
+         typename allocT> bool operator!=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          details_cow_string::shallow<charT, traitsT> rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) != 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                             details_cow_string::shallow<charT, traitsT> rhs) noexcept
+         typename allocT> bool operator<(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                         details_cow_string::shallow<charT, traitsT> rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) < 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                             details_cow_string::shallow<charT, traitsT> rhs) noexcept
+         typename allocT> bool operator>(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                         details_cow_string::shallow<charT, traitsT> rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) > 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              details_cow_string::shallow<charT, traitsT> rhs) noexcept
+         typename allocT> bool operator<=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          details_cow_string::shallow<charT, traitsT> rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) <= 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>=(const basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                              details_cow_string::shallow<charT, traitsT> rhs) noexcept
+         typename allocT> bool operator>=(const basic_cow_string<charT, traitsT, allocT>& lhs,
+                                          details_cow_string::shallow<charT, traitsT> rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.data(), lhs.size(), rhs.c_str(), rhs.length()) >= 0;
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator==(details_cow_string::shallow<charT, traitsT> lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator==(details_cow_string::shallow<charT, traitsT> lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) == 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator!=(details_cow_string::shallow<charT, traitsT> lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator!=(details_cow_string::shallow<charT, traitsT> lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::inequality(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) != 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<(details_cow_string::shallow<charT, traitsT> lhs,
-                                             const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator<(details_cow_string::shallow<charT, traitsT> lhs,
+                                         const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) < 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>(details_cow_string::shallow<charT, traitsT> lhs,
-                                             const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator>(details_cow_string::shallow<charT, traitsT> lhs,
+                                         const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) > 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator<=(details_cow_string::shallow<charT, traitsT> lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator<=(details_cow_string::shallow<charT, traitsT> lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) <= 0;
   }
 template<typename charT, typename traitsT,
-         typename allocatorT> bool operator>=(details_cow_string::shallow<charT, traitsT> lhs,
-                                              const basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> bool operator>=(details_cow_string::shallow<charT, traitsT> lhs,
+                                          const basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return details_cow_string::comparator<charT, traitsT>::relation(lhs.c_str(), lhs.length(), rhs.data(), rhs.size()) >= 0;
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> void swap(basic_cow_string<charT, traitsT, allocatorT>& lhs,
-                                        basic_cow_string<charT, traitsT, allocatorT>& rhs) noexcept
+         typename allocT> void swap(basic_cow_string<charT, traitsT, allocT>& lhs,
+                                    basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                                                        const basic_cow_string<charT, traitsT, allocatorT>& str)
+         typename allocT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                                    const basic_cow_string<charT, traitsT, allocT>& str)
   {
     return fmt.put(str.c_str(), str.size());
   }

@@ -11,31 +11,31 @@ namespace rocket {
 
     namespace details_allocator_utilities {
 
-    template<typename allocatorT> class final_wrapper
+    template<typename allocT> class final_wrapper
       {
       private:
-        allocatorT m_alloc;
+        allocT m_alloc;
 
       public:
-        constexpr final_wrapper() noexcept(is_nothrow_constructible<allocatorT>::value)
+        constexpr final_wrapper() noexcept(is_nothrow_constructible<allocT>::value)
           : m_alloc()
           {
           }
-        explicit constexpr final_wrapper(const allocatorT& alloc) noexcept
+        explicit constexpr final_wrapper(const allocT& alloc) noexcept
           : m_alloc(alloc)
           {
           }
-        explicit constexpr final_wrapper(allocatorT&& alloc) noexcept
+        explicit constexpr final_wrapper(allocT&& alloc) noexcept
           : m_alloc(noadl::move(alloc))
           {
           }
 
       public:
-        constexpr operator const allocatorT& () const noexcept
+        constexpr operator const allocT& () const noexcept
           {
             return this->m_alloc;
           }
-        operator allocatorT& () noexcept
+        operator allocT& () noexcept
           {
             return this->m_alloc;
           }
@@ -43,9 +43,9 @@ namespace rocket {
 
     }  // namespace details_allocator_utilities
 
-template<typename allocatorT> struct allocator_wrapper_base_for : conditional<is_final<allocatorT>::value,
-                                                                              details_allocator_utilities::final_wrapper<allocatorT>,
-                                                                              allocatorT>
+template<typename allocT> struct allocator_wrapper_base_for : conditional<is_final<allocT>::value,
+                                                                          details_allocator_utilities::final_wrapper<allocT>,
+                                                                          allocT>
   {
   };
 
@@ -57,8 +57,7 @@ template<typename allocatorT> struct allocator_wrapper_base_for : conditional<is
       }
     constexpr propagate_none;
 
-    template<typename allocatorT> void propagate(propagate_none_tag,
-                                                 allocatorT& /*lhs*/, const allocatorT& /*rhs*/) noexcept
+    template<typename allocT> void propagate(propagate_none_tag, allocT& /*lhs*/, const allocT& /*rhs*/) noexcept
       {
       }
 
@@ -68,8 +67,7 @@ template<typename allocatorT> struct allocator_wrapper_base_for : conditional<is
       }
     constexpr propagate_copy;
 
-    template<typename allocatorT> void propagate(propagate_copy_tag,
-                                                 allocatorT& lhs, const allocatorT& rhs) noexcept
+    template<typename allocT> void propagate(propagate_copy_tag, allocT& lhs, const allocT& rhs) noexcept
       {
         lhs = rhs;
       }
@@ -80,8 +78,7 @@ template<typename allocatorT> struct allocator_wrapper_base_for : conditional<is
       }
     constexpr propagate_move;
 
-    template<typename allocatorT> void propagate(propagate_move_tag,
-                                                 allocatorT& lhs, allocatorT& rhs) noexcept
+    template<typename allocT> void propagate(propagate_move_tag, allocT& lhs, allocT& rhs) noexcept
       {
         lhs = noadl::move(rhs);
       }
@@ -92,39 +89,38 @@ template<typename allocatorT> struct allocator_wrapper_base_for : conditional<is
       }
     constexpr propagate_swap;
 
-    template<typename allocatorT> void propagate(propagate_swap_tag,
-                                                 allocatorT& lhs, allocatorT& rhs) noexcept
+    template<typename allocT> void propagate(propagate_swap_tag, allocT& lhs, allocT& rhs) noexcept
       {
         noadl::adl_swap(lhs, rhs);
       }
 
     }
 
-template<typename allocatorT> void propagate_allocator_on_copy(allocatorT& lhs, const allocatorT& rhs) noexcept
+template<typename allocT> void propagate_allocator_on_copy(allocT& lhs, const allocT& rhs) noexcept
   {
-    details_allocator_utilities::propagate<allocatorT>(typename conditional<allocator_traits<allocatorT>::propagate_on_container_copy_assignment::value,
-                                                                            details_allocator_utilities::propagate_copy_tag,
-                                                                            details_allocator_utilities::propagate_none_tag>::type(),
+    details_allocator_utilities::propagate<allocT>(typename conditional<allocator_traits<allocT>::propagate_on_container_copy_assignment::value,
+                                                                        details_allocator_utilities::propagate_copy_tag,
+                                                                        details_allocator_utilities::propagate_none_tag>::type(),
                                                        lhs, rhs);
   }
 
-template<typename allocatorT> void propagate_allocator_on_move(allocatorT& lhs, allocatorT&& rhs) noexcept
+template<typename allocT> void propagate_allocator_on_move(allocT& lhs, allocT&& rhs) noexcept
   {
-    details_allocator_utilities::propagate<allocatorT>(typename conditional<allocator_traits<allocatorT>::propagate_on_container_move_assignment::value,
-                                                                            details_allocator_utilities::propagate_move_tag,
-                                                                            details_allocator_utilities::propagate_none_tag>::type(),
+    details_allocator_utilities::propagate<allocT>(typename conditional<allocator_traits<allocT>::propagate_on_container_move_assignment::value,
+                                                                        details_allocator_utilities::propagate_move_tag,
+                                                                        details_allocator_utilities::propagate_none_tag>::type(),
                                                        lhs, rhs);
   }
 
-template<typename allocatorT> void propagate_allocator_on_swap(allocatorT& lhs, allocatorT& rhs) noexcept
+template<typename allocT> void propagate_allocator_on_swap(allocT& lhs, allocT& rhs) noexcept
   {
-    details_allocator_utilities::propagate<allocatorT>(typename conditional<allocator_traits<allocatorT>::propagate_on_container_swap::value,
-                                                                            details_allocator_utilities::propagate_swap_tag,
-                                                                            details_allocator_utilities::propagate_none_tag>::type(),
+    details_allocator_utilities::propagate<allocT>(typename conditional<allocator_traits<allocT>::propagate_on_container_swap::value,
+                                                                        details_allocator_utilities::propagate_swap_tag,
+                                                                        details_allocator_utilities::propagate_none_tag>::type(),
                                                        lhs, rhs);
   }
 
-template<typename allocatorT> struct is_std_allocator : false_type
+template<typename allocT> struct is_std_allocator : false_type
   {
   };
 template<typename valueT> struct is_std_allocator<::std::allocator<valueT>> : true_type

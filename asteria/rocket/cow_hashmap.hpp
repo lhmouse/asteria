@@ -28,7 +28,7 @@
 namespace rocket {
 
 template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = equal_to<keyT>,
-         typename allocatorT = allocator<pair<const keyT, mappedT>>> class cow_hashmap;
+         typename allocT = allocator<pair<const keyT, mappedT>>> class cow_hashmap;
 
     namespace details_cow_hashmap {
 
@@ -45,11 +45,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-    template<typename allocatorT> class bucket
+    template<typename allocT> class bucket
       {
       public:
-        using allocator_type   = allocatorT;
-        using value_type       = typename allocatorT::value_type;
+        using allocator_type   = allocT;
+        using value_type       = typename allocT::value_type;
         using const_reference  = const value_type&;
         using reference        = value_type&;
         using const_pointer    = typename allocator_traits<allocator_type>::const_pointer;
@@ -103,9 +103,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-    template<typename allocatorT> struct pointer_storage : storage_header
+    template<typename allocT> struct pointer_storage : storage_header
       {
-        using allocator_type   = allocatorT;
+        using allocator_type   = allocT;
         using bucket_type      = bucket<allocator_type>;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
 
@@ -164,14 +164,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           = delete;
       };
 
-    template<typename pointerT, typename hashT, typename allocatorT,
-             bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value> struct copy_storage_helper
+    template<typename pointerT, typename hashT, typename allocT,
+             bool copyableT = is_copy_constructible<typename allocT::value_type>::value> struct copy_storage_helper
       {
         void operator()(pointerT ptr, const hashT& hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
             // Get table bounds.
             auto data = ptr->data;
-            auto end = data + pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
+            auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
             // Copy elements one by one.
             for(auto i = off; i != off + cnt; ++i) {
               auto eptr_old = ptr_old->data[i].get();
@@ -183,12 +183,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const auto&) { return false;  });
               ROCKET_ASSERT(bkt);
               // Allocate a new element by copy-constructing from the old one.
-              auto eptr = allocator_traits<allocatorT>::allocate(ptr->alloc, size_t(1));
+              auto eptr = allocator_traits<allocT>::allocate(ptr->alloc, size_t(1));
               try {
-                allocator_traits<allocatorT>::construct(ptr->alloc, noadl::unfancy(eptr), *eptr_old);
+                allocator_traits<allocT>::construct(ptr->alloc, noadl::unfancy(eptr), *eptr_old);
               }
               catch(...) {
-                allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, size_t(1));
+                allocator_traits<allocT>::deallocate(ptr->alloc, eptr, size_t(1));
                 throw;
               }
               // Insert it into the new bucket.
@@ -198,25 +198,25 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
           }
       };
-    template<typename pointerT, typename hashT, typename allocatorT> struct copy_storage_helper<pointerT, hashT, allocatorT,
-                                                                                                false>     // copyableT
+    template<typename pointerT, typename hashT, typename allocT> struct copy_storage_helper<pointerT, hashT, allocT,
+                                                                                            false>     // copyableT
       {
         [[noreturn]] void operator()(pointerT /*ptr*/, const hashT& /*hf*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
-            // `allocatorT::value_type` is not copy-constructible.
+            // `allocT::value_type` is not copy-constructible.
             // Throw an exception unconditionally, even when there is nothing to copy.
             noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` is not copy-constructible.",
-                                                   typeid(typename allocatorT::value_type).name());
+                                                   typeid(typename allocT::value_type).name());
           }
       };
 
-    template<typename pointerT, typename hashT, typename allocatorT> struct move_storage_helper
+    template<typename pointerT, typename hashT, typename allocT> struct move_storage_helper
       {
         void operator()(pointerT ptr, const hashT& hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
             // Get table bounds.
             auto data = ptr->data;
-            auto end = data + pointer_storage<allocatorT>::max_nbkt_for_nblk(ptr->nblk);
+            auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
             // Move elements one by one.
             for(auto i = off; i != off + cnt; ++i) {
               auto eptr_old = ptr_old->data[i].get();
@@ -246,14 +246,15 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-    template<typename allocatorT, typename hashT, typename eqT> class storage_handle : private allocator_wrapper_base_for<allocatorT>::type,
-                                                                                       private conditional<is_same<hashT, allocatorT>::value,
-                                                                                                           ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type,
-                                                                                       private conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
-                                                                                                           ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
+    template<typename allocT, typename hashT,
+             typename eqT> class storage_handle : private allocator_wrapper_base_for<allocT>::type,
+                                                  private conditional<is_same<hashT, allocT>::value,
+                                                                      ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type,
+                                                  private conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
+                                                                      ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
       {
       public:
-        using allocator_type   = allocatorT;
+        using allocator_type   = allocT;
         using value_type       = typename allocator_type::value_type;
         using hasher           = hashT;
         using key_equal        = eqT;
@@ -277,18 +278,18 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       public:
         constexpr storage_handle(const allocator_type& alloc, const hasher& hf, const key_equal& eq)
           : allocator_base(alloc),
-            conditional<is_same<hashT, allocatorT>::value,
+            conditional<is_same<hashT, allocT>::value,
                         ebo_placeholder<0>, hasher_base>::type(hf),
-            conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
+            conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
             m_ptr()
           {
           }
         constexpr storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
           : allocator_base(noadl::move(alloc)),
-            conditional<is_same<hashT, allocatorT>::value,
+            conditional<is_same<hashT, allocT>::value,
                         ebo_placeholder<0>, hasher_base>::type(hf),
-            conditional<is_same<eqT, allocatorT>::value || is_same<eqT, hashT>::value,
+            conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
             m_ptr()
           {
@@ -576,7 +577,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               allocator_traits<allocator_type>::construct(ptr->alloc, noadl::unfancy(eptr), noadl::forward<paramsT>(params)...);
             }
             catch(...) {
-              allocator_traits<allocatorT>::deallocate(ptr->alloc, eptr, size_t(1));
+              allocator_traits<allocT>::deallocate(ptr->alloc, eptr, size_t(1));
               throw;
             }
             // Insert it into the new bucket.
@@ -768,11 +769,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
     }  // namespace details_cow_hashmap
 
-template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocatorT> class cow_hashmap
+template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT> class cow_hashmap
   {
     static_assert(!is_array<keyT>::value, "`keyT` must not be an array type.");
     static_assert(!is_array<mappedT>::value, "`mappedT` must not be an array type.");
-    static_assert(is_same<typename allocatorT::value_type, pair<const keyT, mappedT>>::value, "`allocatorT::value_type` must denote the same type as `pair<const keyT, mappedT>`.");
+    static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value, "`allocT::value_type` must denote the same type as `pair<const keyT, mappedT>`.");
     static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())), "The hash operation shall not throw exceptions.");
 
   public:
@@ -782,7 +783,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     using value_type      = pair<const key_type, mapped_type>;
     using hasher          = hashT;
     using key_equal       = eqT;
-    using allocator_type  = allocatorT;
+    using allocator_type  = allocT;
 
     using size_type        = typename allocator_traits<allocator_type>::size_type;
     using difference_type  = typename allocator_traits<allocator_type>::difference_type;
@@ -1352,8 +1353,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
   };
 
 template<typename keyT, typename mappedT,
-         typename hashT, typename eqT, typename allocatorT> inline void swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocatorT>& lhs,
-                                                                             cow_hashmap<keyT, mappedT, hashT, eqT, allocatorT>& rhs) noexcept
+         typename hashT, typename eqT, typename allocT> void swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs,
+                                                                  cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }

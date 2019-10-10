@@ -25,14 +25,14 @@
 namespace rocket {
 
 template<typename valueT, size_t capacityT,
-         typename allocatorT = allocator<valueT>> class static_vector;
+         typename allocT = allocator<valueT>> class static_vector;
 
     namespace details_static_vector {
 
-    template<typename allocatorT, size_t capacityT> class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
+    template<typename allocT, size_t capacityT> class storage_handle : private allocator_wrapper_base_for<allocT>::type
       {
       public:
-        using allocator_type   = allocatorT;
+        using allocator_type   = allocT;
         using value_type       = typename allocator_type::value_type;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
 
@@ -379,16 +379,16 @@ template<typename valueT, size_t capacityT,
     }  // namespace details_static_vector
 
 template<typename valueT, size_t capacityT,
-         typename allocatorT> class static_vector
+         typename allocT> class static_vector
   {
     static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
     static_assert(capacityT > 0, "`static_vector`s of zero elements are not allowed.");
-    static_assert(is_same<typename allocatorT::value_type, valueT>::value, "`allocatorT::value_type` must denote the same type as `valueT`.");
+    static_assert(is_same<typename allocT::value_type, valueT>::value, "`allocT::value_type` must denote the same type as `valueT`.");
 
   public:
     // types
     using value_type      = valueT;
-    using allocator_type  = allocatorT;
+    using allocator_type  = allocT;
 
     using size_type        = typename allocator_traits<allocator_type>::size_type;
     using difference_type  = typename allocator_traits<allocator_type>::difference_type;
@@ -897,8 +897,8 @@ template<typename valueT, size_t capacityT,
   };
 
 template<typename valueT, size_t capacityT,
-         typename allocatorT> void swap(static_vector<valueT, capacityT, allocatorT>& lhs,
-                                        static_vector<valueT, capacityT, allocatorT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+         typename allocT> void swap(static_vector<valueT, capacityT, allocT>& lhs,
+                                    static_vector<valueT, capacityT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }

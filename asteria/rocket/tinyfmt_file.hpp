@@ -10,18 +10,18 @@
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>,
-         typename allocatorT = allocator<charT>> class basic_tinyfmt_file;
+         typename allocT = allocator<charT>> class basic_tinyfmt_file;
 
 template<typename charT, typename traitsT,
-         typename allocatorT> class basic_tinyfmt_file : public basic_tinyfmt<charT, traitsT>
+         typename allocT> class basic_tinyfmt_file : public basic_tinyfmt<charT, traitsT>
   {
   public:
     using char_type       = charT;
     using traits_type     = traitsT;
-    using allocator_type  = allocatorT;
+    using allocator_type  = allocT;
 
     using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
-    using buffer_type   = basic_tinybuf_file<charT, traitsT, allocatorT>;
+    using buffer_type   = basic_tinybuf_file<charT, traitsT, allocT>;
     using handle_type   = typename buffer_type::handle_type;
 
     using seek_dir   = typename buffer_type::seek_dir;
@@ -83,12 +83,12 @@ template<typename charT, typename traitsT,
   };
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_tinyfmt_file<charT, traitsT, allocatorT>::~basic_tinyfmt_file()
+         typename allocT> basic_tinyfmt_file<charT, traitsT, allocT>::~basic_tinyfmt_file()
   = default;
 
 template<typename charT, typename traitsT,
-         typename allocatorT> void swap(basic_tinyfmt_file<charT, traitsT, allocatorT>& lhs,
-                                        basic_tinyfmt_file<charT, traitsT, allocatorT>& rhs)
+         typename allocT> void swap(basic_tinyfmt_file<charT, traitsT, allocT>& lhs,
+                                    basic_tinyfmt_file<charT, traitsT, allocT>& rhs)
   {
     return lhs.swap(rhs);
   }

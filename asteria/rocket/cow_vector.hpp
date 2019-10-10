@@ -25,7 +25,7 @@
 
 namespace rocket {
 
-template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vector;
+template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
 
     namespace details_cow_vector {
 
@@ -42,9 +42,9 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
           }
       };
 
-    template<typename allocatorT> struct basic_storage : storage_header
+    template<typename allocT> struct basic_storage : storage_header
       {
-        using allocator_type   = allocatorT;
+        using allocator_type   = allocT;
         using value_type       = typename allocator_type::value_type;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
 
@@ -85,96 +85,96 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
           = delete;
       };
 
-    template<typename pointerT, typename allocatorT,
-             bool copyableT = is_copy_constructible<typename allocatorT::value_type>::value,
-             bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocatorT::value_type>,
-                                        is_std_allocator<allocatorT>>::value> struct copy_storage_helper
+    template<typename pointerT, typename allocT,
+             bool copyableT = is_copy_constructible<typename allocT::value_type>::value,
+             bool memcpyT = conjunction<is_trivially_copy_constructible<typename allocT::value_type>,
+                                        is_std_allocator<allocT>>::value> struct copy_storage_helper
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
             // Copy elements one by one.
             auto nelem = ptr->nelem;
-            auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
+            auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
             for(auto i = off; i != off + cnt; ++i) {
-              allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
+              allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
               ptr->nelem = ++nelem;
             }
           }
       };
-    template<typename pointerT, typename allocatorT, bool memcpyT> struct copy_storage_helper<pointerT, allocatorT,
-                                                                                              false,  // copyableT
-                                                                                              memcpyT>  // trivial && std::allocator
+    template<typename pointerT, typename allocT, bool memcpyT> struct copy_storage_helper<pointerT, allocT,
+                                                                                          false,  // copyableT
+                                                                                          memcpyT>  // trivial && std::allocator
       {
         [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
             // Throw an exception unconditionally, even when there is nothing to copy.
             noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` is not copy-constructible.",
-                                                   typeid(typename allocatorT::value_type).name());
+                                                   typeid(typename allocT::value_type).name());
           }
       };
-    template<typename pointerT, typename allocatorT> struct copy_storage_helper<pointerT, allocatorT,
-                                                                                true,  // copyableT
-                                                                                true>  // trivial && std::allocator
+    template<typename pointerT, typename allocT> struct copy_storage_helper<pointerT, allocT,
+                                                                            true,  // copyableT
+                                                                            true>  // trivial && std::allocator
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
             // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
             auto nelem = ptr->nelem;
-            auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
+            auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            ::std::memcpy(static_cast<void*>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocatorT::value_type) * cnt);
+            ::std::memcpy(static_cast<void*>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocT::value_type) * cnt);
             ptr->nelem = (nelem += cnt);
           }
       };
 
-    template<typename pointerT, typename allocatorT,
-             bool movableT = is_move_constructible<typename allocatorT::value_type>::value,
-             bool memcpyT = conjunction<is_trivially_move_constructible<typename allocatorT::value_type>,
-                                        is_std_allocator<allocatorT>>::value> struct move_storage_helper
+    template<typename pointerT, typename allocT,
+             bool movableT = is_move_constructible<typename allocT::value_type>::value,
+             bool memcpyT = conjunction<is_trivially_move_constructible<typename allocT::value_type>,
+                                        is_std_allocator<allocT>>::value> struct move_storage_helper
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
             // Move elements one by one.
             auto nelem = ptr->nelem;
-            auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
+            auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
             for(auto i = off; i != off + cnt; ++i) {
-              allocator_traits<allocatorT>::construct(ptr->alloc, ptr->data + nelem, noadl::move(ptr_old->data[i]));
+              allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, noadl::move(ptr_old->data[i]));
               ptr->nelem = ++nelem;
             }
           }
       };
-    template<typename pointerT, typename allocatorT, bool memcpyT> struct move_storage_helper<pointerT, allocatorT,
-                                                                                              false,  // movableT
-                                                                                              memcpyT>  // trivial && std::allocator
+    template<typename pointerT, typename allocT, bool memcpyT> struct move_storage_helper<pointerT, allocT,
+                                                                                          false,  // movableT
+                                                                                          memcpyT>  // trivial && std::allocator
       {
         [[noreturn]] void operator()(pointerT /*ptr*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
             // Throw an exception unconditionally, even when there is nothing to move.
             noadl::sprintf_and_throw<domain_error>("cow_vector: `%s` is not move-constructible.",
-                                                   typeid(typename allocatorT::value_type).name());
+                                                   typeid(typename allocT::value_type).name());
           }
       };
-    template<typename pointerT, typename allocatorT> struct move_storage_helper<pointerT, allocatorT,
-                                                                                true,  // movableT
-                                                                                true>  // trivial && std::allocator
+    template<typename pointerT, typename allocT> struct move_storage_helper<pointerT, allocT,
+                                                                            true,  // movableT
+                                                                            true>  // trivial && std::allocator
       {
         void operator()(pointerT ptr, pointerT ptr_old, size_t off, size_t cnt) const
           {
             // Optimize it using `std::memcpy()`, as the source and destination locations can't overlap.
             auto nelem = ptr->nelem;
-            auto cap = basic_storage<allocatorT>::max_nelem_for_nblk(ptr->nblk);
+            auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            ::std::memcpy(static_cast<void*>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocatorT::value_type) * cnt);
+            ::std::memcpy(static_cast<void*>(ptr->data + nelem), ptr_old->data + off, sizeof(typename allocT::value_type) * cnt);
             ptr->nelem = (nelem += cnt);
           }
       };
 
-    template<typename allocatorT> class storage_handle : private allocator_wrapper_base_for<allocatorT>::type
+    template<typename allocT> class storage_handle : private allocator_wrapper_base_for<allocT>::type
       {
       public:
-        using allocator_type   = allocatorT;
+        using allocator_type   = allocT;
         using value_type       = typename allocator_type::value_type;
         using size_type        = typename allocator_traits<allocator_type>::size_type;
 
@@ -624,7 +624,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       }
     constexpr append;
 
-    template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, append_tag, paramsT&&... params)
+    template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, append_tag, paramsT&&... params)
       {
         vec->append(noadl::forward<paramsT>(params)...);
       }
@@ -634,7 +634,7 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       }
     constexpr emplace_back;
 
-    template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
+    template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
       {
         vec->emplace_back(noadl::forward<paramsT>(params)...);
       }
@@ -644,22 +644,22 @@ template<typename valueT, typename allocatorT = allocator<valueT>> class cow_vec
       }
     constexpr push_back;
 
-    template<typename vectorT, typename... paramsT> inline void tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
+    template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
       {
         vec->push_back(noadl::forward<paramsT>(params)...);
       }
 
     }  // namespace details_cow_vector
 
-template<typename valueT, typename allocatorT> class cow_vector
+template<typename valueT, typename allocT> class cow_vector
   {
     static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
-    static_assert(is_same<typename allocatorT::value_type, valueT>::value, "`allocatorT::value_type` must denote the same type as `valueT`.");
+    static_assert(is_same<typename allocT::value_type, valueT>::value, "`allocT::value_type` must denote the same type as `valueT`.");
 
   public:
     // types
     using value_type      = valueT;
-    using allocator_type  = allocatorT;
+    using allocator_type  = allocT;
 
     using size_type        = typename allocator_traits<allocator_type>::size_type;
     using difference_type  = typename allocator_traits<allocator_type>::difference_type;
@@ -1280,8 +1280,8 @@ template<typename valueT, typename allocatorT> class cow_vector
       }
   };
 
-template<typename valueT, typename allocatorT> inline void swap(cow_vector<valueT, allocatorT>& lhs,
-                                                                cow_vector<valueT, allocatorT>& rhs) noexcept
+template<typename valueT, typename allocT> void swap(cow_vector<valueT, allocT>& lhs,
+                                                     cow_vector<valueT, allocT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }

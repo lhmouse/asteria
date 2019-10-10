@@ -10,18 +10,18 @@
 namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>,
-         typename allocatorT = allocator<charT>> class basic_tinybuf_str;
+         typename allocT = allocator<charT>> class basic_tinybuf_str;
 
 template<typename charT, typename traitsT,
-         typename allocatorT> class basic_tinybuf_str : public basic_tinybuf<charT, traitsT>
+         typename allocT> class basic_tinybuf_str : public basic_tinybuf<charT, traitsT>
   {
   public:
     using char_type       = charT;
     using traits_type     = traitsT;
-    using allocator_type  = allocatorT;
+    using allocator_type  = allocT;
 
     using buffer_type  = basic_tinybuf<charT, traitsT>;
-    using string_type  = basic_cow_string<charT, traitsT, allocatorT>;
+    using string_type  = basic_cow_string<charT, traitsT, allocT>;
 
     using seek_dir   = typename buffer_type::seek_dir;
     using open_mode  = typename buffer_type::open_mode;
@@ -206,12 +206,12 @@ template<typename charT, typename traitsT,
   };
 
 template<typename charT, typename traitsT,
-         typename allocatorT> basic_tinybuf_str<charT, traitsT, allocatorT>::~basic_tinybuf_str()
+         typename allocT> basic_tinybuf_str<charT, traitsT, allocT>::~basic_tinybuf_str()
   = default;
 
 template<typename charT, typename traitsT,
-         typename allocatorT> void swap(basic_tinybuf_str<charT, traitsT, allocatorT>& lhs,
-                                        basic_tinybuf_str<charT, traitsT, allocatorT>& rhs)
+         typename allocT> void swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs,
+                                    basic_tinybuf_str<charT, traitsT, allocT>& rhs)
   {
     return lhs.swap(rhs);
   }
