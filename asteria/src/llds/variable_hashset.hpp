@@ -56,7 +56,7 @@ class Variable_HashSet
           ::operator delete(this->m_stor.bptr);
         }
 #ifdef ROCKET_DEBUG
-        std::memset(std::addressof(this->m_stor), 0xD2, sizeof(this->m_stor));
+        std::memset(std::addressof(this->m_stor), 0xD2, sizeof(m_stor));
 #endif
       }
 

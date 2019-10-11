@@ -126,7 +126,7 @@ void Random_Number_Generator::reset() noexcept
     this->m_aa = 0;
     this->m_bb = 0;
     this->m_cc = 0;
-    do_read_random_device(this->m_mm, sizeof(this->m_mm));
+    do_read_random_device(this->m_mm, sizeof(m_mm));
     // Scramble words.
     Scrambler regs;
     for(size_t i = 0; i < 64; ++i) {

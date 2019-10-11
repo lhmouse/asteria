@@ -383,6 +383,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT(nref > 0);
             return nref;
           }
+        constexpr double max_load_factor() const noexcept
+          {
+            return 1.0 / static_cast<double>(static_cast<difference_type>(max_load_factor_reciprocal));
+          }
         size_type bucket_count() const noexcept
           {
             auto ptr = this->m_ptr;
@@ -1094,7 +1098,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. The return type differs from `std::unordered_map`.
     constexpr double max_load_factor() const noexcept
       {
-        return 1.0 / static_cast<double>(static_cast<difference_type>(decltype(this->m_sth)::max_load_factor_reciprocal));
+        return this->m_sth.max_load_factor();
       }
     void rehash(size_type n)
       {

@@ -223,7 +223,7 @@ template<typename... alternativesT> class variant
     variant() noexcept(is_nothrow_constructible<typename alternative_at<0>::type>::value)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(this->m_stor, '*', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '*', sizeof(m_stor));
 #endif
         constexpr auto index_new = size_t(0);
         // Value-initialize the first alternative in place.
@@ -234,7 +234,7 @@ template<typename... alternativesT> class variant
             variant(paramT&& param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT&&>::value)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(this->m_stor, '*', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '*', sizeof(m_stor));
 #endif
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
@@ -244,7 +244,7 @@ template<typename... alternativesT> class variant
     variant(const variant& other) noexcept(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value)
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(this->m_stor, '*', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '*', sizeof(m_stor));
 #endif
         auto index_new = other.m_index;
         // Copy-construct the active alternative in place.
@@ -254,7 +254,7 @@ template<typename... alternativesT> class variant
     variant(variant&& other) noexcept
       {
 #ifdef ROCKET_DEBUG
-        ::std::memset(this->m_stor, '*', sizeof(this->m_stor));
+        ::std::memset(this->m_stor, '*', sizeof(m_stor));
 #endif
         auto index_new = other.m_index;
         // Move-construct the active alternative in place.
@@ -373,8 +373,8 @@ template<typename... alternativesT> class variant
         // Destroy the active alternative in place.
         details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
 #ifdef ROCKET_DEBUG
-        this->m_index = static_cast<decltype(this->m_index)>(0xBAD1BEEF);
-        ::std::memset(this->m_stor, '@', sizeof(this->m_stor));
+        this->m_index = static_cast<decltype(m_index)>(0xBAD1BEEF);
+        ::std::memset(this->m_stor, '@', sizeof(m_stor));
 #endif
       }
 

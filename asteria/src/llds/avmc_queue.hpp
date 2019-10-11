@@ -88,7 +88,7 @@ class AVMC_Queue
           this->do_deallocate_storage();
         }
 #ifdef ROCKET_DEBUG
-        std::memset(std::addressof(this->m_stor), 0xE5, sizeof(this->m_stor));
+        std::memset(std::addressof(this->m_stor), 0xE5, sizeof(m_stor));
 #endif
       }
 

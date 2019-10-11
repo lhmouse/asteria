@@ -49,7 +49,7 @@ template<typename valueT, size_t capacityT,
             m_nelem(0)
           {
 #ifdef ROCKET_DEBUG
-            ::std::memset(this->m_ebase, '*', sizeof(this->m_ebase));
+            ::std::memset(this->m_ebase, '*', sizeof(m_ebase));
 #endif
           }
         explicit storage_handle(allocator_type&& alloc) noexcept
@@ -57,7 +57,7 @@ template<typename valueT, size_t capacityT,
             m_nelem(0)
           {
 #ifdef ROCKET_DEBUG
-            ::std::memset(this->m_ebase, '*', sizeof(this->m_ebase));
+            ::std::memset(this->m_ebase, '*', sizeof(m_ebase));
 #endif
           }
         ~storage_handle()
@@ -71,7 +71,7 @@ template<typename valueT, size_t capacityT,
             }
 #ifdef ROCKET_DEBUG
             this->m_nelem = static_cast<decltype(m_nelem)>(0xBAD1BEEF);
-            ::std::memset(this->m_ebase, '~', sizeof(this->m_ebase));
+            ::std::memset(this->m_ebase, '~', sizeof(m_ebase));
 #endif
           }
 
