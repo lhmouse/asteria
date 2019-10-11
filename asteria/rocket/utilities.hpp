@@ -312,6 +312,7 @@ template<typename elementT> elementT* default_construct_at(elementT* ptr) noexce
 template<typename elementT> void destroy_at(elementT* ptr) noexcept(is_nothrow_destructible<elementT>::value)
   {
     if(is_trivially_destructible<elementT>::value) {
+      // Don't do anything. The C++ standard says the lifetime of such an object does not end.
       return;
     }
     ptr->~elementT();

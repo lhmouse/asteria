@@ -141,9 +141,8 @@ template<typename elementT, typename deleterT> class refcnt_base : public virtua
           {
             this->reset(pointer());
 #ifdef ROCKET_DEBUG
-            if(is_trivially_destructible<pointer>::value) {
-              ::std::memset(::std::addressof(this->m_ptr), 0xF6, sizeof(m_ptr));
-            }
+            if(is_trivially_destructible<pointer>::value)
+              ::std::memset(static_cast<void*>(::std::addressof(this->m_ptr)), 0xF6, sizeof(m_ptr));
 #endif
           }
 

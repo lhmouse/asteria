@@ -133,9 +133,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             else {
               // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
-              for(size_type i = 0; i < nbkt; ++i) {
+              for(size_type i = 0; i < nbkt; ++i)
                 noadl::construct_at(this->data + i);
-              }
             }
             this->nelem = 0;
           }
