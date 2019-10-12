@@ -5,145 +5,160 @@
 #define ROCKET_TINYNUMPUT_HPP_
 
 #include "utilities.hpp"
+#include "assert.hpp"
 
 namespace rocket {
 
 class tinynumput
   {
   private:
-    char m_str[62];
-    unsigned char m_off = 0;
-    unsigned char m_end = 0;
+    // These pointers may point to static, immutable storage.
+    // They don't have type `const char*` for convenience.
+    char* m_bptr;
+    char* m_eptr;
+    // This storage must be sufficient for the longest result, which at the moment
+    // is signed 64-bit integer in binary (`-0b111...1` takes 67 bits).
+    // The size is a multiple of eight to prevent padding bytes.
+    static constexpr size_t M = 72;
+    char m_stor[M];
 
   public:
     tinynumput() noexcept
       {
+        this->clear();
       }
-    template<typename xvalueT, ROCKET_ENABLE_IF(is_scalar<xvalueT>::value)> explicit tinynumput(const xvalueT& xvalue) noexcept
+    template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)> explicit tinynumput(const valueT& value) noexcept
       {
-        this->put(xvalue);
+        this->put(value);
       }
 
   public:
     // explicit formatters
-    //   B  : bit
-    //   P  : pointer
-    //   S  : 32-bit (single)
-    //   D  : 64-bit (double)
-    //    P : pointer
-    //    I : signed integer
-    //    U : unsigned integer
-    //    F : floating-point
-    //     T: "true" / "false"
-    //     B: binary, default
-    //     D: decimal, default
-    //     X: hexadecimal, default
-    //     J: binary, scientific
-    //     E: decimal, scientific
-    //     A: hexadecimal, scientific
-    tinynumput& put_BUT(bool value) noexcept;
-    tinynumput& put_PPX(const void* value) noexcept;
-    tinynumput& put_SIB(int32_t value) noexcept;
-    tinynumput& put_SID(int32_t value) noexcept;
-    tinynumput& put_SIX(int32_t value) noexcept;
-    tinynumput& put_SUB(uint32_t value) noexcept;
-    tinynumput& put_SUD(uint32_t value) noexcept;
-    tinynumput& put_SUX(uint32_t value) noexcept;
-    tinynumput& put_DIB(int64_t value) noexcept;
-    tinynumput& put_DID(int64_t value) noexcept;
-    tinynumput& put_DIX(int64_t value) noexcept;
-    tinynumput& put_DUB(uint64_t value) noexcept;
-    tinynumput& put_DUD(uint64_t value) noexcept;
-    tinynumput& put_DUX(uint64_t value) noexcept;
-    tinynumput& put_DFB(double value) noexcept;
-    tinynumput& put_DFD(double value) noexcept;
-    tinynumput& put_DFX(double value) noexcept;
-    tinynumput& put_DFJ(double value) noexcept;
-    tinynumput& put_DFE(double value) noexcept;
-    tinynumput& put_DFA(double value) noexcept;
+    // * boolean
+    tinynumput& put_TB(bool value) noexcept;
+    // * pointer
+    tinynumput& put_XP(const void* value) noexcept;
+    // * unsigned 32-bit integer in binary
+    tinynumput& put_BU(uint32_t value) noexcept;
+    // * unsigned 64-bit integer in binary
+    tinynumput& put_BQ(uint64_t value) noexcept;
+    // * unsigned 32-bit integer in decimal
+    tinynumput& put_DU(uint32_t value) noexcept;
+    // * unsigned 64-bit integer in decimal
+    tinynumput& put_DQ(uint64_t value) noexcept;
+    // * unsigned 32-bit integer in hexadecimal
+    tinynumput& put_XU(uint32_t value) noexcept;
+    // * unsigned 64-bit integer in hexadecimal
+    tinynumput& put_XQ(uint64_t value) noexcept;
+    // * signed 32-bit integer in binary
+    tinynumput& put_BI(int32_t value) noexcept;
+    // * signed 64-bit integer in binary
+    tinynumput& put_BL(int64_t value) noexcept;
+    // * signed 32-bit integer in decimal
+    tinynumput& put_DI(int32_t value) noexcept;
+    // * signed 64-bit integer in decimal
+    tinynumput& put_DL(int64_t value) noexcept;
+    // * signed 32-bit integer in hexadecimal
+    tinynumput& put_XI(int32_t value) noexcept;
+    // * signed 64-bit integer in hexadecimal
+    tinynumput& put_XL(int64_t value) noexcept;
+    // * IEEE-754 double-precision floating-point in binary
+    tinynumput& put_BF(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in decimal
+    tinynumput& put_DF(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in hexadecimal
+    tinynumput& put_XF(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in binary scientific notation
+    tinynumput& put_BE(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in decimal scientific notation
+    tinynumput& put_DE(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in hexadecimal scientific notation
+    tinynumput& put_XE(double value) noexcept;
 
-    // observers
-    bool empty() const noexcept
-      {
-        return this->m_off == this->m_end;
-      }
-    size_t size() const noexcept
-      {
-        return static_cast<size_t>(this->m_end) - this->m_off;
-      }
+    // accessors
     const char* begin() const noexcept
       {
-        return this->m_str + this->m_off;
+        return this->m_bptr;
       }
     const char* end() const noexcept
       {
-        return this->m_str + this->m_end;
+        return this->m_eptr;
+      }
+    bool empty() const noexcept
+      {
+        return this->m_bptr == this->m_eptr;
+      }
+    size_t size() const noexcept
+      {
+        return static_cast<size_t>(this->m_eptr - this->m_bptr);
       }
     const char* data() const noexcept
       {
-        return this->m_str + this->m_off;
+        return this->m_bptr;
       }
-
-    // modifiers
     tinynumput& clear() noexcept
       {
-        return (this->m_off = this->m_end), *this;
+        this->m_bptr = this->m_stor;
+        this->m_eptr = this->m_stor;
+        return *this;
       }
+
+    // default formatters
     tinynumput& put(bool value) noexcept
       {
-        return this->put_BUT(value);
+        return this->put_TB(value);
       }
     tinynumput& put(const void* value) noexcept
       {
-        return this->put_PPX(value);
-      }
-    tinynumput& put(signed char value) noexcept
-      {
-        return this->put_SID(value);
+        return this->put_XP(value);
       }
     tinynumput& put(unsigned char value) noexcept
       {
-        return this->put_SUD(value);
+        return this->put_DU(value);
       }
-    tinynumput& put(signed short value) noexcept
+    tinynumput& put(signed char value) noexcept
       {
-        return this->put_SID(value);
+        return this->put_DI(value);
       }
     tinynumput& put(unsigned short value) noexcept
       {
-        return this->put_SUD(value);
+        return this->put_DU(value);
       }
-    tinynumput& put(signed value) noexcept
+    tinynumput& put(signed short value) noexcept
       {
-        return this->put_SID(value);
+        return this->put_DI(value);
       }
     tinynumput& put(unsigned value) noexcept
       {
-        return this->put_SUD(value);
+        return this->put_DU(value);
       }
-    tinynumput& put(signed long value) noexcept
+    tinynumput& put(signed value) noexcept
       {
-        return this->put_DID(value);
+        return this->put_DI(value);
       }
     tinynumput& put(unsigned long value) noexcept
       {
-        return this->put_DUD(value);
+        return this->put_DQ(value);
       }
-    tinynumput& put(signed long long value) noexcept
+    tinynumput& put(signed long value) noexcept
       {
-        return this->put_DID(value);
+        return this->put_DL(value);
       }
     tinynumput& put(unsigned long long value) noexcept
       {
-        return this->put_DUD(value);
+        return this->put_DQ(value);
+      }
+    tinynumput& put(signed long long value) noexcept
+      {
+        return this->put_DL(value);
       }
     tinynumput& put(float value) noexcept
       {
-        return this->put_DFD(value);
+        return this->put_DF(value);
       }
     tinynumput& put(double value) noexcept
       {
-        return this->put_DFD(value);
+        return this->put_DF(value);
       }
   };
 
