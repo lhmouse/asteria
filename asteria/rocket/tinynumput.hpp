@@ -27,7 +27,8 @@ class tinynumput
       {
         this->clear();
       }
-    template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)> explicit tinynumput(const valueT& value) noexcept
+    template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
+        explicit tinynumput(const valueT& value) noexcept
       {
         this->put(value);
       }
@@ -64,14 +65,14 @@ class tinynumput
     tinynumput& put_XL(int64_t value) noexcept;
     // * IEEE-754 double-precision floating-point in binary
     tinynumput& put_BF(double value) noexcept;
-    // * IEEE-754 double-precision floating-point in decimal
-    tinynumput& put_DF(double value) noexcept;
-    // * IEEE-754 double-precision floating-point in hexadecimal
-    tinynumput& put_XF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in binary scientific notation
     tinynumput& put_BE(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in decimal
+    tinynumput& put_DF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in decimal scientific notation
     tinynumput& put_DE(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in hexadecimal
+    tinynumput& put_XF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in hexadecimal scientific notation
     tinynumput& put_XE(double value) noexcept;
 

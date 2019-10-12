@@ -78,6 +78,7 @@ using ::std::remove_cv;
 using ::std::is_same;
 using ::std::is_trivial;
 using ::std::is_integral;
+using ::std::is_floating_point;
 using ::std::is_void;
 using ::std::is_trivially_default_constructible;
 using ::std::is_trivially_copy_constructible;
