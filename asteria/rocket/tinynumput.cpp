@@ -357,11 +357,11 @@ tinynumput& tinynumput::put_BF(double value) noexcept
       *(ep++) = '0';
       *(ep++) = 'b';
       // Break the number down into fractional and exponential parts. This result is exact.
+      // Normalize the integral part so it is the maximum value in the range [0,2).
+      // The significant value is adjusted into the range [0,0x1p56).
       int exp;
       double frac = ::std::frexp(::std::fabs(value), &exp);
       --exp;
-      // Normalize the integral part so it is the maximum value in the range [0,2).
-      // The significant value is adjusted into the range [0,0x1p56).
       frac = ::std::ldexp(frac, 56);
       // Write the broken-down number...
       if((exp < -4) || (53 <= exp)) {
@@ -410,11 +410,11 @@ tinynumput& tinynumput::put_BE(double value) noexcept
       *(ep++) = '0';
       *(ep++) = 'b';
       // Break the number down into fractional and exponential parts. This result is exact.
+      // Normalize the integral part so it is the maximum value in the range [0,2).
+      // The significant value is adjusted into the range [0,0x1p56).
       int exp;
       double frac = ::std::frexp(::std::fabs(value), &exp);
       --exp;
-      // Normalize the integral part so it is the maximum value in the range [0,2).
-      // The significant value is adjusted into the range [0,0x1p56).
       frac = ::std::ldexp(frac, 56);
       // Write the broken-down number in scientific notation.
       do_xput_F_bin(ep, frac, ep + 1);
@@ -479,11 +479,11 @@ tinynumput& tinynumput::put_XF(double value) noexcept
       *(ep++) = '0';
       *(ep++) = 'x';
       // Break the number down into fractional and exponential parts. This result is exact.
+      // Normalize the integral part so it is the maximum value in the range [0,16).
+      // The significant value is adjusted into the range [0,0x1p56).
       int exp;
       double frac = ::std::frexp(::std::fabs(value), &exp);
       --exp;
-      // Normalize the integral part so it is the maximum value in the range [0,16).
-      // The significant value is adjusted into the range [0,0x1p56).
       frac = ::std::ldexp(frac, 53 + (exp & 3));
       exp &= -4;
       // Write the broken-down number...
@@ -533,11 +533,11 @@ tinynumput& tinynumput::put_XE(double value) noexcept
       *(ep++) = '0';
       *(ep++) = 'x';
       // Break the number down into fractional and exponential parts. This result is exact.
+      // Normalize the integral part so it is the maximum value in the range [0,16).
+      // The significant value is adjusted into the range [0,0x1p56).
       int exp;
       double frac = ::std::frexp(::std::fabs(value), &exp);
       --exp;
-      // Normalize the integral part so it is the maximum value in the range [0,16).
-      // The significant value is adjusted into the range [0,0x1p56).
       frac = ::std::ldexp(frac, 53 + (exp & 3));
       exp &= -4;
       // Write the broken-down number in scientific notation.
