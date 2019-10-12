@@ -51,6 +51,12 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
 
     namespace {
 
+    template<typename valueT>
+        constexpr typename make_unsigned<valueT>::type do_cast_U(const valueT& value) noexcept
+      {
+        return static_cast<typename make_unsigned<valueT>::type>(value);
+      }
+
     template<uint8_t radixT, typename valueT,
              ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
         char* do_xput_U_bkwd(char*& bp, const valueT& value, size_t width = 1)
@@ -162,9 +168,9 @@ tinynumput& tinynumput::put_BI(int32_t value) noexcept
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Extend the sign bit to a word, assuming arithmetic shift.
-    uint32_t sign = static_cast<uint32_t>(value >> 31);
+    uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<2>(bp, (static_cast<uint32_t>(value) ^ sign) - sign);
+    do_xput_U_bkwd<2>(bp, (do_cast_U(value) ^ sign) - sign);
     // Prepend the binary prefix.
     *--bp = 'b';
     *--bp = '0';
@@ -182,9 +188,9 @@ tinynumput& tinynumput::put_BL(int64_t value) noexcept
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Extend the sign bit to a word, assuming arithmetic shift.
-    uint64_t sign = static_cast<uint64_t>(value >> 63);
+    uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<2>(bp, (static_cast<uint64_t>(value) ^ sign) - sign);
+    do_xput_U_bkwd<2>(bp, (do_cast_U(value) ^ sign) - sign);
     // Prepend the binary prefix.
     *--bp = 'b';
     *--bp = '0';
@@ -202,9 +208,9 @@ tinynumput& tinynumput::put_DI(int32_t value) noexcept
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Extend the sign bit to a word, assuming arithmetic shift.
-    uint32_t sign = static_cast<uint32_t>(value >> 31);
+    uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<10>(bp, (static_cast<uint32_t>(value) ^ sign) - sign);
+    do_xput_U_bkwd<10>(bp, (do_cast_U(value) ^ sign) - sign);
     // If the number is negative, prepend a minus sign.
     if(sign)
       *--bp = '-';
@@ -219,9 +225,9 @@ tinynumput& tinynumput::put_DL(int64_t value) noexcept
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Extend the sign bit to a word, assuming arithmetic shift.
-    uint64_t sign = static_cast<uint64_t>(value >> 63);
+    uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<10>(bp, (static_cast<uint64_t>(value) ^ sign) - sign);
+    do_xput_U_bkwd<10>(bp, (do_cast_U(value) ^ sign) - sign);
     // If the number is negative, prepend a minus sign.
     if(sign)
       *--bp = '-';
@@ -236,9 +242,9 @@ tinynumput& tinynumput::put_XI(int32_t value) noexcept
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Extend the sign bit to a word, assuming arithmetic shift.
-    uint32_t sign = static_cast<uint32_t>(value >> 31);
+    uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<16>(bp, (static_cast<uint32_t>(value) ^ sign) - sign);
+    do_xput_U_bkwd<16>(bp, (do_cast_U(value) ^ sign) - sign);
     // Prepend the hexadecimal prefix.
     *--bp = 'x';
     *--bp = '0';
@@ -256,9 +262,9 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Extend the sign bit to a word, assuming arithmetic shift.
-    uint64_t sign = static_cast<uint64_t>(value >> 63);
+    uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<16>(bp, (static_cast<uint64_t>(value) ^ sign) - sign);
+    do_xput_U_bkwd<16>(bp, (do_cast_U(value) ^ sign) - sign);
     // Prepend the hexadecimal prefix.
     *--bp = 'x';
     *--bp = '0';
@@ -272,6 +278,11 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
   }
 
     namespace {
+
+    constexpr uint64_t do_cast_M(const double& value) noexcept
+      {
+        return static_cast<uint64_t>(static_cast<int64_t>(::std::fabs(value))) << 8;
+      }
 
     template<typename valueT>
         char* do_check_special_opt(char*& bp, char*& ep, const valueT& value)
@@ -297,27 +308,10 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
         return nullptr;
       }
 
-    char* do_xput_I_exp(char*& ep, const int& exp)
-      {
-        // Append the sign symbol, always.
-        if(exp < 0)
-          *(ep++) = '-';
-        else
-          *(ep++) = '+';
-        // Write the exponent in this temporary storage backwards.
-        // The exponent shall contain at least two digits.
-        char exps[8];
-        char* expb = ::std::end(exps);
-        do_xput_U_bkwd<10>(expb, static_cast<unsigned>(::std::abs(exp)), 2);
-        // Append the exponent.
-        noadl::ranged_for(expb, ::std::end(exps), [&](const char* p) { *(ep++) = *p;  });
-        return ep;
-      }
-
-    char* do_xput_F_bin(char*& ep, const double& frac, const char* dp_opt)
+    char* do_xput_M_bin(char*& ep, const uint64_t& mant, const char* dp_opt)
       {
         // Write digits in normal order.
-        uint64_t reg = static_cast<uint64_t>(static_cast<int64_t>(frac)) << 8;
+        uint64_t reg = mant;
         while(reg != 0) {
           // Shift a digit out.
           size_t dval = static_cast<size_t>(reg >> 63);
@@ -331,8 +325,41 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
         return ep;
       }
 
-    }  // namespace
+    char* do_xput_M_hex(char*& ep, const uint64_t& mant, const char* dp_opt)
+      {
+        // Write digits in normal order.
+        uint64_t reg = mant;
+        while(reg != 0) {
+          // Shift a digit out.
+          size_t dval = static_cast<size_t>(reg >> 60);
+          reg <<= 4;
+          // Insert a decimal point before `dp_opt`.
+          if(ep == dp_opt)
+            *(ep++) = '.';
+          // Write this digit.
+          *(ep++) = "0123456789ABCDEF"[dval];
+        }
+        return ep;
+      }
 
+    char* do_xput_I_exp(char*& ep, const int& exp)
+      {
+        // Append the sign symbol, always.
+        if(exp < 0)
+          *(ep++) = '-';
+        else
+          *(ep++) = '+';
+        // Write the exponent in this temporary storage backwards.
+        // The exponent shall contain at least two digits.
+        char exps[8];
+        char* expb = ::std::end(exps);
+        do_xput_U_bkwd<10>(expb, do_cast_U(::std::abs(exp)), 2);
+        // Append the exponent.
+        noadl::ranged_for(expb, ::std::end(exps), [&](const char* p) { *(ep++) = *p;  });
+        return ep;
+      }
+
+    }  // namespace
 
 tinynumput& tinynumput::put_BF(double value) noexcept
   {
@@ -344,7 +371,7 @@ tinynumput& tinynumput::put_BF(double value) noexcept
     if(do_check_special_opt(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
-      bp += static_cast<unsigned>(sign + 1);
+      bp += do_cast_U(sign + 1);
     }
     else {
       // Seek to the beginning of the internal buffer.
@@ -360,13 +387,13 @@ tinynumput& tinynumput::put_BF(double value) noexcept
       // Normalize the integral part so it is the maximum value in the range [0,2).
       // The significant value is adjusted into the range [0,0x1p56).
       int exp;
-      double frac = ::std::frexp(::std::fabs(value), &exp);
+      double frac = ::std::frexp(value, &exp);
       --exp;
-      frac = ::std::ldexp(frac, 56);
+      uint64_t mant = do_cast_M(::std::ldexp(frac, 56));
       // Write the broken-down number...
       if((exp < -4) || (53 <= exp)) {
         // ... in scientific notation.
-        do_xput_F_bin(ep, frac, ep + 1);
+        do_xput_M_bin(ep, mant, ep + 1);
         *(ep++) = 'p';
         do_xput_I_exp(ep, exp);
       }
@@ -375,11 +402,11 @@ tinynumput& tinynumput::put_BF(double value) noexcept
         *(ep++) = '0';
         *(ep++) = '.';
         noadl::ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
-        do_xput_F_bin(ep, frac, nullptr);
+        do_xput_M_bin(ep, mant, nullptr);
       }
       else
         // ... in plain format; the decimal is inserted in the middle.
-        do_xput_F_bin(ep, frac, ep + 1 + static_cast<unsigned>(exp));
+        do_xput_M_bin(ep, mant, ep + 1 + do_cast_U(exp));
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
@@ -397,7 +424,7 @@ tinynumput& tinynumput::put_BE(double value) noexcept
     if(do_check_special_opt(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
-      bp += static_cast<unsigned>(sign + 1);
+      bp += do_cast_U(sign + 1);
     }
     else {
       // Seek to the beginning of the internal buffer.
@@ -413,11 +440,11 @@ tinynumput& tinynumput::put_BE(double value) noexcept
       // Normalize the integral part so it is the maximum value in the range [0,2).
       // The significant value is adjusted into the range [0,0x1p56).
       int exp;
-      double frac = ::std::frexp(::std::fabs(value), &exp);
+      double frac = ::std::frexp(value, &exp);
       --exp;
-      frac = ::std::ldexp(frac, 56);
+      uint64_t mant = do_cast_M(::std::ldexp(frac, 56));
       // Write the broken-down number in scientific notation.
-      do_xput_F_bin(ep, frac, ep + 1);
+      do_xput_M_bin(ep, mant, ep + 1);
       *(ep++) = 'p';
       do_xput_I_exp(ep, exp);
     }
@@ -426,6 +453,13 @@ tinynumput& tinynumput::put_BE(double value) noexcept
     this->m_eptr = ep;
     return *this;
   }
+
+    namespace {
+
+    
+
+    }  // namespace
+
 /*
 tinynumput& tinynumput::put_DF(double value) noexcept
   {
@@ -435,27 +469,6 @@ tinynumput& tinynumput::put_DE(double value) noexcept
   {
   }
 */
-    namespace {
-
-    char* do_xput_F_hex(char*& ep, const double& frac, const char* dp_opt)
-      {
-        // Write digits in normal order.
-        uint64_t reg = static_cast<uint64_t>(static_cast<int64_t>(frac)) << 8;
-        while(reg != 0) {
-          // Shift a digit out.
-          size_t dval = static_cast<size_t>(reg >> 60);
-          reg <<= 4;
-          // Insert a decimal point before `dp_opt`.
-          if(ep == dp_opt)
-            *(ep++) = '.';
-          // Write this digit.
-          *(ep++) = "0123456789ABCDEF"[dval];
-        }
-        return ep;
-      }
-
-    }  // namespace
-
 tinynumput& tinynumput::put_XF(double value) noexcept
   {
     char* bp;
@@ -466,7 +479,7 @@ tinynumput& tinynumput::put_XF(double value) noexcept
     if(do_check_special_opt(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
-      bp += static_cast<unsigned>(sign + 1);
+      bp += do_cast_U(sign + 1);
     }
     else {
       // Seek to the beginning of the internal buffer.
@@ -482,14 +495,14 @@ tinynumput& tinynumput::put_XF(double value) noexcept
       // Normalize the integral part so it is the maximum value in the range [0,16).
       // The significant value is adjusted into the range [0,0x1p56).
       int exp;
-      double frac = ::std::frexp(::std::fabs(value), &exp);
+      double frac = ::std::frexp(value, &exp);
       --exp;
-      frac = ::std::ldexp(frac, 53 + (exp & 3));
+      uint64_t mant = do_cast_M(::std::ldexp(frac, 53 + (exp & 3)));
       exp &= -4;
       // Write the broken-down number...
       if((exp < -16) || (53 <= exp)) {
         // ... in scientific notation.
-        do_xput_F_hex(ep, frac, ep + 1);
+        do_xput_M_hex(ep, mant, ep + 1);
         *(ep++) = 'p';
         do_xput_I_exp(ep, exp);
       }
@@ -498,11 +511,11 @@ tinynumput& tinynumput::put_XF(double value) noexcept
         *(ep++) = '0';
         *(ep++) = '.';
         noadl::ranged_for(exp >> 2, -1, [&](int) { *(ep++) = '0';  });
-        do_xput_F_hex(ep, frac, nullptr);
+        do_xput_M_hex(ep, mant, nullptr);
       }
       else
         // ... in plain format; the decimal is inserted in the middle.
-        do_xput_F_hex(ep, frac, ep + 1 + static_cast<unsigned>(exp >> 2));
+        do_xput_M_hex(ep, mant, ep + 1 + do_cast_U(exp >> 2));
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
@@ -520,7 +533,7 @@ tinynumput& tinynumput::put_XE(double value) noexcept
     if(do_check_special_opt(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
-      bp += static_cast<unsigned>(sign + 1);
+      bp += do_cast_U(sign + 1);
     }
     else {
       // Seek to the beginning of the internal buffer.
@@ -536,12 +549,12 @@ tinynumput& tinynumput::put_XE(double value) noexcept
       // Normalize the integral part so it is the maximum value in the range [0,16).
       // The significant value is adjusted into the range [0,0x1p56).
       int exp;
-      double frac = ::std::frexp(::std::fabs(value), &exp);
+      double frac = ::std::frexp(value, &exp);
       --exp;
-      frac = ::std::ldexp(frac, 53 + (exp & 3));
+      uint64_t mant = do_cast_M(::std::ldexp(frac, 53 + (exp & 3)));
       exp &= -4;
       // Write the broken-down number in scientific notation.
-      do_xput_F_hex(ep, frac, ep + 1);
+      do_xput_M_hex(ep, mant, ep + 1);
       *(ep++) = 'p';
       do_xput_I_exp(ep, exp);
     }

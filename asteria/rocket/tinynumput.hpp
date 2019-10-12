@@ -67,14 +67,14 @@ class tinynumput
     tinynumput& put_BF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in binary scientific notation
     tinynumput& put_BE(double value) noexcept;
-    // * IEEE-754 double-precision floating-point in decimal
-    tinynumput& put_DF(double value) noexcept;
-    // * IEEE-754 double-precision floating-point in decimal scientific notation
-    tinynumput& put_DE(double value) noexcept;
     // * IEEE-754 double-precision floating-point in hexadecimal
     tinynumput& put_XF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in hexadecimal scientific notation
     tinynumput& put_XE(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in decimal
+    tinynumput& put_DF(double value) noexcept;
+    // * IEEE-754 double-precision floating-point in decimal scientific notation
+    tinynumput& put_DE(double value) noexcept;
 
     // accessors
     const char* begin() const noexcept
