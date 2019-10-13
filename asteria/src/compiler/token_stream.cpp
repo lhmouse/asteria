@@ -539,15 +539,15 @@ namespace Asteria {
       {
         template<typename ElementT> bool operator()(const ElementT& lhs, const ElementT& rhs) const noexcept
           {
-            return std::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
+            return rocket::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
           }
         template<typename ElementT> bool operator()(char lhs, const ElementT& rhs) const noexcept
           {
-            return std::char_traits<char>::lt(lhs, rhs.first[0]);
+            return rocket::char_traits<char>::lt(lhs, rhs.first[0]);
           }
         template<typename ElementT> bool operator()(const ElementT& lhs, char rhs) const noexcept
           {
-            return std::char_traits<char>::lt(lhs.first[0], rhs);
+            return rocket::char_traits<char>::lt(lhs.first[0], rhs);
           }
       };
 
