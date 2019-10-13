@@ -58,7 +58,7 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
       }
 
     template<uint8_t radixT, typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
-        char* do_xput_U_bkwd(char*& bp, const valueT& value, size_t width = 1)
+        void do_xput_U_bkwd(char*& bp, const valueT& value, size_t width = 1)
       {
         char* stop = bp - width;
         // Write digits backwards.
@@ -73,7 +73,6 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
         // Pad the string to at least the width requested.
         while(bp > stop)
           *--bp = '0';
-        return bp;
       }
 
     }  // namespace
@@ -311,7 +310,7 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
         mant = static_cast<uint64_t>(static_cast<int64_t>(::std::ldexp(frac, 53))) << 11;
       }
 
-    char* do_xput_M_bin(char*& ep, const uint64_t& mant, const char* dp_opt)
+    void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* dp_opt)
       {
         // Write digits in normal order.
         uint64_t reg = mant;
@@ -325,10 +324,9 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
           // Write this digit.
           *(ep++) = static_cast<char>('0' + dval);
         }
-        return ep;
       }
 
-    char* do_xput_M_hex(char*& ep, const uint64_t& mant, const char* dp_opt)
+    void do_xput_M_hex(char*& ep, const uint64_t& mant, const char* dp_opt)
       {
         // Write digits in normal order.
         uint64_t reg = mant;
@@ -342,7 +340,6 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
           // Write this digit.
           *(ep++) = "0123456789ABCDEF"[dval];
         }
-        return ep;
       }
 
     char* do_xput_I_exp(char*& ep, const int& exp)
