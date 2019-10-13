@@ -67,7 +67,8 @@ class Token
   public:
     template<typename XtokT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XtokT&&)> Token(const cow_string& xfile, int32_t xline,
                                                                                 size_t xoffset, size_t xlength, XtokT&& xtok)
-      : m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
+      :
+        m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
         m_stor(rocket::forward<XtokT>(xtok))
       {
       }

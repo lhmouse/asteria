@@ -18,12 +18,14 @@ class Reference
 
   public:
     Reference() noexcept
-      : m_root(),
+      :
+        m_root(),
         m_mods()
       {
       }
     template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Reference_Root, XrootT&&)> Reference(XrootT&& xroot) noexcept
-      : m_root(rocket::forward<XrootT>(xroot)),
+      :
+        m_root(rocket::forward<XrootT>(xroot)),
         m_mods()
       {
       }

@@ -16,11 +16,13 @@ class atomic_flag
 
   public:
     constexpr atomic_flag() noexcept
-      : m_val(false)
+      :
+        m_val(false)
       {
       }
     explicit constexpr atomic_flag(bool val) noexcept
-      : m_val(val)
+      :
+        m_val(val)
       {
       }
 

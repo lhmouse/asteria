@@ -18,15 +18,18 @@ namespace rocket {
 
       public:
         constexpr final_wrapper() noexcept(is_nothrow_constructible<allocT>::value)
-          : m_alloc()
+          :
+            m_alloc()
           {
           }
         explicit constexpr final_wrapper(const allocT& alloc) noexcept
-          : m_alloc(alloc)
+          :
+            m_alloc(alloc)
           {
           }
         explicit constexpr final_wrapper(allocT&& alloc) noexcept
-          : m_alloc(noadl::move(alloc))
+          :
+            m_alloc(noadl::move(alloc))
           {
           }
 

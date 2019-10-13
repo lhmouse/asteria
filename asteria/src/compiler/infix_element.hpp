@@ -68,7 +68,8 @@ class Infix_Element
 
   public:
     template<typename XelemT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XelemT&&)> Infix_Element(XelemT&& elem) noexcept
-      : m_stor(rocket::forward<XelemT>(elem))
+      :
+        m_stor(rocket::forward<XelemT>(elem))
       {
       }
     template<typename XelemT, ASTERIA_SFINAE_ASSIGN(Xvariant, XelemT&&)> Infix_Element& operator=(XelemT&& elem) noexcept

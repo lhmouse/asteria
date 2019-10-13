@@ -24,7 +24,8 @@ class Tail_Call_Arguments final : public virtual Rcbase
   public:
     Tail_Call_Arguments(const Source_Location& sloc, const cow_string& inside, TCO_Aware tco_aware,
                         const rcobj<Abstract_Function>& target, cow_vector<Reference>&& args_self)
-      : m_sloc(sloc), m_inside(inside), m_tco_aware(tco_aware),
+      :
+        m_sloc(sloc), m_inside(inside), m_tco_aware(tco_aware),
         m_target(target), m_args_self(rocket::move(args_self))
       {
       }

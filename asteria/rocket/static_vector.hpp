@@ -45,7 +45,8 @@ template<typename valueT, size_t capacityT,
 
       public:
         explicit storage_handle(const allocator_type& alloc) noexcept
-          : allocator_base(alloc),
+          :
+            allocator_base(alloc),
             m_nelem(0)
           {
 #ifdef ROCKET_DEBUG
@@ -53,7 +54,8 @@ template<typename valueT, size_t capacityT,
 #endif
           }
         explicit storage_handle(allocator_type&& alloc) noexcept
-          : allocator_base(noadl::move(alloc)),
+          :
+            allocator_base(noadl::move(alloc)),
             m_nelem(0)
           {
 #ifdef ROCKET_DEBUG
@@ -181,18 +183,21 @@ template<typename valueT, size_t capacityT,
 
       private:
         constexpr vector_iterator(const parent_type* ref, value_type* ptr) noexcept
-          : m_ref(ref), m_ptr(ptr)
+          :
+            m_ref(ref), m_ptr(ptr)
           {
           }
 
       public:
         constexpr vector_iterator() noexcept
-          : vector_iterator(nullptr, nullptr)
+          :
+            vector_iterator(nullptr, nullptr)
           {
           }
         template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
                 constexpr vector_iterator(const vector_iterator<vectorT, yvalueT>& other) noexcept
-          : vector_iterator(other.m_ref, other.m_ptr)
+          :
+            vector_iterator(other.m_ref, other.m_ptr)
           {
           }
 
@@ -418,51 +423,61 @@ template<typename valueT, size_t capacityT,
   public:
     // 26.3.11.2, construct/copy/destroy
     explicit static_vector(const allocator_type& alloc) noexcept
-      : m_sth(alloc)
+      :
+        m_sth(alloc)
       {
       }
     static_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
-      : static_vector(allocator_type())
+      :
+        static_vector(allocator_type())
       {
       }
     static_vector(const static_vector& other) noexcept(is_nothrow_copy_constructible<value_type>::value)
-      : static_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+      :
+        static_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
     static_vector(const static_vector& other, const allocator_type& alloc) noexcept(is_nothrow_copy_constructible<value_type>::value)
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       {
         this->assign(other);
       }
     static_vector(static_vector&& other) noexcept(is_nothrow_move_constructible<value_type>::value)
-      : static_vector(noadl::move(other.m_sth.as_allocator()))
+      :
+        static_vector(noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
     static_vector(static_vector&& other, const allocator_type& alloc) noexcept(is_nothrow_move_constructible<value_type>::value)
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       {
         this->assign(noadl::move(other));
       }
     static_vector(size_type n, const allocator_type& alloc = allocator_type())
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       {
         this->assign(n);
       }
     static_vector(size_type n, const value_type& value, const allocator_type& alloc = allocator_type())
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       {
         this->assign(n, value);
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
         static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
     static_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
-      : static_vector(alloc)
+      :
+        static_vector(alloc)
       {
         this->assign(init);
       }

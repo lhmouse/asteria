@@ -151,7 +151,8 @@ class Statement
 
   public:
     template<typename XstmtT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XstmtT&&)> Statement(XstmtT&& stmt) noexcept
-      : m_stor(rocket::forward<XstmtT>(stmt))
+      :
+        m_stor(rocket::forward<XstmtT>(stmt))
       {
       }
     template<typename XstmtT, ASTERIA_SFINAE_ASSIGN(Xvariant, XstmtT&&)> Statement& operator=(XstmtT&& stmt) noexcept

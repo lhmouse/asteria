@@ -22,13 +22,15 @@ class Parser_Error : public virtual std::exception
 
   public:
     explicit Parser_Error(Parser_Status xstatus)
-      : m_status(xstatus),
+      :
+        m_status(xstatus),
         m_line(-1), m_offset(0), m_length(0)
       {
         this->do_compose_message();
       }
     Parser_Error(Parser_Status xstatus, long xline, size_t xoffset, size_t xlength)
-      : m_status(xstatus),
+      :
+        m_status(xstatus),
         m_line(xline), m_offset(xoffset), m_length(xlength)
       {
         this->do_compose_message();

@@ -36,17 +36,20 @@ template<typename charT, typename traitsT, typename allocT>
 
   public:
     basic_tinybuf_str() noexcept
-      : m_str(), m_off(),
+      :
+        m_str(), m_off(),
         m_mode()
       {
       }
     explicit basic_tinybuf_str(open_mode mode) noexcept
-      : m_str(), m_off(),
+      :
+        m_str(), m_off(),
         m_mode(mode)
       {
       }
     template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode)
-      : m_str(noadl::forward<xstrT>(xstr)), m_off(),
+      :
+        m_str(noadl::forward<xstrT>(xstr)), m_off(),
         m_mode(mode)
       {
       }

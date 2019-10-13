@@ -36,7 +36,8 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
         size_t nelem;
 
         explicit storage_header(void (*xdtor)(...)) noexcept
-          : dtor(xdtor), nref()
+          :
+            dtor(xdtor), nref()
             // `nelem` is uninitialized.
           {
           }
@@ -62,7 +63,8 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
         union { value_type data[0];  };
 
         basic_storage(void (*xdtor)(...), const allocator_type& xalloc, size_type xnblk) noexcept
-          : storage_header(xdtor),
+          :
+            storage_header(xdtor),
             alloc(xalloc), nblk(xnblk)
           {
             this->nelem = 0;
@@ -195,12 +197,14 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
 
       public:
         explicit constexpr storage_handle(const allocator_type& alloc) noexcept
-          : allocator_base(alloc),
+          :
+            allocator_base(alloc),
             m_ptr()
           {
           }
         explicit constexpr storage_handle(allocator_type&& alloc) noexcept
-          : allocator_base(noadl::move(alloc)),
+          :
+            allocator_base(noadl::move(alloc)),
             m_ptr()
           {
           }
@@ -459,18 +463,21 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
 
       private:
         constexpr vector_iterator(const parent_type* ref, value_type* ptr) noexcept
-          : m_ref(ref), m_ptr(ptr)
+          :
+            m_ref(ref), m_ptr(ptr)
           {
           }
 
       public:
         constexpr vector_iterator() noexcept
-          : vector_iterator(nullptr, nullptr)
+          :
+            vector_iterator(nullptr, nullptr)
           {
           }
         template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
             constexpr vector_iterator(const vector_iterator<vectorT, yvalueT>& other) noexcept
-          : vector_iterator(other.m_ref, other.m_ptr)
+          :
+            vector_iterator(other.m_ref, other.m_ptr)
           {
           }
 
@@ -696,40 +703,48 @@ template<typename valueT, typename allocT> class cow_vector
   public:
     // 26.3.11.2, construct/copy/destroy
     explicit constexpr cow_vector(const allocator_type& alloc) noexcept
-      : m_sth(alloc)
+      :
+        m_sth(alloc)
       {
       }
     constexpr cow_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
-      : cow_vector(allocator_type())
+      :
+        cow_vector(allocator_type())
       {
       }
     cow_vector(const cow_vector& other) noexcept
-      : cow_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+      :
+        cow_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
     cow_vector(const cow_vector& other, const allocator_type& alloc) noexcept
-      : cow_vector(alloc)
+      :
+        cow_vector(alloc)
       {
         this->assign(other);
       }
     cow_vector(cow_vector&& other) noexcept
-      : cow_vector(noadl::move(other.m_sth.as_allocator()))
+      :
+        cow_vector(noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
     cow_vector(cow_vector&& other, const allocator_type& alloc) noexcept
-      : cow_vector(alloc)
+      :
+        cow_vector(alloc)
       {
         this->assign(noadl::move(other));
       }
     explicit cow_vector(size_type n, const allocator_type& alloc = allocator_type())
-      : cow_vector(alloc)
+      :
+        cow_vector(alloc)
       {
         this->assign(n);
       }
     cow_vector(size_type n, const value_type& value, const allocator_type& alloc = allocator_type())
-      : cow_vector(alloc)
+      :
+        cow_vector(alloc)
       {
         this->assign(n, value);
       }
@@ -737,18 +752,21 @@ template<typename valueT, typename allocT> class cow_vector
     template<typename firstT, typename... restT,
              ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
         cow_vector(size_type n, const firstT& first, const restT&... rest)
-      : cow_vector(allocator_type())
+      :
+        cow_vector(allocator_type())
       {
         this->assign(n, first, rest...);
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
         cow_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())
-      : cow_vector(alloc)
+      :
+        cow_vector(alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
     cow_vector(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
-      : cow_vector(alloc)
+      :
+        cow_vector(alloc)
       {
         this->assign(init);
       }

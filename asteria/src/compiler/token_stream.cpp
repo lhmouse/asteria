@@ -90,7 +90,8 @@ namespace Asteria {
 
       public:
         Line_Reader(ref_to<tinybuf> xsbuf, const cow_string& xfile)
-          : m_sbuf(xsbuf), m_file(xfile)
+          :
+            m_sbuf(xsbuf), m_file(xfile)
           {
           }
 

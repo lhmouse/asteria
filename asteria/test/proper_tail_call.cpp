@@ -39,8 +39,7 @@ int main()
         ptc(10000);
 
         ptc = func(n) {
-          return (n <= 0) ? n
-                          : ptc(n-1);  // this may blow the system stack up if non-proper.
+          return (n <= 0) ? n : ptc(n-1);  // this may blow the system stack up if non-proper.
         };
         ptc(10000);
       )__"), tinybuf::open_read);

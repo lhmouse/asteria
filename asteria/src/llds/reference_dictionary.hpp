@@ -35,11 +35,13 @@ class Reference_Dictionary
 
   public:
     constexpr Reference_Dictionary() noexcept
-      : m_stor()
+      :
+        m_stor()
       {
       }
     Reference_Dictionary(Reference_Dictionary&& other) noexcept
-      : m_stor()
+      :
+        m_stor()
       {
         std::swap(this->m_stor, other.m_stor);
       }

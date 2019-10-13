@@ -14,17 +14,21 @@ namespace Asteria {
     namespace {
     namespace CRC32 {
 
-    template<uint32_t valueT, uint32_t divisorT, int roundT> struct Generator : Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
+    template<uint32_t valueT, uint32_t divisorT, int roundT>
+        struct Generator : Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
       {
       };
-    template<uint32_t valueT, uint32_t divisorT> struct Generator<valueT, divisorT, 8> : std::integral_constant<uint32_t, valueT>
+    template<uint32_t valueT, uint32_t divisorT>
+        struct Generator<valueT, divisorT, 8> : std::integral_constant<uint32_t, valueT>
       {
       };
-    template<uint32_t divisorT, size_t... indicesT> constexpr array<uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
+    template<uint32_t divisorT, size_t... indicesT>
+        constexpr array<uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
       {
         return {{ Generator<uint8_t(indicesT), divisorT, 0>::value... }};
       }
-    template<uint32_t divisorT> constexpr array<uint32_t, 256> do_generate_table() noexcept
+    template<uint32_t divisorT>
+        constexpr array<uint32_t, 256> do_generate_table() noexcept
       {
         return do_generate_table_impl<divisorT>(std::make_index_sequence<256>());
       }
@@ -39,7 +43,8 @@ namespace Asteria {
 
       public:
         Hasher() noexcept
-          : m_reg(s_init)
+          :
+            m_reg(s_init)
           {
           }
 
@@ -156,7 +161,8 @@ G_integer std_checksum_crc32(const G_string& data)
 
       public:
         Hasher() noexcept
-          : m_reg(s_offset)
+          :
+            m_reg(s_offset)
           {
           }
 
@@ -359,8 +365,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
       public:
         Hasher() noexcept
-          : m_regs(s_init),
-            m_size(0)
+          :
+            m_regs(s_init), m_size(0)
           {
           }
 
@@ -645,8 +651,8 @@ G_string std_checksum_md5(const G_string& data)
 
       public:
         Hasher() noexcept
-          : m_regs(s_init),
-            m_size(0)
+          :
+            m_regs(s_init), m_size(0)
           {
           }
 
@@ -944,7 +950,8 @@ G_string std_checksum_sha1(const G_string& data)
     namespace {
     namespace SHA256 {
 
-    constexpr std::array<uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
+    constexpr std::array<uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+                                                  0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
 
     class Hasher final : public Abstract_Opaque
       {
@@ -955,8 +962,8 @@ G_string std_checksum_sha1(const G_string& data)
 
       public:
         Hasher() noexcept
-          : m_regs(s_init),
-            m_size(0)
+          :
+            m_regs(s_init), m_size(0)
           {
           }
 

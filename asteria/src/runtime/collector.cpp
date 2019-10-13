@@ -44,7 +44,8 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 
       public:
         explicit Recursion_Sentry(ref_to<long> ref) noexcept
-          : m_old(ref), m_ref(ref)
+          :
+            m_old(ref), m_ref(ref)
           {
             this->m_ref++;
           }
@@ -72,7 +73,8 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 
       public:
         explicit Callback_Wrapper(FuncT&& func)
-          : m_func(rocket::forward<FuncT>(func))
+          :
+            m_func(rocket::forward<FuncT>(func))
           {
           }
 

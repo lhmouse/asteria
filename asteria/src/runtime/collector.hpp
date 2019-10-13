@@ -26,7 +26,8 @@ class Collector
 
   public:
     Collector(Variable_HashSet* output_opt, Collector* tied_opt, uint32_t threshold) noexcept
-      : m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold)
+      :
+        m_output_opt(output_opt), m_tied_opt(tied_opt), m_threshold(threshold)
       {
       }
 

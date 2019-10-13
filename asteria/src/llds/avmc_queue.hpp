@@ -69,11 +69,13 @@ class AVMC_Queue
 
   public:
     constexpr AVMC_Queue() noexcept
-      : m_stor()
+      :
+        m_stor()
       {
       }
     AVMC_Queue(AVMC_Queue&& other) noexcept
-      : m_stor()
+      :
+        m_stor()
       {
         std::swap(this->m_stor, other.m_stor);
       }

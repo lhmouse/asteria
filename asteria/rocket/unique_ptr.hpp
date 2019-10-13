@@ -42,17 +42,20 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
 
       public:
         constexpr stored_pointer() noexcept(is_nothrow_constructible<deleter_type>::value)
-          : deleter_base(),
+          :
+            deleter_base(),
             m_ptr()
           {
           }
         explicit constexpr stored_pointer(const deleter_type& del) noexcept
-          : deleter_base(del),
+          :
+            deleter_base(del),
             m_ptr()
           {
           }
         explicit constexpr stored_pointer(deleter_type&& del) noexcept
-          : deleter_base(noadl::move(del)),
+          :
+            deleter_base(noadl::move(del)),
             m_ptr()
           {
           }
@@ -135,20 +138,24 @@ template<typename elementT, typename deleterT> class unique_ptr
   public:
     // 23.11.1.2.1, constructors
     constexpr unique_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
-      : m_sth()
+      :
+        m_sth()
       {
       }
     explicit constexpr unique_ptr(const deleter_type& del) noexcept
-      : m_sth(del)
+      :
+        m_sth(del)
       {
       }
     explicit unique_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
-      : unique_ptr()
+      :
+        unique_ptr()
       {
         this->reset(ptr);
       }
     unique_ptr(pointer ptr, const deleter_type& del) noexcept
-      : unique_ptr(del)
+      :
+        unique_ptr(del)
       {
         this->reset(ptr);
       }
@@ -156,17 +163,20 @@ template<typename elementT, typename deleterT> class unique_ptr
              ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
                                           is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
         unique_ptr(unique_ptr<yelementT, ydeleterT>&& other) noexcept
-      : unique_ptr(noadl::move(other.m_sth.as_deleter()))
+      :
+        unique_ptr(noadl::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
       }
     unique_ptr(unique_ptr&& other) noexcept
-      : unique_ptr(noadl::move(other.m_sth.as_deleter()))
+      :
+        unique_ptr(noadl::move(other.m_sth.as_deleter()))
       {
         this->reset(other.m_sth.release());
       }
     unique_ptr(unique_ptr&& other, const deleter_type& del) noexcept
-      : unique_ptr(del)
+      :
+        unique_ptr(del)
       {
         this->reset(other.m_sth.release());
       }

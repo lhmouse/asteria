@@ -33,7 +33,8 @@ class Argument_Reader
 
   public:
     Argument_Reader(const cow_string& name, ref_to<const cow_vector<Reference>> args) noexcept
-      : m_name(name), m_args(args), m_throw_on_failure(false),
+      :
+        m_name(name), m_args(args), m_throw_on_failure(false),
         m_overloads(), m_state()
       {
       }

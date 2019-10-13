@@ -18,13 +18,15 @@ class Exception : public std::exception
 
   public:
     template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalT&&)> Exception(const Source_Location& sloc, XvalT&& xval)
-      : m_value(rocket::forward<XvalT>(xval))
+      :
+        m_value(rocket::forward<XvalT>(xval))
       {
         this->m_frames.emplace_back(frame_type_throw, sloc,
                                     this->m_value);
       }
     explicit Exception(const std::exception& stdex)
-      : m_value(G_string(stdex.what()))
+      :
+        m_value(G_string(stdex.what()))
       {
         this->m_frames.emplace_back(frame_type_native, rocket::sref("<native code>"), -1,
                                     this->m_value);

@@ -266,7 +266,8 @@ DCE_Result AIR_Node::optimize_dce()
         ParamU paramu;
 
         constexpr AVMC_Appender()
-          : SparamT(), paramu()
+          :
+            SparamT(), paramu()
           {
           }
 
@@ -286,7 +287,8 @@ DCE_Result AIR_Node::optimize_dce()
         ParamU paramu;
 
         constexpr AVMC_Appender()
-          : SparamT(), paramu()
+          :
+            SparamT(), paramu()
           {
           }
 
@@ -306,7 +308,8 @@ DCE_Result AIR_Node::optimize_dce()
         ParamU paramu;
 
         constexpr AVMC_Appender()
-          : paramu()
+          :
+            paramu()
           {
           }
 

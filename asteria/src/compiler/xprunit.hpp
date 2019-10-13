@@ -100,7 +100,8 @@ class Xprunit
 
   public:
     template<typename XunitT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XunitT&&)> Xprunit(XunitT&& unit) noexcept
-      : m_stor(rocket::forward<XunitT>(unit))
+      :
+        m_stor(rocket::forward<XunitT>(unit))
       {
       }
     template<typename XunitT, ASTERIA_SFINAE_ASSIGN(Xvariant, XunitT&&)> Xprunit& operator=(XunitT&& unit) noexcept

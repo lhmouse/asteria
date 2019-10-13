@@ -57,7 +57,8 @@ namespace Asteria {
 
       public:
         explicit Indenter_string(const cow_string& add)
-          : m_add(add), m_cur(rocket::sref("\n"))
+          :
+            m_add(add), m_cur(rocket::sref("\n"))
           {
           }
 
@@ -84,7 +85,8 @@ namespace Asteria {
 
       public:
         explicit Indenter_spaces(size_t add)
-          : m_add(add), m_cur(0)
+          :
+            m_add(add), m_cur(0)
           {
           }
 

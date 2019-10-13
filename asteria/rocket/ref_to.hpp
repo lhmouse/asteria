@@ -28,12 +28,14 @@ template<typename valueT> class ref_to
     // construct/copy/destroy
     template<typename otherT, ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
         explicit constexpr ref_to(otherT& other) noexcept
-      : m_ptr(::std::addressof(other))
+      :
+        m_ptr(::std::addressof(other))
       {
       }
     template<typename otherT, ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
         constexpr ref_to(ref_to<otherT> other) noexcept
-      : m_ptr(other.m_ptr)
+      :
+        m_ptr(other.m_ptr)
       {
       }
 

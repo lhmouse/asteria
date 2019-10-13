@@ -42,15 +42,18 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 
       public:
         explicit constexpr shallow(const charT* ptr) noexcept
-          : m_ptr(ptr), m_len(traitsT::length(ptr))
+          :
+            m_ptr(ptr), m_len(traitsT::length(ptr))
           {
           }
         constexpr shallow(const charT* ptr, size_t len) noexcept
-          : m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))
+          :
+            m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))
           {
           }
         template<typename allocT> explicit shallow(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
-          : m_ptr(str.c_str()), m_len(str.length())
+          :
+            m_ptr(str.c_str()), m_len(str.length())
           {
           }
 
@@ -70,7 +73,8 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
         mutable reference_counter<long> nref;
 
         explicit storage_header() noexcept
-          : nref()
+          :
+            nref()
           {
           }
       };
@@ -95,7 +99,8 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
         union { value_type data[0];  };
 
         basic_storage(const allocator_type& xalloc, size_type xnblk) noexcept
-          : alloc(xalloc), nblk(xnblk)
+          :
+            alloc(xalloc), nblk(xnblk)
           {
           }
         ~basic_storage()
@@ -127,12 +132,14 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 
       public:
         explicit constexpr storage_handle(const allocator_type& alloc) noexcept
-          : allocator_base(alloc),
+          :
+            allocator_base(alloc),
             m_ptr()
           {
           }
         explicit constexpr storage_handle(allocator_type&& alloc) noexcept
-          : allocator_base(noadl::move(alloc)),
+          :
+            allocator_base(noadl::move(alloc)),
             m_ptr()
           {
           }
@@ -347,18 +354,21 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 
       private:
         constexpr string_iterator(const parent_type* ref, value_type* ptr) noexcept
-          : m_ref(ref), m_ptr(ptr)
+          :
+            m_ref(ref), m_ptr(ptr)
           {
           }
 
       public:
         constexpr string_iterator() noexcept
-          : string_iterator(nullptr, nullptr)
+          :
+            string_iterator(nullptr, nullptr)
           {
           }
         template<typename ycharT, ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
                 constexpr string_iterator(const string_iterator<stringT, ycharT>& other) noexcept
-          : string_iterator(other.m_ref, other.m_ptr)
+          :
+            string_iterator(other.m_ref, other.m_ptr)
           {
           }
 
@@ -696,70 +706,84 @@ template<typename charT, typename traitsT,
   public:
     // 24.3.2.2, construct/copy/destroy
     explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
-      : m_ptr(::std::addressof(null_char)), m_len(0), m_sth(alloc)
+      :
+        m_ptr(::std::addressof(null_char)), m_len(0), m_sth(alloc)
       {
       }
     constexpr basic_cow_string(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
-      : basic_cow_string(allocator_type())
+      :
+        basic_cow_string(allocator_type())
       {
       }
     constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc) noexcept
-      : m_ptr(sh.c_str()), m_len(sh.length()), m_sth(alloc)
+      :
+        m_ptr(sh.c_str()), m_len(sh.length()), m_sth(alloc)
       {
       }
     constexpr basic_cow_string(shallow_type sh) noexcept(is_nothrow_constructible<allocator_type>::value)
-      : basic_cow_string(sh, allocator_type())
+      :
+        basic_cow_string(sh, allocator_type())
       {
       }
     basic_cow_string(const basic_cow_string& other) noexcept
-      : basic_cow_string(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+      :
+        basic_cow_string(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
     basic_cow_string(const basic_cow_string& other, const allocator_type& alloc) noexcept
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       {
         this->assign(other);
       }
     basic_cow_string(basic_cow_string&& other) noexcept
-      : basic_cow_string(noadl::move(other.m_sth.as_allocator()))
+      :
+        basic_cow_string(noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
     basic_cow_string(basic_cow_string&& other, const allocator_type& alloc) noexcept
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       {
         this->assign(noadl::move(other));
       }
     basic_cow_string(const basic_cow_string& other, size_type pos, size_type n = npos,
                      const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       {
         this->assign(other, pos, n);
       }
     basic_cow_string(const value_type* s, size_type n, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       {
         this->assign(s, n);
       }
     explicit basic_cow_string(const value_type* s, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       {
         this->assign(s);
       }
     basic_cow_string(size_type n, value_type ch, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       {
         this->assign(n, ch);
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
         basic_cow_string(inputT first, inputT last, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
     basic_cow_string(initializer_list<value_type> init, const allocator_type& alloc = allocator_type())
-      : basic_cow_string(alloc)
+      :
+        basic_cow_string(alloc)
       {
         this->assign(init);
       }

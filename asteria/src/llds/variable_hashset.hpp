@@ -34,11 +34,13 @@ class Variable_HashSet
 
   public:
     constexpr Variable_HashSet() noexcept
-      : m_stor()
+      :
+        m_stor()
       {
       }
     Variable_HashSet(Variable_HashSet&& other) noexcept
-      : m_stor()
+      :
+        m_stor()
       {
         std::swap(this->m_stor, other.m_stor);
       }

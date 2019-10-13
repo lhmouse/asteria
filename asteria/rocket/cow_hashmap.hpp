@@ -39,7 +39,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         size_t nelem;
 
         explicit storage_header(void (*xdtor)(...)) noexcept
-          : dtor(xdtor), nref()
+          :
+            dtor(xdtor), nref()
             // `nelem` is uninitialized.
           {
           }
@@ -123,7 +124,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         union { bucket_type data[0];  };
 
         pointer_storage(void (*xdtor)(...), const allocator_type& xalloc, size_type xnblk) noexcept
-          : storage_header(xdtor),
+          :
+            storage_header(xdtor),
             alloc(xalloc), nblk(xnblk)
           {
             auto nbkt = pointer_storage::max_nbkt_for_nblk(this->nblk);
@@ -281,7 +283,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
       public:
         constexpr storage_handle(const allocator_type& alloc, const hasher& hf, const key_equal& eq)
-          : allocator_base(alloc),
+          :
+            allocator_base(alloc),
             conditional<is_same<hashT, allocT>::value,
                         ebo_placeholder<0>, hasher_base>::type(hf),
             conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
@@ -290,7 +293,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           {
           }
         constexpr storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
-          : allocator_base(noadl::move(alloc)),
+          :
+            allocator_base(noadl::move(alloc)),
             conditional<is_same<hashT, allocT>::value,
                         ebo_placeholder<0>, hasher_base>::type(hf),
             conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
@@ -671,22 +675,26 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
       private:
         constexpr hashmap_iterator(const parent_type* ref, bucket_type* bkt) noexcept
-          : m_ref(ref), m_bkt(bkt)
+          :
+            m_ref(ref), m_bkt(bkt)
           {
           }
         hashmap_iterator(const parent_type* ref, needs_adjust_tag, bucket_type* hint) noexcept
-          : m_ref(ref), m_bkt(this->do_adjust_forwards(hint))
+          :
+            m_ref(ref), m_bkt(this->do_adjust_forwards(hint))
           {
           }
 
       public:
         constexpr hashmap_iterator() noexcept
-          : hashmap_iterator(nullptr, nullptr)
+          :
+            hashmap_iterator(nullptr, nullptr)
           {
           }
         template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
             constexpr hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT>& other) noexcept
-          : hashmap_iterator(other.m_ref, other.m_bkt)
+          :
+            hashmap_iterator(other.m_ref, other.m_bkt)
           {
           }
 
@@ -820,87 +828,102 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     explicit constexpr cow_hashmap(const allocator_type& alloc)
         noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
                              is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>>::value)
-      : m_sth(alloc, hasher(), key_equal())
+      :
+        m_sth(alloc, hasher(), key_equal())
       {
       }
     constexpr cow_hashmap(clear_t = clear_t())
         noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
                              is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
                              is_nothrow_constructible<allocator_type>>::value)
-      : cow_hashmap(allocator_type())
+      :
+        cow_hashmap(allocator_type())
       {
       }
     explicit cow_hashmap(size_type res_arg, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
                          const allocator_type& alloc = allocator_type())
-      : m_sth(alloc, hf, eq)
+      :
+        m_sth(alloc, hf, eq)
       {
         this->m_sth.reallocate(0, 0, 0, res_arg);
       }
     cow_hashmap(size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
+      :
+        cow_hashmap(res_arg, hasher(), key_equal(), alloc)
       {
       }
     cow_hashmap(size_type res_arg, const hasher& hf, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hf, key_equal(), alloc)
+      :
+        cow_hashmap(res_arg, hf, key_equal(), alloc)
       {
       }
     cow_hashmap(const cow_hashmap& other) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                                                                is_nothrow_copy_constructible<key_equal>>::value)
-      : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(),
+      :
+        cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(),
                     allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
     cow_hashmap(const cow_hashmap& other, const allocator_type& alloc) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                                                                                             is_nothrow_copy_constructible<key_equal>>::value)
-      : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), alloc)
+      :
+        cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), alloc)
       {
         this->assign(other);
       }
     cow_hashmap(cow_hashmap&& other) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                                                           is_nothrow_copy_constructible<key_equal>>::value)
-      : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), noadl::move(other.m_sth.as_allocator()))
+      :
+        cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
     cow_hashmap(cow_hashmap&& other, const allocator_type& alloc) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                                                                                        is_nothrow_copy_constructible<key_equal>>::value)
-      : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), alloc)
+      :
+        cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), alloc)
       {
         this->assign(noadl::move(other));
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
         cow_hashmap(inputT first, inputT last, size_type res_arg = 0,
                     const hasher& hf = hasher(), const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
-      : cow_hashmap(res_arg, hf, eq, alloc)
+      :
+        cow_hashmap(res_arg, hf, eq, alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
         cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hf, key_equal(), alloc)
+      :
+        cow_hashmap(res_arg, hf, key_equal(), alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
         cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
+      :
+        cow_hashmap(res_arg, hasher(), key_equal(), alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
     cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0,
                 const hasher& hf = hasher(), const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
-      : cow_hashmap(res_arg, hf, eq, alloc)
+      :
+        cow_hashmap(res_arg, hf, eq, alloc)
       {
         this->assign(init);
       }
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const hasher& hf, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hf, key_equal(), alloc)
+      :
+        cow_hashmap(res_arg, hf, key_equal(), alloc)
       {
         this->assign(init);
       }
     cow_hashmap(initializer_list<value_type> init, size_type res_arg, const allocator_type& alloc)
-      : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
+      :
+        cow_hashmap(res_arg, hasher(), key_equal(), alloc)
       {
         this->assign(init);
       }

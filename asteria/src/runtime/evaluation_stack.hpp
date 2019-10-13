@@ -17,7 +17,8 @@ class Evaluation_Stack
 
   public:
     Evaluation_Stack() noexcept
-      : m_etop(nullptr), m_refs()
+      :
+        m_etop(nullptr), m_refs()
       {
       }
     ~Evaluation_Stack();
