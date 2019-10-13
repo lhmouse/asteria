@@ -22,10 +22,12 @@ template<typename valueT, size_t capacityT,
 
     namespace details_array {
 
-    template<typename valueT, size_t capacityT, size_t... nestedT> struct element_type_of : enable_if<1, array<valueT, nestedT...>>
+    template<typename valueT, size_t capacityT, size_t... nestedT>
+        struct element_type_of : enable_if<1, array<valueT, nestedT...>>
       {
       };
-    template<typename valueT, size_t capacityT> struct element_type_of<valueT, capacityT> : enable_if<1, valueT>
+    template<typename valueT, size_t capacityT>
+        struct element_type_of<valueT, capacityT> : enable_if<1, valueT>
       {
       };
 
@@ -176,7 +178,8 @@ template<typename valueT, size_t capacityT,
         return this->data()[cnt - 1];
       }
 
-    // There is no `at()` overload that returns a non-const reference. This is the consequent overload which does that.
+    // There is no `at()` overload that returns a non-const reference.
+    // This is the consequent overload which does that.
     // N.B. This is a non-standard extension.
     reference mut(size_type pos)
       {
@@ -203,7 +206,8 @@ template<typename valueT, size_t capacityT,
 
     void swap(array& other) noexcept(is_nothrow_swappable<value_type>::value)
       {
-        noadl::ranged_for(size_type(), capacityT, [&](size_type i) { noadl::adl_swap(this->storage[i], other.storage[i]);  });
+        noadl::ranged_for(size_type(), capacityT,
+                          [&](size_type i) { noadl::adl_swap(this->storage[i], other.storage[i]);  });
       }
 
     // element access
@@ -219,9 +223,9 @@ template<typename valueT, size_t capacityT,
       }
   };
 
-template<typename valueT, size_t capacityT,
-         size_t... nestedT> void swap(array<valueT, capacityT, nestedT...>& lhs,
-                                      array<valueT, capacityT, nestedT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename valueT, size_t capacityT, size_t... nestedT>
+    void swap(array<valueT, capacityT, nestedT...>& lhs,
+              array<valueT, capacityT, nestedT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }

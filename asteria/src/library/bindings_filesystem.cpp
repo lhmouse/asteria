@@ -79,7 +79,7 @@ opt<G_object> std_filesystem_get_information(const G_string& path)
   {
     struct ::stat stb;
     if(::lstat(path.c_str(), &stb) != 0) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // Convert the result to an `object`.
     G_object stat;
@@ -138,7 +138,7 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
     if(err == ENOTDIR) {
       // This is something not a directory.
       if(::unlink(path.c_str()) != 0) {
-        return rocket::nullopt;
+        return rocket::clear;
       }
       // Succeed.
       return G_integer(1);
@@ -162,7 +162,7 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
       if(pair.first == rmlist_rmdir) {
         // This is an empty directory. Remove it.
         if(::rmdir(pair.second.c_str()) != 0) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         count++;
         continue;
@@ -170,7 +170,7 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
       if(pair.first == rmlist_unlink) {
         // This is a plain file. Remove it.
         if(::unlink(pair.second.c_str()) != 0) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         count++;
         continue;
@@ -182,7 +182,7 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
       // Append all entries.
       Directory hd(::opendir(pair.second.c_str()));
       if(!hd) {
-        return rocket::nullopt;
+        return rocket::clear;
       }
       // Write entries.
       struct ::dirent* next;
@@ -208,7 +208,7 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
           // If the file type is unknown, ask for it.
           struct ::stat stb;
           if(::lstat(child.c_str(), &stb) != 0) {
-            return rocket::nullopt;
+            return rocket::clear;
           }
           is_dir = S_ISDIR(stb.st_mode);
         }
@@ -223,7 +223,7 @@ opt<G_object> std_filesystem_directory_list(const G_string& path)
   {
     Directory hd(::opendir(path.c_str()));
     if(!hd) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // Write entries.
     G_object entries;
@@ -254,7 +254,7 @@ opt<G_object> std_filesystem_directory_list(const G_string& path)
         // Identify the entry.
         struct ::stat stb;
         if(::lstat(child.c_str(), &stb) != 0) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         entry.try_emplace(rocket::sref("b_dir"),
           G_boolean(
@@ -279,16 +279,16 @@ opt<G_integer> std_filesystem_directory_create(const G_string& path)
     }
     auto err = errno;
     if(err != EEXIST) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // Fail only if it is not a directory that exists.
     struct ::stat stb;
     if(::stat(path.c_str(), &stb) != 0) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     if(!S_ISDIR(stb.st_mode)) {
       ASTERIA_DEBUG_LOG("A file that is not a directory exists on \'", path, "\'.");
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // The directory already exists.
     return G_integer(0);
@@ -302,7 +302,7 @@ opt<G_integer> std_filesystem_directory_remove(const G_string& path)
     }
     auto err = errno;
     if((err != ENOTEMPTY) && (err != EEXIST)) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // The directory is not empty.
     return G_integer(0);
@@ -319,7 +319,7 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
     // Open the file for reading.
     File hf(::open(path.c_str(), O_RDONLY));
     if(!hf) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // Don't read too many bytes at a time.
     data.resize(static_cast<size_t>(rlimit));
@@ -333,7 +333,7 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
       nread = ::read(hf, data.mut_data(), data.size());
     }
     if(nread < 0) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     data.erase(static_cast<size_t>(nread));
     return rocket::move(data);

@@ -14,7 +14,8 @@ template<typename stringT,
 
     namespace details_prehashed_string {
 
-    template<typename stringT, typename hashT> class string_storage : private allocator_wrapper_base_for<hashT>::type
+    template<typename stringT, typename hashT>
+        class string_storage : private allocator_wrapper_base_for<hashT>::type
       {
       public:
         using string_type  = stringT;
@@ -90,7 +91,8 @@ template<typename stringT,
 
 template<typename stringT, typename hashT> class basic_prehashed_string
   {
-    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const stringT&>())), "The hash operation shall not throw exceptions.");
+    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const stringT&>())),
+                  "The hash operation shall not throw exceptions.");
 
   public:
     // types
@@ -118,15 +120,16 @@ template<typename stringT, typename hashT> class basic_prehashed_string
     details_prehashed_string::string_storage<string_type, hasher> m_sth;
 
   public:
-    basic_prehashed_string() noexcept(conjunction<is_nothrow_constructible<string_type>,
-                                                  is_nothrow_constructible<hasher>,
-                                                  is_nothrow_copy_constructible<hasher>>::value)
+    basic_prehashed_string()
+        noexcept(conjunction<is_nothrow_constructible<string_type>,
+                             is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hasher())
       {
       }
-    template<typename... paramsT> explicit basic_prehashed_string(const hasher& hf,
-                                                                  paramsT&&... params) noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
-                                                                                                            is_nothrow_copy_constructible<hasher>>::value)
+    template<typename... paramsT>
+        explicit basic_prehashed_string(const hasher& hf, paramsT&&... params)
+          noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
+                               is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(hf, noadl::forward<paramsT>(params)...)
       {
       }
@@ -138,7 +141,8 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       : m_sth(hf, noadl::move(str))
       {
       }
-    template<typename paramT, ROCKET_ENABLE_IF(is_convertible<paramT, string_type>::value)> basic_prehashed_string(paramT&& param, const hasher& hf = hasher())
+    template<typename paramT, ROCKET_ENABLE_IF(is_convertible<paramT, string_type>::value)>
+         basic_prehashed_string(paramT&& param, const hasher& hf = hasher())
       : m_sth(hf, noadl::forward<paramT>(param))
       {
       }
@@ -146,16 +150,16 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       : m_sth(hf, init)
       {
       }
-    basic_prehashed_string(const basic_prehashed_string& other) noexcept(conjunction<is_nothrow_constructible<string_type>,
-                                                                                     is_nothrow_copy_assignable<string_type>,
-                                                                                     is_nothrow_copy_constructible<hasher>>::value)
+    basic_prehashed_string(const basic_prehashed_string& other)
+        noexcept(conjunction<is_nothrow_constructible<string_type>, is_nothrow_copy_assignable<string_type>,
+                             is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(other.m_sth.as_hasher())
       {
         this->m_sth.assign(other.m_sth);
       }
-    basic_prehashed_string(basic_prehashed_string&& other) noexcept(conjunction<is_nothrow_constructible<string_type>,
-                                                                                is_nothrow_move_assignable<string_type>,
-                                                                                is_nothrow_copy_constructible<hasher>>::value)
+    basic_prehashed_string(basic_prehashed_string&& other)
+        noexcept(conjunction<is_nothrow_constructible<string_type>, is_nothrow_move_assignable<string_type>,
+                             is_nothrow_copy_constructible<hasher>>::value)
       : m_sth(other.m_sth.as_hasher())
       {
         this->m_sth.assign(noadl::move(other.m_sth));
@@ -165,12 +169,14 @@ template<typename stringT, typename hashT> class basic_prehashed_string
         this->m_sth.assign(init);
         return *this;
       }
-    basic_prehashed_string& operator=(const basic_prehashed_string& other) noexcept(is_nothrow_copy_assignable<string_type>::value)
+    basic_prehashed_string& operator=(const basic_prehashed_string& other)
+        noexcept(is_nothrow_copy_assignable<string_type>::value)
       {
         this->m_sth.assign(other.m_sth);
         return *this;
       }
-    basic_prehashed_string& operator=(basic_prehashed_string&& other) noexcept(is_nothrow_move_assignable<string_type>::value)
+    basic_prehashed_string& operator=(basic_prehashed_string&& other)
+        noexcept(is_nothrow_move_assignable<string_type>::value)
       {
         this->m_sth.assign(noadl::move(other.m_sth));
         return *this;
@@ -319,56 +325,55 @@ using prehashed_wstring    = basic_prehashed_string<cow_wstring,   cow_wstring::
 using prehashed_u16string  = basic_prehashed_string<cow_u16string, cow_u16string::hash>;
 using prehashed_u32string  = basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
-template<typename stringT, typename hashT> bool operator==(const basic_prehashed_string<stringT, hashT>& lhs,
-                                                           const basic_prehashed_string<stringT, hashT>& rhs)
+template<typename stringT, typename hashT>
+    bool operator==(const basic_prehashed_string<stringT, hashT>& lhs,
+                    const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return (lhs.rdhash() == rhs.rdhash()) && (lhs.rdstr() == rhs.rdstr());
   }
-template<typename stringT, typename hashT> bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs,
-                                                           const basic_prehashed_string<stringT, hashT>& rhs)
+template<typename stringT, typename hashT>
+    bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs,
+                    const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return (lhs.rdhash() != rhs.rdhash()) || (lhs.rdstr() != rhs.rdstr());
   }
 
 template<typename stringT, typename hashT, typename otherT,
-         ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>()
-                                 == ::std::declval<const otherT&>()))> bool operator==(const basic_prehashed_string<stringT, hashT>& lhs,
-                                                                                       const otherT& rhs)
+         ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>() == ::std::declval<const otherT&>()))>
+    bool operator==(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
   {
     return lhs.rdstr() == rhs;
   }
 template<typename stringT, typename hashT, typename otherT,
-         ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>()
-                                 != ::std::declval<const otherT&>()))> bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs,
-                                                                                       const otherT& rhs)
+         ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>() != ::std::declval<const otherT&>()))>
+    bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
   {
     return lhs.rdstr() != rhs;
   }
 
 template<typename stringT, typename hashT, typename otherT,
-         ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>()
-                                 == ::std::declval<const stringT&>()))> bool operator==(const otherT& lhs,
-                                                                                        const basic_prehashed_string<stringT, hashT>& rhs)
+         ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>() == ::std::declval<const stringT&>()))>
+    bool operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return lhs == rhs.rdstr();
   }
 template<typename stringT, typename hashT, typename otherT,
-         ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>()
-                                 != ::std::declval<const stringT&>()))> bool operator!=(const otherT& lhs,
-                                                                                        const basic_prehashed_string<stringT, hashT>& rhs)
+         ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>() != ::std::declval<const stringT&>()))>
+    bool operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return lhs != rhs.rdstr();
   }
 
-template<typename stringT, typename hashT> void swap(basic_prehashed_string<stringT, hashT>& lhs,
-                                                     basic_prehashed_string<stringT, hashT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename stringT, typename hashT>
+    void swap(basic_prehashed_string<stringT, hashT>& lhs,
+              basic_prehashed_string<stringT, hashT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT,
-         typename stringT, typename hashT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                                                                     const basic_prehashed_string<stringT, hashT>& str)
+template<typename charT, typename traitsT, typename stringT, typename hashT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                              const basic_prehashed_string<stringT, hashT>& str)
   {
     return fmt << str.rdstr();
   }

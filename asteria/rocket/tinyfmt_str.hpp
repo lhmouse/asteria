@@ -71,7 +71,8 @@ template<typename charT, typename traitsT,
       {
         return this->m_buf.clear_string(mode), *this;
       }
-    template<typename xstrT> basic_tinyfmt_str& set_string(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
+    template<typename xstrT>
+        basic_tinyfmt_str& set_string(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
       {
         return this->m_buf.set_string(noadl::forward<xstrT>(xstr), mode), *this;
       }

@@ -46,8 +46,9 @@ template<typename elementT> class refcnt_ptr;
 
     }
 
-template<typename elementT, typename deleterT> class refcnt_base : public virtual details_refcnt_ptr::reference_counter_base,
-                                                                   private virtual allocator_wrapper_base_for<deleterT>::type
+template<typename elementT, typename deleterT>
+    class refcnt_base : public virtual details_refcnt_ptr::reference_counter_base,
+                        private virtual allocator_wrapper_base_for<deleterT>::type
   {
   public:
     using element_type  = elementT;
@@ -60,8 +61,9 @@ template<typename elementT, typename deleterT> class refcnt_base : public virtua
   private:
     [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info& ytype) const
       {
-        noadl::sprintf_and_throw<domain_error>("refcnt_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
-                                               ytype.name(), typeid(*this).name());
+        noadl::sprintf_and_throw<domain_error>(
+          "refcnt_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
+          ytype.name(), typeid(*this).name());
       }
 
   public:
@@ -118,7 +120,8 @@ template<typename elementT, typename deleterT> class refcnt_base : public virtua
 
     namespace details_refcnt_ptr {
 
-    template<typename elementT, typename deleterT> deleterT copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
+    template<typename elementT, typename deleterT>
+        deleterT copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
       {
         return base.as_deleter();
       }
@@ -202,8 +205,8 @@ template<typename elementT, typename deleterT> class refcnt_base : public virtua
           }
       };
 
-    template<typename targetT, typename sourceT,
-             typename casterT> refcnt_ptr<targetT> pointer_cast_aux(const refcnt_ptr<sourceT>& sptr, casterT&& caster)
+    template<typename targetT, typename sourceT, typename casterT>
+        refcnt_ptr<targetT> pointer_cast_aux(const refcnt_ptr<sourceT>& sptr, casterT&& caster)
       {
         refcnt_ptr<targetT> dptr;
         // Try casting.
@@ -215,8 +218,8 @@ template<typename elementT, typename deleterT> class refcnt_base : public virtua
         }
         return dptr;
       }
-    template<typename targetT, typename sourceT,
-             typename casterT> refcnt_ptr<targetT> pointer_cast_aux(refcnt_ptr<sourceT>&& sptr, casterT&& caster)
+    template<typename targetT, typename sourceT, typename casterT>
+        refcnt_ptr<targetT> pointer_cast_aux(refcnt_ptr<sourceT>&& sptr, casterT&& caster)
       {
         refcnt_ptr<targetT> dptr;
         // Try casting.
@@ -255,13 +258,13 @@ template<typename elementT> class refcnt_ptr
         this->reset(ptr);
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
-            refcnt_ptr(const refcnt_ptr<yelementT>& other) noexcept
+        refcnt_ptr(const refcnt_ptr<yelementT>& other) noexcept
       : refcnt_ptr()
       {
         this->reset(other.m_sth.fork());
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
-            refcnt_ptr(refcnt_ptr<yelementT>&& other) noexcept
+        refcnt_ptr(refcnt_ptr<yelementT>&& other) noexcept
       : refcnt_ptr()
       {
         this->reset(other.m_sth.release());
@@ -282,13 +285,13 @@ template<typename elementT> class refcnt_ptr
         return *this;
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
-            refcnt_ptr& operator=(const refcnt_ptr<yelementT>& other) noexcept
+        refcnt_ptr& operator=(const refcnt_ptr<yelementT>& other) noexcept
       {
         this->reset(other.m_sth.fork());
         return *this;
       }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_ptr<yelementT>::pointer, pointer>::value)>
-            refcnt_ptr& operator=(refcnt_ptr<yelementT>&& other) noexcept
+        refcnt_ptr& operator=(refcnt_ptr<yelementT>&& other) noexcept
       {
         this->reset(other.m_sth.release());
         return *this;
@@ -355,100 +358,111 @@ template<typename elementT> class refcnt_ptr
       }
   };
 
-template<typename xelementT,
-         typename yelementT> constexpr bool operator==(const refcnt_ptr<xelementT>& lhs,
-                                                       const refcnt_ptr<yelementT>& rhs) noexcept
+template<typename xelementT, typename yelementT>
+    constexpr bool operator==(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs) noexcept
   {
     return lhs.get() == rhs.get();
   }
-template<typename xelementT,
-         typename yelementT> constexpr bool operator!=(const refcnt_ptr<xelementT>& lhs,
-                                                       const refcnt_ptr<yelementT>& rhs) noexcept
+template<typename xelementT, typename yelementT>
+    constexpr bool operator!=(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs) noexcept
   {
     return lhs.get() != rhs.get();
   }
-template<typename xelementT,
-         typename yelementT> constexpr bool operator<(const refcnt_ptr<xelementT>& lhs,
-                                                      const refcnt_ptr<yelementT>& rhs)
+template<typename xelementT, typename yelementT>
+    constexpr bool operator<(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs)
   {
     return lhs.get() < rhs.get();
   }
-template<typename xelementT,
-         typename yelementT> constexpr bool operator>(const refcnt_ptr<xelementT>& lhs,
-                                                      const refcnt_ptr<yelementT>& rhs)
+template<typename xelementT, typename yelementT>
+    constexpr bool operator>(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs)
   {
     return lhs.get() > rhs.get();
   }
-template<typename xelementT,
-         typename yelementT> constexpr bool operator<=(const refcnt_ptr<xelementT>& lhs,
-                                                       const refcnt_ptr<yelementT>& rhs)
+template<typename xelementT, typename yelementT>
+    constexpr bool operator<=(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs)
   {
     return lhs.get() <= rhs.get();
   }
-template<typename xelementT,
-         typename yelementT> constexpr bool operator>=(const refcnt_ptr<xelementT>& lhs,
-                                                       const refcnt_ptr<yelementT>& rhs)
+template<typename xelementT, typename yelementT>
+    constexpr bool operator>=(const refcnt_ptr<xelementT>& lhs, const refcnt_ptr<yelementT>& rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
-template<typename elementT> constexpr bool operator==(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
+template<typename elementT>
+    constexpr bool operator==(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
   {
     return +!lhs;
   }
-template<typename elementT> constexpr bool operator!=(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
+template<typename elementT>
+    constexpr bool operator!=(const refcnt_ptr<elementT>& lhs, nullptr_t) noexcept
   {
     return !!lhs;
   }
 
-template<typename elementT> constexpr bool operator==(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
+template<typename elementT>
+    constexpr bool operator==(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
   {
     return +!rhs;
   }
-template<typename elementT> constexpr bool operator!=(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
+template<typename elementT>
+    constexpr bool operator!=(nullptr_t, const refcnt_ptr<elementT>& rhs) noexcept
   {
     return !!rhs;
   }
 
-template<typename elementT> void swap(refcnt_ptr<elementT>& lhs, refcnt_ptr<elementT>& rhs) noexcept
+template<typename elementT>
+    void swap(refcnt_ptr<elementT>& lhs, refcnt_ptr<elementT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT,
-         typename elementT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                                                      const refcnt_ptr<elementT>& rhs)
+template<typename charT, typename traitsT, typename elementT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const refcnt_ptr<elementT>& rhs)
   {
     return fmt << rhs.get();
   }
 
-template<typename targetT, typename sourceT> refcnt_ptr<targetT> static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
+template<typename targetT, typename sourceT>
+    refcnt_ptr<targetT> static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr, [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
+                                                         [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
-template<typename targetT, typename sourceT> refcnt_ptr<targetT> dynamic_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
+template<typename targetT, typename sourceT>
+     refcnt_ptr<targetT> dynamic_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr, [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
+                                                         [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
-template<typename targetT, typename sourceT> refcnt_ptr<targetT> const_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
+template<typename targetT, typename sourceT>
+    refcnt_ptr<targetT> const_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr, [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
-  }
-
-template<typename targetT, typename sourceT> refcnt_ptr<targetT> static_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
-  {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr), [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
-  }
-template<typename targetT, typename sourceT> refcnt_ptr<targetT> dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
-  {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr), [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
-  }
-template<typename targetT, typename sourceT> refcnt_ptr<targetT> const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
-  {
-    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr), [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
+                                                         [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
-template<typename elementT, typename... paramsT> refcnt_ptr<elementT> make_refcnt(paramsT&&... params)
+template<typename targetT, typename sourceT>
+    refcnt_ptr<targetT> static_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
+  {
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+                                                         [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+  }
+template<typename targetT, typename sourceT>
+    refcnt_ptr<targetT> dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
+  {
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+                                                         [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+  }
+template<typename targetT, typename sourceT>
+    refcnt_ptr<targetT> const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
+  {
+    return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
+                                                         [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+  }
+
+template<typename elementT, typename... paramsT>
+    refcnt_ptr<elementT> make_refcnt(paramsT&&... params)
   {
     return refcnt_ptr<elementT>(new elementT(noadl::forward<paramsT>(params)...));
   }

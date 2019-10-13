@@ -219,7 +219,8 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
 template<typename charT, typename traitsT> basic_tinybuf<charT, traitsT>::~basic_tinybuf()
   = default;
 
-template<typename charT, typename traitsT> void swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs) noexcept
+template<typename charT, typename traitsT>
+    void swap(basic_tinybuf<charT, traitsT>& lhs, basic_tinybuf<charT, traitsT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }

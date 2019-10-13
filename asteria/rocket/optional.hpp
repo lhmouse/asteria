@@ -12,15 +12,10 @@ namespace rocket {
 
 template<typename valueT> class optional;
 
-struct nullopt_t
-  {
-  }
-constexpr nullopt;
-
 template<typename valueT> class optional
   {
     static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
-    static_assert(!is_same<valueT, nullopt_t>::value, "`valueT` shall not be `nullopt_t`.");
+    static_assert(!is_same<valueT, clear_t>::value, "`valueT` shall not be `clear_t`.");
 
   public:
     using value_type       = valueT;
@@ -32,18 +27,19 @@ template<typename valueT> class optional
 
   public:
     // 19.6.3.1, constructors
-    constexpr optional(nullopt_t = nullopt) noexcept
+    constexpr optional(clear_t = clear) noexcept
       : m_stor()
       {
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT&&, value_type>::value)>
-            optional(yvalueT&& yvalue) noexcept(is_nothrow_constructible<value_type, yvalueT&&>::value)
+        optional(yvalueT&& yvalue) noexcept(is_nothrow_constructible<value_type, yvalueT&&>::value)
       : m_stor()
       {
         this->m_stor.emplace_back(noadl::forward<yvalueT>(yvalue));
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<const typename optional<yvalueT>::value_type&, value_type>::value)>
-            optional(const optional<yvalueT>& other) noexcept(is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>::value)
+        optional(const optional<yvalueT>& other)
+          noexcept(is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>::value)
       : m_stor()
       {
         if(other.m_stor.empty()) {
@@ -51,7 +47,8 @@ template<typename valueT> class optional
         }
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<typename optional<yvalueT>::value_type&&, value_type>::value)>
-            optional(optional<yvalueT>&& other) noexcept(is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>::value)
+        optional(optional<yvalueT>&& other)
+          noexcept(is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>::value)
       : m_stor()
       {
         if(!other.m_stor.empty()) {
@@ -59,14 +56,14 @@ template<typename valueT> class optional
         }
       }
     // 19.6.3.3, assignment
-    optional& operator=(nullopt_t) noexcept
+    optional& operator=(clear_t) noexcept
       {
         this->m_stor.clear();
         return *this;
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, yvalueT&&>::value)>
-            optional& operator=(yvalueT&& yvalue) noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>,
-                                                                       is_nothrow_assignable<value_type, yvalueT&&>>::value)
+        optional& operator=(yvalueT&& yvalue)
+          noexcept(conjunction<is_nothrow_constructible<value_type, yvalueT&&>, is_nothrow_assignable<value_type, yvalueT&&>>::value)
       {
         if(!this->m_stor.empty()) {
           this->m_stor.mut_front() = noadl::forward<yvalueT>(yvalue);
@@ -77,8 +74,9 @@ template<typename valueT> class optional
         return *this;
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, const typename optional<yvalueT>::value_type&>::value)>
-            optional& operator=(const optional<yvalueT>& other) noexcept(conjunction<is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>,
-                                                                                     is_nothrow_assignable<value_type, const typename optional<yvalueT>::value_type&>>::value)
+        optional& operator=(const optional<yvalueT>& other)
+          noexcept(conjunction<is_nothrow_constructible<value_type, const typename optional<yvalueT>::value_type&>,
+                               is_nothrow_assignable<value_type, const typename optional<yvalueT>::value_type&>>::value)
       {
         if(other.m_stor.empty()) {
           this->m_stor.clear();
@@ -92,8 +90,9 @@ template<typename valueT> class optional
         return *this;
       }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_assignable<value_type, typename optional<yvalueT>::value_type&&>::value)>
-            optional& operator=(optional<yvalueT>&& other) noexcept(conjunction<is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>,
-                                                                                is_nothrow_assignable<value_type, typename optional<yvalueT>::value_type&&>>::value)
+        optional& operator=(optional<yvalueT>&& other)
+          noexcept(conjunction<is_nothrow_constructible<value_type, typename optional<yvalueT>::value_type&&>,
+                               is_nothrow_assignable<value_type, typename optional<yvalueT>::value_type&&>>::value)
       {
         if(other.m_stor.empty()) {
           this->m_stor.clear();
@@ -143,17 +142,20 @@ template<typename valueT> class optional
         return this->m_stor.empty() ? nullptr : ::std::addressof(this->m_stor.mut_front());
       }
     // N.B. The return type differs from `std::variant`.
-    template<typename dvalueT> decltype(0 ? ::std::declval<const_reference>() : ::std::declval<dvalueT>()) value_or(dvalueT&& dvalue) const
+    template<typename dvalueT>
+        typename common_type<const_reference, dvalueT&&>::type value_or(dvalueT&& dvalue) const
       {
         return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : this->m_stor.front();
       }
     // N.B. The return type differs from `std::variant`.
-    template<typename dvalueT> decltype(0 ? ::std::declval<reference>() : ::std::declval<dvalueT>()) value_or(dvalueT&& dvalue)
+    template<typename dvalueT>
+        typename common_type<const_reference, dvalueT&&>::type value_or(dvalueT&& dvalue)
       {
         return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : this->m_stor.mut_front();
       }
     // N.B. This is a non-standard extension.
-    template<typename dvalueT> decltype(0 ? ::std::declval<value_type&&>() : ::std::declval<dvalueT>()) move_value_or(dvalueT&& dvalue)
+    template<typename dvalueT>
+        typename common_type<const_reference, dvalueT&&>::type move_value_or(dvalueT&& dvalue)
       {
         return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : noadl::move(this->m_stor.mut_front());
       }
@@ -199,75 +201,79 @@ template<typename valueT> class optional
       }
   };
 
-template<typename valueT> void swap(optional<valueT>& lhs, optional<valueT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename valueT>
+    void swap(optional<valueT>& lhs, optional<valueT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
 
-template<typename valueT> constexpr bool operator==(const optional<valueT>& lhs,
-                                                    const optional<valueT>& rhs) noexcept(noexcept(::std::declval<const valueT&>()
-                                                                                                   == ::std::declval<const valueT&>()))
+template<typename valueT>
+    constexpr bool operator==(const optional<valueT>& lhs, const optional<valueT>& rhs)
+      noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
   {
     // `lhs` and `rhs` are equal if they contain values that are equal, or both contain no value.
     return (lhs && rhs) ? (*lhs == *rhs) : (!lhs == !rhs);
   }
-template<typename valueT> constexpr bool operator!=(const optional<valueT>& lhs,
-                                                    const optional<valueT>& rhs) noexcept(noexcept(::std::declval<const valueT&>()
-                                                                                                   != ::std::declval<const valueT&>()))
+template<typename valueT>
+    constexpr bool operator!=(const optional<valueT>& lhs, const optional<valueT>& rhs)
+      noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
   {
     // `lhs` and `rhs` are unequal if they contain values that are not equal, or one contains a value and the other does not.
     return (lhs && rhs) ? (*lhs != *rhs) : (!lhs != !rhs);
   }
 
-template<typename valueT> constexpr bool operator==(const optional<valueT>& lhs, nullopt_t) noexcept
+template<typename valueT>
+    constexpr bool operator==(const optional<valueT>& lhs, clear_t) noexcept
   {
     return +!lhs;
   }
-template<typename valueT> constexpr bool operator!=(const optional<valueT>& lhs, nullopt_t) noexcept
+template<typename valueT>
+    constexpr bool operator!=(const optional<valueT>& lhs, clear_t) noexcept
   {
     return !!lhs;
   }
 
-template<typename valueT> constexpr bool operator==(nullopt_t, const optional<valueT>& rhs) noexcept
+template<typename valueT>
+    constexpr bool operator==(clear_t, const optional<valueT>& rhs) noexcept
   {
     return +!rhs;
   }
-template<typename valueT> constexpr bool operator!=(nullopt_t, const optional<valueT>& rhs) noexcept
+template<typename valueT>
+    constexpr bool operator!=(clear_t, const optional<valueT>& rhs) noexcept
   {
     return !!rhs;
   }
 
-template<typename valueT> constexpr bool operator==(const optional<valueT>& lhs,
-                                                    const valueT& rhs) noexcept(noexcept(::std::declval<const valueT&>()
-                                                                                         == ::std::declval<const valueT&>()))
+template<typename valueT>
+    constexpr bool operator==(const optional<valueT>& lhs, const valueT& rhs)
+      noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
   {
     return !!lhs && (*lhs == rhs);
   }
-template<typename valueT> constexpr bool operator!=(const optional<valueT>& lhs,
-                                                    const valueT& rhs) noexcept(noexcept(::std::declval<const valueT&>()
-                                                                                         != ::std::declval<const valueT&>()))
+template<typename valueT>
+    constexpr bool operator!=(const optional<valueT>& lhs, const valueT& rhs)
+      noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
   {
     return +!lhs || (*lhs != rhs);
   }
 
-template<typename valueT> constexpr bool operator==(const valueT& lhs,
-                                                    const optional<valueT>& rhs) noexcept(noexcept(::std::declval<const valueT&>()
-                                                                                                   == ::std::declval<const valueT&>()))
+template<typename valueT>
+    constexpr bool operator==(const valueT& lhs, const optional<valueT>& rhs)
+      noexcept(noexcept(::std::declval<const valueT&>() == ::std::declval<const valueT&>()))
   {
     return !!rhs && (lhs == *rhs);
   }
-template<typename valueT> constexpr bool operator!=(const valueT& lhs,
-                                                    const optional<valueT>& rhs) noexcept(noexcept(::std::declval<const valueT&>()
-                                                                                                   != ::std::declval<const valueT&>()))
+template<typename valueT>
+    constexpr bool operator!=(const valueT& lhs, const optional<valueT>& rhs)
+      noexcept(noexcept(::std::declval<const valueT&>() != ::std::declval<const valueT&>()))
   {
     return +!rhs || (lhs != *rhs);
   }
 
-template<typename charT, typename traitsT,
-         typename valueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                                                    const optional<valueT>& rhs)
+template<typename charT, typename traitsT, typename valueT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const optional<valueT>& rhs)
   {
-    return rhs ? (fmt << *rhs) : (fmt << "<nullopt>");
+    return rhs ? (fmt << *rhs) : (fmt << "<no value>");
   }
 
 }  // namespace rocket

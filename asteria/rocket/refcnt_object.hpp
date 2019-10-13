@@ -20,21 +20,18 @@ template<typename elementT> class refcnt_object
     refcnt_ptr<element_type> m_ptr;
 
   public:
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                             pointer>::value)> refcnt_object(const refcnt_ptr<yelementT>& ptr) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>
+        refcnt_object(const refcnt_ptr<yelementT>& ptr) noexcept
       : m_ptr((ROCKET_ASSERT(ptr), ptr))
       {
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                             pointer>::value)> refcnt_object(refcnt_ptr<yelementT>&& ptr) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>
+        refcnt_object(refcnt_ptr<yelementT>&& ptr) noexcept
       : m_ptr((ROCKET_ASSERT(ptr), noadl::move(ptr)))
       {
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                             pointer>::value)> refcnt_object(const refcnt_object<yelementT>& other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>
+        refcnt_object(const refcnt_object<yelementT>& other) noexcept
       : m_ptr(other.m_ptr)
       {
       }
@@ -44,23 +41,20 @@ template<typename elementT> class refcnt_object
       }
     // We have to implement quite a few assignment operators, as the move constructor is not somehow efficient.
     // Be advised that, similar to `std::reference_wrapper`, all assignment operators modify `*this` rather than `this->get()`.
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                             pointer>::value)> refcnt_object& operator=(const refcnt_ptr<yelementT>& ptr) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>
+        refcnt_object& operator=(const refcnt_ptr<yelementT>& ptr) noexcept
       {
         this->m_ptr = (ROCKET_ASSERT(ptr), ptr);
         return *this;
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                             pointer>::value)> refcnt_object& operator=(refcnt_ptr<yelementT>&& ptr) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>
+        refcnt_object& operator=(refcnt_ptr<yelementT>&& ptr) noexcept
       {
         this->m_ptr = (ROCKET_ASSERT(ptr), rocket::move(ptr));
         return *this;
       }
-    template<typename yelementT,
-             ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer,
-                                             pointer>::value)> refcnt_object& operator=(const refcnt_object<yelementT>& other) noexcept
+    template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>
+        refcnt_object& operator=(const refcnt_object<yelementT>& other) noexcept
       {
         this->m_ptr = other.m_ptr;
         return *this;
@@ -122,14 +116,14 @@ template<typename elementT> class refcnt_object
       }
   };
 
-template<typename elementT> void swap(refcnt_object<elementT>& lhs, refcnt_object<elementT>& rhs) noexcept
+template<typename elementT>
+    void swap(refcnt_object<elementT>& lhs, refcnt_object<elementT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT,
-         typename elementT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                                                      const refcnt_object<elementT>& rhs)
+template<typename charT, typename traitsT, typename elementT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const refcnt_object<elementT>& rhs)
   {
     return fmt << rhs.get();
   }

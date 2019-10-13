@@ -42,7 +42,7 @@ extern G_integer std_numeric_iceil(const G_real& value);
 extern G_integer std_numeric_itrunc(const G_integer& value);
 extern G_integer std_numeric_itrunc(const G_real& value);
 
-extern G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit = rocket::nullopt);
+extern G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit = rocket::clear);
 
 extern G_real std_numeric_sqrt(const G_real& x);
 extern G_real std_numeric_fma(const G_real& x, const G_real& y, const G_real& z);
@@ -66,10 +66,10 @@ extern G_integer std_numeric_lzcnt(const G_integer& x);
 extern G_integer std_numeric_tzcnt(const G_integer& x);
 extern G_integer std_numeric_popcnt(const G_integer& x);
 
-extern G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base = rocket::nullopt, const opt<G_integer>& ebase = rocket::nullopt);
-extern G_string std_numeric_format(const G_real& value, const opt<G_integer>& base = rocket::nullopt, const opt<G_integer>& ebase = rocket::nullopt);
+extern G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base = rocket::clear, const opt<G_integer>& ebase = rocket::clear);
+extern G_string std_numeric_format(const G_real& value, const opt<G_integer>& base = rocket::clear, const opt<G_integer>& ebase = rocket::clear);
 extern opt<G_integer> std_numeric_parse_integer(const G_string& text);
-extern opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& saturating = rocket::nullopt);
+extern opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& saturating = rocket::clear);
 
 // Create an object that is to be referenced as `std.numeric`.
 extern void create_bindings_numeric(G_object& result, API_Version version);

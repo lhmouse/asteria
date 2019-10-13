@@ -69,7 +69,7 @@ G_string std_string_slice(const G_string& text, const G_integer& from, const opt
 G_string std_string_replace_slice(const G_string& text, const G_integer& from, const G_string& replacement)
   {
     G_string res = text;
-    auto range = do_slice(res, from, rocket::nullopt);
+    auto range = do_slice(res, from, rocket::clear);
     // Replace the subrange.
     res.replace(range.first, range.second, replacement);
     return res;
@@ -130,7 +130,7 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
         auto tpos = tbegin;
         for(;;) {
           if(tend - tpos < plen) {
-            return rocket::nullopt;
+            return rocket::clear;
           }
           if(std::equal(pbegin, pend, tpos)) {
             break;
@@ -147,17 +147,17 @@ opt<G_integer> std_string_find(const G_string& text, const G_string& pattern)
     auto range = std::make_pair(text.begin(), text.end());
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
 
 opt<G_integer> std_string_find(const G_string& text, const G_integer& from, const G_string& pattern)
   {
-    auto range = do_slice(text, from, rocket::nullopt);
+    auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
@@ -167,7 +167,7 @@ opt<G_integer> std_string_find(const G_string& text, const G_integer& from, cons
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
@@ -177,17 +177,17 @@ opt<G_integer> std_string_rfind(const G_string& text, const G_string& pattern)
     auto range = std::make_pair(text.begin(), text.end());
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - pattern.ssize();
   }
 
 opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, const G_string& pattern)
   {
-    auto range = do_slice(text, from, rocket::nullopt);
+    auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - pattern.ssize();
   }
@@ -197,7 +197,7 @@ opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, con
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - pattern.ssize();
   }
@@ -223,7 +223,7 @@ G_string std_string_find_and_replace(const G_string& text, const G_string& patte
 G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const G_string& pattern, const G_string& replacement)
   {
     G_string res = text;
-    auto range = do_slice(res, from, rocket::nullopt);
+    auto range = do_slice(res, from, rocket::clear);
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
       if(!qit) {
@@ -267,7 +267,7 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
         // Search the range.
         auto pos = std::find_if(begin, end, [&](char c) { return table[(c & 0xFF)] == match;  });
         if(pos == end) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         return rocket::move(pos);
       }
@@ -278,17 +278,17 @@ opt<G_integer> std_string_find_any_of(const G_string& text, const G_string& acce
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), accept, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
 
 opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& from, const G_string& accept)
   {
-    auto range = do_slice(text, from, rocket::nullopt);
+    auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
@@ -298,7 +298,7 @@ opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& fro
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
@@ -307,17 +307,17 @@ opt<G_integer> std_string_find_not_of(const G_string& text, const G_string& reje
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), reject, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
 
 opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& from, const G_string& reject)
   {
-    auto range = do_slice(text, from, rocket::nullopt);
+    auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
@@ -327,7 +327,7 @@ opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& fro
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - text.begin();
   }
@@ -336,17 +336,17 @@ opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_string& acc
   {
     auto qit = do_find_of_opt(text.rbegin(), text.rend(), accept, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - 1;
   }
 
 opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& from, const G_string& accept)
   {
-    auto range = do_slice(text, from, rocket::nullopt);
+    auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - 1;
   }
@@ -356,7 +356,7 @@ opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& fr
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - 1;
   }
@@ -365,17 +365,17 @@ opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_string& rej
   {
     auto qit = do_find_of_opt(text.rbegin(), text.rend(), reject, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - 1;
   }
 
 opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& from, const G_string& reject)
   {
-    auto range = do_slice(text, from, rocket::nullopt);
+    auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - 1;
   }
@@ -385,7 +385,7 @@ opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& fr
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return text.rend() - *qit - 1;
   }
@@ -750,7 +750,7 @@ opt<G_string> std_string_hex_decode(const G_string& text)
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Ignore it.
         continue;
@@ -765,7 +765,7 @@ opt<G_string> std_string_hex_decode(const G_string& text)
         pos = do_slitchr(s_base16_table, unit[i]);
         if(!*pos) {
           // The character is invalid.
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto off = static_cast<size_t>(pos - s_base16_table) / 2;
         ROCKET_ASSERT(off < 16);
@@ -781,7 +781,7 @@ opt<G_string> std_string_hex_decode(const G_string& text)
     }
     if(unit.size() != 0) {
       // Fail in case of excess digits.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return rocket::move(data);
   }
@@ -853,7 +853,7 @@ opt<G_string> std_string_base32_decode(const G_string& text)
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Ignore it.
         continue;
@@ -867,21 +867,21 @@ opt<G_string> std_string_base32_decode(const G_string& text)
       auto pt = std::find(unit.begin(), unit.end(), s_base32_table[64]);
       if(std::any_of(pt, unit.end(), [&](char cx) { return cx != s_base32_table[64];  })) {
         // Fail if a non-padding character follows a padding character.
-        return rocket::nullopt;
+        return rocket::clear;
       }
       auto p = static_cast<size_t>(pt - unit.begin());
       // How many bytes are there in this unit?
       auto m = p * 5 / 8;
       if((m == 0) || ((m * 8 + 4) / 5 != p)) {
         // Fail due to invalid number of non-padding characters.
-        return rocket::nullopt;
+        return rocket::clear;
       }
       // Decode the current encoding unit.
       for(size_t i = 0; i != p; ++i) {
         pos = do_slitchr(s_base32_table, unit[i]);
         if(!*pos) {
           // The character is invalid.
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto off = static_cast<size_t>(pos - s_base32_table) / 2;
         ROCKET_ASSERT(off < 32);
@@ -900,7 +900,7 @@ opt<G_string> std_string_base32_decode(const G_string& text)
     }
     if(unit.size() != 0) {
       // Fail in case of excess digits.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return rocket::move(data);
   }
@@ -971,7 +971,7 @@ opt<G_string> std_string_base64_decode(const G_string& text)
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Ignore it.
         continue;
@@ -985,21 +985,21 @@ opt<G_string> std_string_base64_decode(const G_string& text)
       auto pt = std::find(unit.begin(), unit.end(), s_base64_table[64]);
       if(std::any_of(pt, unit.end(), [&](char cx) { return cx != s_base64_table[64];  })) {
         // Fail if a non-padding character follows a padding character.
-        return rocket::nullopt;
+        return rocket::clear;
       }
       auto p = static_cast<size_t>(pt - unit.begin());
       // How many bytes are there in this unit?
       auto m = p * 3 / 4;
       if((m == 0) || ((m * 8 + 5) / 6 != p)) {
         // Fail due to invalid number of non-padding characters.
-        return rocket::nullopt;
+        return rocket::clear;
       }
       // Decode the current encoding unit.
       for(size_t i = 0; i != p; ++i) {
         pos = do_slitchr(s_base64_table, unit[i]);
         if(!*pos) {
           // The character is invalid.
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto off = static_cast<size_t>(pos - s_base64_table);
         ROCKET_ASSERT(off < 64);
@@ -1018,7 +1018,7 @@ opt<G_string> std_string_base64_decode(const G_string& text)
     }
     if(unit.size() != 0) {
       // Fail in case of excess digits.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return rocket::move(data);
   }
@@ -1032,7 +1032,7 @@ opt<G_string> std_string_utf8_encode(const G_integer& code_point, const opt<G_bo
     if(!utf8_encode(text, cp)) {
       // This comparison with `true` is by intention, because it may be unset.
       if(permissive != true) {
-        return rocket::nullopt;
+        return rocket::clear;
       }
       // Encode the replacement character.
       utf8_encode(text, 0xFFFD);
@@ -1050,7 +1050,7 @@ opt<G_string> std_string_utf8_encode(const G_array& code_points, const opt<G_boo
       if(!utf8_encode(text, cp)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Encode the replacement character.
         utf8_encode(text, 0xFFFD);
@@ -1073,7 +1073,7 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
       if(!utf8_decode(cp, text, offset)) {
         // This comparison with `true` is by intention, because it may be unset.
         if(permissive != true) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Re-interpret it as an isolated byte.
         cp = text[offset++] & 0xFF;

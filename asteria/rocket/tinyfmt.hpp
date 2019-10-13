@@ -19,7 +19,8 @@ namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>> class basic_tinyfmt;
 
-template<typename charT, typename traitsT> class basic_tinyfmt
+template<typename charT, typename traitsT>
+    class basic_tinyfmt
   {
   public:
     using char_type    = charT;
@@ -69,18 +70,21 @@ template<typename charT, typename traitsT> class basic_tinyfmt
       }
   };
 
-template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>::~basic_tinyfmt()
+template<typename charT, typename traitsT>
+    basic_tinyfmt<charT, traitsT>::~basic_tinyfmt()
   = default;
 
 // zero-conversion inserters
-template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT& c)
+template<typename charT, typename traitsT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT& c)
   {
     // Insert the character as is.
     auto& buf = fmt.get_buffer();
     buf.put(c);
     return fmt;
   }
-template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
+template<typename charT, typename traitsT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
   {
     // Insert the sequence as is.
     auto& buf = fmt.get_buffer();
@@ -89,7 +93,8 @@ template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operat
   }
 
 // conversion inserters
-template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const tinynumput& nump)
+template<typename charT, typename traitsT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const tinynumput& nump)
   {
     // Widen all characters and insert them.
     auto& buf = fmt.get_buffer();
@@ -106,24 +111,26 @@ inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const tinynumpu
 
 // delegating inserters
 template<typename charT, typename traitsT, typename valueT,
-         ROCKET_ENABLE_IF(is_arithmetic<valueT>::value)> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
+         ROCKET_ENABLE_IF(is_arithmetic<valueT>::value)>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
   {
     return fmt << tinynumput(value);
   }
 template<typename charT, typename traitsT, typename valueT,
-         ROCKET_ENABLE_IF(is_enum<valueT>::value)> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
+         ROCKET_ENABLE_IF(is_enum<valueT>::value)>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
   {
     return fmt << tinynumput(static_cast<typename underlying_type<valueT>::type>(value));
   }
-template<typename charT, typename traitsT,
-         typename valueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
+template<typename charT, typename traitsT, typename valueT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
   {
     return fmt << tinynumput(static_cast<const void*>(value));
   }
 
 // rvalue inserter
-template<typename charT, typename traitsT,
-         typename xvalueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
+template<typename charT, typename traitsT, typename xvalueT>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>&& fmt, xvalueT&& xvalue)
   {
     return fmt << noadl::forward<xvalueT>(xvalue);
   }

@@ -12,8 +12,8 @@ namespace rocket {
 template<typename charT, typename traitsT = char_traits<charT>,
          typename allocT = allocator<charT>> class basic_tinybuf_str;
 
-template<typename charT, typename traitsT,
-         typename allocT> class basic_tinybuf_str : public basic_tinybuf<charT, traitsT>
+template<typename charT, typename traitsT, typename allocT>
+    class basic_tinybuf_str : public basic_tinybuf<charT, traitsT>
   {
   public:
     using char_type       = charT;
@@ -74,7 +74,8 @@ template<typename charT, typename traitsT,
         // Return the precise number of characters available.
         return static_cast<off_type>(navail);
       }
-    basic_tinybuf_str& do_flush(const char_type*& gcur, const char_type*& gend, char_type*& /*pcur*/, char_type*& /*pend*/) override
+    basic_tinybuf_str& do_flush(const char_type*& gcur, const char_type*& gend,
+                                char_type*& /*pcur*/, char_type*& /*pend*/) override
       {
         if(gcur) {
           // If the get area exists, update the offset and clear it.
@@ -99,14 +100,16 @@ template<typename charT, typename traitsT,
           ref = this->m_off;
         // Perform range checks.
         if(off < static_cast<off_type>(-ref)) {
-          noadl::sprintf_and_throw<out_of_range>("basic_tinybuf_str: An attempt was made to seek backwards past the beginning of this string "
-                                                 "(the offset was `%lld` and the reference offset was `%lld`).",
-                                                 static_cast<long long>(off), static_cast<long long>(ref));
+          noadl::sprintf_and_throw<out_of_range>(
+            "basic_tinybuf_str: An attempt was made to seek backwards past the beginning of "
+            "this string (the offset was `%lld` and the reference offset was `%lld`).",
+            static_cast<long long>(off), static_cast<long long>(ref));
         }
         if(off > static_cast<off_type>(this->m_str.size() - ref)) {
-          noadl::sprintf_and_throw<out_of_range>("basic_tinybuf_str: An attempt was made to seek past the end of this string "
-                                                 "(the offset was `%lld` and the reference offset was `%lld`).",
-                                                 static_cast<long long>(off), static_cast<long long>(ref));
+          noadl::sprintf_and_throw<out_of_range>(
+            "basic_tinybuf_str: An attempt was made to seek past the end of "
+            "this string (the offset was `%lld` and the reference offset was `%lld`).",
+            static_cast<long long>(off), static_cast<long long>(ref));
         }
         // Convert the relative offset to an absolute one and set it.
         off_type abs = static_cast<off_type>(ref) + off;
@@ -119,7 +122,8 @@ template<typename charT, typename traitsT,
       {
         if(!(this->m_mode & tinybuf_base::open_read)) {
           // Read access is not enabled.
-          noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf_str: This stream was not opened for reading.");
+          noadl::sprintf_and_throw<invalid_argument>(
+            "basic_tinybuf_str: This stream was not opened for reading.");
         }
         // If the get area exists, update the offset and clear it.
         this->flush();
@@ -136,11 +140,13 @@ template<typename charT, typename traitsT,
         gend = gbase + navail;
         return traits_type::to_int_type(gbase[0]);
       }
-    basic_tinybuf_str& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* sadd, size_type nadd) override
+    basic_tinybuf_str& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
+                                   const char_type* sadd, size_type nadd) override
       {
         if(!(this->m_mode & tinybuf_base::open_write)) {
           // Write access is not enabled.
-          noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf_str: This stream was not opened for writing.");
+          noadl::sprintf_and_throw<invalid_argument>(
+            "basic_tinybuf_str: This stream was not opened for writing.");
         }
         // Be warned if the get area exists, it must be invalidated before modifying the string.
         this->flush();
@@ -205,13 +211,13 @@ template<typename charT, typename traitsT,
       }
   };
 
-template<typename charT, typename traitsT,
-         typename allocT> basic_tinybuf_str<charT, traitsT, allocT>::~basic_tinybuf_str()
+template<typename charT, typename traitsT, typename allocT>
+    basic_tinybuf_str<charT, traitsT, allocT>::~basic_tinybuf_str()
   = default;
 
-template<typename charT, typename traitsT,
-         typename allocT> void swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs,
-                                    basic_tinybuf_str<charT, traitsT, allocT>& rhs)
+template<typename charT, typename traitsT, typename allocT>
+    void swap(basic_tinybuf_str<charT, traitsT, allocT>& lhs,
+              basic_tinybuf_str<charT, traitsT, allocT>& rhs)
   {
     return lhs.swap(rhs);
   }

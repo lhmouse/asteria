@@ -69,7 +69,7 @@ G_array std_array_slice(const G_array& data, const G_integer& from, const opt<G_
 
 G_array std_array_replace_slice(const G_array& data, const G_integer& from, const G_array& replacement)
   {
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     // Append segments.
     G_array res;
     res.reserve(data.size() - static_cast<size_t>(range.second - range.first) + replacement.size());
@@ -102,7 +102,7 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
           }
         }
         // Fail to find an element.
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
@@ -126,7 +126,7 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
           }
         }
         // Fail to find an element.
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     }  // namespace
@@ -136,17 +136,17 @@ opt<G_integer> std_array_find(const G_array& data, const Value& target)
     auto range = std::make_pair(data.begin(), data.end());
     auto qit = do_find_opt(range.first, range.second, target);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
 
 opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const Value& target)
   {
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     auto qit = do_find_opt(range.first, range.second, target);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
@@ -156,7 +156,7 @@ opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const 
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(range.first, range.second, target);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
@@ -166,17 +166,17 @@ opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& da
     auto range = std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
 
 opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
@@ -186,7 +186,7 @@ opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& da
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
@@ -196,17 +196,17 @@ opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array
     auto range = std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
 
 opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
@@ -216,7 +216,7 @@ opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return *qit - data.begin();
   }
@@ -226,17 +226,17 @@ opt<G_integer> std_array_rfind(const G_array& data, const Value& target)
     auto range = std::make_pair(data.begin(), data.end());
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
 
 opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const Value& target)
   {
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -246,7 +246,7 @@ opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const
     auto range = do_slice(data, from, length);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), target);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -256,17 +256,17 @@ opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& d
     auto range = std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
 
 opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -276,7 +276,7 @@ opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& d
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, true);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -286,17 +286,17 @@ opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_arra
     auto range = std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
 
 opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -306,7 +306,7 @@ opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_arra
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), predictor, false);
     if(!qit) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return data.rend() - *qit - 1;
   }
@@ -329,7 +329,7 @@ G_integer std_array_count(const G_array& data, const Value& target)
 G_integer std_array_count(const G_array& data, const G_integer& from, const Value& target)
   {
     G_integer count = 0;
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     for(;;) {
       auto qit = do_find_opt(range.first, range.second, target);
       if(!qit) {
@@ -374,7 +374,7 @@ G_integer std_array_count_if(const Global_Context& global, const G_array& data, 
 G_integer std_array_count_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     G_integer count = 0;
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
       if(!qit) {
@@ -419,7 +419,7 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
 G_integer std_array_count_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     G_integer count = 0;
-    auto range = do_slice(data, from, rocket::nullopt);
+    auto range = do_slice(data, from, rocket::clear);
     for(;;) {
       auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
       if(!qit) {
@@ -544,7 +544,7 @@ opt<G_integer> std_array_binary_search(const Global_Context& global, const G_arr
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
     if(!pair.second) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return pair.first - data.begin();
   }
@@ -783,7 +783,7 @@ G_array std_array_shuffle(const G_array& data, const opt<G_integer>& seed)
 opt<G_array> std_array_copy_keys(const opt<G_object>& source)
   {
     if(!source) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     G_array res;
     res.reserve(source->size());
@@ -794,7 +794,7 @@ opt<G_array> std_array_copy_keys(const opt<G_object>& source)
 opt<G_array> std_array_copy_values(const opt<G_object>& source)
   {
     if(!source) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     G_array res;
     res.reserve(source->size());

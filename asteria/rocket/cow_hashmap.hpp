@@ -20,7 +20,7 @@
  * 2. The copy constructor and copy assignment operator will not throw exceptions.
  * 3. Comparison operators are not provided.
  * 4. `emplace()` and `emplace_hint()` functions are not provided. `try_emplace()` is recommended as an alternative.
- * 5. There are no buckets. Bucket lookups and local iterators are not provided. The non-unique (`unordered_multimap`) equivalent cannot be implemented.
+ * 5. There are no buckets. Bucket lookups and local iterators are not provided. Multimap cannot be implemented.
  * 6. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable nor move-assignable.
  * 7. `erase()` may move elements around and invalidate iterators.
  */
@@ -132,7 +132,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               ::std::memset(static_cast<void*>(this->data), 0, sizeof(bucket_type) * nbkt);
             }
             else {
-              // The C++ standard requires that value-initialization of such an object shall not throw exceptions and shall result in a null pointer.
+              // The C++ standard requires that value-initialization of such an object shall not throw exceptions
+              // and shall result in a null pointer.
               for(size_type i = 0; i < nbkt; ++i)
                 noadl::construct_at(this->data + i);
             }
@@ -165,7 +166,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
       };
 
     template<typename pointerT, typename hashT, typename allocT,
-             bool copyableT = is_copy_constructible<typename allocT::value_type>::value> struct copy_storage_helper
+             bool copyableT = is_copy_constructible<typename allocT::value_type>::value>
+        struct copy_storage_helper
       {
         void operator()(pointerT ptr, const hashT& hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
@@ -198,8 +200,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
           }
       };
-    template<typename pointerT, typename hashT, typename allocT> struct copy_storage_helper<pointerT, hashT, allocT,
-                                                                                            false>     // copyableT
+    template<typename pointerT, typename hashT, typename allocT>
+        struct copy_storage_helper<pointerT, hashT, allocT,
+                                   false>     // copyableT
       {
         [[noreturn]] void operator()(pointerT /*ptr*/, const hashT& /*hf*/, pointerT /*ptr_old*/, size_t /*off*/, size_t /*cnt*/) const
           {
@@ -210,7 +213,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-    template<typename pointerT, typename hashT, typename allocT> struct move_storage_helper
+    template<typename pointerT, typename hashT, typename allocT>
+        struct move_storage_helper
       {
         void operator()(pointerT ptr, const hashT& hf, pointerT ptr_old, size_t off, size_t cnt) const
           {
@@ -246,12 +250,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-    template<typename allocT, typename hashT,
-             typename eqT> class storage_handle : private allocator_wrapper_base_for<allocT>::type,
-                                                  private conditional<is_same<hashT, allocT>::value,
-                                                                      ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type,
-                                                  private conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
-                                                                      ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
+    template<typename allocT, typename hashT, typename eqT>
+        class storage_handle : private allocator_wrapper_base_for<allocT>::type,
+                               private conditional<is_same<hashT, allocT>::value,
+                                                   ebo_placeholder<0>, typename allocator_wrapper_base_for<hashT>::type>::type,
+                               private conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
+                                                   ebo_placeholder<1>, typename allocator_wrapper_base_for<eqT>::type>::type
       {
       public:
         using allocator_type   = allocT;
@@ -334,7 +338,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         [[noreturn]] ROCKET_NOINLINE void do_throw_size_overflow(size_type base, size_type add) const
           {
             noadl::sprintf_and_throw<length_error>("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
-                                                   static_cast<long long>(base), static_cast<long long>(add), static_cast<long long>(this->max_size()));
+                                                   static_cast<long long>(base), static_cast<long long>(add),
+                                                   static_cast<long long>(this->max_size()));
           }
 
       public:
@@ -457,7 +462,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
 #endif
-            noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_drop_reference), this->as_allocator(), nblk);
+            noadl::construct_at(noadl::unfancy(ptr), reinterpret_cast<void (*)(...)>(&storage_handle::do_drop_reference),
+                                this->as_allocator(), nblk);
             auto ptr_old = this->m_ptr;
             if(ROCKET_UNEXPECT(ptr_old)) {
               try {
@@ -531,7 +537,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
             // Find the desired element using linear probing.
             auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
-            auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
+            auto bkt = noadl::linear_probe(data, origin, origin, end,
+                                           [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
             if(!bkt) {
               // This can only happen if the load factor is 1.0 i.e. no bucket is empty in the table.
               ROCKET_ASSERT(max_load_factor_reciprocal == 1);
@@ -554,7 +561,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT(this->unique());
             return ptr->data;
           }
-        template<typename ykeyT, typename... paramsT> pair<bucket_type*, bool> keyed_emplace_unchecked(const ykeyT& ykey, paramsT&&... params)
+        template<typename ykeyT, typename... paramsT>
+            pair<bucket_type*, bool> keyed_emplace_unchecked(const ykeyT& ykey, paramsT&&... params)
           {
             ROCKET_ASSERT(this->unique());
             ROCKET_ASSERT(this->element_count() < this->capacity());
@@ -565,7 +573,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             auto end = data + storage::max_nbkt_for_nblk(ptr->nblk);
             // Find an empty bucket using linear probing.
             auto origin = noadl::get_probing_origin(data, end, this->as_hasher()(ykey));
-            auto bkt = noadl::linear_probe(data, origin, origin, end, [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
+            auto bkt = noadl::linear_probe(data, origin, origin, end,
+                                           [&](const bucket_type& rbkt) { return this->as_key_equal()(rbkt->first, ykey);  });
             ROCKET_ASSERT(bkt);
             if(*bkt) {
               // A duplicate key has been found.
@@ -650,8 +659,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         using reference          = value_type&;
         using difference_type    = ptrdiff_t;
 
-        using parent_type   = storage_handle<typename hashmapT::allocator_type, typename hashmapT::hasher, typename hashmapT::key_equal>;
-        using bucket_type   = typename conditional<is_const<valueT>::value, const typename parent_type::bucket_type, typename parent_type::bucket_type>::type;
+        using parent_type   = storage_handle<typename hashmapT::allocator_type,
+                                             typename hashmapT::hasher, typename hashmapT::key_equal>;
+        using bucket_type   = typename conditional<is_const<valueT>::value,
+                                                   const typename parent_type::bucket_type,
+                                                   typename parent_type::bucket_type>::type;
 
       private:
         const parent_type* m_ref;
@@ -672,7 +684,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           : hashmap_iterator(nullptr, nullptr)
           {
           }
-        template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)> constexpr hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT>& other) noexcept
+        template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
+            constexpr hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT>& other) noexcept
           : hashmap_iterator(other.m_ref, other.m_bkt)
           {
           }
@@ -684,8 +697,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
             auto dist = static_cast<size_t>(bkt - ref->buckets());
             ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "This iterator has been invalidated.");
-            ROCKET_ASSERT_MSG(!((dist < ref->bucket_count()) && !*bkt), "The element referenced by this iterator no longer exists.");
-            ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->bucket_count())), "This iterator contains a past-the-end value and cannot be dereferenced.");
+            ROCKET_ASSERT_MSG(!((dist < ref->bucket_count()) && !*bkt),
+                              "The element referenced by this iterator no longer exists.");
+            ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->bucket_count())),
+                              "This iterator contains a past-the-end value and cannot be dereferenced.");
             return bkt;
           }
         bucket_type* do_adjust_forwards(bucket_type* hint) const noexcept
@@ -722,7 +737,8 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         hashmap_iterator& seek_next() noexcept
           {
             auto bkt = this->do_assert_valid_bucket(this->m_bkt, false);
-            ROCKET_ASSERT_MSG(bkt != this->m_ref->buckets() + this->m_ref->bucket_count(), "The past-the-end iterator cannot be incremented.");
+            ROCKET_ASSERT_MSG(bkt != this->m_ref->buckets() + this->m_ref->bucket_count(),
+                              "The past-the-end iterator cannot be incremented.");
             bkt = this->do_adjust_forwards(bkt + 1);
             this->m_bkt = this->do_assert_valid_bucket(bkt, false);
             return *this;
@@ -742,39 +758,42 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
       };
 
-    template<typename hashmapT, typename valueT> inline hashmap_iterator<hashmapT, valueT>& operator++(hashmap_iterator<hashmapT, valueT>& rhs) noexcept
+    template<typename hashmapT, typename valueT>
+        inline hashmap_iterator<hashmapT, valueT>& operator++(hashmap_iterator<hashmapT, valueT>& rhs) noexcept
       {
         return rhs.seek_next();
       }
 
-    template<typename hashmapT, typename valueT> inline hashmap_iterator<hashmapT, valueT> operator++(hashmap_iterator<hashmapT, valueT>& lhs, int) noexcept
+    template<typename hashmapT, typename valueT>
+        inline hashmap_iterator<hashmapT, valueT> operator++(hashmap_iterator<hashmapT, valueT>& lhs, int) noexcept
       {
         auto res = lhs;
         lhs.seek_next();
         return res;
       }
 
-    template<typename hashmapT, typename xvalueT,
-                                typename yvalueT> inline bool operator==(const hashmap_iterator<hashmapT, xvalueT>& lhs,
-                                                                         const hashmap_iterator<hashmapT, yvalueT>& rhs) noexcept
+    template<typename hashmapT, typename xvalueT, typename yvalueT>
+        inline bool operator==(const hashmap_iterator<hashmapT, xvalueT>& lhs, const hashmap_iterator<hashmapT, yvalueT>& rhs) noexcept
       {
         return lhs.tell() == rhs.tell();
       }
-    template<typename hashmapT, typename xvalueT,
-                                typename yvalueT> inline bool operator!=(const hashmap_iterator<hashmapT, xvalueT>& lhs,
-                                                                         const hashmap_iterator<hashmapT, yvalueT>& rhs) noexcept
+    template<typename hashmapT, typename xvalueT, typename yvalueT>
+        inline bool operator!=(const hashmap_iterator<hashmapT, xvalueT>& lhs, const hashmap_iterator<hashmapT, yvalueT>& rhs) noexcept
       {
         return lhs.tell() != rhs.tell();
       }
 
     }  // namespace details_cow_hashmap
 
-template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT> class cow_hashmap
+template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
+    class cow_hashmap
   {
     static_assert(!is_array<keyT>::value, "`keyT` must not be an array type.");
     static_assert(!is_array<mappedT>::value, "`mappedT` must not be an array type.");
-    static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value, "`allocT::value_type` must denote the same type as `pair<const keyT, mappedT>`.");
-    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())), "The hash operation shall not throw exceptions.");
+    static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value,
+                  "`allocT::value_type` must denote the same type as `pair<const keyT, mappedT>`.");
+    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
+                  "The hash operation shall not throw exceptions.");
 
   public:
     // types
@@ -790,22 +809,24 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     using const_reference  = const value_type&;
     using reference        = value_type&;
 
-    using const_iterator          = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
-    using iterator                = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
+    using const_iterator  = details_cow_hashmap::hashmap_iterator<cow_hashmap, const value_type>;
+    using iterator        = details_cow_hashmap::hashmap_iterator<cow_hashmap, value_type>;
 
   private:
     details_cow_hashmap::storage_handle<allocator_type, hasher, key_equal> m_sth;
 
   public:
     // 26.5.4.2, construct/copy/destroy
-    explicit constexpr cow_hashmap(const allocator_type& alloc) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
-                                                                                     is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>>::value)
+    explicit constexpr cow_hashmap(const allocator_type& alloc)
+        noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+                             is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>>::value)
       : m_sth(alloc, hasher(), key_equal())
       {
       }
-    constexpr cow_hashmap(clear_t = clear_t()) noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
-                                                                is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
-                                                                is_nothrow_constructible<allocator_type>>::value)
+    constexpr cow_hashmap(clear_t = clear_t())
+        noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
+                             is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
+                             is_nothrow_constructible<allocator_type>>::value)
       : cow_hashmap(allocator_type())
       {
       }
@@ -825,7 +846,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
     cow_hashmap(const cow_hashmap& other) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                                                                is_nothrow_copy_constructible<key_equal>>::value)
-      : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(), allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+      : cow_hashmap(0, other.m_sth.as_hasher(), other.m_sth.as_key_equal(),
+                    allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
@@ -847,28 +869,27 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->assign(noadl::move(other));
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_hashmap(inputT first, inputT last,
-                                                                                                                 size_type res_arg = 0,
-                                                                                                                 const hasher& hf = hasher(), const key_equal& eq = key_equal(),
-                                                                                                                 const allocator_type& alloc = allocator_type())
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+        cow_hashmap(inputT first, inputT last, size_type res_arg = 0,
+                    const hasher& hf = hasher(), const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
       : cow_hashmap(res_arg, hf, eq, alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_hashmap(inputT first, inputT last,
-                                                                                                                 size_type res_arg, const hasher& hf, const allocator_type& alloc)
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+        cow_hashmap(inputT first, inputT last, size_type res_arg, const hasher& hf, const allocator_type& alloc)
       : cow_hashmap(res_arg, hf, key_equal(), alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_hashmap(inputT first, inputT last,
-                                                                                                                 size_type res_arg, const allocator_type& alloc)
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+        cow_hashmap(inputT first, inputT last, size_type res_arg, const allocator_type& alloc)
       : cow_hashmap(res_arg, hasher(), key_equal(), alloc)
       {
         this->assign(noadl::move(first), noadl::move(last));
       }
-    cow_hashmap(initializer_list<value_type> init,
-                size_type res_arg = 0, const hasher& hf = hasher(), const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
+    cow_hashmap(initializer_list<value_type> init, size_type res_arg = 0,
+                const hasher& hf = hasher(), const key_equal& eq = key_equal(), const allocator_type& alloc = allocator_type())
       : cow_hashmap(res_arg, hf, eq, alloc)
       {
         this->assign(init);
@@ -1088,7 +1109,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. The return type differs from `std::unordered_map`.
     double load_factor() const noexcept
       {
-        return static_cast<double>(static_cast<difference_type>(this->size())) / static_cast<double>(static_cast<difference_type>(this->bucket_count()));
+        return static_cast<double>(static_cast<difference_type>(this->size()))
+               / static_cast<double>(static_cast<difference_type>(this->bucket_count()));
       }
     // N.B. The `constexpr` specifier is a non-standard extension.
     // N.B. The return type differs from `std::unordered_map`.
@@ -1113,18 +1135,21 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return this->try_emplace(noadl::move(value.first), noadl::move(value.second));
       }
     // N.B. The return type is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_hashmap& insert(inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+        cow_hashmap& insert(inputT first, inputT last)
       {
         if(first == last) {
           return *this;
         }
         auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
-          noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT& it) { this->insert(*it);  });
+          noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+                                 [&](const inputT& it) { this->insert(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
-        noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT& it) { this->m_sth.keyed_emplace_unchecked(it->first, *it);  });
+        noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+                               [&](const inputT& it) { this->m_sth.keyed_emplace_unchecked(it->first, *it);  });
         return *this;
       }
     // N.B. The return type is a non-standard extension.
@@ -1149,7 +1174,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->do_reserve_more(1);
         auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                                ::std::forward_as_tuple(noadl::forward<ykeyT>(key)), ::std::forward_as_tuple(noadl::forward<paramsT>(params)...));
+                                                               ::std::forward_as_tuple(noadl::forward<ykeyT>(key)),
+                                                               ::std::forward_as_tuple(noadl::forward<paramsT>(params)...));
         return ::std::make_pair(iterator(this->m_sth, result.first), result.second);
       }
     // N.B. The hint is ignored.
@@ -1230,8 +1256,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return 1;
       }
     // N.B. This is a non-standard extension.
-    template<typename ykeyT, typename ydefaultT> decltype(0 ? ::std::declval<const mapped_type&>()
-                                                            : ::std::declval<ydefaultT>()) get_or(const ykeyT& key, ydefaultT&& ydef) const
+    template<typename ykeyT, typename ydefaultT>
+        typename common_type<const mapped_type&, ydefaultT&&>::type get_or(const ykeyT& key, ydefaultT&& ydef) const
       {
         auto ptr = this->do_get_table();
         size_type tpos;
@@ -1266,7 +1292,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         this->do_reserve_more(1);
         auto result = this->m_sth.keyed_emplace_unchecked(key, ::std::piecewise_construct,
-                                                               ::std::forward_as_tuple(noadl::forward<ykeyT>(key)), ::std::forward_as_tuple());
+                                                               ::std::forward_as_tuple(noadl::forward<ykeyT>(key)),
+                                                               ::std::forward_as_tuple());
         return result.first->get()->second;
       }
     // N.B. This is a non-standard extension.
@@ -1310,7 +1337,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return *this;
       }
     // N.B. This function is a non-standard extension.
-    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)> cow_hashmap& assign(inputT first, inputT last)
+    template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
+        cow_hashmap& assign(inputT first, inputT last)
       {
         this->clear();
         this->insert(noadl::move(first), noadl::move(last));
@@ -1352,9 +1380,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
   };
 
-template<typename keyT, typename mappedT,
-         typename hashT, typename eqT, typename allocT> void swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs,
-                                                                  cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept
+template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
+    void swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs, cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept
   {
     return lhs.swap(rhs);
   }

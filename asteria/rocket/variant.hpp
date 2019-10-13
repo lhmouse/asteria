@@ -15,33 +15,29 @@ template<typename... alternativesT> class variant;
 
     namespace details_variant {
 
-    template<size_t indexT, typename targetT,
-             typename... alternativesT> struct type_finder  // no value
+    template<size_t indexT, typename targetT, typename... alternativesT>
+        struct type_finder  // no value
       {
       };
-    template<size_t indexT, typename targetT,
-             typename firstT, typename... restT> struct type_finder<indexT, targetT,
-                                                                    firstT, restT...> : type_finder<indexT + 1, targetT, restT...>  // recursive
+    template<size_t indexT, typename targetT, typename firstT, typename... restT>
+        struct type_finder<indexT, targetT, firstT, restT...> : type_finder<indexT + 1, targetT, restT...>  // recursive
       {
       };
-    template<size_t indexT, typename targetT,
-             typename... restT> struct type_finder<indexT, targetT,
-                                                   targetT, restT...> : integral_constant<size_t, indexT>  // found
+    template<size_t indexT, typename targetT, typename... restT>
+        struct type_finder<indexT, targetT, targetT, restT...> : integral_constant<size_t, indexT>  // found
       {
       };
 
-    template<size_t indexT,
-             typename... alternativesT> struct type_getter  // no type
+    template<size_t indexT, typename... alternativesT>
+        struct type_getter  // no type
       {
       };
-    template<size_t indexT,
-             typename firstT, typename... restT> struct type_getter<indexT,
-                                                                    firstT, restT...> : type_getter<indexT - 1, restT...>  // recursive
+    template<size_t indexT, typename firstT, typename... restT>
+        struct type_getter<indexT, firstT, restT...> : type_getter<indexT - 1, restT...>  // recursive
       {
       };
-    template<typename firstT,
-             typename... restT> struct type_getter<0,
-                                                   firstT, restT...> : enable_if<1, firstT>  // found
+    template<typename firstT, typename... restT>
+        struct type_getter<0, firstT, restT...> : enable_if<1, firstT>  // found
       {
       };
 
@@ -203,7 +199,8 @@ template<typename... alternativesT> class variant;
 template<typename... alternativesT> class variant
   {
     static_assert(sizeof...(alternativesT) > 0, "At least one alternative must be provided.");
-    static_assert(conjunction<is_nothrow_move_constructible<alternativesT>...>::value, "No move constructors of alternatives are allowed to throw exceptions.");
+    static_assert(conjunction<is_nothrow_move_constructible<alternativesT>...>::value,
+                  "No move constructors of alternatives are allowed to throw exceptions.");
 
   public:
     template<typename targetT> struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
@@ -231,14 +228,15 @@ template<typename... alternativesT> class variant
         this->m_index = index_new;
       }
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<typename decay<paramT>::type>::value)>
-            variant(paramT&& param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT&&>::value)
+        variant(paramT&& param) noexcept(is_nothrow_constructible<typename decay<paramT>::type, paramT&&>::value)
       {
 #ifdef ROCKET_DEBUG
         ::std::memset(this->m_stor, '*', sizeof(m_stor));
 #endif
         constexpr auto index_new = index_of<typename decay<paramT>::type>::value;
         // Copy/move-initialize the alternative in place.
-        noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), noadl::forward<paramT>(param));
+        noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
+                            noadl::forward<paramT>(param));
         this->m_index = index_new;
       }
     variant(const variant& other) noexcept(conjunction<is_nothrow_copy_constructible<alternativesT>...>::value)
@@ -263,8 +261,8 @@ template<typename... alternativesT> class variant
       }
     // 23.7.3.3, assignment
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
-            variant& operator=(const paramT& param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>,
-                                                                         is_nothrow_copy_constructible<paramT>>::value)
+        variant& operator=(const paramT& param) noexcept(conjunction<is_nothrow_copy_assignable<paramT>,
+                                                                     is_nothrow_copy_constructible<paramT>>::value)
       {
         auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
@@ -299,7 +297,7 @@ template<typename... alternativesT> class variant
       }
     // N.B. This assignment operator only accepts rvalues hence no backup is needed.
     template<typename paramT, ROCKET_ENABLE_IF_HAS_VALUE(index_of<paramT>::value)>
-            variant& operator=(paramT&& param) noexcept(is_nothrow_move_assignable<paramT>::value)
+        variant& operator=(paramT&& param) noexcept(is_nothrow_move_assignable<paramT>::value)
       {
         auto index_old = this->m_index;
         constexpr auto index_new = index_of<paramT>::value;
@@ -311,7 +309,8 @@ template<typename... alternativesT> class variant
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Move-construct the alternative in place.
-          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), noadl::move(param));
+          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
+                              noadl::move(param));
           this->m_index = index_new;
         }
         return *this;
@@ -381,8 +380,9 @@ template<typename... alternativesT> class variant
   private:
     [[noreturn]] ROCKET_NOINLINE void do_throw_index_mismatch(size_t yindex, const type_info& ytype) const
       {
-        noadl::sprintf_and_throw<invalid_argument>("variant: The index requested is `%ld` (`%s`), but the index currently active is `%ld` (`%s`).",
-                                                   static_cast<long>(yindex), ytype.name(), static_cast<long>(this->index()), this->type().name());
+        noadl::sprintf_and_throw<invalid_argument>(
+          "variant: The index requested is `%ld` (`%s`), but the index currently active is `%ld` (`%s`).",
+          static_cast<long>(yindex), ytype.name(), static_cast<long>(this->index()), this->type().name());
       }
 
   public:
@@ -449,18 +449,21 @@ template<typename... alternativesT> class variant
 
     template<typename visitorT> void visit(visitorT&& visitor) const
       {
-        static constexpr void (*const s_jump_table[])(const void*, visitorT&&) = { details_variant::wrapped_visit<const alternativesT>... };
+        static constexpr void (*const s_jump_table[])(const void*, visitorT&&) =
+          { details_variant::wrapped_visit<const alternativesT>... };
         s_jump_table[this->m_index](this->m_stor, noadl::forward<visitorT>(visitor));
       }
     template<typename visitorT> void visit(visitorT&& visitor)
       {
-        static constexpr void (*const s_jump_table[])(void*, visitorT&&) = { details_variant::wrapped_visit<alternativesT>... };
+        static constexpr void (*const s_jump_table[])(void*, visitorT&&) =
+          { details_variant::wrapped_visit<alternativesT>... };
         s_jump_table[this->m_index](this->m_stor, noadl::forward<visitorT>(visitor));
       }
 
     // 23.7.3.4, modifiers
     template<size_t indexT, typename... paramsT>
-            typename alternative_at<indexT>::type& emplace(paramsT&&... params) noexcept(is_nothrow_constructible<typename alternative_at<indexT>::type, paramsT&&...>::value)
+        typename alternative_at<indexT>::type& emplace(paramsT&&... params)
+          noexcept(is_nothrow_constructible<typename alternative_at<indexT>::type, paramsT&&...>::value)
       {
         auto index_old = this->m_index;
         constexpr auto index_new = indexT;
@@ -468,7 +471,8 @@ template<typename... alternativesT> class variant
           // Destroy the old alternative.
           details_variant::dispatch_destroy<alternativesT...>(index_old, this->m_stor);
           // Construct the alternative in place.
-          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), noadl::forward<paramsT>(params)...);
+          noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
+                              noadl::forward<paramsT>(params)...);
           this->m_index = index_new;
         }
         else {
@@ -477,7 +481,8 @@ template<typename... alternativesT> class variant
           details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, backup, this->m_stor);
           try {
             // Construct the alternative in place.
-            noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)), noadl::forward<paramsT>(params)...);
+            noadl::construct_at(static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor)),
+                                noadl::forward<paramsT>(params)...);
             this->m_index = index_new;
           }
           catch(...) {
@@ -490,7 +495,7 @@ template<typename... alternativesT> class variant
         return *static_cast<typename alternative_at<index_new>::type*>(static_cast<void*>(this->m_stor));
       }
     template<typename targetT, typename... paramsT>
-            targetT& emplace(paramsT&&... params) noexcept(is_nothrow_constructible<targetT, paramsT&&...>::value)
+        targetT& emplace(paramsT&&... params) noexcept(is_nothrow_constructible<targetT, paramsT&&...>::value)
       {
         return this->emplace<index_of<targetT>::value>(noadl::forward<paramsT>(params)...);
       }
@@ -518,7 +523,8 @@ template<typename... alternativesT> class variant
       }
   };
 
-template<typename... alternativesT> void swap(variant<alternativesT...>& lhs, variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+template<typename... alternativesT>
+    void swap(variant<alternativesT...>& lhs, variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }

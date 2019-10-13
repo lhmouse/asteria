@@ -36,15 +36,15 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // See whether it is one of the acceptable keywords.
         if(!qtok->is_keyword()) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto keyword = qtok->as_keyword();
         if(rocket::is_none_of(keyword, accept)) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Return the keyword and discard this token.
         tstrm.shift();
@@ -55,15 +55,15 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // See whether it is one of the acceptable punctuators.
         if(!qtok->is_punctuator()) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto punct = qtok->as_punctuator();
         if(rocket::is_none_of(punct, accept)) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Return the punctuator and discard this token.
         tstrm.shift();
@@ -74,11 +74,11 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // See whether it is an identifier.
         if(!qtok->is_identifier()) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto name = qtok->as_identifier();
         // Return the identifier and discard this token.
@@ -108,11 +108,11 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // See whether it is a string literal.
         if(!qtok->is_string_literal()) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto val = qtok->as_string_literal();
         // Return the string literal and discard this token.
@@ -125,7 +125,7 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // See whether it is a keyword, identifier, or string literal.
         if(qtok->is_keyword()) {
@@ -147,7 +147,7 @@ namespace Asteria {
           do_concatenate_string_literal_sequence(val, tstrm);
           return val;
         }
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     Value do_generate_null()
@@ -204,12 +204,12 @@ namespace Asteria {
         //   "infinity"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         if(qtok->is_keyword()) {
           auto qconf = std::find(std::begin(s_literal_table), std::end(s_literal_table), qtok->as_keyword());
           if(qconf == std::end(s_literal_table)) {
-            return rocket::nullopt;
+            return rocket::clear;
           }
           auto generator = qconf->generator;
           // Discard this token and create a new value using the generator.
@@ -235,7 +235,7 @@ namespace Asteria {
           do_concatenate_string_literal_sequence(val, tstrm);
           return val;
         }
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     opt<bool> do_accept_negation_opt(Token_Stream& tstrm)
@@ -244,7 +244,7 @@ namespace Asteria {
         //   "!" | "not"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         if(qtok->is_keyword() && (qtok->as_keyword() == keyword_not)) {
           // Discard this token.
@@ -256,7 +256,7 @@ namespace Asteria {
           tstrm.shift();
           return true;
         }
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     opt<cow_vector<phsh_string>> do_accept_identifier_list_opt(Token_Stream& tstrm)
@@ -267,7 +267,7 @@ namespace Asteria {
         //   identifier identifier-list-opt
         auto qname = do_accept_identifier_opt(tstrm);
         if(!qname) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         cow_vector<phsh_string> names;
         for(;;) {
@@ -334,7 +334,7 @@ namespace Asteria {
           qnames->emplace_back(rocket::sref("}"));
           return rocket::move(qnames);
         }
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     // Accept a statement; a blockt is converted to a single statement.
@@ -351,7 +351,7 @@ namespace Asteria {
         cow_vector<Xprunit> units;
         bool succ = do_accept_expression(units, tstrm);
         if(!succ) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         return rocket::move(units);
       }
@@ -366,7 +366,7 @@ namespace Asteria {
         //   statement statement-list-opt
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_op });
         if(!kpunct) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         cow_vector<Statement> body;
         for(;;) {
@@ -387,7 +387,7 @@ namespace Asteria {
       {
         auto qbody = do_accept_block_opt(tstrm);
         if(!qbody) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         Statement::S_block xstmt = { rocket::move(*qbody) };
         return rocket::move(xstmt);
@@ -401,7 +401,7 @@ namespace Asteria {
         //   "=" expression
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_assign });
         if(!kpunct) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         return do_accept_expression_opt(tstrm);
       }
@@ -412,7 +412,7 @@ namespace Asteria {
         //   ";"
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         Statement::S_expression xstmt = { rocket::clear };
         return rocket::move(xstmt);
@@ -424,7 +424,7 @@ namespace Asteria {
         //   "var" variable-declarator equal-initailizer-opt ( "," variable-declarator equal-initializer-opt | "" ) ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_var });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Each declaractor has its own source location.
         cow_vector<Source_Location> slocs;
@@ -465,7 +465,7 @@ namespace Asteria {
         //   "const" variable-declarator equal-initailizer ( "," identifier equal-initializer | "" ) ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_const });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Each declaractor has its own source location.
         cow_vector<Source_Location> slocs;
@@ -535,7 +535,7 @@ namespace Asteria {
           names.emplace_back(rocket::sref("..."));
           return rocket::move(names);
         }
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     opt<cow_vector<phsh_string>> do_accept_parameter_list_declaration_opt(Token_Stream& tstrm)
@@ -544,7 +544,7 @@ namespace Asteria {
         //   "(" parameter-list-opt ")"
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qnames = do_accept_parameter_list_opt(tstrm);
         if(!qnames) {
@@ -565,7 +565,7 @@ namespace Asteria {
         //   "func" identifier parameter-declaration block
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_func });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qname = do_accept_identifier_opt(tstrm);
         if(!qname) {
@@ -589,7 +589,7 @@ namespace Asteria {
         //   expression ";"
         auto kexpr = do_accept_expression_opt(tstrm);
         if(!kexpr) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_semicol });
         if(!kpunct) {
@@ -605,7 +605,7 @@ namespace Asteria {
         //   "else" statement | ""
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_else });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qbody = do_accept_statement_as_block_opt(tstrm);
         if(!qbody) {
@@ -624,7 +624,7 @@ namespace Asteria {
         //   "!" | "not"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_if });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kneg = do_accept_negation_opt(tstrm);
         if(!kneg) {
@@ -668,7 +668,7 @@ namespace Asteria {
         //   ( "case" expression | "default" ) ":" statement-list-opt
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_switch });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
@@ -728,7 +728,7 @@ namespace Asteria {
         //   "do" statement "while" negation-opt "(" expression ")" ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_do });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qbody = do_accept_statement_as_block_opt(tstrm);
         if(!qbody) {
@@ -736,7 +736,7 @@ namespace Asteria {
         }
         qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kneg = do_accept_negation_opt(tstrm);
         if(!kneg) {
@@ -768,7 +768,7 @@ namespace Asteria {
         //   "while" negation-opt "(" expression ")" statement
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_while });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kneg = do_accept_negation_opt(tstrm);
         if(!kneg) {
@@ -800,7 +800,7 @@ namespace Asteria {
         //   "each" identifier "," identifier ":" expression ")" statement
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_each });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qkname = do_accept_identifier_opt(tstrm);
         if(!qkname) {
@@ -859,7 +859,7 @@ namespace Asteria {
         //   for-initializer expression-opt ";" expression-opt ")" statement
         auto qinit = do_accept_for_initializer_opt(tstrm);
         if(!qinit) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qcond = do_accept_expression_opt(tstrm);
         if(!qcond) {
@@ -908,7 +908,7 @@ namespace Asteria {
         //   "for" "(" for-complement
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_for });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_parenth_op });
         if(!kpunct) {
@@ -935,7 +935,7 @@ namespace Asteria {
         if(qkwrd == keyword_for) {
           return jump_target_for;
         }
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     opt<Statement> do_accept_break_statement_opt(Token_Stream& tstrm)
@@ -944,7 +944,7 @@ namespace Asteria {
         //   "break" break-target-opt ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_break });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qtarget = do_accept_break_target_opt(tstrm);
         if(!qtarget) {
@@ -969,7 +969,7 @@ namespace Asteria {
         if(qkwrd == keyword_for) {
           return jump_target_for;
         }
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     opt<Statement> do_accept_continue_statement_opt(Token_Stream& tstrm)
@@ -978,7 +978,7 @@ namespace Asteria {
         //   "continue" continue-target-opt ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_continue });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qtarget = do_accept_continue_target_opt(tstrm);
         if(!qtarget) {
@@ -1000,7 +1000,7 @@ namespace Asteria {
         //   "throw" expression ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_throw });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kexpr = do_accept_expression_opt(tstrm);
         if(!kexpr) {
@@ -1020,7 +1020,7 @@ namespace Asteria {
         //   "&" | ""
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_andb });
         if(!kpunct) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         return true;
       }
@@ -1031,7 +1031,7 @@ namespace Asteria {
         //   "return" reference-specifier-opt expression-opt ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_return });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qref = do_accept_reference_specifier_opt(tstrm);
         if(!qref) {
@@ -1055,7 +1055,7 @@ namespace Asteria {
         //   ":" string-literal | ""
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_colon });
         if(!kpunct) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kmsg = do_accept_string_literal_opt(tstrm);
         if(!kmsg) {
@@ -1072,7 +1072,7 @@ namespace Asteria {
         //   "assert" negation-opt expression assert-message-opt ";"
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_assert });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto kneg = do_accept_negation_opt(tstrm);
         if(!kneg) {
@@ -1100,7 +1100,7 @@ namespace Asteria {
         //   "try" statement "catch" "(" identifier ")" statement
         auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_try });
         if(!qkwrd) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qbtry = do_accept_statement_as_block_opt(tstrm);
         if(!qbtry) {
@@ -1762,7 +1762,7 @@ namespace Asteria {
         cow_vector<Xprunit> units;
         bool succ = do_accept_infix_element(units, tstrm);
         if(!succ) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         Infix_Element::S_head xelem = { rocket::move(units) };
         return rocket::move(xelem);
@@ -1774,7 +1774,7 @@ namespace Asteria {
         //   ( "?" | "?=" ) expression ":"
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_quest_eq });
         if(!kpunct) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         auto qbtrue = do_accept_expression_opt(tstrm);
         if(!qbtrue) {
@@ -1796,7 +1796,7 @@ namespace Asteria {
         if(!kpunct) {
           auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_and });
           if(!qkwrd) {
-            return rocket::nullopt;
+            return rocket::clear;
           }
           kpunct.emplace(punctuator_andl);
         }
@@ -1812,7 +1812,7 @@ namespace Asteria {
         if(!kpunct) {
           auto qkwrd = do_accept_keyword_opt(tstrm, { keyword_or });
           if(!qkwrd) {
-            return rocket::nullopt;
+            return rocket::clear;
           }
           kpunct.emplace(punctuator_orl);
         }
@@ -1826,7 +1826,7 @@ namespace Asteria {
         //   "??" | "??="
         auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_coales, punctuator_coales_eq });
         if(!kpunct) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         Infix_Element::S_coalescence xelem = { *kpunct == punctuator_coales_eq, rocket::clear };
         return rocket::move(xelem);
@@ -1887,19 +1887,19 @@ namespace Asteria {
         //   "="  | "==" | "!=" | "<"  | ">"  | "<="  | ">="  | "<=>"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         if(qtok->is_punctuator()) {
           auto qconf = std::find(std::begin(s_infix_operator_table), std::end(s_infix_operator_table), qtok->as_punctuator());
           if(qconf == std::end(s_infix_operator_table)) {
-            return rocket::nullopt;
+            return rocket::clear;
           }
           // Return the infix operator and discard this token.
           tstrm.shift();
           Infix_Element::S_general xelem = { qconf->xop, qconf->assign, rocket::clear };
           return rocket::move(xelem);
         }
-        return rocket::nullopt;
+        return rocket::clear;
       }
 
     opt<Infix_Element> do_accept_infix_operator_opt(Token_Stream& tstrm)

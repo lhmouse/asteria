@@ -194,13 +194,13 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
     auto n = time_str.find_first_not_of(s_spaces);
     if(n == G_string::npos) {
       // `time_str` consists of only spaces. Fail.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     const char* qrd = time_str.data() + n;
     n = time_str.find_last_not_of(s_spaces) + 1 - n;
     if(n < std::strlen(s_min_str[0])) {
       // `time_str` contains too few characters. Fail.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     const char* qend = qrd + n;
     // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
@@ -217,7 +217,7 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
                 do_getx(qrd, { ':' }) &&
                 do_getx(qrd, tr.tm_sec, 2);
     if(!succ)
-      return rocket::nullopt;
+      return rocket::clear;
     if(tr.tm_year < 1600)
       return INT64_MIN;
     if(tr.tm_year > 9998)
@@ -228,7 +228,7 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
     tr.tm_isdst = 0;
     ::time_t tp = ::timegm(&tr);
     if(tp == static_cast<::time_t>(-1))
-      return rocket::nullopt;
+      return rocket::clear;
     // Convert it to the number of milliseconds.
     auto time_point = static_cast<int64_t>(tp) * 1000;
     // Parse the subsecond part if any.
@@ -238,7 +238,7 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
       while(qend > qrd) {
         char c = *--qend;
         if((c < '0') || ('9' < c))
-          return rocket::nullopt;
+          return rocket::clear;
         r += c - '0';
         r /= 10;
       }
@@ -246,7 +246,7 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
     }
     if(qrd != qend) {
       // Reject invalid characters at the end of `time_str`.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     return time_point;
   }

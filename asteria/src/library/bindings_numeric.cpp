@@ -1536,7 +1536,7 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == G_string::npos) {
       // `text` consists of only spaces. Fail.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     bool rneg = false;  // is the number negative?
     size_t rbegin = 0;  // beginning of significant figures
@@ -1587,7 +1587,7 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
       break;
     default:
       // Fail.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     rbegin = tpos;
     rend = tpos;
@@ -1608,7 +1608,7 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
     }
     // There shall be at least one digit.
     if(icnt == 0) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // Check for the exponent part.
     switch(text[tpos]) {
@@ -1644,7 +1644,7 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
         tpos++;
         // Accept a digit.
         if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         pcnt++;
         // Is the next character a digit separator?
@@ -1654,12 +1654,12 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
       }
       // There shall be at least one digit.
       if(pcnt == 0) {
-        return rocket::nullopt;
+        return rocket::clear;
       }
     }
     // Only spaces are allowed to follow the number.
     if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // The literal is an `integer` if there is no decimal point.
     int64_t val = 0;
@@ -1671,19 +1671,19 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
       }
       // Accept a digit.
       if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
-        return rocket::nullopt;
+        return rocket::clear;
       }
     }
     // Negative exponents are not allowed, not even when the significant part is zero.
     if(pexp < 0) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // Raise the result.
     if(val != 0) {
       for(auto i = pexp; i != 0; --i) {
         // Append a digit zero.
         if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
       }
     }
@@ -1696,7 +1696,7 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == G_string::npos) {
       // `text` consists of only spaces. Fail.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     bool rneg = false;  // is the number negative?
     size_t rbegin = 0;  // beginning of significant figures
@@ -1751,12 +1751,12 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
       {
         // Check for infinities.
         if(do_compare_lowercase(text, tpos + 1, "nfinity", 7) != 0) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         tpos += 8;
         // Only spaces are allowed to follow the number.
         if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Return a signed infinity.
         return std::copysign(INFINITY, -rneg);
@@ -1766,19 +1766,19 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
       {
         // Check for NaNs.
         if(do_compare_lowercase(text, tpos + 1, "an", 2) != 0) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         tpos += 3;
         // Only spaces are allowed to follow the number.
         if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         // Return a signed NaN.
         return std::copysign(NAN, -rneg);
       }
     default:
       // Fail.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     rbegin = tpos;
     rend = tpos;
@@ -1799,7 +1799,7 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
     }
     // There shall be at least one digit.
     if(icnt == 0) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // Check for the fractional part.
     if(text[tpos] == '.') {
@@ -1821,7 +1821,7 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
       }
       // There shall be at least one digit.
       if(fcnt == 0) {
-        return rocket::nullopt;
+        return rocket::clear;
       }
     }
     // Check for the exponent part.
@@ -1858,7 +1858,7 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
         tpos++;
         // Accept a digit.
         if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
-          return rocket::nullopt;
+          return rocket::clear;
         }
         pcnt++;
         // Is the next character a digit separator?
@@ -1868,12 +1868,12 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
       }
       // There shall be at least one digit.
       if(pcnt == 0) {
-        return rocket::nullopt;
+        return rocket::clear;
       }
     }
     // Only spaces are allowed to follow the number.
     if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // Convert the value.
     if(rbase == pbase) {
@@ -1913,7 +1913,7 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
     int fpcls = std::fpclassify(val);
     if((fpcls == FP_INFINITE) && !saturating) {
       // Make sure we return an infinity only when the string is an explicit one.
-      return rocket::nullopt;
+      return rocket::clear;
     }
     // N.B. The sign bit of a negative zero shall have been preserved.
     return val;
