@@ -40,29 +40,29 @@ class tinynumput
     // * pointer
     tinynumput& put_XP(const void* value) noexcept;
     // * unsigned 32-bit integer in binary
-    tinynumput& put_BU(uint32_t value) noexcept;
+    tinynumput& put_BU(uint32_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in binary
-    tinynumput& put_BQ(uint64_t value) noexcept;
+    tinynumput& put_BQ(uint64_t value, size_t precision = 1) noexcept;
     // * unsigned 32-bit integer in decimal
-    tinynumput& put_DU(uint32_t value) noexcept;
+    tinynumput& put_DU(uint32_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in decimal
-    tinynumput& put_DQ(uint64_t value) noexcept;
+    tinynumput& put_DQ(uint64_t value, size_t precision = 1) noexcept;
     // * unsigned 32-bit integer in hexadecimal
-    tinynumput& put_XU(uint32_t value) noexcept;
+    tinynumput& put_XU(uint32_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in hexadecimal
-    tinynumput& put_XQ(uint64_t value) noexcept;
+    tinynumput& put_XQ(uint64_t value, size_t precision = 1) noexcept;
     // * signed 32-bit integer in binary
-    tinynumput& put_BI(int32_t value) noexcept;
+    tinynumput& put_BI(int32_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in binary
-    tinynumput& put_BL(int64_t value) noexcept;
+    tinynumput& put_BL(int64_t value, size_t precision = 1) noexcept;
     // * signed 32-bit integer in decimal
-    tinynumput& put_DI(int32_t value) noexcept;
+    tinynumput& put_DI(int32_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in decimal
-    tinynumput& put_DL(int64_t value) noexcept;
+    tinynumput& put_DL(int64_t value, size_t precision = 1) noexcept;
     // * signed 32-bit integer in hexadecimal
-    tinynumput& put_XI(int32_t value) noexcept;
+    tinynumput& put_XI(int32_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in hexadecimal
-    tinynumput& put_XL(int64_t value) noexcept;
+    tinynumput& put_XL(int64_t value, size_t precision = 1) noexcept;
     // * IEEE-754 double-precision floating-point in binary
     tinynumput& put_BF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in binary scientific notation
