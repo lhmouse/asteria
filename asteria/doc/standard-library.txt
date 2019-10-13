@@ -1517,10 +1517,9 @@
 	  is appended to the significand as follows: If `value` is of
 	  type `integer`, the significand is kept as short as possible;
 	  otherwise (when `value` is of type `real`), it is written in
-	  scientific notation, whose significand always contains a
-	  decimal point. In both cases, the exponent comprises a plus or
-	  minus sign and at least two digits. If `ebase` is absent, no
-	  exponent appears. The result is exact as long as `base` is a
+	  scientific notation. In both cases, the exponent comprises at
+	  least two digits with an explicit sign. If `ebase` is absent,
+	  no exponent appears. The result is exact as long as `base` is a
 	  power of two.
 
 	* Returns a `string` converted from `value`.
