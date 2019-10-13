@@ -390,6 +390,111 @@ G_integer std_numeric_popcnt(const G_integer& x)
 
     namespace {
 
+    pair<G_integer, int> do_decompose_integer(uint8_t ebase, const G_integer& value)
+      {
+        int64_t ireg = value;
+        int iexp = 0;
+        for(;;) {
+          if(ireg == 0) {
+            break;
+          }
+          auto next = ireg / ebase;
+          if(ireg % ebase != 0) {
+            break;
+          }
+          ireg = next;
+          iexp++;
+        }
+        return std::make_pair(ireg, iexp);
+      }
+
+    G_string& do_append_exponent(G_string& text, rocket::tinynumput& nump, char delim, int exp)
+      {
+        // Write the delimiter.
+        text.push_back(delim);
+        // If the exponent is non-negative, ensure there is a plus sign.
+        if(exp >= 0)
+          text.push_back('+');
+        // Format the integer. If the exponent is negative, a minus sign will have been added.
+        nump.put_DI(exp, 2);
+        // Append significant figures.
+        text.append(nump.begin(), nump.end());
+        return text;
+      }
+
+    }  // namespace
+
+G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
+  {
+    G_string text;
+    rocket::tinynumput nump;
+
+    switch(base.value_or(10)) {
+    case 2:
+      {
+        if(!ebase) {
+          nump.put_BL(value);  // binary, long
+          text.append(nump.begin(), nump.end());
+          break;
+        }
+        if(*ebase == 2) {
+          auto p = do_decompose_integer(2, value);
+          nump.put_BL(p.first);  // binary, long
+          text.append(nump.begin(), nump.end());
+          do_append_exponent(text, nump, 'p', p.second);
+          break;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
+      }
+    case 16:
+      {
+        if(!ebase) {
+          nump.put_XL(value);  // hexadecimal, long
+          text.append(nump.begin(), nump.end());
+          break;
+        }
+        if(*ebase == 2) {
+          auto p = do_decompose_integer(2, value);
+          nump.put_XL(p.first);  // hexadecimal, long
+          text.append(nump.begin(), nump.end());
+          do_append_exponent(text, nump, 'p', p.second);
+          break;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
+      }
+    case 10:
+      {
+        if(!ebase) {
+          nump.put_DL(value);  // decimal, long
+          text.append(nump.begin(), nump.end());
+          break;
+        }
+        if(*ebase == 2) {
+          auto p = do_decompose_integer(2, value);
+          nump.put_DL(p.first);  // decimal, long
+          text.append(nump.begin(), nump.end());
+          do_append_exponent(text, nump, 'p', p.second);
+          break;
+        }
+        if(*ebase == 10) {
+          auto p = do_decompose_integer(10, value);
+          nump.put_DL(p.first);  // decimal, long
+          text.append(nump.begin(), nump.end());
+          do_append_exponent(text, nump, 'e', p.second);
+          break;
+        }
+        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
+      }
+    default:
+      ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
+    }
+    return text;
+  }
+
+    namespace {
+
+
+
     constexpr char s_xdigits[] = "00112233445566778899AaBbCcDdEeFf";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
@@ -466,23 +571,6 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return text;
       }
 
-    pair<G_integer, int> do_decompose_integer(uint8_t pbase, const G_integer& value)
-      {
-        auto ireg = value;
-        int iexp = 0;
-        for(;;) {
-          if(ireg == 0) {
-            break;
-          }
-          auto next = ireg / pbase;
-          if(ireg % pbase != 0) {
-            break;
-          }
-          ireg = next;
-          iexp++;
-        }
-        return std::make_pair(ireg, iexp);
-      }
 
     G_string& do_format_exponent(G_string& text, uint8_t pbase, int exp)
       {
@@ -536,51 +624,6 @@ G_integer std_numeric_popcnt(const G_integer& x)
         do_format_exponent(text, pbase, pair.second);
         return text;
       }
-
-    }  // namespace
-
-G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
-  {
-    switch(base.value_or(10)) {
-    case  2:
-      {
-        if(!ebase) {
-          return do_format_no_exponent( 2, value);
-        }
-        if(*ebase ==  2) {
-          return do_format_with_exponent( 2,  2, value);
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
-      }
-    case 16:
-      {
-        if(!ebase) {
-          return do_format_no_exponent(16, value);
-        }
-        if(*ebase ==  2) {
-          return do_format_with_exponent(16,  2, value);
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
-      }
-    case 10:
-      {
-        if(!ebase) {
-          return do_format_no_exponent(10, value);
-        }
-        if(*ebase ==  2) {
-          return do_format_with_exponent(10,  2, value);
-        }
-        if(*ebase == 10) {
-          return do_format_with_exponent(10, 10, value);
-        }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
-      }
-    default:
-      ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
-    }
-  }
-
-    namespace {
 
     constexpr double s_decbnd_dbl[]
       {
