@@ -15,9 +15,9 @@ class Formatter
     tinyfmt_str m_fmt;
 
   public:
-    template<typename ValT> Formatter& operator,(const ValT& val)
+    template<typename ValueT> Formatter& operator,(const ValueT& value)
       {
-        return (this->m_fmt << val), *this;
+        return (this->m_fmt << value), *this;
       }
     cow_string extract_string() noexcept
       {

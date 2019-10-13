@@ -73,16 +73,14 @@ template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>::~basic
   = default;
 
 // zero-conversion inserters
-template<typename charT, typename traitsT,
-         typename valueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT& c)
+template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT& c)
   {
     // Insert the character as is.
     auto& buf = fmt.get_buffer();
     buf.put(c);
     return fmt;
   }
-template<typename charT, typename traitsT,
-         typename valueT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
+template<typename charT, typename traitsT> basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
   {
     // Insert the sequence as is.
     auto& buf = fmt.get_buffer();
