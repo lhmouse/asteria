@@ -13,7 +13,6 @@
 #include <new>  // placement new
 #include <initializer_list>  // std::initializer_list<>
 #include <limits>  // std::numeric_limits<>
-#include <string>  // std::char_traits<>
 #include <functional>  // std::hash<>, std::equal_to<>
 #include <tuple>  // std::tuple<>
 #include <cstring>  // std::memset()
@@ -111,8 +110,6 @@ using ::std::input_iterator_tag;
 using ::std::forward_iterator_tag;
 using ::std::bidirectional_iterator_tag;
 using ::std::random_access_iterator_tag;
-
-using ::std::char_traits;
 
 using ::std::hash;
 using ::std::equal_to;

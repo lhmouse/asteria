@@ -7,6 +7,7 @@
 #include "assert.hpp"
 #include "throw.hpp"
 #include "utilities.hpp"
+#include "char_traits.hpp"
 
 /* Differences from `std::basic_streambuf`:
  * 1. Locales are not supported.
@@ -170,7 +171,7 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
         auto k = static_cast<size_type>(this->m_gend - this->m_gcur);
         if(ROCKET_UNEXPECT(k == 0)) {
           // If the get area is empty, try populating it.
-          if(traits_type::eq_int_type(this->do_call_underflow(true), traits_type::eof())) {
+          if(traits_type::is_eof(this->do_call_underflow(true))) {
             // Report EOF.
             return 0;
           }
