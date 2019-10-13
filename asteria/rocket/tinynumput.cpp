@@ -57,8 +57,7 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
         return static_cast<typename make_unsigned<valueT>::type>(value);
       }
 
-    template<uint8_t radixT, typename valueT,
-             ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
+    template<uint8_t radixT, typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
         char* do_xput_U_bkwd(char*& bp, const valueT& value, size_t width = 1)
       {
         char* stop = bp - width;
@@ -279,11 +278,6 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
 
     namespace {
 
-    constexpr uint64_t do_cast_M(const double& value) noexcept
-      {
-        return static_cast<uint64_t>(static_cast<int64_t>(::std::fabs(value))) << 8;
-      }
-
     template<typename valueT>
         char* do_check_special_opt(char*& bp, char*& ep, const valueT& value)
       {
@@ -306,6 +300,15 @@ tinynumput& tinynumput::put_XL(int64_t value) noexcept
         }
         // Return a null pointer to indicate that the value is finite.
         return nullptr;
+      }
+
+    void do_xfrexp_F(uint64_t& mant, int& exp, const double& value) noexcept
+      {
+        // Note if `value` is not finite then the behavior is undefined.
+        int bexp;
+        double frac = ::std::frexp(::std::fabs(value), &bexp);
+        exp = bexp - 1;
+        mant = static_cast<uint64_t>(static_cast<int64_t>(::std::ldexp(frac, 53))) << 11;
       }
 
     char* do_xput_M_bin(char*& ep, const uint64_t& mant, const char* dp_opt)
@@ -384,12 +387,9 @@ tinynumput& tinynumput::put_BF(double value) noexcept
       *(ep++) = '0';
       *(ep++) = 'b';
       // Break the number down into fractional and exponential parts. This result is exact.
-      // Normalize the integral part so it is the maximum value in the range [0,2).
-      // The significant value is adjusted into the range [0,0x1p56).
+      uint64_t mant;
       int exp;
-      double frac = ::std::frexp(value, &exp);
-      --exp;
-      uint64_t mant = do_cast_M(::std::ldexp(frac, 56));
+      do_xfrexp_F(mant, exp, value);
       // Write the broken-down number...
       if((exp < -4) || (53 <= exp)) {
         // ... in scientific notation.
@@ -437,12 +437,9 @@ tinynumput& tinynumput::put_BE(double value) noexcept
       *(ep++) = '0';
       *(ep++) = 'b';
       // Break the number down into fractional and exponential parts. This result is exact.
-      // Normalize the integral part so it is the maximum value in the range [0,2).
-      // The significant value is adjusted into the range [0,0x1p56).
+      uint64_t mant;
       int exp;
-      double frac = ::std::frexp(value, &exp);
-      --exp;
-      uint64_t mant = do_cast_M(::std::ldexp(frac, 56));
+      do_xfrexp_F(mant, exp, value);
       // Write the broken-down number in scientific notation.
       do_xput_M_bin(ep, mant, ep + 1);
       *(ep++) = 'p';
@@ -492,30 +489,29 @@ tinynumput& tinynumput::put_XF(double value) noexcept
       *(ep++) = '0';
       *(ep++) = 'x';
       // Break the number down into fractional and exponential parts. This result is exact.
-      // Normalize the integral part so it is the maximum value in the range [0,16).
-      // The significant value is adjusted into the range [0,0x1p56).
+      uint64_t mant;
       int exp;
-      double frac = ::std::frexp(value, &exp);
-      --exp;
-      uint64_t mant = do_cast_M(::std::ldexp(frac, 53 + (exp & 3)));
-      exp &= -4;
+      do_xfrexp_F(mant, exp, value);
+      // Normalize the integral part so it is the maximum value in the range [0,16).
+      mant >>= ~exp & 3;
+      exp >>= 2;
       // Write the broken-down number...
-      if((exp < -16) || (53 <= exp)) {
+      if((exp < -4) || (14 <= exp)) {
         // ... in scientific notation.
         do_xput_M_hex(ep, mant, ep + 1);
         *(ep++) = 'p';
-        do_xput_I_exp(ep, exp);
+        do_xput_I_exp(ep, exp * 4);
       }
       else if(exp < 0) {
         // ... in plain format; the number starts with "0."; zeroes are prepended as necessary.
         *(ep++) = '0';
         *(ep++) = '.';
-        noadl::ranged_for(exp >> 2, -1, [&](int) { *(ep++) = '0';  });
+        noadl::ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_hex(ep, mant, nullptr);
       }
       else
         // ... in plain format; the decimal is inserted in the middle.
-        do_xput_M_hex(ep, mant, ep + 1 + do_cast_U(exp >> 2));
+        do_xput_M_hex(ep, mant, ep + 1 + do_cast_U(exp));
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
@@ -546,17 +542,16 @@ tinynumput& tinynumput::put_XE(double value) noexcept
       *(ep++) = '0';
       *(ep++) = 'x';
       // Break the number down into fractional and exponential parts. This result is exact.
-      // Normalize the integral part so it is the maximum value in the range [0,16).
-      // The significant value is adjusted into the range [0,0x1p56).
+      uint64_t mant;
       int exp;
-      double frac = ::std::frexp(value, &exp);
-      --exp;
-      uint64_t mant = do_cast_M(::std::ldexp(frac, 53 + (exp & 3)));
-      exp &= -4;
+      do_xfrexp_F(mant, exp, value);
+      // Normalize the integral part so it is the maximum value in the range [0,16).
+      mant >>= ~exp & 3;
+      exp >>= 2;
       // Write the broken-down number in scientific notation.
       do_xput_M_hex(ep, mant, ep + 1);
       *(ep++) = 'p';
-      do_xput_I_exp(ep, exp);
+      do_xput_I_exp(ep, exp * 4);
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
