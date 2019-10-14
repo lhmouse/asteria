@@ -179,7 +179,8 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
           }
       };
 
-    template<typename allocT> class storage_handle : private allocator_wrapper_base_for<allocT>::type
+    template<typename allocT>
+        class storage_handle : private allocator_wrapper_base_for<allocT>::type
       {
       public:
         using allocator_type   = allocT;

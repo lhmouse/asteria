@@ -112,7 +112,8 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           = delete;
       };
 
-    template<typename allocT, typename traitsT> class storage_handle : private allocator_wrapper_base_for<allocT>::type
+    template<typename allocT, typename traitsT>
+        class storage_handle : private allocator_wrapper_base_for<allocT>::type
       {
       public:
         using allocator_type   = allocT;
