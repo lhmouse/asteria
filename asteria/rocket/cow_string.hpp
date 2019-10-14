@@ -170,7 +170,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
               return;
             }
             // If it has been decremented to zero, deallocate the block.
-            auto st_alloc = storage_allocator(ptr->alloc);
+            storage_allocator st_alloc(ptr->alloc);
             auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
@@ -219,7 +219,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           }
         size_type max_size() const noexcept
           {
-            auto st_alloc = storage_allocator(this->as_allocator());
+            storage_allocator st_alloc(this->as_allocator());
             auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
             return storage::max_nchar_for_nblk(max_nblk / 2);
           }
@@ -259,7 +259,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
             auto cap = this->check_size_add(0, res_arg);
             // Allocate an array of `storage` large enough for a header + `cap` instances of `value_type`.
             auto nblk = storage::min_nblk_for_nchar(cap);
-            auto st_alloc = storage_allocator(this->as_allocator());
+            storage_allocator st_alloc(this->as_allocator());
             auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);

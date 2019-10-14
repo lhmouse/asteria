@@ -330,7 +330,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               return;
             }
             // If it has been decremented to zero, deallocate the block.
-            auto st_alloc = storage_allocator(ptr->alloc);
+            storage_allocator st_alloc(ptr->alloc);
             auto nblk = ptr->nblk;
             noadl::destroy_at(noadl::unfancy(ptr));
 #ifdef ROCKET_DEBUG
@@ -409,7 +409,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
         size_type max_size() const noexcept
           {
-            auto st_alloc = storage_allocator(this->as_allocator());
+            storage_allocator st_alloc(this->as_allocator());
             auto max_nblk = allocator_traits<storage_allocator>::max_size(st_alloc);
             return storage::max_nbkt_for_nblk(max_nblk / 2) / max_load_factor_reciprocal;
           }
@@ -456,7 +456,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             auto cap = this->check_size_add(0, res_arg);
             // Allocate an array of `storage` large enough for a header + `cap` instances of pointers.
             auto nblk = storage::min_nblk_for_nbkt(cap * max_load_factor_reciprocal);
-            auto st_alloc = storage_allocator(this->as_allocator());
+            storage_allocator st_alloc(this->as_allocator());
             auto ptr = allocator_traits<storage_allocator>::allocate(st_alloc, nblk);
 #ifdef ROCKET_DEBUG
             ::std::memset(static_cast<void*>(noadl::unfancy(ptr)), '*', sizeof(storage) * nblk);
