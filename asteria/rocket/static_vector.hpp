@@ -102,12 +102,12 @@ template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>>
           }
         size_type check_size_add(size_type base, size_type add) const
           {
-            auto cap_max = this->max_size();
-            ROCKET_ASSERT(base <= cap_max);
-            if(cap_max - base < add) {
+            auto nmax = this->max_size();
+            ROCKET_ASSERT(base <= nmax);
+            if(nmax - base < add) {
               noadl::sprintf_and_throw<length_error>("static_vector: max size exceeded (`%llu` + `%llu` > `%llu`)",
                                                      static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
-                                                     static_cast<unsigned long long>(cap_max));
+                                                     static_cast<unsigned long long>(nmax));
             }
             return base + add;
           }
