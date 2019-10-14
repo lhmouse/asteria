@@ -168,25 +168,30 @@ template<> struct char_traits<wchar_t>
       }
     static size_type fgetn(::std::FILE* fp, char_type* p, size_type n)
       {
-        size_type k = 0;
-        while(k != n) {
-          int_type ch = ::std::fgetwc(fp);
-          if(ch == WEOF)
+        size_t k = 0;
+        // Read characters one by one, as `fgetws()` doesn't like null characters.
+        ::flockfile(fp);
+        while(k < n) {
+          ::std::wint_t ch = ::fgetwc_unlocked(fp);
+          if(ROCKET_UNEXPECT(ch == WEOF))
             break;
-          p[k] = (wchar_t)ch;
-          ++k;
+          p[k++] = (wchar_t)ch;
         }
+        ::funlockfile(fp);
         return k;
       }
     static size_type fputn(::std::FILE* fp, const char_type* p, size_type n)
       {
-        size_type k = 0;
-        while(k != n) {
-          int_type ch = ::std::fputwc(p[k], fp);
-          if(ch == WEOF)
+        size_t k = 0;
+        // Write characters one by one, as `fputws()` doesn't like null characters.
+        ::flockfile(fp);
+        while(k < n) {
+          ::std::wint_t ch = ::fputwc_unlocked(p[k], fp);
+          if(ROCKET_UNEXPECT(ch == WEOF))
             break;
-          ++k;
+          k++;
         }
+        ::funlockfile(fp);
         return k;
       }
   };
