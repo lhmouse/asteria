@@ -113,7 +113,6 @@ template<typename allocT>
                            details_allocator_utilities::propagate_none_tag>::type(),
       lhs, rhs);
   }
-
 template<typename allocT>
     void propagate_allocator_on_move(allocT& lhs, allocT&& rhs) noexcept
   {
@@ -123,7 +122,6 @@ template<typename allocT>
                            details_allocator_utilities::propagate_none_tag>::type(),
       lhs, rhs);
   }
-
 template<typename allocT>
     void propagate_allocator_on_swap(allocT& lhs, allocT& rhs) noexcept
   {
