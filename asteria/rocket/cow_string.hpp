@@ -179,13 +179,6 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
             allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
           }
 
-        [[noreturn]] ROCKET_NOINLINE void do_throw_size_overflow(size_type base, size_type add) const
-          {
-            noadl::sprintf_and_throw<length_error>("basic_cow_string: Increasing `%lld` by `%lld` would exceed the max length `%lld`.",
-                                                   static_cast<long long>(base), static_cast<long long>(add),
-                                                   static_cast<long long>(this->max_size()));
-          }
-
       public:
         const allocator_type& as_allocator() const noexcept
           {
@@ -235,7 +228,9 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
             auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
-              this->do_throw_size_overflow(base, add);
+              noadl::sprintf_and_throw<length_error>("basic_cow_string: max size exceeded (`%llu` + `%llu` > `%llu`)",
+                                                     static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
+                                                     static_cast<unsigned long long>(cap_max));
             }
             return base + add;
           }
@@ -873,9 +868,9 @@ template<typename charT, typename traitsT,
 
     [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
       {
-        noadl::sprintf_and_throw<out_of_range>(
-          "basic_cow_string: The subscript `%lld` is not a valid position within this string of length `%lld`.",
-          static_cast<long long>(pos), static_cast<long long>(this->size()));
+        noadl::sprintf_and_throw<out_of_range>("basic_cow_string: subscript out of range (`%lld` > `%llu`)",
+                                               static_cast<unsigned long long>(pos),
+                                               static_cast<unsigned long long>(this->size()));
       }
 
     // This function works the same way as `substr()`.

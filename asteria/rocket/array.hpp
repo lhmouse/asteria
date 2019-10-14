@@ -60,8 +60,9 @@ template<typename valueT, size_t capacityT,
   private:
     [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
       {
-        noadl::sprintf_and_throw<out_of_range>("array: The subscript `%lld` is not a valid position within this array of size `%lld`.",
-                                               static_cast<long long>(pos), static_cast<long long>(this->size()));
+        noadl::sprintf_and_throw<out_of_range>("array: subscript out of range (`%lld` > `%llu`)",
+                                               static_cast<unsigned long long>(pos),
+                                               static_cast<unsigned long long>(this->size()));
       }
 
   public:

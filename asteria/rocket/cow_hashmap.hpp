@@ -210,7 +210,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           {
             // `allocT::value_type` is not copy-constructible.
             // Throw an exception unconditionally, even when there is nothing to copy.
-            noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` is not copy-constructible.",
+            noadl::sprintf_and_throw<domain_error>("cow_hashmap: `%s` not copy-constructible",
                                                    typeid(typename allocT::value_type).name());
           }
       };
@@ -339,13 +339,6 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             allocator_traits<storage_allocator>::deallocate(st_alloc, ptr, nblk);
           }
 
-        [[noreturn]] ROCKET_NOINLINE void do_throw_size_overflow(size_type base, size_type add) const
-          {
-            noadl::sprintf_and_throw<length_error>("cow_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
-                                                   static_cast<long long>(base), static_cast<long long>(add),
-                                                   static_cast<long long>(this->max_size()));
-          }
-
       public:
         const hasher& as_hasher() const noexcept
           {
@@ -425,7 +418,9 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
-              this->do_throw_size_overflow(base, add);
+              noadl::sprintf_and_throw<length_error>("cow_hashmap: max size exceeded (`%llu` + `%llu` > `%llu`)",
+                                                     static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
+                                                     static_cast<unsigned long long>(cap_max));
             }
             return base + add;
           }
@@ -992,7 +987,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
     [[noreturn]] ROCKET_NOINLINE void do_throw_key_not_found() const
       {
-        noadl::sprintf_and_throw<out_of_range>("cow_hashmap: The specified key does not exist in this hashmap.");
+        noadl::sprintf_and_throw<out_of_range>("cow_hashmap: key not found");
       }
 
     const details_cow_hashmap::bucket<allocator_type>* do_get_table() const noexcept

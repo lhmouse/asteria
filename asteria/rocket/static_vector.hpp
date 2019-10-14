@@ -82,14 +82,6 @@ template<typename valueT, size_t capacityT,
         storage_handle& operator=(const storage_handle&)
           = delete;
 
-      private:
-        [[noreturn]] ROCKET_NOINLINE void do_throw_size_overflow(size_type base, size_type add) const
-          {
-            noadl::sprintf_and_throw<length_error>("static_vector: Increasing `%lld` by `%lld` would exceed the max size `%lld`.",
-                                                   static_cast<long long>(base), static_cast<long long>(add),
-                                                   static_cast<long long>(this->max_size()));
-          }
-
       public:
         const allocator_type& as_allocator() const noexcept
           {
@@ -113,7 +105,9 @@ template<typename valueT, size_t capacityT,
             auto cap_max = this->max_size();
             ROCKET_ASSERT(base <= cap_max);
             if(cap_max - base < add) {
-              this->do_throw_size_overflow(base, add);
+              noadl::sprintf_and_throw<length_error>("static_vector: max size exceeded (`%llu` + `%llu` > `%llu`)",
+                                                     static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
+                                                     static_cast<unsigned long long>(cap_max));
             }
             return base + add;
           }
@@ -517,8 +511,9 @@ template<typename valueT, size_t capacityT,
 
     [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
       {
-        noadl::sprintf_and_throw<out_of_range>("static_vector: The subscript `%lld` is not a valid position within this vector of size `%lld`.",
-                                               static_cast<long long>(pos), static_cast<long long>(this->size()));
+        noadl::sprintf_and_throw<out_of_range>("static_vector: subscript out of range (`%lld` > `%llu`)",
+                                               static_cast<unsigned long long>(pos),
+                                               static_cast<unsigned long long>(this->size()));
       }
 
     template<typename... paramsT> value_type* do_insert_no_bound_check(size_type tpos, paramsT&&... params)

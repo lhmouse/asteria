@@ -267,19 +267,19 @@ template<> struct char_traits<char16_t>
 
     [[noreturn]] static int_type fgetc(::std::FILE* /*fp*/)
       {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O has not been implemented.");
+        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");
       }
     [[noreturn]] static int_type fputc(::std::FILE* /*fp*/, char_type /*c*/)
       {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O has not been implemented.");
+        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");
       }
     [[noreturn]] static size_type fgetn(::std::FILE* /*fp*/, char_type* /*p*/, size_type /*n*/)
       {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O has not been implemented.");
+        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");
       }
     [[noreturn]] static size_type fputn(::std::FILE* /*fp*/, const char_type* /*p*/, size_type /*n*/)
       {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O has not been implemented.");
+        noadl::sprintf_and_throw<domain_error>("char_traits: `char16_t` I/O not implemented");
       }
   };
 
@@ -359,19 +359,19 @@ template<> struct char_traits<char32_t>
 
     [[noreturn]] static int_type fgetc(::std::FILE* /*fp*/)
       {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O has not been implemented.");
+        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");
       }
     [[noreturn]] static int_type fputc(::std::FILE* /*fp*/, char_type /*c*/)
       {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O has not been implemented.");
+        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");
       }
     [[noreturn]] static size_type fgetn(::std::FILE* /*fp*/, char_type* /*p*/, size_type /*n*/)
       {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O has not been implemented.");
+        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");
       }
     [[noreturn]] static size_type fputn(::std::FILE* /*fp*/, const char_type* /*p*/, size_type /*n*/)
       {
-        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O has not been implemented.");
+        noadl::sprintf_and_throw<domain_error>("char_traits: `char32_t` I/O not implemented");
       }
   };
 

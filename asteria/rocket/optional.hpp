@@ -113,7 +113,7 @@ template<typename valueT> class optional
   private:
     [[noreturn]] ROCKET_NOINLINE reference do_throw_valueless() const
       {
-        noadl::sprintf_and_throw<length_error>("variant: No value has been stored in this variant.");
+        noadl::sprintf_and_throw<length_error>("variant: no value set");
       }
 
   public:
