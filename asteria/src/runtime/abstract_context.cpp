@@ -19,8 +19,7 @@ void Abstract_Context::Cleaner::operator()(Rcbase* base) noexcept
   }
 
 Abstract_Context::~Abstract_Context()
-  {
-  }
+  { }
 
 
 Generational_Collector* Abstract_Context::get_tied_collector_opt() const noexcept

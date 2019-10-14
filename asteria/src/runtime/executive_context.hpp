@@ -28,8 +28,7 @@ class Executive_Context final : public Abstract_Context
       :
         m_parent_opt(parent.ptr()),
         m_global(this->m_parent_opt->m_global), m_stack(this->m_parent_opt->m_stack), m_zvarg(this->m_parent_opt->m_zvarg)
-      {
-      }
+      { }
     Executive_Context(ref_to<const Global_Context> xglobal, ref_to<Evaluation_Stack> xstack, ref_to<const rcobj<Variadic_Arguer>> xzvarg,  // for functions
                       const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
       :

@@ -92,8 +92,7 @@ namespace Asteria {
         Line_Reader(ref_to<tinybuf> xsbuf, const cow_string& xfile)
           :
             m_sbuf(xsbuf), m_file(xfile)
-          {
-          }
+          { }
 
         Line_Reader(const Line_Reader&)
           = delete;
@@ -200,8 +199,7 @@ namespace Asteria {
 
       public:
         constexpr Tack() noexcept
-          {
-          }
+          { }
 
       public:
         constexpr long line() const noexcept

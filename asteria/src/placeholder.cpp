@@ -8,8 +8,7 @@
 namespace Asteria {
 
 Placeholder::~Placeholder()
-  {
-  }
+  { }
 
 tinyfmt& Placeholder::describe(tinyfmt& fmt) const
   {

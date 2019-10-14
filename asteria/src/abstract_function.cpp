@@ -7,7 +7,6 @@
 namespace Asteria {
 
 Abstract_Function::~Abstract_Function()
-  {
-  }
+  { }
 
 }  // namespace Asteria

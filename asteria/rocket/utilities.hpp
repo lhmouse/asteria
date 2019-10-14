@@ -139,8 +139,7 @@ template<typename... unusedT> struct make_void
 
 template<typename lhsT, typename rhsT>
     struct is_lvalue_assignable : is_assignable<typename add_lvalue_reference<lhsT>::type, rhsT>
-  {
-  };
+  { };
 
 // The argument must be a non-const lvalue.
 template<typename argT, ROCKET_DISABLE_IF(is_same<const argT, argT>::value)>
@@ -157,8 +156,7 @@ template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_reference<argT>::v
   }
 
 template<typename typeT> struct remove_cvref : remove_cv<typename remove_reference<typeT>::type>
-  {
-  };
+  { };
 
     namespace details_utilities {
 
@@ -167,8 +165,7 @@ template<typename typeT> struct remove_cvref : remove_cv<typename remove_referen
     template<typename typeT>
         struct is_nothrow_swappable_aux : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(),
                                                                                 ::std::declval<typeT&>()))>
-      {
-      };
+      { };
 
     template<typename typeT>
         void adl_swap_aux(typeT& lhs, typeT& rhs)
@@ -179,8 +176,7 @@ template<typename typeT> struct remove_cvref : remove_cv<typename remove_referen
     }  // namespace details_utilities
 
 template<typename typeT> struct is_nothrow_swappable : details_utilities::is_nothrow_swappable_aux<typeT>
-  {
-  };
+  { };
 
 template<typename typeT> void adl_swap(typeT& lhs, typeT& rhs) noexcept(is_nothrow_swappable<typeT>::value)
   {
@@ -228,21 +224,17 @@ template<typename firstT, typename lastT, typename funcT, typename... paramsT>
 
 template<typename... typesT>
     struct conjunction : true_type
-  {
-  };
+  { };
 template<typename firstT, typename... restT>
     struct conjunction<firstT, restT...> : conditional<bool(firstT::value), conjunction<restT...>, firstT>::type
-  {
-  };
+  { };
 
 template<typename... typesT>
     struct disjunction : false_type
-  {
-  };
+  { };
 template<typename firstT, typename... restT>
     struct disjunction<firstT, restT...> : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
-  {
-  };
+  { };
 
     namespace details_utilities {
 
@@ -499,15 +491,13 @@ template<typename elementT, size_t countT>
 
     template<typename integerT, integerT valueT, typename... candidatesT>
         struct integer_selector  // Be SFINAE-friendly.
-      {
-      };
+      { };
     template<typename integerT, integerT valueT, typename firstT, typename... remainingT>
         struct integer_selector<integerT, valueT, firstT, remainingT...>
           : conditional<firstT(valueT) != valueT,
                         integer_selector<integerT, valueT, remainingT...>,
                         enable_if<1, firstT>>::type
-      {
-      };
+      { };
 
     }  // namespace details_utilities
 
@@ -515,20 +505,17 @@ template<intmax_t valueT>
     struct lowest_signed
       : details_utilities::integer_selector<intmax_t, valueT,
           signed char, signed short, signed, signed long, signed long long>
-  {
-  };
+  { };
 
 template<uintmax_t valueT>
      struct lowest_unsigned
         : details_utilities::integer_selector<uintmax_t, valueT,
             unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
-  {
-  };
+  { };
 
 // This tag value is used to construct an empty container. Assigning `clear` to a container clears it.
 struct clear_t
-  {
-  }
+  { }
 constexpr clear;
 
 // Fancy pointer conversion
@@ -542,13 +529,11 @@ template<typename pointerT>
 
     template<typename targetT, typename sourceT, typename = void>
        struct can_static_cast_aux : false_type
-      {
-      };
+      { };
     template<typename targetT, typename sourceT>
        struct can_static_cast_aux<targetT, sourceT,
          decltype(static_cast<void>(static_cast<targetT>(::std::declval<sourceT>())))> : true_type
-      {
-      };
+      { };
 
     template<typename targetT, typename sourceT>
         constexpr targetT static_or_dynamic_cast_aux(true_type, sourceT&& src)
@@ -565,8 +550,7 @@ template<typename pointerT>
 
 template<typename targetT, typename sourceT>
     struct can_static_cast : details_utilities::can_static_cast_aux<targetT, sourceT>
-  {
-  };
+  { };
 
 template<typename targetT, typename sourceT>
     constexpr targetT static_or_dynamic_cast(sourceT&& src)

@@ -21,8 +21,7 @@ class Variable final : public virtual Rcbase
 
   public:
     Variable() noexcept
-      {
-      }
+      { }
     ~Variable() override;
 
     Variable(const Variable&)

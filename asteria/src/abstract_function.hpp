@@ -13,8 +13,7 @@ class Abstract_Function : public virtual Rcbase
   {
   public:
     Abstract_Function() noexcept
-      {
-      }
+      { }
     ~Abstract_Function() override;
 
   public:

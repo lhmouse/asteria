@@ -22,13 +22,11 @@ class Backtrace_Frame
     template<typename XvalT> Backtrace_Frame(Frame_Type xtype, const Source_Location& xsloc, XvalT&& xval)
       :
         m_type(xtype), m_sloc(xsloc), m_value(rocket::forward<XvalT>(xval))
-      {
-      }
+      { }
     template<typename XvalT> Backtrace_Frame(Frame_Type xtype, const cow_string& xfile, int32_t xline, XvalT&& xval)
       :
         m_type(xtype), m_sloc(xfile, xline), m_value(rocket::forward<XvalT>(xval))
-      {
-      }
+      { }
     ~Backtrace_Frame();
 
   public:

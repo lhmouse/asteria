@@ -70,8 +70,7 @@ class Token
       :
         m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
         m_stor(rocket::forward<XtokT>(xtok))
-      {
-      }
+      { }
 
   public:
     const cow_string& file() const noexcept

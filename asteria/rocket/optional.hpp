@@ -30,8 +30,7 @@ template<typename valueT> class optional
     constexpr optional(clear_t = clear) noexcept
       :
         m_stor()
-      {
-      }
+      { }
     template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT&&, value_type>::value)>
         optional(yvalueT&& yvalue) noexcept(is_nothrow_constructible<value_type, yvalueT&&>::value)
       :

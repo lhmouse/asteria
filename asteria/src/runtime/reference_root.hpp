@@ -16,8 +16,7 @@ class Reference_Root
   {
   public:
     struct S_null
-      {
-      };
+      { };
     struct S_constant
       {
         Value val;
@@ -60,13 +59,11 @@ class Reference_Root
     Reference_Root() noexcept
       :
         m_stor()  // Initialize to a null reference.
-      {
-      }
+      { }
     template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XrootT&&)> Reference_Root(XrootT&& xroot) noexcept
       :
         m_stor(rocket::forward<XrootT>(xroot))
-      {
-      }
+      { }
     template<typename XrootT, ASTERIA_SFINAE_ASSIGN(Xvariant, XrootT&&)> Reference_Root& operator=(XrootT&& xroot) noexcept
       {
         this->m_stor = rocket::forward<XrootT>(xroot);

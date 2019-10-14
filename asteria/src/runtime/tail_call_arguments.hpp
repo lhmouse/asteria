@@ -27,8 +27,7 @@ class Tail_Call_Arguments final : public virtual Rcbase
       :
         m_sloc(sloc), m_inside(inside), m_tco_aware(tco_aware),
         m_target(target), m_args_self(rocket::move(args_self))
-      {
-      }
+      { }
     ~Tail_Call_Arguments() override;
 
     Tail_Call_Arguments(const Tail_Call_Arguments&)

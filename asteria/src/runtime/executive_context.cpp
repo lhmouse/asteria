@@ -9,8 +9,7 @@
 namespace Asteria {
 
 Executive_Context::~Executive_Context()
-  {
-  }
+  { }
 
 void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
   {

@@ -37,18 +37,15 @@ template<typename charT, typename traitsT,
     basic_tinyfmt_str() noexcept
       :
         m_buf(tinybuf_base::open_write)
-      {
-      }
+      { }
     explicit basic_tinyfmt_str(open_mode mode) noexcept
       :
         m_buf(mode)
-      {
-      }
+      { }
     template<typename xstrT> explicit basic_tinyfmt_str(xstrT&& xstr, open_mode mode = tinybuf_base::open_write)
       :
         m_buf(noadl::forward<xstrT>(xstr), mode)
-      {
-      }
+      { }
     ~basic_tinyfmt_str() override;
 
     basic_tinyfmt_str(basic_tinyfmt_str&&)

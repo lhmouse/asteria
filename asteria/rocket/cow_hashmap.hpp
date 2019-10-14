@@ -42,8 +42,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           :
             dtor(xdtor), nref()
             // `nelem` is uninitialized.
-          {
-          }
+          { }
       };
 
     template<typename allocT> class bucket
@@ -248,8 +247,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
     template<int indexT> struct ebo_placeholder
       {
         template<typename anythingT> explicit constexpr ebo_placeholder(anythingT&&) noexcept
-          {
-          }
+          { }
       };
 
     template<typename allocT, typename hashT, typename eqT>
@@ -290,8 +288,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
             m_ptr()
-          {
-          }
+          { }
         constexpr storage_handle(allocator_type&& alloc, const hasher& hf, const key_equal& eq)
           :
             allocator_base(noadl::move(alloc)),
@@ -300,8 +297,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             conditional<is_same<eqT, allocT>::value || is_same<eqT, hashT>::value,
                         ebo_placeholder<1>, key_equal_base>::type(eq),
             m_ptr()
-          {
-          }
+          { }
         ~storage_handle()
           {
             this->deallocate();
@@ -643,8 +639,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 
     // Informs the constructor of an iterator that the `bkt` parameter might point to an empty bucket.
     struct needs_adjust_tag
-      {
-      }
+      { }
     constexpr needs_adjust;
 
     template<typename hashmapT, typename valueT> class hashmap_iterator
@@ -673,26 +668,22 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
         constexpr hashmap_iterator(const parent_type* ref, bucket_type* bkt) noexcept
           :
             m_ref(ref), m_bkt(bkt)
-          {
-          }
+          { }
         hashmap_iterator(const parent_type* ref, needs_adjust_tag, bucket_type* hint) noexcept
           :
             m_ref(ref), m_bkt(this->do_adjust_forwards(hint))
-          {
-          }
+          { }
 
       public:
         constexpr hashmap_iterator() noexcept
           :
             hashmap_iterator(nullptr, nullptr)
-          {
-          }
+          { }
         template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
             constexpr hashmap_iterator(const hashmap_iterator<hashmapT, yvalueT>& other) noexcept
           :
             hashmap_iterator(other.m_ref, other.m_bkt)
-          {
-          }
+          { }
 
       private:
         bucket_type* do_assert_valid_bucket(bucket_type* bkt, bool to_dereference) const noexcept
@@ -826,16 +817,14 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
                              is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>>::value)
       :
         m_sth(alloc, hasher(), key_equal())
-      {
-      }
+      { }
     constexpr cow_hashmap(clear_t = clear_t())
         noexcept(conjunction<is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>,
                              is_nothrow_constructible<key_equal>, is_nothrow_copy_constructible<key_equal>,
                              is_nothrow_constructible<allocator_type>>::value)
       :
         cow_hashmap(allocator_type())
-      {
-      }
+      { }
     explicit cow_hashmap(size_type res_arg, const hasher& hf = hasher(), const key_equal& eq = key_equal(),
                          const allocator_type& alloc = allocator_type())
       :
@@ -846,13 +835,11 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     cow_hashmap(size_type res_arg, const allocator_type& alloc)
       :
         cow_hashmap(res_arg, hasher(), key_equal(), alloc)
-      {
-      }
+      { }
     cow_hashmap(size_type res_arg, const hasher& hf, const allocator_type& alloc)
       :
         cow_hashmap(res_arg, hf, key_equal(), alloc)
-      {
-      }
+      { }
     cow_hashmap(const cow_hashmap& other) noexcept(conjunction<is_nothrow_copy_constructible<hasher>,
                                                                is_nothrow_copy_constructible<key_equal>>::value)
       :

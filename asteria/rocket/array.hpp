@@ -23,12 +23,10 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array;
 
     template<typename valueT, size_t capacityT, size_t... nestedT>
         struct element_type_of : enable_if<1, array<valueT, nestedT...>>
-      {
-      };
+      { };
     template<typename valueT, size_t capacityT>
         struct element_type_of<valueT, capacityT> : enable_if<1, valueT>
-      {
-      };
+      { };
 
     }
 

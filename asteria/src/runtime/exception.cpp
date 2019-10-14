@@ -7,8 +7,7 @@
 namespace Asteria {
 
 Exception::~Exception()
-  {
-  }
+  { }
 
 static_assert(std::is_nothrow_copy_constructible<Exception>::value, "Copy constructors of exceptions are not allow to throw exceptions.");
 static_assert(std::is_nothrow_move_constructible<Exception>::value, "Move constructors of exceptions are not allow to throw exceptions.");

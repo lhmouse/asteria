@@ -39,8 +39,7 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
           :
             dtor(xdtor), nref()
             // `nelem` is uninitialized.
-          {
-          }
+          { }
       };
 
     template<typename allocT> struct basic_storage : storage_header
@@ -201,14 +200,12 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
           :
             allocator_base(alloc),
             m_ptr()
-          {
-          }
+          { }
         explicit constexpr storage_handle(allocator_type&& alloc) noexcept
           :
             allocator_base(noadl::move(alloc)),
             m_ptr()
-          {
-          }
+          { }
         ~storage_handle()
           {
             this->deallocate();
@@ -462,21 +459,18 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
         constexpr vector_iterator(const parent_type* ref, value_type* ptr) noexcept
           :
             m_ref(ref), m_ptr(ptr)
-          {
-          }
+          { }
 
       public:
         constexpr vector_iterator() noexcept
           :
             vector_iterator(nullptr, nullptr)
-          {
-          }
+          { }
         template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
             constexpr vector_iterator(const vector_iterator<vectorT, yvalueT>& other) noexcept
           :
             vector_iterator(other.m_ref, other.m_ptr)
-          {
-          }
+          { }
 
       private:
         value_type* do_assert_valid_pointer(value_type* ptr, bool to_dereference) const noexcept
@@ -643,8 +637,7 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
 
     // Insertion helpers.
     struct append_tag
-      {
-      }
+      { }
     constexpr append;
 
     template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, append_tag, paramsT&&... params)
@@ -653,8 +646,7 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
       }
 
     struct emplace_back_tag
-      {
-      }
+      { }
     constexpr emplace_back;
 
     template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
@@ -663,8 +655,7 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
       }
 
     struct push_back_tag
-      {
-      }
+      { }
     constexpr push_back;
 
     template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
@@ -702,13 +693,11 @@ template<typename valueT, typename allocT> class cow_vector
     explicit constexpr cow_vector(const allocator_type& alloc) noexcept
       :
         m_sth(alloc)
-      {
-      }
+      { }
     constexpr cow_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         cow_vector(allocator_type())
-      {
-      }
+      { }
     cow_vector(const cow_vector& other) noexcept
       :
         cow_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))

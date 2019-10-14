@@ -12,8 +12,7 @@ class Rcbase : public rocket::refcnt_base<Rcbase>
   {
   public:
     Rcbase() noexcept
-      {
-      }
+      { }
     virtual ~Rcbase();
 
   public:

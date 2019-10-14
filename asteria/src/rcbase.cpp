@@ -7,7 +7,6 @@
 namespace Asteria {
 
 Rcbase::~Rcbase()
-  {
-  }
+  { }
 
 }  // namespace Asteria

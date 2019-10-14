@@ -71,8 +71,7 @@ class AVMC_Queue
     constexpr AVMC_Queue() noexcept
       :
         m_stor()
-      {
-      }
+      { }
     AVMC_Queue(AVMC_Queue&& other) noexcept
       :
         m_stor()

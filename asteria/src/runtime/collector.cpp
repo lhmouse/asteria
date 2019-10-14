@@ -75,8 +75,7 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
         explicit Callback_Wrapper(FuncT&& func)
           :
             m_func(rocket::forward<FuncT>(func))
-          {
-          }
+          { }
 
       public:
         bool operator()(const rcptr<Variable>& var) const override

@@ -7,7 +7,6 @@
 namespace Asteria {
 
 Abstract_Opaque::~Abstract_Opaque()
-  {
-  }
+  { }
 
 }  // namespace Asteria

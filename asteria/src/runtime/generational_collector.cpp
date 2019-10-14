@@ -10,8 +10,7 @@
 namespace Asteria {
 
 Generational_Collector::~Generational_Collector()
-  {
-  }
+  { }
 
 Collector Generational_Collector::* Generational_Collector::do_locate(GC_Generation gc_gen) const
   {

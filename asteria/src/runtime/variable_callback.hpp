@@ -12,8 +12,7 @@ class Variable_Callback
   {
   public:
     Variable_Callback() noexcept
-      {
-      }
+      { }
     virtual ~Variable_Callback();
 
   public:

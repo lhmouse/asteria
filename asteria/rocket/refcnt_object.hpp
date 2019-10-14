@@ -24,25 +24,21 @@ template<typename elementT> class refcnt_object
         refcnt_object(const refcnt_ptr<yelementT>& ptr) noexcept
       :
         m_ptr((ROCKET_ASSERT(ptr), ptr))
-      {
-      }
+      { }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>
         refcnt_object(refcnt_ptr<yelementT>&& ptr) noexcept
       :
         m_ptr((ROCKET_ASSERT(ptr), noadl::move(ptr)))
-      {
-      }
+      { }
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>
         refcnt_object(const refcnt_object<yelementT>& other) noexcept
       :
         m_ptr(other.m_ptr)
-      {
-      }
+      { }
     refcnt_object(const refcnt_object& other) noexcept
       :
         m_ptr(other.m_ptr)
-      {
-      }
+      { }
     // We have to implement quite a few assignment operators, as the move constructor is not somehow efficient.
     // Be advised that, similar to `std::reference_wrapper`, all assignment operators modify `*this` rather than `this->get()`.
     template<typename yelementT, ROCKET_ENABLE_IF(is_convertible<typename refcnt_object<yelementT>::pointer, pointer>::value)>

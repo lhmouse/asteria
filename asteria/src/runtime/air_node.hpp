@@ -15,8 +15,7 @@ class AIR_Node
   {
   public:
     struct S_clear_stack
-      {
-      };
+      { };
     struct S_execute_block
       {
         cow_vector<AIR_Node> code_body;
@@ -90,8 +89,7 @@ class AIR_Node
         AIR_Status status;
       };
     struct S_return_by_value
-      {
-      };
+      { };
     struct S_push_literal
       {
         Value val;
@@ -243,8 +241,7 @@ class AIR_Node
     template<typename XnodeT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XnodeT&&)> AIR_Node(XnodeT&& xnode) noexcept
       :
         m_stor(rocket::forward<XnodeT>(xnode))
-      {
-      }
+      { }
     template<typename XnodeT, ASTERIA_SFINAE_ASSIGN(Xvariant, XnodeT&&)> AIR_Node& operator=(XnodeT&& xnode) noexcept
       {
         this->m_stor = rocket::forward<XnodeT>(xnode);

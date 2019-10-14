@@ -139,8 +139,7 @@ template<typename elementT, typename deleterT>
         constexpr stored_pointer() noexcept
           :
             m_ptr()
-          {
-          }
+          { }
         ~stored_pointer()
           {
             this->reset(pointer());
@@ -253,8 +252,7 @@ template<typename elementT> class refcnt_ptr
     constexpr refcnt_ptr(nullptr_t = nullptr) noexcept
       :
         m_sth()
-      {
-      }
+      { }
     explicit refcnt_ptr(pointer ptr) noexcept
       :
         refcnt_ptr()

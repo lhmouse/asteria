@@ -18,8 +18,7 @@ class Analytic_Context final : public Abstract_Context
     template<typename ContextT, ASTERIA_SFINAE_CONVERT(ContextT*, const Abstract_Context*)> explicit Analytic_Context(ref_to<ContextT> parent)  // for non-functions
       :
         m_parent_opt(parent.ptr())
-      {
-      }
+      { }
     Analytic_Context(const Abstract_Context* parent_opt,  // for functions
                      const cow_vector<phsh_string>& params)
       :

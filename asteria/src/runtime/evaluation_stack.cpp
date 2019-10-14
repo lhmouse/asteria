@@ -7,7 +7,6 @@
 namespace Asteria {
 
 Evaluation_Stack::~Evaluation_Stack()
-  {
-  }
+  { }
 
 }  // namespace Asteria

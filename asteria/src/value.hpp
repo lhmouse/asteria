@@ -34,13 +34,11 @@ class Value
     Value() noexcept
       :
         m_stor()  // Initialize to `null`.
-      {
-      }
+      { }
     template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XvalT&&)> Value(XvalT&& xval) noexcept
       :
         m_stor(rocket::forward<XvalT>(xval))
-      {
-      }
+      { }
     template<typename XvalT, ASTERIA_SFINAE_ASSIGN(Xvariant, XvalT&&)> Value& operator=(XvalT&& xval) noexcept
       {
         this->m_stor = rocket::forward<XvalT>(xval);

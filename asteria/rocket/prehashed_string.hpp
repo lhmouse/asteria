@@ -33,8 +33,7 @@ template<typename stringT,
           :
             hasher_base(hf),
             m_str(noadl::forward<paramsT>(params)...), m_hval(this->as_hasher()(this->m_str))
-          {
-          }
+          { }
 
         string_storage(const string_storage&)
           = delete;
@@ -127,37 +126,31 @@ template<typename stringT, typename hashT> class basic_prehashed_string
                              is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>>::value)
       :
         m_sth(hasher())
-      {
-      }
+      { }
     template<typename... paramsT>
         explicit basic_prehashed_string(const hasher& hf, paramsT&&... params)
           noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
                                is_nothrow_copy_constructible<hasher>>::value)
       :
         m_sth(hf, noadl::forward<paramsT>(params)...)
-      {
-      }
+      { }
     basic_prehashed_string(const string_type& str, const hasher& hf = hasher())
       :
         m_sth(hf, str)
-      {
-      }
+      { }
     basic_prehashed_string(string_type&& str, const hasher& hf = hasher())
       :
         m_sth(hf, noadl::move(str))
-      {
-      }
+      { }
     template<typename paramT, ROCKET_ENABLE_IF(is_convertible<paramT, string_type>::value)>
          basic_prehashed_string(paramT&& param, const hasher& hf = hasher())
       :
         m_sth(hf, noadl::forward<paramT>(param))
-      {
-      }
+      { }
     basic_prehashed_string(initializer_list<value_type> init, const hasher& hf = hasher())
       :
         m_sth(hf, init)
-      {
-      }
+      { }
     basic_prehashed_string(const basic_prehashed_string& other)
         noexcept(conjunction<is_nothrow_constructible<string_type>, is_nothrow_copy_assignable<string_type>,
                              is_nothrow_copy_constructible<hasher>>::value)

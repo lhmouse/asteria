@@ -20,18 +20,15 @@ namespace rocket {
         constexpr final_wrapper() noexcept(is_nothrow_constructible<allocT>::value)
           :
             m_alloc()
-          {
-          }
+          { }
         explicit constexpr final_wrapper(const allocT& alloc) noexcept
           :
             m_alloc(alloc)
-          {
-          }
+          { }
         explicit constexpr final_wrapper(allocT&& alloc) noexcept
           :
             m_alloc(noadl::move(alloc))
-          {
-          }
+          { }
 
       public:
         constexpr operator const allocT& () const noexcept
@@ -50,26 +47,22 @@ template<typename allocT>
     struct allocator_wrapper_base_for : conditional<is_final<allocT>::value,
                                                     details_allocator_utilities::final_wrapper<allocT>,
                                                     allocT>
-  {
-  };
+  { };
 
     namespace details_allocator_utilities {
 
     // don't propagate
     struct propagate_none_tag
-      {
-      }
+      { }
     constexpr propagate_none;
 
     template<typename allocT>
         void propagate(propagate_none_tag, allocT& /*lhs*/, const allocT& /*rhs*/) noexcept
-      {
-      }
+      { }
 
     // propagate_on_container_copy_assignment
     struct propagate_copy_tag
-      {
-      }
+      { }
     constexpr propagate_copy;
 
     template<typename allocT>
@@ -80,8 +73,7 @@ template<typename allocT>
 
     // propagate_on_container_move_assignment
     struct propagate_move_tag
-      {
-      }
+      { }
     constexpr propagate_move;
 
     template<typename allocT>
@@ -92,8 +84,7 @@ template<typename allocT>
 
     // propagate_on_container_swap
     struct propagate_swap_tag
-      {
-      }
+      { }
     constexpr propagate_swap;
 
     template<typename allocT>
@@ -134,12 +125,10 @@ template<typename allocT>
 
 template<typename allocT>
     struct is_std_allocator : false_type
-  {
-  };
+  { };
 template<typename valueT>
     struct is_std_allocator<::std::allocator<valueT>> : true_type
-  {
-  };
+  { };
 
 }  // namespace rocket
 

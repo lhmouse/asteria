@@ -10,8 +10,7 @@
 namespace Asteria {
 
 Tail_Call_Arguments::~Tail_Call_Arguments()
-  {
-  }
+  { }
 
 Variable_Callback& Tail_Call_Arguments::enumerate_variables(Variable_Callback& callback) const
   {
