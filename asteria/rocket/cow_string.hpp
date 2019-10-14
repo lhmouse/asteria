@@ -318,7 +318,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 
         void swap(storage_handle& other) noexcept
           {
-            ::std::swap(this->m_ptr, other.m_ptr);
+            noadl::adl_swap(this->m_ptr, other.m_ptr);
           }
       };
 
@@ -1501,7 +1501,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
     void swap(basic_cow_string& other) noexcept
       {
         this->m_sth.swap(other.m_sth);
-        ::std::swap(this->m_ptr, other.m_ptr);
+        noadl::adl_swap(this->m_ptr, other.m_ptr);
         ::std::swap(this->m_len, other.m_len);
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
       }

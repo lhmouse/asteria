@@ -433,7 +433,7 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
 
         void swap(storage_handle& other) noexcept
           {
-            ::std::swap(this->m_ptr, other.m_ptr);
+            noadl::adl_swap(this->m_ptr, other.m_ptr);
           }
       };
 
