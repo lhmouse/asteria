@@ -13,6 +13,10 @@
 #include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
 #include <cstring>  // std::memset()
 
+namespace rocket {
+
+template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
+
 /* Differences from `std::vector`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
  * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
@@ -22,10 +26,6 @@
  * 6. Comparison operators are not provided.
  * 7. The value type may be incomplete. It need be neither copy-assignable nor move-assignable, but must be swappable.
  */
-
-namespace rocket {
-
-template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
 
     namespace details_cow_vector {
 

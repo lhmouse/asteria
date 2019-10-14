@@ -9,16 +9,16 @@
 #include "utilities.hpp"
 #include "char_traits.hpp"
 
+namespace rocket {
+
+template<typename charT, typename traitsT = char_traits<charT>> class basic_tinybuf;
+
 /* Differences from `std::basic_streambuf`:
  * 1. Locales are not supported.
  * 2. Putting back is not supported.
  * 3. The design has been simplified.
  * 4. `off_type` is always `int64_t` regardless of the traits in effect.
  */
-
-namespace rocket {
-
-template<typename charT, typename traitsT = char_traits<charT>> class basic_tinybuf;
 
 struct tinybuf_base
   {

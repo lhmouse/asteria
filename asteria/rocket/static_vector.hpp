@@ -12,6 +12,10 @@
 #include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
 #include <cstring>  // std::memset()
 
+namespace rocket {
+
+template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>> class static_vector;
+
 /* Differences from `std::vector`:
  * 1. The storage of elements are allocated inside the vector object, which eliminates dynamic allocation.
  * 2. An additional capacity template parameter is required.
@@ -22,14 +26,10 @@
  * 7. Incomplete element types are not supported.
  */
 
-namespace rocket {
-
-template<typename valueT, size_t capacityT,
-         typename allocT = allocator<valueT>> class static_vector;
-
     namespace details_static_vector {
 
-    template<typename allocT, size_t capacityT> class storage_handle : private allocator_wrapper_base_for<allocT>::type
+    template<typename allocT, size_t capacityT>
+        class storage_handle : private allocator_wrapper_base_for<allocT>::type
       {
       public:
         using allocator_type   = allocT;

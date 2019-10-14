@@ -9,15 +9,15 @@
 #include "tinybuf.hpp"
 #include "tinynumput.hpp"
 
+namespace rocket {
+
+template<typename charT, typename traitsT = char_traits<charT>> class basic_tinyfmt;
+
 /* Differences from `std::basic_ostream`:
  * 1. Locales are not supported.
  * 2. Formatting is not supported.
  * 3. The stream is stateless. Exceptions are preferred when reporting errors.
  */
-
-namespace rocket {
-
-template<typename charT, typename traitsT = char_traits<charT>> class basic_tinyfmt;
 
 template<typename charT, typename traitsT>
     class basic_tinyfmt

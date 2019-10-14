@@ -9,16 +9,15 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 
+namespace rocket {
+
+template<typename valueT, size_t capacityT, size_t... nestedT> class array;
+
 /* Differences from `std::array`:
  * 1. Multi-dimensional arrays are supported natively.
  * 2. `fill()` takes different parameters.
  * 3. Comparison operators are not provided.
  */
-
-namespace rocket {
-
-template<typename valueT, size_t capacityT,
-         size_t... nestedT> class array;
 
     namespace details_array {
 
@@ -33,8 +32,7 @@ template<typename valueT, size_t capacityT,
 
     }
 
-template<typename valueT, size_t capacityT,
-         size_t... nestedT> class array
+template<typename valueT, size_t capacityT, size_t... nestedT> class array
   {
     static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
     static_assert(capacityT > 0, "`array`s of zero elements are not allowed.");

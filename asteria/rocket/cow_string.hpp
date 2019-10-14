@@ -14,6 +14,11 @@
 #include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
 #include <cstring>  // std::memset()
 
+namespace rocket {
+
+template<typename charT, typename traitsT = char_traits<charT>,
+         typename allocT = allocator<charT>> class basic_cow_string;
+
 /* Differences from `std::basic_string`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
  * 2. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
@@ -24,12 +29,6 @@
  * 7. `data()` returns a null pointer if the string is empty.
  */
 
-namespace rocket {
-
-template<typename charT, typename traitsT = char_traits<charT>,
-         typename allocT = allocator<charT>> class basic_cow_string;
-
-// Please keep this declaration up to date.
 template<typename charT, typename traitsT> class basic_tinyfmt;
 
     namespace details_cow_string {

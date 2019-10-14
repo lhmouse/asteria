@@ -15,6 +15,11 @@
 #include <tuple>  // std::forward_as_tuple()
 #include <cstring>  // std::memset()
 
+namespace rocket {
+
+template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = equal_to<keyT>,
+         typename allocT = allocator<pair<const keyT, mappedT>>> class cow_hashmap;
+
 /* Differences from `std::unordered_map`:
  * 1. `begin()` and `end()` always return `const_iterator`s. `at()`, `front()` and `back()` always return `const_reference`s.
  * 2. The copy constructor and copy assignment operator will not throw exceptions.
@@ -24,11 +29,6 @@
  * 6. The key and mapped types may be incomplete. The mapped type need be neither copy-assignable nor move-assignable.
  * 7. `erase()` may move elements around and invalidate iterators.
  */
-
-namespace rocket {
-
-template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename eqT = equal_to<keyT>,
-         typename allocT = allocator<pair<const keyT, mappedT>>> class cow_hashmap;
 
     namespace details_cow_hashmap {
 
