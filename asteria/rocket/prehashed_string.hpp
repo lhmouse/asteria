@@ -81,7 +81,8 @@ template<typename stringT,
             this->m_str = noadl::move(other.m_str);
             this->m_hval = this->as_hasher()(this->m_str);
           }
-        void exchange_with(string_storage& other)
+
+        void swap(string_storage& other)
           {
             noadl::adl_swap(this->m_str, other.m_str);
             ::std::swap(this->m_hval, other.m_hval);
@@ -304,7 +305,7 @@ template<typename stringT, typename hashT> class basic_prehashed_string
 
     void swap(basic_prehashed_string& other) noexcept(is_nothrow_swappable<string_type>::value)
       {
-        this->m_sth.exchange_with(other.m_sth);
+        this->m_sth.swap(other.m_sth);
       }
 
     // 24.3.2.7, string operations

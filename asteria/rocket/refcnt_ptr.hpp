@@ -121,7 +121,7 @@ template<typename elementT, typename deleterT>
     namespace details_refcnt_ptr {
 
     template<typename elementT, typename deleterT>
-        deleterT copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
+        constexpr deleterT copy_deleter(const refcnt_base<elementT, deleterT>& base) noexcept
       {
         return base.as_deleter();
       }
@@ -200,7 +200,8 @@ template<typename elementT, typename deleterT>
             }
             copy_deleter</*noadl*/>(*ptr)(ptr);
           }
-        void exchange(stored_pointer& other) noexcept
+
+        void swap(stored_pointer& other) noexcept
           {
             noadl::adl_swap(this->m_ptr, other.m_ptr);
           }
@@ -361,7 +362,7 @@ template<typename elementT> class refcnt_ptr
 
     void swap(refcnt_ptr& other) noexcept
       {
-        this->m_sth.exchange(other.m_sth);
+        this->m_sth.swap(other.m_sth);
       }
   };
 

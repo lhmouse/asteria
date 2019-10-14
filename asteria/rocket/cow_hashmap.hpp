@@ -511,10 +511,6 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             }
             this->do_reset(ptr);
           }
-        void exchange_with(storage_handle& other) noexcept
-          {
-            ::std::swap(this->m_ptr, other.m_ptr);
-          }
 
         constexpr operator const storage_handle* () const noexcept
           {
@@ -637,6 +633,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
                   return false;
                 }
               );
+          }
+
+        void swap(storage_handle& other) noexcept
+          {
+            ::std::swap(this->m_ptr, other.m_ptr);
           }
       };
 
@@ -1365,7 +1366,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
 
     void swap(cow_hashmap& other) noexcept
       {
-        this->m_sth.exchange_with(other.m_sth);
+        this->m_sth.swap(other.m_sth);
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
       }
 

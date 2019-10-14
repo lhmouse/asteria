@@ -94,9 +94,10 @@ template<typename handleT, typename closerT> class unique_handle;
             }
             this->as_closer().close(hv_old);
           }
-        void exchange(stored_handle& other) noexcept
+
+        void swap(stored_handle& other) noexcept
           {
-            ::std::swap(this->m_hv, other.m_hv);
+            noadl::adl_swap(this->m_hv, other.m_hv);
           }
       };
 
@@ -201,7 +202,7 @@ template<typename handleT, typename closerT> class unique_handle
     void swap(unique_handle& other) noexcept
       {
         noadl::adl_swap(this->m_sth.as_closer(), other.m_sth.as_closer());
-        this->m_sth.exchange(other.m_sth);
+        this->m_sth.swap(other.m_sth);
       }
   };
 
