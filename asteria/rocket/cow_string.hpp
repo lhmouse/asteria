@@ -662,8 +662,7 @@ template<typename charT, typename traitsT, typename allocT>
     return details_cow_string::shallow<charT, traitsT>(str);
   }
 
-template<typename charT, typename traitsT,
-         typename allocT> class basic_cow_string
+template<typename charT, typename traitsT, typename allocT> class basic_cow_string
   {
     static_assert(!is_array<charT>::value, "`charT` must not be an array type.");
     static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
