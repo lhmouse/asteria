@@ -17,7 +17,7 @@
  *    1) `Closer().null()` returns a handle value called the 'null handle value'.
  *    2) `Closer().is_null()` returns `true` if the argument is a 'null handle value' and `false` otherwise.
  *       N.B. There could more than one null handle values. It is required that `Closer().is_null(Closer().null())` is always `true`.
- *    3) `Closer().close(h)` closes the handle `h`. Null handle values will not be passed to this function.
+ *    3) `Closer().close(hv)` closes the handle `hv`. Null handle values will not be passed to this function.
  */
 
 namespace rocket {
@@ -37,25 +37,25 @@ template<typename handleT, typename closerT> class unique_handle;
         using closer_base = typename allocator_wrapper_base_for<closerT>::type;
 
       private:
-        handle_type m_h;
+        handle_type m_hv;
 
       public:
         constexpr stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
           :
             closer_base(),
-            m_h(this->as_closer().null())
+            m_hv(this->as_closer().null())
           {
           }
         explicit constexpr stored_handle(const closer_type& cl) noexcept
           :
             closer_base(cl),
-            m_h(this->as_closer().null())
+            m_hv(this->as_closer().null())
           {
           }
         explicit constexpr stored_handle(closer_type&& cl) noexcept
           :
             closer_base(noadl::move(cl)),
-            m_h(this->as_closer().null())
+            m_hv(this->as_closer().null())
           {
           }
         ~stored_handle()
@@ -80,23 +80,23 @@ template<typename handleT, typename closerT> class unique_handle;
 
         constexpr handle_type get() const noexcept
           {
-            return this->m_h;
+            return this->m_hv;
           }
         handle_type release() noexcept
           {
-            return ::std::exchange(this->m_h, this->as_closer().null());
+            return ::std::exchange(this->m_hv, this->as_closer().null());
           }
-        void reset(handle_type h_new) noexcept
+        void reset(handle_type hv_new) noexcept
           {
-            auto h_old = ::std::exchange(this->m_h, h_new);
-            if(this->as_closer().is_null(h_old)) {
+            auto hv_old = ::std::exchange(this->m_hv, hv_new);
+            if(this->as_closer().is_null(hv_old)) {
               return;
             }
-            this->as_closer().close(h_old);
+            this->as_closer().close(hv_old);
           }
         void exchange(stored_handle& other) noexcept
           {
-            ::std::swap(this->m_h, other.m_h);
+            ::std::swap(this->m_hv, other.m_hv);
           }
       };
 
@@ -126,17 +126,17 @@ template<typename handleT, typename closerT> class unique_handle
         m_sth(cl)
       {
       }
-    explicit unique_handle(handle_type h) noexcept(is_nothrow_constructible<closer_type>::value)
+    explicit unique_handle(handle_type hv) noexcept(is_nothrow_constructible<closer_type>::value)
       :
         unique_handle()
       {
-        this->reset(h);
+        this->reset(hv);
       }
-    unique_handle(handle_type h, const closer_type& cl) noexcept
+    unique_handle(handle_type hv, const closer_type& cl) noexcept
       :
         unique_handle(cl)
       {
-        this->reset(h);
+        this->reset(hv);
       }
     unique_handle(unique_handle&& other) noexcept
       :
@@ -192,9 +192,9 @@ template<typename handleT, typename closerT> class unique_handle
         this->m_sth.reset(this->m_sth.as_closer().null());
         return *this;
       }
-    unique_handle& reset(handle_type h_new) noexcept
+    unique_handle& reset(handle_type hv_new) noexcept
       {
-        this->m_sth.reset(h_new);
+        this->m_sth.reset(hv_new);
         return *this;
       }
 
