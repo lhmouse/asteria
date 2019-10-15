@@ -917,11 +917,13 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
     cow_hashmap& operator=(const cow_hashmap& other) noexcept
       {
+        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->assign(other);
         return *this;
       }
     cow_hashmap& operator=(cow_hashmap&& other) noexcept
       {
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         this->assign(noadl::move(other));
         return *this;
       }
@@ -1324,14 +1326,12 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     // N.B. This function is a non-standard extension.
     cow_hashmap& assign(const cow_hashmap& other) noexcept
       {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.share_with(other.m_sth);
         return *this;
       }
     // N.B. This function is a non-standard extension.
     cow_hashmap& assign(cow_hashmap&& other) noexcept
       {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         this->m_sth.share_with(noadl::move(other.m_sth));
         return *this;
       }

@@ -773,11 +773,13 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     basic_cow_string& operator=(const basic_cow_string& other) noexcept
       {
+        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->assign(other);
         return *this;
       }
     basic_cow_string& operator=(basic_cow_string&& other) noexcept
       {
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         this->assign(noadl::move(other));
         return *this;
       }
@@ -1291,7 +1293,6 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     basic_cow_string& assign(const basic_cow_string& other) noexcept
       {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.share_with(other.m_sth);
         this->m_ptr = other.m_ptr;
         this->m_len = other.m_len;
@@ -1299,7 +1300,6 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     basic_cow_string& assign(basic_cow_string&& other) noexcept
       {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         this->m_sth.share_with(noadl::move(other.m_sth));
         this->m_ptr = ::std::exchange(other.m_ptr, null_char);
         this->m_len = ::std::exchange(other.m_len, size_type(0));

@@ -475,12 +475,14 @@ template<typename valueT, size_t capacityT,
     static_vector& operator=(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                                                                               is_nothrow_copy_constructible<value_type>>::value)
       {
+        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->assign(other);
         return *this;
       }
     static_vector& operator=(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                                                                          is_nothrow_move_constructible<value_type>>::value)
       {
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         this->assign(noadl::move(other));
         return *this;
       }
@@ -819,7 +821,6 @@ template<typename valueT, size_t capacityT,
     static_vector& assign(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                                                                            is_nothrow_copy_constructible<value_type>>::value)
       {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         // Copy-assign the initial sequence.
         auto ncomm = noadl::min(this->size(), other.size());
         for(size_type i = 0; i != ncomm; ++i) {
@@ -840,7 +841,6 @@ template<typename valueT, size_t capacityT,
     static_vector& assign(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                                                                       is_nothrow_move_constructible<value_type>>::value)
       {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         // Move-assign the initial sequence.
         auto ncomm = noadl::min(this->size(), other.size());
         for(size_type i = 0; i != ncomm; ++i) {
