@@ -14,8 +14,8 @@ class tinynumput
   private:
     // These pointers may point to static, immutable storage.
     // They don't have type `const char*` for convenience.
-    char* m_bptr;
-    char* m_eptr;
+    const char* m_bptr;
+    const char* m_eptr;
     // This storage must be sufficient for the longest result, which at the moment
     // is signed 64-bit integer in binary (`-0b111...1` takes 67 bits).
     // The size is a multiple of eight to prevent padding bytes.
