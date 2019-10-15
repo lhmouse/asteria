@@ -763,14 +763,14 @@ template<typename valueT, typename allocT> class cow_vector
       }
     cow_vector& operator=(const cow_vector& other) noexcept
       {
-        this->assign(other);
         noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        this->assign(other);
         return *this;
       }
     cow_vector& operator=(cow_vector&& other) noexcept
       {
-        this->assign(noadl::move(other));
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        this->assign(noadl::move(other));
         return *this;
       }
     cow_vector& operator=(initializer_list<value_type> init)
@@ -1282,8 +1282,8 @@ template<typename valueT, typename allocT> class cow_vector
 
     void swap(cow_vector& other) noexcept
       {
-        this->m_sth.swap(other.m_sth);
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        this->m_sth.swap(other.m_sth);
       }
 
     // 26.3.11.4, data access

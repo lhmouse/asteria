@@ -475,15 +475,15 @@ template<typename valueT, size_t capacityT,
     static_vector& operator=(const static_vector& other) noexcept(conjunction<is_nothrow_copy_assignable<value_type>,
                                                                               is_nothrow_copy_constructible<value_type>>::value)
       {
-        this->assign(other);
         noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        this->assign(other);
         return *this;
       }
     static_vector& operator=(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                                                                          is_nothrow_move_constructible<value_type>>::value)
       {
-        this->assign(noadl::move(other));
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        this->assign(noadl::move(other));
         return *this;
       }
     static_vector& operator=(initializer_list<value_type> init)
@@ -877,6 +877,7 @@ template<typename valueT, size_t capacityT,
     void swap(static_vector& other) noexcept(conjunction<is_nothrow_swappable<value_type>,
                                                          is_nothrow_move_constructible<value_type>>::value)
       {
+        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         auto sl = this->size();
         auto sr = other.size();
         if(sl < sr) {
@@ -889,7 +890,6 @@ template<typename valueT, size_t capacityT,
           noadl::ranged_for(sr, sl, [&](size_type i) { other.m_sth.emplace_back_unchecked(noadl::move(this->m_sth.mut_data()[i]));  });
           this->m_sth.pop_back_n_unchecked(sl - sr);
         }
-        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
       }
 
     // 26.3.11.4, data access

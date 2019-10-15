@@ -777,14 +777,14 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     basic_cow_string& operator=(const basic_cow_string& other) noexcept
       {
-        this->assign(other);
         noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        this->assign(other);
         return *this;
       }
     basic_cow_string& operator=(basic_cow_string&& other) noexcept
       {
-        this->assign(noadl::move(other));
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        this->assign(noadl::move(other));
         return *this;
       }
     basic_cow_string& operator=(initializer_list<value_type> init)
@@ -1500,10 +1500,10 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
 
     void swap(basic_cow_string& other) noexcept
       {
+        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.swap(other.m_sth);
         noadl::adl_swap(this->m_ptr, other.m_ptr);
-        ::std::swap(this->m_len, other.m_len);
-        noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
+        noadl::adl_swap(this->m_len, other.m_len);
       }
 
     // 24.3.2.7, string operations
