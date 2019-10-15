@@ -1056,6 +1056,13 @@ tinynumput& tinynumput::put_XE(double value) noexcept
         ptrdiff_t dbase = static_cast<ptrdiff_t>(static_cast<size_t>(dpos + 2) / 9);
         exp = static_cast<int>(dbase - 324);
         dbase = dbase * 9 - 2;
+        // Raise super tiny numbers to minimize errors due to underflows.
+        // The threshold is 22 digits.
+        if(exp < -324+22) {
+          reg *= 1e22;
+          dpos += 9*22;
+          dbase += 9*22;
+        }
         // Collect digits from left to right.
         uint64_t ireg = 0;
         size_t dval;
