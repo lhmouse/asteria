@@ -675,7 +675,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
     using shallow_type   = details_cow_string::shallow<charT, traitsT>;
 
     static constexpr size_type npos = size_type(-1);
-    static const value_type null_char;
+    static const value_type null_char[1];
 
     // hash support
     struct hash;
@@ -687,14 +687,6 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
 
   public:
     // 24.3.2.2, construct/copy/destroy
-    explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
-      :
-        m_ptr(::std::addressof(null_char)), m_len(0), m_sth(alloc)
-      { }
-    constexpr basic_cow_string(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
-      :
-        basic_cow_string(allocator_type())
-      { }
     constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc) noexcept
       :
         m_ptr(sh.c_str()), m_len(sh.length()), m_sth(alloc)
@@ -702,6 +694,14 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
     constexpr basic_cow_string(shallow_type sh) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         basic_cow_string(sh, allocator_type())
+      { }
+    explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
+      :
+        m_ptr(null_char), m_len(0), m_sth(alloc)
+      { }
+    constexpr basic_cow_string(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
+      :
+        basic_cow_string(allocator_type())
       { }
     basic_cow_string(const basic_cow_string& other) noexcept
       :
@@ -801,7 +801,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         auto ptr = this->m_sth.reallocate(this->m_ptr, len_one, off_two, len_two, res_arg);
         if(!ptr) {
           // The storage has been deallocated.
-          this->m_ptr = ::std::addressof(null_char);
+          this->m_ptr = null_char;
           this->m_len = 0;
           return nullptr;
         }
@@ -826,7 +826,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         if(!this->unique()) {
           this->m_sth.deallocate();
-          this->m_ptr = ::std::addressof(null_char);
+          this->m_ptr = null_char;
           this->m_len = 0;
           return;
         }
@@ -1305,7 +1305,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         this->m_sth.share_with(noadl::move(other.m_sth));
-        this->m_ptr = ::std::exchange(other.m_ptr, ::std::addressof(null_char));
+        this->m_ptr = ::std::exchange(other.m_ptr, null_char);
         this->m_len = ::std::exchange(other.m_len, size_type(0));
         return *this;
       }
@@ -1791,11 +1791,11 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
   };
 
-template<typename charT, typename traitsT,
-         typename allocT> const charT basic_cow_string<charT, traitsT, allocT>::null_char = { };
+template<typename charT, typename traitsT, typename allocT>
+    const charT basic_cow_string<charT, traitsT, allocT>::null_char[1] = { 0 };
 
-template<typename charT, typename traitsT,
-         typename allocT> struct basic_cow_string<charT, traitsT, allocT>::hash
+template<typename charT, typename traitsT, typename allocT>
+    struct basic_cow_string<charT, traitsT, allocT>::hash
   {
     using result_type    = size_t;
     using argument_type  = basic_cow_string;
