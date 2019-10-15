@@ -763,13 +763,11 @@ template<typename valueT, typename allocT> class cow_vector
       }
     cow_vector& operator=(const cow_vector& other) noexcept
       {
-        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->assign(other);
         return *this;
       }
     cow_vector& operator=(cow_vector&& other) noexcept
       {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         this->assign(noadl::move(other));
         return *this;
       }
@@ -1246,12 +1244,14 @@ template<typename valueT, typename allocT> class cow_vector
     // N.B. The return type is a non-standard extension.
     cow_vector& assign(const cow_vector& other) noexcept
       {
+        noadl::propagate_allocator_on_copy(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.share_with(other.m_sth);
         return *this;
       }
     // N.B. The return type is a non-standard extension.
     cow_vector& assign(cow_vector&& other) noexcept
       {
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
         this->m_sth.share_with(noadl::move(other.m_sth));
         return *this;
       }
