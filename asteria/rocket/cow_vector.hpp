@@ -1314,7 +1314,7 @@ template<typename valueT, typename allocT> class cow_vector
 
 template<typename valueT, typename allocT>
     inline void swap(cow_vector<valueT, allocT>& lhs,
-                     cow_vector<valueT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs))
+                     cow_vector<valueT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
