@@ -844,7 +844,7 @@ template<typename valueT, size_t capacityT,
         // Move-assign the initial sequence.
         auto ncomm = noadl::min(this->size(), other.size());
         for(size_type i = 0; i != ncomm; ++i) {
-          this->m_sth.mut_data()[i] = noadl::move(other.m_sth.data()[i]);
+          this->m_sth.mut_data()[i] = noadl::move(other.m_sth.mut_data()[i]);
         }
         if(ncomm < other.size()) {
           // Move-construct remaining elements from `other` if is longer.
