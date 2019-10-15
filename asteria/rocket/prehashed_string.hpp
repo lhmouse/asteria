@@ -329,54 +329,54 @@ using prehashed_u16string  = basic_prehashed_string<cow_u16string, cow_u16string
 using prehashed_u32string  = basic_prehashed_string<cow_u32string, cow_u32string::hash>;
 
 template<typename stringT, typename hashT>
-    bool operator==(const basic_prehashed_string<stringT, hashT>& lhs,
-                    const basic_prehashed_string<stringT, hashT>& rhs)
+    constexpr bool operator==(const basic_prehashed_string<stringT, hashT>& lhs,
+                              const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return (lhs.rdhash() == rhs.rdhash()) && (lhs.rdstr() == rhs.rdstr());
   }
 template<typename stringT, typename hashT>
-    bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs,
-                    const basic_prehashed_string<stringT, hashT>& rhs)
+    constexpr bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs,
+                              const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return (lhs.rdhash() != rhs.rdhash()) || (lhs.rdstr() != rhs.rdstr());
   }
 
 template<typename stringT, typename hashT, typename otherT,
          ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>() == ::std::declval<const otherT&>()))>
-    bool operator==(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
+    constexpr bool operator==(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
   {
     return lhs.rdstr() == rhs;
   }
 template<typename stringT, typename hashT, typename otherT,
          ROCKET_ENABLE_IF(sizeof(::std::declval<const stringT&>() != ::std::declval<const otherT&>()))>
-    bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
+    constexpr bool operator!=(const basic_prehashed_string<stringT, hashT>& lhs, const otherT& rhs)
   {
     return lhs.rdstr() != rhs;
   }
 
 template<typename stringT, typename hashT, typename otherT,
          ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>() == ::std::declval<const stringT&>()))>
-    bool operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
+    constexpr bool operator==(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return lhs == rhs.rdstr();
   }
 template<typename stringT, typename hashT, typename otherT,
          ROCKET_ENABLE_IF(sizeof(::std::declval<const otherT&>() != ::std::declval<const stringT&>()))>
-    bool operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
+    constexpr bool operator!=(const otherT& lhs, const basic_prehashed_string<stringT, hashT>& rhs)
   {
     return lhs != rhs.rdstr();
   }
 
 template<typename stringT, typename hashT>
-    void swap(basic_prehashed_string<stringT, hashT>& lhs,
-              basic_prehashed_string<stringT, hashT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+    inline void swap(basic_prehashed_string<stringT, hashT>& lhs,
+                     basic_prehashed_string<stringT, hashT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename stringT, typename hashT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                              const basic_prehashed_string<stringT, hashT>& str)
+    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                     const basic_prehashed_string<stringT, hashT>& str)
   {
     return fmt << str.rdstr();
   }

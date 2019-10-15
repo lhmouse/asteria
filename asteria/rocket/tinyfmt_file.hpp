@@ -22,7 +22,8 @@ template<typename charT, typename traitsT, typename allocT>
 
     using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
     using buffer_type   = basic_tinybuf_file<charT, traitsT, allocT>;
-    using handle_type   = typename buffer_type::handle_type;
+    using file_handle   = typename buffer_type::file_handle;
+    using closer_type   = typename buffer_type::closer_type;
 
     using seek_dir   = typename buffer_type::seek_dir;
     using open_mode  = typename buffer_type::open_mode;
@@ -42,9 +43,9 @@ template<typename charT, typename traitsT, typename allocT>
       :
         m_buf(path, mode)
       { }
-    basic_tinyfmt_file(handle_type hf, bool owns) noexcept
+    basic_tinyfmt_file(file_handle fp, const closer_type& cl) noexcept
       :
-        m_buf(hf, owns)
+        m_buf(fp, cl)
       { }
     ~basic_tinyfmt_file() override;
 
@@ -59,7 +60,7 @@ template<typename charT, typename traitsT, typename allocT>
         return this->m_buf;
       }
 
-    handle_type get_handle() const noexcept
+    file_handle get_handle() const noexcept
       {
         return this->m_buf.get_handle();
       }
@@ -67,16 +68,16 @@ template<typename charT, typename traitsT, typename allocT>
       {
         return this->m_buf.open(path, mode), *this;
       }
-    basic_tinyfmt_file& reset(handle_type hf, bool owns)
+    basic_tinyfmt_file& reset(file_handle fp, const closer_type& cl)
       {
-        return this->m_buf.reset(hf, owns), *this;
+        return this->m_buf.reset(fp, cl), *this;
       }
     basic_tinyfmt_file& close()
       {
         return this->m_buf.close(), *this;
       }
 
-    void swap(basic_tinyfmt_file& other)
+    void swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<buffer_type>::value)
       {
         noadl::adl_swap(this->m_buf, other.m_buf);
       }
@@ -87,7 +88,8 @@ template<typename charT, typename traitsT, typename allocT>
   = default;
 
 template<typename charT, typename traitsT, typename allocT>
-    void swap(basic_tinyfmt_file<charT, traitsT, allocT>& lhs, basic_tinyfmt_file<charT, traitsT, allocT>& rhs)
+    inline void swap(basic_tinyfmt_file<charT, traitsT, allocT>& lhs,
+                     basic_tinyfmt_file<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }

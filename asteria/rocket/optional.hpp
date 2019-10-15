@@ -205,7 +205,8 @@ template<typename valueT> class optional
   };
 
 template<typename valueT>
-    void swap(optional<valueT>& lhs, optional<valueT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+    inline void swap(optional<valueT>& lhs,
+                     optional<valueT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
@@ -274,7 +275,8 @@ template<typename valueT>
   }
 
 template<typename charT, typename traitsT, typename valueT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const optional<valueT>& rhs)
+    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                     const optional<valueT>& rhs)
   {
     return rhs ? (fmt << *rhs) : (fmt << "<no value>");
   }

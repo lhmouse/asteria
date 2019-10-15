@@ -177,8 +177,8 @@ template<typename elementT, typename deleterT> class unique_ptr
     // 23.11.1.2.3, assignment
     unique_ptr& operator=(unique_ptr&& other) noexcept
       {
-        this->reset(other.m_sth.release());
         this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
+        this->reset(other.m_sth.release());
         return *this;
       }
     template<typename yelementT, typename ydeleterT,
@@ -186,8 +186,8 @@ template<typename elementT, typename deleterT> class unique_ptr
                                           is_convertible<typename unique_ptr<yelementT, ydeleterT>::deleter_type, deleter_type>>::value)>
         unique_ptr& operator=(unique_ptr<yelementT, ydeleterT>&& other) noexcept
       {
-        this->reset(other.m_sth.release());
         this->m_sth.as_deleter() = noadl::move(other.m_sth.as_deleter());
+        this->reset(other.m_sth.release());
         return *this;
       }
 
@@ -239,8 +239,8 @@ template<typename elementT, typename deleterT> class unique_ptr
 
     void swap(unique_ptr& other) noexcept
       {
-        this->m_sth.swap(other.m_sth);
         noadl::adl_swap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
+        this->m_sth.swap(other.m_sth);
       }
   };
 
@@ -304,39 +304,40 @@ template<typename elementT, typename deleterT>
   }
 
 template<typename elementT, typename deleterT>
-    void swap(unique_ptr<elementT, deleterT>& lhs, unique_ptr<elementT, deleterT>& rhs) noexcept
+    inline void swap(unique_ptr<elementT, deleterT>& lhs,
+                     unique_ptr<elementT, deleterT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename elementT, typename deleterT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                              const unique_ptr<elementT, deleterT>& rhs)
+    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                     const unique_ptr<elementT, deleterT>& rhs)
   {
     return fmt << rhs.get();
   }
 
 template<typename targetT, typename sourceT>
-    unique_ptr<targetT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+    inline unique_ptr<targetT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
                                                          [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
-    unique_ptr<targetT> dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+    inline unique_ptr<targetT> dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
                                                          [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
-    unique_ptr<targetT> const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
+    inline unique_ptr<targetT> const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
                                                          [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
 template<typename elementT, typename... paramsT>
-    unique_ptr<elementT> make_unique(paramsT&&... params)
+    inline unique_ptr<elementT> make_unique(paramsT&&... params)
   {
     return unique_ptr<elementT>(new elementT(noadl::forward<paramsT>(params)...));
   }

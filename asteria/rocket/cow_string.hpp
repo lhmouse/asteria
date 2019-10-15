@@ -2067,14 +2067,15 @@ template<typename charT, typename traitsT, typename allocT>
   }
 
 template<typename charT, typename traitsT, typename allocT>
-    void swap(basic_cow_string<charT, traitsT, allocT>& lhs, basic_cow_string<charT, traitsT, allocT>& rhs) noexcept
+    inline void swap(basic_cow_string<charT, traitsT, allocT>& lhs,
+                     basic_cow_string<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename allocT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                              const basic_cow_string<charT, traitsT, allocT>& str)
+    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                     const basic_cow_string<charT, traitsT, allocT>& str)
   {
     return fmt.put(str.c_str(), str.size());
   }

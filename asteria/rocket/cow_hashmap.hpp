@@ -1387,7 +1387,8 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
   };
 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
-    void swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs, cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept
+    inline void swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs,
+                     cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }

@@ -117,13 +117,15 @@ template<typename elementT> class refcnt_object
   };
 
 template<typename elementT>
-    void swap(refcnt_object<elementT>& lhs, refcnt_object<elementT>& rhs) noexcept
+    inline void swap(refcnt_object<elementT>& lhs,
+                     refcnt_object<elementT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename elementT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const refcnt_object<elementT>& rhs)
+    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                     const refcnt_object<elementT>& rhs)
   {
     return fmt << rhs.get();
   }

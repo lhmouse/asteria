@@ -60,6 +60,7 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/ref_to.hpp  \
   asteria/rocket/tinybuf.hpp  \
   asteria/rocket/tinybuf_str.hpp  \
+  asteria/rocket/unique_file.hpp  \
   asteria/rocket/tinybuf_file.hpp  \
   asteria/rocket/tinynumput.hpp  \
   asteria/rocket/tinyfmt.hpp  \

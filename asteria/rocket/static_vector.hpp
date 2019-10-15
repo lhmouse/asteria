@@ -932,8 +932,8 @@ template<typename valueT, size_t capacityT,
   };
 
 template<typename valueT, size_t capacityT, typename allocT>
-    void swap(static_vector<valueT, capacityT, allocT>& lhs,
-              static_vector<valueT, capacityT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+    inline void swap(static_vector<valueT, capacityT, allocT>& lhs,
+                     static_vector<valueT, capacityT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }

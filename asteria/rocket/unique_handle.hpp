@@ -202,45 +202,52 @@ template<typename handleT, typename closerT> class unique_handle
   };
 
 template<typename handleT, typename closerT>
-    bool operator==(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+    constexpr bool operator==(const unique_handle<handleT, closerT>& lhs,
+                              const unique_handle<handleT, closerT>& rhs)
   {
     return lhs.get() == rhs.get();
   }
 template<typename handleT, typename closerT>
-    bool operator!=(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+    constexpr bool operator!=(const unique_handle<handleT, closerT>& lhs,
+                              const unique_handle<handleT, closerT>& rhs)
   {
     return lhs.get() != rhs.get();
   }
 template<typename handleT, typename closerT>
-    bool operator<(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+    constexpr bool operator<(const unique_handle<handleT, closerT>& lhs,
+                             const unique_handle<handleT, closerT>& rhs)
   {
     return lhs.get() < rhs.get();
   }
 template<typename handleT, typename closerT>
-    bool operator>(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+    constexpr bool operator>(const unique_handle<handleT, closerT>& lhs,
+                             const unique_handle<handleT, closerT>& rhs)
   {
     return lhs.get() > rhs.get();
   }
 template<typename handleT, typename closerT>
-    bool operator<=(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+    constexpr bool operator<=(const unique_handle<handleT, closerT>& lhs,
+                              const unique_handle<handleT, closerT>& rhs)
   {
     return lhs.get() <= rhs.get();
   }
 template<typename handleT, typename closerT>
-    bool operator>=(const unique_handle<handleT, closerT>& lhs, const unique_handle<handleT, closerT>& rhs)
+    constexpr bool operator>=(const unique_handle<handleT, closerT>& lhs,
+                              const unique_handle<handleT, closerT>& rhs)
   {
     return lhs.get() >= rhs.get();
   }
 
 template<typename handleT, typename closerT>
-    void swap(unique_handle<handleT, closerT>& lhs, unique_handle<handleT, closerT>& rhs) noexcept
+    inline void swap(unique_handle<handleT, closerT>& lhs,
+                     unique_handle<handleT, closerT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename handleT, typename closerT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                              const unique_handle<handleT, closerT>& rhs)
+    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                     const unique_handle<handleT, closerT>& rhs)
   {
     return fmt << rhs.get();
   }

@@ -5,7 +5,7 @@
 #define ROCKET_TINYBUF_FILE_HPP_
 
 #include "tinybuf.hpp"
-#include "cow_string.hpp"
+#include "unique_file.hpp"
 
 namespace rocket {
 
@@ -21,7 +21,9 @@ template<typename charT, typename traitsT,
     using allocator_type  = allocT;
 
     using buffer_type  = basic_tinybuf<charT, traitsT>;
-    using handle_type  = int;
+    using file_type    = basic_unique_file<charT, traitsT, allocT>;
+    using file_handle  = typename file_type::file_handle;
+    using closer_type  = typename file_type::closer_type;
 
     using seek_dir   = typename buffer_type::seek_dir;
     using open_mode  = typename buffer_type::open_mode;
@@ -39,14 +41,10 @@ template<typename charT, typename traitsT,
 //      : m_str(), m_off(),
 //        m_mode()
       { }
-    explicit basic_tinybuf_file(open_mode mode) noexcept
-//      : m_str(), m_off(),
-//        m_mode(mode)
-      { }
     explicit basic_tinybuf_file(const char* path, open_mode mode) noexcept
 //      : m_buf(path, mode)
       { }
-    basic_tinybuf_file(handle_type hf, bool owns) noexcept
+    basic_tinybuf_file(file_handle fp, const closer_type& cl) noexcept
 //      : m_buf(hf, owns)
       { }
     ~basic_tinybuf_file() override;
@@ -158,7 +156,7 @@ template<typename charT, typename traitsT,
 //      }
 
   public:
-    handle_type get_handle() const noexcept
+    file_handle get_handle() const noexcept
       {
 //        return this->m_buf.get_handle();
 std::terminate();
@@ -168,7 +166,7 @@ std::terminate();
 //        return this->m_buf.open(path, mode), *this;
 std::terminate();
       }
-    basic_tinybuf_file& reset(handle_type hf, bool owns)
+    basic_tinybuf_file& reset(file_handle fp, const closer_type& cl)
       {
 //        return this->m_buf.reset(hf, owns), *this;
 std::terminate();
@@ -187,13 +185,13 @@ std::terminate();
       }
   };
 
-template<typename charT, typename traitsT,
-         typename allocT> basic_tinybuf_file<charT, traitsT, allocT>::~basic_tinybuf_file()
+template<typename charT, typename traitsT, typename allocT>
+    basic_tinybuf_file<charT, traitsT, allocT>::~basic_tinybuf_file()
   = default;
 
-template<typename charT, typename traitsT,
-         typename allocT> void swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs,
-                                    basic_tinybuf_file<charT, traitsT, allocT>& rhs)
+template<typename charT, typename traitsT, typename allocT>
+    inline void swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs,
+                     basic_tinybuf_file<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }

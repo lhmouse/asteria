@@ -517,7 +517,8 @@ template<typename... alternativesT> class variant
   };
 
 template<typename... alternativesT>
-    void swap(variant<alternativesT...>& lhs, variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
+    inline void swap(variant<alternativesT...>& lhs,
+                     variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
     return lhs.swap(rhs);
   }
