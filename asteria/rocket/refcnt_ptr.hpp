@@ -199,8 +199,7 @@ template<typename elementT, typename deleterT>
             }
             copy_deleter</*noadl*/>(*ptr)(ptr);
           }
-
-        void swap(stored_pointer& other) noexcept
+        void exchange_with(stored_pointer& other) noexcept
           {
             noadl::adl_swap(this->m_ptr, other.m_ptr);
           }
@@ -360,7 +359,7 @@ template<typename elementT> class refcnt_ptr
 
     void swap(refcnt_ptr& other) noexcept
       {
-        this->m_sth.swap(other.m_sth);
+        this->m_sth.exchange_with(other.m_sth);
       }
   };
 

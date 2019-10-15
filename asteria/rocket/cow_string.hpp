@@ -296,6 +296,10 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
             }
             this->do_reset(ptr);
           }
+        void exchange_with(storage_handle& other) noexcept
+          {
+            ::std::swap(this->m_ptr, other.m_ptr);
+          }
 
         constexpr operator const storage_handle* () const noexcept
           {
@@ -314,11 +318,6 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
             }
             ROCKET_ASSERT(this->unique());
             return ptr->data;
-          }
-
-        void swap(storage_handle& other) noexcept
-          {
-            noadl::adl_swap(this->m_ptr, other.m_ptr);
           }
       };
 
@@ -1497,7 +1496,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
     void swap(basic_cow_string& other) noexcept
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
-        this->m_sth.swap(other.m_sth);
+        this->m_sth.exchange_with(other.m_sth);
         noadl::adl_swap(this->m_ptr, other.m_ptr);
         noadl::adl_swap(this->m_len, other.m_len);
       }

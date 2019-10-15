@@ -94,8 +94,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
             }
             this->as_deleter()(ptr);
           }
-
-        void swap(stored_pointer& other) noexcept
+        void exchange_with(stored_pointer& other) noexcept
           {
             noadl::adl_swap(this->m_ptr, other.m_ptr);
           }
@@ -240,7 +239,7 @@ template<typename elementT, typename deleterT> class unique_ptr
     void swap(unique_ptr& other) noexcept
       {
         noadl::adl_swap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
-        this->m_sth.swap(other.m_sth);
+        this->m_sth.exchange_with(other.m_sth);
       }
   };
 
