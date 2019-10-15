@@ -687,17 +687,13 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
 
   public:
     // 24.3.2.2, construct/copy/destroy
-    constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc) noexcept
+    constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_ptr(sh.c_str()), m_len(sh.length()), m_sth(alloc)
       { }
-    constexpr basic_cow_string(shallow_type sh) noexcept(is_nothrow_constructible<allocator_type>::value)
-      :
-        basic_cow_string(sh, allocator_type())
-      { }
     explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
       :
-        m_ptr(null_char), m_len(0), m_sth(alloc)
+        basic_cow_string(shallow_type(null_char, 0), alloc)
       { }
     constexpr basic_cow_string(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
