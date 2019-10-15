@@ -176,7 +176,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             auto data = ptr->data;
             auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
             // Copy elements one by one.
-            for(auto i = off; i != off + cnt; ++i) {
+            for(size_t i = off; i != off + cnt; ++i) {
               auto eptr_old = ptr_old->data[i].get();
               if(!eptr_old) {
                 continue;
@@ -223,7 +223,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             auto data = ptr->data;
             auto end = data + pointer_storage<allocT>::max_nbkt_for_nblk(ptr->nblk);
             // Move elements one by one.
-            for(auto i = off; i != off + cnt; ++i) {
+            for(size_t i = off; i != off + cnt; ++i) {
               auto eptr_old = ptr_old->data[i].get();
               if(!eptr_old) {
                 continue;
@@ -597,7 +597,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
             auto ptr = this->m_ptr;
             ROCKET_ASSERT(ptr);
             // Erase all elements in [tpos,tpos+tn).
-            for(auto i = tpos; i != tpos + tn; ++i) {
+            for(size_type i = tpos; i != tpos + tn; ++i) {
               auto eptr = ptr->data[i].reset();
               if(!eptr) {
                 continue;

@@ -98,7 +98,7 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
             auto nelem = ptr->nelem;
             auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            for(auto i = off; i != off + cnt; ++i) {
+            for(size_t i = off; i != off + cnt; ++i) {
               allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, ptr_old->data[i]);
               ptr->nelem = ++nelem;
             }
@@ -144,7 +144,7 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
             auto nelem = ptr->nelem;
             auto cap = basic_storage<allocT>::max_nelem_for_nblk(ptr->nblk);
             ROCKET_ASSERT(cnt <= cap - nelem);
-            for(auto i = off; i != off + cnt; ++i) {
+            for(size_t i = off; i != off + cnt; ++i) {
               allocator_traits<allocT>::construct(ptr->alloc, ptr->data + nelem, noadl::move(ptr_old->data[i]));
               ptr->nelem = ++nelem;
             }
@@ -425,7 +425,7 @@ template<typename valueT, typename allocT = allocator<valueT>> class cow_vector;
             auto ptr = this->m_ptr;
             ROCKET_ASSERT(ptr);
             auto nelem = ptr->nelem;
-            for(auto i = n; i != 0; --i) {
+            for(size_type i = n; i != 0; --i) {
               ptr->nelem = --nelem;
               allocator_traits<allocator_type>::destroy(ptr->alloc, ptr->data + nelem);
             }

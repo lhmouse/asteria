@@ -150,7 +150,7 @@ template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>>
             }
             auto ebase = this->m_ebase;
             size_t nelem = this->m_nelem;
-            for(auto i = n; i != 0; --i) {
+            for(size_type i = n; i != 0; --i) {
               this->m_nelem = static_cast<decltype(m_nelem)>(--nelem);
               allocator_traits<allocator_type>::destroy(this->as_allocator(), ebase + nelem);
             }
