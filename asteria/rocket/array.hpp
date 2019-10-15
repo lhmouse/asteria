@@ -51,7 +51,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
 
   public:
     // This class has to be an aggregate.
-    value_type storage[capacityT];
+    value_type m_stor[capacityT];
 
   private:
     [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
@@ -65,11 +65,11 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
     // iterators
     constexpr const_iterator begin() const noexcept
       {
-        return this->storage;
+        return this->m_stor;
       }
     constexpr const_iterator end() const noexcept
       {
-        return this->storage + capacityT;
+        return this->m_stor + capacityT;
       }
     constexpr const_reverse_iterator rbegin() const noexcept
       {
@@ -100,12 +100,12 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
     // N.B. This is a non-standard extension.
     constexpr iterator mut_begin()
       {
-        return this->storage;
+        return this->m_stor;
       }
     // N.B. This is a non-standard extension.
     constexpr iterator mut_end()
       {
-        return this->storage + capacityT;
+        return this->m_stor + capacityT;
       }
     // N.B. This is a non-standard extension.
     constexpr reverse_iterator mut_rbegin()
@@ -139,7 +139,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
     // N.B. The template parameter is a non-standard extension.
     template<typename otherT> void fill(const otherT& other)
       {
-        noadl::ranged_for(size_type(), capacityT, [&](size_type i) { this->storage[i] = other;  });
+        noadl::ranged_for(size_type(), capacityT, [&](size_type i) { this->m_stor[i] = other;  });
       }
     // N.B. This is a non-standard extension.
     static constexpr size_type capacity() noexcept
@@ -203,20 +203,20 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
 
     void swap(array& other) noexcept(is_nothrow_swappable<value_type>::value)
       {
-        noadl::ranged_for(size_type(), capacityT,
-                          [&](size_type i) { noadl::adl_swap(this->storage[i], other.storage[i]);  });
+        for(size_type i = 0; i != capacityT; ++i)
+          noadl::adl_swap(this->m_stor[i], other.m_stor[i]);
       }
 
     // element access
     constexpr const value_type* data() const noexcept
       {
-        return this->storage;
+        return this->m_stor;
       }
 
     // N.B. This is a non-standard extension.
     value_type* mut_data()
       {
-        return this->storage;
+        return this->m_stor;
       }
   };
 

@@ -512,6 +512,7 @@ template<typename... alternativesT> class variant
           details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, other.m_stor, backup);
           other.m_index = index_old;
         }
+        return;
       }
   };
 
