@@ -704,8 +704,7 @@ template<typename valueT, size_t capacityT,
           return *this;
         }
         this->do_reserve_more(n);
-        noadl::ranged_do_while(size_type(0), n,
-                               [&](size_type, const paramsT&... fwdp) { this->m_sth.emplace_back_unchecked(fwdp...);  }, params...);
+        noadl::ranged_do_while(size_type(0), n, [&](size_type) { this->m_sth.emplace_back_unchecked(params...);  });
         return *this;
       }
     // N.B. This is a non-standard extension.
