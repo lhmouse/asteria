@@ -17,57 +17,6 @@ template<typename charT, typename traitsT = char_traits<charT>,
 
     namespace details_unique_file {
 
-    class smart_handle
-      {
-      public:
-        using file_handle  = ::std::FILE*;
-        using closer_type  = int (*)(::std::FILE*);
-
-      private:
-        file_handle m_fp;  // file pointer
-        closer_type m_cl;  // closer callback (if it is null then the file is not closed)
-
-      public:
-        constexpr smart_handle() noexcept
-          :
-            m_fp(), m_cl()
-          { }
-        ~smart_handle()
-          {
-            this->reset(nullptr, nullptr);
-          }
-
-        smart_handle(const smart_handle&)
-          = delete;
-        smart_handle& operator=(const smart_handle&)
-          = delete;
-
-      public:
-        /*constexpr*/ file_handle get() const noexcept
-          {
-            return this->m_fp;
-          }
-        file_handle release() noexcept
-          {
-            return ::std::exchange(this->m_fp, nullptr);
-          }
-        void reset(file_handle fp, const closer_type& cl) noexcept
-          {
-            auto fp_old = ::std::exchange(this->m_fp, fp);
-            auto cl_old = ::std::exchange(this->m_cl, cl);
-            if(!fp_old || !cl_old) {
-              return;
-            }
-            (*cl_old)(fp_old);
-          }
-
-        void swap(smart_handle& other) noexcept
-          {
-            ::std::swap(this->m_fp, other.m_fp);
-            ::std::swap(this->m_cl, other.m_cl);
-          }
-      };
-
     template<typename allocT, typename traitsT>
         class basic_smart_buffer : private allocator_wrapper_base_for<allocT>::type
       {
@@ -150,6 +99,13 @@ template<typename charT, typename traitsT = char_traits<charT>,
             this->m_epos = 0;
             this->m_send = 0;
           }
+        void exchange_with(basic_smart_buffer& other) noexcept
+          {
+            noadl::adl_swap(this->m_sptr, other.m_sptr);
+            noadl::adl_swap(this->m_bpos, other.m_bpos);
+            noadl::adl_swap(this->m_epos, other.m_epos);
+            noadl::adl_swap(this->m_send, other.m_send);
+          }
 
         value_type* append(const value_type* sadd, size_type nadd)
           {
@@ -206,20 +162,61 @@ template<typename charT, typename traitsT = char_traits<charT>,
             value_type* aptr = noadl::unfancy(this->m_sptr) + this->m_bpos;
             return aptr;
           }
+      };
 
-        void swap(basic_smart_buffer& other) noexcept
+    class smart_handle
+      {
+      public:
+        using file_handle  = ::std::FILE*;
+        using closer_type  = int (*)(::std::FILE*);
+
+      private:
+        file_handle m_fp;  // file pointer
+        closer_type m_cl;  // closer callback (if it is null then the file is not closed)
+
+      public:
+        constexpr smart_handle() noexcept
+          :
+            m_fp(), m_cl()
+          { }
+        ~smart_handle()
           {
-            noadl::adl_swap(this->m_sptr, other.m_sptr);
-            noadl::adl_swap(this->m_bpos, other.m_bpos);
-            noadl::adl_swap(this->m_epos, other.m_epos);
-            noadl::adl_swap(this->m_send, other.m_send);
+            this->reset(nullptr, nullptr);
+          }
+
+        smart_handle(const smart_handle&)
+          = delete;
+        smart_handle& operator=(const smart_handle&)
+          = delete;
+
+      public:
+        /*constexpr*/ file_handle get() const noexcept
+          {
+            return this->m_fp;
+          }
+        file_handle release() noexcept
+          {
+            return ::std::exchange(this->m_fp, nullptr);
+          }
+        void reset(file_handle fp, const closer_type& cl) noexcept
+          {
+            auto fp_old = ::std::exchange(this->m_fp, fp);
+            auto cl_old = ::std::exchange(this->m_cl, cl);
+            if(!fp_old || !cl_old) {
+              return;
+            }
+            (*cl_old)(fp_old);
+          }
+        void exchange_with(smart_handle& other) noexcept
+          {
+            noadl::adl_swap(this->m_fp, other.m_fp);
+            noadl::adl_swap(this->m_cl, other.m_cl);
           }
       };
 
     }
 
-template<typename charT, typename traitsT,
-         typename allocT> class basic_unique_file
+template<typename charT, typename traitsT, typename allocT> class basic_unique_file
   {
     static_assert(!is_array<charT>::value, "`charT` must not be an array type.");
     static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
@@ -231,8 +228,8 @@ template<typename charT, typename traitsT,
     using traits_type     = traitsT;
     using allocator_type  = allocT;
 
-    using smart_handle  = details_unique_file::smart_handle;
     using smart_buffer  = details_unique_file::basic_smart_buffer<allocator_type, traits_type>;
+    using smart_handle  = details_unique_file::smart_handle;
 
     using size_type        = typename allocator_traits<allocator_type>::size_type;
     using difference_type  = typename allocator_traits<allocator_type>::difference_type;
@@ -240,13 +237,17 @@ template<typename charT, typename traitsT,
     using closer_type      = typename smart_handle::closer_type;
 
   private:
-    smart_handle m_fp;
     smart_buffer m_buf;
+    smart_handle m_fp;
 
   public:
+    constexpr basic_unique_file(smart_handle&& fp, const allocator_type& alloc = allocator_type()) noexcept
+      :
+        m_buf(alloc), m_fp(noadl::move(fp))
+      { }
     explicit constexpr basic_unique_file(const allocator_type& alloc) noexcept
       :
-        m_fp(), m_buf(alloc)
+        basic_unique_file(smart_handle(), alloc)
       { }
     constexpr basic_unique_file() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
@@ -254,58 +255,94 @@ template<typename charT, typename traitsT,
       { }
     basic_unique_file(file_handle fp, const closer_type& cl, const allocator_type& alloc = allocator_type()) noexcept
       :
-        m_fp(), m_buf(alloc)
+        basic_unique_file(alloc)
       {
-        this->m_fp.reset(fp, cl);
+        this->reset(fp, cl);
+      }
+    basic_unique_file(const char* path, const char* mode, const allocator_type& alloc = allocator_type())
+      :
+        basic_unique_file(alloc)
+      {
+        this->open(path, mode);
       }
     basic_unique_file(basic_unique_file&& other) noexcept
       :
         basic_unique_file(noadl::move(other.m_buf.as_allocator()))
       {
-        this->m_fp.swap(other.m_fp);
-        this->m_buf.swap(other.m_buf);
+        this->m_buf.exchange_with(other.m_buf);
+        this->m_fp.exchange_with(other.m_fp);
       }
     basic_unique_file(basic_unique_file&& other, const allocator_type& alloc) /* noexcept(TODO: is_always_equal) */
       :
         basic_unique_file(alloc)
       {
-        this->m_fp.swap(other.m_fp);
-        // Awful allocators...
+        // Compare the nasty allocators, ...
         if(ROCKET_EXPECT(this->m_buf.as_allocator() == other.m_buf.as_allocator())) {
-          // No exceptions will be thrown in this path.
-          this->m_buf.swap(other.m_buf);
+          // 0) if they are equal, they can deallocate memory allocated by each other.
+          // Steal the buffer from `other`.
+          this->m_buf.exchange_with(other.m_buf);
         }
         else {
-          // This path is subject to allocation failures.
+          // 1) if they are unequal, the buffer can't be stolen because `*this` doesn't know how to deallocate it.
+          // Copy buffered contents from `other`, which is subject to exceptions.
           this->m_buf.append(other.m_buf.data(), other.m_buf.size());
         }
+        this->m_fp.exchange_with(other.m_fp);
       }
     basic_unique_file& operator=(basic_unique_file&& other) /* noexcept(TODO: is_always_equal) */
       {
-        this->m_fp.swap(other.m_fp);
-        // Awful allocators...
+        // Compare the nasty allocators, ...
         if(ROCKET_EXPECT(this->m_buf.as_allocator() == other.m_buf.as_allocator())) {
-          // No exceptions will be thrown in this path.
-          this->m_buf.swap(other.m_buf);
+          // 0) if they are equal, they can deallocate memory allocated by each other.
+          // Replace the allocator and steal the buffer from `other`.
           noadl::propagate_allocator_on_move(this->m_buf.as_allocator(), noadl::move(other.m_buf.as_allocator()));
+          this->m_buf.exchange_with(other.m_buf);
         }
-        else if(allocator_traits<allocator_type>::propagate_on_container_move_assignment::value) {
-          // No exceptions will be thrown in this path, either.
+        else if(allocator_traits<allocT>::propagate_on_container_move_assignment::value) {
+          // 1) if the allocator will be replaced, we can steal the buffer, but don't pass the old buffer back to `other`.
+          // Deallocate the old buffer.
           this->m_buf.deallocate();
-          this->m_buf.swap(other.m_buf);
+          // Replace the allocator and steal the buffer from `other`.
           noadl::propagate_allocator_on_move(this->m_buf.as_allocator(), noadl::move(other.m_buf.as_allocator()));
+          this->m_buf.exchange_with(other.m_buf);
         }
         else {
-          // This path is subject to allocation failures.
+          // 2) if the allocator doesn't equal the one from `other` and will not be replaced, we continue to use it.
+          // Copy buffered contents from `other`, which is subject to exceptions.
           this->m_buf.clear();
           this->m_buf.append(other.m_buf.data(), other.m_buf.size());
         }
+        this->m_fp.exchange_with(other.m_fp);
         return *this;
       }
 
   public:
+    constexpr file_handle get_handle() const noexcept
+      {
+        return this->m_fp.get();
+      }
+    constexpr operator bool () const noexcept
+      {
+        return bool(this->m_fp.get());
+      }
+
+    // N.B. The return type differs from `std::basic_string`.
+    const allocator_type& get_allocator() const noexcept
+      {
+        return this->m_sth.as_allocator();
+      }
+    allocator_type& get_allocator() noexcept
+      {
+        return this->m_sth.as_allocator();
+      }
+
     void swap(basic_unique_file& other) noexcept
       {
+        // Be advised that, as standard containers, if the allocators compare unequal, the behavior is undefined.
+        ROCKET_ASSERT(this->m_buf.as_allocator() == other.m_buf.as_allocator());
+        noadl::propagate_allocator_on_swap(this->m_buf.as_allocator(), noadl::move(other.m_buf.as_allocator()));
+        this->m_buf.exchange_with(other.m_buf);
+        this->m_fp.exchange_with(other.m_fp);
       }
   };
 
