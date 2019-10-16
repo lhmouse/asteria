@@ -43,7 +43,7 @@ template<typename charT, typename traitsT = char_traits<charT>,
           = delete;
 
       public:
-        constexpr file_handle get() noexcept
+        /*constexpr*/ file_handle get() const noexcept
           {
             return this->m_fp;
           }
