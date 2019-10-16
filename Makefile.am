@@ -6,7 +6,7 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra  \
   -Werror={{,sign-}conversion,write-strings,return-type}  \
   -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
-AM_CXXFLAGS = -std=c++14 -Wnon-virtual-dtor -Wzero-as-null-pointer-constant -Wmissing-declarations
+AM_CXXFLAGS = -std=gnu++14 -Wnon-virtual-dtor -Wzero-as-null-pointer-constant -Wmissing-declarations
 AM_DEFAULT_SOURCE_EXT = .cpp
 LDADD = lib/libasteria.la
 

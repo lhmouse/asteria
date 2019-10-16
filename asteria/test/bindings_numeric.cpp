@@ -380,8 +380,8 @@ int main()
         assert std.numeric.format(-0x123.C, 16) == "-0x123.C";
         assert std.numeric.format(+0x0.123C,  2) == "0b0.00010010001111";
         assert std.numeric.format(-0x0.123C,  2) == "-0b0.00010010001111";
-        assert std.numeric.format(+0x0.0123C, 10) == "0.0044517517089843749";
-        assert std.numeric.format(-0x0.0123C, 10) == "-0.0044517517089843749";
+        assert std.numeric.format(+0x0.0123C, 10) == "0.004451751708984375";
+        assert std.numeric.format(-0x0.0123C, 10) == "-0.004451751708984375";
         assert std.numeric.format(+0x0.0123C, 16) == "0x0.0123C";
         assert std.numeric.format(-0x0.0123C, 16) == "-0x0.0123C";
         assert std.numeric.format(+0x123.C,  2,  2) == "0b1.0010001111p+08";
