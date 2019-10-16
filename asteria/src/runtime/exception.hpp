@@ -17,19 +17,18 @@ class Exception : public std::exception
     cow_vector<Backtrace_Frame> m_frames;
 
   public:
-    template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalT&&)> Exception(const Source_Location& sloc, XvalT&& xval)
+    template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalT&&)>
+        Exception(const Source_Location& sloc, XvalT&& xval)
       :
         m_value(rocket::forward<XvalT>(xval))
       {
-        this->m_frames.emplace_back(frame_type_throw, sloc,
-                                    this->m_value);
+        this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
       }
     explicit Exception(const std::exception& stdex)
       :
         m_value(G_string(stdex.what()))
       {
-        this->m_frames.emplace_back(frame_type_native, rocket::sref("<native code>"), -1,
-                                    this->m_value);
+        this->m_frames.emplace_back(frame_type_native, rocket::sref("<native code>"), -1, this->m_value);
       }
     ~Exception() override;
 
@@ -54,18 +53,18 @@ class Exception : public std::exception
 
     template<typename XvalT> Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XvalT&& xval)
       {
-        return this->m_frames.emplace_back(frame_type_throw, sloc,
-                                           this->m_value = rocket::forward<XvalT>(xval));  // The value also replaces the one in `*this`.
+        // The value also replaces the one in `*this`.
+        return this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value = rocket::forward<XvalT>(xval));
       }
     Backtrace_Frame& push_frame_catch(const Source_Location& sloc)
       {
-        return this->m_frames.emplace_back(frame_type_catch, sloc,
-                                           this->m_value);  // The value is the one stored in `*this` at this point.
+        // The value is the one stored in `*this` at this point.
+        return this->m_frames.emplace_back(frame_type_catch, sloc, this->m_value);
       }
     Backtrace_Frame& push_frame_func(const Source_Location& sloc, const cow_string& func)
       {
-        return this->m_frames.emplace_back(frame_type_func, sloc,
-                                           func);  // The value is the signature of the enclosing function.
+        // The value is the signature of the enclosing function.
+        return this->m_frames.emplace_back(frame_type_func, sloc, func);
       }
   };
 

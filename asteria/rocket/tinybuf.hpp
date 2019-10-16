@@ -30,18 +30,18 @@ struct tinybuf_base
       };
     enum open_mode
       {
-        open_read    = 0x0001,  // O_RDONLY
-        open_write   = 0x0002,  // O_WRONLY
-        open_rdwr    = 0x0003,  // O_RDWR
-        open_trunc   = 0x0010,  // O_TRUNC
-        open_create  = 0x0020,  // O_CREAT
-        open_append  = 0x0040,  // O_APPEND
-        open_binary  = 0x0080,  // _O_BINARY  (Windows only)
-        open_excl    = 0x0100,  // O_EXCL | O_CREAT
+        open_read    = 0x0001,  // "r"
+        open_write   = 0x0002,  // "w"
+        open_rdwr    = 0x0003,  // "r+"
+        open_trunc   = 0x0010,  // "w+"
+        open_append  = 0x0020,  // "a"
+        open_binary  = 0x0040,  // "b"
+        open_excl    = 0x0080,  // "x"
       };
   };
 
-template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_base
+template<typename charT, typename traitsT>
+    class basic_tinybuf : public tinybuf_base
   {
   public:
     using char_type       = charT;
@@ -92,7 +92,8 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
     // * Synchronizes the get and put areas with the external device.
     // * Throws an exception on failure.
     // The default implementation does nothing.
-    virtual basic_tinybuf& do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/, char_type*& /*pcur*/, char_type*& /*pend*/)
+    virtual basic_tinybuf& do_flush(const char_type*& /*gcur*/, const char_type*& /*gend*/,
+                                    char_type*& /*pcur*/, char_type*& /*pend*/)
       {
         return *this;
       }
@@ -106,7 +107,8 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
       }
 
     // * Reads data from the external device into the get area and discards it unless `peek` is set.
-    // * Returns the first character that has been read, or `traits::eof()` if there are no more characters.
+    // * Returns the first character that has been read, or `traits::eof()` if there are no more
+    //   characters.
     // * Throws an exception in case of failure.
     // This function may reallocate the get area as needed.
     // The default implementation fails.
@@ -114,11 +116,13 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
       {
         noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf: stream not readable");
       }
-    // * Writes the contents of the put area, followed by the sequence denoted by `sadd` unless `nadd` is zero, to the external device.
+    // * Writes the contents of the put area, followed by the sequence denoted by `sadd`
+    //   unless `nadd` is zero, to the external device.
     // * Throws an exception on failure.
     // This function may reallocate the put area as needed.
     // The default implementation fails.
-    virtual basic_tinybuf& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/, const char_type* /*sadd*/, size_type /*nadd*/)
+    virtual basic_tinybuf& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
+                                       const char_type* /*sadd*/, size_type /*nadd*/)
       {
         noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf: stream not writable");
       }
@@ -198,7 +202,8 @@ template<typename charT, typename traitsT> class basic_tinybuf : public tinybuf_
       {
         auto k = static_cast<size_type>(this->m_pend - this->m_pcur);
         if(ROCKET_UNEXPECT(n >= k)) {
-          // If there is no enough room in the put area, evict its contents, followed by the string specified.
+          // If there is no enough room in the put area, evict its contents, followed by
+          // the string specified.
           return this->do_call_overflow(s, n);
         }
         // Append the string to the put area.

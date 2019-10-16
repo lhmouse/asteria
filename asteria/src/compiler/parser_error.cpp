@@ -28,9 +28,9 @@ void Parser_Error::do_compose_message()
     this->m_what = fmt.extract_string();
   }
 
-static_assert(std::is_nothrow_copy_constructible<Parser_Error>::value, "Copy constructors of exceptions are not allow to throw exceptions.");
-static_assert(std::is_nothrow_move_constructible<Parser_Error>::value, "Move constructors of exceptions are not allow to throw exceptions.");
-static_assert(std::is_nothrow_copy_assignable<Parser_Error>::value, "Copy assignment operators of exceptions are not allow to throw exceptions.");
-static_assert(std::is_nothrow_move_assignable<Parser_Error>::value, "Move assignment operators of exceptions are not allow to throw exceptions.");
+static_assert(std::is_nothrow_copy_constructible<Parser_Error>::value, "??");
+static_assert(std::is_nothrow_move_constructible<Parser_Error>::value, "??");
+static_assert(std::is_nothrow_copy_assignable<Parser_Error>::value, "??");
+static_assert(std::is_nothrow_move_assignable<Parser_Error>::value, "??");
 
 }  // namespace Asteria
