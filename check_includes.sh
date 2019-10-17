@@ -5,7 +5,7 @@ export CXX
 
 function check_one()
   {
-    _cmd="${CXX} -std=c++14 -x c++ -E -o /dev/null"
+    _cmd="${CXX} -std=gnu++14 -x c++ -S -o /dev/null"
     echo "Checking \`#include\` directives:  ${_cmd}  \"$1\""
     ${_cmd}  "$1"
   }
