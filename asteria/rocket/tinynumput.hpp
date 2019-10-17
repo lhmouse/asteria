@@ -102,6 +102,7 @@ class tinynumput
       {
         this->m_bptr = this->m_stor;
         this->m_eptr = this->m_stor;
+        this->m_stor[0] = 0;
         return *this;
       }
 
