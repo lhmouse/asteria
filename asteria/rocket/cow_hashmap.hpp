@@ -1260,9 +1260,10 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         }
         return 1;
       }
+
     // N.B. This is a non-standard extension.
     template<typename ykeyT, typename ydefaultT>
-        typename common_type<const mapped_type&, ydefaultT&&>::type get_or(const ykeyT& key, ydefaultT&& ydef) const
+        typename select_type<const mapped_type&, ydefaultT&&>::type get_or(const ykeyT& key, ydefaultT&& ydef) const
       {
         auto ptr = this->do_get_table();
         size_type tpos;
@@ -1270,6 +1271,17 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
           return noadl::forward<ydefaultT>(ydef);
         }
         return ptr[tpos]->second;
+      }
+    // N.B. This is a non-standard extension.
+    template<typename ykeyT, typename ydefaultT>
+        typename select_type<mapped_type&&, ydefaultT&&>::type move_or(const ykeyT& key, ydefaultT&& ydef) const
+      {
+        auto ptr = this->do_mut_table();
+        size_type tpos;
+        if(!this->m_sth.index_of(tpos, key)) {
+          return noadl::forward<ydefaultT>(ydef);
+        }
+        return noadl::move(ptr[tpos]->second);
       }
 
     // 26.5.4.3, element access

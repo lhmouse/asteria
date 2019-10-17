@@ -146,19 +146,19 @@ template<typename valueT> class optional
       }
     // N.B. The return type differs from `std::variant`.
     template<typename dvalueT>
-        typename common_type<const_reference, dvalueT&&>::type value_or(dvalueT&& dvalue) const
+        typename select_type<const_reference, dvalueT&&>::type value_or(dvalueT&& dvalue) const
       {
         return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : this->m_stor.front();
       }
     // N.B. The return type differs from `std::variant`.
     template<typename dvalueT>
-        typename common_type<const_reference, dvalueT&&>::type value_or(dvalueT&& dvalue)
+        typename select_type<reference, dvalueT&&>::type value_or(dvalueT&& dvalue)
       {
         return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : this->m_stor.mut_front();
       }
     // N.B. This is a non-standard extension.
     template<typename dvalueT>
-        typename common_type<const_reference, dvalueT&&>::type move_value_or(dvalueT&& dvalue)
+        typename select_type<value_type&&, dvalueT&&>::type move_value_or(dvalueT&& dvalue)
       {
         return this->m_stor.empty() ? noadl::forward<dvalueT>(dvalue) : noadl::move(this->m_stor.mut_front());
       }

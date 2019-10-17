@@ -50,7 +50,6 @@ using ::std::integral_constant;
 using ::std::enable_if;
 using ::std::conditional;
 using ::std::decay;
-using ::std::common_type;
 using ::std::is_constructible;
 using ::std::is_assignable;
 using ::std::is_nothrow_constructible;
@@ -177,30 +176,48 @@ template<typename typeT> struct remove_cvref : remove_cv<typename remove_referen
 
     }  // namespace details_utilities
 
-template<typename typeT> struct is_nothrow_swappable : details_utilities::is_nothrow_swappable_aux<typeT>
+template<typename typeT>
+    struct is_nothrow_swappable : details_utilities::is_nothrow_swappable_aux<typeT>
   { };
 
-template<typename typeT> void adl_swap(typeT& lhs, typeT& rhs) noexcept(is_nothrow_swappable<typeT>::value)
+template<typename typeT>
+    void adl_swap(typeT& lhs, typeT& rhs) noexcept(is_nothrow_swappable<typeT>::value)
   {
     details_utilities::adl_swap_aux<typeT>(lhs, rhs);
   }
 
+    namespace details_utilities {
+
+    // This distinguishes rvalues from xvalues.
+    template<typename typeT> constexpr typeT declval3() noexcept;
+
+    }
+
+template<typename firstT, typename secondT, typename... restT>
+    struct select_type : select_type<typename select_type<firstT, secondT>::type,
+                                     restT...>
+  { };
+template<typename firstT, typename secondT>
+    struct select_type<firstT, secondT> : enable_if<1, decltype(1 ? details_utilities::declval3<firstT>()
+                                                                  : details_utilities::declval3<secondT>())>
+  { };
+
 template<typename lhsT, typename rhsT>
-    constexpr typename common_type<lhsT&&, rhsT&&>::type min(lhsT&& lhs, rhsT&& rhs)
+    constexpr typename select_type<lhsT&&, rhsT&&>::type min(lhsT&& lhs, rhsT&& rhs)
   {
     return (rhs < lhs) ? noadl::forward<rhsT>(rhs)
                        : noadl::forward<lhsT>(lhs);
   }
 
 template<typename lhsT, typename rhsT>
-    constexpr typename common_type<lhsT&&, rhsT&&>::type max(lhsT&& lhs, rhsT&& rhs)
+    constexpr typename select_type<lhsT&&, rhsT&&>::type max(lhsT&& lhs, rhsT&& rhs)
   {
     return (lhs < rhs) ? noadl::forward<rhsT>(rhs)
                        : noadl::forward<lhsT>(lhs);
   }
 
 template<typename testT, typename lowerT, typename upperT>
-    constexpr typename common_type<testT&&, lowerT&&, upperT&&>::type clamp(testT&& test, lowerT&& lower, upperT&& upper)
+    constexpr typename select_type<testT&&, lowerT&&, upperT&&>::type clamp(testT&& test, lowerT&& lower, upperT&& upper)
   {
     return (test < lower) ? noadl::forward<lowerT>(lower)
                           : (upper < test) ? noadl::forward<upperT>(upper)
