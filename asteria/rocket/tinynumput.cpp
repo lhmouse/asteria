@@ -43,6 +43,8 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
       // Write this digit.
       *(ep++) = "0123456789ABCDEF"[dval];
     }
+    // Append a null terminator.
+    *ep = 0;
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -68,11 +70,11 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
           size_t dval = reg % radixT;
           reg /= radixT;
           // Write this digit.
-          *--bp = "0123456789ABCDEF"[dval];
+          *(--bp) = "0123456789ABCDEF"[dval];
         }
         // Pad the string to at least the precision requested.
         while(bp > stop)
-          *--bp = '0';
+          *(--bp) = '0';
       }
 
     }  // namespace
@@ -81,11 +83,13 @@ tinynumput& tinynumput::put_BU(uint32_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd<2>(bp, value, precision);
     // Prepend the binary prefix.
-    *--bp = 'b';
-    *--bp = '0';
+    *(--bp) = 'b';
+    *(--bp) = '0';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -96,11 +100,13 @@ tinynumput& tinynumput::put_BQ(uint64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd<2>(bp, value, precision);
     // Prepend the binary prefix.
-    *--bp = 'b';
-    *--bp = '0';
+    *(--bp) = 'b';
+    *(--bp) = '0';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -111,6 +117,8 @@ tinynumput& tinynumput::put_DU(uint32_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd<10>(bp, value, precision);
     // Set the string, which resides in the internal storage.
@@ -123,6 +131,8 @@ tinynumput& tinynumput::put_DQ(uint64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd<10>(bp, value, precision);
     // Set the string, which resides in the internal storage.
@@ -135,11 +145,13 @@ tinynumput& tinynumput::put_XU(uint32_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd<16>(bp, value, precision);
     // Prepend the hexadecimal prefix.
-    *--bp = 'x';
-    *--bp = '0';
+    *(--bp) = 'x';
+    *(--bp) = '0';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -150,11 +162,13 @@ tinynumput& tinynumput::put_XQ(uint64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Write digits backwards.
     do_xput_U_bkwd<16>(bp, value, precision);
     // Prepend the hexadecimal prefix.
-    *--bp = 'x';
-    *--bp = '0';
+    *(--bp) = 'x';
+    *(--bp) = '0';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -165,16 +179,18 @@ tinynumput& tinynumput::put_BI(int32_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd<2>(bp, (do_cast_U(value) ^ sign) - sign, precision);
     // Prepend the binary prefix.
-    *--bp = 'b';
-    *--bp = '0';
+    *(--bp) = 'b';
+    *(--bp) = '0';
     // If the number is negative, prepend a minus sign.
     if(sign)
-      *--bp = '-';
+      *(--bp) = '-';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -185,16 +201,18 @@ tinynumput& tinynumput::put_BL(int64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd<2>(bp, (do_cast_U(value) ^ sign) - sign, precision);
     // Prepend the binary prefix.
-    *--bp = 'b';
-    *--bp = '0';
+    *(--bp) = 'b';
+    *(--bp) = '0';
     // If the number is negative, prepend a minus sign.
     if(sign)
-      *--bp = '-';
+      *(--bp) = '-';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -205,13 +223,15 @@ tinynumput& tinynumput::put_DI(int32_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd<10>(bp, (do_cast_U(value) ^ sign) - sign, precision);
     // If the number is negative, prepend a minus sign.
     if(sign)
-      *--bp = '-';
+      *(--bp) = '-';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -222,13 +242,15 @@ tinynumput& tinynumput::put_DL(int64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd<10>(bp, (do_cast_U(value) ^ sign) - sign, precision);
     // If the number is negative, prepend a minus sign.
     if(sign)
-      *--bp = '-';
+      *(--bp) = '-';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -239,16 +261,18 @@ tinynumput& tinynumput::put_XI(int32_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd<16>(bp, (do_cast_U(value) ^ sign) - sign, precision);
     // Prepend the hexadecimal prefix.
-    *--bp = 'x';
-    *--bp = '0';
+    *(--bp) = 'x';
+    *(--bp) = '0';
     // If the number is negative, prepend a minus sign.
     if(sign)
-      *--bp = '-';
+      *(--bp) = '-';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -259,16 +283,18 @@ tinynumput& tinynumput::put_XL(int64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
     do_xput_U_bkwd<16>(bp, (do_cast_U(value) ^ sign) - sign, precision);
     // Prepend the hexadecimal prefix.
-    *--bp = 'x';
-    *--bp = '0';
+    *(--bp) = 'x';
+    *(--bp) = '0';
     // If the number is negative, prepend a minus sign.
     if(sign)
-      *--bp = '-';
+      *(--bp) = '-';
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -411,9 +437,12 @@ tinynumput& tinynumput::put_BF(double value) noexcept
         noadl::ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_bin(ep, mant, nullptr);
       }
-      else
+      else {
         // ... in plain format; the decimal point is inserted in the middle.
         do_xput_M_bin(ep, mant, ep + 1 + do_cast_U(exp));
+      }
+      // Append a null terminator.
+      *ep = 0;
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
@@ -451,6 +480,8 @@ tinynumput& tinynumput::put_BE(double value) noexcept
       do_xput_M_bin(ep, mant, ep + 1);
       *(ep++) = 'p';
       do_xput_I_exp(ep, exp);
+      // Append a null terminator.
+      *ep = 0;
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
@@ -501,9 +532,12 @@ tinynumput& tinynumput::put_XF(double value) noexcept
         noadl::ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_hex(ep, mant, nullptr);
       }
-      else
+      else {
         // ... in plain format; the decimal point is inserted in the middle.
         do_xput_M_hex(ep, mant, ep + 1 + do_cast_U(exp));
+      }
+      // Append a null terminator.
+      *ep = 0;
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
@@ -544,6 +578,8 @@ tinynumput& tinynumput::put_XE(double value) noexcept
       do_xput_M_hex(ep, mant, ep + 1);
       *(ep++) = 'p';
       do_xput_I_exp(ep, exp * 4);
+      // Append a null terminator.
+      *ep = 0;
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
@@ -6478,9 +6514,12 @@ tinynumput& tinynumput::put_DF(double value) noexcept
         noadl::ranged_for(exp, -1, [&](int) { *(ep++) = '0';  });
         do_xput_M_dec(ep, mant, nullptr);
       }
-      else
+      else {
         // ... in plain format; the decimal point is inserted in the middle.
         do_xput_M_dec(ep, mant, ep + 1 + do_cast_U(exp));
+      }
+      // Append a null terminator.
+      *ep = 0;
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
@@ -6515,6 +6554,8 @@ tinynumput& tinynumput::put_DE(double value) noexcept
       do_xput_M_dec(ep, mant, ep + 1);
       *(ep++) = 'e';
       do_xput_I_exp(ep, exp);
+      // Append a null terminator.
+      *ep = 0;
     }
     // Set the string. The internal storage is used for finite values only.
     this->m_bptr = bp;
