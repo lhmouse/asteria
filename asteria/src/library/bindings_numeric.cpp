@@ -199,11 +199,13 @@ G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit
         ASTERIA_THROW_RUNTIME_ERROR("The `limit` for random numbers shall be finite (got `", *limit, "`).");
       }
     }
-    // sqword <= [0,0x1p54)
-    int64_t sqword = global.get_random_uint32();
-    sqword <<= 21;
-    sqword ^= global.get_random_uint32();
-    return static_cast<double>(sqword) / 0x1p53 * limit.value_or(1);
+    int64_t high = global.get_random_uint32();
+    int64_t low = global.get_random_uint32();
+    double ratio = static_cast<double>((high << 21) ^ low) / 0x1p53;
+    if(limit) {
+      ratio *= *limit;
+    }
+    return ratio;
   }
 
 G_real std_numeric_sqrt(const G_real& x)
