@@ -706,37 +706,41 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
       :
-        basic_cow_string(shallow_type(null_char, 0), alloc)
-      {
-      }
-    constexpr basic_cow_string(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
-      :
-        basic_cow_string(allocator_type())
+        m_ptr(null_char), m_len(0), m_sth(alloc)
       {
       }
     basic_cow_string(const basic_cow_string& other) noexcept
       :
-        basic_cow_string(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+        m_ptr(null_char), m_len(0),
+        m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
     basic_cow_string(const basic_cow_string& other, const allocator_type& alloc) noexcept
       :
-        basic_cow_string(alloc)
+        m_ptr(null_char), m_len(0),
+        m_sth(alloc)
       {
         this->assign(other);
       }
     basic_cow_string(basic_cow_string&& other) noexcept
       :
-        basic_cow_string(noadl::move(other.m_sth.as_allocator()))
+        m_ptr(null_char), m_len(0),
+        m_sth(noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
     basic_cow_string(basic_cow_string&& other, const allocator_type& alloc) noexcept
       :
-        basic_cow_string(alloc)
+        m_ptr(null_char), m_len(0),
+        m_sth(alloc)
       {
         this->assign(noadl::move(other));
+      }
+    constexpr basic_cow_string(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
+      :
+        basic_cow_string(allocator_type())
+      {
       }
     basic_cow_string(const basic_cow_string& other, size_type pos, size_type n = npos,
                      const allocator_type& alloc = allocator_type())
