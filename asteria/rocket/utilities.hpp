@@ -227,9 +227,8 @@ template<typename testT, typename lowerT, typename upperT>
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
     void ranged_for(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
-    for(auto qit = noadl::move(first); qit != last; ++qit) {
+    for(auto qit = noadl::move(first); qit != last; ++qit)
       noadl::forward<funcT>(func)(qit, params...);
-    }
   }
 
 template<typename firstT, typename lastT, typename funcT, typename... paramsT>
