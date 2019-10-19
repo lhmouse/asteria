@@ -414,35 +414,35 @@ template<typename valueT, size_t capacityT,
       :
         m_sth(alloc)
       { }
-    static_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
-      :
-        static_vector(allocator_type())
-      { }
     static_vector(const static_vector& other) noexcept(is_nothrow_copy_constructible<value_type>::value)
       :
-        static_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+        m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
     static_vector(const static_vector& other, const allocator_type& alloc) noexcept(is_nothrow_copy_constructible<value_type>::value)
       :
-        static_vector(alloc)
+        m_sth(alloc)
       {
         this->assign(other);
       }
     static_vector(static_vector&& other) noexcept(is_nothrow_move_constructible<value_type>::value)
       :
-        static_vector(noadl::move(other.m_sth.as_allocator()))
+        m_sth(noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
     static_vector(static_vector&& other, const allocator_type& alloc) noexcept(is_nothrow_move_constructible<value_type>::value)
       :
-        static_vector(alloc)
+        m_sth(alloc)
       {
         this->assign(noadl::move(other));
       }
-    static_vector(size_type n, const allocator_type& alloc = allocator_type())
+    static_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
+      :
+        static_vector(allocator_type())
+      { }
+    explicit static_vector(size_type n, const allocator_type& alloc = allocator_type())
       :
         static_vector(alloc)
       {
@@ -453,6 +453,13 @@ template<typename valueT, size_t capacityT,
         static_vector(alloc)
       {
         this->assign(n, value);
+      }
+    template<typename firstT, typename... restT, ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
+        static_vector(size_type n, const firstT& first, const restT&... rest)
+      :
+        static_vector()
+      {
+        this->assign(n, first, rest...);
       }
     template<typename inputT, ROCKET_ENABLE_IF_HAS_TYPE(iterator_traits<inputT>::iterator_category)>
         static_vector(inputT first, inputT last, const allocator_type& alloc = allocator_type())

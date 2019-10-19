@@ -693,34 +693,34 @@ template<typename valueT, typename allocT> class cow_vector
       :
         m_sth(alloc)
       { }
-    constexpr cow_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
-      :
-        cow_vector(allocator_type())
-      { }
     cow_vector(const cow_vector& other) noexcept
       :
-        cow_vector(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
+        m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
     cow_vector(const cow_vector& other, const allocator_type& alloc) noexcept
       :
-        cow_vector(alloc)
+        m_sth(alloc)
       {
         this->assign(other);
       }
     cow_vector(cow_vector&& other) noexcept
       :
-        cow_vector(noadl::move(other.m_sth.as_allocator()))
+        m_sth(noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
     cow_vector(cow_vector&& other, const allocator_type& alloc) noexcept
       :
-        cow_vector(alloc)
+        m_sth(alloc)
       {
         this->assign(noadl::move(other));
       }
+    constexpr cow_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
+      :
+        cow_vector(allocator_type())
+      { }
     explicit cow_vector(size_type n, const allocator_type& alloc = allocator_type())
       :
         cow_vector(alloc)
@@ -734,11 +734,10 @@ template<typename valueT, typename allocT> class cow_vector
         this->assign(n, value);
       }
     // N.B. This is a non-standard extension.
-    template<typename firstT, typename... restT,
-             ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
+    template<typename firstT, typename... restT, ROCKET_DISABLE_IF(is_same<typename decay<firstT>::type, allocator_type>::value)>
         cow_vector(size_type n, const firstT& first, const restT&... rest)
       :
-        cow_vector(allocator_type())
+        cow_vector()
       {
         this->assign(n, first, rest...);
       }
