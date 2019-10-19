@@ -8,7 +8,8 @@
 namespace Asteria {
 
 Analytic_Context::~Analytic_Context()
-  { }
+  {
+  }
 
 void Analytic_Context::do_prepare_function(const cow_vector<phsh_string>& params)
   {

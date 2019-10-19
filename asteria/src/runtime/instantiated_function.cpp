@@ -13,7 +13,8 @@
 namespace Asteria {
 
 Instantiated_Function::~Instantiated_Function()
-  { }
+  {
+  }
 
 tinyfmt& Instantiated_Function::describe(tinyfmt& fmt) const
   {

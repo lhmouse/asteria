@@ -14,7 +14,8 @@ class Placeholder final : public Abstract_Opaque, public Abstract_Function
   {
   public:
     Placeholder() noexcept
-      { }
+      {
+      }
     ~Placeholder() override;
 
   public:

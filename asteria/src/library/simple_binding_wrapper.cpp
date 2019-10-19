@@ -9,7 +9,8 @@
 namespace Asteria {
 
 Simple_Binding_Wrapper::~Simple_Binding_Wrapper()
-  { }
+  {
+  }
 
 tinyfmt& Simple_Binding_Wrapper::describe(tinyfmt& fmt) const
   {

@@ -37,7 +37,8 @@ class Reference_Dictionary
     constexpr Reference_Dictionary() noexcept
       :
         m_stor()
-      { }
+      {
+      }
     Reference_Dictionary(Reference_Dictionary&& other) noexcept
       :
         m_stor()

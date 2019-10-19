@@ -38,15 +38,18 @@ template<typename charT, typename traitsT, typename allocT>
     basic_tinyfmt_file() noexcept
       :
         m_buf()
-      { }
+      {
+      }
     explicit basic_tinyfmt_file(const char* path, open_mode mode) noexcept
       :
         m_buf(path, mode)
-      { }
+      {
+      }
     basic_tinyfmt_file(file_handle fp, const closer_type& cl) noexcept
       :
         m_buf(fp, cl)
-      { }
+      {
+      }
     ~basic_tinyfmt_file() override;
 
     basic_tinyfmt_file(basic_tinyfmt_file&&)

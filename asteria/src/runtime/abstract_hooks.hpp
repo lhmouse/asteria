@@ -13,7 +13,8 @@ class Abstract_Hooks : public virtual Rcbase
   {
   public:
     Abstract_Hooks() noexcept
-      { }
+      {
+      }
     ~Abstract_Hooks() override;
 
   public:

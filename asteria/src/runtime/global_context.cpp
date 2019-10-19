@@ -24,7 +24,8 @@
 namespace Asteria {
 
 Global_Context::~Global_Context()
-  { }
+  {
+  }
 
 bool Global_Context::do_is_analytic() const noexcept
   {

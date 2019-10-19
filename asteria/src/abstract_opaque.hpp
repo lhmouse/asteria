@@ -13,7 +13,8 @@ class Abstract_Opaque : public virtual Rcbase
   {
   public:
     Abstract_Opaque() noexcept
-      { }
+      {
+      }
     ~Abstract_Opaque() override;
 
   public:

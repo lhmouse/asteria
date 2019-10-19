@@ -43,7 +43,8 @@ namespace Asteria {
         Hasher() noexcept
           :
             m_reg(s_init)
-          { }
+          {
+          }
 
       public:
         tinyfmt& describe(tinyfmt& fmt) const override
@@ -160,7 +161,8 @@ G_integer std_checksum_crc32(const G_string& data)
         Hasher() noexcept
           :
             m_reg(s_offset)
-          { }
+          {
+          }
 
       public:
         tinyfmt& describe(tinyfmt& fmt) const override
@@ -362,7 +364,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         Hasher() noexcept
           :
             m_regs(s_init), m_size(0)
-          { }
+          {
+          }
 
       private:
         void do_consume_chunk(const uint8_t* p) noexcept
@@ -647,7 +650,8 @@ G_string std_checksum_md5(const G_string& data)
         Hasher() noexcept
           :
             m_regs(s_init), m_size(0)
-          { }
+          {
+          }
 
       private:
         void do_consume_chunk(const uint8_t* p) noexcept
@@ -957,7 +961,8 @@ G_string std_checksum_sha1(const G_string& data)
         Hasher() noexcept
           :
             m_regs(s_init), m_size(0)
-          { }
+          {
+          }
 
       private:
         void do_consume_chunk(const uint8_t* p) noexcept

@@ -22,7 +22,8 @@ class Abstract_Context
 
   public:
     Abstract_Context() noexcept
-      { }
+      {
+      }
     virtual ~Abstract_Context();
 
     Abstract_Context(const Abstract_Context&)

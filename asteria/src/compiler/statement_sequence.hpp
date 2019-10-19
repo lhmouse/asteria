@@ -16,7 +16,8 @@ class Statement_Sequence
 
   public:
     Statement_Sequence() noexcept
-      { }
+      {
+      }
     Statement_Sequence(Token_Stream& tstrm, const Compiler_Options& opts)
       {
         this->reload(tstrm, opts);

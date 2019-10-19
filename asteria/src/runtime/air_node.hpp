@@ -241,7 +241,8 @@ class AIR_Node
     template<typename XnodeT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XnodeT&&)> AIR_Node(XnodeT&& xnode) noexcept
       :
         m_stor(rocket::forward<XnodeT>(xnode))
-      { }
+      {
+      }
     template<typename XnodeT, ASTERIA_SFINAE_ASSIGN(Xvariant, XnodeT&&)> AIR_Node& operator=(XnodeT&& xnode) noexcept
       {
         this->m_stor = rocket::forward<XnodeT>(xnode);

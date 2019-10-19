@@ -36,7 +36,8 @@ class Variable_HashSet
     constexpr Variable_HashSet() noexcept
       :
         m_stor()
-      { }
+      {
+      }
     Variable_HashSet(Variable_HashSet&& other) noexcept
       :
         m_stor()

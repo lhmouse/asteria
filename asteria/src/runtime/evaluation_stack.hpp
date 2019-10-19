@@ -19,7 +19,8 @@ class Evaluation_Stack
     Evaluation_Stack() noexcept
       :
         m_etop(nullptr), m_refs()
-      { }
+      {
+      }
     ~Evaluation_Stack();
 
     Evaluation_Stack(const Evaluation_Stack&)

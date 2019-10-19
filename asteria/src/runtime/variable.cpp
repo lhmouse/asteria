@@ -8,7 +8,8 @@
 namespace Asteria {
 
 Variable::~Variable()
-  { }
+  {
+  }
 
 long Variable::increment_gcref(long split) const noexcept
   {

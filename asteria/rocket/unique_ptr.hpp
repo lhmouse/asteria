@@ -43,17 +43,20 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
           :
             deleter_base(),
             m_ptr()
-          { }
+          {
+          }
         explicit constexpr stored_pointer(const deleter_type& del) noexcept
           :
             deleter_base(del),
             m_ptr()
-          { }
+          {
+          }
         explicit constexpr stored_pointer(deleter_type&& del) noexcept
           :
             deleter_base(noadl::move(del)),
             m_ptr()
-          { }
+          {
+          }
         ~stored_pointer()
           {
             this->reset(pointer());
@@ -135,11 +138,13 @@ template<typename elementT, typename deleterT> class unique_ptr
     constexpr unique_ptr(nullptr_t = nullptr) noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         m_sth()
-      { }
+      {
+      }
     explicit constexpr unique_ptr(const deleter_type& del) noexcept
       :
         m_sth(del)
-      { }
+      {
+      }
     explicit unique_ptr(pointer ptr) noexcept(is_nothrow_constructible<deleter_type>::value)
       :
         unique_ptr()

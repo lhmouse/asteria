@@ -28,7 +28,8 @@ template<typename elementT> class fill_iterator
           noexcept(is_nothrow_constructible<value_type, paramsT&&...>::value)
       :
         m_pos(pos), m_value(noadl::forward<paramsT>(params)...)
-      { }
+      {
+      }
 
   public:
     difference_type tell() const noexcept

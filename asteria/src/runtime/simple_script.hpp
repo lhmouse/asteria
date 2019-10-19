@@ -17,7 +17,8 @@ class Simple_Script
 
   public:
     Simple_Script()
-      { }
+      {
+      }
     Simple_Script(tinybuf& cbuf, const cow_string& name)
       {
         this->reload(cbuf, name);

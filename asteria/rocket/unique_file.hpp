@@ -31,7 +31,8 @@ template<typename charT, typename traitsT = char_traits<charT>,
         constexpr smart_handle() noexcept
           :
             m_fp(), m_cl()
-          { }
+          {
+          }
         ~smart_handle()
           {
             this->reset(nullptr, nullptr);
@@ -92,12 +93,14 @@ template<typename charT, typename traitsT = char_traits<charT>,
           :
             allocator_base(alloc),
             m_sptr(), m_bpos(), m_epos(), m_send()
-          { }
+          {
+          }
         explicit constexpr basic_smart_buffer(allocator_type&& alloc) noexcept
           :
             allocator_base(noadl::move(alloc)),
             m_sptr(), m_bpos(), m_epos(), m_send()
-          { }
+          {
+          }
         ~basic_smart_buffer()
           {
             this->deallocate();
@@ -247,11 +250,13 @@ template<typename charT, typename traitsT,
     explicit constexpr basic_unique_file(const allocator_type& alloc) noexcept
       :
         m_fp(), m_buf(alloc)
-      { }
+      {
+      }
     constexpr basic_unique_file() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         basic_unique_file(allocator_type())
-      { }
+      {
+      }
     basic_unique_file(file_handle fp, const closer_type& cl, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_fp(), m_buf(alloc)

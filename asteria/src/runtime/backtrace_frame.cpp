@@ -8,6 +8,7 @@
 namespace Asteria {
 
 Backtrace_Frame::~Backtrace_Frame()
-  { }
+  {
+  }
 
 }  // namespace Asteria

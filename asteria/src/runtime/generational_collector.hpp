@@ -26,7 +26,8 @@ class Generational_Collector final : public virtual Rcbase
         m_oldest(&(this->m_pool),           nullptr,  10),
         m_middle(&(this->m_pool), &(this->m_oldest),  60),
         m_newest(&(this->m_pool), &(this->m_middle), 800)
-      { }
+      {
+      }
     ~Generational_Collector() override;
 
     Generational_Collector(const Generational_Collector&)

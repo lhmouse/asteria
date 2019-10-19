@@ -8,7 +8,8 @@
 namespace Asteria {
 
 Parser_Error::~Parser_Error()
-  { }
+  {
+  }
 
 void Parser_Error::do_compose_message()
   {

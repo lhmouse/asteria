@@ -43,7 +43,8 @@ class Reference_Modifier
     template<typename XmodT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XmodT&&)> Reference_Modifier(XmodT&& xmod) noexcept
       :
         m_stor(rocket::forward<XmodT>(xmod))
-      { }
+      {
+      }
     template<typename XmodT, ASTERIA_SFINAE_ASSIGN(Xvariant, XmodT&&)> Reference_Modifier& operator=(XmodT&& xmod) noexcept
       {
         this->m_stor = rocket::forward<XmodT>(xmod);

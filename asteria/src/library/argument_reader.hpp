@@ -36,7 +36,8 @@ class Argument_Reader
       :
         m_name(name), m_args(args), m_throw_on_failure(false),
         m_overloads(), m_state()
-      { }
+      {
+      }
 
     Argument_Reader(const Argument_Reader&)
       = delete;

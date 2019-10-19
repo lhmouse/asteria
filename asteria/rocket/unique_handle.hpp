@@ -44,17 +44,20 @@ template<typename handleT, typename closerT> class unique_handle;
           :
             closer_base(),
             m_hv(this->as_closer().null())
-          { }
+          {
+          }
         explicit constexpr stored_handle(const closer_type& cl) noexcept
           :
             closer_base(cl),
             m_hv(this->as_closer().null())
-          { }
+          {
+          }
         explicit constexpr stored_handle(closer_type&& cl) noexcept
           :
             closer_base(noadl::move(cl)),
             m_hv(this->as_closer().null())
-          { }
+          {
+          }
         ~stored_handle()
           {
             this->reset(this->as_closer().null());
@@ -116,11 +119,13 @@ template<typename handleT, typename closerT> class unique_handle
     constexpr unique_handle() noexcept(is_nothrow_constructible<closer_type>::value)
       :
         m_sth()
-      { }
+      {
+      }
     explicit constexpr unique_handle(const closer_type& cl) noexcept
       :
         m_sth(cl)
-      { }
+      {
+      }
     explicit unique_handle(handle_type hv) noexcept(is_nothrow_constructible<closer_type>::value)
       :
         unique_handle()

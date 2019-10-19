@@ -96,7 +96,8 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
   }
 
 Runtime_Error::~Runtime_Error()
-  { }
+  {
+  }
 
 bool throw_runtime_error(const char* func, cow_string&& msg)
   {

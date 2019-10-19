@@ -24,13 +24,15 @@ class Variadic_Arguer final : public Abstract_Function
       :
         m_sloc(xsloc), m_func(xfunc),
         m_vargs(rocket::forward<XvargsT>(xvargs)...)
-      { }
+      {
+      }
     template<typename... XvargsT> Variadic_Arguer(const Variadic_Arguer& other,
                                                   XvargsT&&... xvargs)
       :
         m_sloc(other.m_sloc), m_func(other.m_func),
         m_vargs(rocket::forward<XvargsT>(xvargs)...)
-      { }
+      {
+      }
 
   public:
     const Source_Location& sloc() const noexcept

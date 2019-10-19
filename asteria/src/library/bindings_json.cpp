@@ -26,13 +26,15 @@ namespace Asteria {
       };
 
     Indenter::~Indenter()
-      { }
+      {
+      }
 
     class Indenter_none final : public Indenter
       {
       public:
         explicit Indenter_none()
-          { }
+          {
+          }
 
       public:
         tinyfmt& break_line(tinyfmt& fmt) const override
@@ -40,9 +42,11 @@ namespace Asteria {
             return fmt;
           }
         void increment_level() override
-          { }
+          {
+          }
         void decrement_level() override
-          { }
+          {
+          }
       };
 
     class Indenter_string final : public Indenter
@@ -55,7 +59,8 @@ namespace Asteria {
         explicit Indenter_string(const cow_string& add)
           :
             m_add(add), m_cur(rocket::sref("\n"))
-          { }
+          {
+          }
 
       public:
         tinyfmt& break_line(tinyfmt& fmt) const override
@@ -82,7 +87,8 @@ namespace Asteria {
         explicit Indenter_spaces(size_t add)
           :
             m_add(add), m_cur(0)
-          { }
+          {
+          }
 
       public:
         tinyfmt& break_line(tinyfmt& fmt) const override

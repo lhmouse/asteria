@@ -40,13 +40,16 @@ template<typename charT, typename traitsT,
     basic_tinybuf_file() noexcept
 //      : m_str(), m_off(),
 //        m_mode()
-      { }
+      {
+      }
     explicit basic_tinybuf_file(const char* path, open_mode mode) noexcept
 //      : m_buf(path, mode)
-      { }
+      {
+      }
     basic_tinybuf_file(file_handle fp, const closer_type& cl) noexcept
 //      : m_buf(hf, owns)
-      { }
+      {
+      }
     ~basic_tinybuf_file() override;
 
     basic_tinybuf_file(basic_tinybuf_file&&)

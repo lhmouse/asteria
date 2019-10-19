@@ -18,19 +18,23 @@ class Source_Location
     Source_Location() noexcept
       :
         m_file(rocket::sref("<empty>")), m_line(-1)
-      { }
+      {
+      }
     Source_Location(cow_string xfile, long xline) noexcept
       :
         m_file(rocket::move(xfile)), m_line(xline)
-      { }
+      {
+      }
     template<typename FirstT, typename SecondT> Source_Location(const pair<FirstT, SecondT>& xpair) noexcept
       :
         m_file(xpair.first), m_line(xpair.second)
-      { }
+      {
+      }
     template<typename FirstT, typename SecondT> Source_Location(pair<FirstT, SecondT>&& xpair) noexcept
       :
         m_file(rocket::move(xpair.first)), m_line(xpair.second)
-      { }
+      {
+      }
 
   public:
     const cow_string& file() const noexcept

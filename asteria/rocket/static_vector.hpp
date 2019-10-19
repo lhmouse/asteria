@@ -179,18 +179,21 @@ template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>>
         constexpr vector_iterator(const parent_type* ref, value_type* ptr) noexcept
           :
             m_ref(ref), m_ptr(ptr)
-          { }
+          {
+          }
 
       public:
         constexpr vector_iterator() noexcept
           :
             vector_iterator(nullptr, nullptr)
-          { }
+          {
+          }
         template<typename yvalueT, ROCKET_ENABLE_IF(is_convertible<yvalueT*, valueT*>::value)>
                 constexpr vector_iterator(const vector_iterator<vectorT, yvalueT>& other) noexcept
           :
             vector_iterator(other.m_ref, other.m_ptr)
-          { }
+          {
+          }
 
       private:
         value_type* do_assert_valid_pointer(value_type* ptr, bool to_dereference) const noexcept
@@ -354,7 +357,8 @@ template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>>
 
     // Insertion helpers.
     struct append_tag
-      { }
+      {
+      }
     constexpr append;
 
     template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, append_tag, paramsT&&... params)
@@ -363,7 +367,8 @@ template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>>
       }
 
     struct emplace_back_tag
-      { }
+      {
+      }
     constexpr emplace_back;
 
     template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, emplace_back_tag, paramsT&&... params)
@@ -372,7 +377,8 @@ template<typename valueT, size_t capacityT, typename allocT = allocator<valueT>>
       }
 
     struct push_back_tag
-      { }
+      {
+      }
     constexpr push_back;
 
     template<typename vectorT, typename... paramsT> void tagged_append(vectorT* vec, push_back_tag, paramsT&&... params)
@@ -413,7 +419,8 @@ template<typename valueT, size_t capacityT,
     explicit static_vector(const allocator_type& alloc) noexcept
       :
         m_sth(alloc)
-      { }
+      {
+      }
     static_vector(const static_vector& other) noexcept(is_nothrow_copy_constructible<value_type>::value)
       :
         m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
@@ -441,7 +448,8 @@ template<typename valueT, size_t capacityT,
     static_vector(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         static_vector(allocator_type())
-      { }
+      {
+      }
     explicit static_vector(size_type n, const allocator_type& alloc = allocator_type())
       :
         static_vector(alloc)

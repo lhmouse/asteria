@@ -43,15 +43,18 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
         explicit constexpr shallow(const charT* ptr) noexcept
           :
             m_ptr(ptr), m_len(traitsT::length(ptr))
-          { }
+          {
+          }
         constexpr shallow(const charT* ptr, size_t len) noexcept
           :
             m_ptr(ptr), m_len((ROCKET_ASSERT(traitsT::eq(ptr[len], charT())), len))
-          { }
+          {
+          }
         template<typename allocT> explicit shallow(const basic_cow_string<charT, traitsT, allocT>& str) noexcept
           :
             m_ptr(str.c_str()), m_len(str.length())
-          { }
+          {
+          }
 
       public:
         constexpr const charT* c_str() const noexcept
@@ -71,7 +74,8 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
         explicit storage_header() noexcept
           :
             nref()
-          { }
+          {
+          }
       };
 
     template<typename allocT> struct basic_storage : storage_header
@@ -96,9 +100,11 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
         basic_storage(const allocator_type& xalloc, size_type xnblk) noexcept
           :
             alloc(xalloc), nblk(xnblk)
-          { }
+          {
+          }
         ~basic_storage()
-          { }
+          {
+          }
 
         basic_storage(const basic_storage&)
           = delete;
@@ -129,12 +135,14 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           :
             allocator_base(alloc),
             m_ptr()
-          { }
+          {
+          }
         explicit constexpr storage_handle(allocator_type&& alloc) noexcept
           :
             allocator_base(noadl::move(alloc)),
             m_ptr()
-          { }
+          {
+          }
         ~storage_handle()
           {
             this->deallocate();
@@ -343,18 +351,21 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
         constexpr string_iterator(const parent_type* ref, value_type* ptr) noexcept
           :
             m_ref(ref), m_ptr(ptr)
-          { }
+          {
+          }
 
       public:
         constexpr string_iterator() noexcept
           :
             string_iterator(nullptr, nullptr)
-          { }
+          {
+          }
         template<typename ycharT, ROCKET_ENABLE_IF(is_convertible<ycharT*, charT*>::value)>
                 constexpr string_iterator(const string_iterator<stringT, ycharT>& other) noexcept
           :
             string_iterator(other.m_ref, other.m_ptr)
-          { }
+          {
+          }
 
       private:
         value_type* do_assert_valid_pointer(value_type* ptr, bool to_dereference) const noexcept
@@ -560,7 +571,8 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 
     // Replacement helpers.
     struct append_tag
-      { }
+      {
+      }
     constexpr append;
 
     template<typename stringT, typename... paramsT>
@@ -570,7 +582,8 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
       }
 
     struct push_back_tag
-      { }
+      {
+      }
     constexpr push_back;
 
     template<typename stringT, typename... paramsT>
@@ -689,15 +702,18 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
     constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_ptr(sh.c_str()), m_len(sh.length()), m_sth(alloc)
-      { }
+      {
+      }
     explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
       :
         basic_cow_string(shallow_type(null_char, 0), alloc)
-      { }
+      {
+      }
     constexpr basic_cow_string(clear_t = clear_t()) noexcept(is_nothrow_constructible<allocator_type>::value)
       :
         basic_cow_string(allocator_type())
-      { }
+      {
+      }
     basic_cow_string(const basic_cow_string& other) noexcept
       :
         basic_cow_string(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))

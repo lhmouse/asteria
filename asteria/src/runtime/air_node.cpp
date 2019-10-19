@@ -268,7 +268,8 @@ DCE_Result AIR_Node::optimize_dce()
         constexpr AVMC_Appender()
           :
             SparamT(), paramu()
-          { }
+          {
+          }
 
         AVMC_Queue& request(AVMC_Queue& queue) const
           {
@@ -288,7 +289,8 @@ DCE_Result AIR_Node::optimize_dce()
         constexpr AVMC_Appender()
           :
             SparamT(), paramu()
-          { }
+          {
+          }
 
         AVMC_Queue& request(AVMC_Queue& queue) const
           {
@@ -308,7 +310,8 @@ DCE_Result AIR_Node::optimize_dce()
         constexpr AVMC_Appender()
           :
             paramu()
-          { }
+          {
+          }
 
         AVMC_Queue& request(AVMC_Queue& queue) const
           {

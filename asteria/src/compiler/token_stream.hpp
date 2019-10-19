@@ -16,7 +16,8 @@ class Token_Stream
 
   public:
     Token_Stream() noexcept
-      { }
+      {
+      }
     Token_Stream(tinybuf& cbuf, const cow_string& file, const Compiler_Options& opts)
       {
         this->reload(cbuf, file, opts);

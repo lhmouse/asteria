@@ -20,15 +20,18 @@ namespace rocket {
         constexpr final_wrapper() noexcept(is_nothrow_constructible<allocT>::value)
           :
             m_alloc()
-          { }
+          {
+          }
         explicit constexpr final_wrapper(const allocT& alloc) noexcept
           :
             m_alloc(alloc)
-          { }
+          {
+          }
         explicit constexpr final_wrapper(allocT&& alloc) noexcept
           :
             m_alloc(noadl::move(alloc))
-          { }
+          {
+          }
 
       public:
         constexpr operator const allocT& () const noexcept
@@ -53,16 +56,19 @@ template<typename allocT>
 
     // don't propagate
     struct propagate_none_tag
-      { }
+      {
+      }
     constexpr propagate_none;
 
     template<typename allocT>
         void propagate(propagate_none_tag, allocT& /*lhs*/, const allocT& /*rhs*/) noexcept
-      { }
+      {
+      }
 
     // propagate_on_container_copy_assignment
     struct propagate_copy_tag
-      { }
+      {
+      }
     constexpr propagate_copy;
 
     template<typename allocT>
@@ -73,7 +79,8 @@ template<typename allocT>
 
     // propagate_on_container_move_assignment
     struct propagate_move_tag
-      { }
+      {
+      }
     constexpr propagate_move;
 
     template<typename allocT>
@@ -84,7 +91,8 @@ template<typename allocT>
 
     // propagate_on_container_swap
     struct propagate_swap_tag
-      { }
+      {
+      }
     constexpr propagate_swap;
 
     template<typename allocT>
