@@ -235,9 +235,8 @@ template<typename firstT, typename lastT, typename funcT, typename... paramsT>
     void ranged_do_while(firstT first, lastT last, funcT&& func, const paramsT&... params)
   {
     auto qit = noadl::move(first);
-    do {
-      noadl::forward<funcT>(func)(qit, params...);
-    } while(++qit != last);
+    do noadl::forward<funcT>(func)(qit, params...);
+      while(++qit != last);
   }
 
 template<typename... typesT>
@@ -338,9 +337,8 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
       //        > 0 1 2 3 4 5 6 7 8 9 -
       // After:         bot   brk     end
       //        > 3 4 5 0 1 2 6 7 8 9 -
-      do {
-        noadl::adl_swap(ptr[bot++], ptr[brk++]);
-      } while(bot != stp);
+      do noadl::adl_swap(ptr[bot++], ptr[brk++]);
+        while(bot != stp);
       // `isr` will have been decreased by `isl`, which will not result in zero.
       isr = end - brk;
       // `isl` is unchanged.
@@ -352,9 +350,8 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
       //        > 0 1 2 3 4 5 6 7 8 9 -
       // After:       bot       brk   end
       //        > 7 8 9 3 4 5 6 0 1 2 -
-      do {
-        noadl::adl_swap(ptr[bot++], ptr[brk++]);
-      } while(brk != end);
+      do noadl::adl_swap(ptr[bot++], ptr[brk++]);
+        while(brk != end);
       // `isl` will have been decreased by `isr`, which will not result in zero.
       isl = stp - bot;
       // `isr` is unchanged.
@@ -365,9 +362,8 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
     //        > 0 1 2 3 4 5 6 7 8 9 -
     // After:             bot       brk
     //        > 5 6 7 8 9 0 1 2 3 4 -
-    do {
-      noadl::adl_swap(ptr[bot++], ptr[brk++]);
-    } while(bot != stp);
+    do noadl::adl_swap(ptr[bot++], ptr[brk++]);
+      while(bot != stp);
   }
 
     namespace details_utilities {
