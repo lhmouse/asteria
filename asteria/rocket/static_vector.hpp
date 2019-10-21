@@ -497,7 +497,7 @@ template<typename valueT, size_t capacityT,
     static_vector& operator=(static_vector&& other) noexcept(conjunction<is_nothrow_move_assignable<value_type>,
                                                                          is_nothrow_move_constructible<value_type>>::value)
       {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->assign(noadl::move(other));
         return *this;
       }

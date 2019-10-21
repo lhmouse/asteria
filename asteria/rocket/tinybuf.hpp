@@ -28,6 +28,7 @@ struct tinybuf_base
         seek_cur  = 1,  // SEEK_CUR
         seek_end  = 2,  // SEEK_END
       };
+
     enum open_mode
       {
         open_read    = 0x0001,  // "r"

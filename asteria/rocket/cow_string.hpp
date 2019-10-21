@@ -798,7 +798,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
     basic_cow_string& operator=(basic_cow_string&& other) noexcept
       {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->assign(noadl::move(other));
         return *this;
       }

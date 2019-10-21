@@ -778,7 +778,7 @@ template<typename valueT, typename allocT> class cow_vector
       }
     cow_vector& operator=(cow_vector&& other) noexcept
       {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->assign(noadl::move(other));
         return *this;
       }

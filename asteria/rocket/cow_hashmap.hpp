@@ -936,7 +936,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       }
     cow_hashmap& operator=(cow_hashmap&& other) noexcept
       {
-        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), noadl::move(other.m_sth.as_allocator()));
+        noadl::propagate_allocator_on_move(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->assign(noadl::move(other));
         return *this;
       }
