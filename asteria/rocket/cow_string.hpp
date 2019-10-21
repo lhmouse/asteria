@@ -1513,12 +1513,13 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         return rlen;
       }
 
-    void swap(basic_cow_string& other) noexcept
+    basic_cow_string& swap(basic_cow_string& other) noexcept
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
         noadl::adl_swap(this->m_ptr, other.m_ptr);
         noadl::adl_swap(this->m_len, other.m_len);
+        return *this;
       }
 
     // 24.3.2.7, string operations
@@ -2085,7 +2086,7 @@ template<typename charT, typename traitsT, typename allocT>
     inline void swap(basic_cow_string<charT, traitsT, allocT>& lhs,
                      basic_cow_string<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename allocT>

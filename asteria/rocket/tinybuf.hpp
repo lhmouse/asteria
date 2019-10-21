@@ -213,12 +213,13 @@ template<typename charT, typename traitsT>
         return *this;
       }
 
-    void swap(basic_tinybuf& other) noexcept
+    basic_tinybuf& swap(basic_tinybuf& other) noexcept
       {
         ::std::swap(this->m_gcur, other.m_gcur);
         ::std::swap(this->m_gend, other.m_gend);
         ::std::swap(this->m_pcur, other.m_pcur);
         ::std::swap(this->m_pend, other.m_pend);
+        return *this;
       }
   };
 
@@ -230,7 +231,7 @@ template<typename charT, typename traitsT>
     inline void swap(basic_tinybuf<charT, traitsT>& lhs,
                      basic_tinybuf<charT, traitsT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 extern template class basic_tinybuf<char>;

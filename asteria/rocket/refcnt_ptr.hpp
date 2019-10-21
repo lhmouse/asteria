@@ -359,9 +359,10 @@ template<typename elementT> class refcnt_ptr
         return this->m_sth.reset(ptr), *this;
       }
 
-    void swap(refcnt_ptr& other) noexcept
+    refcnt_ptr& swap(refcnt_ptr& other) noexcept
       {
         this->m_sth.exchange_with(other.m_sth);
+        return *this;
       }
   };
 
@@ -422,7 +423,7 @@ template<typename elementT>
     inline void swap(refcnt_ptr<elementT>& lhs,
                      refcnt_ptr<elementT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename elementT>
@@ -436,38 +437,38 @@ template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
     return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-                                                         [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
      inline refcnt_ptr<targetT> dynamic_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
     return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-                                                         [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> const_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
     return details_refcnt_ptr::pointer_cast_aux<targetT>(sptr,
-                                                         [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
 template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> static_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
     return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
-                                                         [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> dynamic_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
     return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
-                                                         [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> const_pointer_cast(refcnt_ptr<sourceT>&& sptr) noexcept
   {
     return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
-                                                         [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
 template<typename elementT, typename... paramsT>

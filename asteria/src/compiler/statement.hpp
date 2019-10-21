@@ -171,9 +171,10 @@ class Statement
         return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.empty();
       }
 
-    void swap(Statement& other) noexcept
+    Statement& swap(Statement& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
+        return *this;
       }
 
     cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
@@ -182,7 +183,7 @@ class Statement
 
 inline void swap(Statement& lhs, Statement& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace Asteria

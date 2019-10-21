@@ -50,7 +50,8 @@ template<typename allocT>
     struct allocator_wrapper_base_for : conditional<is_final<allocT>::value,
                                                     details_allocator_utilities::final_wrapper<allocT>,
                                                     allocT>
-  { };
+  {
+  };
 
     namespace details_allocator_utilities {
 
@@ -133,10 +134,12 @@ template<typename allocT>
 
 template<typename allocT>
     struct is_std_allocator : false_type
-  { };
+  {
+  };
 template<typename valueT>
     struct is_std_allocator<::std::allocator<valueT>> : true_type
-  { };
+  {
+  };
 
 }  // namespace rocket
 

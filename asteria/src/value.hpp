@@ -166,9 +166,10 @@ class Value
         return this->m_stor.as<gtype_object>();
       }
 
-    void swap(Value& other) noexcept
+    Value& swap(Value& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
+        return *this;
       }
 
     bool is_convertible_to_real() const noexcept
@@ -207,7 +208,7 @@ class Value
 
 inline void swap(Value& lhs, Value& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const Value& value)

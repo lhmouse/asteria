@@ -162,9 +162,10 @@ class AVMC_Queue
         return *this;
       }
 
-    void swap(AVMC_Queue& other) noexcept
+    AVMC_Queue& swap(AVMC_Queue& other) noexcept
       {
         std::swap(this->m_stor, other.m_stor);
+        return *this;
       }
 
     AVMC_Queue& request(size_t nbytes)
@@ -214,7 +215,7 @@ class AVMC_Queue
 
 inline void swap(AVMC_Queue& lhs, AVMC_Queue& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace Asteria

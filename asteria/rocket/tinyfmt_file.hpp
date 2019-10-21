@@ -80,9 +80,10 @@ template<typename charT, typename traitsT, typename allocT>
         return this->m_buf.close(), *this;
       }
 
-    void swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<buffer_type>::value)
+    basic_tinyfmt_file& swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<buffer_type>::value)
       {
         noadl::adl_swap(this->m_buf, other.m_buf);
+        return *this;
       }
   };
 
@@ -94,7 +95,7 @@ template<typename charT, typename traitsT, typename allocT>
     inline void swap(basic_tinyfmt_file<charT, traitsT, allocT>& lhs,
                      basic_tinyfmt_file<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 extern template class basic_tinyfmt_file<char>;

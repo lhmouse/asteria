@@ -198,10 +198,11 @@ template<typename handleT, typename closerT> class unique_handle
         return *this;
       }
 
-    void swap(unique_handle& other) noexcept
+    unique_handle& swap(unique_handle& other) noexcept
       {
         noadl::adl_swap(this->m_sth.as_closer(), other.m_sth.as_closer());
         this->m_sth.exchange_with(other.m_sth);
+        return *this;
       }
   };
 
@@ -246,7 +247,7 @@ template<typename handleT, typename closerT>
     inline void swap(unique_handle<handleT, closerT>& lhs,
                      unique_handle<handleT, closerT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename handleT, typename closerT>

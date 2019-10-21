@@ -20,7 +20,8 @@ class Reference_Modifier
         phsh_string key;
       };
     struct S_array_end
-      { };
+      {
+      };
 
     enum Index : uint8_t
       {
@@ -57,9 +58,10 @@ class Reference_Modifier
         return static_cast<Index>(this->m_stor.index());
       }
 
-    void swap(Reference_Modifier& other) noexcept
+    Reference_Modifier& swap(Reference_Modifier& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
+        return *this;
       }
 
     const Value* apply_const_opt(const Value& parent) const;
@@ -69,7 +71,7 @@ class Reference_Modifier
 
 inline void swap(Reference_Modifier& lhs, Reference_Modifier& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace Asteria

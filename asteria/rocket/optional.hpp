@@ -197,11 +197,12 @@ template<typename valueT> class optional
       }
 
     // 19.6.3.4, swap
-    void swap(optional& other) noexcept(conjunction<is_nothrow_swappable<value_type>,
-                                                    is_nothrow_move_constructible<value_type>,
-                                                    is_nothrow_move_assignable<value_type>>::value)
+    optional& swap(optional& other) noexcept(conjunction<is_nothrow_swappable<value_type>,
+                                                         is_nothrow_move_constructible<value_type>,
+                                                         is_nothrow_move_assignable<value_type>>::value)
       {
         this->m_stor.swap(other.m_stor);
+        return *this;
       }
   };
 
@@ -209,7 +210,7 @@ template<typename valueT>
     inline void swap(optional<valueT>& lhs,
                      optional<valueT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 template<typename valueT>

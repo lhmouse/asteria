@@ -76,10 +76,11 @@ class Reference
         return *this;
       }
 
-    void swap(Reference& other) noexcept
+    Reference& swap(Reference& other) noexcept
       {
         this->m_root.swap(other.m_root);
         this->m_mods.swap(other.m_mods);
+        return *this;
       }
 
     const Value& read() const
@@ -143,7 +144,7 @@ class Reference
 
 inline void swap(Reference& lhs, Reference& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace Asteria

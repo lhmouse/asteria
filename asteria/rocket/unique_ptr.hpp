@@ -19,11 +19,13 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
 
     template<typename elementT, typename deleterT, typename = void>
         struct pointer_of : enable_if<1, elementT*>
-      { };
+      {
+      };
     template<typename elementT, typename deleterT>
         struct pointer_of<elementT, deleterT,
                           typename make_void<typename deleterT::pointer>::type> : enable_if<1, typename deleterT::pointer>
-      { };
+      {
+      };
 
     template<typename pointerT, typename deleterT>
         class stored_pointer : private allocator_wrapper_base_for<deleterT>::type
@@ -241,10 +243,11 @@ template<typename elementT, typename deleterT> class unique_ptr
         return this->m_sth.reset(ptr_new), *this;
       }
 
-    void swap(unique_ptr& other) noexcept
+    unique_ptr& swap(unique_ptr& other) noexcept
       {
         noadl::adl_swap(this->m_sth.as_deleter(), other.m_sth.as_deleter());
         this->m_sth.exchange_with(other.m_sth);
+        return *this;
       }
   };
 
@@ -311,7 +314,7 @@ template<typename elementT, typename deleterT>
     inline void swap(unique_ptr<elementT, deleterT>& lhs,
                      unique_ptr<elementT, deleterT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename elementT, typename deleterT>
@@ -325,19 +328,19 @@ template<typename targetT, typename sourceT>
     inline unique_ptr<targetT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
-                                                         [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return static_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline unique_ptr<targetT> dynamic_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
-                                                         [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return dynamic_cast<targetT*>(ptr);  });
   }
 template<typename targetT, typename sourceT>
     inline unique_ptr<targetT> const_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
     return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
-                                                         [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+                               [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
   }
 
 template<typename elementT, typename... paramsT>

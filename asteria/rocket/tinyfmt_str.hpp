@@ -84,9 +84,10 @@ template<typename charT, typename traitsT,
         return this->m_buf.extract_string(mode);
       }
 
-    void swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<buffer_type>::value)
+    basic_tinyfmt_str& swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<buffer_type>::value)
       {
         noadl::adl_swap(this->m_buf, other.m_buf);
+        return *this;
       }
   };
 
@@ -98,7 +99,7 @@ template<typename charT, typename traitsT, typename allocT>
     inline void swap(basic_tinyfmt_str<charT, traitsT, allocT>& lhs,
                      basic_tinyfmt_str<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 extern template class basic_tinyfmt_str<char>;

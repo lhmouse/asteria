@@ -17,23 +17,29 @@ template<typename... alternativesT> class variant;
 
     template<size_t indexT, typename targetT, typename... alternativesT>
         struct type_finder  // no value
-      { };
+      {
+      };
     template<size_t indexT, typename targetT, typename firstT, typename... restT>
         struct type_finder<indexT, targetT, firstT, restT...> : type_finder<indexT + 1, targetT, restT...>  // recursive
-      { };
+      {
+      };
     template<size_t indexT, typename targetT, typename... restT>
         struct type_finder<indexT, targetT, targetT, restT...> : integral_constant<size_t, indexT>  // found
-      { };
+      {
+      };
 
     template<size_t indexT, typename... alternativesT>
         struct type_getter  // no type
-      { };
+      {
+      };
     template<size_t indexT, typename firstT, typename... restT>
         struct type_getter<indexT, firstT, restT...> : type_getter<indexT - 1, restT...>  // recursive
-      { };
+      {
+      };
     template<typename firstT, typename... restT>
         struct type_getter<0, firstT, restT...> : enable_if<1, firstT>  // found
-      { };
+      {
+      };
 
     // In a `catch` block that is conditionally unreachable, direct use of `throw` is possibly subject to compiler warnings.
     // Wrapping the `throw` expression in a function could silence this warning.
@@ -198,9 +204,11 @@ template<typename... alternativesT> class variant
 
   public:
     template<typename targetT> struct index_of : details_variant::type_finder<0, targetT, alternativesT...>
-      { };
+      {
+      };
     template<size_t indexT> struct alternative_at : details_variant::type_getter<indexT, alternativesT...>
-      { };
+      {
+      };
     static constexpr size_t alternative_size = sizeof...(alternativesT);
 
   private:
@@ -493,7 +501,7 @@ template<typename... alternativesT> class variant
       }
 
     // 23.7.3.6, swap
-    void swap(variant& other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)
+    variant& swap(variant& other) noexcept(conjunction<is_nothrow_swappable<alternativesT>...>::value)
       {
         auto index_old = this->m_index;
         auto index_new = other.m_index;
@@ -512,7 +520,7 @@ template<typename... alternativesT> class variant
           details_variant::dispatch_move_construct_then_destroy<alternativesT...>(index_old, other.m_stor, backup);
           other.m_index = index_old;
         }
-        return;
+        return *this;
       }
   };
 
@@ -520,7 +528,7 @@ template<typename... alternativesT>
     inline void swap(variant<alternativesT...>& lhs,
                      variant<alternativesT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace rocket

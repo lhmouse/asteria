@@ -1376,10 +1376,11 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
         return *this;
       }
 
-    void swap(cow_hashmap& other) noexcept
+    cow_hashmap& swap(cow_hashmap& other) noexcept
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
+        return *this;
       }
 
     // N.B. The return type differs from `std::unordered_map`.
@@ -1415,7 +1416,7 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
     inline void swap(cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& lhs,
                      cow_hashmap<keyT, mappedT, hashT, eqT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace rocket

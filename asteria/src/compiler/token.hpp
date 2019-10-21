@@ -150,13 +150,14 @@ class Token
         return this->m_stor.as<index_string_literal>().val;
       }
 
-    void swap(Token& other) noexcept
+    Token& swap(Token& other) noexcept
       {
         this->m_file.swap(other.m_file);
         std::swap(this->m_line, other.m_line);
         std::swap(this->m_offset, other.m_offset);
         std::swap(this->m_length, other.m_length);
         this->m_stor.swap(other.m_stor);
+        return *this;
       }
 
     tinyfmt& print(tinyfmt& fmt) const;
@@ -164,7 +165,7 @@ class Token
 
 inline void swap(Token& lhs, Token& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 inline tinyfmt& operator<<(tinyfmt& fmt, const Token& token)

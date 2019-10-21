@@ -487,7 +487,8 @@ template<uint32_t... paramsT> struct Compiler_Options_template;
 template<uint32_t fragmentT> struct Compiler_Options_fragment;
 
 template<uint32_t versionT> struct Compiler_Options_template<versionT> : Compiler_Options_template<versionT, versionT>
-  { };
+  {
+  };
 template<uint32_t versionT, uint32_t fragmentT> struct Compiler_Options_template<versionT, fragmentT> : Compiler_Options_template<versionT, fragmentT - 1>,
                                                                                                         Compiler_Options_fragment<fragmentT>
   {

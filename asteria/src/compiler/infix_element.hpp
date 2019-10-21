@@ -84,9 +84,10 @@ class Infix_Element
         return static_cast<Index>(this->m_stor.index());
       }
 
-    void swap(Infix_Element& other) noexcept
+    Infix_Element& swap(Infix_Element& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
+        return *this;
       }
 
     // Returns the precedence of this element.
@@ -99,7 +100,7 @@ class Infix_Element
 
 inline void swap(Infix_Element& lhs, Infix_Element& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace Asteria

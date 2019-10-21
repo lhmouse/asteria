@@ -92,9 +92,10 @@ class Variable_HashSet
         return *this;
       }
 
-    void swap(Variable_HashSet& other) noexcept
+    Variable_HashSet& swap(Variable_HashSet& other) noexcept
       {
         std::swap(this->m_stor, other.m_stor);
+        return *this;
       }
 
     size_t size() const noexcept
@@ -173,7 +174,7 @@ class Variable_HashSet
 
 inline void swap(Variable_HashSet& lhs, Variable_HashSet& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace Asteria

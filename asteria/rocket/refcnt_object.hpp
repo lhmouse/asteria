@@ -97,9 +97,10 @@ template<typename elementT> class refcnt_object
         return this->m_ptr.get();
       }
 
-    void swap(refcnt_object& other) noexcept
+    refcnt_object& swap(refcnt_object& other) noexcept
       {
         this->m_ptr.swap(other.m_ptr);
+        return *this;
       }
 
     constexpr operator const refcnt_ptr<element_type>& () const noexcept
@@ -124,7 +125,7 @@ template<typename elementT>
     inline void swap(refcnt_object<elementT>& lhs,
                      refcnt_object<elementT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename elementT>

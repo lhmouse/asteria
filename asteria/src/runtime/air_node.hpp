@@ -15,7 +15,8 @@ class AIR_Node
   {
   public:
     struct S_clear_stack
-      { };
+      {
+      };
     struct S_execute_block
       {
         cow_vector<AIR_Node> code_body;
@@ -89,7 +90,8 @@ class AIR_Node
         AIR_Status status;
       };
     struct S_return_by_value
-      { };
+      {
+      };
     struct S_push_literal
       {
         Value val;
@@ -255,9 +257,10 @@ class AIR_Node
         return static_cast<Index>(this->m_stor.index());
       }
 
-    void swap(AIR_Node& other) noexcept
+    AIR_Node& swap(AIR_Node& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
+        return *this;
       }
 
     // Perform dead code elimination on this node.
@@ -277,7 +280,7 @@ class AIR_Node
 
 inline void swap(AIR_Node& lhs, AIR_Node& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace Asteria

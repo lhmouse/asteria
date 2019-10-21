@@ -180,11 +180,12 @@ std::terminate();
 std::terminate();
       }
 
-    void swap(basic_tinybuf_file& other)
+    basic_tinybuf_file& swap(basic_tinybuf_file& other)
       {
 //        noadl::adl_swap(this->m_str, other.m_str);
 //        ::std::swap(this->m_off, other.m_off);
 //        ::std::swap(this->m_mode, other.m_mode);
+        return *this;
       }
   };
 
@@ -196,7 +197,7 @@ template<typename charT, typename traitsT, typename allocT>
     inline void swap(basic_tinybuf_file<charT, traitsT, allocT>& lhs,
                      basic_tinybuf_file<charT, traitsT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 extern template class basic_tinybuf_file<char>;

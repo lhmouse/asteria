@@ -93,9 +93,10 @@ class Reference_Dictionary
         return *this;
       }
 
-    void swap(Reference_Dictionary& other) noexcept
+    Reference_Dictionary& swap(Reference_Dictionary& other) noexcept
       {
         std::swap(this->m_stor, other.m_stor);
+        return *this;
       }
 
     size_t size() const noexcept
@@ -157,6 +158,11 @@ class Reference_Dictionary
         return callback;
       }
   };
+
+inline void swap(Reference_Dictionary& lhs, Reference_Dictionary& rhs) noexcept
+  {
+    lhs.swap(rhs);
+  }
 
 }  // namespace Asteria
 

@@ -23,10 +23,12 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array;
 
     template<typename valueT, size_t capacityT, size_t... nestedT>
         struct element_type_of : enable_if<1, array<valueT, nestedT...>>
-      { };
+      {
+      };
     template<typename valueT, size_t capacityT>
         struct element_type_of<valueT, capacityT> : enable_if<1, valueT>
-      { };
+      {
+      };
 
     }
 
@@ -137,9 +139,12 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
         return static_cast<difference_type>(this->size());
       }
     // N.B. The template parameter is a non-standard extension.
-    template<typename otherT> void fill(const otherT& other)
+    template<typename otherT> array& fill(const otherT& other)
       {
-        noadl::ranged_for(size_type(), capacityT, [&](size_type i) { this->m_stor[i] = other;  });
+        for(size_type i = 0; i != capacityT; ++i) {
+          this->m_stor[i] = other;
+        }
+        return *this;
       }
     // N.B. This is a non-standard extension.
     static constexpr size_type capacity() noexcept
@@ -201,10 +206,12 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
         return this->mut_data()[cnt - 1];
       }
 
-    void swap(array& other) noexcept(is_nothrow_swappable<value_type>::value)
+    array& swap(array& other) noexcept(is_nothrow_swappable<value_type>::value)
       {
-        for(size_type i = 0; i != capacityT; ++i)
+        for(size_type i = 0; i != capacityT; ++i) {
           noadl::adl_swap(this->m_stor[i], other.m_stor[i]);
+        }
+        return *this;
       }
 
     // element access
@@ -224,7 +231,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT>
     inline void swap(array<valueT, capacityT, nestedT...>& lhs,
                      array<valueT, capacityT, nestedT...>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace rocket

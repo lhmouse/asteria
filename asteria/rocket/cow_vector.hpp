@@ -1288,10 +1288,11 @@ template<typename valueT, typename allocT> class cow_vector
         return *this;
       }
 
-    void swap(cow_vector& other) noexcept
+    cow_vector& swap(cow_vector& other) noexcept
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
         this->m_sth.exchange_with(other.m_sth);
+        return *this;
       }
 
     // 26.3.11.4, data access
@@ -1325,7 +1326,7 @@ template<typename valueT, typename allocT>
     inline void swap(cow_vector<valueT, allocT>& lhs,
                      cow_vector<valueT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace rocket

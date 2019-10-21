@@ -16,10 +16,12 @@ namespace Asteria {
 
     template<uint32_t valueT, uint32_t divisorT, int roundT>
         struct Generator : Generator<(valueT >> 1) ^ (-(valueT & 1) & divisorT), divisorT, roundT + 1>
-      { };
+      {
+      };
     template<uint32_t valueT, uint32_t divisorT>
         struct Generator<valueT, divisorT, 8> : std::integral_constant<uint32_t, valueT>
-      { };
+      {
+      };
     template<uint32_t divisorT, size_t... indicesT>
         constexpr array<uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
       {
@@ -267,7 +269,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     namespace {
 
     template<uint8_t valueT> struct Hexdigit : std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
-      { };
+      {
+      };
     template<uint8_t valueT> constexpr array<char, 2> do_generate_hex_digits_for_byte() noexcept
       {
         return {{ Hexdigit<uint8_t(valueT / 16)>::value, Hexdigit<uint8_t(valueT % 16)>::value }};

@@ -16,7 +16,8 @@ class Reference_Root
   {
   public:
     struct S_null
-      { };
+      {
+      };
     struct S_constant
       {
         Value val;
@@ -106,9 +107,10 @@ class Reference_Root
         return this->m_stor.as<index_tail_call>().tca;
       }
 
-    void swap(Reference_Root& other) noexcept
+    Reference_Root& swap(Reference_Root& other) noexcept
       {
         this->m_stor.swap(other.m_stor);
+        return *this;
       }
 
     const Value& dereference_const() const;
@@ -118,7 +120,7 @@ class Reference_Root
 
 inline void swap(Reference_Root& lhs, Reference_Root& rhs) noexcept
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace Asteria

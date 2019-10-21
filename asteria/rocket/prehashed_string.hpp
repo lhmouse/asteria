@@ -302,9 +302,10 @@ template<typename stringT, typename hashT> class basic_prehashed_string
         return this->m_sth.str().copy(s, tn, tpos);
       }
 
-    void swap(basic_prehashed_string& other) noexcept(is_nothrow_swappable<string_type>::value)
+    basic_prehashed_string& swap(basic_prehashed_string& other) noexcept(is_nothrow_swappable<string_type>::value)
       {
         this->m_sth.exchange_with(other.m_sth);
+        return *this;
       }
 
     // 24.3.2.7, string operations
@@ -377,7 +378,7 @@ template<typename stringT, typename hashT>
     inline void swap(basic_prehashed_string<stringT, hashT>& lhs,
                      basic_prehashed_string<stringT, hashT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 template<typename charT, typename traitsT, typename stringT, typename hashT>

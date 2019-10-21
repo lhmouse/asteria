@@ -896,7 +896,7 @@ template<typename valueT, size_t capacityT,
         return *this;
       }
 
-    void swap(static_vector& other) noexcept(conjunction<is_nothrow_swappable<value_type>,
+    static_vector& swap(static_vector& other) noexcept(conjunction<is_nothrow_swappable<value_type>,
                                                          is_nothrow_move_constructible<value_type>>::value)
       {
         noadl::propagate_allocator_on_swap(this->m_sth.as_allocator(), other.m_sth.as_allocator());
@@ -919,7 +919,7 @@ template<typename valueT, size_t capacityT,
           // Truncate `*this`.
           this->m_sth.pop_back_n_unchecked(this->size() - ncomm);
         }
-        return;
+        return *this;
       }
 
     // 26.3.11.4, data access
@@ -950,7 +950,7 @@ template<typename valueT, size_t capacityT, typename allocT>
     inline void swap(static_vector<valueT, capacityT, allocT>& lhs,
                      static_vector<valueT, capacityT, allocT>& rhs) noexcept(noexcept(lhs.swap(rhs)))
   {
-    return lhs.swap(rhs);
+    lhs.swap(rhs);
   }
 
 }  // namespace rocket
