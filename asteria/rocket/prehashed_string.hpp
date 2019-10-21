@@ -83,8 +83,8 @@ template<typename stringT,
           }
         void exchange_with(string_storage& other)
           {
-            noadl::adl_swap(this->m_str, other.m_str);
-            ::std::swap(this->m_hval, other.m_hval);
+            xswap(this->m_str, other.m_str);
+            xswap(this->m_hval, other.m_hval);
           }
       };
 

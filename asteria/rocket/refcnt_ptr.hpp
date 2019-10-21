@@ -202,7 +202,7 @@ template<typename elementT, typename deleterT>
           }
         void exchange_with(stored_pointer& other) noexcept
           {
-            noadl::adl_swap(this->m_ptr, other.m_ptr);
+            xswap(this->m_ptr, other.m_ptr);
           }
       };
 

@@ -64,8 +64,8 @@ template<typename charT, typename traitsT = char_traits<charT>,
 
         void swap(smart_handle& other) noexcept
           {
-            ::std::swap(this->m_fp, other.m_fp);
-            ::std::swap(this->m_cl, other.m_cl);
+            xswap(this->m_fp, other.m_fp);
+            xswap(this->m_cl, other.m_cl);
           }
       };
 
@@ -212,10 +212,10 @@ template<typename charT, typename traitsT = char_traits<charT>,
 
         void swap(basic_smart_buffer& other) noexcept
           {
-            noadl::adl_swap(this->m_sptr, other.m_sptr);
-            noadl::adl_swap(this->m_bpos, other.m_bpos);
-            noadl::adl_swap(this->m_epos, other.m_epos);
-            noadl::adl_swap(this->m_send, other.m_send);
+            xswap(this->m_sptr, other.m_sptr);
+            xswap(this->m_bpos, other.m_bpos);
+            xswap(this->m_epos, other.m_epos);
+            xswap(this->m_send, other.m_send);
           }
       };
 
@@ -292,13 +292,13 @@ template<typename charT, typename traitsT,
         if(ROCKET_EXPECT(this->m_buf.as_allocator() == other.m_buf.as_allocator())) {
           // No exceptions will be thrown in this path.
           this->m_buf.swap(other.m_buf);
-          noadl::propagate_allocator_on_move(this->m_buf.as_allocator(), noadl::move(other.m_buf.as_allocator()));
+          noadl::propagate_allocator_on_move(this->m_buf.as_allocator(), other.m_buf.as_allocator());
         }
         else if(allocator_traits<allocator_type>::propagate_on_container_move_assignment::value) {
           // No exceptions will be thrown in this path, either.
           this->m_buf.deallocate();
           this->m_buf.swap(other.m_buf);
-          noadl::propagate_allocator_on_move(this->m_buf.as_allocator(), noadl::move(other.m_buf.as_allocator()));
+          noadl::propagate_allocator_on_move(this->m_buf.as_allocator(), other.m_buf.as_allocator());
         }
         else {
           // This path is subject to allocation failures.

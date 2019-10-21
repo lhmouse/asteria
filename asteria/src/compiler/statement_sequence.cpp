@@ -207,8 +207,8 @@ namespace Asteria {
           return rocket::clear;
         }
         if(qtok->is_keyword()) {
-          auto qconf = std::find(std::begin(s_literal_table), std::end(s_literal_table), qtok->as_keyword());
-          if(qconf == std::end(s_literal_table)) {
+          auto qconf = std::find(begin(s_literal_table), end(s_literal_table), qtok->as_keyword());
+          if(qconf == end(s_literal_table)) {
             return rocket::clear;
           }
           auto generator = qconf->generator;
@@ -1302,8 +1302,8 @@ namespace Asteria {
           return false;
         }
         if(qtok->is_keyword()) {
-          auto qconf = std::find(std::begin(s_keyword_table), std::end(s_keyword_table), qtok->as_keyword());
-          if(qconf == std::end(s_keyword_table)) {
+          auto qconf = std::find(begin(s_keyword_table), end(s_keyword_table), qtok->as_keyword());
+          if(qconf == end(s_keyword_table)) {
             return false;
           }
           // Return the prefix operator and discard this token.
@@ -1313,8 +1313,8 @@ namespace Asteria {
           return true;
         }
         if(qtok->is_punctuator()) {
-          auto qconf = std::find(std::begin(s_punctuator_table), std::end(s_punctuator_table), qtok->as_punctuator());
-          if(qconf == std::end(s_punctuator_table)) {
+          auto qconf = std::find(begin(s_punctuator_table), end(s_punctuator_table), qtok->as_punctuator());
+          if(qconf == end(s_punctuator_table)) {
             return false;
           }
           // Return the prefix operator and discard this token.
@@ -1623,8 +1623,8 @@ namespace Asteria {
           return false;
         }
         if(qtok->is_punctuator()) {
-          auto qconf = std::find(std::begin(s_postfix_operator_table), std::end(s_postfix_operator_table), qtok->as_punctuator());
-          if(qconf == std::end(s_postfix_operator_table)) {
+          auto qconf = std::find(begin(s_postfix_operator_table), end(s_postfix_operator_table), qtok->as_punctuator());
+          if(qconf == end(s_postfix_operator_table)) {
             return false;
           }
           // Return the postfix operator and discard this token.
@@ -1890,8 +1890,8 @@ namespace Asteria {
           return rocket::clear;
         }
         if(qtok->is_punctuator()) {
-          auto qconf = std::find(std::begin(s_infix_operator_table), std::end(s_infix_operator_table), qtok->as_punctuator());
-          if(qconf == std::end(s_infix_operator_table)) {
+          auto qconf = std::find(begin(s_infix_operator_table), end(s_infix_operator_table), qtok->as_punctuator());
+          if(qconf == end(s_infix_operator_table)) {
             return rocket::clear;
           }
           // Return the infix operator and discard this token.

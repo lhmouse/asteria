@@ -513,7 +513,7 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
         void exchange_with(storage_handle& other) noexcept
           {
-            ::std::swap(this->m_ptr, other.m_ptr);
+            xswap(this->m_ptr, other.m_ptr);
           }
 
         constexpr operator const storage_handle* () const noexcept

@@ -388,10 +388,10 @@ tinynumput& tinynumput::put_XL(int64_t value, size_t precision) noexcept
         // Write the exponent in this temporary storage backwards.
         // The exponent shall contain at least two digits.
         char temps[8];
-        char* tbp = ::std::end(temps);
+        char* tbp = end(temps);
         do_xput_U_bkwd<10>(tbp, do_cast_U(::std::abs(exp)), 2);
         // Append the exponent.
-        noadl::ranged_for(tbp, ::std::end(temps), [&](const char* p) { *(ep++) = *p;  });
+        noadl::ranged_for(tbp, end(temps), [&](const char* p) { *(ep++) = *p;  });
         return ep;
       }
 
@@ -6452,7 +6452,7 @@ int main(void)
           reg /= 10;
         // Write digits in reverse order.
         char temps[24];
-        char* tbp = ::std::begin(temps);
+        char* tbp = begin(temps);
         while(reg != 0) {
           // Shift a digit out.
           size_t dval = reg % 10;

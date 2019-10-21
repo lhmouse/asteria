@@ -86,7 +86,7 @@ template<typename charT, typename traitsT,
 
     basic_tinyfmt_str& swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<buffer_type>::value)
       {
-        noadl::adl_swap(this->m_buf, other.m_buf);
+        xswap(this->m_buf, other.m_buf);
         return *this;
       }
   };

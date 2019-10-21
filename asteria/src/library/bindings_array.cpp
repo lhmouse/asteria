@@ -775,7 +775,7 @@ G_array std_array_shuffle(const G_array& data, const opt<G_integer>& seed)
       if(k == i) {
         continue;
       }
-      swap(res.mut(k), res.mut(i));
+      xswap(res.mut(k), res.mut(i));
     }
     return res;
   }

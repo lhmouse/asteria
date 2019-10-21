@@ -209,7 +209,7 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
     array& swap(array& other) noexcept(is_nothrow_swappable<value_type>::value)
       {
         for(size_type i = 0; i != capacityT; ++i) {
-          noadl::adl_swap(this->m_stor[i], other.m_stor[i]);
+          xswap(this->m_stor[i], other.m_stor[i]);
         }
         return *this;
       }

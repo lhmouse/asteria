@@ -105,13 +105,13 @@ void Global_Context::initialize(API_Version version)
     this->m_prng = prng;
     // Initialize standard library modules.
 #ifdef ROCKET_DEBUG
-    ROCKET_ASSERT(std::is_sorted(std::begin(s_modules), std::end(s_modules), Module_Comparator()));
+    ROCKET_ASSERT(std::is_sorted(begin(s_modules), end(s_modules), Module_Comparator()));
 #endif
     // Get the range of modules to initialize.
     // This also determines the maximum version number of the library, which will be referenced as `yend[-1].version`.
     G_object stdo;
-    auto bmods = std::begin(s_modules) + 1;
-    auto emods = std::upper_bound(bmods, std::end(s_modules), version, Module_Comparator());
+    auto bmods = begin(s_modules) + 1;
+    auto emods = std::upper_bound(bmods, end(s_modules), version, Module_Comparator());
     // Initialize library modules.
     for(auto q = bmods; q != emods; ++q) {
       // Create the subobject if it doesn't exist.

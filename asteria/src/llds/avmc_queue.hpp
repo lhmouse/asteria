@@ -77,11 +77,11 @@ class AVMC_Queue
       :
         m_stor()
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
       }
     AVMC_Queue& operator=(AVMC_Queue&& other) noexcept
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
         return *this;
       }
     ~AVMC_Queue()
@@ -164,7 +164,7 @@ class AVMC_Queue
 
     AVMC_Queue& swap(AVMC_Queue& other) noexcept
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
         return *this;
       }
 

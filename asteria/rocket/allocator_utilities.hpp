@@ -99,7 +99,7 @@ template<typename allocT>
     template<typename allocT>
         void propagate(propagate_swap_tag, allocT& lhs, allocT& rhs) noexcept
       {
-        noadl::adl_swap(lhs, rhs);
+        xswap(lhs, rhs);
       }
 
     }

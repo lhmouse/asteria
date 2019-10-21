@@ -209,9 +209,9 @@ template<typename charT, typename traitsT, typename allocT>
     basic_tinybuf_str& swap(basic_tinybuf_str& other) noexcept(conjunction<is_nothrow_swappable<buffer_type>,
                                                                            is_nothrow_swappable<string_type>>::value)
       {
-        noadl::adl_swap(this->m_str, other.m_str);
-        ::std::swap(this->m_off, other.m_off);
-        ::std::swap(this->m_mode, other.m_mode);
+        xswap(this->m_str, other.m_str);
+        xswap(this->m_off, other.m_off);
+        xswap(this->m_mode, other.m_mode);
         return *this;
       }
   };

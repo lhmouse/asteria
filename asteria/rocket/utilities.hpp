@@ -8,7 +8,7 @@
 #include "compiler.h"
 
 #include <type_traits>  // so many...
-#include <iterator>  // std::iterator_traits<>
+#include <iterator>  // std::iterator_traits<>, std::begin(), std::end()
 #include <utility>  // std::swap()
 #include <memory>  // std::allocator<>, std::addressof(), std::default_delete<>
 #include <new>  // placement new
@@ -127,6 +127,12 @@ using ::std::range_error;
 using ::std::overflow_error;
 using ::std::underflow_error;
 
+using ::std::cbegin;
+using ::std::cend;
+using ::std::begin;
+using ::std::end;
+using ::std::swap;
+
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
@@ -157,37 +163,21 @@ template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_reference<argT>::v
     return static_cast<targetT&&>(arg);
   }
 
-template<typename typeT> struct remove_cvref : remove_cv<typename remove_reference<typeT>::type>
-  {
-  };
-
-    namespace details_utilities {
-
-    using ::std::swap;
-
-    template<typename typeT>
-        struct is_nothrow_swappable_aux : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(),
-                                                                                ::std::declval<typeT&>()))>
-      {
-      };
-
-    template<typename typeT>
-        void adl_swap_aux(typeT& lhs, typeT& rhs)
-      {
-        swap(lhs, rhs);
-      }
-
-    }  // namespace details_utilities
-
 template<typename typeT>
-    struct is_nothrow_swappable : details_utilities::is_nothrow_swappable_aux<typeT>
+    struct remove_cvref : remove_cv<typename remove_reference<typeT>::type>
   {
   };
 
 template<typename typeT>
-    void adl_swap(typeT& lhs, typeT& rhs) noexcept(is_nothrow_swappable<typeT>::value)
+    struct is_nothrow_swappable : integral_constant<bool, noexcept(swap(::std::declval<typeT&>(),
+                                                                        ::std::declval<typeT&>()))>
   {
-    details_utilities::adl_swap_aux<typeT>(lhs, rhs);
+  };
+
+template<typename typeT>
+    ROCKET_ARTIFICIAL_FUNCTION inline void xswap(typeT& lhs, typeT& rhs) noexcept(noexcept(swap(lhs, rhs)))
+  {
+    swap(lhs, rhs);
   }
 
     namespace details_utilities {
@@ -347,7 +337,7 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
       //        > 0 1 2 3 4 5 6 7 8 9 -
       // After:         bot   brk     end
       //        > 3 4 5 0 1 2 6 7 8 9 -
-      do noadl::adl_swap(ptr[bot++], ptr[brk++]);
+      do swap(ptr[bot++], ptr[brk++]);
         while(bot != stp);
       // `isr` will have been decreased by `isl`, which will not result in zero.
       isr = end - brk;
@@ -360,7 +350,7 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
       //        > 0 1 2 3 4 5 6 7 8 9 -
       // After:       bot       brk   end
       //        > 7 8 9 3 4 5 6 0 1 2 -
-      do noadl::adl_swap(ptr[bot++], ptr[brk++]);
+      do swap(ptr[bot++], ptr[brk++]);
         while(brk != end);
       // `isl` will have been decreased by `isr`, which will not result in zero.
       isl = stp - bot;
@@ -372,7 +362,7 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
     //        > 0 1 2 3 4 5 6 7 8 9 -
     // After:             bot       brk
     //        > 5 6 7 8 9 0 1 2 3 4 -
-    do noadl::adl_swap(ptr[bot++], ptr[brk++]);
+    do swap(ptr[bot++], ptr[brk++]);
       while(bot != stp);
   }
 
@@ -404,9 +394,10 @@ template<typename elementT, typename callbackT>
     template<typename containerT, typename callbackT>
         bool any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
       {
-        for(auto&& qelem : cont)
+        for(auto&& qelem : cont) {
           if(noadl::forward<callbackT>(callback)(qelem))
             return true;
+        }
         return false;
       }
 
@@ -429,9 +420,10 @@ template<typename elementT, typename callbackT>
     template<typename containerT, typename callbackT>
         bool none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
       {
-        for(auto&& qelem : cont)
+        for(auto&& qelem : cont) {
           if(noadl::forward<callbackT>(callback)(qelem))
             return false;
+        }
         return true;
       }
 
@@ -454,9 +446,10 @@ template<typename elementT, typename callbackT>
     template<typename targetT, typename containerT>
         bool is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
       {
-        for(auto&& qelem : cont)
+        for(auto&& qelem : cont) {
           if(noadl::forward<targetT>(targ) == qelem)
             return true;
+        }
         return false;
       }
 
@@ -479,9 +472,10 @@ template<typename targetT, typename elementT>
     template<typename targetT, typename containerT>
         bool is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
       {
-        for(auto&& qelem : cont)
+        for(auto&& qelem : cont) {
           if(noadl::forward<targetT>(targ) == qelem)
             return false;
+        }
         return true;
       }
 

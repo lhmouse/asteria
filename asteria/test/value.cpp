@@ -46,72 +46,72 @@ int main()
     value = nullptr;
     Value cmp(nullptr);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
     cmp = G_boolean(true);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
 
     value = G_boolean(true);
     cmp = G_boolean(true);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
     value = G_boolean(false);
     cmp = G_boolean(true);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_greater);
 
     value = G_integer(42);
     cmp = G_boolean(true);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
 
     value = G_integer(5);
     cmp = G_integer(6);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_greater);
 
     value = G_integer(3);
     cmp = G_integer(3);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
     ASTERIA_TEST_CHECK(value.convert_to_real() == 3.0);
     ASTERIA_TEST_CHECK(value.is_integer());
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
     ASTERIA_TEST_CHECK(value.mutate_into_real() == 3.0);
     ASTERIA_TEST_CHECK(value.is_real());
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
     value = G_real(-2.5);
     cmp = G_real(11.0);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_greater);
 
     value = G_real(1.0);
     cmp = G_real(NAN);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
 
     value = G_string(rocket::sref("hello"));
     cmp = G_string(rocket::sref("world"));
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_greater);
 
     array.clear();
@@ -120,17 +120,17 @@ int main()
     value = array;
     cmp = std::move(array);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_equal);
 
     value.open_array().mut(1) = G_string(rocket::sref("hello"));
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_greater);
 
     value.open_array().mut(1) = G_boolean(true);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
     value.open_array().erase(std::prev(value.as_array().end()));
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_less);
@@ -141,6 +141,6 @@ int main()
     value = std::move(object);
     cmp = value;
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
-    std::swap(value, cmp);
+    xswap(value, cmp);
     ASTERIA_TEST_CHECK(value.compare(cmp) == compare_unordered);
   }

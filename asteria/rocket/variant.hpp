@@ -171,7 +171,7 @@ template<typename... alternativesT> class variant;
 
     template<typename alternativeT> void wrapped_adl_swap(void* dptr, void* sptr)
       {
-        noadl::adl_swap(*static_cast<alternativeT*>(dptr), *static_cast<alternativeT*>(sptr));
+        xswap(*static_cast<alternativeT*>(dptr), *static_cast<alternativeT*>(sptr));
       }
     template<typename... alternativesT> void dispatch_swap(size_t rindex, void* dptr, void* sptr)
       {
@@ -181,7 +181,7 @@ template<typename... alternativesT> class variant;
         if(ROCKET_EXPECT(test_bit(s_trivial_table, sizeof...(alternativesT), rindex))) {
           // Swap them trivially.
           using storage = typename aligned_union<1, alternativesT...>::type;
-          ::std::swap(*static_cast<storage*>(sptr), *static_cast<storage*>(dptr));
+          xswap(*static_cast<storage*>(sptr), *static_cast<storage*>(dptr));
           return;
         }
         // Invoke the `swap()` function via ADL.

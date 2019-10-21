@@ -42,11 +42,11 @@ class Variable_HashSet
       :
         m_stor()
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
       }
     Variable_HashSet& operator=(Variable_HashSet&& other) noexcept
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
         return *this;
       }
     ~Variable_HashSet()
@@ -94,7 +94,7 @@ class Variable_HashSet
 
     Variable_HashSet& swap(Variable_HashSet& other) noexcept
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
         return *this;
       }
 

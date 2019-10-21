@@ -43,11 +43,11 @@ class Reference_Dictionary
       :
         m_stor()
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
       }
     Reference_Dictionary& operator=(Reference_Dictionary&& other) noexcept
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
         return *this;
       }
     ~Reference_Dictionary()
@@ -95,7 +95,7 @@ class Reference_Dictionary
 
     Reference_Dictionary& swap(Reference_Dictionary& other) noexcept
       {
-        std::swap(this->m_stor, other.m_stor);
+        xswap(this->m_stor, other.m_stor);
         return *this;
       }
 

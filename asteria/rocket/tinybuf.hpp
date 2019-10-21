@@ -215,10 +215,10 @@ template<typename charT, typename traitsT>
 
     basic_tinybuf& swap(basic_tinybuf& other) noexcept
       {
-        ::std::swap(this->m_gcur, other.m_gcur);
-        ::std::swap(this->m_gend, other.m_gend);
-        ::std::swap(this->m_pcur, other.m_pcur);
-        ::std::swap(this->m_pend, other.m_pend);
+        xswap(this->m_gcur, other.m_gcur);
+        xswap(this->m_gend, other.m_gend);
+        xswap(this->m_pcur, other.m_pcur);
+        xswap(this->m_pend, other.m_pend);
         return *this;
       }
   };

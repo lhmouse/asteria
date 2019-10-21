@@ -182,9 +182,9 @@ std::terminate();
 
     basic_tinybuf_file& swap(basic_tinybuf_file& other)
       {
-//        noadl::adl_swap(this->m_str, other.m_str);
-//        ::std::swap(this->m_off, other.m_off);
-//        ::std::swap(this->m_mode, other.m_mode);
+//        swap(this->m_str, other.m_str);
+//        swap(this->m_off, other.m_off);
+//        swap(this->m_mode, other.m_mode);
         return *this;
       }
   };
