@@ -113,7 +113,7 @@ template<typename allocT>
       lhs, rhs);
   }
 template<typename allocT>
-    void propagate_allocator_on_move(allocT& lhs, allocT&& rhs) noexcept
+    void propagate_allocator_on_move(allocT& lhs, allocT& rhs) noexcept
   {
     details_allocator_utilities::propagate<allocT>(
       typename conditional<allocator_traits<allocT>::propagate_on_container_move_assignment::value,
