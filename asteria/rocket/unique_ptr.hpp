@@ -94,10 +94,8 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
         void reset(pointer ptr_new) noexcept
           {
             auto ptr = ::std::exchange(this->m_ptr, ptr_new);
-            if(!ptr) {
-              return;
-            }
-            this->as_deleter()(ptr);
+            if(ptr)
+              this->as_deleter()(ptr);
           }
         void exchange_with(stored_pointer& other) noexcept
           {

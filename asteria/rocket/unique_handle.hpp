@@ -89,10 +89,8 @@ template<typename handleT, typename closerT> class unique_handle;
         void reset(handle_type hv_new) noexcept
           {
             auto hv_old = ::std::exchange(this->m_hv, hv_new);
-            if(this->as_closer().is_null(hv_old)) {
-              return;
-            }
-            this->as_closer().close(hv_old);
+            if(!this->as_closer().is_null(hv_old))
+              this->as_closer().close(hv_old);
           }
         void exchange_with(stored_handle& other) noexcept
           {

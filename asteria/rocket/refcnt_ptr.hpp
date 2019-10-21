@@ -192,13 +192,8 @@ template<typename elementT, typename deleterT>
         void reset(pointer ptr_new) noexcept
           {
             auto ptr = ::std::exchange(this->m_ptr, ptr_new);
-            if(!ptr) {
-              return;
-            }
-            if(ROCKET_EXPECT(!ptr->reference_counter_base::drop_reference())) {
-              return;
-            }
-            copy_deleter</*noadl*/>(*ptr)(ptr);
+            if(ptr && ROCKET_UNEXPECT(ptr->reference_counter_base::drop_reference()))
+              copy_deleter</*noadl*/>(*ptr)(ptr);
           }
         void exchange_with(stored_pointer& other) noexcept
           {
