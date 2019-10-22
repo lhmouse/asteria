@@ -892,7 +892,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         // Throw a `Runtime_Error`.
         tinyfmt_str fmt;
-        fmt << "Assertion failed at \'" << sloc << "\': " << msg;
+        fmt << "Assertion failed at '" << sloc << "': " << msg;
         throw_runtime_error(__func__, fmt.extract_string());
       }
 
@@ -1071,13 +1071,13 @@ DCE_Result AIR_Node::optimize_dce()
         }
         try {
           // Perform a non-proper call.
-          ASTERIA_DEBUG_LOG("Initiating function call at \'", sloc, "\' inside `", inside, "`: target = ", target);
+          ASTERIA_DEBUG_LOG("Initiating function call at '", sloc, "' inside `", inside, "`: target = ", target);
           target->invoke(self, ctx.global(), rocket::move(args));
           self.finish_call(ctx.global());
-          ASTERIA_DEBUG_LOG("Returned from function call at \'", sloc, "\' inside `", inside, "`: target = ", target);
+          ASTERIA_DEBUG_LOG("Returned from function call at '", sloc, "' inside `", inside, "`: target = ", target);
         }
         catch(Exception& except) {
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at \'", sloc, "\' inside `", inside, "`: ", except.value());
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at '", sloc, "' inside `", inside, "`: ", except.value());
           // Append the current frame and rethrow the exception.
           except.push_frame_func(sloc, inside);
           // Call the hook function if any.
@@ -1087,7 +1087,7 @@ DCE_Result AIR_Node::optimize_dce()
           throw;
         }
         catch(const std::exception& stdex) {
-          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at \'", sloc, "\' inside `", inside, "`: ", stdex.what());
+          ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at '", sloc, "' inside `", inside, "`: ", stdex.what());
           // Translate the exception, append the current frame, and throw the new exception.
           Exception except(stdex);
           except.push_frame_func(sloc, inside);

@@ -45,7 +45,7 @@ int main()
         assert std.json.parse("  42  ") == 42;
         assert std.json.parse("  76.5") == 76.5;
         assert std.json.parse("2 1") == null;
-        assert std.json.parse("\'hello\'") == "hello";
+        assert std.json.parse("'hello'") == "hello";
         assert std.json.parse("\"\u55B5\"") == "喵";
         assert std.json.parse("\"\u55b5\"") == "喵";
         assert std.json.parse("\"\\u0007\\b\\u000B\\f\\n\\r\\t\"") == "\a\b\v\f\n\r\t";
