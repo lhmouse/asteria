@@ -12,8 +12,8 @@ namespace rocket {
 template<typename charT, typename traitsT = char_traits<charT>,
          typename allocT = allocator<charT>> class basic_tinybuf_file;
 
-template<typename charT, typename traitsT,
-         typename allocT> class basic_tinybuf_file : public basic_tinybuf<charT, traitsT>
+template<typename charT, typename traitsT, typename allocT>
+    class basic_tinybuf_file : public basic_tinybuf<charT, traitsT>
   {
   public:
     using char_type       = charT;

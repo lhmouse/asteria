@@ -228,7 +228,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
             auto nmax = this->max_size();
             ROCKET_ASSERT(base <= nmax);
             if(nmax - base < add) {
-              noadl::sprintf_and_throw<length_error>("basic_cow_string: max size exceeded (`%llu` + `%llu` > `%llu`)",
+              noadl::sprintf_and_throw<length_error>("cow_string: max size exceeded (`%llu` + `%llu` > `%llu`)",
                                                      static_cast<unsigned long long>(base), static_cast<unsigned long long>(add),
                                                      static_cast<unsigned long long>(nmax));
             }
@@ -866,7 +866,7 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
 
     [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
       {
-        noadl::sprintf_and_throw<out_of_range>("basic_cow_string: subscript out of range (`%lld` > `%llu`)",
+        noadl::sprintf_and_throw<out_of_range>("cow_string: subscript out of range (`%lld` > `%llu`)",
                                                static_cast<unsigned long long>(pos),
                                                static_cast<unsigned long long>(this->size()));
       }

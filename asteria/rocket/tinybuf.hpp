@@ -104,7 +104,7 @@ template<typename charT, typename traitsT>
     // The default implementation fails.
     virtual off_type do_seek(off_type /*off*/, seek_dir /*dir*/)
       {
-        noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf: stream not seekable");
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not seekable");
       }
 
     // * Reads data from the external device into the get area and discards it unless `peek` is set.
@@ -115,7 +115,7 @@ template<typename charT, typename traitsT>
     // The default implementation fails.
     virtual int_type do_underflow(const char_type*& /*gcur*/, const char_type*& /*gend*/, bool /*peek*/)
       {
-        noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf: stream not readable");
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not readable");
       }
     // * Writes the contents of the put area, followed by the sequence denoted by `sadd`
     //   unless `nadd` is zero, to the external device.
@@ -125,7 +125,7 @@ template<typename charT, typename traitsT>
     virtual basic_tinybuf& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
                                        const char_type* /*sadd*/, size_type /*nadd*/)
       {
-        noadl::sprintf_and_throw<invalid_argument>("basic_tinybuf: stream not writable");
+        noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
       }
 
   public:
