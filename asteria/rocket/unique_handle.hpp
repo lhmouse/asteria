@@ -260,7 +260,7 @@ class std_file_closer
   {
   public:
     using file_handle      = ::FILE*;
-    using closer_function  = int (::FILE*);
+    using closer_function  = int (file_handle);
 
   private:
     closer_function* m_cl;
@@ -273,6 +273,15 @@ class std_file_closer
       }
 
   public:
+    constexpr operator closer_function* () const noexcept
+      {
+        return this->m_cl;
+      }
+    int operator()(file_handle fp) const noexcept
+      {
+        return this->close(fp);
+      }
+
     constexpr file_handle null() const noexcept
       {
         return nullptr;
@@ -281,10 +290,12 @@ class std_file_closer
       {
         return fp == nullptr;
       }
-    void close(file_handle fp) const noexcept
+    int close(file_handle fp) const noexcept
       {
         if(this->m_cl)
-          (*(this->m_cl))(fp);
+          return (*(this->m_cl))(fp);
+        else
+          return 0;
       }
   };
 
