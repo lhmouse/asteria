@@ -419,7 +419,7 @@ template<typename charT, typename traitsT, typename allocT>
         return *this;
       }
 
-    basic_linear_buffer& swap(basic_linear_buffer&& other)
+    basic_linear_buffer& swap(basic_linear_buffer& other)
                     noexcept(is_std_allocator<allocator_type>::value /* TODO: is_always_equal */ ||
                              allocator_traits<allocator_type>::propagate_on_container_swap::value)
       {
