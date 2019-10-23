@@ -32,7 +32,7 @@ template<typename charT, typename traitsT, typename allocT>
   private:
     string_type m_stor;
     size_type m_goff = 0;  // offset of the beginning of the get area
-    open_mode m_mode = { };  // no access by default
+    bool m_mapp = false;  // append mode
 
   public:
     basic_tinybuf_str() noexcept(is_nothrow_constructible<string_type>::value)
@@ -47,8 +47,9 @@ template<typename charT, typename traitsT, typename allocT>
       }
     explicit basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
       :
-        m_stor(alloc), m_mode(mode)
+        basic_tinybuf_str(alloc)
       {
+        this->clear_string(mode);
       }
     template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode,
                                                         const allocator_type& alloc = allocator_type())
@@ -67,10 +68,6 @@ template<typename charT, typename traitsT, typename allocT>
   protected:
     off_type do_fortell() const override
       {
-        if(!tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_read)) {
-          // Read access is not enabled.
-          return -1;
-        }
         // Calculate the number of characters after the get area.
         auto navail = this->m_stor.size() - this->m_goff;
         if(navail == 0) {
@@ -121,10 +118,6 @@ template<typename charT, typename traitsT, typename allocT>
 
     int_type do_underflow(const char_type*& gcur, const char_type*& gend, bool peek) override
       {
-        if(!tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_read)) {
-          // Read access is not enabled.
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_str: no read access");
-        }
         // If the get area exists, update the offset and clear it.
         this->do_sync_areas();
         // Calculate the number of characters available.
@@ -143,25 +136,20 @@ template<typename charT, typename traitsT, typename allocT>
     basic_tinybuf_str& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
                                    const char_type* sadd, size_type nadd) override
       {
-        if(!tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_write)) {
-          // Write access is not enabled.
-          noadl::sprintf_and_throw<invalid_argument>("tinybuf_str: no write access");
-        }
         // Be warned if the get area exists, it must be invalidated before modifying the string.
         this->do_sync_areas();
         // Notice that we don't use put areas.
         // If `open_append` is in effect, always append to the end.
-        bool append = tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_append) ||
-                      (this->m_goff == this->m_stor.size());
-        if(ROCKET_UNEXPECT(!append)) {
+        if(ROCKET_EXPECT((this->m_goff == this->m_stor.size()) || this->m_mapp)) {
+          // Append the string to the end.
+          this->m_stor.append(sadd, nadd);
+          this->m_goff = this->m_stor.size();
+        }
+        else {
           // Replace the substring from `m_goff`.
           this->m_stor.replace(this->m_goff, nadd, sadd, nadd);
           this->m_goff += nadd;
-          return *this;
         }
-        // Append the string to the end.
-        this->m_stor.append(sadd, nadd);
-        this->m_goff = this->m_stor.size();
         return *this;
       }
 
@@ -180,7 +168,7 @@ template<typename charT, typename traitsT, typename allocT>
         // Clear the string and set the new mode.
         this->m_stor.clear();
         this->m_goff = 0;
-        this->m_mode = mode;
+        this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
       }
     template<typename xstrT> void set_string(xstrT&& xstr, open_mode mode)
       {
@@ -188,7 +176,7 @@ template<typename charT, typename traitsT, typename allocT>
         // Set the new string and mode.
         this->m_stor = noadl::forward<xstrT>(xstr);
         this->m_goff = 0;
-        this->m_mode = mode;
+        this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
       }
     string_type extract_string(open_mode mode)
       {
@@ -197,7 +185,7 @@ template<typename charT, typename traitsT, typename allocT>
         string_type str;
         this->m_stor.swap(str);
         this->m_goff = 0;
-        this->m_mode = mode;
+        this->m_mapp = tinybuf_base::has_mode(mode, tinybuf_base::open_append);
         return str;
       }
 
@@ -206,7 +194,7 @@ template<typename charT, typename traitsT, typename allocT>
         xswap(this->m_stor, other.m_stor);
         // No exception shall be thrown afterwards.
         xswap(this->m_goff, other.m_goff);
-        xswap(this->m_mode, other.m_mode);
+        xswap(this->m_mapp, other.m_mapp);
         xswap<tinybuf_type>(*this, other);
         return *this;
       }

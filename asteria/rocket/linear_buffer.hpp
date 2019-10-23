@@ -17,7 +17,8 @@ template<typename charT, typename traitsT = char_traits<charT>,
 
     namespace details_linear_buffer {
 
-    template<typename allocT, typename traitsT> class basic_storage : private allocator_wrapper_base_for<allocT>::type
+    template<typename allocT, typename traitsT>
+        class basic_storage : private allocator_wrapper_base_for<allocT>::type
       {
       public:
         using allocator_type  = allocT;
@@ -388,7 +389,7 @@ template<typename charT, typename traitsT, typename allocT>
       {
         return this->m_stor.mut_data() + this->m_goff;
       }
-    value_type* reserve(size_type nbump)
+    size_type reserve(size_type nbump)
       {
         if(ROCKET_UNEXPECT(nbump > this->m_stor.capacity() - this->m_eoff)) {
           // Reallocate the buffer.
@@ -400,7 +401,7 @@ template<typename charT, typename traitsT, typename allocT>
 #ifdef ROCKET_DEBUG
         traits_type::assign(this->mut_end(), nbump, value_type(0xD3D3D3D3));
 #endif
-        return this->mut_end();
+        return this->m_stor.capacity() - this->m_eoff;
       }
     basic_linear_buffer& accept(size_type nbump) noexcept
       {
@@ -411,7 +412,8 @@ template<typename charT, typename traitsT, typename allocT>
 
     basic_linear_buffer& putn(const value_type* s, size_type n)
       {
-        traits_type::copy(this->reserve(n), s, n);
+        this->reserve(n);
+        traits_type::copy(this->mut_end(), s, n);
         this->accept(n);
         return *this;
       }

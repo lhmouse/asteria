@@ -47,6 +47,23 @@ struct tinybuf_base
       }
   };
 
+constexpr tinybuf_base::open_mode operator~(tinybuf_base::open_mode rhs) noexcept
+  {
+    return tinybuf_base::open_mode(~uint32_t(rhs));
+  }
+constexpr tinybuf_base::open_mode operator&(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
+  {
+    return tinybuf_base::open_mode(uint32_t(lhs) & uint32_t(rhs));
+  }
+constexpr tinybuf_base::open_mode operator|(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
+  {
+    return tinybuf_base::open_mode(uint32_t(lhs) | uint32_t(rhs));
+  }
+constexpr tinybuf_base::open_mode operator^(tinybuf_base::open_mode lhs, tinybuf_base::open_mode rhs) noexcept
+  {
+    return tinybuf_base::open_mode(uint32_t(lhs) ^ uint32_t(rhs));
+  }
+
 template<typename charT, typename traitsT>
     class basic_tinybuf : public tinybuf_base
   {
@@ -135,7 +152,7 @@ template<typename charT, typename traitsT>
       }
 
     // * Calls `do_flush()` only when either the get or put area is active.
-    // This function may be useful when handling interleaved reads and writes.
+    // This function may be useful when handling interleaving reads and writes.
     basic_tinybuf& do_sync_areas()
       {
         if(ROCKET_EXPECT(!this->m_gcur && !this->m_pcur))
