@@ -35,20 +35,26 @@ template<typename charT, typename traitsT, typename allocT>
     size_type m_off = 0;
 
   public:
-    basic_tinybuf_str() noexcept
+    explicit basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
       :
-        m_mode()
+        m_mode(mode), m_str(alloc)
       {
       }
-    explicit basic_tinybuf_str(open_mode mode) noexcept
+    basic_tinybuf_str(const allocator_type& alloc) noexcept
       :
-        m_mode(mode)
+        basic_tinybuf_str(open_mode(), alloc)
+      {
+      }
+    basic_tinybuf_str() noexcept(is_nothrow_constructible<allocator_type>::value)
+      :
+        basic_tinybuf_str(open_mode(), allocator_type())
       {
       }
     template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode)
       :
-        m_mode(mode), m_str(noadl::forward<xstrT>(xstr)), m_off()
+        basic_tinybuf_str()
       {
+        this->set_string(noadl::forward<xstrT>(xstr), mode);
       }
     ~basic_tinybuf_str() override;
 
@@ -195,12 +201,13 @@ template<typename charT, typename traitsT, typename allocT>
         return str;
       }
 
-    basic_tinybuf_str& swap(basic_tinybuf_str& other) noexcept(conjunction<is_nothrow_swappable<buffer_type>,
-                                                                           is_nothrow_swappable<string_type>>::value)
+    basic_tinybuf_str& swap(basic_tinybuf_str& other) noexcept(is_nothrow_swappable<string_type>::value)
       {
         xswap(this->m_str, other.m_str);
+        // No exception shall be thrown afterwards.
         xswap(this->m_off, other.m_off);
         xswap(this->m_mode, other.m_mode);
+        xswap<buffer_type>(*this, other);
         return *this;
       }
   };
