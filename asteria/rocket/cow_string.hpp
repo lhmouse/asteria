@@ -693,46 +693,42 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
     struct hash;
 
   private:
-    const value_type* m_ptr;
-    size_type m_len;
     details_cow_string::storage_handle<allocator_type, traits_type> m_sth;
+    const value_type* m_ptr = null_char;
+    size_type m_len = 0;
 
   public:
     // 24.3.2.2, construct/copy/destroy
     constexpr basic_cow_string(shallow_type sh, const allocator_type& alloc = allocator_type()) noexcept
       :
-        m_ptr(sh.c_str()), m_len(sh.length()), m_sth(alloc)
+        m_sth(alloc), m_ptr(sh.c_str()), m_len(sh.length())
       {
       }
     explicit constexpr basic_cow_string(const allocator_type& alloc) noexcept
       :
-        m_ptr(null_char), m_len(0), m_sth(alloc)
+        m_sth(alloc)
       {
       }
     basic_cow_string(const basic_cow_string& other) noexcept
       :
-        m_ptr(null_char), m_len(0),
         m_sth(allocator_traits<allocator_type>::select_on_container_copy_construction(other.m_sth.as_allocator()))
       {
         this->assign(other);
       }
     basic_cow_string(const basic_cow_string& other, const allocator_type& alloc) noexcept
       :
-        m_ptr(null_char), m_len(0),
         m_sth(alloc)
       {
         this->assign(other);
       }
     basic_cow_string(basic_cow_string&& other) noexcept
       :
-        m_ptr(null_char), m_len(0),
         m_sth(noadl::move(other.m_sth.as_allocator()))
       {
         this->assign(noadl::move(other));
       }
     basic_cow_string(basic_cow_string&& other, const allocator_type& alloc) noexcept
       :
-        m_ptr(null_char), m_len(0),
         m_sth(alloc)
       {
         this->assign(noadl::move(other));
