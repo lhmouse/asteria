@@ -13,6 +13,7 @@
 namespace rocket {
 
 template<typename handleT, typename closerT> class unique_handle;
+class std_file_closer;
 
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.
@@ -254,6 +255,38 @@ template<typename charT, typename traitsT, typename handleT, typename closerT>
   {
     return fmt << rhs.get();
   }
+
+class std_file_closer
+  {
+  public:
+    using file_handle      = ::FILE*;
+    using closer_function  = int (::FILE*);
+
+  private:
+    closer_function* m_cl;
+
+  public:
+    constexpr std_file_closer(closer_function* cl) noexcept
+      :
+        m_cl(cl)
+      {
+      }
+
+  public:
+    constexpr file_handle null() const noexcept
+      {
+        return nullptr;
+      }
+    constexpr bool is_null(file_handle fp) const noexcept
+      {
+        return fp == nullptr;
+      }
+    void close(file_handle fp) const noexcept
+      {
+        if(this->m_cl)
+          (*(this->m_cl))(fp);
+      }
+  };
 
 }  // namespace rocket
 
