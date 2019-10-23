@@ -103,16 +103,10 @@ template<typename charT, typename traitsT, typename allocT>
           ref = this->m_off;
         // Perform range checks.
         if(off < static_cast<off_type>(-ref)) {
-          noadl::sprintf_and_throw<out_of_range>(
-            "basic_tinybuf_str: An attempt was made to seek backwards past the beginning of "
-            "this string (the offset was `%lld` and the reference offset was `%lld`).",
-            static_cast<long long>(off), static_cast<long long>(ref));
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_str: attempt to seek to a negative offset");
         }
         if(off > static_cast<off_type>(this->m_str.size() - ref)) {
-          noadl::sprintf_and_throw<out_of_range>(
-            "basic_tinybuf_str: An attempt was made to seek past the end of "
-            "this string (the offset was `%lld` and the reference offset was `%lld`).",
-            static_cast<long long>(off), static_cast<long long>(ref));
+          noadl::sprintf_and_throw<out_of_range>("tinybuf_str: attempt to seek past the end");
         }
         // Convert the relative offset to an absolute one and set it.
         off_type abs = static_cast<off_type>(ref) + off;
@@ -125,8 +119,7 @@ template<typename charT, typename traitsT, typename allocT>
       {
         if(!(this->m_mode & tinybuf_base::open_read)) {
           // Read access is not enabled.
-          noadl::sprintf_and_throw<invalid_argument>(
-            "basic_tinybuf_str: This stream was not opened for reading.");
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_str: no read access");
         }
         // If the get area exists, update the offset and clear it.
         this->flush();
@@ -148,8 +141,7 @@ template<typename charT, typename traitsT, typename allocT>
       {
         if(!(this->m_mode & tinybuf_base::open_write)) {
           // Write access is not enabled.
-          noadl::sprintf_and_throw<invalid_argument>(
-            "basic_tinybuf_str: This stream was not opened for writing.");
+          noadl::sprintf_and_throw<invalid_argument>("tinybuf_str: no write access");
         }
         // Be warned if the get area exists, it must be invalidated before modifying the string.
         this->flush();
