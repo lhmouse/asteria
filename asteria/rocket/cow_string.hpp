@@ -1028,14 +1028,14 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         return this->m_len;
       }
-    size_type max_size() const noexcept
-      {
-        return this->m_sth.max_size();
-      }
     // N.B. This is a non-standard extension.
     difference_type ssize() const noexcept
       {
         return static_cast<difference_type>(this->size());
+      }
+    size_type max_size() const noexcept
+      {
+        return this->m_sth.max_size();
       }
     // N.B. The return type is a non-standard extension.
     basic_cow_string& resize(size_type n, value_type ch = value_type())

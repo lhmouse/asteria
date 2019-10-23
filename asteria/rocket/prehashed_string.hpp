@@ -254,13 +254,14 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       {
         return this->m_sth.str().length();
       }
-    size_type max_size() const noexcept
-      {
-        return this->m_sth.str().max_size();
-      }
+    // N.B. This is a non-standard extension.
     difference_type ssize() const noexcept
       {
         return static_cast<difference_type>(this->m_sth.str().size());
+      }
+    size_type max_size() const noexcept
+      {
+        return this->m_sth.str().max_size();
       }
     basic_prehashed_string& clear() noexcept(noexcept(::std::declval<string_type&>().clear()))
       {

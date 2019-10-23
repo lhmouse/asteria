@@ -1060,14 +1060,14 @@ template<typename keyT, typename mappedT, typename hashT, typename eqT, typename
       {
         return this->m_sth.element_count();
       }
-    size_type max_size() const noexcept
-      {
-        return this->m_sth.max_size();
-      }
     // N.B. This is a non-standard extension.
     difference_type ssize() const noexcept
       {
         return static_cast<difference_type>(this->size());
+      }
+    size_type max_size() const noexcept
+      {
+        return this->m_sth.max_size();
       }
     size_type capacity() const noexcept
       {

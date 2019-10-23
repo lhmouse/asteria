@@ -129,14 +129,14 @@ template<typename valueT, size_t capacityT, size_t... nestedT> class array
       {
         return capacityT;
       }
-    constexpr size_type max_size() const noexcept
-      {
-        return capacityT;
-      }
     // N.B. This is a non-standard extension.
     constexpr difference_type ssize() const noexcept
       {
         return static_cast<difference_type>(this->size());
+      }
+    constexpr size_type max_size() const noexcept
+      {
+        return capacityT;
       }
     // N.B. The template parameter is a non-standard extension.
     template<typename otherT> array& fill(const otherT& other)
