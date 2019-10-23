@@ -50,10 +50,12 @@ template<typename charT, typename traitsT, typename allocT>
         m_mode(mode), m_str(alloc)
       {
       }
-    template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode)
+    template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode,
+                                                        const allocator_type& alloc = allocator_type())
       :
-        m_mode(mode), m_str(noadl::forward<xstrT>(xstr))
+        basic_tinybuf_str(alloc)
       {
+        this->set_string(noadl::forward<xstrT>(xstr), mode);
       }
     ~basic_tinybuf_str() override;
 
