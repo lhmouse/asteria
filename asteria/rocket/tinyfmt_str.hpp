@@ -21,17 +21,17 @@ template<typename charT, typename traitsT,
     using allocator_type  = allocT;
 
     using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
-    using buffer_type   = basic_tinybuf_str<charT, traitsT>;
-    using string_type   = typename buffer_type::string_type;
+    using tinybuf_type  = basic_tinybuf_str<charT, traitsT>;
+    using string_type   = typename tinybuf_type::string_type;
 
-    using seek_dir   = typename buffer_type::seek_dir;
-    using open_mode  = typename buffer_type::open_mode;
-    using int_type   = typename buffer_type::int_type;
-    using off_type   = typename buffer_type::off_type;
-    using size_type  = typename buffer_type::size_type;
+    using seek_dir   = typename tinybuf_type::seek_dir;
+    using open_mode  = typename tinybuf_type::open_mode;
+    using int_type   = typename tinybuf_type::int_type;
+    using off_type   = typename tinybuf_type::off_type;
+    using size_type  = typename tinybuf_type::size_type;
 
   private:
-    mutable buffer_type m_buf;
+    mutable tinybuf_type m_buf;
 
   public:
     basic_tinyfmt_str() noexcept
@@ -57,7 +57,7 @@ template<typename charT, typename traitsT,
       = default;
 
   public:
-    buffer_type& get_buffer() const override
+    tinybuf_type& get_buffer() const override
       {
         return this->m_buf;
       }
@@ -84,7 +84,7 @@ template<typename charT, typename traitsT,
         return this->m_buf.extract_string(mode);
       }
 
-    basic_tinyfmt_str& swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<buffer_type>::value)
+    basic_tinyfmt_str& swap(basic_tinyfmt_str& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
         xswap(this->m_buf, other.m_buf);
         return *this;

@@ -20,19 +20,19 @@ template<typename charT, typename traitsT, typename allocT>
     using traits_type     = traitsT;
     using allocator_type  = allocT;
 
-    using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
-    using buffer_type   = basic_tinybuf_file<charT, traitsT, allocT>;
-    using file_handle   = typename buffer_type::file_handle;
-    using closer_type   = typename buffer_type::closer_type;
+    using tinyfmt_type   = basic_tinyfmt<charT, traitsT>;
+    using tinybuf_type   = basic_tinybuf_file<charT, traitsT, allocT>;
+    using file_handle    = typename tinybuf_type::file_handle;
+    using closer_type    = typename tinybuf_type::closer_type;
 
-    using seek_dir   = typename buffer_type::seek_dir;
-    using open_mode  = typename buffer_type::open_mode;
-    using int_type   = typename buffer_type::int_type;
-    using off_type   = typename buffer_type::off_type;
-    using size_type  = typename buffer_type::size_type;
+    using seek_dir   = typename tinybuf_type::seek_dir;
+    using open_mode  = typename tinybuf_type::open_mode;
+    using int_type   = typename tinybuf_type::int_type;
+    using off_type   = typename tinybuf_type::off_type;
+    using size_type  = typename tinybuf_type::size_type;
 
   private:
-    mutable buffer_type m_buf;
+    mutable tinybuf_type m_buf;
 
   public:
     basic_tinyfmt_file() noexcept
@@ -58,7 +58,7 @@ template<typename charT, typename traitsT, typename allocT>
       = default;
 
   public:
-    buffer_type& get_buffer() const override
+    tinybuf_type& get_buffer() const override
       {
         return this->m_buf;
       }
@@ -80,7 +80,7 @@ template<typename charT, typename traitsT, typename allocT>
         return this->m_buf.close(), *this;
       }
 
-    basic_tinyfmt_file& swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<buffer_type>::value)
+    basic_tinyfmt_file& swap(basic_tinyfmt_file& other) noexcept(is_nothrow_swappable<tinybuf_type>::value)
       {
         xswap(this->m_buf, other.m_buf);
         return *this;

@@ -27,13 +27,13 @@ template<typename charT, typename traitsT>
     using traits_type  = traitsT;
 
     using tinyfmt_type  = basic_tinyfmt;
-    using buffer_type   = basic_tinybuf<charT, traitsT>;
+    using tinybuf_type  = basic_tinybuf<charT, traitsT>;
 
-    using seek_dir   = typename buffer_type::seek_dir;
-    using open_mode  = typename buffer_type::open_mode;
-    using int_type   = typename buffer_type::int_type;
-    using off_type   = typename buffer_type::off_type;
-    using size_type  = typename buffer_type::size_type;
+    using seek_dir   = typename tinybuf_type::seek_dir;
+    using open_mode  = typename tinybuf_type::open_mode;
+    using int_type   = typename tinybuf_type::int_type;
+    using off_type   = typename tinybuf_type::off_type;
+    using size_type  = typename tinybuf_type::size_type;
 
   protected:
     // This interface class is stateless.
@@ -49,7 +49,7 @@ template<typename charT, typename traitsT>
 
   public:
     // buffer interfaces
-    virtual buffer_type& get_buffer() const = 0;
+    virtual tinybuf_type& get_buffer() const = 0;
 
     // unformatted output functions
     basic_tinyfmt& flush()

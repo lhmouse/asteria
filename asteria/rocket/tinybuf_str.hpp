@@ -20,14 +20,14 @@ template<typename charT, typename traitsT, typename allocT>
     using traits_type     = traitsT;
     using allocator_type  = allocT;
 
-    using buffer_type  = basic_tinybuf<charT, traitsT>;
-    using string_type  = basic_cow_string<charT, traitsT, allocT>;
+    using tinybuf_type  = basic_tinybuf<charT, traitsT>;
+    using string_type   = basic_cow_string<charT, traitsT, allocT>;
 
-    using seek_dir   = typename buffer_type::seek_dir;
-    using open_mode  = typename buffer_type::open_mode;
-    using int_type   = typename buffer_type::int_type;
-    using off_type   = typename buffer_type::off_type;
-    using size_type  = typename buffer_type::size_type;
+    using seek_dir   = typename tinybuf_type::seek_dir;
+    using open_mode  = typename tinybuf_type::open_mode;
+    using int_type   = typename tinybuf_type::int_type;
+    using off_type   = typename tinybuf_type::off_type;
+    using size_type  = typename tinybuf_type::size_type;
 
   private:
     open_mode m_mode;
@@ -99,9 +99,9 @@ template<typename charT, typename traitsT, typename allocT>
         this->flush();
         // Get the seek reference offset.
         size_type ref;
-        if(dir == buffer_type::seek_set)
+        if(dir == tinybuf_type::seek_set)
           ref = 0;
-        else if(dir == buffer_type::seek_end)
+        else if(dir == tinybuf_type::seek_end)
           ref = this->m_str.size();
         else
           ref = this->m_off;
@@ -208,7 +208,7 @@ template<typename charT, typename traitsT, typename allocT>
         // No exception shall be thrown afterwards.
         xswap(this->m_off, other.m_off);
         xswap(this->m_mode, other.m_mode);
-        xswap<buffer_type>(*this, other);
+        xswap<tinybuf_type>(*this, other);
         return *this;
       }
   };
