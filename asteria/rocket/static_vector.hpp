@@ -9,8 +9,6 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
-#include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
-#include <cstring>  // std::memset()
 
 namespace rocket {
 

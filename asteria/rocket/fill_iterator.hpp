@@ -5,7 +5,6 @@
 #define ROCKET_FILL_ITERATOR_HPP_
 
 #include "utilities.hpp"
-#include <iterator>  // std::random_access_iterator_tag
 
 namespace rocket {
 

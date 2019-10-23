@@ -11,8 +11,6 @@
 #include "char_traits.hpp"
 #include "allocator_utilities.hpp"
 #include "reference_counter.hpp"
-#include <iterator>  // std::iterator_traits<>, std::random_access_iterator_tag
-#include <cstring>  // std::memset()
 
 namespace rocket {
 

@@ -11,9 +11,7 @@
 #include "allocator_utilities.hpp"
 #include "hash_table_utilities.hpp"
 #include "reference_counter.hpp"
-#include <iterator>  // std::iterator_traits<>, std::forward_iterator_tag
 #include <tuple>  // std::forward_as_tuple()
-#include <cstring>  // std::memset()
 
 namespace rocket {
 
