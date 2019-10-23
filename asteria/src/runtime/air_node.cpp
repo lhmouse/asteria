@@ -1503,7 +1503,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         G_string res;
         // Reserve space for the result string.
-        auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
+        auto ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
         if(static_cast<uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
@@ -1520,7 +1520,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         G_string res;
         // Reserve space for the result string.
-        auto ptr = rocket::unfancy(res.insert(res.begin(), lhs.size(), ' '));
+        auto ptr = &*(res.insert(res.begin(), lhs.size(), ' '));
         if(static_cast<uint64_t>(rhs) >= lhs.size()) {
           return res;
         }
