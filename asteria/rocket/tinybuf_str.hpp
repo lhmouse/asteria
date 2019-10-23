@@ -35,26 +35,25 @@ template<typename charT, typename traitsT, typename allocT>
     size_type m_off = 0;
 
   public:
+    basic_tinybuf_str() noexcept(is_nothrow_constructible<string_type>::value)
+      :
+        m_mode(), m_str()
+      {
+      }
+    basic_tinybuf_str(const allocator_type& alloc) noexcept
+      :
+        m_mode(), m_str(alloc)
+      {
+      }
     explicit basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
       :
         m_mode(mode), m_str(alloc)
       {
       }
-    basic_tinybuf_str(const allocator_type& alloc) noexcept
-      :
-        basic_tinybuf_str(open_mode(), alloc)
-      {
-      }
-    basic_tinybuf_str() noexcept(is_nothrow_constructible<allocator_type>::value)
-      :
-        basic_tinybuf_str(open_mode(), allocator_type())
-      {
-      }
     template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode)
       :
-        basic_tinybuf_str()
+        m_mode(mode), m_str(noadl::forward<xstrT>(xstr))
       {
-        this->set_string(noadl::forward<xstrT>(xstr), mode);
       }
     ~basic_tinybuf_str() override;
 
