@@ -183,7 +183,7 @@ bool utf8_decode(char32_t& cp, const char*& pos, size_t avail)
       return false;
     }
     // Unset bits that are not part of the payload.
-    cp &= UINT32_C(0xFF) >> u8len;
+    cp &= static_cast<char32_t>(0xFF >> u8len);
     // Accumulate trailing code units.
     for(size_t i = 1; i < u8len; ++i) {
       char32_t cu = *(pos++) & 0xFF;
@@ -414,8 +414,10 @@ uint64_t generate_random_seed() noexcept
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
     // The source is read in little-endian byte order.
     uint64_t seed = 0xCBF29CE484222325;
-    for(int i = 0; i < 8; ++i)
-      seed = (seed ^ (source & 0xFF)) * 0x100000001B3, source >>= 8;
+    for(size_t i = 0; i < 8; ++i) {
+      seed = (seed ^ (source & 0xFF)) * 0x100000001B3;
+      source >>= 8;
+    }
     return seed;
   }
 
