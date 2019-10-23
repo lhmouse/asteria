@@ -30,27 +30,24 @@ template<typename charT, typename traitsT, typename allocT>
     using size_type  = typename buffer_type::size_type;
 
   private:
-    string_type m_str;
-    size_type m_off;
     open_mode m_mode;
+    string_type m_str;
+    size_type m_off = 0;
 
   public:
     basic_tinybuf_str() noexcept
       :
-        m_str(), m_off(),
         m_mode()
       {
       }
     explicit basic_tinybuf_str(open_mode mode) noexcept
       :
-        m_str(), m_off(),
         m_mode(mode)
       {
       }
     template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode)
       :
-        m_str(noadl::forward<xstrT>(xstr)), m_off(),
-        m_mode(mode)
+        m_mode(mode), m_str(noadl::forward<xstrT>(xstr)), m_off()
       {
       }
     ~basic_tinybuf_str() override;
