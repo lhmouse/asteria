@@ -40,7 +40,7 @@ template<typename charT, typename traitsT, typename allocT>
         m_mode(), m_str()
       {
       }
-    basic_tinybuf_str(const allocator_type& alloc) noexcept
+    explicit basic_tinybuf_str(const allocator_type& alloc) noexcept
       :
         m_mode(), m_str(alloc)
       {
