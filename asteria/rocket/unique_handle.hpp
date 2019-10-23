@@ -196,6 +196,12 @@ template<typename handleT, typename closerT> class unique_handle
         this->m_sth.reset(hv_new);
         return *this;
       }
+    unique_handle& reset(handle_type hv_new, const closer_type& cl) noexcept
+      {
+        this->m_sth.reset(hv_new);
+        this->m_sth.as_closer() = cl;
+        return *this;
+      }
 
     unique_handle& swap(unique_handle& other) noexcept
       {
