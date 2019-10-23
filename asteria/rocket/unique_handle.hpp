@@ -288,7 +288,7 @@ class std_file_closer
       }
   };
 
-using unique_std_file  = unique_handle<std_file_closer>;
+using unique_std_file  = unique_handle<std_file_closer::file_handle, std_file_closer>;
 
 }  // namespace rocket
 
