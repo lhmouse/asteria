@@ -176,8 +176,7 @@ template<typename charT, typename traitsT, typename allocT>
       }
     void clear_string(open_mode mode)
       {
-        // Invalidate the get area.
-        this->do_sync_rw();
+        this->do_purge();
         // Clear the string and set the new mode.
         this->m_stor.clear();
         this->m_goff = 0;
@@ -185,8 +184,7 @@ template<typename charT, typename traitsT, typename allocT>
       }
     template<typename xstrT> void set_string(xstrT&& xstr, open_mode mode)
       {
-        // Invalidate the get area.
-        this->do_sync_rw();
+        this->do_purge();
         // Set the new string and mode.
         this->m_stor = noadl::forward<xstrT>(xstr);
         this->m_goff = 0;
@@ -194,8 +192,7 @@ template<typename charT, typename traitsT, typename allocT>
       }
     string_type extract_string(open_mode mode)
       {
-        // Invalidate the get area.
-        this->do_sync_rw();
+        this->do_purge();
         // Swap the string with an empty one and set the new mode.
         string_type str;
         this->m_stor.swap(str);

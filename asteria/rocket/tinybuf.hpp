@@ -134,7 +134,7 @@ template<typename charT, typename traitsT>
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
       }
 
-    // * Calls `do_flush()` only when either the get area or the put area is active.
+    // * Calls `do_flush()` only when either the get or put area is active.
     // This function may be useful when handling interleaved reads and writes.
     basic_tinybuf& do_sync_rw()
       {
@@ -144,6 +144,18 @@ template<typename charT, typename traitsT>
         else
           // Synchronize the get and put areas.
           return this->do_flush(this->m_gcur, this->m_gend, this->m_pcur, this->m_pend);
+      }
+    // * Destroys the get and put areas.
+    // This function may be useful when clearing this buffer.
+    basic_tinybuf& do_purge() noexcept
+      {
+        // Purge the get area.
+        this->m_gcur = nullptr;
+        this->m_gend = nullptr;
+        // Purge the put area.
+        this->m_pcur = nullptr;
+        this->m_pend = nullptr;
+        return *this;
       }
 
   public:
