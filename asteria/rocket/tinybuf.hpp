@@ -134,6 +134,18 @@ template<typename charT, typename traitsT>
         noadl::sprintf_and_throw<invalid_argument>("tinybuf: stream not writable");
       }
 
+    // * Calls `do_flush()` only when either the get area or the put area is active.
+    // This function may be useful when handling interleaved reads and writes.
+    basic_tinybuf& do_sync_rw()
+      {
+        if(ROCKET_EXPECT(!this->m_gcur && !this->m_pcur))
+          // Don't bother do anything if neither the get area nor the put area exists.
+          return *this;
+        else
+          // Synchronize the get and put areas.
+          return this->do_flush(this->m_gcur, this->m_gend, this->m_pcur, this->m_pend);
+      }
+
   public:
     off_type fortell() const
       {
@@ -146,12 +158,8 @@ template<typename charT, typename traitsT>
       }
     basic_tinybuf& flush()
       {
-        if(ROCKET_EXPECT(!this->m_gcur && !this->m_pcur))
-          // Don't bother do anything if neither the get area nor the put area exists.
-          return *this;
-        else
-          // Synchronize the get and put areas.
-          return this->do_flush(this->m_gcur, this->m_gend, this->m_pcur, this->m_pend);
+        // Synchronize the get and put areas.
+        return this->do_flush(this->m_gcur, this->m_gend, this->m_pcur, this->m_pend);
       }
     off_type seek(off_type off, seek_dir dir)
       {
