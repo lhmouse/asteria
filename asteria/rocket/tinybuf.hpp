@@ -136,7 +136,7 @@ template<typename charT, typename traitsT>
 
     // * Calls `do_flush()` only when either the get or put area is active.
     // This function may be useful when handling interleaved reads and writes.
-    basic_tinybuf& do_sync_rw()
+    basic_tinybuf& do_sync_areas()
       {
         if(ROCKET_EXPECT(!this->m_gcur && !this->m_pcur))
           // Don't bother do anything if neither the get area nor the put area exists.
@@ -147,7 +147,7 @@ template<typename charT, typename traitsT>
       }
     // * Destroys the get and put areas.
     // This function may be useful when clearing this buffer.
-    basic_tinybuf& do_purge() noexcept
+    basic_tinybuf& do_purge_areas() noexcept
       {
         // Purge the get area.
         this->m_gcur = nullptr;
