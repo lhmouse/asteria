@@ -9,11 +9,14 @@
 #include "allocator_utilities.hpp"
 #include "utilities.hpp"
 #include "tinyfmt.hpp"
+#include <stdio.h>
+#include <unistd.h>
 
 namespace rocket {
 
 template<typename handleT, typename closerT> class unique_handle;
 class std_file_closer;
+class posix_file_closer;
 
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.
@@ -266,7 +269,7 @@ class std_file_closer
   {
   public:
     using file_handle      = ::FILE*;
-    using closer_function  = int (file_handle);
+    using closer_function  = decltype(::fclose);
 
   private:
     closer_function* m_cl;
@@ -299,13 +302,57 @@ class std_file_closer
     int close(file_handle fp) const noexcept
       {
         if(this->m_cl)
-          return (*(this->m_cl))(fp);
+          return this->m_cl(fp);
         else
           return 0;
       }
   };
 
-using unique_std_file  = unique_handle<std_file_closer::file_handle, std_file_closer>;
+class posix_file_closer
+  {
+  public:
+    using file_handle      = int;
+    using closer_function  = decltype(::close);
+
+  private:
+    closer_function* m_cl;
+
+  public:
+    constexpr posix_file_closer(closer_function* cl) noexcept
+      :
+        m_cl(cl)
+      {
+      }
+
+  public:
+    constexpr operator closer_function* () const noexcept
+      {
+        return this->m_cl;
+      }
+    int operator()(file_handle fp) const noexcept
+      {
+        return this->close(fp);
+      }
+
+    constexpr file_handle null() const noexcept
+      {
+        return -1;
+      }
+    constexpr bool is_null(file_handle fp) const noexcept
+      {
+        return fp == -1;
+      }
+    int close(file_handle fp) const noexcept
+      {
+        if(this->m_cl)
+          return this->m_cl(fp);
+        else
+          return 0;
+      }
+  };
+
+using unique_std_file    = unique_handle<::FILE*, std_file_closer>;
+using unique_posix_file  = unique_handle<int, posix_file_closer>;
 
 }  // namespace rocket
 
