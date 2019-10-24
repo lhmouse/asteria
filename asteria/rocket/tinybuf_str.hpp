@@ -67,7 +67,7 @@ template<typename charT, typename traitsT, typename allocT>
   protected:
     off_type do_fortell() const override
       {
-        if(!(this->m_mode & tinybuf_base::open_read)) {
+        if(!tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_read)) {
           // Read access is not enabled.
           return -1;
         }
@@ -121,7 +121,7 @@ template<typename charT, typename traitsT, typename allocT>
 
     int_type do_underflow(const char_type*& gcur, const char_type*& gend, bool peek) override
       {
-        if(!(this->m_mode & tinybuf_base::open_read)) {
+        if(!tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_read)) {
           // Read access is not enabled.
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_str: no read access");
         }
@@ -143,23 +143,25 @@ template<typename charT, typename traitsT, typename allocT>
     basic_tinybuf_str& do_overflow(char_type*& /*pcur*/, char_type*& /*pend*/,
                                    const char_type* sadd, size_type nadd) override
       {
-        if(!(this->m_mode & tinybuf_base::open_write)) {
+        if(!tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_write)) {
           // Write access is not enabled.
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_str: no write access");
         }
         // Be warned if the get area exists, it must be invalidated before modifying the string.
         this->flush();
         // Notice that we don't use the put area.
-        if(this->m_mode & tinybuf_base::open_append) {
-          // If `open_append` is in effect, always append to the end.
-          this->m_str.append(sadd, nadd);
-          this->m_off = this->m_str.size();
-        }
-        else {
+        // If `open_append` is in effect, always append to the end.
+        bool append = tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_append) ||
+                      (this->m_off == this->m_str.size());
+        if(ROCKET_UNEXPECT(!append)) {
           // Replace the substring from `m_off`.
           this->m_str.replace(this->m_off, nadd, sadd, nadd);
           this->m_off += nadd;
+          return *this;
         }
+        // Append the string to the end.
+        this->m_str.append(sadd, nadd);
+        this->m_off = this->m_str.size();
         return *this;
       }
 

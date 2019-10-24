@@ -1245,7 +1245,8 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
         basic_cow_string other(this->m_sth.as_allocator());
         other.reserve(this->size() + noadl::estimate_distance(first, last));
         other.append(this->data(), this->size());
-        noadl::ranged_do_while(noadl::move(first), noadl::move(last), [&](const inputT& it) { other.push_back(*it);  });
+        noadl::ranged_do_while(noadl::move(first), noadl::move(last),
+                               [&](const inputT& it) { other.push_back(*it);  });
         this->assign(noadl::move(other));
         return *this;
       }

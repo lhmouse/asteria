@@ -1109,12 +1109,12 @@ template<typename valueT, typename allocT> class cow_vector
         auto dist = noadl::estimate_distance(first, last);
         if(dist == 0) {
           noadl::ranged_do_while(noadl::move(first), noadl::move(last),
-            [&](const inputT& it) { this->emplace_back(*it);  });
+                                 [&](const inputT& it) { this->emplace_back(*it);  });
           return *this;
         }
         this->do_reserve_more(dist);
         noadl::ranged_do_while(noadl::move(first), noadl::move(last),
-          [&](const inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
+                               [&](const inputT& it) { this->m_sth.emplace_back_unchecked(*it);  });
         return *this;
       }
     // 26.3.11.5, modifiers

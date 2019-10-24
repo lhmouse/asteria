@@ -31,14 +31,19 @@ struct tinybuf_base
 
     enum open_mode : uint16_t
       {
-        open_read    = 0x0001,  // O_RDONLY
-        open_write   = 0x0002,  // O_WRONLY
-        open_append  = 0x0004,  // O_APPEND
-        open_binary  = 0x0008,  // _O_BINARY (Windows only)
-        open_create  = 0x0010,  // O_CREAT
-        open_trunc   = 0x0020,  // O_TRUNC
-        open_excl    = 0x0040,  // O_EXCL
+        open_read    = 0b000000000001,  // O_RDONLY
+        open_write   = 0b000000000010,  // O_WRONLY
+        open_append  = 0b000000000110,  // O_APPEND
+        open_binary  = 0b000000001000,  // _O_BINARY (Windows only)
+        open_create  = 0b000000010010,  // O_CREAT
+        open_trunc   = 0b000000100010,  // O_TRUNC
+        open_excl    = 0b000001000010,  // O_EXCL
       };
+
+    static constexpr bool has_mode(open_mode mode, open_mode opt) noexcept
+      {
+        return (mode & opt) == opt;
+      }
   };
 
 template<typename charT, typename traitsT>
