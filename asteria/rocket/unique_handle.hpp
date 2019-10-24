@@ -9,8 +9,6 @@
 #include "allocator_utilities.hpp"
 #include "utilities.hpp"
 #include "tinyfmt.hpp"
-#include <stdio.h>
-#include <unistd.h>
 
 namespace rocket {
 
@@ -269,7 +267,7 @@ class std_file_closer
   {
   public:
     using file_handle      = ::FILE*;
-    using closer_function  = decltype(::fclose);
+    using closer_function  = int (::FILE* fp);  // decltype(::fclose)
 
   private:
     closer_function* m_cl;
@@ -312,7 +310,7 @@ class posix_file_closer
   {
   public:
     using file_handle      = int;
-    using closer_function  = decltype(::close);
+    using closer_function  = int (int fd);  // decltype(::close)
 
   private:
     closer_function* m_cl;

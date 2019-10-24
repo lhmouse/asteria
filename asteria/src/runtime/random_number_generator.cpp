@@ -5,7 +5,7 @@
 #include "random_number_generator.hpp"
 #include "../utilities.hpp"
 #include <fcntl.h>  // ::open()
-#include <unistd.h>  // ::read()
+#include <unistd.h>  // ::close(), ::read()
 
 namespace Asteria {
 
@@ -58,16 +58,17 @@ void Random_Number_Generator::do_update() noexcept
 
     namespace {
 
-    bool do_read_random_device(void* data, size_t size) noexcept
+    size_t do_read_random_device(void* data, size_t size) noexcept
       {
-        std::memset(data, 'x', size);
-        int fd = ::open("/dev/urandom", O_RDONLY);
-        if(fd == -1) {
-          return false;
+        rocket::unique_posix_file fd(::open("/dev/urandom", O_RDONLY), ::close);
+        if(!fd) {
+          return 0;
         }
-        auto nread = ::read(fd, data, size);
-        ::close(fd);
-        return nread > 0;
+        ::ssize_t nread = ::read(fd, data, size);
+        if(nread < 0) {
+          return 0;
+        }
+        return static_cast<size_t>(nread);
       }
 
     class Scrambler
@@ -126,6 +127,8 @@ void Random_Number_Generator::reset() noexcept
     this->m_aa = 0;
     this->m_bb = 0;
     this->m_cc = 0;
+    // Initialize the pool with some entropy from the system.
+    std::memset(this->m_mm, '/', sizeof(m_mm));
     do_read_random_device(this->m_mm, sizeof(m_mm));
     // Scramble words.
     Scrambler regs;
