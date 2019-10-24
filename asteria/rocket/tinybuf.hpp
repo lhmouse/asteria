@@ -22,22 +22,22 @@ template<typename charT, typename traitsT = char_traits<charT>> class basic_tiny
 
 struct tinybuf_base
   {
-    enum seek_dir
+    enum seek_dir : uint8_t
       {
         seek_set  = 0,  // SEEK_SET
         seek_cur  = 1,  // SEEK_CUR
         seek_end  = 2,  // SEEK_END
       };
 
-    enum open_mode
+    enum open_mode : uint16_t
       {
-        open_read    = 0x0001,  // "r"
-        open_write   = 0x0002,  // "w"
-        open_rdwr    = 0x0003,  // "r+"
-        open_trunc   = 0x0010,  // "w+"
-        open_append  = 0x0020,  // "a"
-        open_binary  = 0x0040,  // "b"
-        open_excl    = 0x0080,  // "x"
+        open_read    = 0x0001,  // O_RDONLY
+        open_write   = 0x0002,  // O_WRONLY
+        open_append  = 0x0004,  // O_APPEND
+        open_binary  = 0x0008,  // _O_BINARY (Windows only)
+        open_create  = 0x0010,  // O_CREAT
+        open_trunc   = 0x0020,  // O_TRUNC
+        open_excl    = 0x0040,  // O_EXCL
       };
   };
 
