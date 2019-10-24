@@ -30,24 +30,24 @@ template<typename charT, typename traitsT, typename allocT>
     using size_type  = typename tinybuf_type::size_type;
 
   private:
-    open_mode m_mode;
-    string_type m_str;
-    size_type m_off = 0;
+    string_type m_stor;
+    size_type m_goff = 0;  // offset of the beginning of the get area
+    open_mode m_mode = { };  // no access by default
 
   public:
     basic_tinybuf_str() noexcept(is_nothrow_constructible<string_type>::value)
       :
-        m_mode(), m_str()
+        m_stor()
       {
       }
     explicit basic_tinybuf_str(const allocator_type& alloc) noexcept
       :
-        m_mode(), m_str(alloc)
+        m_stor(alloc)
       {
       }
     explicit basic_tinybuf_str(open_mode mode, const allocator_type& alloc = allocator_type()) noexcept
       :
-        m_mode(mode), m_str(alloc)
+        m_stor(alloc), m_mode(mode)
       {
       }
     template<typename xstrT> explicit basic_tinybuf_str(xstrT&& xstr, open_mode mode,
@@ -72,7 +72,7 @@ template<typename charT, typename traitsT, typename allocT>
           return -1;
         }
         // Calculate the number of characters after the get area.
-        auto navail = this->m_str.size() - this->m_off;
+        auto navail = this->m_stor.size() - this->m_goff;
         if(navail == 0) {
           // If no more characters are available, return -1.
           // Don't return 0 in this case, as it indicates the number of characters is unknown.
@@ -86,7 +86,7 @@ template<typename charT, typename traitsT, typename allocT>
       {
         if(gcur) {
           // If the get area exists, update the offset and clear it.
-          this->m_off = static_cast<size_type>(gcur - this->m_str.data());
+          this->m_goff = static_cast<size_type>(gcur - this->m_stor.data());
           gcur = nullptr;
           gend = nullptr;
         }
@@ -102,19 +102,19 @@ template<typename charT, typename traitsT, typename allocT>
         if(dir == tinybuf_type::seek_set)
           ref = 0;
         else if(dir == tinybuf_type::seek_end)
-          ref = this->m_str.size();
+          ref = this->m_stor.size();
         else
-          ref = this->m_off;
+          ref = this->m_goff;
         // Perform range checks.
         if(off < static_cast<off_type>(-ref)) {
           noadl::sprintf_and_throw<out_of_range>("tinybuf_str: attempt to seek to a negative offset");
         }
-        if(off > static_cast<off_type>(this->m_str.size() - ref)) {
+        if(off > static_cast<off_type>(this->m_stor.size() - ref)) {
           noadl::sprintf_and_throw<out_of_range>("tinybuf_str: attempt to seek past the end");
         }
         // Convert the relative offset to an absolute one and set it.
         off_type abs = static_cast<off_type>(ref) + off;
-        this->m_off = static_cast<size_type>(abs);
+        this->m_goff = static_cast<size_type>(abs);
         // Return the absolute offset.
         return abs;
       }
@@ -128,13 +128,13 @@ template<typename charT, typename traitsT, typename allocT>
         // If the get area exists, update the offset and clear it.
         this->flush();
         // Calculate the number of characters available.
-        auto navail = this->m_str.size() - this->m_off;
+        auto navail = this->m_stor.size() - this->m_goff;
         if(navail == 0) {
           // If no more characters are available, return EOF.
           return traits_type::eof();
         }
         // Get the range of remaining characters.
-        auto gbase = this->m_str.data() + this->m_off;
+        auto gbase = this->m_stor.data() + this->m_goff;
         // Set the new get area. Exclude the first character if `peek` is not set.
         gcur = gbase + !peek;
         gend = gbase + navail;
@@ -152,35 +152,35 @@ template<typename charT, typename traitsT, typename allocT>
         // Notice that we don't use the put area.
         // If `open_append` is in effect, always append to the end.
         bool append = tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_append) ||
-                      (this->m_off == this->m_str.size());
+                      (this->m_goff == this->m_stor.size());
         if(ROCKET_UNEXPECT(!append)) {
-          // Replace the substring from `m_off`.
-          this->m_str.replace(this->m_off, nadd, sadd, nadd);
-          this->m_off += nadd;
+          // Replace the substring from `m_goff`.
+          this->m_stor.replace(this->m_goff, nadd, sadd, nadd);
+          this->m_goff += nadd;
           return *this;
         }
         // Append the string to the end.
-        this->m_str.append(sadd, nadd);
-        this->m_off = this->m_str.size();
+        this->m_stor.append(sadd, nadd);
+        this->m_goff = this->m_stor.size();
         return *this;
       }
 
   public:
     const string_type& get_string() const noexcept
       {
-        return this->m_str;
+        return this->m_stor;
       }
     const char_type* get_c_string() const noexcept
       {
-        return this->m_str.c_str();
+        return this->m_stor.c_str();
       }
     void clear_string(open_mode mode)
       {
         // Invalidate the get area.
         this->flush();
         // Clear the string and set the new mode.
-        this->m_str.clear();
-        this->m_off = 0;
+        this->m_stor.clear();
+        this->m_goff = 0;
         this->m_mode = mode;
       }
     template<typename xstrT> void set_string(xstrT&& xstr, open_mode mode)
@@ -188,8 +188,8 @@ template<typename charT, typename traitsT, typename allocT>
         // Invalidate the get area.
         this->flush();
         // Set the new string and mode.
-        this->m_str = noadl::forward<xstrT>(xstr);
-        this->m_off = 0;
+        this->m_stor = noadl::forward<xstrT>(xstr);
+        this->m_goff = 0;
         this->m_mode = mode;
       }
     string_type extract_string(open_mode mode)
@@ -198,17 +198,17 @@ template<typename charT, typename traitsT, typename allocT>
         this->flush();
         // Swap the string with an empty one and set the new mode.
         string_type str;
-        this->m_str.swap(str);
-        this->m_off = 0;
+        this->m_stor.swap(str);
+        this->m_goff = 0;
         this->m_mode = mode;
         return str;
       }
 
     basic_tinybuf_str& swap(basic_tinybuf_str& other) noexcept(is_nothrow_swappable<string_type>::value)
       {
-        xswap(this->m_str, other.m_str);
+        xswap(this->m_stor, other.m_stor);
         // No exception shall be thrown afterwards.
-        xswap(this->m_off, other.m_off);
+        xswap(this->m_goff, other.m_goff);
         xswap(this->m_mode, other.m_mode);
         xswap<tinybuf_type>(*this, other);
         return *this;
