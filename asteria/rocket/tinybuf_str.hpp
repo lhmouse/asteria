@@ -96,7 +96,7 @@ template<typename charT, typename traitsT, typename allocT>
     off_type do_seek(off_type off, seek_dir dir) override
       {
         // Invalidate the get area before doing anything else.
-        this->flush();
+        this->do_sync_rw();
         // Get the seek reference offset.
         size_type ref;
         if(dir == tinybuf_type::seek_set)
@@ -126,7 +126,7 @@ template<typename charT, typename traitsT, typename allocT>
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_str: no read access");
         }
         // If the get area exists, update the offset and clear it.
-        this->flush();
+        this->do_sync_rw();
         // Calculate the number of characters available.
         auto navail = this->m_stor.size() - this->m_goff;
         if(navail == 0) {
@@ -148,7 +148,7 @@ template<typename charT, typename traitsT, typename allocT>
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_str: no write access");
         }
         // Be warned if the get area exists, it must be invalidated before modifying the string.
-        this->flush();
+        this->do_sync_rw();
         // Notice that we don't use put areas.
         // If `open_append` is in effect, always append to the end.
         bool append = tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_append) ||
@@ -177,7 +177,7 @@ template<typename charT, typename traitsT, typename allocT>
     void clear_string(open_mode mode)
       {
         // Invalidate the get area.
-        this->flush();
+        this->do_sync_rw();
         // Clear the string and set the new mode.
         this->m_stor.clear();
         this->m_goff = 0;
@@ -186,7 +186,7 @@ template<typename charT, typename traitsT, typename allocT>
     template<typename xstrT> void set_string(xstrT&& xstr, open_mode mode)
       {
         // Invalidate the get area.
-        this->flush();
+        this->do_sync_rw();
         // Set the new string and mode.
         this->m_stor = noadl::forward<xstrT>(xstr);
         this->m_goff = 0;
@@ -195,7 +195,7 @@ template<typename charT, typename traitsT, typename allocT>
     string_type extract_string(open_mode mode)
       {
         // Invalidate the get area.
-        this->flush();
+        this->do_sync_rw();
         // Swap the string with an empty one and set the new mode.
         string_type str;
         this->m_stor.swap(str);
