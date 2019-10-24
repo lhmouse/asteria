@@ -201,12 +201,14 @@ template<typename charT, typename traitsT, typename allocT>
       :
         m_stor(alloc)
       {
-        if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc))
+        if(ROCKET_EXPECT(this->m_stor.as_allocator() == alloc)) {
           // If the allocators compare equal, they can deallocate memory allocated by each other.
           this->do_exchange_with(other);
-        else
+        }
+        else {
           // Otherwise, we have to copy its contents instead.
           this->putn(other.data(), other.size());
+        }
       }
     constexpr basic_linear_buffer() noexcept(is_nothrow_constructible<allocator_type>::value)
       :
