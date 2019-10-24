@@ -90,7 +90,7 @@ template<typename charT, typename traitsT, typename allocT>
           gcur = nullptr;
           gend = nullptr;
         }
-        // Notice that we don't use the put area.
+        // Notice that we don't use put areas.
         return *this;
       }
     off_type do_seek(off_type off, seek_dir dir) override
@@ -149,7 +149,7 @@ template<typename charT, typename traitsT, typename allocT>
         }
         // Be warned if the get area exists, it must be invalidated before modifying the string.
         this->flush();
-        // Notice that we don't use the put area.
+        // Notice that we don't use put areas.
         // If `open_append` is in effect, always append to the end.
         bool append = tinybuf_base::has_mode(this->m_mode, tinybuf_base::open_append) ||
                       (this->m_goff == this->m_stor.size());
