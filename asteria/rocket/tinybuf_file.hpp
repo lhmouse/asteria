@@ -80,7 +80,7 @@ template<typename charT, typename traitsT, typename allocT>
           return *this;
         }
         if(gcur != gend) {
-          // If the get area has been consumed partially, rewind the file position to the first unread character,
+          // If the get area has been consumed partially, rewind the file position to the beginning of it,
           // then discard characters that have been consumed so far.
           ROCKET_ASSERT(gend == this->m_gbuf.end());
           if(::fseeko(this->m_file, this->m_goff, SEEK_SET) != 0) {
