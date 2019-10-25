@@ -49,24 +49,24 @@ template<typename charT, typename traitsT>
 
   public:
     // buffer interfaces
-    virtual tinybuf_type& get_buffer() const = 0;
+    virtual tinybuf_type& get_tinybuf() const = 0;
 
     // unformatted output functions
     basic_tinyfmt& flush()
       {
-        return this->get_buffer().flush(), *this;
+        return this->get_tinybuf().flush(), *this;
       }
     off_type seek(off_type off, seek_dir dir = tinybuf_base::seek_set)
       {
-        return this->get_buffer().seek(off, dir);
+        return this->get_tinybuf().seek(off, dir);
       }
-    basic_tinyfmt& put(char_type c)
+    basic_tinyfmt& putc(char_type c)
       {
-        return this->get_buffer().put(c), *this;
+        return this->get_tinybuf().putc(c), *this;
       }
-    basic_tinyfmt& put(const char_type* s, size_type n)
+    basic_tinyfmt& putn(const char_type* s, size_type n)
       {
-        return this->get_buffer().put(s, n), *this;
+        return this->get_tinybuf().putn(s, n), *this;
       }
   };
 
@@ -79,16 +79,16 @@ template<typename charT, typename traitsT>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT& c)
   {
     // Insert the character as is.
-    auto& buf = fmt.get_buffer();
-    buf.put(c);
+    auto& buf = fmt.get_tinybuf();
+    buf.putc(c);
     return fmt;
   }
 template<typename charT, typename traitsT>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT* s)
   {
     // Insert the sequence as is.
-    auto& buf = fmt.get_buffer();
-    buf.put(s, traitsT::length(s));
+    auto& buf = fmt.get_tinybuf();
+    buf.putn(s, traitsT::length(s));
     return fmt;
   }
 
@@ -97,15 +97,15 @@ template<typename charT, typename traitsT>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const tinynumput& nump)
   {
     // Widen all characters and insert them.
-    auto& buf = fmt.get_buffer();
-    noadl::for_each(nump, [&](char c) { buf.put(traitsT::to_char_type(static_cast<unsigned char>(c)));  });
+    auto& buf = fmt.get_tinybuf();
+    noadl::for_each(nump, [&](char c) { buf.putc(traitsT::to_char_type(c & 0xFF));  });
     return fmt;
   }
 inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const tinynumput& nump)
   {
     // Optimize it a bit if no conversion is required.
-    auto& buf = fmt.get_buffer();
-    buf.put(nump.data(), nump.size());
+    auto& buf = fmt.get_tinybuf();
+    buf.putn(nump.data(), nump.size());
     return fmt;
   }
 

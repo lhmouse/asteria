@@ -2088,7 +2088,7 @@ template<typename charT, typename traitsT, typename allocT>
     inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                      const basic_cow_string<charT, traitsT, allocT>& str)
   {
-    return fmt.put(str.c_str(), str.size());
+    return fmt.putn(str.c_str(), str.size());
   }
 
 }  // namespace rocket

@@ -196,7 +196,7 @@ template<typename charT, typename traitsT>
         return this->do_seek(off, dir);
       }
 
-    int_type peek()
+    int_type peekc()
       {
         if(ROCKET_EXPECT(this->m_gcur != this->m_gend))
           // Return the first character in the get area.
@@ -205,7 +205,7 @@ template<typename charT, typename traitsT>
           // Try populating the get area.
           return this->do_call_underflow(true);
       }
-    int_type get()
+    int_type getc()
       {
         if(ROCKET_EXPECT(this->m_gcur != this->m_gend))
           // Return and discard the first character in the get area.
@@ -214,7 +214,7 @@ template<typename charT, typename traitsT>
           // Try populating the get area and discard the first character.
           return this->do_call_underflow(false);
       }
-    size_type get(char_type* s, size_type n)
+    size_type getn(char_type* s, size_type n)
       {
         auto k = static_cast<size_type>(this->m_gend - this->m_gcur);
         if(ROCKET_UNEXPECT(k == 0)) {
@@ -233,7 +233,7 @@ template<typename charT, typename traitsT>
         this->m_gcur += k;
         return k;
       }
-    basic_tinybuf& put(char_type c)
+    basic_tinybuf& putc(char_type c)
       {
         if(ROCKET_EXPECT(this->m_pcur != this->m_pend))
           // Append a character to the put area.
@@ -242,7 +242,7 @@ template<typename charT, typename traitsT>
           // Evict data from the put area followed by the character specified.
           return this->do_call_overflow(::std::addressof(c), 1);
       }
-    basic_tinybuf& put(const char_type* s, size_type n)
+    basic_tinybuf& putn(const char_type* s, size_type n)
       {
         auto k = static_cast<size_type>(this->m_pend - this->m_pcur);
         if(ROCKET_UNEXPECT(n >= k)) {

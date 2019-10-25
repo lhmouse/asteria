@@ -20,10 +20,10 @@ template<typename charT, typename traitsT, typename allocT>
     using traits_type     = traitsT;
     using allocator_type  = allocT;
 
-    using tinyfmt_type   = basic_tinyfmt<charT, traitsT>;
-    using tinybuf_type   = basic_tinybuf_file<charT, traitsT, allocT>;
-    using file_handle    = typename tinybuf_type::file_handle;
-    using closer_type    = typename tinybuf_type::closer_type;
+    using tinyfmt_type     = basic_tinyfmt<charT, traitsT>;
+    using tinybuf_type     = basic_tinybuf_file<charT, traitsT, allocT>;
+    using file_handle      = typename tinybuf_type::file_handle;
+    using closer_function  = typename tinybuf_type::closer_function;
 
     using seek_dir   = typename tinybuf_type::seek_dir;
     using open_mode  = typename tinybuf_type::open_mode;
@@ -40,12 +40,12 @@ template<typename charT, typename traitsT, typename allocT>
         m_buf()
       {
       }
-    explicit basic_tinyfmt_file(const char* path, open_mode mode) noexcept
+    explicit basic_tinyfmt_file(const char* path, open_mode mode = tinybuf_base::open_write) noexcept
       :
         m_buf(path, mode)
       {
       }
-    basic_tinyfmt_file(file_handle fp, const closer_type& cl) noexcept
+    basic_tinyfmt_file(file_handle fp, closer_function* cl) noexcept
       :
         m_buf(fp, cl)
       {
@@ -58,7 +58,7 @@ template<typename charT, typename traitsT, typename allocT>
       = default;
 
   public:
-    tinybuf_type& get_buffer() const override
+    tinybuf_type& get_tinybuf() const override
       {
         return this->m_buf;
       }
@@ -67,15 +67,19 @@ template<typename charT, typename traitsT, typename allocT>
       {
         return this->m_buf.get_handle();
       }
+    closer_function* get_closer() const noexcept
+      {
+        return this->m_buf.get_closer();
+      }
+    basic_tinyfmt_file& reset(file_handle fp, closer_function* cl) noexcept
+      {
+        return this->m_buf.reset(fp, cl), *this;
+      }
     basic_tinyfmt_file& open(const char* path, open_mode mode = tinybuf_base::open_write)
       {
         return this->m_buf.open(path, mode), *this;
       }
-    basic_tinyfmt_file& reset(file_handle fp, const closer_type& cl)
-      {
-        return this->m_buf.reset(fp, cl), *this;
-      }
-    basic_tinyfmt_file& close()
+    basic_tinyfmt_file& close() noexcept
       {
         return this->m_buf.close(), *this;
       }
