@@ -256,22 +256,20 @@ template<typename charT, typename traitsT, typename allocT>
       }
     basic_tinybuf_file& open(const char* path, open_mode mode)
       {
+        const char* fmode;
         int flags;
-        char mstr[8];
-        unsigned mlen = 0;
         // Translate read/write access flags.
         if(tinybuf_base::has_mode(mode, tinybuf_base::open_read_write)) {
           flags = O_RDWR;
-          mstr[mlen++] = 'r';
-          mstr[mlen++] = '+';
+          fmode = "r+";
         }
         else if(tinybuf_base::has_mode(mode, tinybuf_base::open_read)) {
           flags = O_RDONLY;
-          mstr[mlen++] = 'r';
+          fmode = "r";
         }
         else if(tinybuf_base::has_mode(mode, tinybuf_base::open_write)) {
           flags = O_WRONLY;
-          mstr[mlen++] = 'w';
+          fmode = "w";
         }
         else {
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no access specified (path `%s`, mode `%u`)",
@@ -280,10 +278,6 @@ template<typename charT, typename traitsT, typename allocT>
         // Translate combination flags.
         if(tinybuf_base::has_mode(mode, tinybuf_base::open_append)) {
           flags |= O_APPEND;
-          mstr[0] = 'a';  // might be "w" or "r+"
-        }
-        if(tinybuf_base::has_mode(mode, tinybuf_base::open_binary)) {
-          mstr[mlen++] = 'b';
         }
         if(tinybuf_base::has_mode(mode, tinybuf_base::open_create)) {
           flags |= O_CREAT;
@@ -294,7 +288,6 @@ template<typename charT, typename traitsT, typename allocT>
         if(tinybuf_base::has_mode(mode, tinybuf_base::open_exclusive)) {
           flags |= O_EXCL;
         }
-        mstr[mlen] = 0;
         // Open the file.
         unique_posix_file fd(::open(path, flags, 0666), ::close);
         if(!fd) {
@@ -302,7 +295,7 @@ template<typename charT, typename traitsT, typename allocT>
                                                   errno, path, mode);
         }
         // Convert it to a `FILE*`.
-        unique_std_file fp(::fdopen(fd, mstr), ::fclose);
+        unique_std_file fp(::fdopen(fd, fmode), ::fclose);
         if(!fp) {
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: stream open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
