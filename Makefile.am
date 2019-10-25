@@ -22,7 +22,7 @@ BUILT_SOURCES =  \
   .pch.hpp  \
   .pch.hpp.gch
 
-MOSTLYCLEANFILES =  \
+CLEANFILES =  \
   .pch.hpp  \
   .pch.hpp.gch  \
   .pch.hpp.gch.lo
