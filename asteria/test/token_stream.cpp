@@ -10,8 +10,8 @@ using namespace Asteria;
 int main()
   {
     Token_Stream ts;
-    tinybuf_str sbuf;
-    sbuf.set_string(rocket::sref(
+    tinybuf_str cbuf;
+    cbuf.set_string(rocket::sref(
       R"__(#!some shebang
         hh+++
         if <<<->>>>>"\u55b5b喵"/
@@ -19,8 +19,8 @@ int main()
         .false/*more
         comments*/;/*yet more*/-42e13
       )__"), tinybuf::open_read);
-    ts.reload(sbuf, rocket::sref("dummy_file"), { });
-    ASTERIA_TEST_CHECK(sbuf.get() == EOF);
+    ts.reload(cbuf, rocket::sref("dummy_file"), { });
+    ASTERIA_TEST_CHECK(cbuf.getc() == EOF);
 
     auto p = ts.peek_opt();
     ASTERIA_TEST_CHECK(p);

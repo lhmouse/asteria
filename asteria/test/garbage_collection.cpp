@@ -40,8 +40,8 @@ int main()
 
     bcnt.store(0, std::memory_order_relaxed);
     {
-      tinybuf_str sbuf;
-      sbuf.set_string(rocket::sref(
+      tinybuf_str cbuf;
+      cbuf.set_string(rocket::sref(
         R"__(
           var g;
           func leak() {
@@ -53,7 +53,7 @@ int main()
             leak();
           }
         )__"), tinybuf::open_read);
-      Simple_Script code(sbuf, rocket::sref("my_file"));
+      Simple_Script code(cbuf, rocket::sref("my_file"));
       Global_Context global;
       code.execute(global);
     }

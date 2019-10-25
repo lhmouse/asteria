@@ -10,12 +10,12 @@
 
 namespace Asteria {
 
-Simple_Script& Simple_Script::reload(tinybuf& sbuf, const cow_string& name)
+Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
   {
     AIR_Node::S_instantiate_function xnode = { };
     xnode.opts = this->m_opts;
     // Tokenize the character stream.
-    Token_Stream tstrm(sbuf, name, xnode.opts);
+    Token_Stream tstrm(cbuf, name, xnode.opts);
     // Parse tokens.
     Statement_Sequence stmseq(tstrm, xnode.opts);
     // Initialize arguments for the function object.
@@ -35,16 +35,16 @@ Simple_Script& Simple_Script::reload(tinybuf& sbuf, const cow_string& name)
 
 Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name)
   {
-    tinybuf_str sbuf;
-    sbuf.set_string(code, tinybuf::open_read);
-    return this->reload(sbuf, name);
+    tinybuf_str cbuf;
+    cbuf.set_string(code, tinybuf::open_read);
+    return this->reload(cbuf, name);
   }
 
 Simple_Script& Simple_Script::reload_file(const cow_string& path)
   {
-    tinybuf_file sbuf;
-    sbuf.open(path.c_str(), tinybuf::open_read);
-    return this->reload(sbuf, path);
+    tinybuf_file cbuf;
+    cbuf.open(path.c_str(), tinybuf::open_read);
+    return this->reload(cbuf, path);
   }
 
 rcptr<Abstract_Function> Simple_Script::copy_function_opt() const noexcept

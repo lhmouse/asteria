@@ -81,7 +81,7 @@ namespace Asteria {
     class Line_Reader
       {
       private:
-        ref_to<tinybuf> m_sbuf;
+        ref_to<tinybuf> m_cbuf;
         cow_string m_file;
 
         cow_string m_str;
@@ -89,9 +89,9 @@ namespace Asteria {
         size_t m_offset = 0;
 
       public:
-        Line_Reader(ref_to<tinybuf> xsbuf, const cow_string& xfile)
+        Line_Reader(ref_to<tinybuf> xcbuf, const cow_string& xfile)
           :
-            m_sbuf(xsbuf), m_file(xfile)
+            m_cbuf(xcbuf), m_file(xfile)
           {
           }
 
@@ -101,9 +101,9 @@ namespace Asteria {
           = delete;
 
       public:
-        tinybuf& sbuf() const noexcept
+        tinybuf& cbuf() const noexcept
           {
-            return this->m_sbuf;
+            return this->m_cbuf;
           }
         const cow_string& file() const noexcept
           {
@@ -121,7 +121,7 @@ namespace Asteria {
             this->m_offset = 0;
             // Buffer a line.
             for(;;) {
-              int ch = this->m_sbuf->get();
+              int ch = this->m_cbuf->getc();
               if(ch == EOF) {
                 // When the EOF is encountered, ...
                 if(this->m_str.empty()) {
@@ -888,7 +888,7 @@ namespace Asteria {
 
     }  // namespace
 
-Token_Stream& Token_Stream::reload(tinybuf& sbuf, const cow_string& file, const Compiler_Options& opts)
+Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const Compiler_Options& opts)
   {
     // Tokens are parsed and stored here in normal order.
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
@@ -899,7 +899,7 @@ Token_Stream& Token_Stream::reload(tinybuf& sbuf, const cow_string& file, const 
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Line_Reader reader(rocket::ref(sbuf), file);
+    Line_Reader reader(rocket::ref(cbuf), file);
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
       if((reader.line() == 1) && (reader.navail() >= 2) && (std::memcmp(reader.data(), "#!", 2) == 0)) {

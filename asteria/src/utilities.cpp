@@ -12,8 +12,8 @@ namespace Asteria {
 
     void do_ltoa_fixed(cow_string& str, long num, size_t width)
       {
-        std::array<char, 64> sbuf;
-        auto spos = sbuf.end();
+        std::array<char, 64> cbuf;
+        auto spos = cbuf.end();
         // Write digits from the right to the left.
         long reg = num;
         for(size_t i = 0; i != width; ++i) {
@@ -22,7 +22,7 @@ namespace Asteria {
           *--spos = static_cast<char>('0' + d);
         }
         // Append the formatted string.
-        str.append(spos, sbuf.end());
+        str.append(spos, cbuf.end());
       }
 
     constexpr char s_ctrl_reps[][16] =

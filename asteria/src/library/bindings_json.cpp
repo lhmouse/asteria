@@ -617,9 +617,9 @@ Value std_json_parse(const G_string& text)
     // Tokenize the source string.
     Token_Stream tstrm;
     try {
-      tinybuf_str sbuf;
-      sbuf.set_string(text, tinybuf::open_read);
-      tstrm.reload(sbuf, rocket::sref("<JSON text>"), opts);
+      tinybuf_str cbuf;
+      cbuf.set_string(text, tinybuf::open_read);
+      tstrm.reload(cbuf, rocket::sref("<JSON text>"), opts);
     }
     catch(Parser_Error& except) {
       ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", except.what(), "\n---\n", text);

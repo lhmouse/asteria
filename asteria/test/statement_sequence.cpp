@@ -12,8 +12,8 @@ using namespace Asteria;
 
 int main()
   {
-    tinybuf_str sbuf;
-    sbuf.set_string(rocket::sref(
+    tinybuf_str cbuf;
+    cbuf.set_string(rocket::sref(
       R"__(
         func third() {
           const f = func(p) = p + "ow";
@@ -32,7 +32,7 @@ int main()
           return typeof(e) + ":" + e;
         }
       )__"), tinybuf::open_read);
-    Token_Stream tstrm(sbuf, rocket::sref("dummy file"), { });
+    Token_Stream tstrm(cbuf, rocket::sref("dummy file"), { });
     Statement_Sequence stmseq(tstrm, { });
     ASTERIA_TEST_CHECK(stmseq.size() == 4);
   }

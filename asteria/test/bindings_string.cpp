@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    tinybuf_str sbuf;
-    sbuf.set_string(rocket::sref(
+    tinybuf_str cbuf;
+    cbuf.set_string(rocket::sref(
       R"__(
         assert std.string.slice("hello", 0) == "hello";
         assert std.string.slice("hello", 1) == "ello";
@@ -278,7 +278,7 @@ int main()
         assert std.string.unpack_64le("\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E") == [ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ];
       )__"), tinybuf::open_read);
 
-    Simple_Script code(sbuf, rocket::sref("my_file"));
+    Simple_Script code(cbuf, rocket::sref("my_file"));
     Global_Context global;
     code.execute(global);
   }
