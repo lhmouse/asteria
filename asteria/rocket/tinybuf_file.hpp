@@ -164,31 +164,28 @@ template<typename charT, typename traitsT, typename allocT>
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
         }
         // Clear the input buffer.
-        auto goff = this->m_goff;
-        ROCKET_ASSERT(goff < 0);
         if(!gcur) {
-          // The file position shall have been updated.
+          // The file may be seekable. We will check this later but the file position shall have been updated.
           // In this case we discard the entire input buffer.
           this->m_gbuf.clear();
         }
         else {
-          // The stream is non-seekable. We cannot reload the buffer, so it must not be cleared.
+          // The file is definitely non-seekable. We cannot reload the buffer, so it must not be cleared.
           // In this case we discard characters that have been read so far.
           this->m_gbuf.discard(static_cast<size_type>(gcur - this->m_gbuf.begin()));
         }
-        // Record the offset of the beginning of the get area.
-        if(goff == -1) {
-          // Retrieve the file position.
+        // Get the file position of the beginning of the new get area.
+        auto goff = this->m_goff;
+        if(goff != -2) {
+          // The stream looks seekable.
           goff = ::ftello(this->m_file);
-          if(goff != -1)
-            // Perform a zero seek in case of interleaving reads and writes.
-            ::fseeko(this->m_file, 0, SEEK_CUR);
-          else
+          // Perform a zero seek in case of interleaving reads and writes.
+          if((goff == -1) || (::fseeko(this->m_file, 0, SEEK_CUR) != 0))
             // Mark the file non-seekable.
             goff = -2;
         }
         // Read some characters and append them to the input buffer.
-        auto navail = this->m_gbuf.reserve(0x100);
+        auto navail = this->m_gbuf.reserve(0x1000);
         navail = traits_type::fgetn(this->m_file, this->m_gbuf.mut_end(), navail);
         this->m_gbuf.accept(navail);
         this->m_goff = goff;

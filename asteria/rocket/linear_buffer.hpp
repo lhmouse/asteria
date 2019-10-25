@@ -103,7 +103,7 @@ template<typename charT, typename traitsT = char_traits<charT>,
                                                        static_cast<unsigned long long>(nused), static_cast<unsigned long long>(nadd),
                                                        static_cast<unsigned long long>(nmax));
               }
-              auto cap_new = (nused + nadd) | 0x100;
+              auto cap_new = (nused + nadd) | 0x1000;
               auto ptr_new = allocator_traits<allocator_type>::allocate(this->as_allocator(), cap_new);
               auto pbuf_new = noadl::unfancy(ptr_new);
 #ifdef ROCKET_DEBUG
