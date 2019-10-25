@@ -183,7 +183,7 @@ bool utf8_decode(char32_t& cp, const char*& pos, size_t avail)
       return false;
     }
     // Unset bits that are not part of the payload.
-    cp &= static_cast<char32_t>(0xFF >> u8len);
+    cp &= UINT32_C(0xFF) >> u8len;
     // Accumulate trailing code units.
     for(size_t i = 1; i < u8len; ++i) {
       char32_t cu = *(pos++) & 0xFF;

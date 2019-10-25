@@ -8,9 +8,6 @@
 #include "../runtime/global_context.hpp"
 #include "../runtime/collector.hpp"
 #include "../utilities.hpp"
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-#  include <x86intrin.h>
-#endif
 
 namespace Asteria {
 
@@ -347,47 +344,55 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
 
 G_integer std_numeric_lzcnt(const G_integer& x)
   {
-#if defined(__GNUC__)
-#  if defined(__LZCNT__)
-    return G_integer(::_lzcnt_u64(static_cast<uint64_t>(x)));
-#  else
-    if(x == 0)
-      return 64;
-    else
-      return __builtin_clzll(static_cast<uint64_t>(x));
-#  endif
-#else
-#  error Please implement `lzcnt()` for this platform.
-#endif
+    // TODO: Modern CPUs have intrinsics for this.
+    uint8_t count = 0;
+    // Scan bits from left to right.
+    auto bits = static_cast<uint64_t>(x);
+    auto mask = UINT64_C(1) << 63;
+    for(;;) {
+      if(bits & mask)
+        break;
+      count++;
+      mask >>= 1;
+      if(!mask)
+        break;
+    }
+    return count;
   }
 
 G_integer std_numeric_tzcnt(const G_integer& x)
   {
-#if defined(__GNUC__)
-#  if defined(__BMI__)
-    return G_integer(::_tzcnt_u64(static_cast<uint64_t>(x)));
-#  else
-    if(x == 0)
-      return 64;
-    else
-      return __builtin_ctzll(static_cast<uint64_t>(x));
-#  endif
-#else
-#  error Please implement `tzcnt()` for this platform.
-#endif
+    // TODO: Modern CPUs have intrinsics for this.
+    uint8_t count = 0;
+    // Scan bits from right to left.
+    auto bits = static_cast<uint64_t>(x);
+    auto mask = UINT64_C(1);
+    for(;;) {
+      if(bits & mask)
+        break;
+      count++;
+      mask <<= 1;
+      if(!mask)
+        break;
+    }
+    return count;
   }
 
 G_integer std_numeric_popcnt(const G_integer& x)
   {
-#if defined(__GNUC__)
-#  if defined(__POPCNT__)
-    return G_integer(::_mm_popcnt_u64(static_cast<uint64_t>(x)));
-#  else
-    return __builtin_popcountll(static_cast<uint64_t>(x));
-#  endif
-#else
-#  error Please implement `popcnt()` for this platform.
-#endif
+    // TODO: Modern CPUs have intrinsics for this.
+    uint8_t count = 0;
+    // Scan bits from right to left.
+    auto bits = static_cast<uint64_t>(x);
+    auto mask = UINT64_C(1);
+    for(;;) {
+      if(bits & mask)
+        count++;
+      mask <<= 1;
+      if(!mask)
+        break;
+    }
+    return count;
   }
 
     namespace {
