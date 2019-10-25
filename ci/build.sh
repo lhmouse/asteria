@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
 # setup
-test -n "${CXX}"  \
-  || CXX="g++"
+test -n "${CXX}" || CXX="g++"
+export CXX
 
 # build
 ${CXX} --version
@@ -13,5 +13,4 @@ autoreconf -ifv
 make -j$(nproc)
 
 # test
-make -j$(nproc) check  \
-  || (cat ./test-suite.log; false)
+make -j$(nproc) check || (cat ./test-suite.log; false)
