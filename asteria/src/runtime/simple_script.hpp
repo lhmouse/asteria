@@ -51,7 +51,7 @@ class Simple_Script
         return this->m_cptr.reset(), *this;
       }
 
-    Simple_Script& reload(tinybuf& cbuf, const cow_string& name);
+    Simple_Script& reload(tinybuf& cbuf, const cow_string& name = rocket::sref("<unnamed>"));
     Simple_Script& reload_string(const cow_string& code, const cow_string& name);
     Simple_Script& reload_file(const cow_string& path);
     Simple_Script& reload_stdin();

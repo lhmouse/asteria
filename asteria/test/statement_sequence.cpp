@@ -32,7 +32,8 @@ int main()
           return typeof(e) + ":" + e;
         }
       )__"), tinybuf::open_read);
-    Token_Stream tstrm(cbuf, rocket::sref("dummy file"), { });
+    Token_Stream tstrm;
+    tstrm.reload(cbuf, rocket::sref("dummy file"), { });
     Statement_Sequence stmseq(tstrm, { });
     ASTERIA_TEST_CHECK(stmseq.size() == 4);
   }
