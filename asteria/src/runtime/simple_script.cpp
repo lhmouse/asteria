@@ -15,7 +15,8 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     AIR_Node::S_instantiate_function xnode = { };
     xnode.opts = this->m_opts;
     // Tokenize the character stream.
-    Token_Stream tstrm(cbuf, name, xnode.opts);
+    Token_Stream tstrm;
+    tstrm.reload(cbuf, name, xnode.opts);
     // Parse tokens.
     Statement_Sequence stmseq(tstrm, xnode.opts);
     // Initialize arguments for the function object.
@@ -45,6 +46,13 @@ Simple_Script& Simple_Script::reload_file(const cow_string& path)
     tinybuf_file cbuf;
     cbuf.open(path.c_str(), tinybuf::open_read);
     return this->reload(cbuf, path);
+  }
+
+Simple_Script& Simple_Script::reload_stdin()
+  {
+    tinybuf_file cbuf;
+    cbuf.reset(stdin, nullptr);
+    return this->reload(cbuf, rocket::sref("<stdin>"));
   }
 
 rcptr<Abstract_Function> Simple_Script::copy_function_opt() const noexcept

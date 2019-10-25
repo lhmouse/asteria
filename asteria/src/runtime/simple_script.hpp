@@ -54,6 +54,7 @@ class Simple_Script
     Simple_Script& reload(tinybuf& cbuf, const cow_string& name);
     Simple_Script& reload_string(const cow_string& code, const cow_string& name);
     Simple_Script& reload_file(const cow_string& path);
+    Simple_Script& reload_stdin();
 
     rcptr<Abstract_Function> copy_function_opt() const noexcept;
 

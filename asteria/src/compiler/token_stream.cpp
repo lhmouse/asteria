@@ -894,7 +894,7 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
     // We will have to reverse this sequence before storing it into `*this` if it is accepted.
     cow_vector<Token> tokens;
     // Destroy the contents of `*this` and reuse their storage, if any.
-    tokens.swap(this->m_tokens);
+    tokens.swap(this->m_rtoks);
     tokens.clear();
     // Save the position of an unterminated block comment.
     Tack bcomm;
@@ -975,7 +975,7 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
     // Reverse the token sequence now.
     std::reverse(tokens.mut_begin(), tokens.mut_end());
     // Succeed.
-    this->m_tokens = rocket::move(tokens);
+    this->m_rtoks = rocket::move(tokens);
     return *this;
   }
 

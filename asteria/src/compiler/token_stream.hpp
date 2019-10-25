@@ -12,43 +12,37 @@ namespace Asteria {
 class Token_Stream
   {
   private:
-    cow_vector<Token> m_tokens;  // Tokens are stored in reverse order.
+    cow_vector<Token> m_rtoks;  // Tokens are stored in reverse order.
 
   public:
     Token_Stream() noexcept
+      :
+        m_rtoks()
       {
-      }
-    Token_Stream(tinybuf& cbuf, const cow_string& file, const Compiler_Options& opts)
-      {
-        this->reload(cbuf, file, opts);
       }
 
   public:
     bool empty() const noexcept
       {
-        return this->m_tokens.empty();
+        return this->m_rtoks.empty();
       }
     Token_Stream& clear() noexcept
       {
-        return this->m_tokens.clear(), *this;
+        return this->m_rtoks.clear(), *this;
       }
 
     // These are accessors and modifiers of tokens in this stream.
     size_t size() const noexcept
       {
-        return this->m_tokens.size();
+        return this->m_rtoks.size();
       }
     const Token* peek_opt(size_t offset = 0) const noexcept
       {
-        if(ROCKET_UNEXPECT(offset >= this->m_tokens.size())) {
-          return nullptr;
-        }
-        return std::addressof(this->m_tokens.rbegin()[ptrdiff_t(offset)]);
+        return this->m_rtoks.get_ptr(this->m_rtoks.size() + ~offset);
       }
     Token_Stream& shift(size_t count = 1)
       {
-        this->m_tokens.pop_back(count);
-        return *this;
+        return this->m_rtoks.pop_back(count), *this;
       }
 
     // This function parses characters from the input stream and fills tokens into `*this`.
