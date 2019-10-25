@@ -156,7 +156,7 @@ template<typename charT, typename traitsT>
     basic_tinybuf& do_sync_areas()
       {
         if(ROCKET_EXPECT(!this->m_gcur && !this->m_pcur))
-          // Don't bother do anything if neither the get area nor the put area exists.
+          // Don't bother doing anything if neither the get area nor the put area exists.
           return *this;
         else
           // Synchronize the get and put areas.
