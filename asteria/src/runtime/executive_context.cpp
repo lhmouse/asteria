@@ -58,7 +58,7 @@ const Abstract_Context* Executive_Context::do_get_parent_opt() const noexcept
     return this->get_parent_opt();
   }
 
-Reference* Executive_Context::do_allocate_reference_lazy_opt(Reference_Dictionary& named_refs, const phsh_string& name) const
+Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_refs, const phsh_string& name) const
   {
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.

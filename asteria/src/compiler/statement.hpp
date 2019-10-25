@@ -150,12 +150,12 @@ class Statement
     Xvariant m_stor;
 
   public:
-    template<typename XstmtT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XstmtT&&)> Statement(XstmtT&& stmt) noexcept
+    template<typename XstmtT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XstmtT&&)> Statement(XstmtT&& stmt)
       :
         m_stor(rocket::forward<XstmtT>(stmt))
       {
       }
-    template<typename XstmtT, ASTERIA_SFINAE_ASSIGN(Xvariant, XstmtT&&)> Statement& operator=(XstmtT&& stmt) noexcept
+    template<typename XstmtT, ASTERIA_SFINAE_ASSIGN(Xvariant, XstmtT&&)> Statement& operator=(XstmtT&& stmt)
       {
         this->m_stor = rocket::forward<XstmtT>(stmt);
         return *this;

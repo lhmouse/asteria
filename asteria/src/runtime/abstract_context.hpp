@@ -34,7 +34,7 @@ class Abstract_Context
   protected:
     virtual bool do_is_analytic() const noexcept = 0;
     virtual const Abstract_Context* do_get_parent_opt() const noexcept = 0;
-    virtual Reference* do_allocate_reference_lazy_opt(Reference_Dictionary& named_refs, const phsh_string& name) const = 0;
+    virtual Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs, const phsh_string& name) const = 0;
 
   public:
     bool is_analytic() const noexcept
@@ -51,7 +51,7 @@ class Abstract_Context
         auto qref = this->m_named_refs.get_opt(name);
         if(ROCKET_UNEXPECT(!qref)) {
           // Initialize builtins only when needed.
-          qref = this->do_allocate_reference_lazy_opt(this->m_named_refs, name);
+          qref = this->do_lazy_lookup_opt(this->m_named_refs, name);
         }
         return qref;
       }

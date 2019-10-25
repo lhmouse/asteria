@@ -36,12 +36,12 @@ class Value
         m_stor()  // Initialize to `null`.
       {
       }
-    template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XvalT&&)> Value(XvalT&& xval) noexcept
+    template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XvalT&&)> Value(XvalT&& xval)
       :
         m_stor(rocket::forward<XvalT>(xval))
       {
       }
-    template<typename XvalT, ASTERIA_SFINAE_ASSIGN(Xvariant, XvalT&&)> Value& operator=(XvalT&& xval) noexcept
+    template<typename XvalT, ASTERIA_SFINAE_ASSIGN(Xvariant, XvalT&&)> Value& operator=(XvalT&& xval)
       {
         this->m_stor = rocket::forward<XvalT>(xval);
         return *this;

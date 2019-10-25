@@ -28,7 +28,7 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
   protected:
     bool do_is_analytic() const noexcept override;
     const Abstract_Context* do_get_parent_opt() const noexcept override;
-    Reference* do_allocate_reference_lazy_opt(Reference_Dictionary& named_refs, const phsh_string& name) const override;
+    Reference* do_lazy_lookup_opt(Reference_Dictionary& named_refs, const phsh_string& name) const override;
 
   public:
     bool is_analytic() const noexcept

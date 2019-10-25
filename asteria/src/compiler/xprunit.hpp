@@ -99,12 +99,12 @@ class Xprunit
     Xvariant m_stor;
 
   public:
-    template<typename XunitT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XunitT&&)> Xprunit(XunitT&& unit) noexcept
+    template<typename XunitT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XunitT&&)> Xprunit(XunitT&& unit)
       :
         m_stor(rocket::forward<XunitT>(unit))
       {
       }
-    template<typename XunitT, ASTERIA_SFINAE_ASSIGN(Xvariant, XunitT&&)> Xprunit& operator=(XunitT&& unit) noexcept
+    template<typename XunitT, ASTERIA_SFINAE_ASSIGN(Xvariant, XunitT&&)> Xprunit& operator=(XunitT&& unit)
       {
         this->m_stor = rocket::forward<XunitT>(unit);
         return *this;
