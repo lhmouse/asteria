@@ -20,10 +20,10 @@ template<typename charT, typename traitsT, typename allocT>
     using traits_type     = traitsT;
     using allocator_type  = allocT;
 
-    using tinyfmt_type     = basic_tinyfmt<charT, traitsT>;
-    using tinybuf_type     = basic_tinybuf_file<charT, traitsT, allocT>;
-    using file_handle      = typename tinybuf_type::file_handle;
-    using closer_function  = typename tinybuf_type::closer_function;
+    using tinyfmt_type  = basic_tinyfmt<charT, traitsT>;
+    using tinybuf_type  = basic_tinybuf_file<charT, traitsT, allocT>;
+    using handle_type   = typename tinybuf_type::handle_type;
+    using closer_type   = typename tinybuf_type::closer_type;
 
     using seek_dir   = typename tinybuf_type::seek_dir;
     using open_mode  = typename tinybuf_type::open_mode;
@@ -45,7 +45,7 @@ template<typename charT, typename traitsT, typename allocT>
         m_buf(path, mode)
       {
       }
-    basic_tinyfmt_file(file_handle fp, closer_function* cl) noexcept
+    basic_tinyfmt_file(handle_type fp, closer_type cl) noexcept
       :
         m_buf(fp, cl)
       {
@@ -63,15 +63,15 @@ template<typename charT, typename traitsT, typename allocT>
         return this->m_buf;
       }
 
-    file_handle get_handle() const noexcept
+    handle_type get_handle() const noexcept
       {
         return this->m_buf.get_handle();
       }
-    closer_function* get_closer() const noexcept
+    closer_type get_closer() const noexcept
       {
         return this->m_buf.get_closer();
       }
-    basic_tinyfmt_file& reset(file_handle fp, closer_function* cl) noexcept
+    basic_tinyfmt_file& reset(handle_type fp, closer_type cl) noexcept
       {
         return this->m_buf.reset(fp, cl), *this;
       }

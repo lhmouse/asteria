@@ -15,50 +15,6 @@
 
 namespace Asteria {
 
-    namespace {
-
-    // This is used to close a native file handle when it is out of use.
-    struct File_Closer
-      {
-        constexpr int null() const noexcept
-          {
-            return -1;
-          }
-        constexpr bool is_null(int fd) const noexcept
-          {
-            return fd == -1;
-          }
-        void close(int fd) const noexcept
-          {
-            ::close(fd);
-          }
-      };
-    // This is the smart handle type.
-    // It is convertible to a native handle implicitly.
-    using File = rocket::unique_handle<decltype(File_Closer().null()), File_Closer>;
-
-    // This is used to close a native directory handle when it is out of use.
-    struct Directory_Closer
-      {
-        constexpr ::DIR* null() const noexcept
-          {
-            return nullptr;
-          }
-        constexpr bool is_null(::DIR* pd) const noexcept
-          {
-            return pd == nullptr;
-          }
-        void close(::DIR* pd) const noexcept
-          {
-            ::closedir(pd);
-          }
-      };
-    // This is the smart handle type.
-    // It is convertible to a native handle implicitly.
-    using Directory = rocket::unique_handle<decltype(Directory_Closer().null()), Directory_Closer>;
-
-    }  // namespace
-
 G_string std_filesystem_get_working_directory()
   {
     // Get the current directory, resizing the buffer as needed.
@@ -180,13 +136,13 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
       // is encountered for a second time, will all of its children have been removed.
       stack.emplace_back(rmlist_rmdir, pair.second);
       // Append all entries.
-      Directory hd(::opendir(pair.second.c_str()));
-      if(!hd) {
+      rocket::unique_dir dp(::opendir(pair.second.c_str()), ::closedir);
+      if(!dp) {
         return rocket::clear;
       }
       // Write entries.
       struct ::dirent* next;
-      while((next = ::readdir(hd)) != nullptr) {
+      while((next = ::readdir(dp)) != nullptr) {
         // Skip special entries.
         if(next->d_name[0] == '.') {
           if(next->d_name[1] == 0)  // "."
@@ -221,14 +177,14 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
 
 opt<G_object> std_filesystem_directory_list(const G_string& path)
   {
-    Directory hd(::opendir(path.c_str()));
-    if(!hd) {
+    rocket::unique_dir dp(::opendir(path.c_str()), closedir);
+    if(!dp) {
       return rocket::clear;
     }
     // Write entries.
     G_object entries;
     struct ::dirent* next;
-    while((next = ::readdir(hd)) != nullptr) {
+    while((next = ::readdir(dp)) != nullptr) {
       cow_string name;
       G_object entry;
       // Assume the name is in UTF-8.
@@ -317,8 +273,8 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
     int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
     G_string data;
     // Open the file for reading.
-    File hf(::open(path.c_str(), O_RDONLY));
-    if(!hf) {
+    rocket::unique_sysfile fd(::open(path.c_str(), O_RDONLY), ::close);
+    if(!fd) {
       return rocket::clear;
     }
     // Don't read too many bytes at a time.
@@ -326,11 +282,11 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
     ::ssize_t nread;
     if(offset) {
       // Read data from the offset specified.
-      nread = ::pread(hf, data.mut_data(), data.size(), roffset);
+      nread = ::pread(fd, data.mut_data(), data.size(), roffset);
     }
     else {
       // Read data from the beginning.
-      nread = ::read(hf, data.mut_data(), data.size());
+      nread = ::read(fd, data.mut_data(), data.size());
     }
     if(nread < 0) {
       return rocket::clear;
@@ -370,8 +326,8 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     int64_t nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
     G_string data;
     // Open the file for reading.
-    File hf(::open(path.c_str(), O_RDONLY));
-    if(!hf) {
+    rocket::unique_sysfile fd(::open(path.c_str(), O_RDONLY), ::close);
+    if(!fd) {
       return false;
     }
     for(;;) {
@@ -384,11 +340,11 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
       ::ssize_t nread;
       if(offset) {
         // Read data from the offset specified.
-        nread = ::pread(hf, data.mut_data(), data.size(), roffset);
+        nread = ::pread(fd, data.mut_data(), data.size(), roffset);
       }
       else {
         // Read data from the beginning.
-        nread = ::read(hf, data.mut_data(), data.size());
+        nread = ::read(fd, data.mut_data(), data.size());
       }
       if(nread < 0) {
         return false;
@@ -420,8 +376,8 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       flags |= O_TRUNC;
     }
     // Open the file for writing.
-    File hf(::open(path.c_str(), flags, 0666));
-    if(!hf) {
+    rocket::unique_sysfile fd(::open(path.c_str(), flags, 0666), ::close);
+    if(!fd) {
       return false;
     }
     // Set the file pointer when an offset is specified, even when it is an explicit zero.
@@ -429,7 +385,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       // If `roffset` is not zero, truncate the file there.
       // This also ensures it is a normal file (not a pipe or socket whatsoever).
       // Otherwise, the file will have been truncate at creation.
-      if(::ftruncate(hf, roffset) != 0)
+      if(::ftruncate(fd, roffset) != 0)
         return false;
     }
     for(;;) {
@@ -438,7 +394,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
         break;
       }
       // Write data to the end.
-      ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<size_t>(nremaining));
+      ::ssize_t nwritten = ::write(fd, data.data() + data.size() - nremaining, static_cast<size_t>(nremaining));
       if(nwritten < 0) {
         return false;
       }
@@ -458,8 +414,8 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       flags |= O_EXCL;
     }
     // Open the file for writing.
-    File hf(::open(path.c_str(), flags, 0666));
-    if(!hf) {
+    rocket::unique_sysfile fd(::open(path.c_str(), flags, 0666), ::close);
+    if(!fd) {
       return false;
     }
     for(;;) {
@@ -468,7 +424,7 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
         break;
       }
       // Write data to the end.
-      ::ssize_t nwritten = ::write(hf, data.data() + data.size() - nremaining, static_cast<size_t>(nremaining));
+      ::ssize_t nwritten = ::write(fd, data.data() + data.size() - nremaining, static_cast<size_t>(nremaining));
       if(nwritten < 0) {
         return false;
       }
@@ -480,7 +436,7 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
 bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& path_old)
   {
     // Open the old file.
-    File hf_old(::open(path_old.c_str(), O_RDONLY));
+    rocket::unique_sysfile hf_old(::open(path_old.c_str(), O_RDONLY), ::close);
     if(!hf_old) {
       return false;
     }
@@ -490,7 +446,7 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
       return false;
     }
     // Create the new file, discarding its contents.
-    File hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200));
+    rocket::unique_sysfile hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200), ::close);
     if(!hf_new) {
       // If the file cannot be opened, unlink it and try again.
       if((errno == EISDIR) || (::unlink(path_new.c_str()) != 0)) {

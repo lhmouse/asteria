@@ -6,7 +6,8 @@
 
 #include "tinybuf.hpp"
 #include "linear_buffer.hpp"
-#include "unique_handle.hpp"
+#include "unique_file.hpp"
+#include "unique_sysfile.hpp"
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::close()
 #include <stdio.h>  // ::fdopen(), ::fclose()
@@ -24,10 +25,10 @@ template<typename charT, typename traitsT, typename allocT>
     using traits_type     = traitsT;
     using allocator_type  = allocT;
 
-    using tinybuf_type     = basic_tinybuf<charT, traitsT>;
-    using file_buffer      = basic_linear_buffer<char_type, traits_type, allocator_type>;
-    using file_handle      = /*typename*/ std_file_closer::file_handle;
-    using closer_function  = /*typename*/ std_file_closer::closer_function;
+    using tinybuf_type  = basic_tinybuf<charT, traitsT>;
+    using file_buffer   = basic_linear_buffer<char_type, traits_type, allocator_type>;
+    using handle_type   = typename file_closer::handle_type;
+    using closer_type   = typename file_closer::closer_type;
 
     using seek_dir   = typename tinybuf_type::seek_dir;
     using open_mode  = typename tinybuf_type::open_mode;
@@ -39,7 +40,7 @@ template<typename charT, typename traitsT, typename allocT>
     basic_linear_buffer<char_type, traits_type, allocator_type> m_gbuf;  // input buffer
     off_type m_goff = -1;  // file position of the beginning of the input buffer
                            // [`-1` if the buffer is inactive; `-2` if the file is non-seekable.]
-    unique_std_file m_file = { nullptr, nullptr };  // file handle
+    unique_file m_file = { nullptr, nullptr };  // file handle
 
   public:
     basic_tinybuf_file() noexcept(is_nothrow_constructible<file_buffer>::value)
@@ -52,7 +53,7 @@ template<typename charT, typename traitsT, typename allocT>
         m_gbuf(alloc)
       {
       }
-    basic_tinybuf_file(file_handle fp, closer_function* cl, const allocator_type& alloc = allocator_type()) noexcept
+    basic_tinybuf_file(handle_type fp, closer_type cl, const allocator_type& alloc = allocator_type()) noexcept
       :
         basic_tinybuf_file(alloc)
       {
@@ -234,16 +235,16 @@ template<typename charT, typename traitsT, typename allocT>
       }
 
   public:
-    file_handle get_handle() const noexcept
+    handle_type get_handle() const noexcept
       {
         return this->m_file.get();
       }
-    closer_function* get_closer() const noexcept
+    closer_type get_closer() const noexcept
       {
         return this->m_file.get_closer();
       }
 
-    basic_tinybuf_file& reset(file_handle fp, closer_function* cl) noexcept
+    basic_tinybuf_file& reset(handle_type fp, closer_type cl) noexcept
       {
         this->do_purge_areas();
         // Discard the input buffer and reset the file handle, ignoring any errors.
@@ -293,13 +294,13 @@ template<typename charT, typename traitsT, typename allocT>
         }
         mstr[mlen] = 0;
         // Open the file.
-        unique_posix_file fd(::open(path, flags, 0666), ::close);
+        unique_sysfile fd(::open(path, flags, 0666), ::close);
         if(!fd) {
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: file open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
         }
         // Convert it to a `FILE*`.
-        unique_std_file fp(::fdopen(fd, mstr), ::fclose);
+        unique_file fp(::fdopen(fd, mstr), ::fclose);
         if(!fp) {
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: stream open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
