@@ -13,7 +13,6 @@ class tinynumput
   {
   private:
     // These pointers may point to static, immutable storage.
-    // They don't have type `const char*` for convenience.
     const char* m_bptr;
     const char* m_eptr;
     // This storage must be sufficient for the longest result, which at the moment
