@@ -16,8 +16,8 @@ class tinynumput
     const char* m_bptr;
     const char* m_eptr;
     // This storage must be sufficient for the longest result, which at the moment
-    // is signed 64-bit integer in binary (`-0b111...1` takes 67 bits), with a null
-    // terminator.
+    // is signed 64-bit integer in binary (`"-0b111...1"` takes 68 bytes along with
+    // the null terminator).
     // The size is a multiple of eight to prevent padding bytes.
     static constexpr size_t M = 71;
     char m_stor[M+1];
