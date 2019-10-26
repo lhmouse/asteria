@@ -60,7 +60,7 @@ void Random_Number_Generator::do_update() noexcept
 
     size_t do_read_random_device(void* data, size_t size) noexcept
       {
-        rocket::unique_sysfile fd(::open("/dev/urandom", O_RDONLY), ::close);
+        rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY), ::close);
         if(!fd) {
           return 0;
         }

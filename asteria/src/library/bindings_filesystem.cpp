@@ -136,7 +136,7 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
       // is encountered for a second time, will all of its children have been removed.
       stack.emplace_back(rmlist_rmdir, pair.second);
       // Append all entries.
-      rocket::unique_dir dp(::opendir(pair.second.c_str()), ::closedir);
+      rocket::unique_posix_dir dp(::opendir(pair.second.c_str()), ::closedir);
       if(!dp) {
         return rocket::clear;
       }
@@ -177,7 +177,7 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
 
 opt<G_object> std_filesystem_directory_list(const G_string& path)
   {
-    rocket::unique_dir dp(::opendir(path.c_str()), closedir);
+    rocket::unique_posix_dir dp(::opendir(path.c_str()), closedir);
     if(!dp) {
       return rocket::clear;
     }
@@ -273,7 +273,7 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
     int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
     G_string data;
     // Open the file for reading.
-    rocket::unique_sysfile fd(::open(path.c_str(), O_RDONLY), ::close);
+    rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
       return rocket::clear;
     }
@@ -326,7 +326,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
     int64_t nremaining = rocket::max(limit.value_or(INT64_MAX), 0);
     G_string data;
     // Open the file for reading.
-    rocket::unique_sysfile fd(::open(path.c_str(), O_RDONLY), ::close);
+    rocket::unique_posix_fd fd(::open(path.c_str(), O_RDONLY), ::close);
     if(!fd) {
       return false;
     }
@@ -376,7 +376,7 @@ bool std_filesystem_file_write(const G_string& path, const G_string& data, const
       flags |= O_TRUNC;
     }
     // Open the file for writing.
-    rocket::unique_sysfile fd(::open(path.c_str(), flags, 0666), ::close);
+    rocket::unique_posix_fd fd(::open(path.c_str(), flags, 0666), ::close);
     if(!fd) {
       return false;
     }
@@ -414,7 +414,7 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
       flags |= O_EXCL;
     }
     // Open the file for writing.
-    rocket::unique_sysfile fd(::open(path.c_str(), flags, 0666), ::close);
+    rocket::unique_posix_fd fd(::open(path.c_str(), flags, 0666), ::close);
     if(!fd) {
       return false;
     }
@@ -436,7 +436,7 @@ bool std_filesystem_file_append(const G_string& path, const G_string& data, cons
 bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& path_old)
   {
     // Open the old file.
-    rocket::unique_sysfile hf_old(::open(path_old.c_str(), O_RDONLY), ::close);
+    rocket::unique_posix_fd hf_old(::open(path_old.c_str(), O_RDONLY), ::close);
     if(!hf_old) {
       return false;
     }
@@ -446,7 +446,7 @@ bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& pat
       return false;
     }
     // Create the new file, discarding its contents.
-    rocket::unique_sysfile hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200), ::close);
+    rocket::unique_posix_fd hf_new(::open(path_new.c_str(), O_WRONLY | O_CREAT | O_TRUNC | O_APPEND, 0200), ::close);
     if(!hf_new) {
       // If the file cannot be opened, unlink it and try again.
       if((errno == EISDIR) || (::unlink(path_new.c_str()) != 0)) {

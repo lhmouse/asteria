@@ -52,7 +52,7 @@ class sysfile_closer
       }
   };
 
-using unique_sysfile  = unique_handle<int, sysfile_closer>;
+using unique_posix_fd  = unique_handle<int, sysfile_closer>;
 
 }  // namespace rocket
 

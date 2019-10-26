@@ -6,8 +6,8 @@
 
 #include "tinybuf.hpp"
 #include "linear_buffer.hpp"
-#include "unique_file.hpp"
-#include "unique_sysfile.hpp"
+#include "unique_posix_file.hpp"
+#include "unique_posix_fd.hpp"
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::close()
 #include <stdio.h>  // ::fdopen(), ::fclose()
@@ -40,7 +40,7 @@ template<typename charT, typename traitsT, typename allocT>
     basic_linear_buffer<char_type, traits_type, allocator_type> m_gbuf;  // input buffer
     off_type m_goff = -1;  // file position of the beginning of the input buffer
                            // [`-1` if the buffer is inactive; `-2` if the file is non-seekable.]
-    unique_file m_file = { nullptr, nullptr };  // file handle
+    unique_posix_file m_file = { nullptr, nullptr };  // file handle
 
   public:
     basic_tinybuf_file() noexcept(is_nothrow_constructible<file_buffer>::value)
@@ -294,13 +294,13 @@ template<typename charT, typename traitsT, typename allocT>
         }
         mstr[mlen] = 0;
         // Open the file.
-        unique_sysfile fd(::open(path, flags, 0666), ::close);
+        unique_posix_fd fd(::open(path, flags, 0666), ::close);
         if(!fd) {
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: file open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);
         }
         // Convert it to a `FILE*`.
-        unique_file fp(::fdopen(fd, mstr), ::fclose);
+        unique_posix_file fp(::fdopen(fd, mstr), ::fclose);
         if(!fp) {
           noadl::sprintf_and_throw<runtime_error>("tinybuf_file: stream open error (errno `%d`, path `%s`, mode `%u`)",
                                                   errno, path, mode);

@@ -45,9 +45,9 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/variant.hpp  \
   asteria/rocket/fill_iterator.hpp  \
   asteria/rocket/unique_handle.hpp  \
-  asteria/rocket/unique_file.hpp  \
-  asteria/rocket/unique_dir.hpp  \
-  asteria/rocket/unique_sysfile.hpp  \
+  asteria/rocket/unique_posix_file.hpp  \
+  asteria/rocket/unique_posix_dir.hpp  \
+  asteria/rocket/unique_posix_fd.hpp  \
   asteria/rocket/reference_counter.hpp  \
   asteria/rocket/char_traits.hpp  \
   asteria/rocket/cow_string.hpp  \

@@ -1,25 +1,25 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_UNIQUE_FILE_HPP_
-#define ROCKET_UNIQUE_FILE_HPP_
+#ifndef ROCKET_UNIQUE_DIR_HPP_
+#define ROCKET_UNIQUE_DIR_HPP_
 
 #include "unique_handle.hpp"
-#include <stdio.h>  // ::FILE, ::fclose()
+#include <dirent.h>  // ::DIR, ::closedir()
 
 namespace rocket {
 
-class file_closer
+class dir_closer
   {
   public:
-    using handle_type  = ::FILE*;
-    using closer_type  = decltype(::fclose)*;
+    using handle_type  = ::DIR*;
+    using closer_type  = decltype(::closedir)*;
 
   private:
     closer_type m_cl;
 
   public:
-    constexpr file_closer(closer_type cl) noexcept
+    constexpr dir_closer(closer_type cl) noexcept
       :
         m_cl(cl)
       {
@@ -30,29 +30,29 @@ class file_closer
       {
         return this->m_cl;
       }
-    int operator()(handle_type fp) const noexcept
+    int operator()(handle_type dp) const noexcept
       {
-        return this->close(fp);
+        return this->close(dp);
       }
 
     constexpr handle_type null() const noexcept
       {
         return nullptr;
       }
-    constexpr bool is_null(handle_type fp) const noexcept
+    constexpr bool is_null(handle_type dp) const noexcept
       {
-        return fp == nullptr;
+        return dp == nullptr;
       }
-    int close(handle_type fp) const noexcept
+    int close(handle_type dp) const noexcept
       {
         if(this->m_cl)
-          return this->m_cl(fp);
+          return this->m_cl(dp);
         else
           return 0;
       }
   };
 
-using unique_file  = unique_handle<::FILE*, file_closer>;
+using unique_posix_dir  = unique_handle<::DIR*, dir_closer>;
 
 }  // namespace rocket
 
