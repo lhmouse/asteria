@@ -67,7 +67,7 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
         valueT reg = value;
         while(reg != 0) {
           // Shift a digit out.
-          size_t dval = reg % radixT;
+          size_t dval = static_cast<size_t>(reg % radixT);
           reg /= radixT;
           // Write this digit.
           *(--bp) = "0123456789ABCDEF"[dval];
@@ -6455,7 +6455,7 @@ int main(void)
         char* tbp = begin(temps);
         while(reg != 0) {
           // Shift a digit out.
-          size_t dval = reg % 10;
+          size_t dval = static_cast<size_t>(reg % 10);
           reg /= 10;
           // Write this digit.
           *(tbp++) = static_cast<char>('0' + dval);
