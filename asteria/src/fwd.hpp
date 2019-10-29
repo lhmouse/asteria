@@ -34,16 +34,16 @@
 #include "../rocket/tinyfmt_file.hpp"
 
 // Macros
-#define ASTERIA_SFINAE_CONSTRUCT(...)    ROCKET_ENABLE_IF(::std::is_constructible<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
-#define ASTERIA_SFINAE_ASSIGN(...)       ROCKET_ENABLE_IF(::rocket::is_lvalue_assignable<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
-#define ASTERIA_SFINAE_CONVERT(...)      ROCKET_ENABLE_IF(::std::is_convertible<ROCKET_CAR(__VA_ARGS__), ROCKET_CDR(__VA_ARGS__)>::value)
+#define ASTERIA_SFINAE_CONSTRUCT(T_, ...)    ROCKET_ENABLE_IF(::std::is_constructible<T_, __VA_ARGS__>::value)
+#define ASTERIA_SFINAE_ASSIGN(T_, ...)       ROCKET_ENABLE_IF(::rocket::is_lvalue_assignable<T_, __VA_ARGS__>::value)
+#define ASTERIA_SFINAE_CONVERT(T_, ...)      ROCKET_ENABLE_IF(::std::is_convertible<T_, __VA_ARGS__>::value)
 
-#define ASTERIA_VOID_T(...)              typename ::rocket::make_void<__VA_ARGS__>::type
-#define ASTERIA_VOID_OF(...)             typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
+#define ASTERIA_VOID_T(...)        typename ::rocket::make_void<__VA_ARGS__>::type
+#define ASTERIA_VOID_OF(...)       typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
 
-#define ASTERIA_AND_(x_, y_)             (bool(x_) && bool(y_))
-#define ASTERIA_OR_(x_, y_)              (bool(x_) || bool(y_))
-#define ASTERIA_COMMA_(x_, y_)           (void(x_) ,      (y_))
+#define ASTERIA_AND_(x_, y_)          (bool(x_) && bool(y_))
+#define ASTERIA_OR_(x_, y_)           (bool(x_) || bool(y_))
+#define ASTERIA_COMMA_(x_, y_)        (void(x_) ,      (y_))
 
 namespace Asteria {
 
@@ -486,7 +486,7 @@ enum API_Version : uint32_t
   {
     api_version_none       = 0x00000000,  // no standard library
     api_version_0001_0000  = 0x00010000,  // version 1.0
-    api_version_sentinel /* auto inc */,  // [subtract one from this value to get the maximum version number]
+    api_version_sentinel /* auto inc */,  // [subtract one to get the maximum version number]
     api_version_latest     = 0xFFFFFFFF,  // everything
   };
 
@@ -494,11 +494,13 @@ enum API_Version : uint32_t
 template<uint32_t... paramsT> struct Compiler_Options_template;
 template<uint32_t fragmentT> struct Compiler_Options_fragment;
 
-template<uint32_t versionT> struct Compiler_Options_template<versionT> : Compiler_Options_template<versionT, versionT>
+template<uint32_t versionT>
+    struct Compiler_Options_template<versionT> : Compiler_Options_template<versionT, versionT>
   {
   };
-template<uint32_t versionT, uint32_t fragmentT> struct Compiler_Options_template<versionT, fragmentT> : Compiler_Options_template<versionT, fragmentT - 1>,
-                                                                                                        Compiler_Options_fragment<fragmentT>
+template<uint32_t versionT, uint32_t fragmentT>
+    struct Compiler_Options_template<versionT, fragmentT> : Compiler_Options_template<versionT, fragmentT - 1>,
+                                                            Compiler_Options_fragment<fragmentT>
   {
     // All members from `Compiler_Options_fragment<fragmentT>` have been brought in.
     // This struct does not define anything by itself.
