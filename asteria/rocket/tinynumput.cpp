@@ -59,16 +59,16 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
         return static_cast<typename make_unsigned<valueT>::type>(value);
       }
 
-    template<uint8_t radixT, typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
-        void do_xput_U_bkwd(char*& bp, const valueT& value, size_t precision = 1)
+    template<typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
+        void do_xput_U_bkwd(char*& bp, const valueT& value, uint8_t radix, size_t precision)
       {
         char* stop = bp - precision;
         // Write digits backwards.
         valueT reg = value;
         while(reg != 0) {
           // Shift a digit out.
-          size_t dval = static_cast<size_t>(reg % radixT);
-          reg /= radixT;
+          size_t dval = static_cast<size_t>(reg % radix);
+          reg /= radix;
           // Write this digit.
           *(--bp) = "0123456789ABCDEF"[dval];
         }
@@ -86,7 +86,7 @@ tinynumput& tinynumput::put_BU(uint32_t value, size_t precision) noexcept
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
-    do_xput_U_bkwd<2>(bp, value, precision);
+    do_xput_U_bkwd(bp, value, 2, precision);
     // Prepend the binary prefix.
     *(--bp) = 'b';
     *(--bp) = '0';
@@ -103,7 +103,7 @@ tinynumput& tinynumput::put_BQ(uint64_t value, size_t precision) noexcept
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
-    do_xput_U_bkwd<2>(bp, value, precision);
+    do_xput_U_bkwd(bp, value, 2, precision);
     // Prepend the binary prefix.
     *(--bp) = 'b';
     *(--bp) = '0';
@@ -120,7 +120,7 @@ tinynumput& tinynumput::put_DU(uint32_t value, size_t precision) noexcept
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
-    do_xput_U_bkwd<10>(bp, value, precision);
+    do_xput_U_bkwd(bp, value, 10, precision);
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -134,7 +134,7 @@ tinynumput& tinynumput::put_DQ(uint64_t value, size_t precision) noexcept
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
-    do_xput_U_bkwd<10>(bp, value, precision);
+    do_xput_U_bkwd(bp, value, 10, precision);
     // Set the string, which resides in the internal storage.
     this->m_bptr = bp;
     this->m_eptr = ep;
@@ -148,7 +148,7 @@ tinynumput& tinynumput::put_XU(uint32_t value, size_t precision) noexcept
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
-    do_xput_U_bkwd<16>(bp, value, precision);
+    do_xput_U_bkwd(bp, value, 16, precision);
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
     *(--bp) = '0';
@@ -165,7 +165,7 @@ tinynumput& tinynumput::put_XQ(uint64_t value, size_t precision) noexcept
     // Append a null terminator.
     *bp = 0;
     // Write digits backwards.
-    do_xput_U_bkwd<16>(bp, value, precision);
+    do_xput_U_bkwd(bp, value, 16, precision);
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
     *(--bp) = '0';
@@ -184,7 +184,7 @@ tinynumput& tinynumput::put_BI(int32_t value, size_t precision) noexcept
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<2>(bp, (do_cast_U(value) ^ sign) - sign, precision);
+    do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 2, precision);
     // Prepend the binary prefix.
     *(--bp) = 'b';
     *(--bp) = '0';
@@ -206,7 +206,7 @@ tinynumput& tinynumput::put_BL(int64_t value, size_t precision) noexcept
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<2>(bp, (do_cast_U(value) ^ sign) - sign, precision);
+    do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 2, precision);
     // Prepend the binary prefix.
     *(--bp) = 'b';
     *(--bp) = '0';
@@ -228,7 +228,7 @@ tinynumput& tinynumput::put_DI(int32_t value, size_t precision) noexcept
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<10>(bp, (do_cast_U(value) ^ sign) - sign, precision);
+    do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 10, precision);
     // If the number is negative, prepend a minus sign.
     if(sign)
       *(--bp) = '-';
@@ -247,7 +247,7 @@ tinynumput& tinynumput::put_DL(int64_t value, size_t precision) noexcept
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<10>(bp, (do_cast_U(value) ^ sign) - sign, precision);
+    do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 10, precision);
     // If the number is negative, prepend a minus sign.
     if(sign)
       *(--bp) = '-';
@@ -266,7 +266,7 @@ tinynumput& tinynumput::put_XI(int32_t value, size_t precision) noexcept
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint32_t sign = do_cast_U(value >> 31);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<16>(bp, (do_cast_U(value) ^ sign) - sign, precision);
+    do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 16, precision);
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
     *(--bp) = '0';
@@ -288,7 +288,7 @@ tinynumput& tinynumput::put_XL(int64_t value, size_t precision) noexcept
     // Extend the sign bit to a word, assuming arithmetic shift.
     uint64_t sign = do_cast_U(value >> 63);
     // Write digits backwards using its absolute value without causing overflows.
-    do_xput_U_bkwd<16>(bp, (do_cast_U(value) ^ sign) - sign, precision);
+    do_xput_U_bkwd(bp, (do_cast_U(value) ^ sign) - sign, 16, precision);
     // Prepend the hexadecimal prefix.
     *(--bp) = 'x';
     *(--bp) = '0';
@@ -389,7 +389,7 @@ tinynumput& tinynumput::put_XL(int64_t value, size_t precision) noexcept
         // The exponent shall contain at least two digits.
         char temps[8];
         char* tbp = end(temps);
-        do_xput_U_bkwd<10>(tbp, do_cast_U(::std::abs(exp)), 2);
+        do_xput_U_bkwd(tbp, do_cast_U(::std::abs(exp)), 10, 2);
         // Append the exponent.
         noadl::ranged_for(tbp, end(temps), [&](const char* p) { *(ep++) = *p;  });
         return ep;
