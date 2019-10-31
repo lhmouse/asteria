@@ -35,6 +35,35 @@ class tinynumput
       }
 
   public:
+    // accessors
+    const char* begin() const noexcept
+      {
+        return this->m_bptr;
+      }
+    const char* end() const noexcept
+      {
+        return this->m_eptr;
+      }
+    bool empty() const noexcept
+      {
+        return this->m_bptr == this->m_eptr;
+      }
+    size_t size() const noexcept
+      {
+        return static_cast<size_t>(this->m_eptr - this->m_bptr);
+      }
+    const char* data() const noexcept
+      {
+        return this->m_bptr;
+      }
+    tinynumput& clear() noexcept
+      {
+        this->m_bptr = this->m_stor;
+        this->m_eptr = this->m_stor;
+        this->m_stor[0] = 0;
+        return *this;
+      }
+
     // explicit formatters
     // * boolean
     tinynumput& put_TB(bool value) noexcept;
@@ -76,35 +105,6 @@ class tinynumput
     tinynumput& put_DF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in decimal scientific notation
     tinynumput& put_DE(double value) noexcept;
-
-    // accessors
-    const char* begin() const noexcept
-      {
-        return this->m_bptr;
-      }
-    const char* end() const noexcept
-      {
-        return this->m_eptr;
-      }
-    bool empty() const noexcept
-      {
-        return this->m_bptr == this->m_eptr;
-      }
-    size_t size() const noexcept
-      {
-        return static_cast<size_t>(this->m_eptr - this->m_bptr);
-      }
-    const char* data() const noexcept
-      {
-        return this->m_bptr;
-      }
-    tinynumput& clear() noexcept
-      {
-        this->m_bptr = this->m_stor;
-        this->m_eptr = this->m_stor;
-        this->m_stor[0] = 0;
-        return *this;
-      }
 
     // default formatters
     tinynumput& put(bool value) noexcept
