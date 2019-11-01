@@ -69,30 +69,18 @@ class tinynumput
     tinynumput& put_TB(bool value) noexcept;
     // * pointer
     tinynumput& put_XP(const void* value) noexcept;
-    // * unsigned 32-bit integer in binary
-    tinynumput& put_BU(uint32_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in binary
-    tinynumput& put_BQ(uint64_t value, size_t precision = 1) noexcept;
-    // * unsigned 32-bit integer in decimal
-    tinynumput& put_DU(uint32_t value, size_t precision = 1) noexcept;
+    tinynumput& put_BU(uint64_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in decimal
-    tinynumput& put_DQ(uint64_t value, size_t precision = 1) noexcept;
-    // * unsigned 32-bit integer in hexadecimal
-    tinynumput& put_XU(uint32_t value, size_t precision = 1) noexcept;
+    tinynumput& put_DU(uint64_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in hexadecimal
-    tinynumput& put_XQ(uint64_t value, size_t precision = 1) noexcept;
-    // * signed 32-bit integer in binary
-    tinynumput& put_BI(int32_t value, size_t precision = 1) noexcept;
+    tinynumput& put_XU(uint64_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in binary
-    tinynumput& put_BL(int64_t value, size_t precision = 1) noexcept;
-    // * signed 32-bit integer in decimal
-    tinynumput& put_DI(int32_t value, size_t precision = 1) noexcept;
+    tinynumput& put_BI(int64_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in decimal
-    tinynumput& put_DL(int64_t value, size_t precision = 1) noexcept;
-    // * signed 32-bit integer in hexadecimal
-    tinynumput& put_XI(int32_t value, size_t precision = 1) noexcept;
+    tinynumput& put_DI(int64_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in hexadecimal
-    tinynumput& put_XL(int64_t value, size_t precision = 1) noexcept;
+    tinynumput& put_XI(int64_t value, size_t precision = 1) noexcept;
     // * IEEE-754 double-precision floating-point in binary
     tinynumput& put_BF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in binary scientific notation
@@ -141,19 +129,19 @@ class tinynumput
       }
     tinynumput& put(unsigned long value) noexcept
       {
-        return this->put_DQ(value);
+        return this->put_DU(value);
       }
     tinynumput& put(signed long value) noexcept
       {
-        return this->put_DL(value);
+        return this->put_DI(value);
       }
     tinynumput& put(unsigned long long value) noexcept
       {
-        return this->put_DQ(value);
+        return this->put_DU(value);
       }
     tinynumput& put(signed long long value) noexcept
       {
-        return this->put_DL(value);
+        return this->put_DI(value);
       }
     tinynumput& put(float value) noexcept
       {
