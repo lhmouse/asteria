@@ -71,16 +71,16 @@ class tinynumput
     tinynumput& put_XP(const void* value) noexcept;
     // * unsigned 64-bit integer in binary
     tinynumput& put_BU(uint64_t value, size_t precision = 1) noexcept;
-    // * unsigned 64-bit integer in decimal
-    tinynumput& put_DU(uint64_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in hexadecimal
     tinynumput& put_XU(uint64_t value, size_t precision = 1) noexcept;
+    // * unsigned 64-bit integer in decimal
+    tinynumput& put_DU(uint64_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in binary
     tinynumput& put_BI(int64_t value, size_t precision = 1) noexcept;
-    // * signed 64-bit integer in decimal
-    tinynumput& put_DI(int64_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in hexadecimal
     tinynumput& put_XI(int64_t value, size_t precision = 1) noexcept;
+    // * signed 64-bit integer in decimal
+    tinynumput& put_DI(int64_t value, size_t precision = 1) noexcept;
     // * IEEE-754 double-precision floating-point in binary
     tinynumput& put_BF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in binary scientific notation
