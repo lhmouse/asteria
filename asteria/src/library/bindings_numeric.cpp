@@ -440,13 +440,13 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
     case 2:
       {
         if(!ebase) {
-          nump.put_BL(value);  // binary, long
+          nump.put_BI(value);  // binary, long
           text.append(nump.begin(), nump.end());
           break;
         }
         if(*ebase == 2) {
           auto p = do_decompose_integer(2, value);
-          nump.put_BL(p.first);  // binary, long
+          nump.put_BI(p.first);  // binary, long
           text.append(nump.begin(), nump.end());
           do_append_exponent(text, nump, 'p', p.second);
           break;
@@ -456,13 +456,13 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
     case 16:
       {
         if(!ebase) {
-          nump.put_XL(value);  // hexadecimal, long
+          nump.put_XI(value);  // hexadecimal, long
           text.append(nump.begin(), nump.end());
           break;
         }
         if(*ebase == 2) {
           auto p = do_decompose_integer(2, value);
-          nump.put_XL(p.first);  // hexadecimal, long
+          nump.put_XI(p.first);  // hexadecimal, long
           text.append(nump.begin(), nump.end());
           do_append_exponent(text, nump, 'p', p.second);
           break;
@@ -472,20 +472,20 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
     case 10:
       {
         if(!ebase) {
-          nump.put_DL(value);  // decimal, long
+          nump.put_DI(value);  // decimal, long
           text.append(nump.begin(), nump.end());
           break;
         }
         if(*ebase == 2) {
           auto p = do_decompose_integer(2, value);
-          nump.put_DL(p.first);  // decimal, long
+          nump.put_DI(p.first);  // decimal, long
           text.append(nump.begin(), nump.end());
           do_append_exponent(text, nump, 'p', p.second);
           break;
         }
         if(*ebase == 10) {
           auto p = do_decompose_integer(10, value);
-          nump.put_DL(p.first);  // decimal, long
+          nump.put_DI(p.first);  // decimal, long
           text.append(nump.begin(), nump.end());
           do_append_exponent(text, nump, 'e', p.second);
           break;
