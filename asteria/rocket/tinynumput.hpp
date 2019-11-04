@@ -94,7 +94,7 @@ class tinynumput
     // * IEEE-754 double-precision floating-point in decimal scientific notation
     tinynumput& put_DE(double value) noexcept;
 
-    // default formatters
+    // default format functions
     tinynumput& put(bool value) noexcept
       {
         return this->put_TB(value);
