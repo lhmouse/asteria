@@ -9,6 +9,7 @@ namespace rocket {
 
 ascii_numput& ascii_numput::put_TB(bool value) noexcept
   {
+    this->clear();
     char* bp;
     char* ep;
     // Get the template string literal. The string is immutable.
@@ -28,6 +29,7 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
 
 ascii_numput& ascii_numput::put_XP(const void* value) noexcept
   {
+    this->clear();
     char* bp = this->m_stor;
     char* ep = bp;
     // Write the hexadecimal prefix.
@@ -82,6 +84,7 @@ ascii_numput& ascii_numput::put_XP(const void* value) noexcept
 
 ascii_numput& ascii_numput::put_BU(uint64_t value, size_t precision) noexcept
   {
+    this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Append a null terminator.
@@ -99,6 +102,7 @@ ascii_numput& ascii_numput::put_BU(uint64_t value, size_t precision) noexcept
 
 ascii_numput& ascii_numput::put_XU(uint64_t value, size_t precision) noexcept
   {
+    this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Append a null terminator.
@@ -116,6 +120,7 @@ ascii_numput& ascii_numput::put_XU(uint64_t value, size_t precision) noexcept
 
 ascii_numput& ascii_numput::put_DU(uint64_t value, size_t precision) noexcept
   {
+    this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Append a null terminator.
@@ -130,6 +135,7 @@ ascii_numput& ascii_numput::put_DU(uint64_t value, size_t precision) noexcept
 
 ascii_numput& ascii_numput::put_BI(int64_t value, size_t precision) noexcept
   {
+    this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Append a null terminator.
@@ -152,6 +158,7 @@ ascii_numput& ascii_numput::put_BI(int64_t value, size_t precision) noexcept
 
 ascii_numput& ascii_numput::put_XI(int64_t value, size_t precision) noexcept
   {
+    this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Append a null terminator.
@@ -174,6 +181,7 @@ ascii_numput& ascii_numput::put_XI(int64_t value, size_t precision) noexcept
 
 ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
   {
+    this->clear();
     char* bp = this->m_stor + M;
     char* ep = bp;
     // Append a null terminator.
@@ -289,6 +297,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
 
 ascii_numput& ascii_numput::put_BF(double value) noexcept
   {
+    this->clear();
     char* bp;
     char* ep;
     // Extract the sign bit and extend it to a word.
@@ -342,6 +351,7 @@ ascii_numput& ascii_numput::put_BF(double value) noexcept
 
 ascii_numput& ascii_numput::put_BE(double value) noexcept
   {
+    this->clear();
     char* bp;
     char* ep;
     // Extract the sign bit and extend it to a word.
@@ -381,6 +391,7 @@ ascii_numput& ascii_numput::put_BE(double value) noexcept
 
 ascii_numput& ascii_numput::put_XF(double value) noexcept
   {
+    this->clear();
     char* bp;
     char* ep;
     // Extract the sign bit and extend it to a word.
@@ -437,6 +448,7 @@ ascii_numput& ascii_numput::put_XF(double value) noexcept
 
 ascii_numput& ascii_numput::put_XE(double value) noexcept
   {
+    this->clear();
     char* bp;
     char* ep;
     // Extract the sign bit and extend it to a word.
@@ -6369,6 +6381,7 @@ int main(void)
 
 ascii_numput& ascii_numput::put_DF(double value) noexcept
   {
+    this->clear();
     char* bp;
     char* ep;
     // Extract the sign bit and extend it to a word.
@@ -6419,6 +6432,7 @@ ascii_numput& ascii_numput::put_DF(double value) noexcept
 
 ascii_numput& ascii_numput::put_DE(double value) noexcept
   {
+    this->clear();
     char* bp;
     char* ep;
     // Extract the sign bit and extend it to a word.
