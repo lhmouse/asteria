@@ -97,59 +97,31 @@ class tinynumput
     // default format functions
     tinynumput& put(bool value) noexcept
       {
-        return this->put_TB(value);
+        this->put_TB(value);
+        return *this;
       }
     tinynumput& put(const void* value) noexcept
       {
-        return this->put_XP(value);
+        this->put_XP(value);
+        return *this;
       }
-    tinynumput& put(unsigned char value) noexcept
+    template<typename valueT, ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
+        tinynumput& put(const valueT& value) noexcept
       {
-        return this->put_DU(value);
+        this->put_DU(value);
+        return *this;
       }
-    tinynumput& put(signed char value) noexcept
+    template<typename valueT, ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
+        tinynumput& put(const valueT& value) noexcept
       {
-        return this->put_DI(value);
+        this->put_DI(value);
+        return *this;
       }
-    tinynumput& put(unsigned short value) noexcept
+    template<typename valueT, ROCKET_ENABLE_IF(is_floating_point<valueT>::value)>
+        tinynumput& put(const valueT& value) noexcept
       {
-        return this->put_DU(value);
-      }
-    tinynumput& put(signed short value) noexcept
-      {
-        return this->put_DI(value);
-      }
-    tinynumput& put(unsigned value) noexcept
-      {
-        return this->put_DU(value);
-      }
-    tinynumput& put(signed value) noexcept
-      {
-        return this->put_DI(value);
-      }
-    tinynumput& put(unsigned long value) noexcept
-      {
-        return this->put_DU(value);
-      }
-    tinynumput& put(signed long value) noexcept
-      {
-        return this->put_DI(value);
-      }
-    tinynumput& put(unsigned long long value) noexcept
-      {
-        return this->put_DU(value);
-      }
-    tinynumput& put(signed long long value) noexcept
-      {
-        return this->put_DI(value);
-      }
-    tinynumput& put(float value) noexcept
-      {
-        return this->put_DF(value);
-      }
-    tinynumput& put(double value) noexcept
-      {
-        return this->put_DF(value);
+        this->put_DF(value);
+        return *this;
       }
   };
 
