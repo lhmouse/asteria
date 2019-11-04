@@ -27,8 +27,8 @@ template<typename charT, typename traitsT, typename allocT>
 
     using tinybuf_type  = basic_tinybuf<charT, traitsT>;
     using file_buffer   = basic_linear_buffer<char_type, traits_type, allocator_type>;
-    using handle_type   = typename file_closer::handle_type;
-    using closer_type   = typename file_closer::closer_type;
+    using handle_type   = typename posix_file_closer::handle_type;
+    using closer_type   = typename posix_file_closer::closer_type;
 
     using seek_dir   = typename tinybuf_type::seek_dir;
     using open_mode  = typename tinybuf_type::open_mode;

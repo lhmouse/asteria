@@ -1,15 +1,15 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_UNIQUE_FILE_HPP_
-#define ROCKET_UNIQUE_FILE_HPP_
+#ifndef ROCKET_UNIQUE_POSIX_FILE_HPP_
+#define ROCKET_UNIQUE_POSIX_FILE_HPP_
 
 #include "unique_handle.hpp"
 #include <stdio.h>  // ::FILE, ::fclose()
 
 namespace rocket {
 
-class file_closer
+class posix_file_closer
   {
   public:
     using handle_type  = ::FILE*;
@@ -19,7 +19,7 @@ class file_closer
     closer_type m_cl;
 
   public:
-    constexpr file_closer(closer_type cl) noexcept
+    constexpr posix_file_closer(closer_type cl) noexcept
       :
         m_cl(cl)
       {
@@ -52,7 +52,7 @@ class file_closer
       }
   };
 
-using unique_posix_file  = unique_handle<::FILE*, file_closer>;
+using unique_posix_file  = unique_handle<::FILE*, posix_file_closer>;
 
 }  // namespace rocket
 

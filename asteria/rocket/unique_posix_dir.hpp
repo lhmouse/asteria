@@ -1,15 +1,15 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_UNIQUE_DIR_HPP_
-#define ROCKET_UNIQUE_DIR_HPP_
+#ifndef ROCKET_UNIQUE_POSIX_DIR_HPP_
+#define ROCKET_UNIQUE_POSIX_DIR_HPP_
 
 #include "unique_handle.hpp"
 #include <dirent.h>  // ::DIR, ::closedir()
 
 namespace rocket {
 
-class dir_closer
+class posix_dir_closer
   {
   public:
     using handle_type  = ::DIR*;
@@ -19,7 +19,7 @@ class dir_closer
     closer_type m_cl;
 
   public:
-    constexpr dir_closer(closer_type cl) noexcept
+    constexpr posix_dir_closer(closer_type cl) noexcept
       :
         m_cl(cl)
       {
@@ -52,7 +52,7 @@ class dir_closer
       }
   };
 
-using unique_posix_dir  = unique_handle<::DIR*, dir_closer>;
+using unique_posix_dir  = unique_handle<::DIR*, posix_dir_closer>;
 
 }  // namespace rocket
 
