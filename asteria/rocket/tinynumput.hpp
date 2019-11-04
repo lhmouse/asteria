@@ -64,7 +64,7 @@ class tinynumput
         return *this;
       }
 
-    // explicit formatters
+    // explicit format functions
     // * boolean
     tinynumput& put_TB(bool value) noexcept;
     // * pointer
