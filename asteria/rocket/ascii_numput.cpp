@@ -2,6 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "ascii_numput.hpp"
+#include "assert.hpp"
 #include <cmath>
 
 namespace rocket {

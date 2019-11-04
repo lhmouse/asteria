@@ -5,7 +5,6 @@
 #define ROCKET_ASCII_NUMPUT_HPP_
 
 #include "utilities.hpp"
-#include "assert.hpp"
 
 namespace rocket {
 
