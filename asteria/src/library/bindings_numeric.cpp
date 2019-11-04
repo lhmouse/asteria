@@ -415,7 +415,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return std::make_pair(ireg, iexp);
       }
 
-    G_string& do_append_exponent(G_string& text, rocket::tinynumput& nump, char delim, int exp)
+    G_string& do_append_exponent(G_string& text, rocket::ascii_numput& nump, char delim, int exp)
       {
         // Write the delimiter.
         text.push_back(delim);
@@ -434,7 +434,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
 G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
   {
     G_string text;
-    rocket::tinynumput nump;
+    rocket::ascii_numput nump;
 
     switch(base.value_or(10)) {
     case 2:
@@ -501,7 +501,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
 G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
   {
     G_string text;
-    rocket::tinynumput nump;
+    rocket::ascii_numput nump;
 
     switch(base.value_or(10)) {
     case 2:

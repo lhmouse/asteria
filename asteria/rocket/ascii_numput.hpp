@@ -1,15 +1,15 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_TINYNUMPUT_HPP_
-#define ROCKET_TINYNUMPUT_HPP_
+#ifndef ROCKET_ASCII_NUMPUT_HPP_
+#define ROCKET_ASCII_NUMPUT_HPP_
 
 #include "utilities.hpp"
 #include "assert.hpp"
 
 namespace rocket {
 
-class tinynumput
+class ascii_numput
   {
   private:
     // These pointers may point to static, immutable storage.
@@ -24,12 +24,12 @@ class tinynumput
     char m_stor[M+1];
 
   public:
-    tinynumput() noexcept
+    ascii_numput() noexcept
       {
         this->clear();
       }
     template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
-        explicit tinynumput(const valueT& value) noexcept
+        explicit ascii_numput(const valueT& value) noexcept
       {
         this->put(value);
       }
@@ -56,7 +56,7 @@ class tinynumput
       {
         return this->m_bptr;
       }
-    tinynumput& clear() noexcept
+    ascii_numput& clear() noexcept
       {
         this->m_bptr = this->m_stor;
         this->m_eptr = this->m_stor;
@@ -66,59 +66,59 @@ class tinynumput
 
     // explicit format functions
     // * boolean
-    tinynumput& put_TB(bool value) noexcept;
+    ascii_numput& put_TB(bool value) noexcept;
     // * pointer
-    tinynumput& put_XP(const void* value) noexcept;
+    ascii_numput& put_XP(const void* value) noexcept;
     // * unsigned 64-bit integer in binary
-    tinynumput& put_BU(uint64_t value, size_t precision = 1) noexcept;
+    ascii_numput& put_BU(uint64_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in hexadecimal
-    tinynumput& put_XU(uint64_t value, size_t precision = 1) noexcept;
+    ascii_numput& put_XU(uint64_t value, size_t precision = 1) noexcept;
     // * unsigned 64-bit integer in decimal
-    tinynumput& put_DU(uint64_t value, size_t precision = 1) noexcept;
+    ascii_numput& put_DU(uint64_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in binary
-    tinynumput& put_BI(int64_t value, size_t precision = 1) noexcept;
+    ascii_numput& put_BI(int64_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in hexadecimal
-    tinynumput& put_XI(int64_t value, size_t precision = 1) noexcept;
+    ascii_numput& put_XI(int64_t value, size_t precision = 1) noexcept;
     // * signed 64-bit integer in decimal
-    tinynumput& put_DI(int64_t value, size_t precision = 1) noexcept;
+    ascii_numput& put_DI(int64_t value, size_t precision = 1) noexcept;
     // * IEEE-754 double-precision floating-point in binary
-    tinynumput& put_BF(double value) noexcept;
+    ascii_numput& put_BF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in binary scientific notation
-    tinynumput& put_BE(double value) noexcept;
+    ascii_numput& put_BE(double value) noexcept;
     // * IEEE-754 double-precision floating-point in hexadecimal
-    tinynumput& put_XF(double value) noexcept;
+    ascii_numput& put_XF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in hexadecimal scientific notation
-    tinynumput& put_XE(double value) noexcept;
+    ascii_numput& put_XE(double value) noexcept;
     // * IEEE-754 double-precision floating-point in decimal
-    tinynumput& put_DF(double value) noexcept;
+    ascii_numput& put_DF(double value) noexcept;
     // * IEEE-754 double-precision floating-point in decimal scientific notation
-    tinynumput& put_DE(double value) noexcept;
+    ascii_numput& put_DE(double value) noexcept;
 
     // default format functions
-    tinynumput& put(bool value) noexcept
+    ascii_numput& put(bool value) noexcept
       {
         this->put_TB(value);
         return *this;
       }
-    tinynumput& put(const void* value) noexcept
+    ascii_numput& put(const void* value) noexcept
       {
         this->put_XP(value);
         return *this;
       }
     template<typename valueT, ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
-        tinynumput& put(const valueT& value) noexcept
+        ascii_numput& put(const valueT& value) noexcept
       {
         this->put_DU(value);
         return *this;
       }
     template<typename valueT, ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
-        tinynumput& put(const valueT& value) noexcept
+        ascii_numput& put(const valueT& value) noexcept
       {
         this->put_DI(value);
         return *this;
       }
     template<typename valueT, ROCKET_ENABLE_IF(is_floating_point<valueT>::value)>
-        tinynumput& put(const valueT& value) noexcept
+        ascii_numput& put(const valueT& value) noexcept
       {
         this->put_DF(value);
         return *this;

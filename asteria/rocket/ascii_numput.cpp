@@ -1,12 +1,12 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#include "tinynumput.hpp"
+#include "ascii_numput.hpp"
 #include <cmath>
 
 namespace rocket {
 
-tinynumput& tinynumput::put_TB(bool value) noexcept
+ascii_numput& ascii_numput::put_TB(bool value) noexcept
   {
     char* bp;
     char* ep;
@@ -25,7 +25,7 @@ tinynumput& tinynumput::put_TB(bool value) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_XP(const void* value) noexcept
+ascii_numput& ascii_numput::put_XP(const void* value) noexcept
   {
     char* bp = this->m_stor;
     char* ep = bp;
@@ -79,7 +79,7 @@ tinynumput& tinynumput::put_XP(const void* value) noexcept
 
     }  // namespace
 
-tinynumput& tinynumput::put_BU(uint64_t value, size_t precision) noexcept
+ascii_numput& ascii_numput::put_BU(uint64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
@@ -96,7 +96,7 @@ tinynumput& tinynumput::put_BU(uint64_t value, size_t precision) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_XU(uint64_t value, size_t precision) noexcept
+ascii_numput& ascii_numput::put_XU(uint64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
@@ -113,7 +113,7 @@ tinynumput& tinynumput::put_XU(uint64_t value, size_t precision) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_DU(uint64_t value, size_t precision) noexcept
+ascii_numput& ascii_numput::put_DU(uint64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
@@ -127,7 +127,7 @@ tinynumput& tinynumput::put_DU(uint64_t value, size_t precision) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_BI(int64_t value, size_t precision) noexcept
+ascii_numput& ascii_numput::put_BI(int64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
@@ -149,7 +149,7 @@ tinynumput& tinynumput::put_BI(int64_t value, size_t precision) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_XI(int64_t value, size_t precision) noexcept
+ascii_numput& ascii_numput::put_XI(int64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
@@ -171,7 +171,7 @@ tinynumput& tinynumput::put_XI(int64_t value, size_t precision) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_DI(int64_t value, size_t precision) noexcept
+ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
   {
     char* bp = this->m_stor + M;
     char* ep = bp;
@@ -286,7 +286,7 @@ tinynumput& tinynumput::put_DI(int64_t value, size_t precision) noexcept
 
     }  // namespace
 
-tinynumput& tinynumput::put_BF(double value) noexcept
+ascii_numput& ascii_numput::put_BF(double value) noexcept
   {
     char* bp;
     char* ep;
@@ -339,7 +339,7 @@ tinynumput& tinynumput::put_BF(double value) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_BE(double value) noexcept
+ascii_numput& ascii_numput::put_BE(double value) noexcept
   {
     char* bp;
     char* ep;
@@ -378,7 +378,7 @@ tinynumput& tinynumput::put_BE(double value) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_XF(double value) noexcept
+ascii_numput& ascii_numput::put_XF(double value) noexcept
   {
     char* bp;
     char* ep;
@@ -434,7 +434,7 @@ tinynumput& tinynumput::put_XF(double value) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_XE(double value) noexcept
+ascii_numput& ascii_numput::put_XE(double value) noexcept
   {
     char* bp;
     char* ep;
@@ -6366,7 +6366,7 @@ int main(void)
 
     }  // namespace
 
-tinynumput& tinynumput::put_DF(double value) noexcept
+ascii_numput& ascii_numput::put_DF(double value) noexcept
   {
     char* bp;
     char* ep;
@@ -6416,7 +6416,7 @@ tinynumput& tinynumput::put_DF(double value) noexcept
     return *this;
   }
 
-tinynumput& tinynumput::put_DE(double value) noexcept
+ascii_numput& ascii_numput::put_DE(double value) noexcept
   {
     char* bp;
     char* ep;

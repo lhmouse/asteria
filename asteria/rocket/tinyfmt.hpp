@@ -7,7 +7,7 @@
 #include "utilities.hpp"
 #include "throw.hpp"
 #include "tinybuf.hpp"
-#include "tinynumput.hpp"
+#include "ascii_numput.hpp"
 
 namespace rocket {
 
@@ -94,14 +94,14 @@ template<typename charT, typename traitsT>
 
 // conversion inserters
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const tinynumput& nump)
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const ascii_numput& nump)
   {
     // Widen all characters and insert them.
     auto& buf = fmt.get_tinybuf();
     noadl::for_each(nump, [&](char c) { buf.putc(traitsT::to_char_type(c & 0xFF));  });
     return fmt;
   }
-inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const tinynumput& nump)
+inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const ascii_numput& nump)
   {
     // Optimize it a bit if no conversion is required.
     auto& buf = fmt.get_tinybuf();
@@ -114,18 +114,18 @@ template<typename charT, typename traitsT, typename valueT,
          ROCKET_ENABLE_IF(is_arithmetic<valueT>::value)>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
   {
-    return fmt << tinynumput(value);
+    return fmt << ascii_numput(value);
   }
 template<typename charT, typename traitsT, typename valueT,
          ROCKET_ENABLE_IF(is_enum<valueT>::value)>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
   {
-    return fmt << tinynumput(static_cast<typename underlying_type<valueT>::type>(value));
+    return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));
   }
 template<typename charT, typename traitsT, typename valueT>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
   {
-    return fmt << tinynumput(static_cast<const void*>(value));
+    return fmt << ascii_numput(static_cast<const void*>(value));
   }
 
 // rvalue inserter
