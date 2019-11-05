@@ -510,30 +510,40 @@ void do_print_one(int m, int e)
     int bexp, uoff;
     long long mant;
 
-    // Raise the value `m` to the power `e` of ten.
-    value = m * powq(10, e);
-    // Break it down into the fraction and exponent.
-    frac = frexpq(value, &bexp);
-    // Truncate the fraction to 53 bits. Do not round it.
-    frac = ldexpq(frac, 53);
-    mant = (long long)frac;
-    bexp = bexp - 1;
-    // Print the higher part in fixed-point format.
-    printf("\t{ 0x1.%.13llXp%+.4d, ",
-           mant & 0xFFFFFFFFFFFFF, bexp);
-    // Subtract the higher part to get the lower part.
-    frac = ldexpq(frac - mant, 53);
-    mant = (long long)frac;
-    bexp = bexp - 53;
-    // Truncate it to zero in case of underflows.
-    // Note: The purpose of this operation is solely to
-    //       silence compilers that warn about truncation.
-    uoff = -1023 - bexp;
-    if(uoff >= 0 && (uoff > 63 || mant >> uoff == 0))
-      mant = 0;
-    // Print the lower part in fixed-point format.
-    printf(" 0x0.%.14llXp%+.4d }, ",
-           (mant << 3) & 0xFFFFFFFFFFFFF8, bexp + 1);
+    if(e <= -324 && m < 3) {
+      // The value is too small for `double`.
+      printf("\t{ %1$23s,  %1$24s }, ", "0");
+    }
+    else if(e >= +308 && m > 1) {
+      // The value is too large for `double`.
+      printf("\t{ %1$23s,  %1$24s }, ", "HUGE_VAL");
+    }
+    else {
+      // Raise the value `m` to the power `e` of ten.
+      value = m * powq(10, e);
+      // Break it down into the fraction and exponent.
+      frac = frexpq(value, &bexp);
+      // Truncate the fraction to 53 bits. Do not round it.
+      frac = ldexpq(frac, 53);
+      mant = (long long)frac;
+      bexp = bexp - 1;
+      // Print the higher part in fixed-point format.
+      printf("\t{ 0x1.%.13llXp%+.4d, ",
+             mant & 0xFFFFFFFFFFFFF, bexp);
+      // Subtract the higher part to get the lower part.
+      frac = ldexpq(frac - mant, 53);
+      mant = (long long)frac;
+      bexp = bexp - 53;
+      // Truncate it to zero in case of underflows.
+      // Note: The purpose of this operation is solely to
+      //       silence compilers that warn about truncation.
+      uoff = -1023 - bexp;
+      if(uoff >= 0 && (uoff > 63 || mant >> uoff == 0))
+        mant = 0;
+      // Print the lower part in fixed-point format.
+      printf(" 0x0.%.14llXp%+.4d }, ",
+             (mant << 3) & 0xFFFFFFFFFFFFF8, bexp + 1);
+    }
     // Print some comments.
     printf("  // %d.0e%+.4d\n", m, e);
   }
@@ -543,21 +553,18 @@ int main(void)
     int m, e;
 
     for(e = -324; e <= +308; ++e) {
-      for(m = 1; m <= 9; ++m) {
-        if(e <= -324 && m < 3)
-          continue;  // denormalized
-        if(e >= +308 && m > 1)
-          continue;  // infinity
+      for(m = 1; m <= 9; ++m)
         do_print_one(m, e);
-      }
     }
     return 0;
   }
 #endif  // 0
 
-    // This is generated data. Do not edit by hand!
+    // These are generated data. Do not edit by hand!
     constexpr double s_decbounds_F[][2] =
       {
+        {                       0,                         0 },   // 1.0e-0324
+        {                       0,                         0 },   // 2.0e-0324
         { 0x1.36E3CDEF8CB55p-1075,  0x0.00000000000000p-1127 },   // 3.0e-0324
         { 0x1.9E851294BB9C6p-1075,  0x0.00000000000000p-1127 },   // 4.0e-0324
         { 0x1.03132B9CF541Cp-1074,  0x0.00000000000000p-1126 },   // 5.0e-0324
@@ -6245,20 +6252,30 @@ int main(void)
         { 0x1.C7B1F3CAC7433p+1022,  0x0.1CAB0301FBBB28p+0970 },   // 8.0e+0307
         { 0x1.005419221015Cp+1023,  0x0.C02031B11D9948p+0971 },   // 9.0e+0307
         { 0x1.1CCF385EBC89Fp+1023,  0x0.F1EAE1E13D54F8p+0971 },   // 1.0e+0308
+        {                 HUGE_VAL,                 HUGE_VAL },   // 2.0e+0308
+        {                 HUGE_VAL,                 HUGE_VAL },   // 3.0e+0308
+        {                 HUGE_VAL,                 HUGE_VAL },   // 4.0e+0308
+        {                 HUGE_VAL,                 HUGE_VAL },   // 5.0e+0308
+        {                 HUGE_VAL,                 HUGE_VAL },   // 6.0e+0308
+        {                 HUGE_VAL,                 HUGE_VAL },   // 7.0e+0308
+        {                 HUGE_VAL,                 HUGE_VAL },   // 8.0e+0308
+        {                 HUGE_VAL,                 HUGE_VAL },   // 9.0e+0308
       };
     // Look at the table:
-    // 0) There are 7 numbers with an exponent of -324.
-    // 1) There are 9x631 numbers with an exponent in the range [-323,+307].
-    // 2) There is 1 number with an exponent of +308.
-    // Hence, there are 5687 numbers in this table.
-    static_assert(noadl::countof(s_decbounds_F) == 5687, "??");
+    // 0) There are 2 zeroes at the beginning.
+    // 1) There are 7 numbers with an exponent of -324.
+    // 2) There are 9*631 numbers with an exponent in the range [-323,+307].
+    // 3) There is 1 number with an exponent of +308.
+    // 4) There are 8 infinity values at the end.
+    // Hence, there are 5697 numbers in this table.
+    static_assert(noadl::countof(s_decbounds_F) == 5697, "??");
 
     ptrdiff_t do_xbisect_decbounds(ptrdiff_t start, ptrdiff_t count, const double& value) noexcept
       {
+        ROCKET_ASSERT(count > 0);
         // Locate the last number in the table that is <= `value`.
         // This is equivalent to `::std::count_bound(start, start + count, value) - start - 1`.
         // Note that this function may return a negative offset.
-        ROCKET_ASSERT(count > 0);
         ptrdiff_t bpos = start;
         ptrdiff_t epos = start + count;
         while(bpos != epos) {
@@ -6285,18 +6302,18 @@ int main(void)
         // Note if `value` is not finite then the behavior is undefined.
         // Get the first digit.
         double reg = ::std::fabs(value);
-        ptrdiff_t dpos = do_xbisect_decbounds(0, 5687, reg);
+        ptrdiff_t dpos = do_xbisect_decbounds(0, 5697, reg);
         if(ROCKET_UNEXPECT(dpos < 0)) {
-          // If `value` is less than the minimum number in the table, it must be zero.
+          // Return zero.
           exp = 0;
           mant = 0;
           return;
         }
-        // Set `dbase` to the start of a sequence of 9 numbers with the same exponent.
+        // Set `dbase` to the beginning of a sequence of 9 numbers with the same exponent.
         // This also calculates the exponent on the way.
-        ptrdiff_t dbase = static_cast<ptrdiff_t>(static_cast<size_t>(dpos + 2) / 9);
+        ptrdiff_t dbase = static_cast<ptrdiff_t>(do_cast_U(dpos) / 9);
         exp = static_cast<int>(dbase - 324);
-        dbase = dbase * 9 - 2;
+        dbase *= 9;
         // Raise super tiny numbers to minimize errors due to underflows.
         // The threshold is 18 digits, as `1e19` can't be represented accurately.
         if(exp < -324+18) {
