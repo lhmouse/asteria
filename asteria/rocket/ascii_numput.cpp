@@ -6252,14 +6252,14 @@ int main(void)
         { 0x1.C7B1F3CAC7433p+1022,  0x0.1CAB0301FBBB28p+0970 },   // 8.0e+0307
         { 0x1.005419221015Cp+1023,  0x0.C02031B11D9948p+0971 },   // 9.0e+0307
         { 0x1.1CCF385EBC89Fp+1023,  0x0.F1EAE1E13D54F8p+0971 },   // 1.0e+0308
-        {                 HUGE_VAL,                 HUGE_VAL },   // 2.0e+0308
-        {                 HUGE_VAL,                 HUGE_VAL },   // 3.0e+0308
-        {                 HUGE_VAL,                 HUGE_VAL },   // 4.0e+0308
-        {                 HUGE_VAL,                 HUGE_VAL },   // 5.0e+0308
-        {                 HUGE_VAL,                 HUGE_VAL },   // 6.0e+0308
-        {                 HUGE_VAL,                 HUGE_VAL },   // 7.0e+0308
-        {                 HUGE_VAL,                 HUGE_VAL },   // 8.0e+0308
-        {                 HUGE_VAL,                 HUGE_VAL },   // 9.0e+0308
+        {                HUGE_VAL,                  HUGE_VAL },   // 2.0e+0308
+        {                HUGE_VAL,                  HUGE_VAL },   // 3.0e+0308
+        {                HUGE_VAL,                  HUGE_VAL },   // 4.0e+0308
+        {                HUGE_VAL,                  HUGE_VAL },   // 5.0e+0308
+        {                HUGE_VAL,                  HUGE_VAL },   // 6.0e+0308
+        {                HUGE_VAL,                  HUGE_VAL },   // 7.0e+0308
+        {                HUGE_VAL,                  HUGE_VAL },   // 8.0e+0308
+        {                HUGE_VAL,                  HUGE_VAL },   // 9.0e+0308
       };
     // Look at the table:
     // 0) There are 2 zeroes at the beginning.
