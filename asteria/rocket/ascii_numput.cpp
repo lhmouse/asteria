@@ -6364,8 +6364,9 @@ int main(void)
       {
         // Strip trailing zeroes.
         uint64_t reg = mant;
-        while((reg != 0) && (reg % 10 == 0))
+        while((reg != 0) && (reg % 10 == 0)) {
           reg /= 10;
+        }
         // Write digits in reverse order.
         char temps[24];
         char* tbp = begin(temps);
