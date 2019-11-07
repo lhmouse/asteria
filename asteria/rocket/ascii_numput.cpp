@@ -38,37 +38,6 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
         return static_cast<typename make_unsigned<valueT>::type>(value);
       }
 
-    }
-
-ascii_numput& ascii_numput::put_XP(const void* value) noexcept
-  {
-    this->clear();
-    char* bp = this->m_stor;
-    char* ep = bp;
-    // Write the hexadecimal prefix.
-    *(ep++) = '0';
-    *(ep++) = 'x';
-    // Write all digits in normal order.
-    // This is done by extract digits from the more significant side.
-    uintptr_t reg = reinterpret_cast<uintptr_t>(value);
-    constexpr int nbits = numeric_limits<uintptr_t>::digits;
-    for(int i = 0; i != nbits / 4; ++i) {
-      // Shift a digit out.
-      size_t dval = reg >> (nbits - 4);
-      reg <<= 4;
-      // Write this digit.
-      *(ep++) = s_xdigits[dval];
-    }
-    // Append a null terminator.
-    *ep = 0;
-    // Set the string, which resides in the internal storage.
-    this->m_bptr = bp;
-    this->m_eptr = ep;
-    return *this;
-  }
-
-    namespace {
-
     template<typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
         void do_xput_U_bkwd(char*& bp, const valueT& value, uint8_t radix, size_t precision)
       {
@@ -87,7 +56,25 @@ ascii_numput& ascii_numput::put_XP(const void* value) noexcept
           *(--bp) = '0';
       }
 
-    }  // namespace
+    }
+
+ascii_numput& ascii_numput::put_XP(const void* value) noexcept
+  {
+    this->clear();
+    char* bp = this->m_stor + M;
+    char* ep = bp;
+    // Append a null terminator.
+    *bp = 0;
+    // Write digits backwards.
+    do_xput_U_bkwd(bp, reinterpret_cast<uintptr_t>(value), 16, sizeof(value) * 2);
+    // Prepend the hexadecimal prefix.
+    *(--bp) = 'x';
+    *(--bp) = '0';
+    // Set the string, which resides in the internal storage.
+    this->m_bptr = bp;
+    this->m_eptr = ep;
+    return *this;
+  }
 
 ascii_numput& ascii_numput::put_BU(uint64_t value, size_t precision) noexcept
   {
