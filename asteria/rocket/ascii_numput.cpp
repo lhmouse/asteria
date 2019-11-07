@@ -35,9 +35,9 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
         return static_cast<typename make_unsigned<valueT>::type>(value);
       }
 
-    constexpr char do_xdigit_from(int dval) noexcept
+    constexpr char do_pdigit_X(uint8_t dval) noexcept
       {
-        return static_cast<char>('0' + (((9 - dval) >> 15) & ('A' - '0' - 10)) + dval);
+        return static_cast<char>('0' + dval + (static_cast<uint8_t>(9 - dval) >> 5));
       }
 
     template<typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
@@ -48,10 +48,10 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
         valueT reg = value;
         while(reg != 0) {
           // Shift a digit out.
-          int dval = static_cast<int>(reg % radix);
+          uint8_t dval = static_cast<uint8_t>(reg % radix);
           reg /= radix;
           // Write this digit.
-          *(--bp) = do_xdigit_from(dval);
+          *(--bp) = do_pdigit_X(dval);
         }
         // Pad the string to at least the precision requested.
         while(bp > stop)
@@ -236,7 +236,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
         uint64_t reg = mant;
         while(reg != 0) {
           // Shift a digit out.
-          int dval = static_cast<int>(reg >> 63);
+          uint8_t dval = static_cast<uint8_t>(reg >> 63);
           reg <<= 1;
           // Insert a decimal point before `dp_opt`.
           if(ep == dp_opt)
@@ -257,13 +257,13 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
         uint64_t reg = mant;
         while(reg != 0) {
           // Shift a digit out.
-          int dval = static_cast<int>(reg >> 60);
+          uint8_t dval = static_cast<uint8_t>(reg >> 60);
           reg <<= 4;
           // Insert a decimal point before `dp_opt`.
           if(ep == dp_opt)
             *(ep++) = '.';
           // Write this digit.
-          *(ep++) = do_xdigit_from(dval);
+          *(ep++) = do_pdigit_X(dval);
         }
         // If `dp_opt` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
@@ -6320,7 +6320,7 @@ int main(void)
         // Collect digits from left to right.
         uint64_t ireg = 0;
         int dcnt = 0;
-        int dval;
+        uint8_t dval;
         // After shifting the most significant digit out, accumulate the rounding
         // error from the other end here. This error is very tiny when compared with
         // the origin value (it's about `0x1p-52` times) so only apply this fix when
@@ -6329,12 +6329,13 @@ int main(void)
         // Shift some digits into `ireg`.
         for(;;) {
           // Shift a digit out.
-          dval = static_cast<int>(dpos - dbase + 1);
+          dval = static_cast<uint8_t>(dpos - dbase + 1);
           // Do not accumulate the 18th digit which is stored in `dval`.
           if(++dcnt == 18) {
             break;
           }
-          ireg = ireg * 10 + do_cast_U(dval);
+          ireg *= 10;
+          ireg += dval;
           dbase -= 9;
           // If the next digit underflows, truncate it to zero.
           if(ROCKET_UNEXPECT(dbase < 0)) {
@@ -6370,7 +6371,7 @@ int main(void)
         char* tbp = begin(temps);
         while(reg != 0) {
           // Shift a digit out.
-          int dval = static_cast<int>(reg % 10);
+          uint8_t dval = static_cast<uint8_t>(reg % 10);
           reg /= 10;
           // Write this digit.
           *(tbp++) = static_cast<char>('0' + dval);
