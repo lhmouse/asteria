@@ -27,6 +27,19 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
     return *this;
   }
 
+    namespace {
+
+    constexpr char s_xdigits[16] = { '0', '1', '2', '3', '4', '5', '6', '7',
+                                     '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+
+    template<typename valueT>
+        constexpr typename make_unsigned<valueT>::type do_cast_U(const valueT& value) noexcept
+      {
+        return static_cast<typename make_unsigned<valueT>::type>(value);
+      }
+
+    }
+
 ascii_numput& ascii_numput::put_XP(const void* value) noexcept
   {
     this->clear();
@@ -44,7 +57,7 @@ ascii_numput& ascii_numput::put_XP(const void* value) noexcept
       size_t dval = reg >> (nbits - 4);
       reg <<= 4;
       // Write this digit.
-      *(ep++) = "0123456789ABCDEF"[dval];
+      *(ep++) = s_xdigits[dval];
     }
     // Append a null terminator.
     *ep = 0;
@@ -55,12 +68,6 @@ ascii_numput& ascii_numput::put_XP(const void* value) noexcept
   }
 
     namespace {
-
-    template<typename valueT>
-        constexpr typename make_unsigned<valueT>::type do_cast_U(const valueT& value) noexcept
-      {
-        return static_cast<typename make_unsigned<valueT>::type>(value);
-      }
 
     template<typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
         void do_xput_U_bkwd(char*& bp, const valueT& value, uint8_t radix, size_t precision)
@@ -73,7 +80,7 @@ ascii_numput& ascii_numput::put_XP(const void* value) noexcept
           size_t dval = static_cast<size_t>(reg % radix);
           reg /= radix;
           // Write this digit.
-          *(--bp) = "0123456789ABCDEF"[dval];
+          *(--bp) = s_xdigits[dval];
         }
         // Pad the string to at least the precision requested.
         while(bp > stop)
@@ -267,7 +274,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
           if(ep == dp_opt)
             *(ep++) = '.';
           // Write this digit.
-          *(ep++) = "0123456789ABCDEF"[dval];
+          *(ep++) = s_xdigits[dval];
         }
         // If `dp_opt` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
