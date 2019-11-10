@@ -35,6 +35,10 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
         return static_cast<typename make_unsigned<valueT>::type>(value);
       }
 
+    constexpr char do_pdigit_D(uint8_t dval) noexcept
+      {
+        return static_cast<char>('0' + dval);
+      }
     constexpr char do_pdigit_X(uint8_t dval) noexcept
       {
         return static_cast<char>('0' + dval + (static_cast<uint8_t>(9 - dval) >> 5));
@@ -242,7 +246,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
           if(ep == dp_opt)
             *(ep++) = '.';
           // Write this digit.
-          *(ep++) = do_pdigit_X(dval);
+          *(ep++) = do_pdigit_D(dval);
         }
         // If `dp_opt` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
@@ -6375,7 +6379,7 @@ int main(void)
           uint8_t dval = static_cast<uint8_t>(reg % 10);
           reg /= 10;
           // Write this digit.
-          *(tbp++) = do_pdigit_X(dval);
+          *(tbp++) = do_pdigit_D(dval);
         }
         // Pop digits and append them to `ep`.
         while(tbp != temps) {
