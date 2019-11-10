@@ -43,7 +43,6 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
     template<typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
         void do_xput_U_bkwd(char*& bp, const valueT& value, uint8_t radix, size_t precision)
       {
-        char* stop = bp - precision;
         // Write digits backwards.
         valueT reg = value;
         while(reg != 0) {
@@ -54,7 +53,8 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
           *(--bp) = do_pdigit_X(dval);
         }
         // Pad the string to at least the precision requested.
-        while(bp > stop)
+        char* fp = bp - precision;
+        while(bp > fp)
           *(--bp) = '0';
       }
 
@@ -242,7 +242,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
           if(ep == dp_opt)
             *(ep++) = '.';
           // Write this digit.
-          *(ep++) = static_cast<char>('0' + dval);
+          *(ep++) = do_pdigit_X(dval);
         }
         // If `dp_opt` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
@@ -6375,7 +6375,7 @@ int main(void)
           uint8_t dval = static_cast<uint8_t>(reg % 10);
           reg /= 10;
           // Write this digit.
-          *(tbp++) = static_cast<char>('0' + dval);
+          *(tbp++) = do_pdigit_X(dval);
         }
         // Pop digits and append them to `ep`.
         while(tbp != temps) {
