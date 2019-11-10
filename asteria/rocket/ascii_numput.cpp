@@ -47,8 +47,9 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
     template<typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
         void do_xput_U_bkwd(char*& bp, const valueT& value, uint8_t radix, size_t precision)
       {
-        // Write digits backwards.
+        char* fp = bp - precision;
         valueT reg = value;
+        // Write digits backwards.
         while(reg != 0) {
           // Shift a digit out.
           uint8_t dval = static_cast<uint8_t>(reg % radix);
@@ -57,7 +58,6 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
           *(--bp) = do_pdigit_X(dval);
         }
         // Pad the string to at least the precision requested.
-        char* fp = bp - precision;
         while(bp > fp)
           *(--bp) = '0';
       }
