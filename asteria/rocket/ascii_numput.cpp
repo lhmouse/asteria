@@ -44,11 +44,10 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
         return static_cast<char>('0' + dval + (static_cast<uint8_t>(9 - dval) >> 5));
       }
 
-    template<typename valueT, ROCKET_ENABLE_IF(is_unsigned<valueT>::value)>
-        void do_xput_U_bkwd(char*& bp, const valueT& value, uint8_t radix, size_t precision) noexcept
+    void do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t radix, size_t precision) noexcept
       {
         char* fp = bp - precision;
-        valueT reg = value;
+        uint64_t reg = value;
         // Write digits backwards.
         while(reg != 0) {
           // Shift a digit out.
