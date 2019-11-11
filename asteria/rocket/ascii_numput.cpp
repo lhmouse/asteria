@@ -6365,28 +6365,29 @@ int main(void)
 
     void do_xput_M_dec(char*& ep, const uint64_t& mant, const char* dp_opt) noexcept
       {
-        // Strip trailing zeroes.
         uint64_t reg = mant;
-        while((reg != 0) && (reg % 10 == 0)) {
-          reg /= 10;
-        }
-        // Write digits in reverse order.
-        char temps[24];
-        char* tbp = begin(temps);
-        while(reg != 0) {
-          // Shift a digit out.
-          uint8_t dval = static_cast<uint8_t>(reg % 10);
-          reg /= 10;
-          // Write this digit.
-          *(tbp++) = do_pdigit_D(dval);
-        }
-        // Pop digits and append them to `ep`.
-        while(tbp != temps) {
-          // Insert a decimal point before `dp_opt`.
-          if(ep == dp_opt)
-            *(ep++) = '.';
-          // Write this digit.
-          *(ep++) = *--tbp;
+        if(reg != 0) {
+          // Strip trailing zeroes.
+          while(reg % 10 == 0)
+            reg /= 10;
+          // Write digits in reverse order.
+          char temps[24];
+          char* tbp = begin(temps);
+          while(reg != 0) {
+            // Shift a digit out.
+            uint8_t dval = static_cast<uint8_t>(reg % 10);
+            reg /= 10;
+            // Write this digit.
+            *(tbp++) = do_pdigit_D(dval);
+          }
+          // Pop digits and append them to `ep`.
+          while(tbp != temps) {
+            // Insert a decimal point before `dp_opt`.
+            if(ep == dp_opt)
+              *(ep++) = '.';
+            // Write this digit.
+            *(ep++) = *--tbp;
+          }
         }
         // If `dp_opt` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
