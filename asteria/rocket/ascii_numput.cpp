@@ -47,12 +47,12 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
     void do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision) noexcept
       {
         char* fp = bp - precision;
-        uint64_t reg = value;
+        uint64_t ireg = value;
         // Write digits backwards.
-        while(reg != 0) {
+        while(ireg != 0) {
           // Shift a digit out.
-          uint8_t dval = static_cast<uint8_t>(reg % base);
-          reg /= base;
+          uint8_t dval = static_cast<uint8_t>(ireg % base);
+          ireg /= base;
           // Write this digit.
           *(--bp) = do_pdigit_X(dval);
         }
@@ -236,11 +236,11 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
     void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* dp_opt) noexcept
       {
         // Write digits in normal order.
-        uint64_t reg = mant;
-        while(reg != 0) {
+        uint64_t ireg = mant;
+        while(ireg != 0) {
           // Shift a digit out.
-          uint8_t dval = static_cast<uint8_t>(reg >> 63);
-          reg <<= 1;
+          uint8_t dval = static_cast<uint8_t>(ireg >> 63);
+          ireg <<= 1;
           // Insert a decimal point before `dp_opt`.
           if(ep == dp_opt)
             *(ep++) = '.';
@@ -257,11 +257,11 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
     void do_xput_M_hex(char*& ep, const uint64_t& mant, const char* dp_opt) noexcept
       {
         // Write digits in normal order.
-        uint64_t reg = mant;
-        while(reg != 0) {
+        uint64_t ireg = mant;
+        while(ireg != 0) {
           // Shift a digit out.
-          uint8_t dval = static_cast<uint8_t>(reg >> 60);
-          reg <<= 4;
+          uint8_t dval = static_cast<uint8_t>(ireg >> 60);
+          ireg <<= 4;
           // Insert a decimal point before `dp_opt`.
           if(ep == dp_opt)
             *(ep++) = '.';
@@ -6300,25 +6300,25 @@ int main(void)
       {
         // Note if `value` is not finite then the behavior is undefined.
         // Get the first digit.
-        double reg = ::std::fabs(value);
-        ptrdiff_t dpos = do_xbisect_decbounds(0, 5697, reg);
+        double freg = ::std::fabs(value);
+        ptrdiff_t dpos = do_xbisect_decbounds(0, 5697, freg);
         if(ROCKET_UNEXPECT(dpos < 0)) {
           // Return zero.
           exp = 0;
           mant = 0;
           return;
         }
-        // Set `dbase` to the beginning of a sequence of 9 numbers with the same exponent.
+        // Set `dbas` to the beginning of a sequence of 9 numbers with the same exponent.
         // This also calculates the exponent on the way.
-        ptrdiff_t dbase = static_cast<ptrdiff_t>(do_cast_U(dpos) / 9);
-        exp = static_cast<int>(dbase - 324);
-        dbase *= 9;
+        ptrdiff_t dbas = static_cast<ptrdiff_t>(do_cast_U(dpos) / 9);
+        exp = static_cast<int>(dbas - 324);
+        dbas *= 9;
         // Raise super tiny numbers to minimize errors due to underflows.
         // The threshold is 22 digits, as `1e23` can't be represented accurately.
         if(exp < -324+22) {
-          reg *= 1e22;
+          freg *= 1e22;
           dpos += 9*22;
-          dbase += 9*22;
+          dbas += 9*22;
         }
         // Collect digits from left to right.
         uint64_t ireg = 0;
@@ -6332,29 +6332,29 @@ int main(void)
         // Shift some digits into `ireg`.
         for(;;) {
           // Shift a digit out.
-          dval = static_cast<uint8_t>(dpos - dbase + 1);
+          dval = static_cast<uint8_t>(dpos - dbas + 1);
           // Do not accumulate the 18th digit which is stored in `dval`.
           if(++dcnt == 18) {
             break;
           }
           ireg *= 10;
           ireg += dval;
-          dbase -= 9;
+          dbas -= 9;
           // If the next digit underflows, truncate it to zero.
-          if(ROCKET_UNEXPECT(dbase < 0)) {
-            dpos = dbase - 1;
+          if(ROCKET_UNEXPECT(dbas < 0)) {
+            dpos = dbas - 1;
             continue;
           }
           // Locate the next digit.
           if(dval != 0) {
-            reg -= s_decbounds_F[dpos][0];
+            freg -= s_decbounds_F[dpos][0];
             com += s_decbounds_F[dpos][1];
           }
           // Fix the rounding error when there have been 12 digits.
           if(dcnt == 12) {
-            reg -= com;
+            freg -= com;
           }
-          dpos = do_xbisect_decbounds(dbase, 9, reg);
+          dpos = do_xbisect_decbounds(dbas, 9, freg);
         }
         // Round the 18th digit towards even.
         if(dval >= 5) {
@@ -6365,15 +6365,15 @@ int main(void)
 
     void do_xput_M_dec(char*& ep, const uint64_t& mant, const char* dp_opt) noexcept
       {
-        uint64_t reg = mant;
-        if(reg != 0) {
+        uint64_t ireg = mant;
+        if(ireg != 0) {
           // Write digits in reverse order.
           char temps[24];
           char* tbp = end(temps);
-          while(reg != 0) {
+          while(ireg != 0) {
             // Shift a digit out.
-            uint8_t dval = static_cast<uint8_t>(reg % 10);
-            reg /= 10;
+            uint8_t dval = static_cast<uint8_t>(ireg % 10);
+            ireg /= 10;
             // Write this digit unless it is amongst trailing zeroes.
             if((tbp != end(temps)) || (dval != 0))
               *(--tbp) = do_pdigit_D(dval);
