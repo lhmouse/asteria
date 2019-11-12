@@ -6314,11 +6314,11 @@ int main(void)
         exp = static_cast<int>(dbase - 324);
         dbase *= 9;
         // Raise super tiny numbers to minimize errors due to underflows.
-        // The threshold is 18 digits, as `1e19` can't be represented accurately.
-        if(exp < -324+18) {
-          reg *= 1e18;
-          dpos += 9*18;
-          dbase += 9*18;
+        // The threshold is 22 digits, as `1e23` can't be represented accurately.
+        if(exp < -324+22) {
+          reg *= 1e22;
+          dpos += 9*22;
+          dbase += 9*22;
         }
         // Collect digits from left to right.
         uint64_t ireg = 0;
