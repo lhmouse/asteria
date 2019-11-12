@@ -6367,26 +6367,24 @@ int main(void)
       {
         uint64_t reg = mant;
         if(reg != 0) {
-          // Strip trailing zeroes.
-          while(reg % 10 == 0)
-            reg /= 10;
           // Write digits in reverse order.
           char temps[24];
-          char* tbp = begin(temps);
+          char* tbp = end(temps);
           while(reg != 0) {
             // Shift a digit out.
             uint8_t dval = static_cast<uint8_t>(reg % 10);
             reg /= 10;
-            // Write this digit.
-            *(tbp++) = do_pdigit_D(dval);
+            // Write this digit unless it is amongst trailing zeroes.
+            if((tbp != end(temps)) || (dval != 0))
+              *(--tbp) = do_pdigit_D(dval);
           }
           // Pop digits and append them to `ep`.
-          while(tbp != temps) {
+          while(tbp != end(temps)) {
             // Insert a decimal point before `dp_opt`.
             if(ep == dp_opt)
               *(ep++) = '.';
             // Write this digit.
-            *(ep++) = *--tbp;
+            *(ep++) = *(tbp++);
           }
         }
         // If `dp_opt` is set, fill zeroes until it is reached,
