@@ -849,7 +849,7 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
           return rocket::clear;
         }
         // Return a signed infinity.
-        return std::copysign(INFINITY, -rneg);
+        return std::copysign(std::numeric_limits<G_real>::infinity(), -rneg);
       }
     case 'n':
     case 'N':
@@ -864,7 +864,7 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
           return rocket::clear;
         }
         // Return a signed NaN.
-        return std::copysign(NAN, -rneg);
+        return std::copysign(std::numeric_limits<G_real>::quiet_NaN(), -rneg);
       }
     default:
       // Fail.

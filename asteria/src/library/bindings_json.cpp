@@ -400,12 +400,12 @@ G_string std_json_format(const Value& value, const G_integer& indent)
             if(name == "Infinity") {
               tstrm.shift(2);
               // Accept a signed `Infinity`.
-              return G_real(std::copysign(INFINITY, -rneg));
+              return std::copysign(std::numeric_limits<G_real>::infinity(), -rneg);
             }
             if(name == "NaN") {
               tstrm.shift(2);
               // Accept a signed `NaN`.
-              return G_real(std::copysign(NAN, -rneg));
+              return std::copysign(std::numeric_limits<G_real>::quiet_NaN(), -rneg);
             }
           }
         }
@@ -432,33 +432,33 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         auto qnum = do_accept_number_opt(tstrm);
         if(qnum) {
           // Accept a `Number`.
-          return G_real(*qnum);
+          return *qnum;
         }
         auto qstr = do_accept_string_opt(tstrm);
         if(qstr) {
           // Accept a `String`.
-          return G_string(rocket::move(*qstr));
+          return rocket::move(*qstr);
         }
         qstr = do_accept_identifier_opt(tstrm, { "true", "false", "Infinity", "NaN", "null" });
         if(qstr) {
           if(qstr->front() == 't') {
             // Accept a `Boolean` of value `true`.
-            return G_boolean(true);
+            return true;
           }
           if(qstr->front() == 'f') {
             // Accept a `Boolean` of value `false`.
-            return G_boolean(false);
+            return false;
           }
           if(qstr->front() == 'I') {
             // Accept a `Number` of value `Infinity`.
-            return G_real(INFINITY);
+            return std::numeric_limits<G_real>::infinity();
           }
           if(qstr->front() == 'N') {
             // Accept a `Number` of value `NaN`.
-            return G_real(NAN);
+            return std::numeric_limits<G_real>::quiet_NaN();
           }
           // Accept an explicit `null`.
-          return G_null();
+          return nullptr;
         }
         return rocket::clear;
       }

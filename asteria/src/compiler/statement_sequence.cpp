@@ -152,23 +152,23 @@ namespace Asteria {
 
     Value do_generate_null()
       {
-        return G_null();
+        return nullptr;
       }
     Value do_generate_false()
       {
-        return G_boolean(false);
+        return false;
       }
     Value do_generate_true()
       {
-        return G_boolean(true);
+        return true;
       }
     Value do_generate_nan()
       {
-        return G_real(NAN);
+        return std::numeric_limits<double>::quiet_NaN();
       }
     Value do_generate_infinity()
       {
-        return G_real(INFINITY);
+        return std::numeric_limits<double>::infinity();
       }
 
     struct Literal_Element

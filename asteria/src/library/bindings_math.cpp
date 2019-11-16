@@ -55,7 +55,7 @@ G_real std_math_log(const G_real& x, const opt<G_real>& base)
       return std::log10(x);
     }
     if((*base == 1) || (*base <= 0)) {
-      return NAN;
+      return std::numeric_limits<G_real>::quiet_NaN();
     }
     return std::log2(x) / std::log2(*base);
   }
