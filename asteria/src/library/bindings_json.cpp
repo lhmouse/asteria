@@ -386,6 +386,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
         if(qtok->is_punctuator()) {
           auto punct = qtok->as_punctuator();
           if(rocket::is_any_of(punct, { punctuator_add, punctuator_sub })) {
+            G_real sign = (punct == punctuator_sub) ? -1.0 : +1.0;
             // Only `Infinity` and `NaN` are allowed.
             // Please note that the tokenizer will have merged sign symbols into adjacent number literals.
             qtok = tstrm.peek_opt(1);
@@ -396,16 +397,15 @@ G_string std_json_format(const Value& value, const G_integer& indent)
               return rocket::clear;
             }
             const auto& name = qtok->as_identifier();
-            bool rneg = punct == punctuator_sub;
             if(name == "Infinity") {
               tstrm.shift(2);
               // Accept a signed `Infinity`.
-              return std::copysign(std::numeric_limits<G_real>::infinity(), -rneg);
+              return std::copysign(std::numeric_limits<G_real>::infinity(), sign);
             }
             if(name == "NaN") {
               tstrm.shift(2);
               // Accept a signed `NaN`.
-              return std::copysign(std::numeric_limits<G_real>::quiet_NaN(), -rneg);
+              return std::copysign(std::numeric_limits<G_real>::quiet_NaN(), sign);
             }
           }
         }
