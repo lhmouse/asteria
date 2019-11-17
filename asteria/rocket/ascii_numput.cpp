@@ -6267,7 +6267,7 @@ int main(void)
     // 3) There is 1 number with an exponent of +308.
     // 4) There are 8 infinity values at the end.
     // Hence, there are 5697 numbers in this table.
-    static_assert(noadl::countof(s_decbounds_F) == 5697, "??");
+    static_assert(noadl::countof(s_decbounds_F) == 5697);
 
     ptrdiff_t do_xbisect_decbounds(ptrdiff_t start, ptrdiff_t count, const double& value) noexcept
       {

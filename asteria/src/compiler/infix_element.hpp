@@ -61,7 +61,7 @@ class Infix_Element
         , S_coalescence  // 4,
         , S_general      // 5,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value);
 
   private:
     Xvariant m_stor;

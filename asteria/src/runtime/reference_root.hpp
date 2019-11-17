@@ -51,7 +51,7 @@ class Reference_Root
         , S_variable   // 3,
         , S_tail_call  // 4,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value);
 
   private:
     Xvariant m_stor;

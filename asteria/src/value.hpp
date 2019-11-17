@@ -25,7 +25,7 @@ class Value
         , G_array     // 7,
         , G_object    // 8,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value);
 
   private:
     Xvariant m_stor;

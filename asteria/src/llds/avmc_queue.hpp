@@ -38,7 +38,7 @@ class AVMC_Queue
         Executor* exec;
         Enumerator* vnum;
       };
-    static_assert(std::is_trivial<Vtable>::value, "??");
+    static_assert(std::is_trivial<Vtable>::value);
 
   private:
     enum : size_t

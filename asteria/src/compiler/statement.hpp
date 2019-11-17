@@ -144,7 +144,7 @@ class Statement
         , S_return      // 14,
         , S_assert      // 15,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "???");
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value);
 
   private:
     Xvariant m_stor;
