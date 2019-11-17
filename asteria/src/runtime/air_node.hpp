@@ -234,7 +234,7 @@ class AIR_Node
         , S_unpack_struct_object   // 28,
         , S_define_null_variable   // 29,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value);
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;

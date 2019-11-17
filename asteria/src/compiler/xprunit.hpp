@@ -93,7 +93,7 @@ class Xprunit
         , S_coalescence       //  9,
         , S_operator_fma      // 10,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value);
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;

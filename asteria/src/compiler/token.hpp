@@ -55,7 +55,7 @@ class Token
         , S_real_literal     // 4,
         , S_string_literal   // 5,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value);
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     cow_string m_file;

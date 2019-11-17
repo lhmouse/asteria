@@ -283,7 +283,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
     template<bool bigendT, typename WordT> G_string& do_pdigits_impl(G_string& str, const WordT& ref)
       {
-        static_assert(std::is_unsigned<WordT>::value);
+        static_assert(std::is_unsigned<WordT>::value, "");
         std::array<uint8_t, sizeof(WordT)> stor_le;
         uint64_t word = static_cast<uint64_t>(ref);
         // Write the word in little-endian order.
@@ -311,7 +311,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
     template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const uint8_t* ptr)
       {
-        static_assert(std::is_unsigned<WordT>::value);
+        static_assert(std::is_unsigned<WordT>::value, "");
         std::array<uint8_t, sizeof(WordT)> stor_be;
         uint64_t word = 0;
         // Re-arrange bytes.

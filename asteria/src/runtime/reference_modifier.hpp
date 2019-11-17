@@ -35,7 +35,7 @@ class Reference_Modifier
         , S_object_key   // 1,
         , S_array_end    // 2,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value);
+    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;
