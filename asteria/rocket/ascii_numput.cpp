@@ -496,8 +496,7 @@ ascii_numput& ascii_numput::put_XE(double value) noexcept
  * into two parts for accuracy.
  *
  * Compile with:
- *   gcc -std=c99 -W{all,extra,pedantic,{sign-,}conversion}  \
- *       table.c -lquadmath -lm
+ *   gcc -std=c99 -W{all,extra,sign-,}conversion} table.c -lquadmath
  */
 
 #include <quadmath.h>
