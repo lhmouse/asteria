@@ -48,7 +48,7 @@ extern G_real std_numeric_sqrt(const G_real& x);
 extern G_real std_numeric_fma(const G_real& x, const G_real& y, const G_real& z);
 extern G_real std_numeric_remainder(const G_real& x, const G_real& y);
 
-extern G_array std_numeric_frexp(const G_real& x);
+extern pair<G_real, G_integer> std_numeric_frexp(const G_real& x);
 extern G_real std_numeric_ldexp(const G_real& frac, const G_integer& exp);
 
 extern G_integer std_numeric_addm(const G_integer& x, const G_integer& y);

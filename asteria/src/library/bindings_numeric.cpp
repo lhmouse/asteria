@@ -220,15 +220,11 @@ G_real std_numeric_remainder(const G_real& x, const G_real& y)
     return std::remainder(x, y);
   }
 
-G_array std_numeric_frexp(const G_real& x)
+pair<G_real, G_integer> std_numeric_frexp(const G_real& x)
   {
-    int rexp;
-    auto frac = std::frexp(x, &rexp);
-    // Return an array of two elements.
-    G_array res(2);
-    res.mut(0) = G_real(frac);
-    res.mut(1) = G_integer(rexp);
-    return res;
+    int exp;
+    auto frac = std::frexp(x, &exp);
+    return { frac, exp };
   }
 
 G_real std_numeric_ldexp(const G_real& frac, const G_integer& exp)
@@ -1823,7 +1819,13 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           G_real x;
           if(reader.start().g(x).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_numeric_frexp(x) };
+            auto pair = std_numeric_frexp(x);
+            // This function returns a `pair`, but we would like to return an array so convert it.
+            G_array xval;
+            xval.emplace_back(pair.first);
+            xval.emplace_back(pair.second);
+            // Return the array.
+            Reference_Root::S_temporary xref = { rocket::move(xval) };
             return rocket::move(xref);
           }
           // Fail.

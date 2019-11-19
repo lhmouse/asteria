@@ -46,7 +46,7 @@ extern G_boolean std_array_is_sorted(const Global_Context& global, const G_array
 extern opt<G_integer> std_array_binary_search(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator = rocket::clear);
 extern G_integer std_array_lower_bound(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator = rocket::clear);
 extern G_integer std_array_upper_bound(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator = rocket::clear);
-extern G_array std_array_equal_range(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator = rocket::clear);
+extern pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator = rocket::clear);
 
 extern G_array std_array_sort(const Global_Context& global, const G_array& data, const opt<G_function>& comparator = rocket::clear);
 extern G_array std_array_sortu(const Global_Context& global, const G_array& data, const opt<G_function>& comparator = rocket::clear);

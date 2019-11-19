@@ -561,16 +561,12 @@ G_integer std_array_upper_bound(const Global_Context& global, const G_array& dat
     return upos - data.begin();
   }
 
-G_array std_array_equal_range(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
+pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
     auto lpos = do_bound(global, data.begin(), pair.first, comparator, target, [](Compare cmp) { return cmp != compare_greater;  });
     auto upos = do_bound(global, pair.first, data.end(), comparator, target, [](Compare cmp) { return cmp == compare_less;  });
-    // Store both bounds in an `array`.
-    G_array res(2);
-    res.mut(0) = G_integer(lpos - data.begin());
-    res.mut(1) = G_integer(upos - data.begin());
-    return res;
+    return { lpos - data.begin(), upos - data.begin() };
   }
 
     namespace {
@@ -1803,7 +1799,13 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           opt<G_function> comparator;
           if(reader.start().g(data).g(target).g(comparator).finish()) {
             // Call the binding function.
-            Reference_Root::S_temporary xref = { std_array_equal_range(global, data, target, comparator) };
+            auto pair = std_array_equal_range(global, data, target, comparator);
+            // This function returns a `pair`, but we would like to return an array so convert it.
+            G_array xval;
+            xval.emplace_back(pair.first);
+            xval.emplace_back(pair.second);
+            // Return the array.
+            Reference_Root::S_temporary xref = { rocket::move(xval) };
             return rocket::move(xref);
           }
           // Fail.
