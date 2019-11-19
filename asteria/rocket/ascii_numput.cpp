@@ -550,10 +550,10 @@ int main(void)
   {
     int m, e;
 
-    for(e = -324; e <= +308; ++e) {
+    for(e = -324; e <= +308; ++e)
       for(m = 1; m <= 9; ++m)
         do_print_one(m, e);
-    }
+
     return 0;
   }
 #endif  // 0
