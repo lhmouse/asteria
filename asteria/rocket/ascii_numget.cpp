@@ -335,7 +335,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr) noexcep
         {
           erdx = true;
           // A decimal exponent is expected.
-          if((base == 10) && do_match_char_ci(rp[0], 'e')) {
+          if((eptr - rp >= 1) && do_match_char_ci(rp[0], 'e')) {
             // Skip the exponent initiator.
             rp += 1;
             has_expo = true;
