@@ -6264,14 +6264,7 @@ int main(void)
         {                HUGE_VAL,                  HUGE_VAL },   // 8.0e+308
         {                HUGE_VAL,                  HUGE_VAL },   // 9.0e+308
       };
-    // Look at the table:
-    // 0) There are 2 zeroes at the beginning.
-    // 1) There are 7 numbers with an exponent of -324.
-    // 2) There are 9*631 numbers with an exponent in the range [-323,+307].
-    // 3) There is 1 number with an exponent of +308.
-    // 4) There are 8 infinity values at the end.
-    // Hence, there are 5697 numbers in this table.
-    static_assert(noadl::countof(s_decbounds_F) == 5697, "");
+    static_assert(noadl::countof(s_decbounds_F) == 633 * 9, "");
 
     ptrdiff_t do_xbisect_decbounds(ptrdiff_t start, ptrdiff_t count, const double& value) noexcept
       {
