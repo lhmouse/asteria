@@ -254,7 +254,8 @@ check_PROGRAMS =  \
   asteria/test/bindings_math.test  \
   asteria/test/bindings_filesystem.test  \
   asteria/test/bindings_checksum.test  \
-  asteria/test/bindings_json.test
+  asteria/test/bindings_json.test  \
+  asteria/test/github_65.test
 
 TESTS = ${check_PROGRAMS}
 

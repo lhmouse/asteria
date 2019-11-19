@@ -1124,6 +1124,7 @@ DCE_Result AIR_Node::optimize_dce()
         G_array array;
         array.resize(nelems);
         for(auto it = array.mut_rbegin(); it != array.rend(); ++it) {
+          // Write elements backwards.
           *it = ctx.stack().get_top().read();
           ctx.stack().pop();
         }
@@ -1142,7 +1143,8 @@ DCE_Result AIR_Node::optimize_dce()
         G_object object;
         object.reserve(keys.size());
         for(auto it = keys.rbegin(); it != keys.rend(); ++it) {
-          object.insert_or_assign(*it, ctx.stack().get_top().read());
+          // Use `try_emplace()` instead of `insert_or_assign()`. In case of duplicate keys, the last value takes precedence.
+          object.try_emplace(*it, ctx.stack().get_top().read());
           ctx.stack().pop();
         }
         // Push the object as a temporary.
