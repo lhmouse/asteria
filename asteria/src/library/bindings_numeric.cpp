@@ -425,6 +425,8 @@ G_integer std_numeric_popcnt(const G_integer& x)
         return text;
       }
 
+    constexpr char s_spaces[] = " \f\n\r\t\v";
+
     }  // namespace
 
 G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
@@ -556,67 +558,6 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
     return text;
   }
 
-    namespace {
-
-    constexpr char s_xdigits[] = "00112233445566778899AaBbCcDdEeFf";
-    constexpr char s_spaces[] = " \f\n\r\t\v";
-
-    inline int do_compare_lowercase(const G_string& str, size_t from, const char* cmp, size_t len) noexcept
-      {
-        for(size_t si = from, ci = 0; ci != len; ++si, ++ci) {
-          // Read a character from `str` and convert it into lowercase.
-          int sc = static_cast<unsigned char>(str[si]);
-          if(('A' <= sc) && (sc <= 'Z')) {
-            sc |= 0x20;
-          }
-          // Compare it with the character from `cmp`, which must not be in uppercase.
-          sc -= static_cast<unsigned char>(cmp[ci]);
-          if(sc != 0) {
-            return sc;
-          }
-        }
-        // The strings are equal.
-        return 0;
-      }
-
-    inline uint8_t do_translate_digit(char c) noexcept
-      {
-        return static_cast<size_t>(std::find(s_xdigits, s_xdigits + 32, c) - s_xdigits) / 2 & 0xFF;
-      }
-
-    inline bool do_accumulate_digit(int64_t& value, int64_t limit, uint8_t base, uint8_t dval) noexcept
-      {
-        if(limit >= 0) {
-          // Accumulate the digit towards positive infinity.
-          if(value > (limit - dval) / base) {
-            return false;
-          }
-          value *= base;
-          value += dval;
-        }
-        else {
-          // Accumulate the digit towards negative infinity.
-          if(value < (limit + dval) / base) {
-            return false;
-          }
-          value *= base;
-          value -= dval;
-        }
-        return true;
-      }
-
-    inline void do_raise_real(double& value, uint8_t base, int64_t exp) noexcept
-      {
-        if(exp > 0) {
-          value *= std::pow(base, +exp);
-        }
-        if(exp < 0) {
-          value /= std::pow(base, -exp);
-        }
-      }
-
-    }  // namespace
-
 opt<G_integer> std_numeric_parse_integer(const G_string& text)
   {
     auto tpos = text.find_first_not_of(s_spaces);
@@ -624,157 +565,25 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
       // `text` consists of only spaces. Fail.
       return rocket::clear;
     }
-    bool rneg = false;  // is the number negative?
-    size_t rbegin = 0;  // beginning of significant figures
-    size_t rend = 0;  // end of significant figures
-    uint8_t rbase = 10;  // the base of the integral and fractional parts.
-    int64_t icnt = 0;  // number of integral digits (always non-negative)
-    uint8_t pbase = 0;  // the base of the exponent.
-    bool pneg = false;  // is the exponent negative?
-    int64_t pexp = 0;  // `pbase`'d exponent
-    int64_t pcnt = 0;  // number of exponent digits (always non-negative)
-    // Get the sign of the number if any.
-    switch(text[tpos]) {
-    case '+':
-      tpos++;
-      rneg = false;
-      break;
-    case '-':
-      tpos++;
-      rneg = true;
-      break;
-    }
-    switch(text[tpos]) {
-    case '0':
-      // Check for the base prefix.
-      switch(text[tpos + 1]) {
-      case 'b':
-      case 'B':
-        tpos += 2;
-        rbase =  2;
-        break;
-      case 'x':
-      case 'X':
-        tpos += 2;
-        rbase = 16;
-        break;
-      }
-      // Fallthrough
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-      // Do nothing.
-      break;
-    default:
-      // Fail.
+    auto bptr = text.data() + tpos;
+    auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
+
+    G_integer value;
+    rocket::ascii_numget numg;
+    if(!numg.parse_I(bptr, eptr)) {
+      // `text` could not be converted to an integer. Fail.
       return rocket::clear;
     }
-    rbegin = tpos;
-    rend = tpos;
-    // Parse the integral part.
-    for(;;) {
-      auto dval = do_translate_digit(text[tpos]);
-      if(dval >= rbase) {
-        break;
-      }
-      tpos++;
-      // Accept a digit.
-      rend = tpos;
-      icnt++;
-      // Is the next character a digit separator?
-      if(text[tpos] == '`') {
-        tpos++;
-      }
-    }
-    // There shall be at least one digit.
-    if(icnt == 0) {
+    if(bptr != eptr) {
+      // `text` consists of invalid characters. Fail.
       return rocket::clear;
     }
-    // Check for the exponent part.
-    switch(text[tpos]) {
-    case 'p':
-    case 'P':
-      tpos++;
-      pbase =  2;
-      break;
-    case 'e':
-    case 'E':
-      tpos++;
-      pbase = 10;
-      break;
-    }
-    if(pbase != 0) {
-      // Get the sign of the exponent if any.
-      switch(text[tpos]) {
-      case '+':
-        tpos++;
-        pneg = false;
-        break;
-      case '-':
-        tpos++;
-        pneg = true;
-        break;
-      }
-      // Parse the exponent as an integer. The value must fit in 24 bits.
-      for(;;) {
-        auto dval = do_translate_digit(text[tpos]);
-        if(dval >= 10) {
-          break;
-        }
-        tpos++;
-        // Accept a digit.
-        if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
-          return rocket::clear;
-        }
-        pcnt++;
-        // Is the next character a digit separator?
-        if(text[tpos] == '`') {
-          tpos++;
-        }
-      }
-      // There shall be at least one digit.
-      if(pcnt == 0) {
-        return rocket::clear;
-      }
-    }
-    // Only spaces are allowed to follow the number.
-    if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
+    if(!numg.cast_I(value, INT64_MIN, INT64_MAX)) {
+      // The value is out of range.
       return rocket::clear;
     }
-    // The literal is an `integer` if there is no decimal point.
-    int64_t val = 0;
-    // Accumulate digits from left to right.
-    for(auto ri = rbegin; ri != rend; ++ri) {
-      auto dval = do_translate_digit(text[ri]);
-      if(dval >= rbase) {
-        continue;
-      }
-      // Accept a digit.
-      if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
-        return rocket::clear;
-      }
-    }
-    // Negative exponents are not allowed, not even when the significant part is zero.
-    if(pexp < 0) {
-      return rocket::clear;
-    }
-    // Raise the result.
-    if(val != 0) {
-      for(auto i = pexp; i != 0; --i) {
-        // Append a digit zero.
-        if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
-          return rocket::clear;
-        }
-      }
-    }
-    // Return the integer.
-    return val;
+    // The value has been stored successfully.
+    return value;
   }
 
 opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& saturating)
@@ -784,225 +593,27 @@ opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& s
       // `text` consists of only spaces. Fail.
       return rocket::clear;
     }
-    bool rneg = false;  // is the number negative?
-    size_t rbegin = 0;  // beginning of significant figures
-    size_t rend = 0;  // end of significant figures
-    uint8_t rbase = 10;  // the base of the integral and fractional parts.
-    int64_t icnt = 0;  // number of integral digits (always non-negative)
-    int64_t fcnt = 0;  // number of fractional digits (always non-negative)
-    uint8_t pbase = 0;  // the base of the exponent.
-    bool pneg = false;  // is the exponent negative?
-    int64_t pexp = 0;  // `pbase`'d exponent
-    int64_t pcnt = 0;  // number of exponent digits (always non-negative)
-    // Get the sign of the number if any.
-    switch(text[tpos]) {
-    case '+':
-      tpos++;
-      rneg = false;
-      break;
-    case '-':
-      tpos++;
-      rneg = true;
-      break;
-    }
-    switch(text[tpos]) {
-    case '0':
-      // Check for the base prefix.
-      switch(text[tpos + 1]) {
-      case 'b':
-      case 'B':
-        tpos += 2;
-        rbase = 2;
-        break;
-      case 'x':
-      case 'X':
-        tpos += 2;
-        rbase = 16;
-        break;
-      }
-      // Fallthrough
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-    case '7':
-    case '8':
-    case '9':
-      // Do nothing.
-      break;
-    case 'i':
-    case 'I':
-      {
-        // Check for infinities.
-        if(do_compare_lowercase(text, tpos + 1, "nfinity", 7) != 0) {
-          return rocket::clear;
-        }
-        tpos += 8;
-        // Only spaces are allowed to follow the number.
-        if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-          return rocket::clear;
-        }
-        // Return a signed infinity.
-        return std::copysign(std::numeric_limits<G_real>::infinity(), -rneg);
-      }
-    case 'n':
-    case 'N':
-      {
-        // Check for NaNs.
-        if(do_compare_lowercase(text, tpos + 1, "an", 2) != 0) {
-          return rocket::clear;
-        }
-        tpos += 3;
-        // Only spaces are allowed to follow the number.
-        if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-          return rocket::clear;
-        }
-        // Return a signed NaN.
-        return std::copysign(std::numeric_limits<G_real>::quiet_NaN(), -rneg);
-      }
-    default:
-      // Fail.
+    auto bptr = text.data() + tpos;
+    auto eptr = text.data() + text.find_last_not_of(s_spaces) + 1;
+
+    G_real value;
+    rocket::ascii_numget numg;
+    if(!numg.parse_F(bptr, eptr)) {
+      // `text` could not be converted to an integer. Fail.
       return rocket::clear;
     }
-    rbegin = tpos;
-    rend = tpos;
-    // Parse the integral part.
-    for(;;) {
-      auto dval = do_translate_digit(text[tpos]);
-      if(dval >= rbase) {
-        break;
-      }
-      tpos++;
-      // Accept a digit.
-      rend = tpos;
-      icnt++;
-      // Is the next character a digit separator?
-      if(text[tpos] == '`') {
-        tpos++;
-      }
-    }
-    // There shall be at least one digit.
-    if(icnt == 0) {
+    if(bptr != eptr) {
+      // `text` consists of invalid characters. Fail.
       return rocket::clear;
     }
-    // Check for the fractional part.
-    if(text[tpos] == '.') {
-      tpos++;
-      // Parse the fractional part.
-      for(;;) {
-        auto dval = do_translate_digit(text[tpos]);
-        if(dval >= rbase) {
-          break;
-        }
-        tpos++;
-        // Accept a digit.
-        rend = tpos;
-        fcnt++;
-        // Is the next character a digit separator?
-        if(text[tpos] == '`') {
-          tpos++;
-        }
-      }
-      // There shall be at least one digit.
-      if(fcnt == 0) {
+    if(!numg.cast_F(value, -HUGE_VAL, +HUGE_VAL)) {
+      // The value is out of range.
+      // Accept infinities if `saturating` is set to `true`.
+      if(!(std::isinf(value) && (saturating == true)))
         return rocket::clear;
-      }
     }
-    // Check for the exponent part.
-    switch(text[tpos]) {
-    case 'e':
-    case 'E':
-      tpos++;
-      pbase = 10;
-      break;
-    case 'p':
-    case 'P':
-      tpos++;
-      pbase = 2;
-      break;
-    }
-    if(pbase != 0) {
-      // Get the sign of the exponent if any.
-      switch(text[tpos]) {
-      case '+':
-        tpos++;
-        pneg = false;
-        break;
-      case '-':
-        tpos++;
-        pneg = true;
-        break;
-      }
-      // Parse the exponent as an integer. The value must fit in 24 bits.
-      for(;;) {
-        auto dval = do_translate_digit(text[tpos]);
-        if(dval >= 10) {
-          break;
-        }
-        tpos++;
-        // Accept a digit.
-        if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
-          return rocket::clear;
-        }
-        pcnt++;
-        // Is the next character a digit separator?
-        if(text[tpos] == '`') {
-          tpos++;
-        }
-      }
-      // There shall be at least one digit.
-      if(pcnt == 0) {
-        return rocket::clear;
-      }
-    }
-    // Only spaces are allowed to follow the number.
-    if(text.find_first_not_of(s_spaces, tpos) != G_string::npos) {
-      return rocket::clear;
-    }
-    // Convert the value.
-    if(rbase == pbase) {
-      // Contract floating operations to minimize rounding errors.
-      pexp -= fcnt;
-      icnt += fcnt;
-      fcnt = 0;
-    }
-    // Digits are accumulated using a 64-bit integer with no fractional part.
-    // Excess significant figures are discard if the integer would overflow.
-    int64_t tval = 0;
-    int64_t tcnt = icnt;
-    // Accumulate digits from left to right.
-    for(auto ri = rbegin; ri != rend; ++ri) {
-      auto dval = do_translate_digit(text[ri]);
-      if(dval >= rbase) {
-        continue;
-      }
-      // Accept a digit.
-      if(!do_accumulate_digit(tval, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
-        break;
-      }
-      // Nudge the decimal point to the right.
-      tcnt--;
-    }
-    // Raise the result.
-    double val;
-    if(tval == 0) {
-      val = std::copysign(0.0, -rneg);
-    }
-    else {
-      val = static_cast<double>(tval);
-      do_raise_real(val, rbase, tcnt);
-      do_raise_real(val, pbase, pexp);
-    }
-    // Check for overflow or underflow.
-    int fpcls = std::fpclassify(val);
-    if((fpcls == FP_INFINITE) && !saturating) {
-      // Make sure we return an infinity only when the string is an explicit one.
-      return rocket::clear;
-    }
-    // N.B. The sign bit of a negative zero shall have been preserved.
-    return val;
+    // The value has been stored successfully.
+    return value;
   }
 
 void create_bindings_numeric(G_object& result, API_Version /*version*/)
@@ -2284,11 +1895,11 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "    case of characters:\n"
           "\n"
           "    * Binary (base-2):\n"
-          "      `[+-]?0b([01]`?)+[ep][+]?([0-9]`?)+`\n"
+          "      `[+-]?0b([01]`?)+`\n"
           "    * Hexadecimal (base-16):\n"
-          "      `[+-]?0x([0-9a-f]`?)+[ep][+]?([0-9]`?)+`\n"
+          "      `[+-]?0x([0-9a-f]`?)+`\n"
           "    * Decimal (base-10):\n"
-          "      `[+-]?([0-9]`?)+[ep][+]?([0-9]`?)+`\n"
+          "      `[+-]?([0-9]`?)+`\n"
           "\n"
           "    If the string does not match any of the above, this function\n"
           "    fails. If the result is outside the range of representable\n"
