@@ -345,17 +345,17 @@ G_real std_numeric_muls(const G_real& x, const G_real& y)
 G_integer std_numeric_lzcnt(const G_integer& x)
   {
     // TODO: Modern CPUs have intrinsics for this.
-    uint8_t count = 0;
+    uint64_t ireg = static_cast<uint64_t>(x);
+    if(ireg == 0) {
+      return 64;
+    }
+    uint32_t count = 0;
     // Scan bits from left to right.
-    auto bits = static_cast<uint64_t>(x);
-    auto mask = UINT64_C(1) << 63;
-    for(;;) {
-      if(bits & mask)
-        break;
-      count++;
-      mask >>= 1;
-      if(!mask)
-        break;
+    for(unsigned i = 32; i != 0; i /= 2) {
+      if(ireg >> (64 - i))
+        continue;
+      ireg <<= i;
+      count += i;
     }
     return count;
   }
@@ -363,17 +363,17 @@ G_integer std_numeric_lzcnt(const G_integer& x)
 G_integer std_numeric_tzcnt(const G_integer& x)
   {
     // TODO: Modern CPUs have intrinsics for this.
-    uint8_t count = 0;
+    uint64_t ireg = static_cast<uint64_t>(x);
+    if(ireg == 0) {
+      return 64;
+    }
+    uint32_t count = 0;
     // Scan bits from right to left.
-    auto bits = static_cast<uint64_t>(x);
-    auto mask = UINT64_C(1);
-    for(;;) {
-      if(bits & mask)
-        break;
-      count++;
-      mask <<= 1;
-      if(!mask)
-        break;
+    for(unsigned i = 32; i != 0; i /= 2) {
+      if(ireg << (64 - i))
+        continue;
+      ireg >>= i;
+      count += i;
     }
     return count;
   }
@@ -381,16 +381,16 @@ G_integer std_numeric_tzcnt(const G_integer& x)
 G_integer std_numeric_popcnt(const G_integer& x)
   {
     // TODO: Modern CPUs have intrinsics for this.
-    uint8_t count = 0;
+    uint64_t ireg = static_cast<uint64_t>(x);
+    if(ireg == 0) {
+      return 0;
+    }
+    uint32_t count = 0;
     // Scan bits from right to left.
-    auto bits = static_cast<uint64_t>(x);
-    auto mask = UINT64_C(1);
-    for(;;) {
-      if(bits & mask)
-        count++;
-      mask <<= 1;
-      if(!mask)
-        break;
+    for(unsigned i = 0; i != 64; ++i) {
+      uint32_t n = ireg & 1;
+      ireg >>= 1;
+      count += n;
     }
     return count;
   }
