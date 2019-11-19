@@ -348,7 +348,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr) noexcep
         bool esign = do_get_sign(rp, eptr);
         // Get the exponent.
         mantissa em = { };
-        if(do_collect_U(em, rp, eptr, 10, UINT32_MAX) == 0) {
+        if(do_collect_U(em, rp, eptr, 10, 999'999'999'999'999) == 0) {
           return *this;
         }
         // This shall not overflow.
