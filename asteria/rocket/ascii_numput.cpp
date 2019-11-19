@@ -559,7 +559,12 @@ int main(void)
 #endif  // 0
 
     // These are generated data. Do not edit by hand!
-    constexpr double s_decbounds_F[][2] =
+    struct decbounds_F
+      {
+        double high;
+        double low;
+      }
+    constexpr s_decbounds_F[] =
       {
         {                       0,                         0 },   // 1.0e-324
         {                       0,                         0 },   // 2.0e-324
@@ -6280,7 +6285,7 @@ int main(void)
           // Get the median.
           // We know `epos - bpos` cannot be negative, so `>> 1` is a bit faster than `/ 2`.
           ptrdiff_t mpos = bpos + ((epos - bpos) >> 1);
-          const double& med = s_decbounds_F[mpos][0];
+          const double& med = s_decbounds_F[mpos].high;
           // Stops immediately if `value` equals `med`.
           if(::std::memcmp(&value, &med, sizeof(double)) == 0) {
             bpos = mpos + 1;
@@ -6346,8 +6351,8 @@ int main(void)
           }
           // Locate the next digit.
           if(dval != 0) {
-            freg -= s_decbounds_F[dpos][0];
-            com += s_decbounds_F[dpos][1];
+            freg -= s_decbounds_F[dpos].high;
+            com += s_decbounds_F[dpos].low;
           }
           // Fix the rounding error when there have been 12 digits.
           if(dcnt == 12) {
