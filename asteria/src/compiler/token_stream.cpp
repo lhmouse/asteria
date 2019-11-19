@@ -234,41 +234,11 @@ namespace Asteria {
           }
       };
 
-    template<typename XtokenT> void do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XtokenT&& xtoken)
+    template<typename XtokenT> bool do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XtokenT&& xtoken)
       {
         tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, rocket::forward<XtokenT>(xtoken));
         reader.consume(tlen);
-      }
-
-    inline bool do_accumulate_digit(int64_t& val, int64_t limit, uint8_t base, uint8_t dval) noexcept
-      {
-        if(limit >= 0) {
-          // Accumulate the digit towards positive infinity.
-          if(val > (limit - dval) / base) {
-            return false;
-          }
-          val *= base;
-          val += dval;
-        }
-        else {
-          // Accumulate the digit towards negative infinity.
-          if(val < (limit + dval) / base) {
-            return false;
-          }
-          val *= base;
-          val -= dval;
-        }
         return true;
-      }
-
-    inline void do_raise(double& val, uint8_t base, int64_t exp) noexcept
-      {
-        if(exp > 0) {
-          val *= std::pow(base, +exp);
-        }
-        if(exp < 0) {
-          val /= std::pow(base, -exp);
-        }
       }
 
     bool do_may_infix_operators_follow(cow_vector<Token>& tokens)
@@ -293,6 +263,24 @@ namespace Asteria {
         return true;
       }
 
+    cow_string& do_collect_digits(cow_string& tstr, Line_Reader& reader, size_t& tlen, uint8_t mask)
+      {
+        for(;;) {
+          if(reader.peek(tlen) == '`') {
+            // Skip a digit separator.
+            tlen++;
+            continue;
+          }
+          if(!do_check_cctype(reader.peek(tlen), mask)) {
+            break;
+          }
+          // Collect a digit.
+          tstr += reader.peek(tlen);
+          tlen++;
+        }
+        return tstr;
+      }
+
     bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, bool integers_as_reals)
       {
         // numeric-literal ::=
@@ -311,228 +299,116 @@ namespace Asteria {
         //   PCRE([eE][-+]?([0-9]`?)+)
         // binary-exponent-suffix ::=
         //   PCRE([pP][-+]?([0-9]`?)+)
-        bool rneg = false;  // is the number negative?
-        size_t rbegin = 0;  // beginning of significant figures
-        size_t rend = 0;  // end of significant figures
-        uint8_t rbase = 10;  // the base of the integral and fractional parts.
-        int64_t icnt = 0;  // number of integral digits (always non-negative)
-        int64_t fcnt = 0;  // number of fractional digits (always non-negative)
-        uint8_t pbase = 0;  // the base of the exponent.
-        bool pneg = false;  // is the exponent negative?
-        int64_t pexp = 0;  // `pbase`'d exponent
-        int64_t pcnt = 0;  // number of exponent digits (always non-negative)
-        // Get the sign of the number if any.
+        cow_string tstr;
         size_t tlen = 0;
+        // Look for an explicit sign symbol.
         switch(reader.peek(tlen)) {
         case '+':
-          tlen++;
-          rneg = false;
-          break;
+          {
+            tstr = rocket::sref("+");
+            tlen++;
+            break;
+          }
         case '-':
-          tlen++;
-          rneg = true;
-          break;
+          {
+            tstr = rocket::sref("-");
+            tlen++;
+            break;
+          }
         }
+        // If a sign symbol exists in a context where an infix operator is allowed, it is treated as the latter.
         if((tlen != 0) && do_may_infix_operators_follow(tokens)) {
           return false;
         }
         if(!do_check_cctype(reader.peek(tlen), cctype_digit)) {
           return false;
         }
-        // Check for the base prefix.
+        // These are characterstics of the literal.
+        uint8_t mmask = cctype_digit;
+        uint8_t expch = 'e';
+        bool has_point = false;
+        // Get the mask of mantissa digits and tell which character initiates the exponent.
         if(reader.peek(tlen) == '0') {
-          switch(reader.peek(tlen + 1)) {
-          case 'b':
-          case 'B':
-            tlen += 2;
-            rbase = 2;
-            break;
-          case 'x':
-          case 'X':
-            tlen += 2;
-            rbase = 16;
-            break;
-          }
-        }
-        rbegin = tlen;
-        rend = tlen;
-        // Parse the integral part.
-        for(;;) {
-          auto dval = do_translate_digit(reader.peek(tlen));
-          if(dval >= rbase) {
-            break;
-          }
+          tstr += reader.peek(tlen);
           tlen++;
-          // Accept a digit.
-          rend = tlen;
-          icnt++;
-          // Is the next character a digit separator?
-          if(reader.peek(tlen) == '`') {
+          // Check the radix identifier.
+          if(rocket::is_any_of(static_cast<uint8_t>(reader.peek(tlen) | 0x20), { 'b', 'x' })) {
+            tstr += reader.peek(tlen);
             tlen++;
+            // Accept the radix identifier.
+            mmask = cctype_xdigit;
+            expch = 'p';
           }
         }
-        // There shall be at least one digit.
-        if(icnt == 0) {
-          do_throw_parser_error(parser_status_numeric_literal_incomplete, reader, tlen);
-        }
-        // Check for the fractional part.
+        // Accept the longest string composing the integral part.
+        do_collect_digits(tstr, reader, tlen, mmask);
+        // Check for a radix point. If one exists, the fractional part shall follow.
         if(reader.peek(tlen) == '.') {
+          tstr += reader.peek(tlen);
           tlen++;
-          // Parse the fractional part.
-          for(;;) {
-            auto dval = do_translate_digit(reader.peek(tlen));
-            if(dval >= rbase) {
-              break;
-            }
-            tlen++;
-            // Accept a digit.
-            rend = tlen;
-            fcnt++;
-            // Is the next character a digit separator?
-            if(reader.peek(tlen) == '`') {
-              tlen++;
-            }
-          }
-          // There shall be at least one digit.
-          if(fcnt == 0) {
-            do_throw_parser_error(parser_status_numeric_literal_incomplete, reader, tlen);
-          }
+          // Accept the fractional part.
+          has_point = true;
+          do_collect_digits(tstr, reader, tlen, mmask);
         }
-        // Check for the exponent part.
-        switch(reader.peek(tlen)) {
-        case 'e':
-        case 'E':
+        // Check for the exponent.
+        if(static_cast<uint8_t>(reader.peek(tlen) | 0x20) == expch) {
+          tstr += reader.peek(tlen);
           tlen++;
-          pbase = 10;
-          break;
-        case 'p':
-        case 'P':
-          tlen++;
-          pbase = 2;
-          break;
-        }
-        if(pbase != 0) {
-          // Parse the exponent part.
-          // Get the sign of the exponent if any.
-          switch(reader.peek(tlen)) {
-          case '+':
+          // Check for an optional sign symbol.
+          if(rocket::is_any_of(reader.peek(tlen), { '+', '-' })) {
+            tstr += reader.peek(tlen);
             tlen++;
-            pneg = false;
-            break;
-          case '-':
-            tlen++;
-            pneg = true;
-            break;
           }
-          // Parse the exponent as an integer. The value must fit in 24 bits.
-          for(;;) {
-            auto dval = do_translate_digit(reader.peek(tlen));
-            if(dval >= 10) {
-              break;
-            }
-            tlen++;
-            // Accept a digit.
-            if(!do_accumulate_digit(pexp, pneg ? -0x800000 : +0x7FFFFF, 10, dval)) {
-              do_throw_parser_error(parser_status_numeric_literal_exponent_overflow, reader, tlen);
-            }
-            pcnt++;
-            // Is the next character a digit separator?
-            if(reader.peek(tlen) == '`') {
-              tlen++;
-            }
-          }
-          // There shall be at least one digit.
-          if(pcnt == 0) {
-            do_throw_parser_error(parser_status_numeric_literal_incomplete, reader, tlen);
-          }
+          // Accept the exponent.
+          do_collect_digits(tstr, reader, tlen, cctype_digit);
         }
-        if(reader.peek(tlen) == '`') {
-          do_throw_parser_error(parser_status_digit_separator_following_nondigit, reader, tlen);
+        // Accept numeric suffixes.
+        // Note, at the moment we make no use of such suffixes, so any suffix will definitely cause parser errors.
+        do_collect_digits(tstr, reader, tlen, cctype_alpha | cctype_digit);
+        // Convert the token to a literal.
+        // We always parse the literal as a floating-point number.
+        rocket::ascii_numget numg;
+        const char* bp = tstr.c_str();
+        const char* ep = bp + tstr.size();
+        if(!numg.parse_F(bp, ep)) {
+          do_throw_parser_error(parser_status_numeric_literal_invalid, reader, tlen);
         }
-        // Disallow suffixes. Suffixes such as `ll`, `u` and `f` are used in C and C++ to specify the types of numeric literals.
-        // Since we make no use of them, we just reserve them for further use for good.
-        if(do_check_cctype(reader.peek(tlen), cctype_namei | cctype_digit)) {
-          do_throw_parser_error(parser_status_numeric_literal_suffix_disallowed, reader, tlen);
+        if(bp != ep) {
+          do_throw_parser_error(parser_status_numeric_literal_suffix_invalid, reader, tlen);
         }
-        // Is this an `integer` or a `real`?
-        if(!integers_as_reals && (fcnt == 0)) {
-          // The literal is an `integer` if there is no decimal point.
-          int64_t val = 0;
-          // Accumulate digits from left to right.
-          for(auto ri = rbegin; ri != rend; ++ri) {
-            auto dval = do_translate_digit(reader.peek(ri));
-            if(dval >= rbase) {
-              continue;
-            }
-            // Accept a digit.
-            if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
-              do_throw_parser_error(parser_status_integer_literal_overflow, reader, tlen);
-            }
+        // It is cast to an integer only when `integers_as_reals` is `false` and it does not contain a radix point.
+        if(!integers_as_reals && !has_point) {
+          // Try casting the value to an `integer`.
+          Token::S_integer_literal xtoken;
+          numg.cast_I(xtoken.val, INT64_MIN, INT64_MAX);
+          // Check for errors. Note that integer casts never underflows.
+          if(numg.overflowed()) {
+            do_throw_parser_error(parser_status_integer_literal_overflow, reader, tlen);
           }
-          // Negative exponents are not allowed, not even when the significant part is zero.
-          if(pexp < 0) {
-            do_throw_parser_error(parser_status_integer_literal_exponent_negative, reader, tlen);
+          if(numg.inexact()) {
+            do_throw_parser_error(parser_status_integer_literal_inexact, reader, tlen);
           }
-          // Raise the result.
-          if(val != 0) {
-            for(auto i = pexp; i != 0; --i) {
-              // Append a digit zero.
-              if(!do_accumulate_digit(val, rneg ? INT64_MIN : INT64_MAX, pbase, 0)) {
-                do_throw_parser_error(parser_status_integer_literal_overflow, reader, tlen);
-              }
-            }
+          if(!numg) {
+            do_throw_parser_error(parser_status_numeric_literal_invalid, reader, tlen);
           }
-          // Push an integer literal.
-          Token::S_integer_literal xtoken = { val };
-          do_push_token(tokens, reader, tlen, rocket::move(xtoken));
-          return true;
-        }
-        // The literal is a `real` if there is a decimal point.
-        if(rbase == pbase) {
-          // Contract floating operations to minimize rounding errors.
-          pexp -= fcnt;
-          icnt += fcnt;
-          fcnt = 0;
-        }
-        // Digits are accumulated using a 64-bit integer with no fractional part.
-        // Excess significant figures are discard if the integer would overflow.
-        int64_t tval = 0;
-        int64_t tcnt = icnt;
-        // Accumulate digits from left to right.
-        for(auto ri = rbegin; ri != rend; ++ri) {
-          auto dval = do_translate_digit(reader.peek(ri));
-          if(dval >= rbase) {
-            continue;
-          }
-          // Accept a digit.
-          if(!do_accumulate_digit(tval, rneg ? INT64_MIN : INT64_MAX, rbase, dval)) {
-            break;
-          }
-          // Nudge the decimal point to the right.
-          tcnt--;
-        }
-        // Raise the result.
-        double val;
-        if(tval == 0) {
-          val = std::copysign(0.0, -rneg);
+          return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
         }
         else {
-          val = static_cast<double>(tval);
-          do_raise(val, rbase, tcnt);
-          do_raise(val, pbase, pexp);
+          // Try casting the value to a `real`.
+          Token::S_real_literal xtoken;
+          numg.cast_F(xtoken.val, -DBL_MAX, DBL_MAX);
+          // Check for errors. Note that integer casts are never inexact.
+          if(numg.overflowed()) {
+            do_throw_parser_error(parser_status_real_literal_overflow, reader, tlen);
+          }
+          if(numg.underflowed()) {
+            do_throw_parser_error(parser_status_real_literal_underflow, reader, tlen);
+          }
+          if(!numg) {
+            do_throw_parser_error(parser_status_numeric_literal_invalid, reader, tlen);
+          }
+          return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
         }
-        // Check for overflow or underflow.
-        int fpcls = std::fpclassify(val);
-        if(fpcls == FP_INFINITE) {
-          do_throw_parser_error(parser_status_real_literal_overflow, reader, tlen);
-        }
-        if((fpcls == FP_ZERO) && (tval != 0)) {
-          do_throw_parser_error(parser_status_real_literal_underflow, reader, tlen);
-        }
-        // Push a real literal.
-        Token::S_real_literal xtoken = { val };
-        do_push_token(tokens, reader, tlen, rocket::move(xtoken));
-        return true;
       }
 
     struct Prefix_Comparator
@@ -635,8 +511,7 @@ namespace Asteria {
           if((tlen <= reader.navail()) && (std::memcmp(reader.data(), cur.first, tlen) == 0)) {
             // A punctuator has been found.
             Token::S_punctuator xtoken = { cur.second };
-            do_push_token(tokens, reader, tlen, rocket::move(xtoken));
-            return true;
+            return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
           }
           range.second--;
         }
@@ -785,8 +660,7 @@ namespace Asteria {
           }
         }
         Token::S_string_literal xtoken = { rocket::move(val) };
-        do_push_token(tokens, reader, tlen, rocket::move(xtoken));
-        return true;
+        return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
       }
 
     struct Keyword_Element
@@ -866,8 +740,7 @@ namespace Asteria {
         if(keywords_as_identifiers) {
           // Do not check for identifiers.
           Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-          do_push_token(tokens, reader, tlen, rocket::move(xtoken));
-          return true;
+          return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
         }
 #ifdef ROCKET_DEBUG
         ROCKET_ASSERT(std::is_sorted(begin(s_keywords), end(s_keywords), Prefix_Comparator()));
@@ -877,15 +750,13 @@ namespace Asteria {
           if(range.first == range.second) {
             // No matching keyword has been found so far.
             Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-            do_push_token(tokens, reader, tlen, rocket::move(xtoken));
-            return true;
+            return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
           }
           const auto& cur = range.first[0];
           if((std::strlen(cur.first) == tlen) && (std::memcmp(reader.data(), cur.first, tlen) == 0)) {
             // A keyword has been found.
             Token::S_keyword xtoken = { cur.second };
-            do_push_token(tokens, reader, tlen, rocket::move(xtoken));
-            return true;
+            return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
           }
           range.first++;
         }
