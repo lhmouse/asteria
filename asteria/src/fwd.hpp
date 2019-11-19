@@ -32,6 +32,8 @@
 #include "../rocket/ref_to.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/tinyfmt_file.hpp"
+#include "../rocket/ascii_numget.hpp"
+#include "../rocket/ascii_numput.hpp"
 
 // Macros
 #define ASTERIA_SFINAE_CONSTRUCT(T_, ...)    ROCKET_ENABLE_IF(::std::is_constructible<T_, __VA_ARGS__>::value)
