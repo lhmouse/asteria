@@ -681,6 +681,7 @@ namespace Asteria {
           }
           tlen++;
           // Translate it.
+          int xcnt = 0;
           switch(next) {
           case '\'':
           case '\"':
@@ -742,12 +743,16 @@ namespace Asteria {
               break;
             }
           case 'U':
-          case 'u':
-          case 'x':
             {
+              xcnt += 2;
+              // Fallthrough
+          case 'u':
+              xcnt += 2;
+              // Fallthrough
+          case 'x':
               char32_t cp = 0;
               // How many hex digits are there?
-              int xcnt = 2 + (next != 'x') * 2 + (next == 'U') * 2;
+              xcnt += 2;
               // Read hex digits.
               for(int i = 0; i < xcnt; ++i) {
                 // Read a hex digit.
@@ -856,7 +861,7 @@ namespace Asteria {
           if(!do_check_cctype(next, cctype_namei | cctype_digit)) {
             break;
           }
-          ++tlen;
+          tlen++;
         }
         if(keywords_as_identifiers) {
           // Do not check for identifiers.
