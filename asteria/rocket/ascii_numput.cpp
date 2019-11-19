@@ -492,11 +492,11 @@ ascii_numput& ascii_numput::put_XE(double value) noexcept
 
 #if 0
 /* This program is used to generate the bound table for decimal numbers.
- * Each bound value from `3e-324` to `1e+308` is split into two parts for
- * accuracy.
+ * Each bound value from `3e-324` to `1e+308` is split into two parts
+ * for accuracy.
  *
  * Compile with:
- *   gcc -std=c99 -W{all,extra,sign-,}conversion} table.c -lquadmath
+ *   gcc -std=c99 -W{all,extra,{sign-,}conversion} table.c -lquadmath
  */
 
 #include <quadmath.h>
