@@ -441,6 +441,10 @@ ascii_numget& ascii_numget::cast_U(uint64_t& value, uint64_t lower, uint64_t upp
             ireg = next;
           }
         }
+        // Set the inexact flag if some significant figures have been lost.
+        if(this->m_madd) {
+          this->m_inxc = true;
+        }
         // Set the value.
         value = ireg;
         break;
@@ -539,6 +543,10 @@ ascii_numget& ascii_numget::cast_I(int64_t& value, int64_t lower, int64_t upper)
             }
             ireg = next;
           }
+        }
+        // Set the inexact flag if some significant figures have been lost.
+        if(this->m_madd) {
+          this->m_inxc = true;
         }
         // Set the value.
         if(this->m_sign) {
