@@ -546,33 +546,29 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "UTF code point value invalid";
       }
-    case parser_status_numeric_literal_incomplete:
+    case parser_status_numeric_literal_invalid:
       {
-        return "numeric literal incomplete";
-      }
-    case parser_status_numeric_literal_suffix_disallowed:
-      {
-        return "numeric literal suffix disallowed";
-      }
-    case parser_status_numeric_literal_exponent_overflow:
-      {
-        return "numeric literal exponent too large";
+        return "numeric literal invalid";
       }
     case parser_status_integer_literal_overflow:
       {
-        return "integer literal exponent too large";
+        return "integer literal too large";
       }
-    case parser_status_integer_literal_exponent_negative:
+    case parser_status_integer_literal_inexact:
       {
-        return "integer literal exponent negative";
+        return "fraction as an integer literal";
       }
     case parser_status_real_literal_overflow:
       {
-        return "real literal overflowed to infinity";
+        return "real literal too large";
       }
     case parser_status_real_literal_underflow:
       {
         return "real literal truncated to zero";
+      }
+    case parser_status_numeric_literal_suffix_invalid:
+      {
+        return "numeric literal suffix invalid";
       }
     case parser_status_block_comment_unclosed:
       {

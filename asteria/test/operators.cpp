@@ -273,13 +273,13 @@ int main()
         assert false < true;
         assert 1 < 2;
         assert 1.0 < 2.0;
-        assert 1.0p30 < infinity;
+        assert 0x1.0p30 < infinity;
         assert "aa" < "b";
 
         assert true > false;
         assert 2 > 1;
         assert 2.0 > 1.0;
-        assert -1.0p30 > -infinity;
+        assert -0x1.0p30 > -infinity;
         assert "aa" > "a";
 
         assert true >= true;
