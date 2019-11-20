@@ -168,17 +168,6 @@ template<typename charT, typename traitsT, typename allocT>
         if(!this->m_file) {
           noadl::sprintf_and_throw<invalid_argument>("tinybuf_file: no file opened");
         }
-        // Clear the input buffer.
-        if(!gcur) {
-          // The file may be seekable. We will check this later but the file position shall have been updated.
-          // In this case we discard the entire input buffer.
-          this->m_gbuf.clear();
-        }
-        else {
-          // The file is definitely non-seekable. We cannot reload the buffer, so it must not be cleared.
-          // In this case we discard characters that have been read so far.
-          this->m_gbuf.discard(static_cast<size_type>(gcur - this->m_gbuf.begin()));
-        }
         // Get the file position of the beginning of the new get area.
         auto goff = this->m_goff;
         if(goff != -2) {
@@ -189,8 +178,24 @@ template<typename charT, typename traitsT, typename allocT>
             // Mark the file non-seekable.
             goff = -2;
         }
-        // Read some characters and append them to the input buffer.
-        auto navail = this->m_gbuf.reserve(0x1000);
+        // Reserve storage for the read operation.
+        size_type navail;
+        if(!gcur) {
+          // The file is seekable so the buffer may be reloaded.
+          // In this case we discard the entire buffer.
+          this->m_gbuf.clear();
+          navail = this->m_gbuf.reserve(0x4000);
+        }
+        else {
+          // The file is non-seekable so the buffer cannot be cleared.
+          // In this case we discard characters that have been read so far.
+          this->m_gbuf.discard(static_cast<size_type>(gcur - this->m_gbuf.begin()));
+          // Reallocate the buffer as needed.
+          navail = this->m_gbuf.reserve(0x2000);
+          gcur = this->m_gbuf.begin();
+          gend = this->m_gbuf.end();
+        }
+        // Read some characters and append them to the buffer.
         navail = traits_type::fgetn(this->m_file, this->m_gbuf.mut_end(), navail);
         this->m_gbuf.accept(navail);
         this->m_goff = goff;
