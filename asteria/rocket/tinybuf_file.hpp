@@ -111,6 +111,10 @@ template<typename charT, typename traitsT, typename allocT>
           // No file has been opened. There are no characters to read.
           return -1;
         }
+        if(::feof(this->m_file) || ::ferror(this->m_file)) {
+          // No characters could be read.
+          return -1;
+        }
         // TODO: Not implemented yet.
         return 0;
       }
