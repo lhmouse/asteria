@@ -201,7 +201,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
     namespace {
 
     template<typename valueT>
-        char* do_check_special_opt(char*& bp, char*& ep, const valueT& value) noexcept
+        char* do_check_special(char*& bp, char*& ep, const valueT& value) noexcept
       {
         // Note that this function returns a pointer to immutable strings.
         int cls = ::std::fpclassify(value);
@@ -233,7 +233,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
         mant = static_cast<uint64_t>(static_cast<int64_t>(::std::ldexp(frac, 53))) << 11;
       }
 
-    void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* dp_opt) noexcept
+    void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
       {
         // Write digits in normal order.
         uint64_t ireg = mant;
@@ -241,20 +241,20 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
           // Shift a digit out.
           uint8_t dval = static_cast<uint8_t>(ireg >> 63);
           ireg <<= 1;
-          // Insert a decimal point before `dp_opt`.
-          if(ep == dp_opt)
+          // Insert a decimal point before `rdxp`.
+          if(ep == rdxp)
             *(ep++) = '.';
           // Write this digit.
           *(ep++) = do_pdigit_D(dval);
         }
-        // If `dp_opt` is set, fill zeroes until it is reached,
+        // If `rdxp` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
-        if(dp_opt)
-          while(ep < dp_opt)
+        if(rdxp)
+          while(ep < rdxp)
             *(ep++) = '0';
       }
 
-    void do_xput_M_hex(char*& ep, const uint64_t& mant, const char* dp_opt) noexcept
+    void do_xput_M_hex(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
       {
         // Write digits in normal order.
         uint64_t ireg = mant;
@@ -262,16 +262,16 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
           // Shift a digit out.
           uint8_t dval = static_cast<uint8_t>(ireg >> 60);
           ireg <<= 4;
-          // Insert a decimal point before `dp_opt`.
-          if(ep == dp_opt)
+          // Insert a decimal point before `rdxp`.
+          if(ep == rdxp)
             *(ep++) = '.';
           // Write this digit.
           *(ep++) = do_pdigit_X(dval);
         }
-        // If `dp_opt` is set, fill zeroes until it is reached,
+        // If `rdxp` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
-        if(dp_opt)
-          while(ep < dp_opt)
+        if(rdxp)
+          while(ep < rdxp)
             *(ep++) = '0';
       }
 
@@ -302,7 +302,7 @@ ascii_numput& ascii_numput::put_BF(double value) noexcept
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
-    if(do_check_special_opt(bp, ep, value)) {
+    if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
       bp += do_cast_U(sign + 1);
@@ -356,7 +356,7 @@ ascii_numput& ascii_numput::put_BE(double value) noexcept
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
-    if(do_check_special_opt(bp, ep, value)) {
+    if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
       bp += do_cast_U(sign + 1);
@@ -396,7 +396,7 @@ ascii_numput& ascii_numput::put_XF(double value) noexcept
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
-    if(do_check_special_opt(bp, ep, value)) {
+    if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
       bp += do_cast_U(sign + 1);
@@ -453,7 +453,7 @@ ascii_numput& ascii_numput::put_XE(double value) noexcept
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
-    if(do_check_special_opt(bp, ep, value)) {
+    if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
       bp += do_cast_U(sign + 1);
@@ -1246,7 +1246,7 @@ int main(void)
         exp = static_cast<int>(bpos) - 324;
       }
 
-    void do_xput_M_dec(char*& ep, const uint64_t& mant, const char* dp_opt) noexcept
+    void do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
       {
         uint64_t ireg = mant;
         if(ireg != 0) {
@@ -1263,17 +1263,17 @@ int main(void)
           }
           // Pop digits and append them to `ep`.
           while(tbp != end(temps)) {
-            // Insert a decimal point before `dp_opt`.
-            if(ep == dp_opt)
+            // Insert a decimal point before `rdxp`.
+            if(ep == rdxp)
               *(ep++) = '.';
             // Write this digit.
             *(ep++) = *(tbp++);
           }
         }
-        // If `dp_opt` is set, fill zeroes until it is reached,
+        // If `rdxp` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
-        if(dp_opt)
-          while(ep < dp_opt)
+        if(rdxp)
+          while(ep < rdxp)
             *(ep++) = '0';
       }
 
@@ -1287,7 +1287,7 @@ ascii_numput& ascii_numput::put_DF(double value) noexcept
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
-    if(do_check_special_opt(bp, ep, value)) {
+    if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
       bp += do_cast_U(sign + 1);
@@ -1338,7 +1338,7 @@ ascii_numput& ascii_numput::put_DE(double value) noexcept
     // Extract the sign bit and extend it to a word.
     int sign = ::std::signbit(value) ? -1 : 0;
     // Treat non-finite values and zeroes specially.
-    if(do_check_special_opt(bp, ep, value)) {
+    if(do_check_special(bp, ep, value)) {
       // Use the template string literal, which is immutable.
       // Skip the minus sign if the sign bit is clear.
       bp += do_cast_U(sign + 1);
