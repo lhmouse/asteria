@@ -1233,7 +1233,7 @@ int main(void)
         const auto& mult = s_decmult_F[bpos];
         // Extract the mantissa.
         freg = ::std::ldexp(freg, mult.bexp);
-        uint64_t ireg = static_cast<uint64_t>(static_cast<int64_t>(freg));
+        uint64_t ireg = static_cast<uint64_t>(static_cast<int64_t>(freg) | 1);
         // Multiply two 64-bit values and get the high-order half.
         // TODO: Modern CPUs have intrinsics for this.
         uint64_t xhi = ireg >> 32;
