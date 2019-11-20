@@ -87,11 +87,31 @@ template<> struct char_traits<char>
       }
     static size_type fgetn(::FILE* fp, char_type* p, size_type n)
       {
-        return ::fread(p, 1, n, fp);
+        size_t k = 0;
+        ::flockfile(fp);
+        while(k < n) {
+          int ch = ::fgetc_unlocked(fp);
+          if(ROCKET_UNEXPECT(ch == EOF))
+            break;
+          p[k++] = (char)ch;
+          if(ch == '\n')
+            break;
+        }
+        ::funlockfile(fp);
+        return k;
       }
     static size_type fputn(::FILE* fp, const char_type* p, size_type n)
       {
-        return ::fwrite(p, 1, n, fp);
+        size_t k = 0;
+        ::flockfile(fp);
+        while(k < n) {
+          int ch = ::fputc_unlocked(p[k], fp);
+          if(ROCKET_UNEXPECT(ch == EOF))
+            break;
+          k++;
+        }
+        ::funlockfile(fp);
+        return k;
       }
   };
 
@@ -168,7 +188,6 @@ template<> struct char_traits<wchar_t>
       }
     static size_type fgetn(::FILE* fp, char_type* p, size_type n)
       {
-        // Read characters one by one, as `fgetws()` doesn't like null characters.
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
@@ -176,13 +195,14 @@ template<> struct char_traits<wchar_t>
           if(ROCKET_UNEXPECT(ch == WEOF))
             break;
           p[k++] = (wchar_t)ch;
+          if(ch == L'\n')
+            break;
         }
         ::funlockfile(fp);
         return k;
       }
     static size_type fputn(::FILE* fp, const char_type* p, size_type n)
       {
-        // Write characters one by one, as `fputws()` doesn't like null characters.
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
