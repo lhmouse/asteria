@@ -1369,15 +1369,16 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
         case 10:
           {
             // Get the multiplier.
-            if(this->m_expo < -343) {
+            uint32_t mpos = static_cast<uint32_t>(this->m_expo + 343);
+            if(mpos >= INT32_MAX) {
               freg = 0;
               break;
             }
-            if(this->m_expo > +308) {
+            if(mpos >= noadl::countof(s_decmult_F)) {
               freg = numeric_limits<double>::infinity();
               break;
             }
-            const auto& mult = s_decmult_F[static_cast<uint32_t>(this->m_expo + 343)];
+            const auto& mult = s_decmult_F[mpos];
             // Adjust `ireg` such that its MSB is non-zero.
             // TODO: Modern CPUs have intrinsics for LZCNT.
             int32_t lzcnt = 0;
@@ -1395,10 +1396,8 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
             uint64_t ylo = mult.mant & UINT32_MAX;
             ireg = xhi * yhi + (xlo * yhi >> 32) + (xhi * ylo >> 32);
             // Convert the mantissa to a floating-point number.
-            // Set the LSB in case of rounding.
             ROCKET_ASSERT(ireg <= INT64_MAX);
-            ireg |= 1;
-            freg = static_cast<double>(static_cast<int64_t>(ireg));
+            freg = static_cast<double>(static_cast<int64_t>(ireg | 1));
             freg = ::std::ldexp(freg, mult.bexp - lzcnt);
             break;
           }
