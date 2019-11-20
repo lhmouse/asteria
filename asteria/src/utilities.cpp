@@ -421,4 +421,28 @@ uint64_t generate_random_seed() noexcept
     return seed;
   }
 
+bool get_line(cow_string& str, tinybuf& ibuf)
+  {
+    // Destroy existent contents.
+    str.clear();
+    // Get characters one by one.
+    for(;;) {
+      int ch = ibuf.getc();
+      if(ch == EOF) {
+        // If the string is empty, report EOF.
+        if(str.empty()) {
+          return false;
+        }
+        // Otherwise, accept the last line.
+        break;
+      }
+      if(ch == '\n') {
+        // Discard the LF.
+        break;
+      }
+      str.push_back(static_cast<char>(ch));
+    }
+    return true;
+  }
+
 }  // namespace Asteria

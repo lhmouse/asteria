@@ -84,9 +84,9 @@ namespace Asteria {
         ref_to<tinybuf> m_cbuf;
         cow_string m_file;
 
+        size_t m_off = 0;
         cow_string m_str;
         long m_line = 0;
-        size_t m_offset = 0;
 
       public:
         Line_Reader(ref_to<tinybuf> xcbuf, const cow_string& xfile)
@@ -116,27 +116,10 @@ namespace Asteria {
 
         bool advance()
           {
-            // Clear the current line buffer.
-            this->m_str.clear();
-            this->m_offset = 0;
             // Buffer a line.
-            for(;;) {
-              int ch = this->m_cbuf->getc();
-              if(ch == EOF) {
-                // When the EOF is encountered, ...
-                if(this->m_str.empty()) {
-                  // ... if the last line is empty, fail; ...
-                  return false;
-                }
-                // ... otherwise, accept the last line which does not end in an LF anyway.
-                break;
-              }
-              if(ch == '\n') {
-                // Accept a line without the LF.
-                break;
-              }
-              // Push the character to the line buffer.
-              this->m_str.push_back(static_cast<char>(ch));
+            this->m_off = 0;
+            if(!get_line(this->m_str, this->m_cbuf)) {
+              return false;
             }
             // Increment the line number if a line has been read successfully.
             if(this->m_line == INT32_MAX) {
@@ -150,39 +133,39 @@ namespace Asteria {
 
         size_t offset() const noexcept
           {
-            return this->m_offset;
+            return this->m_off;
           }
         size_t navail() const noexcept
           {
-            return this->m_str.size() - this->m_offset;
+            return this->m_str.size() - this->m_off;
           }
         const char* data(size_t add = 0) const
           {
-            if(add > this->m_str.size() - this->m_offset) {
+            if(add > this->m_str.size() - this->m_off) {
               ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
             }
-            return this->m_str.data() + (this->m_offset + add);
+            return this->m_str.data() + (this->m_off + add);
           }
         char peek(size_t add = 0) const noexcept
           {
-            if(add > this->m_str.size() - this->m_offset) {
+            if(add > this->m_str.size() - this->m_off) {
               return 0;
             }
-            return this->m_str[this->m_offset + add];
+            return this->m_str[this->m_off + add];
           }
         void consume(size_t add)
           {
-            if(add > this->m_str.size() - this->m_offset) {
+            if(add > this->m_str.size() - this->m_off) {
               ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
             }
-            this->m_offset += add;
+            this->m_off += add;
           }
         void rewind(size_t off = 0)
           {
             if(off > this->m_str.size()) {
               ASTERIA_THROW_RUNTIME_ERROR("The offset was past the end of the current line.");
             }
-            this->m_offset = off;
+            this->m_off = off;
           }
       };
 
