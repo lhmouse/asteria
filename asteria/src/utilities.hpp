@@ -9,6 +9,7 @@
 
 namespace Asteria {
 
+// Stream-style formatter
 class Formatter
   {
   private:
@@ -66,16 +67,19 @@ class Runtime_Error : public virtual std::exception
 #define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
                                                             ::std::terminate())
 
+// UTF-8 conversion functions
 extern bool utf8_encode(char*& pos, char32_t cp);
 extern bool utf8_encode(cow_string& text, char32_t cp);
 extern bool utf8_decode(char32_t& cp, const char*& pos, size_t avail);
 extern bool utf8_decode(char32_t& cp, const cow_string& text, size_t& offset);
 
+// UTF-16 conversion functions
 extern bool utf16_encode(char16_t*& pos, char32_t cp);
 extern bool utf16_encode(cow_u16string& text, char32_t cp);
 extern bool utf16_decode(char32_t& cp, const char16_t*& pos, size_t avail);
 extern bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset);
 
+// C-style quoting
 struct Quote_Wrapper
   {
     const char* str;
@@ -97,6 +101,7 @@ inline Quote_Wrapper quote(const cow_string& str) noexcept
 
 extern tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q);
 
+// Justifying
 struct Paragraph_Wrapper
   {
     size_t indent;
@@ -110,6 +115,7 @@ constexpr Paragraph_Wrapper pwrap(size_t indent, size_t hanging) noexcept
 
 extern tinyfmt& operator<<(tinyfmt& fmt, const Paragraph_Wrapper& q);
 
+// Negative array index wrapper
 struct Wrapped_Index
   {
     uint64_t nprepend;  // number of elements to prepend
