@@ -645,6 +645,7 @@ void do_print_one(int e)
     printf("\t{ 0x%.16llX, ", mant);
     // Print the exponent in binary.
     printf("%+5d },", bexp);
+
     // Print some comments.
     printf("  // 1.0e%+.3d\n", e);
   }
