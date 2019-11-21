@@ -1231,7 +1231,7 @@ int main(void)
         // Get the multiplier.
         const auto& mult = s_decmult_F[bpos];
         // Extract the mantissa.
-        freg = ::std::ldexp(freg, mult.bexp);
+        freg = ::std::scalbn(freg, mult.bexp);
         uint64_t ireg = static_cast<uint64_t>(static_cast<int64_t>(freg) | 1);
         // Multiply two 64-bit values and get the high-order half.
         // TODO: Modern CPUs have intrinsics for this.
