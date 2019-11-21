@@ -230,7 +230,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
         int bexp;
         double frac = ::std::frexp(::std::fabs(value), &bexp);
         exp = bexp - 1;
-        mant = static_cast<uint64_t>(static_cast<int64_t>(::std::ldexp(frac, 53))) << 11;
+        mant = static_cast<uint64_t>(static_cast<int64_t>(frac * 0x1p53)) << 11;
       }
 
     void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
@@ -1206,7 +1206,6 @@ int main(void)
         // Get the first digit.
         double freg = ::std::fabs(value);
         // Locate the last number in the table that is <= `freg`.
-        // This is equivalent to `::std::count_bound(start, start + count, freg) - start - 1`.
         uint32_t bpos = 1;
         uint32_t epos = noadl::countof(s_decmult_F);
         for(;;) {
