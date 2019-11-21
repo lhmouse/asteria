@@ -1375,7 +1375,7 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
               break;
             }
             if(mpos >= noadl::countof(s_decmult_F)) {
-              freg = numeric_limits<double>::infinity();
+              freg = HUGE_VAL;
               break;
             }
             const auto& mult = s_decmult_F[mpos];
