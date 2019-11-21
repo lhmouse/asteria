@@ -1356,13 +1356,13 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
               // Drop two bits from the right.
               ireg = (ireg >> 2) | (((ireg >> 1) | ireg) & 1) | this->m_madd;
               freg = static_cast<double>(static_cast<int64_t>(ireg));
-              freg = ::std::scalbn(freg, this->m_expo + 2);
+              freg = ::std::ldexp(freg, this->m_expo + 2);
             }
             else {
               // Shift overflowed digits into the right.
               ireg = (ireg << 1) | this->m_madd;
               freg = static_cast<double>(static_cast<int64_t>(ireg));
-              freg = ::std::scalbn(freg, this->m_expo - 1);
+              freg = ::std::ldexp(freg, this->m_expo - 1);
             }
             break;
           }
@@ -1398,7 +1398,7 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
             // Convert the mantissa to a floating-point number.
             ROCKET_ASSERT(ireg <= INT64_MAX);
             freg = static_cast<double>(static_cast<int64_t>(ireg | 1));
-            freg = ::std::scalbn(freg, mult.bexp - lzcnt);
+            freg = ::std::ldexp(freg, mult.bexp - lzcnt);
             break;
           }
         default:
