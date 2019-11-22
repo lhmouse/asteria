@@ -90,7 +90,7 @@ template<> struct char_traits<char>
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
-          int ch = ::fgetc_unlocked(fp);
+          int ch = ::getc_unlocked(fp);
           if(ROCKET_UNEXPECT(ch == EOF))
             break;
           p[k++] = (char)ch;
@@ -105,7 +105,7 @@ template<> struct char_traits<char>
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
-          int ch = ::fputc_unlocked(p[k], fp);
+          int ch = ::putc_unlocked(p[k], fp);
           if(ROCKET_UNEXPECT(ch == EOF))
             break;
           k++;
@@ -191,7 +191,7 @@ template<> struct char_traits<wchar_t>
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
-          ::wint_t ch = ::fgetwc_unlocked(fp);
+          ::wint_t ch = ::getwc_unlocked(fp);
           if(ROCKET_UNEXPECT(ch == WEOF))
             break;
           p[k++] = (wchar_t)ch;
@@ -206,7 +206,7 @@ template<> struct char_traits<wchar_t>
         size_t k = 0;
         ::flockfile(fp);
         while(k < n) {
-          ::wint_t ch = ::fputwc_unlocked(p[k], fp);
+          ::wint_t ch = ::putwc_unlocked(p[k], fp);
           if(ROCKET_UNEXPECT(ch == WEOF))
             break;
           k++;
@@ -278,7 +278,7 @@ template<> struct char_traits<char16_t>
       }
     static size_type length(const char_type* p) noexcept
       {
-        for(size_t i = 0; true; ++i)
+        for(size_t i = 0; ; ++i)
           if(p[i] == 0)
             return i;
       }
@@ -340,9 +340,8 @@ template<> struct char_traits<char32_t>
 
     static char_type* assign(char_type* p, size_type n, char_type c) noexcept
       {
-        size_t k = 0;
-        while(k < n) {
-          p[k++] = c;
+        for(size_t i = 0; i < n; ++i) {
+          p[i] = c;
         }
         return p;
       }
@@ -373,7 +372,7 @@ template<> struct char_traits<char32_t>
       }
     static size_type length(const char_type* p) noexcept
       {
-        for(size_t i = 0; true; ++i)
+        for(size_t i = 0; ; ++i)
           if(p[i] == 0)
             return i;
       }
