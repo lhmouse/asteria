@@ -12,6 +12,7 @@
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::rmdir(), ::close(), ::read(), ::write(), ::unlink()
 #include <stdio.h>  // ::rename()
+#include <errno.h>  // errno
 
 namespace Asteria {
 

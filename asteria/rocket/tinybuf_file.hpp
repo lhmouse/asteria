@@ -11,6 +11,7 @@
 #include <fcntl.h>  // ::open()
 #include <unistd.h>  // ::close()
 #include <stdio.h>  // ::fdopen(), ::fclose()
+#include <errno.h>  // errno
 
 namespace rocket {
 
