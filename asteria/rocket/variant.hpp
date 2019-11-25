@@ -380,9 +380,9 @@ template<typename... alternativesT> class variant
   private:
     [[noreturn]] ROCKET_NOINLINE void do_throw_index_mismatch(size_t yindex, const type_info& ytype) const
       {
-        noadl::sprintf_and_throw<invalid_argument>(
-          "variant: The index requested is `%ld` (`%s`), but the index currently active is `%ld` (`%s`).",
-          static_cast<long>(yindex), ytype.name(), static_cast<long>(this->index()), this->type().name());
+        noadl::sprintf_and_throw<invalid_argument>("variant: index mismatch (requesting `%d` [`%s`], got `%d` [`%s`]).",
+                                                   static_cast<int>(yindex), ytype.name(),
+                                                   static_cast<int>(this->index()), this->type().name());
       }
 
   public:

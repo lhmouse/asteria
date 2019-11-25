@@ -61,9 +61,8 @@ template<typename elementT, typename deleterT>
   private:
     [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info& ytype) const
       {
-        noadl::sprintf_and_throw<domain_error>(
-          "refcnt_base: The current object cannot be converted to type `%s`, whose most derived type is `%s`.",
-          ytype.name(), typeid(*this).name());
+        noadl::sprintf_and_throw<domain_error>("refcnt_base: bad dynamic cast to type `%s` from type `%s`",
+                                               ytype.name(), typeid(*this).name());
       }
 
   public:
@@ -97,9 +96,8 @@ template<typename elementT, typename deleterT>
     template<typename yelementT = elementT> refcnt_ptr<const yelementT> share_this() const
       {
         auto ptr = noadl::static_or_dynamic_cast<const yelementT*>(this);
-        if(!ptr) {
+        if(!ptr)
           this->do_throw_bad_cast(typeid(yelementT));
-        }
         // Share ownership.
         refcnt_ptr<const yelementT> dptr(ptr);
         this->details_refcnt_ptr::reference_counter_base::add_reference();
@@ -108,9 +106,8 @@ template<typename elementT, typename deleterT>
     template<typename yelementT = elementT> refcnt_ptr<yelementT> share_this()
       {
         auto ptr = noadl::static_or_dynamic_cast<yelementT*>(this);
-        if(!ptr) {
+        if(!ptr)
           this->do_throw_bad_cast(typeid(yelementT));
-        }
         // Share ownership.
         refcnt_ptr<yelementT> dptr(ptr);
         this->details_refcnt_ptr::reference_counter_base::add_reference();
