@@ -93,7 +93,7 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
           }
         void reset(pointer ptr_new) noexcept
           {
-            auto ptr = ::std::exchange(this->m_ptr, ptr_new);
+            auto ptr = ::std::exchange(this->m_ptr, noadl::move(ptr_new));
             if(ptr)
               this->as_deleter()(ptr);
           }
@@ -149,13 +149,13 @@ template<typename elementT, typename deleterT> class unique_ptr
       :
         unique_ptr()
       {
-        this->reset(ptr);
+        this->reset(noadl::move(ptr));
       }
     unique_ptr(pointer ptr, const deleter_type& del) noexcept
       :
         unique_ptr(del)
       {
-        this->reset(ptr);
+        this->reset(noadl::move(ptr));
       }
     template<typename yelementT, typename ydeleterT,
              ROCKET_ENABLE_IF(conjunction<is_convertible<typename unique_ptr<yelementT, ydeleterT>::pointer, pointer>,
@@ -238,7 +238,8 @@ template<typename elementT, typename deleterT> class unique_ptr
     // N.B. The return type differs from `std::unique_ptr`.
     unique_ptr& reset(pointer ptr_new = pointer()) noexcept
       {
-        return this->m_sth.reset(ptr_new), *this;
+        this->m_sth.reset(noadl::move(ptr_new));
+        return *this;
       }
 
     unique_ptr& swap(unique_ptr& other) noexcept
