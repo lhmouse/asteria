@@ -367,7 +367,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             return code;
           }
         default:
-          ASTERIA_TERMINATE("An unknown target scope type `", altr.target, "` has been encountered. This is likely a bug. Please report.");
+          ASTERIA_TERMINATE("Target scope type `", altr.target, "` is unhandled." ASTERIA_REPORT_BUG);
         }
       }
     case index_continue:
@@ -398,7 +398,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             return code;
           }
         default:
-          ASTERIA_TERMINATE("An unknown target scope type `", altr.target, "` has been encountered. This is likely a bug. Please report.");
+          ASTERIA_TERMINATE("Target scope type `", altr.target, "` is unhandled." ASTERIA_REPORT_BUG);
         }
       }
     case index_throw:
@@ -456,7 +456,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
     default:
-      ASTERIA_TERMINATE("An unknown statement type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Statement type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 

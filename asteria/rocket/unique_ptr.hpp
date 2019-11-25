@@ -9,11 +9,11 @@
 #include "throw.hpp"
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
-#include "tinyfmt.hpp"
 
 namespace rocket {
 
 template<typename elementT, typename deleterT = default_delete<const elementT>> class unique_ptr;
+template<typename charT, typename traitsT> class basic_tinyfmt;
 
     namespace details_unique_ptr {
 
@@ -122,7 +122,6 @@ template<typename elementT, typename deleterT = default_delete<const elementT>> 
 template<typename elementT, typename deleterT> class unique_ptr
   {
     static_assert(!is_array<elementT>::value, "`elementT` must not be an array type.");
-
     template<typename, typename> friend class unique_ptr;
 
   public:
@@ -316,13 +315,6 @@ template<typename elementT, typename deleterT>
     lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT, typename elementT, typename deleterT>
-    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                                     const unique_ptr<elementT, deleterT>& rhs)
-  {
-    return fmt << rhs.get();
-  }
-
 template<typename targetT, typename sourceT>
     inline unique_ptr<targetT> static_pointer_cast(unique_ptr<sourceT>&& sptr) noexcept
   {
@@ -340,6 +332,13 @@ template<typename targetT, typename sourceT>
   {
     return details_unique_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
                                [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+  }
+
+template<typename charT, typename traitsT, typename elementT, typename deleterT>
+    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                     const unique_ptr<elementT, deleterT>& rhs)
+  {
+    return fmt << rhs.get();
   }
 
 template<typename elementT, typename... paramsT>

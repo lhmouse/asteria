@@ -61,7 +61,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
         ASTERIA_THROW_RUNTIME_ERROR("`continue` statements are not allowed outside matching loop statements.");
       }
     default:
-      ASTERIA_TERMINATE("An invalid status code `", status, "` was returned from a function. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("An invalid status code `", status, "` was returned from a function." ASTERIA_REPORT_BUG);
     }
   }
 

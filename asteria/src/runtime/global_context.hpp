@@ -13,7 +13,6 @@ namespace Asteria {
 class Global_Context final : public virtual Rcbase, public Abstract_Context
   {
   private:
-    rcptr<Rcbase> m_xph;  // the placeholder
     rcptr<Rcbase> m_prng;  // the global pseudo random number generator
     rcptr<Rcbase> m_stdv;  // the `std` variable
     rcptr<Rcbase> m_hooks_opt;  // the hook callback dispatcher
@@ -50,11 +49,6 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
     Collector* get_collector_opt(GC_Generation gc_gen) const;
     rcptr<Variable> create_variable(const Source_Location& sloc, const phsh_string& name, GC_Generation gc_hint = gc_generation_newest) const;
     size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest) const;
-
-    // These are interfaces of the placeholder.
-    rcobj<Placeholder> placeholder() const noexcept;
-    rcobj<Abstract_Opaque> placeholder_opaque() const noexcept;
-    rcobj<Abstract_Function> placeholder_function() const noexcept;
 
     // These are interfaces of the PRNG.
     uint32_t get_random_uint32() const noexcept;

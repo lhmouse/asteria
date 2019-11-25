@@ -55,7 +55,7 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/cow_hashmap.hpp  \
   asteria/rocket/unique_ptr.hpp  \
   asteria/rocket/refcnt_ptr.hpp  \
-  asteria/rocket/refcnt_object.hpp  \
+  asteria/rocket/checked_ptr.hpp  \
   asteria/rocket/prehashed_string.hpp  \
   asteria/rocket/static_vector.hpp  \
   asteria/rocket/optional.hpp  \
@@ -103,8 +103,7 @@ pkginclude_HEADERS =  \
   asteria/src/abstract_opaque.hpp  \
   asteria/src/abstract_function.hpp  \
   asteria/src/value.hpp  \
-  asteria/src/source_location.hpp  \
-  asteria/src/placeholder.hpp
+  asteria/src/source_location.hpp
 
 pkginclude_lldsdir = ${pkgincludedir}/llds
 pkginclude_llds_HEADERS =  \
@@ -170,7 +169,6 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/abstract_function.cpp  \
   asteria/src/value.cpp  \
   asteria/src/source_location.cpp  \
-  asteria/src/placeholder.cpp  \
   asteria/src/llds/variable_hashset.cpp  \
   asteria/src/llds/reference_dictionary.cpp  \
   asteria/src/llds/avmc_queue.cpp  \

@@ -8,11 +8,11 @@
 #include "assert.hpp"
 #include "allocator_utilities.hpp"
 #include "utilities.hpp"
-#include "tinyfmt.hpp"
 
 namespace rocket {
 
 template<typename handleT, typename closerT> class unique_handle;
+template<typename charT, typename traitsT> class basic_tinyfmt;
 
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.

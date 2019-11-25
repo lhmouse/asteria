@@ -34,12 +34,12 @@ extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) n
 #ifndef ASTERIA_ENABLE_DEBUG_LOGS
 #  define ASTERIA_ENABLE_DEBUG_LOGS  0
 #endif
-// Write arguments to the standard error stream, if `ASTERIA_ENABLE_DEBUG_LOGS` is defined to be a non-zero value.
+
 #define ASTERIA_DEBUG_LOG(...)     ASTERIA_AND_(ROCKET_UNEXPECT(ASTERIA_ENABLE_DEBUG_LOGS),  \
                                                 ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)))
-// Write arguments to the standard error stream, then call `std::terminate()`.
 #define ASTERIA_TERMINATE(...)     ASTERIA_COMMA_(::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
                                                   ::std::terminate())
+#define ASTERIA_REPORT_BUG         " This is likely a bug. Please report it to <" PACKAGE_BUGREPORT ">."
 
 class Runtime_Error : public virtual std::exception
   {

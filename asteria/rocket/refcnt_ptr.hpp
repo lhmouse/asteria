@@ -10,12 +10,12 @@
 #include "utilities.hpp"
 #include "allocator_utilities.hpp"
 #include "reference_counter.hpp"
-#include "tinyfmt.hpp"
 
 namespace rocket {
 
 template<typename elementT, typename deleterT = default_delete<const elementT>> class refcnt_base;
 template<typename elementT> class refcnt_ptr;
+template<typename charT, typename traitsT> class basic_tinyfmt;
 
     namespace details_refcnt_ptr {
 
@@ -233,7 +233,6 @@ template<typename elementT, typename deleterT>
 template<typename elementT> class refcnt_ptr
   {
     static_assert(!is_array<elementT>::value, "`elementT` must not be an array type.");
-
     template<typename> friend class refcnt_ptr;
 
   public:
@@ -421,13 +420,6 @@ template<typename elementT>
     lhs.swap(rhs);
   }
 
-template<typename charT, typename traitsT, typename elementT>
-    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
-                                                     const refcnt_ptr<elementT>& rhs)
-  {
-    return fmt << rhs.get();
-  }
-
 template<typename targetT, typename sourceT>
     inline refcnt_ptr<targetT> static_pointer_cast(const refcnt_ptr<sourceT>& sptr) noexcept
   {
@@ -464,6 +456,13 @@ template<typename targetT, typename sourceT>
   {
     return details_refcnt_ptr::pointer_cast_aux<targetT>(noadl::move(sptr),
                                [](sourceT* ptr) { return const_cast<targetT*>(ptr);  });
+  }
+
+template<typename charT, typename traitsT, typename elementT>
+    inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
+                                                     const refcnt_ptr<elementT>& rhs)
+  {
+    return fmt << rhs.get();
   }
 
 template<typename elementT, typename... paramsT>

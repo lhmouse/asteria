@@ -7,7 +7,6 @@
 #include "generational_collector.hpp"
 #include "abstract_hooks.hpp"
 #include "variable.hpp"
-#include "../placeholder.hpp"
 #include "../library/bindings_version.hpp"
 #include "../library/bindings_gc.hpp"
 #include "../library/bindings_debug.hpp"
@@ -97,9 +96,6 @@ void Global_Context::initialize(API_Version version)
     // Initialize the global garbage collector.
     auto gcoll = rocket::make_refcnt<Generational_Collector>();
     this->tie_collector(gcoll);
-    // Allocate a new placeholder.
-    auto xph = rocket::make_refcnt<Placeholder>();
-    this->m_xph = xph;
     // Use default seed.
     auto prng = rocket::make_refcnt<Random_Number_Generator>();
     this->m_prng = prng;
@@ -178,27 +174,6 @@ size_t Global_Context::collect_variables(GC_Generation gc_limit) const
       nfreed = gcoll->collect_variables(gc_limit);
     }
     return nfreed;
-  }
-
-rcobj<Placeholder> Global_Context::placeholder() const noexcept
-  {
-    auto xph = rocket::dynamic_pointer_cast<Placeholder>(this->m_xph);
-    ROCKET_ASSERT(xph);
-    return rocket::move(xph);
-  }
-
-rcobj<Abstract_Opaque> Global_Context::placeholder_opaque() const noexcept
-  {
-    auto xph = rocket::dynamic_pointer_cast<Abstract_Opaque>(this->m_xph);
-    ROCKET_ASSERT(xph);
-    return rocket::move(xph);
-  }
-
-rcobj<Abstract_Function> Global_Context::placeholder_function() const noexcept
-  {
-    auto xph = rocket::dynamic_pointer_cast<Abstract_Function>(this->m_xph);
-    ROCKET_ASSERT(xph);
-    return rocket::move(xph);
   }
 
 uint32_t Global_Context::get_random_uint32() const noexcept

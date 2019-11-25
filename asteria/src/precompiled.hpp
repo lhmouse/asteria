@@ -21,7 +21,7 @@
 #include "../rocket/unique_posix_fd.hpp"
 #include "../rocket/unique_ptr.hpp"
 #include "../rocket/refcnt_ptr.hpp"
-#include "../rocket/refcnt_object.hpp"
+#include "../rocket/checked_ptr.hpp"
 #include "../rocket/variant.hpp"
 #include "../rocket/optional.hpp"
 #include "../rocket/array.hpp"

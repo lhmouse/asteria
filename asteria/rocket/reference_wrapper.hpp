@@ -12,7 +12,6 @@ template<typename valueT> class reference_wrapper
   {
     static_assert(!is_reference<valueT>::value, "`valueT` must not be a reference type.");
     static_assert(!is_void<valueT>::value, "`valueT` must not be a `void` type.");
-
     template<typename> friend class reference_wrapper;
 
   public:

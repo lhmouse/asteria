@@ -65,7 +65,7 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
     if(name == "__func") {
       auto& func = named_refs.open(rocket::sref("__func"));
       // Create a constant string of the function signature.
-      Reference_Root::S_constant xref = { G_string(this->zvarg()->func()) };
+      Reference_Root::S_constant xref = { G_string(this->m_zvarg->func()) };
       func = rocket::move(xref);
       return &func;
     }
@@ -79,12 +79,12 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
       // Initialize the variadic argument getter.
       if(this->m_args_self.empty()) {
         // Reference the pre-allocated zero-ary argument getter if there are variadic arguments.
-        Reference_Root::S_constant xref = { G_function(this->zvarg()) };
+        Reference_Root::S_constant xref = { G_function(this->m_zvarg) };
         varg = rocket::move(xref);
       }
       else {
         // Create a new argument getter otherwise.
-        auto kvarg = rocket::make_refcnt<Variadic_Arguer>(this->zvarg(), rocket::move(this->m_args_self));
+        auto kvarg = rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), rocket::move(this->m_args_self));
         this->m_args_self.clear();
         // Set it.
         Reference_Root::S_constant xref = { G_function(rocket::move(kvarg)) };

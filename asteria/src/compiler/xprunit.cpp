@@ -167,7 +167,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }
     default:
-      ASTERIA_TERMINATE("An unknown expression unit type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Expression unit type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 

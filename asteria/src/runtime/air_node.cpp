@@ -3280,7 +3280,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
             return avmcp.output<do_apply_xop_end_a>(queue);
           }
         default:
-          ASTERIA_TERMINATE("An unknown operator enumeration `", altr.xop, "` has been encountered. This is likely a bug. Please report.");
+          ASTERIA_TERMINATE("Operator enumeration `", altr.xop, "` is unhandled." ASTERIA_REPORT_BUG);
         }
       }
     case index_unpack_struct_array:
@@ -3331,7 +3331,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_define_null_variable>(queue);
       }
     default:
-      ASTERIA_TERMINATE("An unknown AIR node type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("AIR node type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 

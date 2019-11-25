@@ -860,7 +860,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           Argument_Reader reader(rocket::sref("std.filesystem.file_stream"), rocket::ref(args));
           // Parse arguments.
           G_string path;
-          G_function callback = global.placeholder_function();
+          G_function callback;
           opt<G_integer> offset;
           opt<G_integer> limit;
           if(reader.start().g(path).g(callback).g(offset).g(limit).finish()) {

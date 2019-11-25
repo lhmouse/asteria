@@ -6,11 +6,11 @@
 
 #include "compiler.h"
 #include "static_vector.hpp"
-#include "tinyfmt.hpp"
 
 namespace rocket {
 
 template<typename valueT> class optional;
+template<typename charT, typename traitsT> class basic_tinyfmt;
 
 template<typename valueT> class optional
   {

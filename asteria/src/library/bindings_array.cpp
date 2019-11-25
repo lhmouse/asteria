@@ -1022,7 +1022,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           Argument_Reader::State state;
           // Parse arguments.
           G_array data;
-          G_function predictor = global.placeholder_function();
+          G_function predictor;
           if(reader.start().g(data).save(state).g(predictor).finish()) {
             // Call the binding function.
             auto qindex = std_array_find_if(global, data, predictor);
@@ -1102,7 +1102,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           Argument_Reader::State state;
           // Parse arguments.
           G_array data;
-          G_function predictor = global.placeholder_function();
+          G_function predictor;
           if(reader.start().g(data).save(state).g(predictor).finish()) {
             // Call the binding function.
             auto qindex = std_array_find_if_not(global, data, predictor);
@@ -1262,7 +1262,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           Argument_Reader::State state;
           // Parse arguments.
           G_array data;
-          G_function predictor = global.placeholder_function();
+          G_function predictor;
           if(reader.start().g(data).save(state).g(predictor).finish()) {
             // Call the binding function.
             auto qindex = std_array_rfind_if(global, data, predictor);
@@ -1342,7 +1342,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           Argument_Reader::State state;
           // Parse arguments.
           G_array data;
-          G_function predictor = global.placeholder_function();
+          G_function predictor;
           if(reader.start().g(data).save(state).g(predictor).finish()) {
             // Call the binding function.
             auto qindex = std_array_rfind_if_not(global, data, predictor);
@@ -1489,7 +1489,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           Argument_Reader::State state;
           // Parse arguments.
           G_array data;
-          G_function predictor = global.placeholder_function();
+          G_function predictor;
           if(reader.start().g(data).save(state).g(predictor).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_array_count_if(global, data, predictor) };
@@ -1559,7 +1559,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           Argument_Reader::State state;
           // Parse arguments.
           G_array data;
-          G_function predictor = global.placeholder_function();
+          G_function predictor;
           if(reader.start().g(data).save(state).g(predictor).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_array_count_if_not(global, data, predictor) };
@@ -2030,7 +2030,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
         [](const Value& /*opaque*/, const Global_Context& global, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.array.generate"), rocket::ref(args));
           // Parse arguments.
-          G_function generator = global.placeholder_function();
+          G_function generator;
           G_integer length;
           if(reader.start().g(generator).g(length).finish()) {
             // Call the binding function.

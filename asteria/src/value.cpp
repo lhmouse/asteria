@@ -44,7 +44,7 @@ bool Value::test() const noexcept
         return true;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Value type enumeration `", this->gtype(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 
@@ -137,7 +137,7 @@ Compare Value::compare(const Value& other) const noexcept
         return compare_unordered;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Value type enumeration `", this->gtype(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 
@@ -160,11 +160,11 @@ bool Value::unique() const noexcept
       }
     case gtype_opaque:
       {
-        return this->m_stor.as<gtype_opaque>().unique();
+        return this->m_stor.as<gtype_opaque>().get().unique();
       }
     case gtype_function:
       {
-        return this->m_stor.as<gtype_function>().unique();
+        return this->m_stor.as<gtype_function>().get().unique();
       }
     case gtype_array:
       {
@@ -175,7 +175,7 @@ bool Value::unique() const noexcept
         return this->m_stor.as<gtype_object>().unique();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Value type enumeration `", this->gtype(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 
@@ -198,11 +198,11 @@ long Value::use_count() const noexcept
       }
     case gtype_opaque:
       {
-        return this->m_stor.as<gtype_opaque>().use_count();
+        return this->m_stor.as<gtype_opaque>().get().use_count();
       }
     case gtype_function:
       {
-        return this->m_stor.as<gtype_function>().use_count();
+        return this->m_stor.as<gtype_function>().get().use_count();
       }
     case gtype_array:
       {
@@ -213,7 +213,7 @@ long Value::use_count() const noexcept
         return this->m_stor.as<gtype_object>().use_count();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Value type enumeration `", this->gtype(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 
@@ -230,11 +230,11 @@ long Value::gcref_split() const noexcept
       }
     case gtype_opaque:
       {
-        return this->m_stor.as<gtype_opaque>().use_count();
+        return this->m_stor.as<gtype_opaque>().get().use_count();
       }
     case gtype_function:
       {
-        return this->m_stor.as<gtype_function>().use_count();
+        return this->m_stor.as<gtype_function>().get().use_count();
       }
     case gtype_array:
       {
@@ -245,7 +245,7 @@ long Value::gcref_split() const noexcept
         return this->m_stor.as<gtype_object>().use_count();
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Value type enumeration `", this->gtype(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 
@@ -323,7 +323,7 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
         return fmt;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Value type enumeration `", this->gtype(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 
@@ -408,7 +408,7 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         return fmt;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Value type enumeration `", this->gtype(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 
@@ -440,7 +440,7 @@ Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
         return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& p) { p.second.enumerate_variables(callback);  }), callback;
       }
     default:
-      ASTERIA_TERMINATE("An unknown value type enumeration `", this->gtype(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Value type enumeration `", this->gtype(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 

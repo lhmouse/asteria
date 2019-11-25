@@ -41,7 +41,7 @@ tinyfmt& Token::print(tinyfmt& fmt) const
         return fmt << "string-literal `" << quote(this->m_stor.as<index_string_literal>().val) << "`";
       }
     default:
-      ASTERIA_TERMINATE("An unknown token type enumeration `", this->index(), "` has been encountered. This is likely a bug. Please report.");
+      ASTERIA_TERMINATE("Token type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
     }
   }
 

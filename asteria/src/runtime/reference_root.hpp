@@ -28,11 +28,11 @@ class Reference_Root
       };
     struct S_variable
       {
-        rcobj<Variable> var;
+        ckptr<Variable> var;
       };
     struct S_tail_call
       {
-        rcobj<Tail_Call_Arguments> tca;
+        ckptr<Tail_Call_Arguments> tca;
       };
 
     enum Index : uint8_t
@@ -93,7 +93,7 @@ class Reference_Root
       {
         return this->index() == index_variable;
       }
-    const rcobj<Variable>& as_variable() const
+    const ckptr<Variable>& as_variable() const
       {
         return this->m_stor.as<index_variable>().var;
       }
@@ -102,7 +102,7 @@ class Reference_Root
       {
         return this->index() == index_tail_call;
       }
-    const rcobj<Tail_Call_Arguments>& as_tail_call() const
+    const ckptr<Tail_Call_Arguments>& as_tail_call() const
       {
         return this->m_stor.as<index_tail_call>().tca;
       }
