@@ -64,7 +64,7 @@ class Abstract_Context
         return this->m_named_refs.clear(), *this;
       }
 
-    Generational_Collector* get_tied_collector_opt() const noexcept;
+    rcptr<Generational_Collector> get_tied_collector_opt() const noexcept;
     void tie_collector(const rcptr<Generational_Collector>& coll_opt) noexcept;
   };
 

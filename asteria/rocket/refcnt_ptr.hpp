@@ -58,11 +58,11 @@ template<typename elementT, typename deleterT>
   private:
     using deleter_base  = typename allocator_wrapper_base_for<deleter_type>::type;
 
-  private:
-    [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info& ytype) const
+  protected:
+    [[noreturn]] ROCKET_NOINLINE void do_throw_bad_cast(const type_info& to, const type_info& from) const
       {
         noadl::sprintf_and_throw<domain_error>("refcnt_base: bad dynamic cast to type `%s` from type `%s`",
-                                               ytype.name(), typeid(*this).name());
+                                               to.name(), from.name());
       }
 
   public:
@@ -96,8 +96,9 @@ template<typename elementT, typename deleterT>
     template<typename yelementT = elementT> refcnt_ptr<const yelementT> share_this() const
       {
         auto ptr = noadl::static_or_dynamic_cast<const yelementT*>(this);
-        if(!ptr)
-          this->do_throw_bad_cast(typeid(yelementT));
+        if(!ptr) {
+          this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
+        }
         // Share ownership.
         refcnt_ptr<const yelementT> dptr(ptr);
         this->details_refcnt_ptr::reference_counter_base::add_reference();
@@ -106,8 +107,9 @@ template<typename elementT, typename deleterT>
     template<typename yelementT = elementT> refcnt_ptr<yelementT> share_this()
       {
         auto ptr = noadl::static_or_dynamic_cast<yelementT*>(this);
-        if(!ptr)
-          this->do_throw_bad_cast(typeid(yelementT));
+        if(!ptr) {
+          this->do_throw_bad_cast(typeid(yelementT), typeid(*this));
+        }
         // Share ownership.
         refcnt_ptr<yelementT> dptr(ptr);
         this->details_refcnt_ptr::reference_counter_base::add_reference();

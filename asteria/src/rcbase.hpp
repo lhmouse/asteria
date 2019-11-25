@@ -28,11 +28,21 @@ class Rcbase : public rocket::refcnt_base<Rcbase>
 
     template<typename TargetT> rcptr<const TargetT> share_this() const
       {
-        return rocket::refcnt_base<Rcbase>::share_this<TargetT>();
+        auto ptr = rocket::dynamic_pointer_cast<const TargetT>(
+                     this->rocket::refcnt_base<Rcbase>::share_this<Rcbase>());
+        if(!ptr) {
+          this->do_throw_bad_cast(typeid(TargetT), typeid(*this));
+        }
+        return ptr;
       }
     template<typename TargetT> rcptr<TargetT> share_this()
       {
-        return rocket::refcnt_base<Rcbase>::share_this<TargetT>();
+        auto ptr = rocket::dynamic_pointer_cast<TargetT>(
+                     this->rocket::refcnt_base<Rcbase>::share_this<Rcbase>());
+        if(!ptr) {
+          this->do_throw_bad_cast(typeid(TargetT), typeid(*this));
+        }
+        return ptr;
       }
   };
 

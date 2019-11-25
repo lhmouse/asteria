@@ -22,9 +22,9 @@ Abstract_Context::~Abstract_Context()
   {
   }
 
-Generational_Collector* Abstract_Context::get_tied_collector_opt() const noexcept
+rcptr<Generational_Collector> Abstract_Context::get_tied_collector_opt() const noexcept
   {
-    return dynamic_cast<Generational_Collector*>(this->m_coll_opt.get());
+    return this->m_coll_opt ? this->m_coll_opt->share_this<Generational_Collector>() : nullptr;
   }
 
 void Abstract_Context::tie_collector(const rcptr<Generational_Collector>& coll_opt) noexcept

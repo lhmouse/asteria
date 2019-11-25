@@ -103,7 +103,7 @@ G_object std_checksum_crc32_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<CRC32::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<CRC32::Hasher>());
               // Parse arguments.
               G_string data;
               if(reader.start().g(data).finish()) {
@@ -128,7 +128,7 @@ G_object std_checksum_crc32_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<CRC32::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<CRC32::Hasher>());
               // Parse arguments.
               if(reader.start().finish()) {
                 Reference_Root::S_temporary xref = { h.finish() };
@@ -221,7 +221,7 @@ G_object std_checksum_fnv1a32_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<FNV1a32::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<FNV1a32::Hasher>());
               // Parse arguments.
               G_string data;
               if(reader.start().g(data).finish()) {
@@ -246,7 +246,7 @@ G_object std_checksum_fnv1a32_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<FNV1a32::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<FNV1a32::Hasher>());
               // Parse arguments.
               if(reader.start().finish()) {
                 Reference_Root::S_temporary xref = { h.finish() };
@@ -592,7 +592,7 @@ G_object std_checksum_md5_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<MD5::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<MD5::Hasher>());
               // Parse arguments.
               G_string data;
               if(reader.start().g(data).finish()) {
@@ -617,7 +617,7 @@ G_object std_checksum_md5_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<MD5::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<MD5::Hasher>());
               // Parse arguments.
               if(reader.start().finish()) {
                 Reference_Root::S_temporary xref = { h.finish() };
@@ -902,7 +902,7 @@ G_object std_checksum_sha1_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<SHA1::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<SHA1::Hasher>());
               // Parse arguments.
               G_string data;
               if(reader.start().g(data).finish()) {
@@ -927,7 +927,7 @@ G_object std_checksum_sha1_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<SHA1::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<SHA1::Hasher>());
               // Parse arguments.
               if(reader.start().finish()) {
                 Reference_Root::S_temporary xref = { h.finish() };
@@ -1183,7 +1183,7 @@ G_object std_checksum_sha256_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<SHA256::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<SHA256::Hasher>());
               // Parse arguments.
               G_string data;
               if(reader.start().g(data).finish()) {
@@ -1208,7 +1208,7 @@ G_object std_checksum_sha256_new()
               // Get the hasher.
               Reference_Modifier::S_object_key xmod = { rocket::sref("!h") };
               self.zoom_in(rocket::move(xmod));
-              auto& h = dynamic_cast<SHA256::Hasher&>(*(self.open().open_opaque()));
+              auto& h = *(self.open().as_opaque()->share_this<SHA256::Hasher>());
               // Parse arguments.
               if(reader.start().finish()) {
                 Reference_Root::S_temporary xref = { h.finish() };
