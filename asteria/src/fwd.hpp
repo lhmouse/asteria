@@ -29,7 +29,7 @@
 #include "../rocket/variant.hpp"
 #include "../rocket/optional.hpp"
 #include "../rocket/array.hpp"
-#include "../rocket/ref_to.hpp"
+#include "../rocket/reference_wrapper.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/tinyfmt_file.hpp"
 #include "../rocket/ascii_numget.hpp"
@@ -141,7 +141,7 @@ template<typename T> using opt = rocket::optional<T>;
 template<typename F, typename S> using pair = std::pair<F, S>;
 template<typename F, typename S> using cow_bivector = rocket::cow_vector<std::pair<F, S>>;
 template<typename E, size_t... k> using array = rocket::array<E, k...>;
-template<typename E> using ref_to = rocket::ref_to<E>;
+template<typename E> using ref_to = rocket::reference_wrapper<E>;
 
 // `using`-directives
 using rocket::cbegin;

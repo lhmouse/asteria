@@ -60,7 +60,7 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/static_vector.hpp  \
   asteria/rocket/optional.hpp  \
   asteria/rocket/array.hpp  \
-  asteria/rocket/ref_to.hpp  \
+  asteria/rocket/reference_wrapper.hpp  \
   asteria/rocket/linear_buffer.hpp  \
   asteria/rocket/tinybuf.hpp  \
   asteria/rocket/tinybuf_str.hpp  \

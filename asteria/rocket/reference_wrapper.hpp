@@ -1,19 +1,19 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ROCKET_REF_TO_HPP_
-#define ROCKET_REF_TO_HPP_
+#ifndef ROCKET_REFERENCE_WRAPPER_HPP_
+#define ROCKET_REFERENCE_WRAPPER_HPP_
 
 #include "utilities.hpp"
 
 namespace rocket {
 
-template<typename valueT> class ref_to
+template<typename valueT> class reference_wrapper
   {
     static_assert(!is_reference<valueT>::value, "`valueT` must not be a reference type.");
     static_assert(!is_void<valueT>::value, "`valueT` must not be a `void` type.");
 
-    template<typename> friend class ref_to;
+    template<typename> friend class reference_wrapper;
 
   public:
     // types
@@ -27,13 +27,13 @@ template<typename valueT> class ref_to
   public:
     // construct/copy/destroy
     template<typename otherT, ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
-        explicit constexpr ref_to(otherT& other) noexcept
+        explicit constexpr reference_wrapper(otherT& other) noexcept
       :
         m_ptr(::std::addressof(other))
       {
       }
     template<typename otherT, ROCKET_ENABLE_IF(is_convertible<otherT*, valueT*>::value)>
-        constexpr ref_to(ref_to<otherT> other) noexcept
+        constexpr reference_wrapper(reference_wrapper<otherT> other) noexcept
       :
         m_ptr(other.m_ptr)
       {
@@ -60,26 +60,26 @@ template<typename valueT> class ref_to
       }
   };
 
-template<typename valueT> constexpr ref_to<const valueT> cref(valueT& value) noexcept
+template<typename valueT> constexpr reference_wrapper<const valueT> cref(valueT& value) noexcept
   {
-    return ref_to<const valueT>(value);
+    return reference_wrapper<const valueT>(value);
   }
-template<typename valueT> constexpr ref_to<const valueT> cref(ref_to<valueT> value) noexcept
+template<typename valueT> constexpr reference_wrapper<const valueT> cref(reference_wrapper<valueT> value) noexcept
   {
-    return ref_to<const valueT>(value);
+    return reference_wrapper<const valueT>(value);
   }
-template<typename valueT> constexpr ref_to<const valueT> cref(valueT&& value) noexcept
+template<typename valueT> constexpr reference_wrapper<const valueT> cref(valueT&& value) noexcept
   = delete;
 
-template<typename valueT> constexpr ref_to<valueT> ref(valueT& value) noexcept
+template<typename valueT> constexpr reference_wrapper<valueT> ref(valueT& value) noexcept
   {
-    return ref_to<valueT>(value);
+    return reference_wrapper<valueT>(value);
   }
-template<typename valueT> constexpr ref_to<valueT> ref(ref_to<valueT> value) noexcept
+template<typename valueT> constexpr reference_wrapper<valueT> ref(reference_wrapper<valueT> value) noexcept
   {
-    return ref_to<valueT>(value);
+    return reference_wrapper<valueT>(value);
   }
-template<typename valueT> constexpr ref_to<valueT> ref(valueT&& value) noexcept
+template<typename valueT> constexpr reference_wrapper<valueT> ref(valueT&& value) noexcept
   = delete;
 
 }  // namespace rocket
