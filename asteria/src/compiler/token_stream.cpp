@@ -116,10 +116,27 @@ namespace Asteria {
 
         bool advance()
           {
-            // Buffer a line.
+            // Clear the current line buffer.
+            this->m_str.clear();
             this->m_off = 0;
-            if(!get_line(this->m_str, this->m_cbuf)) {
-              return false;
+            // Buffer a line.
+            for(;;) {
+              int ch = this->m_cbuf->getc();
+              if(ch == EOF) {
+                // When the EOF is encountered, ...
+                if(this->m_str.empty()) {
+                  // ... if the last line is empty, fail; ...
+                  return false;
+                }
+                // ... otherwise, accept the last line which does not end in an LF anyway.
+                break;
+              }
+              if(ch == '\n') {
+                // Accept a line without the LF.
+                break;
+              }
+              // Append the character to the line buffer.
+              this->m_str.push_back(static_cast<char>(ch));
             }
             // Increment the line number if a line has been read successfully.
             if(this->m_line == INT32_MAX) {

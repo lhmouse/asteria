@@ -128,9 +128,6 @@ extern Wrapped_Index wrap_index(int64_t index, size_t size) noexcept;
 // Note that the return value may be either positive or negative.
 extern uint64_t generate_random_seed() noexcept;
 
-// Get a line from a stream.
-extern bool get_line(cow_string& str, tinybuf& ibuf);
-
 }  // namespace Asteria
 
 #endif
