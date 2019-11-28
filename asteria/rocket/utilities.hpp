@@ -548,7 +548,7 @@ constexpr clear;
 
 // Fancy pointer conversion
 template<typename pointerT>
-   constexpr typename remove_reference<decltype(*(::std::declval<pointerT>()))>::type* unfancy(pointerT&& ptr)
+    constexpr typename remove_reference<decltype(*(::std::declval<pointerT&>()))>::type* unfancy(pointerT&& ptr)
   {
     return ptr ? ::std::addressof(*ptr) : nullptr;
   }
