@@ -76,7 +76,7 @@ template<typename charT, typename traitsT>
 
 // zero-conversion inserters
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const charT& c)
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, charT c)
   {
     // Insert the character as is.
     auto& buf = fmt.get_tinybuf();
