@@ -829,7 +829,7 @@ template<typename valueT, typename allocT> class cow_vector
 
     [[noreturn]] ROCKET_NOINLINE void do_throw_subscript_of_range(size_type pos) const
       {
-        noadl::sprintf_and_throw<out_of_range>("cow_vector: subscript out of range (`%lld` > `%llu`)",
+        noadl::sprintf_and_throw<out_of_range>("cow_vector: subscript out of range (`%llu` > `%llu`)",
                                                static_cast<unsigned long long>(pos),
                                                static_cast<unsigned long long>(this->size()));
       }
