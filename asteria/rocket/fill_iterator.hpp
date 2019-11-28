@@ -24,7 +24,7 @@ template<typename elementT> class fill_iterator
   public:
     template<typename... paramsT>
         explicit fill_iterator(difference_type pos, paramsT&&... params)
-          noexcept(is_nothrow_constructible<value_type, paramsT&&...>::value)
+                    noexcept(is_nothrow_constructible<value_type, paramsT&&...>::value)
       :
         m_pos(pos), m_value(noadl::forward<paramsT>(params)...)
       {

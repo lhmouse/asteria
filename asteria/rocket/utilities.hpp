@@ -286,7 +286,7 @@ template<typename iteratorT>
 
 template<typename elementT, typename... paramsT>
     elementT* construct_at(elementT* ptr, paramsT&&... params)
-      noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
+                       noexcept(is_nothrow_constructible<elementT, paramsT&&...>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xAA, sizeof(elementT));
@@ -295,7 +295,8 @@ template<typename elementT, typename... paramsT>
   }
 
 template<typename elementT>
-    elementT* default_construct_at(elementT* ptr) noexcept(is_nothrow_default_constructible<elementT>::value)
+    elementT* default_construct_at(elementT* ptr)
+                       noexcept(is_nothrow_default_constructible<elementT>::value)
   {
 #ifdef ROCKET_DEBUG
     ::std::memset(static_cast<void*>(ptr), 0xBE, sizeof(elementT));

@@ -121,17 +121,17 @@ template<typename stringT, typename hashT> class basic_prehashed_string
     details_prehashed_string::string_storage<string_type, hasher> m_sth;
 
   public:
-    basic_prehashed_string()
-        noexcept(conjunction<is_nothrow_constructible<string_type>,
-                             is_nothrow_constructible<hasher>, is_nothrow_copy_constructible<hasher>>::value)
+    basic_prehashed_string() noexcept(conjunction<is_nothrow_constructible<string_type>,
+                                                  is_nothrow_constructible<hasher>,
+                                                  is_nothrow_copy_constructible<hasher>>::value)
       :
         m_sth(hasher())
       {
       }
     template<typename... paramsT>
         explicit basic_prehashed_string(const hasher& hf, paramsT&&... params)
-          noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
-                               is_nothrow_copy_constructible<hasher>>::value)
+                            noexcept(conjunction<is_nothrow_constructible<string_type, paramsT&&...>,
+                                                 is_nothrow_copy_constructible<hasher>>::value)
       :
         m_sth(hf, noadl::forward<paramsT>(params)...)
       {
@@ -158,16 +158,18 @@ template<typename stringT, typename hashT> class basic_prehashed_string
       {
       }
     basic_prehashed_string(const basic_prehashed_string& other)
-        noexcept(conjunction<is_nothrow_constructible<string_type>, is_nothrow_copy_assignable<string_type>,
-                             is_nothrow_copy_constructible<hasher>>::value)
+                     noexcept(conjunction<is_nothrow_constructible<string_type>,
+                                          is_nothrow_copy_assignable<string_type>,
+                                          is_nothrow_copy_constructible<hasher>>::value)
       :
         m_sth(other.m_sth.as_hasher())
       {
         this->m_sth.assign(other.m_sth);
       }
     basic_prehashed_string(basic_prehashed_string&& other)
-        noexcept(conjunction<is_nothrow_constructible<string_type>, is_nothrow_move_assignable<string_type>,
-                             is_nothrow_copy_constructible<hasher>>::value)
+                     noexcept(conjunction<is_nothrow_constructible<string_type>,
+                                          is_nothrow_move_assignable<string_type>,
+                                          is_nothrow_copy_constructible<hasher>>::value)
       :
         m_sth(other.m_sth.as_hasher())
       {
@@ -179,13 +181,13 @@ template<typename stringT, typename hashT> class basic_prehashed_string
         return *this;
       }
     basic_prehashed_string& operator=(const basic_prehashed_string& other)
-        noexcept(is_nothrow_copy_assignable<string_type>::value)
+                                noexcept(is_nothrow_copy_assignable<string_type>::value)
       {
         this->m_sth.assign(other.m_sth);
         return *this;
       }
     basic_prehashed_string& operator=(basic_prehashed_string&& other)
-        noexcept(is_nothrow_move_assignable<string_type>::value)
+                                noexcept(is_nothrow_move_assignable<string_type>::value)
       {
         this->m_sth.assign(noadl::move(other.m_sth));
         return *this;

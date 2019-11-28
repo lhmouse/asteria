@@ -463,7 +463,7 @@ template<typename... alternativesT> class variant
     // 23.7.3.4, modifiers
     template<size_t indexT, typename... paramsT>
         typename alternative_at<indexT>::type& emplace(paramsT&&... params)
-          noexcept(is_nothrow_constructible<typename alternative_at<indexT>::type, paramsT&&...>::value)
+                           noexcept(is_nothrow_constructible<typename alternative_at<indexT>::type, paramsT&&...>::value)
       {
         auto index_old = this->m_index;
         constexpr auto index_new = indexT;
