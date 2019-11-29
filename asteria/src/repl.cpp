@@ -327,6 +327,10 @@ int main(int argc, char** argv)
           break;
         }
         if(ch == '\n') {
+          // REPL commands can't straddle multiple lines.
+          if(code.empty() || (code.front() == '\\')) {
+            break;
+          }
           // If a line feed isn't escaped, the current snippet is terminated.
           if(!escape) {
             break;
@@ -404,7 +408,6 @@ int main(int argc, char** argv)
           continue;
         }
       }
-
       // Execute the script.
       try {
         // The script returns a `Reference` so let's dereference it.
