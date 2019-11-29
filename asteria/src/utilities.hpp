@@ -26,7 +26,7 @@ class Formatter
       }
   };
 
-#define ASTERIA_XFORMAT_(...)      ((::Asteria::Formatter(), __VA_ARGS__).extract_string())
+#define ASTERIA_FORMAT(...)        ((::Asteria::Formatter(), __VA_ARGS__).extract_string())
 
 extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
@@ -36,8 +36,8 @@ extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) n
 #endif
 
 #define ASTERIA_DEBUG_LOG(...)     ASTERIA_AND_(ROCKET_UNEXPECT(ASTERIA_ENABLE_DEBUG_LOGS),  \
-                                                ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)))
-#define ASTERIA_TERMINATE(...)     ASTERIA_COMMA_(::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
+                                                ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_FORMAT(__VA_ARGS__)))
+#define ASTERIA_TERMINATE(...)     ASTERIA_COMMA_(::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_FORMAT(__VA_ARGS__)),  \
                                                   ::std::terminate())
 #define ASTERIA_REPORT_BUG         " This is likely a bug. Please report it to <" PACKAGE_BUGREPORT ">."
 
@@ -64,7 +64,7 @@ class Runtime_Error : public virtual std::exception
 [[noreturn]] extern bool throw_runtime_error(const char* func, cow_string&& msg);
 
 // Evaluate arguments to create a string, then throw an exception containing this string.
-#define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_XFORMAT_(__VA_ARGS__)),  \
+#define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_FORMAT(__VA_ARGS__)),  \
                                                             ::std::terminate())
 
 // UTF-8 conversion functions
