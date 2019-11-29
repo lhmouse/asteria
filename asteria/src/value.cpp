@@ -286,14 +286,14 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
       {
         const auto& altr = this->m_stor.as<gtype_opaque>();
         // <opaque> [[`my opaque`]]
-        fmt << "<opaque> [[`" << altr << "`]]";
+        fmt << "<opaque> [[`" << *altr << "`]]";
         return fmt;
       }
     case gtype_function:
       {
         const auto& altr = this->m_stor.as<gtype_function>();
         // <function> [[`my function`]]
-        fmt << "<function> [[`" << altr << "`]]";
+        fmt << "<function> [[`" << *altr << "`]]";
         return fmt;
       }
     case gtype_array:
@@ -361,14 +361,14 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
       {
         const auto& altr = this->m_stor.as<gtype_opaque>();
         // opaque("typeid") [[`my opaque`]]
-        fmt << "opaque(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
+        fmt << "opaque(" << quote(typeid(*altr).name()) << ") [[`" << *altr << "`]]";
         return fmt;
       }
     case gtype_function:
       {
         const auto& altr = this->m_stor.as<gtype_function>();
         // function("typeid") [[`my function`]]
-        fmt << "function(" << quote(typeid(*altr).name()) << ") [[`" << altr << "`]]";
+        fmt << "function(" << quote(typeid(*altr).name()) << ") [[`" << *altr << "`]]";
         return fmt;
       }
     case gtype_array:
