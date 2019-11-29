@@ -317,7 +317,7 @@ int main(int argc, char** argv)
       code.clear();
       escape = false;
       line = 0;
-      ::fprintf(stderr, "\n#%lu%n:%lu> ", ++index, &indent, ++line);
+      ::fprintf(stderr, "\n#%lu%n:%3lu> ", ++index, &indent, ++line);
       s_sigint = 0;
 
       for(;;) {
@@ -337,7 +337,7 @@ int main(int argc, char** argv)
           }
           // Otherwise, a line break is appended and the preceding backslash is deleted.
           // Prompt for the next consecutive line.
-          ::fprintf(stderr, "%*c%lu> ", indent, ':', ++line);
+          ::fprintf(stderr, "%*c%3lu> ", indent, ':', ++line);
         }
         else {
           // Backslashes not preceding line feeds are preserved as is.
