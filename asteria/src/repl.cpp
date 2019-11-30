@@ -41,40 +41,64 @@ const Exception* do_backtrace_opt(const std::exception& stdex) noexcept
     return nullptr;
   }
 
-cow_string do_stringify_value(const Value& value) noexcept
+cow_string do_stringify_value(const Value& val) noexcept
   try {
-    // Format the value and return the string.
     tinyfmt_str fmt;
-    fmt << value;
+    fmt << val;
     return fmt.extract_string();
   }
   catch(const std::exception& other) {
     ASTERIA_DEBUG_LOG("Could not stringify value: ", other.what());
-    return rocket::sref("<bad value>");
+    return rocket::sref("<invalid value>");
+  }
+
+cow_string do_stringify_reference(const Reference& ref) noexcept
+  try {
+    const char* prefix = nullptr;
+    if(ref.is_lvalue())
+      prefix = "lvalue ";
+    else if(ref.is_rvalue())
+      prefix = "rvalue ";
+    if(!prefix) {
+      return rocket::sref("<tail call>");
+    }
+    cow_string str = do_stringify_value(ref.read());
+    str.insert(0, prefix);
+    return str;
+  }
+  catch(const std::exception& other) {
+    ASTERIA_DEBUG_LOG("Could not stringify reference: ", other.what());
+    return rocket::sref("<invalid reference>");
   }
 
 // These hooks just print everything to the standard error stream.
 struct Debug_Hooks : Abstract_Hooks
   {
-    void on_variable_declare(const Source_Location& sloc, const phsh_string& name) noexcept override
+    void on_variable_declare(const Source_Location& sloc, const phsh_string& inside,
+                             const phsh_string& name) noexcept override
       {
-        ::fprintf(stderr, "~ running: %s:%ld -- declaring variable `%s`\n",
-                          sloc.file().c_str(), sloc.line(), name.c_str());
+        ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- declaring variable: %s\n",
+                          sloc.file().c_str(), sloc.line(), inside.c_str(),
+                          name.c_str());
       }
-    void on_function_call(const Source_Location& sloc, const phsh_string& inside) noexcept override
+    void on_function_call(const Source_Location& sloc, const phsh_string& inside,
+                          const ckptr<Abstract_Function>& target) noexcept override
       {
-        ::fprintf(stderr, "~ running: %s:%ld -- initiating function call inside `%s`\n",
-                          sloc.file().c_str(), sloc.line(), inside.c_str());
+        ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- initiating function call: %s\n",
+                          sloc.file().c_str(), sloc.line(), inside.c_str(),
+                          do_stringify_value(target).c_str());
       }
-    void on_function_return(const Source_Location& sloc, const phsh_string& inside) noexcept override
+    void on_function_return(const Source_Location& sloc, const phsh_string& inside,
+                            const Reference& result) noexcept override
       {
-        ::fprintf(stderr, "~ running: %s:%ld -- returned from function call inside `%s`\n",
-                          sloc.file().c_str(), sloc.line(), inside.c_str());
+        ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- returned from function call: %s\n",
+                          sloc.file().c_str(), sloc.line(), inside.c_str(),
+                          do_stringify_reference(result).c_str());
       }
     void on_function_except(const Source_Location& sloc, const phsh_string& inside,
                             const Exception& except) noexcept override
       {
-        ::fprintf(stderr, "~ running: %s:%ld -- caught exception from function call inside `%s`: %s\n",
+        ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- caught exception from function call: %s\n",
                           sloc.file().c_str(), sloc.line(), inside.c_str(),
                           do_stringify_value(except.value()).c_str());
       }
@@ -258,8 +282,8 @@ int main(int argc, char** argv)
       // Execute the script.
       // The script returns a `Reference` so let's dereference it.
       const auto ref = script.execute(global, rocket::move(args));
-      const auto& val = ref.read();
       // If the script returns an `integer`, forward its lower 8 bits.
+      const auto& val = ref.read();
       if(val.is_integer()) {
         return val.as_integer() & 0xFF;
       }
@@ -400,9 +424,8 @@ int main(int argc, char** argv)
       try {
         // The script returns a `Reference` so let's dereference it.
         const auto ref = script.execute(global, rocket::move(args));
-        const auto& val = ref.read();
         // Print the value.
-        ::fprintf(stderr, "* value #%lu: %s\n", index, do_stringify_value(val).c_str());
+        ::fprintf(stderr, "* value #%lu: %s\n", index, do_stringify_reference(ref).c_str());
       }
       catch(const std::exception& stdex) {
         // Print the exception and discard this snippet.

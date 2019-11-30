@@ -98,7 +98,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       // Call the hook function if any.
       auto qh = global.get_hooks_opt();
       if(qh) {
-        qh->on_function_call(sloc, inside);
+        qh->on_function_call(sloc, inside, target);
       }
       try {
         // Unwrap the function call.
@@ -130,7 +130,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       }
       // Call the hook function if any.
       if(qh) {
-        qh->on_function_return(sloc, inside);
+        qh->on_function_return(sloc, inside, *this);
       }
     }
     if(tco_conj == tco_aware_by_val) {

@@ -146,7 +146,7 @@ Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
     return coll;
   }
 
-rcptr<Variable> Global_Context::create_variable(const Source_Location& sloc, const phsh_string& name, GC_Generation gc_hint) const
+rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint) const
   {
     rcptr<Variable> var;
     // Allocate a variable from the collector.
@@ -156,11 +156,6 @@ rcptr<Variable> Global_Context::create_variable(const Source_Location& sloc, con
     }
     if(ROCKET_UNEXPECT(!var)) {
       var = rocket::make_refcnt<Variable>();
-    }
-    // Call the hook function if any.
-    auto qh = this->get_hooks_opt();
-    if(qh) {
-      qh->on_variable_declare(sloc, name);
     }
     return var;
   }

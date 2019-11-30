@@ -525,10 +525,16 @@ DCE_Result AIR_Node::optimize_dce()
         // Unpack arguments.
         const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
         const auto& name = do_pcast<Params_sloc_name>(params)->name;
+        const auto& inside = ctx.zvarg()->func();
 
         // Allocate a variable and initialize it to `null`.
-        auto var = ctx.global().create_variable(sloc, name);
+        auto var = ctx.global().create_variable();
         var->reset(G_null(), true);
+        // Call the hook function if any.
+        auto qh = ctx.global().get_hooks_opt();
+        if(qh) {
+          qh->on_variable_declare(sloc, inside, name);
+        }
         // Inject the variable into the current context.
         Reference_Root::S_variable xref = { rocket::move(var) };
         ctx.open_named_reference(name) = xref;
@@ -1024,6 +1030,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& sloc = do_pcast<Params_call>(params)->sloc;
         const auto& args_by_refs = do_pcast<Params_call>(params)->args_by_refs;
         const auto& tco_aware = static_cast<TCO_Aware>(paramu.u8s[0]);
+        const auto& inside = ctx.zvarg()->func();
 
         // Pop arguments off the stack backwards.
         cow_vector<Reference> args;
@@ -1051,7 +1058,6 @@ DCE_Result AIR_Node::optimize_dce()
         self.zoom_out();
 
         // Call the function now.
-        const auto& inside = ctx.zvarg()->func();
         if(tco_aware != tco_aware_none) {
           // Pack arguments for this proper tail call.
           args.emplace_back(rocket::move(self));
@@ -1067,7 +1073,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Call the hook function if any.
         auto qh = ctx.global().get_hooks_opt();
         if(qh) {
-          qh->on_function_call(sloc, inside);
+          qh->on_function_call(sloc, inside, target);
         }
         try {
           // Perform a non-proper call.
@@ -1099,7 +1105,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         // Call the hook function if any.
         if(qh) {
-          qh->on_function_return(sloc, inside);
+          qh->on_function_return(sloc, inside, self);
         }
         return air_status_next;
       }
@@ -2625,10 +2631,16 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& immutable = static_cast<bool>(paramu.u8s[0]);
         const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
         const auto& name = do_pcast<Params_sloc_name>(params)->name;
+        const auto& inside = ctx.zvarg()->func();
 
         // Allocate a variable and initialize it to `null`.
-        auto var = ctx.global().create_variable(sloc, name);
+        auto var = ctx.global().create_variable();
         var->reset(G_null(), immutable);
+        // Call the hook function if any.
+        auto qh = ctx.global().get_hooks_opt();
+        if(qh) {
+          qh->on_variable_declare(sloc, inside, name);
+        }
         // Inject the variable into the current context.
         Reference_Root::S_variable xref = { rocket::move(var) };
         ctx.open_named_reference(name) = rocket::move(xref);

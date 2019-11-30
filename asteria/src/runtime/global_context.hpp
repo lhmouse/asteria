@@ -47,7 +47,7 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
 
     // These are interfaces of the global garbage collector.
     Collector* get_collector_opt(GC_Generation gc_gen) const;
-    rcptr<Variable> create_variable(const Source_Location& sloc, const phsh_string& name, GC_Generation gc_hint = gc_generation_newest) const;
+    rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest) const;
     size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest) const;
 
     // These are interfaces of the PRNG.
