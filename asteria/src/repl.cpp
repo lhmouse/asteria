@@ -407,7 +407,7 @@ int main(int argc, char** argv)
         const auto ref = script.execute(global, rocket::move(args));
         const auto& val = ref.read();
         // Print the value.
-        ::fprintf(stderr, "~ value #%lu: %s\n", index, do_stringify_value(val).c_str());
+        ::fprintf(stderr, "* value #%lu: %s\n", index, do_stringify_value(val).c_str());
       }
       catch(const std::exception& stdex) {
         // Print the exception and discard this snippet.
