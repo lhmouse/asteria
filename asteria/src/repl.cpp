@@ -59,33 +59,29 @@ struct Debug_Hooks : Abstract_Hooks
     void on_variable_declare(const Source_Location& sloc, const phsh_string& name) noexcept override
       {
         ::fprintf(stderr, "~ %s:%ld -- declaring variable `%s`\n",
-                          sloc.file().c_str(), sloc.line(),
-                          name.c_str());
+                          sloc.file().c_str(), sloc.line(), name.c_str());
       }
     void on_function_enter(const Source_Location& sloc, const phsh_string& name) noexcept override
       {
         ::fprintf(stderr, "~ %s:%ld -- entering function `%s`\n",
-                          sloc.file().c_str(), sloc.line(),
-                          name.c_str());
+                          sloc.file().c_str(), sloc.line(), name.c_str());
       }
     void on_function_call(const Source_Location& sloc, const phsh_string& inside) noexcept override
       {
         ::fprintf(stderr, "~ %s:%ld -- initiating function call inside `%s`\n",
-                          sloc.file().c_str(), sloc.line(),
-                          inside.c_str());
+                          sloc.file().c_str(), sloc.line(), inside.c_str());
       }
     void on_function_return(const Source_Location& sloc, const phsh_string& inside) noexcept override
       {
         ::fprintf(stderr, "~ %s:%ld -- returned from function call inside `%s`\n",
-                          sloc.file().c_str(), sloc.line(),
-                          inside.c_str());
+                          sloc.file().c_str(), sloc.line(), inside.c_str());
       }
     void on_function_except(const Source_Location& sloc, const phsh_string& inside,
                             const Exception& except) noexcept override
       {
         ::fprintf(stderr, "~ %s:%ld -- caught exception from function call inside `%s`: %s\n",
-                          sloc.file().c_str(), sloc.line(),
-                          inside.c_str(), do_stringify_value(except.value()).c_str());
+                          sloc.file().c_str(), sloc.line(), inside.c_str(),
+                          do_stringify_value(except.value()).c_str());
       }
   };
 
@@ -198,7 +194,7 @@ int main(int argc, char** argv)
                "  -h       show help message then exit\n"
                "  -I       suppress interactive mode [default is auto-detecting]\n"
                "  -i       force interactive mode [default is auto-detecting]\n"
-               "  -O       equivalent to -O1\n"
+               "  -O       equivalent to `-O1`\n"
                "  -O[LVL]  set optimization level to the integer LVL [default is 2]\n"
                "  -V       show version information then exit\n"
                "  -v       print execution details to the standard error\n"
