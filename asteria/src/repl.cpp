@@ -54,17 +54,16 @@ cow_string do_stringify_value(const Value& val) noexcept
 
 cow_string do_stringify_reference(const Reference& ref) noexcept
   try {
-    const char* prefix = nullptr;
+    const char* prefix;
     if(ref.is_lvalue())
       prefix = "lvalue ";
     else if(ref.is_rvalue())
       prefix = "rvalue ";
-    if(!prefix) {
+    else
       return rocket::sref("<tail call>");
-    }
-    cow_string str = do_stringify_value(ref.read());
-    str.insert(0, prefix);
-    return str;
+    tinyfmt_str fmt;
+    fmt << prefix << ref.read();
+    return fmt.extract_string();
   }
   catch(const std::exception& other) {
     ASTERIA_DEBUG_LOG("Could not stringify reference: ", other.what());
