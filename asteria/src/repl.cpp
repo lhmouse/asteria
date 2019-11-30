@@ -135,8 +135,8 @@ int main(int argc, char** argv)
         }
       case 'O':
         {
-          // If `-O` is specified without an argument, it is equivalent to `-O1`.
           s = ::optarg;
+          // If `-O` is specified without an argument, it is equivalent to `-O1`.
           if(!s || !*s) {
             optimization_level = 1;
             break;
