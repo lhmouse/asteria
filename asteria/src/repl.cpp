@@ -58,28 +58,23 @@ struct Debug_Hooks : Abstract_Hooks
   {
     void on_variable_declare(const Source_Location& sloc, const phsh_string& name) noexcept override
       {
-        ::fprintf(stderr, "~ %s:%ld -- declaring variable `%s`\n",
-                          sloc.file().c_str(), sloc.line(), name.c_str());
-      }
-    void on_function_enter(const Source_Location& sloc, const phsh_string& name) noexcept override
-      {
-        ::fprintf(stderr, "~ %s:%ld -- entering function `%s`\n",
+        ::fprintf(stderr, "~ running: %s:%ld -- declaring variable `%s`\n",
                           sloc.file().c_str(), sloc.line(), name.c_str());
       }
     void on_function_call(const Source_Location& sloc, const phsh_string& inside) noexcept override
       {
-        ::fprintf(stderr, "~ %s:%ld -- initiating function call inside `%s`\n",
+        ::fprintf(stderr, "~ running: %s:%ld -- initiating function call inside `%s`\n",
                           sloc.file().c_str(), sloc.line(), inside.c_str());
       }
     void on_function_return(const Source_Location& sloc, const phsh_string& inside) noexcept override
       {
-        ::fprintf(stderr, "~ %s:%ld -- returned from function call inside `%s`\n",
+        ::fprintf(stderr, "~ running: %s:%ld -- returned from function call inside `%s`\n",
                           sloc.file().c_str(), sloc.line(), inside.c_str());
       }
     void on_function_except(const Source_Location& sloc, const phsh_string& inside,
                             const Exception& except) noexcept override
       {
-        ::fprintf(stderr, "~ %s:%ld -- caught exception from function call inside `%s`: %s\n",
+        ::fprintf(stderr, "~ running: %s:%ld -- caught exception from function call inside `%s`: %s\n",
                           sloc.file().c_str(), sloc.line(), inside.c_str(),
                           do_stringify_value(except.value()).c_str());
       }

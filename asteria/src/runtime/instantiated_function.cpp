@@ -7,7 +7,6 @@
 #include "evaluation_stack.hpp"
 #include "executive_context.hpp"
 #include "global_context.hpp"
-#include "abstract_hooks.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -28,11 +27,6 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     Executive_Context ctx_func(rocket::ref(global), rocket::ref(stack), rocket::ref(this->m_zvarg),
                                this->m_params, rocket::move(self), rocket::move(args));
     stack.reserve(rocket::move(args));
-    // Call the hook function if any.
-    auto qh = global.get_hooks_opt();
-    if(qh) {
-      qh->on_function_enter(this->m_zvarg->sloc(), this->m_zvarg->func());
-    }
     // Execute the function body.
     auto status = this->m_queue.execute(ctx_func);
     // Handle the return reference.
@@ -40,12 +34,14 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     case air_status_next:
       {
         // Return `null` if the control flow reached the end of the function.
-        return self = Reference_Root::S_null();
+        self = Reference_Root::S_null();
+        break;
       }
     case air_status_return:
       {
         // Return the reference at the top of `stack`.
-        return self = rocket::move(stack.open_top());
+        self = rocket::move(stack.open_top());
+        break;
       }
     case air_status_break_unspec:
     case air_status_break_switch:
@@ -63,6 +59,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     default:
       ASTERIA_TERMINATE("An invalid status code `", status, "` was returned from a function." ASTERIA_REPORT_BUG);
     }
+    return self;
   }
 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const

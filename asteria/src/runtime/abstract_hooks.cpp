@@ -15,10 +15,6 @@ void Abstract_Hooks::on_variable_declare(const Source_Location& /*sloc*/, const 
   {
   }
 
-void Abstract_Hooks::on_function_enter(const Source_Location& /*sloc*/, const phsh_string& /*name*/)
-  {
-  }
-
 void Abstract_Hooks::on_function_call(const Source_Location& /*sloc*/, const phsh_string& /*inside*/)
   {
   }
