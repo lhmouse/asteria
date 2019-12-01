@@ -35,7 +35,7 @@ const Exception* do_backtrace_opt(const std::exception& stdex) noexcept
     ::fprintf(stderr, "  -- end of backtrace\n");
     return std::addressof(except);
   }
-  catch(const std::exception& other) {
+  catch(std::exception& other) {
     ASTERIA_DEBUG_LOG("Could not retrieve exception backtrace: ", other.what());
     ::fprintf(stderr, "  -- no backtrace available\n");
     return nullptr;
@@ -47,7 +47,7 @@ cow_string do_stringify_value(const Value& val) noexcept
     fmt << val;
     return fmt.extract_string();
   }
-  catch(const std::exception& other) {
+  catch(std::exception& other) {
     ASTERIA_DEBUG_LOG("Could not stringify value: ", other.what());
     return rocket::sref("<invalid value>");
   }
@@ -65,7 +65,7 @@ cow_string do_stringify_reference(const Reference& ref) noexcept
     fmt << prefix << ref.read();
     return fmt.extract_string();
   }
-  catch(const std::exception& other) {
+  catch(std::exception& other) {
     ASTERIA_DEBUG_LOG("Could not stringify reference: ", other.what());
     return rocket::sref("<invalid reference>");
   }
@@ -397,7 +397,7 @@ int main(int argc, char** argv)
         // First, try parsing it as a statement list.
         script.reload_string(code, name);
       }
-      catch(const Parser_Error& except) {
+      catch(Parser_Error& except) {
         // We only want to make a second attempt in the case of absence of a semicolon at the end.
         if((except.status() != parser_status_semicolon_expected) || (except.line() > 0)) {
           // Bail out upon irrecoverable errors.
@@ -413,7 +413,7 @@ int main(int argc, char** argv)
           // Try parsing it again.
           script.reload_string(code, name);
         }
-        catch(const Parser_Error& except) {
+        catch(Parser_Error& except) {
           // Bail out upon irrecoverable errors.
           ::fprintf(stderr, "! caught exception: %s\n", except.what());
           continue;
@@ -426,7 +426,7 @@ int main(int argc, char** argv)
         // Print the value.
         ::fprintf(stderr, "* value #%lu: %s\n", index, do_stringify_reference(ref).c_str());
       }
-      catch(const std::exception& stdex) {
+      catch(std::exception& stdex) {
         // Print the exception and discard this snippet.
         ::fprintf(stderr, "! caught exception: %s\n", stdex.what());
         do_backtrace_opt(stdex);
@@ -434,7 +434,7 @@ int main(int argc, char** argv)
     }
     return 0;
   }
-  catch(const std::exception& stdex) {
+  catch(std::exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
     ::fprintf(stderr, "! unhandled exception: %s\n", stdex.what());
     do_backtrace_opt(stdex);

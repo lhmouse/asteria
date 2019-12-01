@@ -14,7 +14,7 @@ void Abstract_Context::Cleaner::operator()(Rcbase* base) noexcept
     ROCKET_ASSERT(coll);
     coll->collect_variables(gc_generation_oldest);
   }
-  catch(const std::exception& stdex) {
+  catch(std::exception& stdex) {
     ASTERIA_DEBUG_LOG("An exception was thrown during garbage collection and some resources might have leaked: ", stdex.what());
   }
 

@@ -117,7 +117,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         }
         throw;
       }
-      catch(const std::exception& stdex) {
+      catch(std::exception& stdex) {
         ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at '", sloc, "' inside `", inside, "`: ", stdex.what());
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Exception except(stdex);

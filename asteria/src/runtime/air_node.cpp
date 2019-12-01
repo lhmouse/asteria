@@ -216,7 +216,7 @@ DCE_Result AIR_Node::optimize_dce()
         return queue.execute(ctx);
       }
 
-    AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
+    AIR_Status do_execute_catch(AVMC_Queue& queue, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
       {
         if(ROCKET_EXPECT(queue.empty())) {
           return air_status_next;
@@ -873,7 +873,7 @@ DCE_Result AIR_Node::optimize_dce()
           except.push_frame_throw(sloc, rocket::move(value));
           throw;
         }
-        catch(const std::exception& stdex) {
+        catch(std::exception& stdex) {
           // Translate the exception.
           Exception except(stdex);
           except.push_frame_throw(sloc, rocket::move(value));
@@ -1092,7 +1092,7 @@ DCE_Result AIR_Node::optimize_dce()
           }
           throw;
         }
-        catch(const std::exception& stdex) {
+        catch(std::exception& stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at '", sloc, "' inside `", inside, "`: ", stdex.what());
           // Translate the exception, append the current frame, and throw the new exception.
           Exception except(stdex);

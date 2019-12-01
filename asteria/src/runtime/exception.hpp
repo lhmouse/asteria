@@ -56,7 +56,7 @@ class Exception : public std::exception
         // The value also replaces the one in `*this`.
         return this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value = rocket::forward<XvalT>(xval));
       }
-    Backtrace_Frame& push_frame_catch(const Source_Location& sloc)
+    Backtrace_Frame& push_frame_catch(Source_Location& sloc)
       {
         // The value is the one stored in `*this` at this point.
         return this->m_frames.emplace_back(frame_type_catch, sloc, this->m_value);
