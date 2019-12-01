@@ -49,10 +49,6 @@
 
 namespace Asteria {
 
-// Utilities
-class Formatter;
-class Runtime_Error;
-
 // Low-level Data Structure
 class Variable_HashSet;
 class Reference_Dictionary;
