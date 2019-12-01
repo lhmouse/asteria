@@ -499,7 +499,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           // Compare `target` with the element in the middle.
           auto cmp = do_compare(global, comparator, target, *mpos);
           if(cmp == compare_unordered) {
-            ASTERIA_THROW_RUNTIME_ERROR("The elements `", target, "` and `", *mpos, "` are unordered.");
+            ASTERIA_THROW("The elements `", target, "` and `", *mpos, "` are unordered.");
           }
           if(cmp == compare_equal) {
             return std::make_pair(rocket::move(mpos), true);
@@ -527,7 +527,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           // Compare `target` with the element in the middle.
           auto cmp = do_compare(global, comparator, target, *mpos);
           if(cmp == compare_unordered) {
-            ASTERIA_THROW_RUNTIME_ERROR("The elements `", target, "` and `", *mpos, "` are unordered.");
+            ASTERIA_THROW("The elements `", target, "` and `", *mpos, "` are unordered.");
           }
           if(rocket::forward<PredT>(pred)(cmp)) {
             epos = mpos;
@@ -613,7 +613,7 @@ pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, c
           for(;;) {
             auto cmp = do_compare(global, comparator, *(bpos[0]), *(bpos[1]));
             if(cmp == compare_unordered) {
-              ASTERIA_THROW_RUNTIME_ERROR("The elements `", *(bpos[0]), "` and `", *(bpos[1]), "` are unordered.");
+              ASTERIA_THROW("The elements `", *(bpos[0]), "` and `", *(bpos[1]), "` are unordered.");
             }
             // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
             bi = (cmp == compare_greater);

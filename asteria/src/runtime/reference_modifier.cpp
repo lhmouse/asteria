@@ -19,7 +19,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
+          ASTERIA_THROW("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
         }
         const auto& arr = parent.as_array();
         // Return a pointer to the element at the given index.
@@ -39,7 +39,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         if(!parent.is_object()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
+          ASTERIA_THROW("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
         }
         const auto& obj = parent.as_object();
         // Return a pointer to the value with the given key.
@@ -58,7 +58,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and has no past-the-end element.");
+          ASTERIA_THROW("`", parent, "` is not an `array` and has no past-the-end element.");
         }
         const auto& arr = parent.as_array();
         // Returns the last element.
@@ -69,7 +69,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         return std::addressof(arr.back());
       }
     default:
-      ASTERIA_TERMINATE("Reference modifier type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
+      ASTERIA_TERMINATE("Reference modifier type enumeration `", this->index(), "` is unhandled.");
     }
   }
 
@@ -87,7 +87,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           parent = G_array();
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
+          ASTERIA_THROW("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
         }
         auto& arr = parent.open_array();
         // Return a pointer to the element at the given index if the index is valid; create an element if it is out of range.
@@ -99,7 +99,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
             return nullptr;
           }
           if(nadd > arr.max_size() - arr.size()) {
-            ASTERIA_THROW_RUNTIME_ERROR("Extending an `array` of length `", arr.size(), "` by `", nadd, "` would exceed the system limit.");
+            ASTERIA_THROW("Extending an `array` of length `", arr.size(), "` by `", nadd, "` would exceed the system limit.");
           }
           arr.insert(arr.begin(), static_cast<size_t>(w.nprepend));
           arr.insert(arr.end(), static_cast<size_t>(w.nappend));
@@ -117,7 +117,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           parent = G_object();
         }
         if(!parent.is_object()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
+          ASTERIA_THROW("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
         }
         auto& obj = parent.open_object();
         // Return a pointer to the value with the given key if it is found; create a value otherwise.
@@ -145,14 +145,14 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           parent = G_array();
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and has no past-the-end element.");
+          ASTERIA_THROW("`", parent, "` is not an `array` and has no past-the-end element.");
         }
         auto& arr = parent.open_array();
         // Append a new element to the end and return a pointer to it.
         return std::addressof(arr.emplace_back());
       }
     default:
-      ASTERIA_TERMINATE("Reference modifier type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
+      ASTERIA_TERMINATE("Reference modifier type enumeration `", this->index(), "` is unhandled.");
     }
   }
 
@@ -167,7 +167,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
           return G_null();
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
+          ASTERIA_THROW("`", parent, "` is not an `array` and cannot be indexed by `integer`s.");
         }
         auto& arr = parent.open_array();
         // Erase the element at the given index and return it.
@@ -189,7 +189,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
           return G_null();
         }
         if(!parent.is_object()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
+          ASTERIA_THROW("`", parent, "` is not an `object` and cannot be indexed by `string`s.");
         }
         auto& obj = parent.open_object();
         // Erase the value with the given key and return it.
@@ -210,7 +210,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
           return G_null();
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW_RUNTIME_ERROR("`", parent, "` is not an `array` and has no past-the-end element.");
+          ASTERIA_THROW("`", parent, "` is not an `array` and has no past-the-end element.");
         }
         auto& arr = parent.open_array();
         // Erase the last element and return it.
@@ -223,7 +223,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         return elem;
       }
     default:
-      ASTERIA_TERMINATE("Reference modifier type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
+      ASTERIA_TERMINATE("Reference modifier type enumeration `", this->index(), "` is unhandled.");
     }
   }
 

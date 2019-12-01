@@ -30,42 +30,21 @@ class Formatter
 
 extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
-// N.B. You can define this as something non-constant.
+// Hint: You can define this as something non-constant.
 #ifndef ASTERIA_ENABLE_DEBUG_LOGS
 #  define ASTERIA_ENABLE_DEBUG_LOGS  0
 #endif
 
-#define ASTERIA_DEBUG_LOG(...)     ASTERIA_AND_(ROCKET_UNEXPECT(ASTERIA_ENABLE_DEBUG_LOGS),  \
-                                                ::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_FORMAT(__VA_ARGS__)))
-#define ASTERIA_TERMINATE(...)     ASTERIA_COMMA_(::Asteria::write_log_to_stderr(__FILE__, __LINE__, ASTERIA_FORMAT(__VA_ARGS__)),  \
-                                                  ::std::terminate())
-#define ASTERIA_REPORT_BUG         " This is likely a bug. Please report it to <" PACKAGE_BUGREPORT ">."
-
-class Runtime_Error : public virtual std::exception
-  {
-  private:
-    cow_string m_msg;
-
-  public:
-    explicit Runtime_Error(cow_string&& msg)
-      {
-        this->m_msg.swap(msg);
-        this->m_msg.insert(0, "asteria runtime error: ");
-      }
-    ~Runtime_Error() override;
-
-  public:
-    const char* what() const noexcept override
-      {
-        return this->m_msg.c_str();
-      }
-  };
-
-[[noreturn]] extern bool throw_runtime_error(const char* func, cow_string&& msg);
-
-// Evaluate arguments to create a string, then throw an exception containing this string.
-#define ASTERIA_THROW_RUNTIME_ERROR(...)     ASTERIA_COMMA_(::Asteria::throw_runtime_error(__func__, ASTERIA_FORMAT(__VA_ARGS__)),  \
-                                                            ::std::terminate())
+#define ASTERIA_DEBUG_LOG(...)     (ROCKET_UNEXPECT(ASTERIA_ENABLE_DEBUG_LOGS) &&  \
+                                       ::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+                                           ASTERIA_FORMAT(__VA_ARGS__)))
+#define ASTERIA_TERMINATE(...)     (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
+                                           ASTERIA_FORMAT(__VA_ARGS__, "\nThis is likely a bug. Please report.")),  \
+                                       ::std::terminate())
+#define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
+                                       "Asteria: %s\n"  \
+                                       "[thrown from native function `%s(...)`]",  \
+                                       ASTERIA_FORMAT(__VA_ARGS__).c_str(), __func__))
 
 // UTF-8 conversion functions
 extern bool utf8_encode(char*& pos, char32_t cp);

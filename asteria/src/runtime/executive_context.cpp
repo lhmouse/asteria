@@ -29,7 +29,7 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
         break;
       }
       if(param.rdstr().starts_with("__")) {
-        ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
+        ASTERIA_THROW("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Set the parameter.
       if(ROCKET_UNEXPECT(i >= args.size())) {
@@ -40,7 +40,7 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
     }
     if(!qelps && (args.size() > params.size())) {
       // Disallow exceess arguments if the function is not variadic.
-      ASTERIA_THROW_RUNTIME_ERROR("Too many arguments were provided (expecting no more than `", params.size(), "`, but got `", args.size(), "`).");
+      ASTERIA_THROW("Too many arguments were provided (expecting no more than `", params.size(), "`, but got `", args.size(), "`).");
     }
     // Prepare `__this` and `__varg`. This is tricky.
     args.erase(0, rocket::min(qelps.value_or(SIZE_MAX), args.size()));

@@ -24,7 +24,7 @@ G_string std_filesystem_get_working_directory()
     while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
       auto err = errno;
       if(err != ERANGE) {
-        ASTERIA_THROW_RUNTIME_ERROR("`getcwd()` failed.");
+        ASTERIA_THROW("`getcwd()` failed.");
       }
       cwd.append(cwd.size() / 2, '*');
     }
@@ -268,7 +268,7 @@ opt<G_integer> std_filesystem_directory_remove(const G_string& path)
 opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
+      ASTERIA_THROW("The file offset shall not be negative (got `", *offset, "`).");
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
@@ -320,7 +320,7 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
 bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
+      ASTERIA_THROW("The file offset shall not be negative (got `", *offset, "`).");
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
@@ -365,7 +365,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
 bool std_filesystem_file_write(const G_string& path, const G_string& data, const opt<G_integer>& offset)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW_RUNTIME_ERROR("The file offset shall not be negative (got `", *offset, "`).");
+      ASTERIA_THROW("The file offset shall not be negative (got `", *offset, "`).");
     }
     int64_t roffset = offset.value_or(0);
     int64_t nremaining = static_cast<int64_t>(data.size());

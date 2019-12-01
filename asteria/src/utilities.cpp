@@ -95,18 +95,6 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
     return ::fwrite(str.data(), str.size(), 1, stderr) == 1;
   }
 
-Runtime_Error::~Runtime_Error()
-  {
-  }
-
-bool throw_runtime_error(const char* func, cow_string&& msg)
-  {
-    // Append the function signature.
-    msg << "\n[thrown from native function `" << func << "(...)`]";
-    // Throw it.
-    throw Runtime_Error(rocket::move(msg));
-  }
-
 bool utf8_encode(char*& pos, char32_t cp)
   {
     if(cp < 0x80) {

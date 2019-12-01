@@ -26,8 +26,8 @@ class Argument_Reader
     ref_to<const cow_vector<Reference>> m_args;
     bool m_throw_on_failure;
 
-    // `m_overloads` contains all overloads that have been tested so far.
-    cow_string m_overloads;
+    // `m_ovlds` contains all overloads that have been tested so far.
+    cow_string m_ovlds;
     // `m_state` can be copied elsewhere and back; any further operations will resume from that point.
     State m_state;
 
@@ -35,7 +35,7 @@ class Argument_Reader
     Argument_Reader(const cow_string& name, ref_to<const cow_vector<Reference>> args) noexcept
       :
         m_name(name), m_args(args), m_throw_on_failure(false),
-        m_overloads(), m_state()
+        m_ovlds(), m_state()
       {
       }
 

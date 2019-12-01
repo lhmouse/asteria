@@ -30,10 +30,10 @@ const Value& Reference_Root::dereference_const() const
       }
     case index_tail_call:
       {
-        ASTERIA_THROW_RUNTIME_ERROR("Tail call wrappers cannot be dereferenced directly.");
+        ASTERIA_THROW("Tail call wrappers cannot be dereferenced directly.");
       }
     default:
-      ASTERIA_TERMINATE("Reference root type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
+      ASTERIA_TERMINATE("Reference root type enumeration `", this->index(), "` is unhandled.");
     }
   }
 
@@ -42,30 +42,30 @@ Value& Reference_Root::dereference_mutable() const
     switch(this->index()) {
     case index_null:
       {
-        ASTERIA_THROW_RUNTIME_ERROR("The constant `null` cannot be modified.");
+        ASTERIA_THROW("The constant `null` cannot be modified.");
       }
     case index_constant:
       {
-        ASTERIA_THROW_RUNTIME_ERROR("The constant `", this->m_stor.as<index_constant>().val, "` cannot be modified.");
+        ASTERIA_THROW("The constant `", this->m_stor.as<index_constant>().val, "` cannot be modified.");
       }
     case index_temporary:
       {
-        ASTERIA_THROW_RUNTIME_ERROR("The temporary value `", this->m_stor.as<index_temporary>().val, "` cannot be modified.");
+        ASTERIA_THROW("The temporary value `", this->m_stor.as<index_temporary>().val, "` cannot be modified.");
       }
     case index_variable:
       {
         const auto& var = this->m_stor.as<index_variable>().var;
         if(var->is_immutable()) {
-          ASTERIA_THROW_RUNTIME_ERROR("This variable having value `", var->get_value(), "` is immutable and cannot be modified.");
+          ASTERIA_THROW("This variable having value `", var->get_value(), "` is immutable and cannot be modified.");
         }
         return var->open_value();
       }
     case index_tail_call:
       {
-        ASTERIA_THROW_RUNTIME_ERROR("Tail call wrappers cannot be dereferenced directly.");
+        ASTERIA_THROW("Tail call wrappers cannot be dereferenced directly.");
       }
     default:
-      ASTERIA_TERMINATE("Reference root type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
+      ASTERIA_TERMINATE("Reference root type enumeration `", this->index(), "` is unhandled.");
     }
   }
 
@@ -98,7 +98,7 @@ Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callba
         return this->m_stor.as<index_tail_call>().tca->enumerate_variables(callback);
       }
     default:
-      ASTERIA_TERMINATE("Reference root type enumeration `", this->index(), "` is unhandled." ASTERIA_REPORT_BUG);
+      ASTERIA_TERMINATE("Reference root type enumeration `", this->index(), "` is unhandled.");
     }
   }
 

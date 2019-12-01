@@ -14,7 +14,7 @@ namespace Asteria {
 G_integer std_numeric_abs(const G_integer& value)
   {
     if(value == INT64_MIN) {
-      ASTERIA_THROW_RUNTIME_ERROR("The absolute value of `", value, "` cannot be represented as an `integer`.");
+      ASTERIA_THROW("The absolute value of `", value, "` cannot be represented as an `integer`.");
     }
     return std::abs(value);
   }
@@ -69,14 +69,14 @@ G_boolean std_numeric_is_nan(const G_real& value)
     const G_integer& do_verify_bounds(const G_integer& lower, const G_integer& upper)
       {
         if(!(lower <= upper)) {
-          ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than or equal to the `upper` bound (got `", lower, "` and `", upper, "`).");
+          ASTERIA_THROW("The `lower` bound must be less than or equal to the `upper` bound (got `", lower, "` and `", upper, "`).");
         }
         return upper;
       }
     const G_real& do_verify_bounds(const G_real& lower, const G_real& upper)
       {
         if(!std::islessequal(lower, upper)) {
-          ASTERIA_THROW_RUNTIME_ERROR("The `lower` bound must be less than or equal to the `upper` bound (got `", lower, "` and `", upper, "`).");
+          ASTERIA_THROW("The `lower` bound must be less than or equal to the `upper` bound (got `", lower, "` and `", upper, "`).");
         }
         return upper;
       }
@@ -138,7 +138,7 @@ G_real std_numeric_trunc(const G_real& value)
     G_integer do_icast(const G_real& value)
       {
         if(!(std::islessequal(-0x1p63, value) && std::isless(value, +0x1p63))) {
-          ASTERIA_THROW_RUNTIME_ERROR("The `real` number `", value, "` cannot be represented as an `integer`.");
+          ASTERIA_THROW("The `real` number `", value, "` cannot be represented as an `integer`.");
         }
         return G_integer(value);
       }
@@ -190,10 +190,10 @@ G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit
     if(limit) {
       int fpcls = std::fpclassify(*limit);
       if(fpcls == FP_ZERO) {
-        ASTERIA_THROW_RUNTIME_ERROR("The `limit` for random numbers shall not be zero (got `", *limit, "`).");
+        ASTERIA_THROW("The `limit` for random numbers shall not be zero (got `", *limit, "`).");
       }
       if((fpcls == FP_INFINITE) || (fpcls == FP_NAN)) {
-        ASTERIA_THROW_RUNTIME_ERROR("The `limit` for random numbers shall be finite (got `", *limit, "`).");
+        ASTERIA_THROW("The `limit` for random numbers shall be finite (got `", *limit, "`).");
       }
     }
     int64_t high = global.get_random_uint32();
@@ -449,7 +449,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           do_append_exponent(text, nump, 'p', p.second);
           break;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
+        ASTERIA_THROW("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
       }
     case 16:
       {
@@ -465,7 +465,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           do_append_exponent(text, nump, 'p', p.second);
           break;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
+        ASTERIA_THROW("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
       }
     case 10:
       {
@@ -488,10 +488,10 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           do_append_exponent(text, nump, 'e', p.second);
           break;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
+        ASTERIA_THROW("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
       }
     default:
-      ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
+      ASTERIA_THROW("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
     }
     return text;
   }
@@ -514,7 +514,7 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           text.append(nump.begin(), nump.end());
           break;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
+        ASTERIA_THROW("The base of the exponent of a number in binary must be `2` (got `", *ebase, "`).");
       }
     case 16:
       {
@@ -528,7 +528,7 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           text.append(nump.begin(), nump.end());
           break;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
+        ASTERIA_THROW("The base of the exponent of a number in hexadecimal must be `2` (got `", *ebase, "`).");
       }
     case 10:
       {
@@ -550,10 +550,10 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           text.append(nump.begin(), nump.end());
           break;
         }
-        ASTERIA_THROW_RUNTIME_ERROR("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
+        ASTERIA_THROW("The base of the exponent of a number in decimal must be either `2` or `10` (got `", *ebase, "`).");
       }
     default:
-      ASTERIA_THROW_RUNTIME_ERROR("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
+      ASTERIA_THROW("The base of a number must be either `2` or `10` or `16` (got `", *base, "`).");
     }
     return text;
   }

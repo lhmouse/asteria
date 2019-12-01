@@ -140,7 +140,7 @@ namespace Asteria {
             }
             // Increment the line number if a line has been read successfully.
             if(this->m_line == INT32_MAX) {
-              ASTERIA_THROW_RUNTIME_ERROR("There are too many lines in the source code.");
+              ASTERIA_THROW("There are too many lines in the source code.");
             }
             this->m_line++;
             // Accept the line.
@@ -159,7 +159,7 @@ namespace Asteria {
         const char* data(size_t add = 0) const
           {
             if(add > this->m_str.size() - this->m_off) {
-              ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
+              ASTERIA_THROW("An attempt was made to seek past the end of the current line.");
             }
             return this->m_str.data() + (this->m_off + add);
           }
@@ -173,14 +173,14 @@ namespace Asteria {
         void consume(size_t add)
           {
             if(add > this->m_str.size() - this->m_off) {
-              ASTERIA_THROW_RUNTIME_ERROR("An attempt was made to seek past the end of the current line.");
+              ASTERIA_THROW("An attempt was made to seek past the end of the current line.");
             }
             this->m_off += add;
           }
         void rewind(size_t off = 0)
           {
             if(off > this->m_str.size()) {
-              ASTERIA_THROW_RUNTIME_ERROR("The offset was past the end of the current line.");
+              ASTERIA_THROW("The offset was past the end of the current line.");
             }
             this->m_off = off;
           }

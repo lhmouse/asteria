@@ -12,7 +12,7 @@ namespace Asteria {
 
 Value Reference::do_throw_unset_no_modifier() const
   {
-    ASTERIA_THROW_RUNTIME_ERROR("Only array elements or object members may be `unset`.");
+    ASTERIA_THROW("Only array elements or object members may be `unset`.");
   }
 
 const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const

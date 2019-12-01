@@ -68,17 +68,17 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes)
     // Once a node has been appended, reallocation is no longer allowed.
     // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
     if(this->m_stor.bptr) {
-      ASTERIA_THROW_RUNTIME_ERROR("Reservation is no longer allowed once an AVMC node has been appended.");
+      ASTERIA_THROW("Reservation is no longer allowed once an AVMC node has been appended.");
     }
     constexpr auto nbytes_hdr = sizeof(Header);
     constexpr auto nbytes_max = nbytes_hdr * nphdrs_max;
     if(nbytes > nbytes_max) {
-      ASTERIA_THROW_RUNTIME_ERROR("AMVC node parameter size `", nbytes, "` exceeds the limit `", nbytes_max, "`.");
+      ASTERIA_THROW("AMVC node parameter size `", nbytes, "` exceeds the limit `", nbytes_max, "`.");
     }
     auto nbytes_node = static_cast<uint32_t>(1 + (nbytes + nbytes_hdr - 1) / nbytes_hdr);
     // Reserve one header, followed by `nphdrs` headers for the parameters.
     if(this->m_stor.nrsrv > INT32_MAX / nbytes_hdr + nbytes_node) {
-      ASTERIA_THROW_RUNTIME_ERROR("Too many AVMC nodes have been appended.");
+      ASTERIA_THROW("Too many AVMC nodes have been appended.");
     }
     this->m_stor.nrsrv += nbytes_node;
   }
@@ -96,7 +96,7 @@ AVMC_Queue::Header* AVMC_Queue::do_check_storage_for_params(size_t nbytes)
     // Check the number of available headers.
     auto navail = static_cast<size_t>(this->m_stor.nrsrv - this->m_stor.nused);
     if((navail < 1) || (nbytes_hdr * (navail - 1) < nbytes)) {
-      ASTERIA_THROW_RUNTIME_ERROR("This AVMC queue is full.");
+      ASTERIA_THROW("This AVMC queue is full.");
     }
     qnode->nphdrs = (nbytes + nbytes_hdr - 1) / nbytes_hdr % nphdrs_max;
     return qnode;

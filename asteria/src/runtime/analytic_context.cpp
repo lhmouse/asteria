@@ -25,7 +25,7 @@ void Analytic_Context::do_prepare_function(const cow_vector<phsh_string>& params
         break;
       }
       if(param.rdstr().starts_with("__")) {
-        ASTERIA_THROW_RUNTIME_ERROR("The function parameter name `", param, "` is reserved and cannot be used.");
+        ASTERIA_THROW("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Its contents are out of interest.
       this->open_named_reference(param) /*= Reference_Root::S_null()*/;
