@@ -216,7 +216,7 @@ DCE_Result AIR_Node::optimize_dce()
         return queue.execute(ctx);
       }
 
-    AIR_Status do_execute_catch(AVMC_Queue& queue, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
+    AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
       {
         if(ROCKET_EXPECT(queue.empty())) {
           return air_status_next;
