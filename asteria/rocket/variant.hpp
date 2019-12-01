@@ -198,9 +198,9 @@ template<typename... alternativesT> class variant;
 
 template<typename... alternativesT> class variant
   {
-    static_assert(sizeof...(alternativesT) > 0, "At least one alternative must be provided.");
+    static_assert(sizeof...(alternativesT) > 0, "no alternative types provided");
     static_assert(conjunction<is_nothrow_move_constructible<alternativesT>...>::value,
-                  "No move constructors of alternatives are allowed to throw exceptions.");
+                  "move constructors of alternative types must not throw exceptions");
 
   public:
     template<typename targetT> struct index_of : details_variant::type_finder<0, targetT, alternativesT...>

@@ -231,7 +231,7 @@ template<typename elementT, typename deleterT>
 
 template<typename elementT> class refcnt_ptr
   {
-    static_assert(!is_array<elementT>::value, "`elementT` must not be an array type.");
+    static_assert(!is_array<elementT>::value, "invalid element type");
     template<typename> friend class refcnt_ptr;
 
   public:

@@ -78,7 +78,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
             return static_cast<closer_base&>(*this);
           }
 
-        constexpr handle_type get() const noexcept
+        constexpr const handle_type& get() const noexcept
           {
             return this->m_hv;
           }
@@ -88,9 +88,9 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           }
         void reset(handle_type hv_new) noexcept
           {
-            auto hv_old = ::std::exchange(this->m_hv, hv_new);
+            auto hv_old = ::std::exchange(this->m_hv, noadl::move(hv_new));
             if(!this->as_closer().is_null(hv_old))
-              this->as_closer().close(hv_old);
+              this->as_closer().close(noadl::move(hv_old));
           }
         void exchange_with(stored_handle& other) noexcept
           {
@@ -102,8 +102,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 
 template<typename handleT, typename closerT> class unique_handle
   {
-    static_assert(!is_array<handleT>::value, "`handleT` must not be an array type.");
-    static_assert(is_trivial<handleT>::value, "`handleT` must be a trivial type.");
+    static_assert(!is_array<handleT>::value, "invalid handle type");
 
   public:
     using handle_type  = handleT;
@@ -128,13 +127,13 @@ template<typename handleT, typename closerT> class unique_handle
       :
         unique_handle()
       {
-        this->reset(hv);
+        this->reset(noadl::move(hv));
       }
     unique_handle(handle_type hv, const closer_type& cl) noexcept
       :
         unique_handle(cl)
       {
-        this->reset(hv);
+        this->reset(noadl::move(hv));
       }
     unique_handle(unique_handle&& other) noexcept
       :
@@ -174,7 +173,7 @@ template<typename handleT, typename closerT> class unique_handle
       {
         return !(this->m_sth.as_closer().is_null(this->m_sth.get()));
       }
-    constexpr operator handle_type () const noexcept
+    constexpr operator const handle_type& () const noexcept
       {
         return this->m_sth.get();
       }
@@ -192,12 +191,12 @@ template<typename handleT, typename closerT> class unique_handle
       }
     unique_handle& reset(handle_type hv_new) noexcept
       {
-        this->m_sth.reset(hv_new);
+        this->m_sth.reset(noadl::move(hv_new));
         return *this;
       }
     unique_handle& reset(handle_type hv_new, const closer_type& cl) noexcept
       {
-        this->m_sth.reset(hv_new);
+        this->m_sth.reset(noadl::move(hv_new));
         this->m_sth.as_closer() = cl;
         return *this;
       }

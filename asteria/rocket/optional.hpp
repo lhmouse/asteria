@@ -14,8 +14,8 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 
 template<typename valueT> class optional
   {
-    static_assert(!is_array<valueT>::value, "`valueT` must not be an array type.");
-    static_assert(!is_same<valueT, clear_t>::value, "`valueT` shall not be `clear_t`.");
+    static_assert(!is_array<valueT>::value, "invalid element type");
+    static_assert(!is_same<valueT, clear_t>::value, "invalid element type");
 
   public:
     using value_type       = valueT;

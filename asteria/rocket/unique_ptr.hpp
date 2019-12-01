@@ -121,7 +121,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
 
 template<typename elementT, typename deleterT> class unique_ptr
   {
-    static_assert(!is_array<elementT>::value, "`elementT` must not be an array type.");
+    static_assert(!is_array<elementT>::value, "invalid element type");
     template<typename, typename> friend class unique_ptr;
 
   public:

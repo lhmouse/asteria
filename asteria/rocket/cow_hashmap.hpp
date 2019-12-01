@@ -692,16 +692,14 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
 
       private:
-        bucket_type* do_assert_valid_bucket(bucket_type* bkt, bool to_dereference) const noexcept
+        bucket_type* do_assert_valid_bucket(bucket_type* bkt, bool deref) const noexcept
           {
             auto ref = this->m_ref;
-            ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
+            ROCKET_ASSERT_MSG(ref, "iterator not initialized");
             auto dist = static_cast<size_t>(bkt - ref->buckets());
-            ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "This iterator has been invalidated.");
-            ROCKET_ASSERT_MSG(!((dist < ref->bucket_count()) && !*bkt),
-                              "The element referenced by this iterator no longer exists.");
-            ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->bucket_count())),
-                              "This iterator contains a past-the-end value and cannot be dereferenced.");
+            ROCKET_ASSERT_MSG(dist <= ref->bucket_count(), "iterator invalidated");
+            ROCKET_ASSERT_MSG((dist == ref->bucket_count()) || *bkt, "iterator invalidated");
+            ROCKET_ASSERT_MSG(!deref || (dist < ref->bucket_count()), "past-the-end iterator not dereferenceable");
             return bkt;
           }
         bucket_type* do_adjust_forwards(bucket_type* hint) const noexcept
@@ -710,12 +708,11 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
               return nullptr;
             }
             auto ref = this->m_ref;
-            ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
-            auto end = ref->buckets() + ref->bucket_count();
+            ROCKET_ASSERT_MSG(ref, "iterator not initialized");
+            // Find the next non-empty bucket.
             auto bkt = hint;
-            while((bkt != end) && !*bkt) {
+            while((bkt != ref->buckets() + ref->bucket_count()) && !*bkt)
               ++bkt;
-            }
             return bkt;
           }
 
@@ -732,14 +729,12 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
           }
         bucket_type* tell_owned_by(const parent_type* ref) const noexcept
           {
-            ROCKET_ASSERT_MSG(this->m_ref == ref, "This iterator does not refer to an element in the same container.");
+            ROCKET_ASSERT_MSG(this->m_ref == ref, "iterator not belonging to the same container");
             return this->tell();
           }
         hashmap_iterator& seek_next() noexcept
           {
-            auto bkt = this->do_assert_valid_bucket(this->m_bkt, false);
-            ROCKET_ASSERT_MSG(bkt != this->m_ref->buckets() + this->m_ref->bucket_count(),
-                              "The past-the-end iterator cannot be incremented.");
+            auto bkt = this->do_assert_valid_bucket(this->m_bkt, true);
             bkt = this->do_adjust_forwards(bkt + 1);
             this->m_bkt = this->do_assert_valid_bucket(bkt, false);
             return *this;
@@ -789,12 +784,10 @@ template<typename keyT, typename mappedT, typename hashT = hash<keyT>, typename 
 template<typename keyT, typename mappedT, typename hashT, typename eqT, typename allocT>
     class cow_hashmap
   {
-    static_assert(!is_array<keyT>::value, "`keyT` must not be an array type.");
-    static_assert(!is_array<mappedT>::value, "`mappedT` must not be an array type.");
-    static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value,
-                  "`allocT::value_type` must denote the same type as `pair<const keyT, mappedT>`.");
-    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())),
-                  "The hash operation shall not throw exceptions.");
+    static_assert(!is_array<keyT>::value, "invalid key type");
+    static_assert(!is_array<mappedT>::value, "invalid mapped value type");
+    static_assert(is_same<typename allocT::value_type, pair<const keyT, mappedT>>::value, "inappropriate allocator type");
+    static_assert(noexcept(::std::declval<const hashT&>()(::std::declval<const keyT&>())), "hash operations must not throw exceptions");
 
   public:
     // types

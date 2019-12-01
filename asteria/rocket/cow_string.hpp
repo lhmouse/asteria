@@ -366,14 +366,13 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           }
 
       private:
-        value_type* do_assert_valid_pointer(value_type* ptr, bool to_dereference) const noexcept
+        value_type* do_assert_valid_pointer(value_type* ptr, bool deref) const noexcept
           {
             auto ref = this->m_ref;
-            ROCKET_ASSERT_MSG(ref, "This iterator has not been initialized.");
+            ROCKET_ASSERT_MSG(ref, "iterator not initialized");
             auto dist = static_cast<size_t>(ptr - ref->data());
-            ROCKET_ASSERT_MSG(dist <= ref->size(), "This iterator has been invalidated.");
-            ROCKET_ASSERT_MSG(!(to_dereference && (dist == ref->size())),
-                              "This iterator contains a past-the-end value and cannot be dereferenced.");
+            ROCKET_ASSERT_MSG(dist <= ref->size(), "iterator invalidated");
+            ROCKET_ASSERT_MSG(!deref || (dist < ref->size()), "past-the-end iterator not dereferenceable");
             return ptr;
           }
 
@@ -390,7 +389,7 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
           }
         value_type* tell_owned_by(const parent_type* ref) const noexcept
           {
-            ROCKET_ASSERT_MSG(this->m_ref == ref, "This iterator does not refer to an element in the same container.");
+            ROCKET_ASSERT_MSG(this->m_ref == ref, "iterator not belonging to the same container");
             return this->tell();
           }
         string_iterator& seek(value_type* ptr) noexcept
@@ -661,10 +660,9 @@ template<typename charT, typename traitsT, typename allocT>
 
 template<typename charT, typename traitsT, typename allocT> class basic_cow_string
   {
-    static_assert(!is_array<charT>::value, "`charT` must not be an array type.");
-    static_assert(is_trivial<charT>::value, "`charT` must be a trivial type.");
-    static_assert(is_same<typename allocT::value_type, charT>::value,
-                  "`allocT::value_type` must denote the same type as `charT`.");
+    static_assert(!is_array<charT>::value, "invalid character type");
+    static_assert(is_trivial<charT>::value, "characters must be trivial");
+    static_assert(is_same<typename allocT::value_type, charT>::value, "inappropriate allocator type");
 
   public:
     // types
