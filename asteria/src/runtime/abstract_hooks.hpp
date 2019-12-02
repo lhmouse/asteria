@@ -31,7 +31,7 @@ class Abstract_Hooks : public virtual Rcbase
     // The original exception will be rethrown after the hook returns.
     // N.B. It is suggested that you should not throw exceptions from this hook.
     virtual void on_function_except(const Source_Location& sloc, const phsh_string& inside,
-                                    const Exception& except);
+                                    const Runtime_Error& except);
   };
 
 }  // namespace Asteria

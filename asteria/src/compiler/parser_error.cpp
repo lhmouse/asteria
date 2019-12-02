@@ -29,9 +29,9 @@ void Parser_Error::do_compose_message()
     this->m_what = fmt.extract_string();
   }
 
-static_assert(std::is_nothrow_copy_constructible<Parser_Error>::value, "");
-static_assert(std::is_nothrow_move_constructible<Parser_Error>::value, "");
-static_assert(std::is_nothrow_copy_assignable<Parser_Error>::value, "");
-static_assert(std::is_nothrow_move_assignable<Parser_Error>::value, "");
+static_assert(rocket::conjunction<std::is_nothrow_copy_constructible<Parser_Error>,
+                                  std::is_nothrow_move_constructible<Parser_Error>,
+                                  std::is_nothrow_copy_assignable<Parser_Error>,
+                                  std::is_nothrow_move_assignable<Parser_Error>>::value, "");
 
 }  // namespace Asteria

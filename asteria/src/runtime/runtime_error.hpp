@@ -1,8 +1,8 @@
 // This file is part of Asteria.
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
-#ifndef ASTERIA_RUNTIME_EXCEPTION_HPP_
-#define ASTERIA_RUNTIME_EXCEPTION_HPP_
+#ifndef ASTERIA_RUNTIME_RUNTIME_ERROR_HPP_
+#define ASTERIA_RUNTIME_RUNTIME_ERROR_HPP_
 
 #include "../fwd.hpp"
 #include "backtrace_frame.hpp"
@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Exception : public std::exception
+class Runtime_Error : public std::exception
   {
   private:
     Value m_value;
@@ -18,19 +18,19 @@ class Exception : public std::exception
 
   public:
     template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalT&&)>
-        Exception(const Source_Location& sloc, XvalT&& xval)
+        Runtime_Error(const Source_Location& sloc, XvalT&& xval)
       :
         m_value(rocket::forward<XvalT>(xval))
       {
         this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
       }
-    explicit Exception(const std::exception& stdex)
+    explicit Runtime_Error(const std::exception& stdex)
       :
         m_value(G_string(stdex.what()))
       {
         this->m_frames.emplace_back(frame_type_native, rocket::sref("<native code>"), -1, this->m_value);
       }
-    ~Exception() override;
+    ~Runtime_Error() override;
 
   public:
     const char* what() const noexcept override

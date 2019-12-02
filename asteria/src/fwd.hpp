@@ -57,7 +57,7 @@ class Value;
 class Abstract_Opaque;
 class Abstract_Function;
 class Abstract_Hooks;
-class Placeholder;
+class Runtime_Error;
 class Reference_Root;
 class Reference_Modifier;
 class Reference;
@@ -76,7 +76,6 @@ class Variadic_Arguer;
 class Instantiated_Function;
 class AIR_Node;
 class Backtrace_Frame;
-class Exception;
 class Simple_Script;
 
 // Compiler

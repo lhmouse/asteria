@@ -6,7 +6,7 @@
 #include "runtime/reference.hpp"
 #include "runtime/global_context.hpp"
 #include "runtime/simple_script.hpp"
-#include "runtime/exception.hpp"
+#include "runtime/runtime_error.hpp"
 #include "runtime/abstract_hooks.hpp"
 #include "compiler/parser_error.hpp"
 #include <unistd.h>
@@ -17,9 +17,9 @@ using namespace Asteria;
 
 namespace {
 
-const Exception* do_backtrace_opt(const std::exception& stdex) noexcept
+const Runtime_Error* do_backtrace_opt(const std::exception& xbase) noexcept
   try {
-    const auto& except = dynamic_cast<const Exception&>(stdex);
+    const auto& except = dynamic_cast<const Runtime_Error&>(xbase);
     tinyfmt_str fmt;
     // Print stack frames to the standard error stream.
     for(unsigned long i = 0; i != except.count_frames(); ++i) {
@@ -35,8 +35,8 @@ const Exception* do_backtrace_opt(const std::exception& stdex) noexcept
     ::fprintf(stderr, "  -- end of backtrace\n");
     return std::addressof(except);
   }
-  catch(std::exception& other) {
-    ASTERIA_DEBUG_LOG("Could not retrieve exception backtrace: ", other.what());
+  catch(std::exception& stdex) {
+    ASTERIA_DEBUG_LOG("Could not retrieve exception backtrace: ", stdex.what());
     ::fprintf(stderr, "  -- no backtrace available\n");
     return nullptr;
   }
@@ -47,8 +47,8 @@ cow_string do_stringify_value(const Value& val) noexcept
     fmt << val;
     return fmt.extract_string();
   }
-  catch(std::exception& other) {
-    ASTERIA_DEBUG_LOG("Could not stringify value: ", other.what());
+  catch(std::exception& stdex) {
+    ASTERIA_DEBUG_LOG("Could not stringify value: ", stdex.what());
     return rocket::sref("<invalid value>");
   }
 
@@ -95,7 +95,7 @@ struct Debug_Hooks : Abstract_Hooks
                           do_stringify_reference(result).c_str());
       }
     void on_function_except(const Source_Location& sloc, const phsh_string& inside,
-                            const Exception& except) noexcept override
+                            const Runtime_Error& except) noexcept override
       {
         ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- caught exception from function call: %s\n",
                           sloc.file().c_str(), sloc.line(), inside.c_str(),

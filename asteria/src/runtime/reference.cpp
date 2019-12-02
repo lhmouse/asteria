@@ -5,7 +5,7 @@
 #include "reference.hpp"
 #include "global_context.hpp"
 #include "abstract_hooks.hpp"
-#include "exception.hpp"
+#include "runtime_error.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -107,8 +107,8 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         // The result will have been stored into `*this`.
         ASTERIA_DEBUG_LOG("Returned from tail call at '", sloc, "' inside `", inside, "`: target = ", *target);
       }
-      catch(Exception& except) {
-        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside tail call at '", sloc, "' inside `", inside, "`: ", except.value());
+      catch(Runtime_Error& except) {
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error` thrown inside tail call at '", sloc, "' inside `", inside, "`: ", except.value());
         // Append all frames that have been expanded so far and rethrow the exception.
         std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
@@ -120,7 +120,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       catch(std::exception& stdex) {
         ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at '", sloc, "' inside `", inside, "`: ", stdex.what());
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
-        Exception except(stdex);
+        Runtime_Error except(stdex);
         std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
         if(qh) {

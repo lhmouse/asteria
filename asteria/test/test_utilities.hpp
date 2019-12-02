@@ -5,7 +5,7 @@
 #define ASTERIA_TEST_UTILITIES_HPP_
 
 #include "../src/fwd.hpp"
-#include "../src/runtime/exception.hpp"
+#include "../src/runtime/runtime_error.hpp"
 #include "../src/utilities.hpp"
 
 #define ASTERIA_TEST_CHECK(expr_)  \
@@ -27,14 +27,9 @@
         static_cast<void>(expr_);  \
         /* failure */  \
       }  \
-      catch(::Asteria::Exception& e) {  \
-        /* success */  \
-        ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", e.value());  \
-        break;  \
-      }  \
       catch(::Asteria::Runtime_Error& e) {  \
         /* success */  \
-        ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error`: ", e.what());  \
+        ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error`: ", e.value());  \
         break;  \
       }  \
       catch(::std::exception& e) {  \

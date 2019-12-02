@@ -27,7 +27,7 @@ void Abstract_Hooks::on_function_return(const Source_Location& /*sloc*/, const p
   }
 
 void Abstract_Hooks::on_function_except(const Source_Location& /*sloc*/, const phsh_string& /*inside*/,
-                                        const Exception& /*except*/)
+                                        const Runtime_Error& /*except*/)
   {
   }
 

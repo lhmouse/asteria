@@ -9,7 +9,7 @@
 #include "evaluation_stack.hpp"
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
-#include "exception.hpp"
+#include "runtime_error.hpp"
 #include "../compiler/statement.hpp"
 #include "../utilities.hpp"
 
@@ -216,7 +216,7 @@ DCE_Result AIR_Node::optimize_dce()
         return queue.execute(ctx);
       }
 
-    AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except, const Exception& except, const Executive_Context& ctx)
+    AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_except, const Runtime_Error& except, const Executive_Context& ctx)
       {
         if(ROCKET_EXPECT(queue.empty())) {
           return air_status_next;
@@ -243,7 +243,7 @@ DCE_Result AIR_Node::optimize_dce()
             // Append this frame.
             backtrace.emplace_back(rocket::move(r));
           }
-          ASTERIA_DEBUG_LOG("Exception backtrace:\n", Value(backtrace));
+          ASTERIA_DEBUG_LOG("Runtime_Error backtrace:\n", Value(backtrace));
           Reference_Root::S_constant xref = { rocket::move(backtrace) };
           ctx_next.open_named_reference(rocket::sref("__backtrace")) = rocket::move(xref);
         }
@@ -834,17 +834,17 @@ DCE_Result AIR_Node::optimize_dce()
           }
           return status;
         }
-        catch(Exception& except) {
+        catch(Runtime_Error& except) {
           // Reuse the exception object. Don't bother allocating a new one.
           except.push_frame_catch(sloc);
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception`: ", except.value());
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error`: ", except.value());
           // This branch must be executed inside this `catch` block.
           // User-provided bindings may obtain the current exception using `std::current_exception`.
           return do_execute_catch(queue_catch, name_except, except, ctx);
         }
         catch(std::exception& stdex) {
           // Translate the exception.
-          Exception except(stdex);
+          Runtime_Error except(stdex);
           except.push_frame_catch(sloc);
           ASTERIA_DEBUG_LOG("Translated `std::exception`: ", except.value());
           // This branch must be executed inside this `catch` block.
@@ -868,19 +868,19 @@ DCE_Result AIR_Node::optimize_dce()
             std::rethrow_exception(eptr);
           }
         }
-        catch(Exception& except) {
+        catch(Runtime_Error& except) {
           // Modify it in place. Don't bother allocating a new one.
           except.push_frame_throw(sloc, rocket::move(value));
           throw;
         }
         catch(std::exception& stdex) {
           // Translate the exception.
-          Exception except(stdex);
+          Runtime_Error except(stdex);
           except.push_frame_throw(sloc, rocket::move(value));
           throw except;
         }
         // If no nested exception exists, construct a fresh one.
-        Exception except(sloc, rocket::move(value));
+        Runtime_Error except(sloc, rocket::move(value));
         throw except;
       }
 
@@ -1082,8 +1082,8 @@ DCE_Result AIR_Node::optimize_dce()
           self.finish_call(ctx.global());
           ASTERIA_DEBUG_LOG("Returned from function call at '", sloc, "' inside `", inside, "`: target = ", target);
         }
-        catch(Exception& except) {
-          ASTERIA_DEBUG_LOG("Caught `Asteria::Exception` thrown inside function call at '", sloc, "' inside `", inside, "`: ", except.value());
+        catch(Runtime_Error& except) {
+          ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error` thrown inside function call at '", sloc, "' inside `", inside, "`: ", except.value());
           // Append the current frame and rethrow the exception.
           except.push_frame_func(sloc, inside);
           // Call the hook function if any.
@@ -1095,7 +1095,7 @@ DCE_Result AIR_Node::optimize_dce()
         catch(std::exception& stdex) {
           ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at '", sloc, "' inside `", inside, "`: ", stdex.what());
           // Translate the exception, append the current frame, and throw the new exception.
-          Exception except(stdex);
+          Runtime_Error except(stdex);
           except.push_frame_func(sloc, inside);
           // Call the hook function if any.
           if(qh) {
