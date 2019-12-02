@@ -32,11 +32,10 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
         ASTERIA_THROW("The function parameter name `", param, "` is reserved and cannot be used.");
       }
       // Set the parameter.
-      if(ROCKET_UNEXPECT(i >= args.size())) {
+      if(ROCKET_UNEXPECT(i >= args.size()))
         this->open_named_reference(param) = Reference_Root::S_null();
-        continue;
-      }
-      this->open_named_reference(param) = rocket::move(args.mut(i));
+      else
+        this->open_named_reference(param) = rocket::move(args.mut(i));
     }
     if(!qelps && (args.size() > params.size())) {
       // Disallow exceess arguments if the function is not variadic.
