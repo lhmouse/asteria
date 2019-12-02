@@ -18,7 +18,7 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          throw Parser_Error(status);
+          throw Parser_Error(status, -1, 0, 0);
         }
         throw Parser_Error(status, qtok->line(), qtok->offset(), qtok->length());
       }
@@ -27,7 +27,7 @@ namespace Asteria {
       {
         auto qtok = tstrm.peek_opt();
         if(!qtok) {
-          return std::make_pair(rocket::sref("<end of source>"), -1);
+          return std::make_pair(rocket::sref("<end of stream>"), -1);
         }
         return Source_Location(qtok->file(), qtok->line());
       }

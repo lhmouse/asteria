@@ -15,7 +15,7 @@ void Parser_Error::do_compose_message()
   {
     tinyfmt_str fmt;
     // Write the status code in digital form.
-    fmt << "asteria parser error " << this->m_status << " at ";
+    fmt << "asteria parser error " << this->m_stat << " at ";
     // Append the source location.
     if(this->m_line > 0) {
       fmt << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
@@ -24,7 +24,7 @@ void Parser_Error::do_compose_message()
       fmt << "the end of input data";
     }
     // Append the status description.
-    fmt << ": " << describe_parser_status(this->m_status);
+    fmt << ": " << describe_parser_status(this->m_stat);
     // Set the string.
     this->m_what = fmt.extract_string();
   }

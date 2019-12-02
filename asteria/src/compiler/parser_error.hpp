@@ -12,25 +12,17 @@ namespace Asteria {
 class Parser_Error : public virtual std::exception
   {
   private:
-    Parser_Status m_status;
+    Parser_Status m_stat;
     long m_line;
     size_t m_offset;
     size_t m_length;
-
     // Create a comprehensive string that is also human-readable.
     cow_string m_what;
 
   public:
-    explicit Parser_Error(Parser_Status xstatus)
+    Parser_Error(Parser_Status xstat, long xline, size_t xoffset, size_t xlength)
       :
-        m_status(xstatus),
-        m_line(-1), m_offset(0), m_length(0)
-      {
-        this->do_compose_message();
-      }
-    Parser_Error(Parser_Status xstatus, long xline, size_t xoffset, size_t xlength)
-      :
-        m_status(xstatus),
+        m_stat(xstat),
         m_line(xline), m_offset(xoffset), m_length(xlength)
       {
         this->do_compose_message();
@@ -60,11 +52,11 @@ class Parser_Error : public virtual std::exception
       }
     Parser_Status status() const noexcept
       {
-        return this->m_status;
+        return this->m_stat;
       }
     const char* what_status() const noexcept
       {
-        return describe_parser_status(this->m_status);
+        return describe_parser_status(this->m_stat);
       }
   };
 
