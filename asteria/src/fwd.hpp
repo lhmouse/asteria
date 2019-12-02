@@ -43,10 +43,6 @@
 #define ASTERIA_VOID_T(...)        typename ::rocket::make_void<__VA_ARGS__>::type
 #define ASTERIA_VOID_OF(...)       typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
 
-#define ASTERIA_AND_(x_, y_)          (bool(x_) && bool(y_))
-#define ASTERIA_OR_(x_, y_)           (bool(x_) || bool(y_))
-#define ASTERIA_COMMA_(x_, y_)        (void(x_) ,      (y_))
-
 namespace Asteria {
 
 // Low-level Data Structure
