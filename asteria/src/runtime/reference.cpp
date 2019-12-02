@@ -12,7 +12,7 @@ namespace Asteria {
 
 Value Reference::do_throw_unset_no_modifier() const
   {
-    ASTERIA_THROW("Only array elements or object members may be `unset`.");
+    ASTERIA_THROW("non-members can't be unset");
   }
 
 const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
@@ -21,15 +21,13 @@ const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, con
     for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_const_opt(*qref);
-      if(!qref) {
+      if(!qref)
         return null_value;
-      }
     }
     // Apply the last modifier.
     qref = last.apply_const_opt(*qref);
-    if(!qref) {
+    if(!qref)
       return null_value;
-    }
     return *qref;
   }
 
@@ -53,9 +51,8 @@ Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Ref
     for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, false);  // no create
-      if(!qref) {
+      if(!qref)
         return null_value;
-      }
     }
     // Apply the last modifier.
     return last.apply_and_erase(*qref);

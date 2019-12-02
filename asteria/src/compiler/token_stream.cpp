@@ -255,7 +255,7 @@ namespace Asteria {
         }
         if(p.is_punctuator()) {
           // Infix operators may follow if the punctuator can terminate an expression.
-          return rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec, punctuator_end_a,
+          return rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec, punctuator_tail,
                                                         punctuator_parenth_cl, punctuator_bracket_cl,
                                                         punctuator_brace_cl });
         }
@@ -479,7 +479,7 @@ namespace Asteria {
         { "?\?",   punctuator_coales      },
         { "?\?=",  punctuator_coales_eq   },
         { "[",     punctuator_bracket_op  },
-        { "[$]",   punctuator_end_a       },
+        { "[$]",   punctuator_tail        },
         { "]",     punctuator_bracket_cl  },
         { "^",     punctuator_xorb        },
         { "^=",    punctuator_xorb_eq     },

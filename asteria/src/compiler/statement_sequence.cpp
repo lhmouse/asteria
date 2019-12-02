@@ -1604,9 +1604,9 @@ namespace Asteria {
       }
     constexpr s_postfix_operator_table[] =
       {
-        { punctuator_inc,    xop_inc_post  },
-        { punctuator_dec,    xop_dec_post  },
-        { punctuator_end_a,  xop_end_a     },
+        { punctuator_inc,   xop_inc_post  },
+        { punctuator_dec,   xop_dec_post  },
+        { punctuator_tail,  xop_tail      },
       };
 
     constexpr bool operator==(const Postfix_Operator_Element& lhs, Punctuator rhs) noexcept

@@ -2545,11 +2545,11 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_end_a(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
+    AIR_Status do_apply_xop_tail(Executive_Context& ctx, ParamU /*paramu*/, const void* /*params*/)
       {
         // This operator is unary.
         auto& lref = ctx.stack().open_top();
-        Reference_Modifier::S_array_end xmod = { };
+        Reference_Modifier::S_array_tail xmod = { };
         lref.zoom_in(rocket::move(xmod));
         return air_status_next;
       }
@@ -3287,9 +3287,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           {
             return avmcp.output<do_apply_xop_fma>(queue);
           }
-        case xop_end_a:
+        case xop_tail:
           {
-            return avmcp.output<do_apply_xop_end_a>(queue);
+            return avmcp.output<do_apply_xop_tail>(queue);
           }
         default:
           ASTERIA_TERMINATE("Operator enumeration `", altr.xop, "` is unhandled.");
