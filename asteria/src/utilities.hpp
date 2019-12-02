@@ -39,11 +39,11 @@ extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) n
                                        ::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
                                            ASTERIA_FORMAT(__VA_ARGS__)))
 #define ASTERIA_TERMINATE(...)     (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-                                           ASTERIA_FORMAT(__VA_ARGS__, "\nThis is likely a bug. Please report.")),  \
+                                         ASTERIA_FORMAT(__VA_ARGS__,  \
+                                           "\n\nThis is likely a bug. Please report.")),  \
                                        ::std::terminate())
 #define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
-                                       "Asteria: %s\n"  \
-                                       "[thrown from native function `%s(...)`]",  \
+                                       "%s\n[thrown from native function `%s(...)`]",  \
                                        ASTERIA_FORMAT(__VA_ARGS__).c_str(), __func__))
 
 // UTF-8 conversion functions

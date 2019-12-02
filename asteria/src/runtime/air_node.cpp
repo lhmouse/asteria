@@ -897,7 +897,7 @@ DCE_Result AIR_Node::optimize_dce()
           return air_status_next;
         }
         // Throw a `runtime_error`.
-        rocket::sprintf_and_throw<std::runtime_error>("Asteria: assertion failure: %s\n"
+        rocket::sprintf_and_throw<std::runtime_error>("assertion failure: %s\n"
                                                       "[declared at '%s:%ld']",
                                                       msg.c_str(), sloc.file().c_str(), sloc.line());
       }

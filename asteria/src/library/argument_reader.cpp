@@ -608,7 +608,7 @@ void Argument_Reader::throw_no_matching_function_call() const
       ovlds << ']';
     }
     // Throw the exception now.
-    rocket::sprintf_and_throw<std::invalid_argument>("Asteria: no matching function call for `%s(%s)`%s",
+    rocket::sprintf_and_throw<std::invalid_argument>("no matching function call for `%s(%s)`%s",
                                                      this->m_name.c_str(), args.c_str(), ovlds.c_str());
   }
 

@@ -401,7 +401,7 @@ int main(int argc, char** argv)
         // We only want to make a second attempt in the case of absence of a semicolon at the end.
         if((except.status() != parser_status_semicolon_expected) || (except.line() > 0)) {
           // Bail out upon irrecoverable errors.
-          ::fprintf(stderr, "! caught exception: %s\n", except.what());
+          ::fprintf(stderr, "! parser error: %s\n", except.what());
           continue;
         }
       }
@@ -415,7 +415,7 @@ int main(int argc, char** argv)
         }
         catch(Parser_Error& except) {
           // Bail out upon irrecoverable errors.
-          ::fprintf(stderr, "! caught exception: %s\n", except.what());
+          ::fprintf(stderr, "! parser error: %s\n", except.what());
           continue;
         }
       }
@@ -428,7 +428,7 @@ int main(int argc, char** argv)
       }
       catch(std::exception& stdex) {
         // Print the exception and discard this snippet.
-        ::fprintf(stderr, "! caught exception: %s\n", stdex.what());
+        ::fprintf(stderr, "! runtime error: %s\n", stdex.what());
         do_backtrace_opt(stdex);
       }
     }
