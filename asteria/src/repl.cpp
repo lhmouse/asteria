@@ -28,7 +28,7 @@ const Runtime_Error* do_backtrace_opt(const std::exception& xbase) noexcept
       fmt.clear_string();
       fmt << frm.value();
       // Print a line of backtrace.
-      ::fprintf(stderr, "  [%lu] %s:%ld <%s> -- %s\n",
+      ::fprintf(stderr, "  [%lu] %s:%ld (%s) -- %s\n",
                         i, frm.sloc().file().c_str(), frm.sloc().line(), frm.what_type(),
                         fmt.get_c_string());
     }

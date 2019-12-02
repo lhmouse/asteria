@@ -43,8 +43,8 @@ extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) n
                                            "\n\nThis is likely a bug. Please report.")),  \
                                        ::std::terminate())
 #define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
-                                       "%s\n[thrown from native function `%s(...)`]",  \
-                                       ASTERIA_FORMAT(__VA_ARGS__).c_str(), __func__))
+                                       "%s: %s\n[thrown from native code at '%s:%ld']",  \
+                                       __func__, ASTERIA_FORMAT(__VA_ARGS__).c_str(), __FILE__, (long)__LINE__))
 
 // UTF-8 conversion functions
 extern bool utf8_encode(char*& pos, char32_t cp);
