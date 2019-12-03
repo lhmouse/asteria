@@ -15,7 +15,7 @@ Executive_Context::~Executive_Context()
 void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)
   {
     // This is the subscript of the special pameter placeholder `...`.
-    opt<size_t> qelps;
+    size_t elps = SIZE_MAX;
     // Set parameters, which are local references.
     for(size_t i = 0; i < params.size(); ++i) {
       const auto& param = params.at(i);
@@ -25,7 +25,7 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
       if(param == "...") {
         // Nothing is set for the parameter placeholder, but the parameter list terminates here.
         ROCKET_ASSERT(i == params.size() - 1);
-        qelps = i;
+        elps = i;
         break;
       }
       if(param.rdstr().starts_with("__")) {
@@ -37,12 +37,12 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
       else
         this->open_named_reference(param) = rocket::move(args.mut(i));
     }
-    if(!qelps && (args.size() > params.size())) {
+    if((elps == SIZE_MAX) && (args.size() > params.size())) {
       // Disallow exceess arguments if the function is not variadic.
       ASTERIA_THROW("Too many arguments were provided (expecting no more than `", params.size(), "`, but got `", args.size(), "`).");
     }
-    // Prepare `__this` and `__varg`. This is tricky.
-    args.erase(0, rocket::min(qelps.value_or(SIZE_MAX), args.size()));
+    // Pack `__this` and `__varg`. This is tricky.
+    args.erase(0, elps);
     args.emplace_back(rocket::move(self));
     this->m_args_self = rocket::move(args);
   }
