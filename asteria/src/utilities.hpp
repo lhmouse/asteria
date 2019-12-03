@@ -32,7 +32,7 @@ extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) n
 
 // Hint: You can define this as something non-constant.
 #ifndef ASTERIA_ENABLE_DEBUG_LOGS
-#  define ASTERIA_ENABLE_DEBUG_LOGS  0
+#  define ASTERIA_ENABLE_DEBUG_LOGS   0u
 #endif
 
 #define ASTERIA_DEBUG_LOG(...)     (ROCKET_UNEXPECT(ASTERIA_ENABLE_DEBUG_LOGS) &&  \
@@ -40,11 +40,12 @@ extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) n
                                            ASTERIA_FORMAT(__VA_ARGS__)))
 #define ASTERIA_TERMINATE(...)     (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
                                          ASTERIA_FORMAT("ASTERIA_TERMINATE: ", __VA_ARGS__,  \
-                                           "\n\nThis is likely a bug. Please report.")),  \
+                                           "\nThis is likely a bug. Please report.")),  \
                                        ::std::terminate())
 #define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
                                        "%s: %s\n[thrown from native code at '%s:%ld']",  \
-                                       __func__, ASTERIA_FORMAT(__VA_ARGS__).c_str(), __FILE__, (long)__LINE__))
+                                       __func__, ASTERIA_FORMAT(__VA_ARGS__).c_str(),  \
+                                       __FILE__, (long)__LINE__))
 
 // UTF-8 conversion functions
 extern bool utf8_encode(char*& pos, char32_t cp);
