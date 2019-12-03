@@ -180,21 +180,14 @@ template<typename typeT>
     swap(lhs, rhs);
   }
 
-    namespace details_utilities {
-
-    // This distinguishes rvalues from xvalues.
-    template<typename typeT> constexpr typeT declval3() noexcept;
-
-    }
-
 template<typename firstT, typename secondT, typename... restT>
     struct select_type : select_type<typename select_type<firstT, secondT>::type,
                                      restT...>
   {
   };
 template<typename firstT, typename secondT>
-    struct select_type<firstT, secondT> : enable_if<1, decltype(1 ? details_utilities::declval3<firstT>()
-                                                                  : details_utilities::declval3<secondT>())>
+    struct select_type<firstT, secondT> : enable_if<1, decltype(1 ? ::std::declval<firstT ()>()()
+                                                                  : ::std::declval<secondT ()>()())>
   {
   };
 
