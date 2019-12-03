@@ -23,9 +23,9 @@ These rules cover all files in the `asteria/src` directory, save for those in `a
 
 1. A full-width character counts as two half-width ones.
 
-2. The _suggested_ maximum number of half-width characters in a line is **160** characters. This means that you should keep you lines shorter than this where appropriate.
+2. The _suggested_ maximum number of half-width characters in a line is **120** characters. This means that you should keep you lines shorter than this where appropriate.
 
-3. The maximum number of half-width characters in a line is **200** characters. Lines longer than this shall be split into multiple lines, unless otherwise specified.
+3. The maximum number of half-width characters in a line is **180** characters. Lines longer than this shall be split into multiple lines, unless specified otherwise.
 
 4. Function and function template declarations, especially those in public headers, are exempt from this limit. Each such declaration must consist of a single line. The rationale is that, when a call to such function or function template contains a syntax error, GCC only prints one contextual line about the target, which would not include the entire declaration if it straddled multiple lines.
 
