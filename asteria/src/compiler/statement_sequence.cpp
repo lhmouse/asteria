@@ -1490,7 +1490,7 @@ namespace Asteria {
         }
         kpunct = do_accept_punctuator_opt(tstrm, { punctuator_brace_cl });
         if(!kpunct) {
-          do_throw_parser_error(parser_status_closed_brace_expected, tstrm);
+          do_throw_parser_error(parser_status_closed_brace_or_name_expected, tstrm);
         }
         Xprunit::S_unnamed_object xunit = { rocket::move(keys) };
         units.emplace_back(rocket::move(xunit));

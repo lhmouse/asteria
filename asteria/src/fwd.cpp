@@ -674,6 +674,10 @@ const char* describe_parser_status(Parser_Status status) noexcept
       {
         return "`=` or `:` expected";
       }
+    case parser_status_closed_brace_or_name_expected:
+      {
+        return "`}`, identifier or string literal expected";
+      }
     default:
       {
         return "<unknown parser error>";

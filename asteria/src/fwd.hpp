@@ -469,6 +469,7 @@ enum Parser_Status : uint32_t
     parser_status_closed_bracket_expected                    = 3023,
     parser_status_open_brace_or_equal_initializer_expected   = 3024,
     parser_status_equals_sign_or_colon_expected              = 3025,
+    parser_status_closed_brace_or_name_expected              = 3026,
   };
 
 ROCKET_PURE_FUNCTION extern const char* describe_parser_status(Parser_Status status) noexcept;
