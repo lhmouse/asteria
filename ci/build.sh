@@ -6,11 +6,11 @@ export CXX
 
 # build
 ${CXX} --version
-./check_includes.sh
 mkdir -p m4
 autoreconf -ifv
 ./configure --disable-silent-rules ${_options}
 make -j$(nproc)
 
 # test
+./check_includes.sh
 make -j$(nproc) check || (cat ./test-suite.log; false)
