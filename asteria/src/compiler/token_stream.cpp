@@ -144,7 +144,6 @@ namespace Asteria {
             }
             this->m_line++;
             // Accept the line.
-            ASTERIA_DEBUG_LOG("Read line ", this->m_line, "\t: ", this->m_str);
             return true;
           }
 
@@ -838,7 +837,6 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
                          do_accept_string_literal(tokens, reader, '\'', opts.escapable_single_quotes) ||
                          do_accept_identifier_or_keyword(tokens, reader, opts.keywords_as_identifiers);
         if(!token_got) {
-          ASTERIA_DEBUG_LOG("Non-token character encountered in source code: ", reader.data());
           do_throw_parser_error(parser_status_token_character_unrecognized, reader, 1);
         }
       }

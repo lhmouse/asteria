@@ -99,13 +99,10 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       }
       try {
         // Unwrap the function call.
-        ASTERIA_DEBUG_LOG("Unpacking tail call at '", sloc, "' inside `", inside, "`: target = ", *target);
         target->invoke(*this, global, rocket::move(args));
         // The result will have been stored into `*this`.
-        ASTERIA_DEBUG_LOG("Returned from tail call at '", sloc, "' inside `", inside, "`: target = ", *target);
       }
       catch(Runtime_Error& except) {
-        ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error` thrown inside tail call at '", sloc, "' inside `", inside, "`: ", except.value());
         // Append all frames that have been expanded so far and rethrow the exception.
         std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
@@ -115,7 +112,6 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         throw;
       }
       catch(std::exception& stdex) {
-        ASTERIA_DEBUG_LOG("Caught `std::exception` thrown inside function call at '", sloc, "' inside `", inside, "`: ", stdex.what());
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Runtime_Error except(stdex);
         std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });

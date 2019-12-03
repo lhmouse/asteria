@@ -244,7 +244,6 @@ opt<G_integer> std_filesystem_directory_create(const G_string& path)
       return rocket::clear;
     }
     if(!S_ISDIR(stb.st_mode)) {
-      ASTERIA_DEBUG_LOG("A file that is not a directory exists on '", path, "'.");
       return rocket::clear;
     }
     // The directory already exists.

@@ -111,7 +111,6 @@ Collector* Collector::collect_single_opt()
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
     // We initialize `gcref` to zero then increment it, rather than initialize `gcref` to the reference count then decrement it.
     // This saves a phase below for us.
-    ASTERIA_DEBUG_LOG("Garbage collection begins: this = ", static_cast<void*>(this), ", tracked_variables = ", this->m_tracked.size());
     this->m_staging.clear();
     ///////////////////////////////////////////////////////////////////////////
     // Phase 1
@@ -209,7 +208,6 @@ Collector* Collector::collect_single_opt()
         // All reachable variables will have negative gcref counters.
         if(root->get_gcref() >= 0) {
           // Overwrite the value of this variable with a scalar value to break reference cycles.
-          ASTERIA_DEBUG_LOG("\tCollecting unreachable variable: ", root->get_value());
           root->reset(s_defunct_value, true);
           // Cache this variable if a pool is specified.
           if(output) {
@@ -220,10 +218,8 @@ Collector* Collector::collect_single_opt()
         }
         // Transfer this variable to the next generational collector, if one has been tied.
         if(!tied) {
-          ASTERIA_DEBUG_LOG("\tKeeping reachable variable: ", root->get_value());
           return false;
         }
-        ASTERIA_DEBUG_LOG("\tTransferring variable to the next generation: ", root->get_value());
         tied->m_tracked.insert(root);
         // Check whether the next generation needs to be checked as well.
         if(tied->m_counter++ >= tied->m_threshold) {
@@ -237,7 +233,6 @@ Collector* Collector::collect_single_opt()
     ///////////////////////////////////////////////////////////////////////////
     this->m_staging.clear();
     this->m_counter = 0;
-    ASTERIA_DEBUG_LOG("Garbage collection ends: this = ", static_cast<void*>(this));
     return next;
   }
 

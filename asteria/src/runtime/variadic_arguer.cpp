@@ -29,7 +29,6 @@ Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*glob
       auto w = wrap_index(*qindex, nvargs);
       auto nadd = w.nprepend | w.nappend;
       if(nadd != 0) {
-        ASTERIA_DEBUG_LOG("Variadic argument index is out of range: index = ", *qindex, ", nvarg = ", nvargs);
         return self = Reference_Root::S_null();
       }
       return self = this->m_vargs.at(w.rindex);

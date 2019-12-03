@@ -6,7 +6,7 @@ sudo: required
 
 env:
   - _options=""
-  - _options="--enable-debug-logs --enable-debug-checks"
+  - _options="--enable-debug-checks"
 
 compiler:
   - gcc

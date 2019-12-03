@@ -622,19 +622,16 @@ Value std_json_parse(const G_string& text)
       tstrm.reload(cbuf, rocket::sref("<JSON text>"), opts);
     }
     catch(Parser_Error& except) {
-      ASTERIA_DEBUG_LOG("Could not tokenize JSON text: ", except.what(), "\n---\n", text);
       return G_null();
     }
     // Parse tokens.
     auto qvalue = do_json_parse_nonrecursive_opt(tstrm);
     if(!qvalue) {
-      ASTERIA_DEBUG_LOG("Invalid or empty JSON text: ", text);
       return G_null();
     }
     // Check whether all tokens have been consumed.
     auto qtok = tstrm.peek_opt();
     if(qtok) {
-      ASTERIA_DEBUG_LOG("Excess token `", *qtok, "`: ", text);
       return G_null();
     }
     return rocket::move(*qvalue);

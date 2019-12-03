@@ -26,9 +26,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     xnode.body = stmseq.get_statements();
     // Construct an IR node so we can reuse its code somehow.
     AIR_Node node(rocket::move(xnode));
-    ASTERIA_DEBUG_LOG("Instantiating code from '", name, "'...");
     auto qtarget = node.instantiate_function(nullptr);
-    ASTERIA_DEBUG_LOG("Finished instantiating code from '", name, "' as `", *qtarget, "`.");
     // Accept it.
     this->m_cptr = rocket::move(qtarget);
     return *this;

@@ -26,7 +26,6 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         auto w = wrap_index(altr.index, arr.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
-          ASTERIA_DEBUG_LOG("Array subscript out of range: index = ", altr.index, ", size = ", arr.size());
           return nullptr;
         }
         return std::addressof(arr.at(w.rindex));
@@ -45,7 +44,6 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         // Return a pointer to the value with the given key.
         auto rit = obj.find(altr.key);
         if(rit == obj.end()) {
-          ASTERIA_DEBUG_LOG("Object member not found: key = ", altr.key, ", parent = ", parent);
           return nullptr;
         }
         return std::addressof(rit->second);
@@ -63,7 +61,6 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         const auto& arr = parent.as_array();
         // Returns the last element.
         if(arr.empty()) {
-          ASTERIA_DEBUG_LOG("Attempt to reference the last (nonexistent) element of an empty `array`.");
           return nullptr;
         }
         return std::addressof(arr.back());
@@ -95,7 +92,6 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
           if(!create_new) {
-            ASTERIA_DEBUG_LOG("Array subscript out of range: index = ", altr.index, ", size = ", arr.size());
             return nullptr;
           }
           if(nadd > arr.max_size() - arr.size()) {
@@ -125,7 +121,6 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         if(!create_new) {
           rit = obj.find_mut(altr.key);
           if(rit == obj.end()) {
-            ASTERIA_DEBUG_LOG("Object member not found: key = ", altr.key, ", parent = ", parent);
             return nullptr;
           }
         }
@@ -174,7 +169,6 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         auto w = wrap_index(altr.index, arr.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
-          ASTERIA_DEBUG_LOG("Array subscript out of range: index = ", altr.index, ", size = ", arr.size());
           return G_null();
         }
         auto elem = rocket::move(arr.mut(w.rindex));
@@ -195,7 +189,6 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         // Erase the value with the given key and return it.
         auto rit = obj.find_mut(altr.key);
         if(rit == obj.end()) {
-          ASTERIA_DEBUG_LOG("Object member not found: key = ", altr.key, ", parent = ", parent);
           return nullptr;
         }
         auto elem = rocket::move(rit->second);
@@ -215,7 +208,6 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         auto& arr = parent.open_array();
         // Erase the last element and return it.
         if(arr.empty()) {
-          ASTERIA_DEBUG_LOG("Attempt to reference the last (nonexistent) element of an empty `array`.");
           return nullptr;
         }
         auto elem = rocket::move(arr.mut_back());

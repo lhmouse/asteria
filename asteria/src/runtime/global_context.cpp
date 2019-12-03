@@ -36,9 +36,8 @@ const Abstract_Context* Global_Context::do_get_parent_opt() const noexcept
     return this->get_parent_opt();
   }
 
-Reference* Global_Context::do_lazy_lookup_opt(Reference_Dictionary& /*named_refs*/, const phsh_string& name) const
+Reference* Global_Context::do_lazy_lookup_opt(Reference_Dictionary& /*named_refs*/, const phsh_string& /*name*/) const
   {
-    ASTERIA_DEBUG_LOG("An undeclared identifier `", name, "` has been encountered.");
     return nullptr;
   }
 
@@ -116,9 +115,7 @@ void Global_Context::initialize(API_Version version)
         ROCKET_ASSERT(pair.first->second.is_null());
         pair.first->second = G_object();
       }
-      ASTERIA_DEBUG_LOG("Begin initialization of standard library module: name = ", q->name);
       (*(q->init))(pair.first->second.open_object(), emods[-1].version);
-      ASTERIA_DEBUG_LOG("Finished initialization of standard library module: name = ", q->name);
     }
     // Set up version information.
     auto pair = stdo.try_emplace(rocket::sref("version"));

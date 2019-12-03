@@ -7,7 +7,7 @@ environment:
 
   matrix:
     - _options: ""
-    - _options: "--enable-debug-logs --enable-debug-checks"
+    - _options: "--enable-debug-checks"
 
 build_script:
   - bash ci/build.sh

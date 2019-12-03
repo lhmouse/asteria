@@ -29,12 +29,10 @@
       }  \
       catch(::Asteria::Runtime_Error& e) {  \
         /* success */  \
-        ASTERIA_DEBUG_LOG("Caught `Asteria::Runtime_Error`: ", e.value());  \
         break;  \
       }  \
       catch(::std::exception& e) {  \
         /* success */  \
-        ASTERIA_DEBUG_LOG("Caught `std::exception`: ", e.what());  \
         break;  \
       }  \
       ::std::fprintf(stderr, "ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: %s\n  at %s:%ld\n",  \

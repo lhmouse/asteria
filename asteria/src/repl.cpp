@@ -37,7 +37,6 @@ const Runtime_Error* do_backtrace_opt(const std::exception& xbase) noexcept
     return std::addressof(except);
   }
   catch(std::exception& stdex) {
-    ASTERIA_DEBUG_LOG("Could not retrieve exception backtrace: ", stdex.what());
     ::fprintf(stderr, "  -- no backtrace available\n");
     return nullptr;
   }
@@ -49,7 +48,6 @@ cow_string do_stringify_value(const Value& val) noexcept
     return fmt.extract_string();
   }
   catch(std::exception& stdex) {
-    ASTERIA_DEBUG_LOG("Could not stringify value: ", stdex.what());
     return rocket::sref("<invalid value>");
   }
 
@@ -67,7 +65,6 @@ cow_string do_stringify_reference(const Reference& ref) noexcept
     return fmt.extract_string();
   }
   catch(std::exception& other) {
-    ASTERIA_DEBUG_LOG("Could not stringify reference: ", other.what());
     return rocket::sref("<invalid reference>");
   }
 

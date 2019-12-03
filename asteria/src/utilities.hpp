@@ -30,18 +30,11 @@ class Formatter
 
 extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
 
-// Hint: You can define this as something non-constant.
-#ifndef ASTERIA_ENABLE_DEBUG_LOGS
-#  define ASTERIA_ENABLE_DEBUG_LOGS   0u
-#endif
-
-#define ASTERIA_DEBUG_LOG(...)     (ROCKET_UNEXPECT(ASTERIA_ENABLE_DEBUG_LOGS) &&  \
-                                       ::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-                                           ASTERIA_FORMAT(__VA_ARGS__)))
 #define ASTERIA_TERMINATE(...)     (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
                                          ASTERIA_FORMAT("ASTERIA_TERMINATE: ", __VA_ARGS__,  \
                                            "\nThis is likely a bug. Please report.")),  \
                                        ::std::terminate())
+
 #define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
                                        "%s: %s\n[thrown from native code at '%s:%ld']",  \
                                        __func__, ASTERIA_FORMAT(__VA_ARGS__).c_str(),  \

@@ -1996,7 +1996,6 @@ Statement_Sequence& Statement_Sequence::reload(Token_Stream& tstrm, const Compil
     }
     auto qtok = tstrm.peek_opt();
     if(qtok) {
-      ASTERIA_DEBUG_LOG("Excess token: ", *qtok);
       do_throw_parser_error(parser_status_statement_expected, tstrm);
     }
     // Succeed.
