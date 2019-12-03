@@ -525,7 +525,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Unpack arguments.
         const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
         const auto& name = do_pcast<Params_sloc_name>(params)->name;
-        const auto& inside = ctx.zvarg()->func();
+        const auto& inside = ctx.zvarg().func();
 
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();
@@ -1030,7 +1030,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& sloc = do_pcast<Params_call>(params)->sloc;
         const auto& args_by_refs = do_pcast<Params_call>(params)->args_by_refs;
         const auto& tco_aware = static_cast<TCO_Aware>(paramu.u8s[0]);
-        const auto& inside = ctx.zvarg()->func();
+        const auto& inside = ctx.zvarg().func();
 
         // Pop arguments off the stack backwards.
         cow_vector<Reference> args;
@@ -2631,7 +2631,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& immutable = static_cast<bool>(paramu.u8s[0]);
         const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
         const auto& name = do_pcast<Params_sloc_name>(params)->name;
-        const auto& inside = ctx.zvarg()->func();
+        const auto& inside = ctx.zvarg().func();
 
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();

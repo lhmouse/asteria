@@ -9,7 +9,7 @@ using namespace Asteria;
 int main()
   {
     try {
-      ASTERIA_THROW_RUNTIME_ERROR("test", ' ', "exception: ", 42, '$');
+      ASTERIA_THROW("test", ' ', "exception: ", 42, '$');
       std::terminate();
     }
     catch(std::exception& e) {

@@ -2,6 +2,7 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "precompiled.hpp"
+#include <config.h>
 #include "utilities.hpp"
 #include "runtime/reference.hpp"
 #include "runtime/global_context.hpp"

@@ -18,7 +18,7 @@ class Executive_Context final : public Abstract_Context
     // so they are not passed here and there upon each native call.
     ref_to<const Global_Context> m_global;
     ref_to<Evaluation_Stack> m_stack;
-    ckptr<Variadic_Arguer> m_zvarg;
+    ref_to<Variadic_Arguer> m_zvarg;
 
     // The last reference is `self`. This member is used for lazy initialization.
     mutable cow_vector<Reference> m_args_self;
@@ -31,7 +31,7 @@ class Executive_Context final : public Abstract_Context
         m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg)
       {
       }
-    Executive_Context(ref_to<const Global_Context> xglobal, ref_to<Evaluation_Stack> xstack, const ckptr<Variadic_Arguer>& xzvarg,
+    Executive_Context(ref_to<const Global_Context> xglobal, ref_to<Evaluation_Stack> xstack, ref_to<Variadic_Arguer> xzvarg,
                       const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)  // for functions
       :
         m_parent_opt(nullptr),
@@ -67,7 +67,7 @@ class Executive_Context final : public Abstract_Context
       {
         return this->m_stack;
       }
-    const ckptr<Variadic_Arguer>& zvarg() const noexcept
+    Variadic_Arguer& zvarg() const noexcept
       {
         return this->m_zvarg;
       }

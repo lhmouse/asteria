@@ -76,19 +76,20 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
       self = rocket::move(this->m_args_self.mut_back());
       this->m_args_self.pop_back();
       // Initialize the variadic argument getter.
+      rcptr<Variadic_Arguer> kvarg;
       if(this->m_args_self.empty()) {
         // Reference the pre-allocated zero-ary argument getter if there are variadic arguments.
-        Reference_Root::S_constant xref = { G_function(this->m_zvarg) };
-        varg = rocket::move(xref);
+        this->m_zvarg->add_reference();
+        kvarg.reset(this->m_zvarg.ptr());
       }
       else {
         // Create a new argument getter otherwise.
-        auto kvarg = rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), rocket::move(this->m_args_self));
+        kvarg = rocket::make_refcnt<Variadic_Arguer>(this->m_zvarg, rocket::move(this->m_args_self));
         this->m_args_self.clear();
-        // Set it.
-        Reference_Root::S_constant xref = { G_function(rocket::move(kvarg)) };
-        varg = rocket::move(xref);
       }
+      // Set it.
+      Reference_Root::S_constant xref = { G_function(rocket::move(kvarg)) };
+      varg = rocket::move(xref);
       // Return a pointer to the reference requested.
       return (name[2] == 't') ? &self : &varg;
     }
