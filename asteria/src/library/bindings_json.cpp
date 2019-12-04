@@ -120,44 +120,61 @@ namespace Asteria {
           // Escape double quotes, backslashes, and control characters.
           switch(cp) {
           case '\"':
-            fmt << "\\\"";
-            break;
-          case '\\':
-            fmt << "\\\\";
-            break;
-          case '\b':
-            fmt << "\\b";
-            break;
-          case '\f':
-            fmt << "\\f";
-            break;
-          case '\n':
-            fmt << "\\n";
-            break;
-          case '\r':
-            fmt << "\\r";
-            break;
-          case '\t':
-            fmt << "\\t";
-            break;
-          default:
-            if((0x20 <= cp) && (cp <= 0x7E)) {
-              // Write printable characters as is.
-              fmt << static_cast<char>(cp);
+            {
+              fmt << "\\\"";
               break;
             }
-            // Encode the character in UTF-16.
-            char16_t ustr[2];
-            char16_t* epos = ustr;
-            utf16_encode(epos, cp);
-            for(auto p = ustr; p != epos; ++p) {
-              fmt << "\\u";
-              uintptr_t reg = *p;
-              int shr = 16;
-              while((shr -= 4) >= 0)
-                fmt << "0123456789ABCDEF"[(reg >> shr) & 0xF];
+          case '\\':
+            {
+              fmt << "\\\\";
+              break;
             }
-            break;
+          case '\b':
+            {
+              fmt << "\\b";
+              break;
+            }
+          case '\f':
+            {
+              fmt << "\\f";
+              break;
+            }
+          case '\n':
+            {
+              fmt << "\\n";
+              break;
+            }
+          case '\r':
+            {
+              fmt << "\\r";
+              break;
+            }
+          case '\t':
+            {
+              fmt << "\\t";
+              break;
+            }
+          default:
+            {
+              if((0x20 <= cp) && (cp <= 0x7E)) {
+                // Write printable characters as is.
+                fmt << static_cast<char>(cp);
+                break;
+              }
+              // Encode the character in UTF-16.
+              char16_t ustr[2];
+              char16_t* epos = ustr;
+              utf16_encode(epos, cp);
+              // Write code units.
+              rocket::ascii_numput nump;
+              for(auto p = ustr; p != epos; ++p) {
+                nump.put_XU(*p, 4);
+                char seq[6] = { "\\u" };
+                std::memcpy(seq + 2, nump.data() + 2, 4);
+                fmt.putn(seq, 6);
+              }
+              break;
+            }
           }
         }
         fmt << '\"';
