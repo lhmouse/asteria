@@ -100,11 +100,11 @@ Precedence Infix_Element::tell_precedence() const noexcept
             return precedence_assignment;
           }
         default:
-          ASTERIA_TERMINATE("An invalid infix operator `", altr.xop, "` has been encountered.");
+          ASTERIA_TERMINATE("invalid operator type (xop `", altr.xop, "`)");
         }
       }
     default:
-      ASTERIA_TERMINATE("Infix-element type enumeration `", this->index(), "` is unhandled.");
+      ASTERIA_TERMINATE("invalid infix element type (index `", this->index(), "`)");
     }
   }
 
@@ -162,7 +162,7 @@ void Infix_Element::extract(cow_vector<Xprunit>& units)
         return;
       }
     default:
-      ASTERIA_TERMINATE("Infix-element type enumeration `", this->index(), "` is unhandled.");
+      ASTERIA_TERMINATE("invalid infix element type (index `", this->index(), "`)");
     }
   }
 
@@ -200,7 +200,7 @@ cow_vector<Xprunit>& Infix_Element::open_junction() noexcept
         return altr.rhs;
       }
     default:
-      ASTERIA_TERMINATE("Infix-element type enumeration `", this->index(), "` is unhandled.");
+      ASTERIA_TERMINATE("invalid infix element type (index `", this->index(), "`)");
     }
   }
 

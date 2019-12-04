@@ -19,12 +19,11 @@ namespace Asteria {
 G_string std_filesystem_get_working_directory()
   {
     // Get the current directory, resizing the buffer as needed.
-    G_string cwd;
-    cwd.resize(PATH_MAX);
+    G_string cwd(PATH_MAX, '*');
     while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
-      auto err = errno;
+      int err = errno;
       if(err != ERANGE) {
-        ASTERIA_THROW("`getcwd()` failed.");
+        ASTERIA_THROW("`getcwd()` failed (errno was `", err, "`)");
       }
       cwd.append(cwd.size() / 2, '*');
     }
@@ -91,7 +90,7 @@ opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
       // Succeed.
       return G_integer(1);
     }
-    auto err = errno;
+    int err = errno;
     if(err == ENOTDIR) {
       // This is something not a directory.
       if(::unlink(path.c_str()) != 0) {
@@ -234,7 +233,7 @@ opt<G_integer> std_filesystem_directory_create(const G_string& path)
       // A new directory has been created.
       return G_integer(1);
     }
-    auto err = errno;
+    int err = errno;
     if(err != EEXIST) {
       return rocket::clear;
     }
@@ -256,7 +255,7 @@ opt<G_integer> std_filesystem_directory_remove(const G_string& path)
       // The directory has been removed.
       return G_integer(1);
     }
-    auto err = errno;
+    int err = errno;
     if((err != ENOTEMPTY) && (err != EEXIST)) {
       return rocket::clear;
     }
@@ -267,7 +266,7 @@ opt<G_integer> std_filesystem_directory_remove(const G_string& path)
 opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW("The file offset shall not be negative (got `", *offset, "`).");
+      ASTERIA_THROW("negative file offset (offset `", *offset, "`)");
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
@@ -319,7 +318,7 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
 bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW("The file offset shall not be negative (got `", *offset, "`).");
+      ASTERIA_THROW("negative file offset (offset `", *offset, "`)");
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
@@ -364,7 +363,7 @@ bool std_filesystem_file_stream(const Global_Context& global, const G_string& pa
 bool std_filesystem_file_write(const G_string& path, const G_string& data, const opt<G_integer>& offset)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW("The file offset shall not be negative (got `", *offset, "`).");
+      ASTERIA_THROW("negative file offset (offset `", *offset, "`)");
     }
     int64_t roffset = offset.value_or(0);
     int64_t nremaining = static_cast<int64_t>(data.size());

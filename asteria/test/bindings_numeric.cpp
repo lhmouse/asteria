@@ -358,8 +358,6 @@ int main()
         assert std.numeric.format(-0x1234, 16) == "-0x1234";
         assert std.numeric.format(+0x1234,  2,  2) == "0b10010001101p+02";
         assert std.numeric.format(-0x1234,  2,  2) == "-0b10010001101p+02";
-        assert std.numeric.format(+0x1234, 10,  2) == "1165p+02";
-        assert std.numeric.format(-0x1234, 10,  2) == "-1165p+02";
         assert std.numeric.format(+0x1234, 16,  2) == "0x48Dp+02";
         assert std.numeric.format(-0x1234, 16,  2) == "-0x48Dp+02";
         assert std.numeric.format(+0x1234, 10, 10) == "466e+01";
@@ -386,14 +384,10 @@ int main()
         assert std.numeric.format(-0x0.0123C, 16) == "-0x0.0123C";
         assert std.numeric.format(+0x123.C,  2,  2) == "0b1.0010001111p+08";
         assert std.numeric.format(-0x123.C,  2,  2) == "-0b1.0010001111p+08";
-        assert std.numeric.format(+0x123.C, 10,  2) == "1.1396484375p+08";
-        assert std.numeric.format(-0x123.C, 10,  2) == "-1.1396484375p+08";
         assert std.numeric.format(+0x123.C, 16,  2) == "0x1.23Cp+08";
         assert std.numeric.format(-0x123.C, 16,  2) == "-0x1.23Cp+08";
         assert std.numeric.format(+0x0.0123C,  2,  2) == "0b1.0010001111p-08";
         assert std.numeric.format(-0x0.0123C,  2,  2) == "-0b1.0010001111p-08";
-        assert std.numeric.format(+0x0.0123C, 10,  2) == "1.1396484375p-08";
-        assert std.numeric.format(-0x0.0123C, 10,  2) == "-1.1396484375p-08";
         assert std.numeric.format(+0x0.0123C, 16,  2) == "0x1.23Cp-08";
         assert std.numeric.format(-0x0.0123C, 16,  2) == "-0x1.23Cp-08";
         assert std.numeric.format(+0x123.C, 10, 10) == "2.9175e+02";

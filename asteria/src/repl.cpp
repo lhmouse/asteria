@@ -18,7 +18,7 @@ using namespace Asteria;
 
 namespace {
 
-const Runtime_Error* do_backtrace_opt(const std::exception& xbase) noexcept
+template<typename XbaseT> int do_backtrace(const XbaseT& xbase) noexcept
   try {
     const auto& except = dynamic_cast<const Runtime_Error&>(xbase);
     tinyfmt_str fmt;
@@ -33,12 +33,10 @@ const Runtime_Error* do_backtrace_opt(const std::exception& xbase) noexcept
                         i, frm.sloc().file().c_str(), frm.sloc().line(), frm.what_type(),
                         fmt.get_c_string());
     }
-    ::fprintf(stderr, "  -- end of backtrace\n");
-    return std::addressof(except);
+    return ::fprintf(stderr, "  -- end of backtrace\n");
   }
   catch(std::exception& stdex) {
-    ::fprintf(stderr, "  -- no backtrace available\n");
-    return nullptr;
+    return ::fprintf(stderr, "  -- no backtrace available\n");
   }
 
 cow_string do_stringify_value(const Value& val) noexcept
@@ -424,10 +422,15 @@ int main(int argc, char** argv)
         // Print the value.
         ::fprintf(stderr, "* value #%lu: %s\n", index, do_stringify_reference(ref).c_str());
       }
+      catch(Runtime_Error& except) {
+        // Print the exception and discard this snippet.
+        ::fprintf(stderr, "! runtime error: %s\n", do_stringify_value(except.value()).c_str());
+        do_backtrace(except);
+      }
       catch(std::exception& stdex) {
         // Print the exception and discard this snippet.
         ::fprintf(stderr, "! runtime error: %s\n", stdex.what());
-        do_backtrace_opt(stdex);
+        do_backtrace(stdex);
       }
     }
     return 0;
@@ -435,6 +438,6 @@ int main(int argc, char** argv)
   catch(std::exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
     ::fprintf(stderr, "! unhandled exception: %s\n", stdex.what());
-    do_backtrace_opt(stdex);
+    do_backtrace(stdex);
     return 3;
   }

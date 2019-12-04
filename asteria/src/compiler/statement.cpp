@@ -15,10 +15,10 @@ namespace Asteria {
     void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const phsh_string& name, const char* desc)
       {
         if(name.rdstr().empty()) {
-          ASTERIA_THROW("The name for this ", desc, " must not be empty.");
+          ASTERIA_THROW("attempt to declare a nameless ", desc);
         }
         if(name.rdstr().starts_with("__")) {
-          ASTERIA_THROW("The name `", name, "` for this ", desc, " is reserved and cannot be used.");
+          ASTERIA_THROW("reserved name not declarable (name `", name, "` for ", desc, ")");
         }
         // Record this name.
         if(names_opt) {
@@ -367,7 +367,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             return code;
           }
         default:
-          ASTERIA_TERMINATE("Target scope type `", altr.target, "` is unhandled.");
+          ASTERIA_TERMINATE("invalid target scope type (target `", altr.target, "`)");
         }
       }
     case index_continue:
@@ -383,7 +383,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           }
         case jump_target_switch:
           {
-            ASTERIA_TERMINATE("`target_switch` is not allowed to follow `continue`.");
+            ASTERIA_TERMINATE("`target_switch` not allowed to follow `continue`");
           }
         case jump_target_while:
           {
@@ -398,7 +398,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             return code;
           }
         default:
-          ASTERIA_TERMINATE("Target scope type `", altr.target, "` is unhandled.");
+          ASTERIA_TERMINATE("invalid target scope type (target `", altr.target, "`)");
         }
       }
     case index_throw:
@@ -456,7 +456,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }
     default:
-      ASTERIA_TERMINATE("Statement type enumeration `", this->index(), "` is unhandled.");
+      ASTERIA_TERMINATE("invalid statement type (index `", this->index(), "`)");
     }
   }
 

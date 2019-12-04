@@ -68,17 +68,17 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes)
     // Once a node has been appended, reallocation is no longer allowed.
     // Otherwise we would have to move nodes around, which complexifies things without any obvious benefits.
     if(this->m_stor.bptr) {
-      ASTERIA_THROW("Reservation is no longer allowed once an AVMC node has been appended.");
+      ASTERIA_THROW("AVMC queue not resizable");
     }
     constexpr auto nbytes_hdr = sizeof(Header);
     constexpr auto nbytes_max = nbytes_hdr * nphdrs_max;
     if(nbytes > nbytes_max) {
-      ASTERIA_THROW("AMVC node parameter size `", nbytes, "` exceeds the limit `", nbytes_max, "`.");
+      ASTERIA_THROW("invalid AVMC node size (`", nbytes, "` > `", nbytes_max, "`)");
     }
     auto nbytes_node = static_cast<uint32_t>(1 + (nbytes + nbytes_hdr - 1) / nbytes_hdr);
     // Reserve one header, followed by `nphdrs` headers for the parameters.
     if(this->m_stor.nrsrv > INT32_MAX / nbytes_hdr + nbytes_node) {
-      ASTERIA_THROW("Too many AVMC nodes have been appended.");
+      ASTERIA_THROW("too many AVMC nodes");
     }
     this->m_stor.nrsrv += nbytes_node;
   }
@@ -87,7 +87,7 @@ AVMC_Queue::Header* AVMC_Queue::do_check_storage_for_params(size_t nbytes)
   {
     constexpr auto nbytes_hdr = sizeof(Header);
     auto bptr = this->m_stor.bptr;
-    // If no storage has been allocated so far, it shall be allocated now, forbidding further reservation.
+    // If no storage has been allocated so far, it shall be allocated now.
     if(ROCKET_UNEXPECT(!bptr)) {
       bptr = static_cast<Header*>(::operator new(nbytes_hdr * this->m_stor.nrsrv));
       this->m_stor.bptr = bptr;
@@ -95,8 +95,8 @@ AVMC_Queue::Header* AVMC_Queue::do_check_storage_for_params(size_t nbytes)
     auto qnode = bptr + this->m_stor.nused;
     // Check the number of available headers.
     auto navail = static_cast<size_t>(this->m_stor.nrsrv - this->m_stor.nused);
-    if((navail < 1) || (nbytes_hdr * (navail - 1) < nbytes)) {
-      ASTERIA_THROW("This AVMC queue is full.");
+    if((navail < 1) || (nbytes > nbytes_hdr * (navail - 1))) {
+      ASTERIA_THROW("AVMC queue full");
     }
     qnode->nphdrs = (nbytes + nbytes_hdr - 1) / nbytes_hdr % nphdrs_max;
     return qnode;

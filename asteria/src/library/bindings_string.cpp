@@ -481,7 +481,7 @@ G_string std_string_rtrim(const G_string& text, const opt<G_string>& reject)
           return rocket::sref(" ");
         }
         if(padding->empty()) {
-          ASTERIA_THROW("Padding empty strings could result in infinite loops.");
+          ASTERIA_THROW("empty padding string not valid");
         }
         return rocket::sref(*padding);
       }
@@ -632,7 +632,7 @@ G_array std_string_explode(const G_string& text, const opt<G_string>& delim, con
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
       if(*limit <= 0) {
-        ASTERIA_THROW("The limit of number of segments must be greater than zero (got `", *limit, "`).");
+        ASTERIA_THROW("max number of segments must be positive (limit `", *limit, "`)");
       }
       rlimit = static_cast<uint64_t>(*limit);
     }
@@ -1122,7 +1122,7 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
         // How many words will the result have?
         auto nwords = text.size() / stor_be.size();
         if(text.size() != nwords * stor_be.size()) {
-          ASTERIA_THROW("The length of the source string must be a multiple of `", stor_be.size(), "` (got `", text.size(), "`).");
+          ASTERIA_THROW("length of source string not divisible by ", stor_be.size(), " (length `", text.size(), "`)");
         }
         values.reserve(nwords);
         // Unpack integers.
@@ -1137,7 +1137,7 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
           // Assemble the word.
           for(const auto& byte : stor_be) {
             word <<= 8;
-            word |= static_cast<unsigned char>(byte);
+            word |= static_cast<uint8_t>(byte);
           }
           // Append the word.
           values.emplace_back(G_integer(static_cast<WordT>(word)));

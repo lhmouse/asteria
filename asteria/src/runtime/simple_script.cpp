@@ -62,7 +62,7 @@ Reference Simple_Script::execute(const Global_Context& global, cow_vector<Refere
   {
     auto qtarget = this->copy_function_opt();
     if(!qtarget) {
-      ASTERIA_THROW("No code has been loaded so far.");
+      ASTERIA_THROW("no script loaded");
     }
     Reference self;
     qtarget->invoke(self, global, rocket::move(args));

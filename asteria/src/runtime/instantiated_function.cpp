@@ -48,16 +48,16 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
     case air_status_break_while:
     case air_status_break_for:
       {
-        ASTERIA_THROW("`break` statements are not allowed outside matching `switch` or loop statements.");
+        ASTERIA_THROW("stray `break` statement");
       }
     case air_status_continue_unspec:
     case air_status_continue_while:
     case air_status_continue_for:
       {
-        ASTERIA_THROW("`continue` statements are not allowed outside matching loop statements.");
+        ASTERIA_THROW("stray `continue` statement");
       }
     default:
-      ASTERIA_TERMINATE("An invalid status code `", status, "` was returned from a function.");
+      ASTERIA_TERMINATE("invalid AIR status code (status `", status, "`)");
     }
     return self;
   }

@@ -18,7 +18,7 @@ template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
 void Argument_Reader::do_record_parameter_required(Gtype gtype)
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("This argument sentry had already been finished; no argument could be extracted any further.");
+      ASTERIA_THROW("argument sentry finished and disposed");
     }
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", " << describe_gtype(gtype);
@@ -28,7 +28,7 @@ void Argument_Reader::do_record_parameter_required(Gtype gtype)
 void Argument_Reader::do_record_parameter_optional(Gtype gtype)
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("This argument sentry had already been finished; no argument could be extracted any further.");
+      ASTERIA_THROW("argument sentry finished and disposed");
     }
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", [" << describe_gtype(gtype) << ']';
@@ -38,7 +38,7 @@ void Argument_Reader::do_record_parameter_optional(Gtype gtype)
 void Argument_Reader::do_record_parameter_generic()
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("This argument sentry had already been finished; no argument could be extracted any further.");
+      ASTERIA_THROW("argument sentry finished and disposed");
     }
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", <generic>";
@@ -48,7 +48,7 @@ void Argument_Reader::do_record_parameter_generic()
 void Argument_Reader::do_record_parameter_variadic()
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("This argument sentry had already been finished; no argument could be extracted any further.");
+      ASTERIA_THROW("argument sentry finished and disposed");
     }
     // Terminate the parameter list.
     this->m_state.history << ", ...";
@@ -57,7 +57,7 @@ void Argument_Reader::do_record_parameter_variadic()
 void Argument_Reader::do_record_parameter_finish()
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("This argument sentry had already been finished; it cannot be finished a second time.");
+      ASTERIA_THROW("argument sentry finished and disposed");
     }
     // Terminate this overload.
     this->m_state.history.push_back('\0');
@@ -111,17 +111,17 @@ Argument_Reader& Argument_Reader::g(Reference& ref)
     return *this;
   }
 
-Argument_Reader& Argument_Reader::g(Value& value)
+Argument_Reader& Argument_Reader::g(Value& val)
   {
     this->do_record_parameter_generic();
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      value = G_null();
+      val = G_null();
       return *this;
     }
-    // Copy the value as is.
-    value = karg->read();
+    // Copy the val as is.
+    val = karg->read();
     return *this;
   }
 
@@ -134,21 +134,21 @@ Argument_Reader& Argument_Reader::g(opt<G_boolean>& qxvalue)
       qxvalue.reset();
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(value.is_null()) {
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(val.is_null()) {
       // Accept a `null` argument.
       qxvalue.reset();
       return *this;
     }
-    if(!value.is_boolean()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `boolean` or `null` was expected.");  });
+    if(!val.is_boolean()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `boolean` or `null`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    qxvalue = value.as_boolean();
+    // Copy the val.
+    qxvalue = val.as_boolean();
     return *this;
   }
 
@@ -161,21 +161,21 @@ Argument_Reader& Argument_Reader::g(opt<G_integer>& qxvalue)
       qxvalue.reset();
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(value.is_null()) {
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(val.is_null()) {
       // Accept a `null` argument.
       qxvalue.reset();
       return *this;
     }
-    if(!value.is_integer()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `integer` or `null` was expected.");  });
+    if(!val.is_integer()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `integer` or `null`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    qxvalue = value.as_integer();
+    // Copy the val.
+    qxvalue = val.as_integer();
     return *this;
   }
 
@@ -188,21 +188,21 @@ Argument_Reader& Argument_Reader::g(opt<G_real>& qxvalue)
       qxvalue.reset();
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(value.is_null()) {
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(val.is_null()) {
       // Accept a `null` argument.
       qxvalue.reset();
       return *this;
     }
-    if(!value.is_convertible_to_real()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `integer`, `real` or `null` was expected.");  });
+    if(!val.is_convertible_to_real()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `integer`, `real` or `null`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    qxvalue = value.convert_to_real();
+    // Copy the val.
+    qxvalue = val.convert_to_real();
     return *this;
   }
 
@@ -215,21 +215,21 @@ Argument_Reader& Argument_Reader::g(opt<G_string>& qxvalue)
       qxvalue.reset();
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(value.is_null()) {
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(val.is_null()) {
       // Accept a `null` argument.
       qxvalue.reset();
       return *this;
     }
-    if(!value.is_string()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `string` or `null` was expected.");  });
+    if(!val.is_string()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `string` or `null`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    qxvalue = value.as_string();
+    // Copy the val.
+    qxvalue = val.as_string();
     return *this;
   }
 
@@ -242,21 +242,21 @@ Argument_Reader& Argument_Reader::g(opt<G_opaque>& qxvalue)
       qxvalue.reset();
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(value.is_null()) {
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(val.is_null()) {
       // Accept a `null` argument.
       qxvalue.reset();
       return *this;
     }
-    if(!value.is_opaque()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `opaque` or `null` was expected.");  });
+    if(!val.is_opaque()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `opaque` or `null`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    qxvalue = value.as_opaque();
+    // Copy the val.
+    qxvalue = val.as_opaque();
     return *this;
   }
 
@@ -269,21 +269,21 @@ Argument_Reader& Argument_Reader::g(opt<G_function>& qxvalue)
       qxvalue.reset();
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(value.is_null()) {
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(val.is_null()) {
       // Accept a `null` argument.
       qxvalue.reset();
       return *this;
     }
-    if(!value.is_function()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `function` or `null` was expected.");  });
+    if(!val.is_function()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `function` or `null`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    qxvalue = value.as_function();
+    // Copy the val.
+    qxvalue = val.as_function();
     return *this;
   }
 
@@ -296,21 +296,21 @@ Argument_Reader& Argument_Reader::g(opt<G_array>& qxvalue)
       qxvalue.reset();
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(value.is_null()) {
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(val.is_null()) {
       // Accept a `null` argument.
       qxvalue.reset();
       return *this;
     }
-    if(!value.is_array()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `array` or `null` was expected.");  });
+    if(!val.is_array()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `array` or `null`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    qxvalue = value.as_array();
+    // Copy the val.
+    qxvalue = val.as_array();
     return *this;
   }
 
@@ -323,21 +323,21 @@ Argument_Reader& Argument_Reader::g(opt<G_object>& qxvalue)
       qxvalue.reset();
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(value.is_null()) {
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(val.is_null()) {
       // Accept a `null` argument.
       qxvalue.reset();
       return *this;
     }
-    if(!value.is_object()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `object` or `null` was expected.");  });
+    if(!val.is_object()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `object` or `null`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    qxvalue = value.as_object();
+    // Copy the val.
+    qxvalue = val.as_object();
     return *this;
   }
 
@@ -347,19 +347,19 @@ Argument_Reader& Argument_Reader::g(G_boolean& xvalue)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      this->do_fail([&]{ ASTERIA_THROW("No argument is available.");  });
+      this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(!value.is_boolean()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `boolean` was expected.");  });
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(!val.is_boolean()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `boolean`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    xvalue = value.as_boolean();
+    // Copy the val.
+    xvalue = val.as_boolean();
     return *this;
   }
 
@@ -369,19 +369,19 @@ Argument_Reader& Argument_Reader::g(G_integer& xvalue)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      this->do_fail([&]{ ASTERIA_THROW("No argument is available.");  });
+      this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(!value.is_integer()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `integer` was expected.");  });
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(!val.is_integer()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `integer`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    xvalue = value.as_integer();
+    // Copy the val.
+    xvalue = val.as_integer();
     return *this;
   }
 
@@ -391,19 +391,19 @@ Argument_Reader& Argument_Reader::g(G_real& xvalue)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      this->do_fail([&]{ ASTERIA_THROW("No argument is available.");  });
+      this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(!value.is_convertible_to_real()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `integer` or `real` was expected.");  });
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(!val.is_convertible_to_real()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `integer` or `real`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    xvalue = value.convert_to_real();
+    // Copy the val.
+    xvalue = val.convert_to_real();
     return *this;
   }
 
@@ -413,19 +413,19 @@ Argument_Reader& Argument_Reader::g(G_string& xvalue)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      this->do_fail([&]{ ASTERIA_THROW("No argument is available.");  });
+      this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(!value.is_string()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `string` was expected.");  });
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(!val.is_string()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `string`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    xvalue = value.as_string();
+    // Copy the val.
+    xvalue = val.as_string();
     return *this;
   }
 
@@ -435,19 +435,19 @@ Argument_Reader& Argument_Reader::g(G_opaque& xvalue)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      this->do_fail([&]{ ASTERIA_THROW("No argument is available.");  });
+      this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(!value.is_opaque()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `opaque` was expected.");  });
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(!val.is_opaque()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `opaque`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    xvalue = value.as_opaque();
+    // Copy the val.
+    xvalue = val.as_opaque();
     return *this;
   }
 
@@ -457,19 +457,19 @@ Argument_Reader& Argument_Reader::g(G_function& xvalue)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      this->do_fail([&]{ ASTERIA_THROW("No argument is available.");  });
+      this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(!value.is_function()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `function` was expected.");  });
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(!val.is_function()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `function`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    xvalue = value.as_function();
+    // Copy the val.
+    xvalue = val.as_function();
     return *this;
   }
 
@@ -479,19 +479,19 @@ Argument_Reader& Argument_Reader::g(G_array& xvalue)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      this->do_fail([&]{ ASTERIA_THROW("No argument is available.");  });
+      this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(!value.is_array()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `array` was expected.");  });
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(!val.is_array()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `array`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    xvalue = value.as_array();
+    // Copy the val.
+    xvalue = val.as_array();
     return *this;
   }
 
@@ -501,19 +501,19 @@ Argument_Reader& Argument_Reader::g(G_object& xvalue)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      this->do_fail([&]{ ASTERIA_THROW("No argument is available.");  });
+      this->do_fail([&]{ ASTERIA_THROW("no more arguments");  });
       return *this;
     }
-    // Read a value from the argument.
-    const auto& value = karg->read();
-    if(!value.is_object()) {
-      // If the value doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("Argument ", karg - this->m_args->data() + 1, " had type `", value.what_gtype(), "`, "
-                                                     "but `object` was expected.");  });
+    // Read a valuefrom the argument.
+    const auto& val = karg->read();
+    if(!val.is_object()) {
+      // If the val doesn't have the desired type, fail.
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
+                                       " (expecting `object`, got `", val.what_gtype(), "`)"); });
       return *this;
     }
-    // Copy the value.
-    xvalue = value.as_object();
+    // Copy the val.
+    xvalue = val.as_object();
     return *this;
   }
 
@@ -529,8 +529,9 @@ bool Argument_Reader::finish(cow_vector<Reference>& vargs)
     // Initialize the argument vector.
     vargs.clear();
     // Copy variadic arguments, if any.
-    if(*qvoff < this->m_args->size()) {
-      rocket::ranged_for(*qvoff, this->m_args->size(), [&](size_t i) { vargs.emplace_back(this->m_args.get()[i]);  });
+    auto nargs = this->m_args->size();
+    if(nargs > *qvoff) {
+      rocket::ranged_for(*qvoff, nargs, [&](size_t i) { vargs.emplace_back(this->m_args->data()[i]);  });
     }
     return true;
   }
@@ -547,8 +548,9 @@ bool Argument_Reader::finish(cow_vector<Value>& vargs)
     // Initialize the argument vector.
     vargs.clear();
     // Copy variadic arguments, if any.
-    if(*qvoff < this->m_args->size()) {
-      rocket::ranged_for(*qvoff, this->m_args->size(), [&](size_t i) { vargs.emplace_back(this->m_args.get()[i].read());  });
+    auto nargs = this->m_args->size();
+    if(nargs > *qvoff) {
+      rocket::ranged_for(*qvoff, nargs, [&](size_t i) { vargs.emplace_back(this->m_args->data()[i].read());  });
     }
     return true;
   }
@@ -562,9 +564,9 @@ bool Argument_Reader::finish()
       return false;
     }
     // There shall be no more arguments than parameters.
-    if(*qvoff < this->m_args->size()) {
-      this->do_fail([&]{ ASTERIA_THROW("Too many arguments were provided (got `", this->m_args->size(), "`, "
-                                                     "but expecting no more than `", *qvoff, "`).");  });
+    auto nargs = this->m_args->size();
+    if(nargs > *qvoff) {
+      this->do_fail([&]{ ASTERIA_THROW("too many arguments (`", nargs, "` > `", *qvoff, "`)");  });
       return false;
     }
     return true;

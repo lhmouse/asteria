@@ -10,14 +10,23 @@
 
 #define ASTERIA_TEST_CHECK(expr_)  \
     do {  \
-      if(expr_) {  \
-        /* success */  \
-        break;  \
+      try {  \
+        if(expr_) {  \
+          /* success */  \
+          break;  \
+        }  \
+        /* failure */  \
+        ::std::fprintf(stderr, "ASTERIA_TEST_CHECK() failed: %s\n  at %s:%ld\n",  \
+                               #expr_, __FILE__, (long)__LINE__);  \
+        ::std::terminate();  \
+        /* unreachable */  \
       }  \
-      /* failure */  \
-      ::std::fprintf(stderr, "ASTERIA_TEST_CHECK() failed: %s\n  at %s:%ld\n",  \
-                             #expr_, __FILE__, static_cast<long>(__LINE__));  \
-      ::std::terminate();  \
+      catch(::std::exception& e_) {  \
+        /* failure */  \
+        ::std::fprintf(stderr, "ASTERIA_TEST_CHECK() caught an exception: %s\n  what = %s\n  at %s:%ld\n",  \
+                               #expr_, e_.what(), __FILE__, (long)__LINE__);  \
+        ::std::terminate();  \
+      }  \
       /* unreachable */  \
     } while(false)
 
@@ -27,16 +36,16 @@
         static_cast<void>(expr_);  \
         /* failure */  \
       }  \
-      catch(::Asteria::Runtime_Error& e) {  \
+      catch(::Asteria::Runtime_Error& e_) {  \
         /* success */  \
         break;  \
       }  \
-      catch(::std::exception& e) {  \
+      catch(::std::exception& e_) {  \
         /* success */  \
         break;  \
       }  \
       ::std::fprintf(stderr, "ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: %s\n  at %s:%ld\n",  \
-                             #expr_, __FILE__, static_cast<long>(__LINE__));  \
+                             #expr_, __FILE__, (long)__LINE__);  \
       ::std::terminate();  \
       /* unreachable */  \
     } while(false)

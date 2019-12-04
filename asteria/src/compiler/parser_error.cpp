@@ -13,7 +13,10 @@ Parser_Error::~Parser_Error()
 
 void Parser_Error::do_compose_message()
   {
+    // Reuse the string.
     tinyfmt_str fmt;
+    this->m_what.clear();
+    fmt.set_string(rocket::move(this->m_what));
     // Write the status code in digital form.
     fmt << "asteria parser error " << this->m_stat << " at ";
     // Append the source location.

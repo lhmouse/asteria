@@ -12,7 +12,7 @@ const char* describe_frame_type(Frame_Type type) noexcept
     switch(type) {
     case frame_type_native:
       {
-        return "native";
+        return "native code";
       }
     case frame_type_throw:
       {
@@ -24,7 +24,7 @@ const char* describe_frame_type(Frame_Type type) noexcept
       }
     case frame_type_func:
       {
-        return "func";
+        return "function";
       }
     default:
       return "<unknown frame type>";
