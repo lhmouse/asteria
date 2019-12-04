@@ -16,6 +16,7 @@ namespace rocket {
 
 template<typename charT, typename traitsT = char_traits<charT>,
          typename allocT = allocator<charT>> class basic_cow_string;
+template<typename charT, typename traitsT> class basic_tinyfmt;
 
 /* Differences from `std::basic_string`:
  * 1. All functions guarantee only basic exception safety rather than strong exception safety, hence are more efficient.
@@ -26,8 +27,6 @@ template<typename charT, typename traitsT = char_traits<charT>,
  * 6. It is possible to create strings holding non-owning references of null-terminated character arrays allocated externally.
  * 7. `data()` returns a null pointer if the string is empty.
  */
-
-template<typename charT, typename traitsT> class basic_tinyfmt;
 
     namespace details_cow_string {
 
@@ -64,6 +63,12 @@ template<typename charT, typename traitsT> class basic_tinyfmt;
             return this->m_len;
           }
       };
+
+    template<typename charT, typename traitsT>
+        inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, shallow<charT, traitsT> sh)
+      {
+        return fmt.putn(sh.c_str(), sh.length());
+      }
 
     struct storage_header
       {
@@ -1151,6 +1156,10 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
 
     // 24.3.2.6, modifiers
+    basic_cow_string& operator+=(shallow_type sh)
+      {
+        return this->append(sh);
+      }
     basic_cow_string& operator+=(const basic_cow_string& other)
       {
         return this->append(other);
@@ -1169,6 +1178,10 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       }
 
     // N.B. This is a non-standard extension.
+    basic_cow_string& operator<<(shallow_type sh)
+      {
+        return this->append(sh);
+      }
     basic_cow_string& operator<<(const basic_cow_string& other)
       {
         return this->append(other);
@@ -1183,7 +1196,16 @@ template<typename charT, typename traitsT, typename allocT> class basic_cow_stri
       {
         return this->push_back(ch);
       }
+    // N.B. This is a non-standard extension.
+    basic_cow_string& operator<<(initializer_list<value_type> init)
+      {
+        return this->append(init);
+      }
 
+    basic_cow_string& append(shallow_type sh)
+      {
+        return this->append(sh.c_str(), sh.length());
+      }
     basic_cow_string& append(const basic_cow_string& other, size_type pos = 0, size_type n = npos)
       {
         return this->append(other.data() + pos, other.do_clamp_substr(pos, n));
@@ -2086,7 +2108,7 @@ template<typename charT, typename traitsT, typename allocT>
     inline basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt,
                                                      const basic_cow_string<charT, traitsT, allocT>& str)
   {
-    return fmt.putn(str.c_str(), str.size());
+    return fmt.putn(str.data(), str.size());
   }
 
 }  // namespace rocket

@@ -169,9 +169,9 @@ namespace Asteria {
               rocket::ascii_numput nump;
               for(auto p = ustr; p != epos; ++p) {
                 nump.put_XU(*p, 4);
-                char seq[6] = { "\\u" };
+                char seq[8] = { "\\u" };
                 std::memcpy(seq + 2, nump.data() + 2, 4);
-                fmt.putn(seq, 6);
+                fmt << rocket::sref(seq, 6);
               }
               break;
             }

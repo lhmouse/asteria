@@ -25,16 +25,12 @@ namespace Asteria {
         str.append(spos, cbuf.end());
       }
 
-    constexpr char s_ctrl_reps[][16] =
+    constexpr char s_ctrl_reps[][8] =
       {
-        "[NUL\\x00]",  "[SOH\\x01]",  "[STX\\x02]",  "[ETX\\x03]",
-        "[EOT\\x04]",  "[ENQ\\x05]",  "[ACK\\x06]",  "[BEL\\x07]",
-        "[BS\\x08]",   /*TAB*/"\t",   /*LF*/"\n\t",  "[VT\\x0B]",
-        "[FF\\x0C]",   /*CR*/"\r",    "[SO\\x0E]",   "[SI\\x0F]",
-        "[DLE\\x10]",  "[DC1\\x11]",  "[DC2\\x12]",  "[DC3\\x13]",
-        "[DC4\\x14]",  "[NAK\\x15]",  "[SYN\\x16]",  "[ETB\\x17]",
-        "[CAN\\x18]",  "[EM\\x19]",   "[SUB\\x1A]",  "[ESC\\x1B]",
-        "[FS\\x1C]",   "[GS\\x1D]",   "[RS\\x1E]",   "[US\\x1F]",
+        "[NUL]",  "[SOH]",  "[STX]",  "[ETX]",  "[EOT]",  "[ENQ]",  "[ACK]",  "[BEL]",
+        "[BS]",   "\t",     "\n\t",   "[VT]",   "[FF]",   "\r",     "[SO]",   "[SI]",
+        "[DLE]",  "[DC1]",  "[DC2]",  "[DC3]",  "[DC4]",  "[NAK]",  "[SYN]",  "[ETB]",
+        "[CAN]",  "[EM]",   "[SUB]",  "[ESC]",  "[FS]",   "[GS]",   "[RS]",   "[US]",
       };
 
     template<typename ParamT> inline void do_append_str(cow_string& str, ParamT&& param)
@@ -83,7 +79,7 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
       // Control characters are ['\x00','\x1F'] and '\x7F'.
       size_t ch = c & 0xFF;
       if(ch == 0x7F)
-        do_append_str(str, "[DEL\\x7F]");
+        do_append_str(str, "[DEL]");
       else if(ch <= 0x1F)
         do_append_str(str, s_ctrl_reps[ch]);
       else
