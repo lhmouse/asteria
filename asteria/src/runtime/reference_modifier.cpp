@@ -95,7 +95,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
             return nullptr;
           }
           if(nadd > arr.max_size() - arr.size()) {
-            ASTERIA_THROW("invalid array length: ", arr.size(), " + ", nadd);
+            ASTERIA_THROW("array length overflow: ", arr.size(), " + ", nadd);
           }
           arr.insert(arr.begin(), static_cast<size_t>(w.nprepend));
           arr.insert(arr.end(), static_cast<size_t>(w.nappend));

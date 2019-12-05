@@ -1459,7 +1459,7 @@ DCE_Result AIR_Node::optimize_dce()
           return res;
         }
         if(nchars > res.max_size() / count) {
-          ASTERIA_THROW("invalid string length (`", nchars, "` * `", count, "` > `", res.max_size(), "`)");
+          ASTERIA_THROW("string length overflow (`", nchars, "` * `", count, "` > `", res.max_size(), "`)");
         }
         auto times = static_cast<size_t>(count);
         if(nchars == 1) {
@@ -1541,7 +1541,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         G_string res;
         if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size()) {
-          ASTERIA_THROW("invalid string length (`", lhs.size(), "` + `", rhs, "` > `", res.max_size(), "`)");
+          ASTERIA_THROW("string length overflow (`", lhs.size(), "` + `", rhs, "` > `", res.max_size(), "`)");
         }
         // Append spaces in the right and return the result.
         size_t count = static_cast<size_t>(rhs);
