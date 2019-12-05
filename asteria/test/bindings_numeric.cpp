@@ -432,9 +432,9 @@ int main()
         assert std.numeric.parse_real("-123.75") == -123.75;
         assert std.numeric.parse_real(" 0") == 0;
         assert std.numeric.parse_real("+0") == 0;
-        assert __signb std.numeric.parse_real("+0") ==  0;
+        assert __sign std.numeric.parse_real("+0") ==  0;
         assert std.numeric.parse_real("-0") == 0;
-        assert __signb std.numeric.parse_real("-0") == -1;
+        assert __sign std.numeric.parse_real("-0") == -1;
         assert std.numeric.parse_real(" infinity") == +infinity;
         assert std.numeric.parse_real("+infinity") == +infinity;
         assert std.numeric.parse_real("-infinity") == -infinity;

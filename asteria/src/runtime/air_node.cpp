@@ -1202,7 +1202,7 @@ DCE_Result AIR_Node::optimize_dce()
         return std::abs(rhs);
       }
 
-    ROCKET_PURE_FUNCTION G_integer do_operator_signb(const G_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_sign(const G_integer& rhs)
       {
         return rhs >> 63;
       }
@@ -1373,7 +1373,7 @@ DCE_Result AIR_Node::optimize_dce()
         return std::fabs(rhs);
       }
 
-    ROCKET_PURE_FUNCTION G_integer do_operator_signb(const G_real& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_operator_sign(const G_real& rhs)
       {
         return std::signbit(rhs) ? -1 : 0;
       }
@@ -1881,7 +1881,7 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
-    AIR_Status do_apply_xop_signb(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
+    AIR_Status do_apply_xop_sign(Executive_Context& ctx, ParamU paramu, const void* /*params*/)
       {
         // Unpack arguments.
         const auto& assign = static_cast<bool>(paramu.u8s[0]);
@@ -1891,14 +1891,14 @@ DCE_Result AIR_Node::optimize_dce()
         // Get the sign bit of the operand as a temporary value, then return it.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
-          reg = do_operator_signb(reg);
+          reg = do_operator_sign(reg);
         }
         else if(rhs.is_real()) {
           // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
-          rhs = do_operator_signb(rhs.as_real());
+          rhs = do_operator_sign(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("Prefix `__signb` is not defined for `", rhs, "`.");
+          ASTERIA_THROW("Prefix `__sign` is not defined for `", rhs, "`.");
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -3159,9 +3159,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           {
             return avmcp.output<do_apply_xop_abs>(queue);
           }
-        case xop_signb:
+        case xop_sign:
           {
-            return avmcp.output<do_apply_xop_signb>(queue);
+            return avmcp.output<do_apply_xop_sign>(queue);
           }
         case xop_round:
           {

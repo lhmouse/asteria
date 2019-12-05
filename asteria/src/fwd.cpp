@@ -454,9 +454,9 @@ const char* stringify_keyword(Keyword kwrd) noexcept
       {
         return "__abs";
       }
-    case keyword_signb:
+    case keyword_sign:
       {
-        return "__signb";
+        return "__sign";
       }
     case keyword_round:
       {

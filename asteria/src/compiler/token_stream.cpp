@@ -680,7 +680,7 @@ namespace Asteria {
         { "__isnan",   keyword_isnan     },
         { "__itrunc",  keyword_itrunc    },
         { "__round",   keyword_round     },
-        { "__signb",   keyword_signb     },
+        { "__sign",    keyword_sign      },
         { "__sqrt",    keyword_sqrt      },
         { "__trunc",   keyword_trunc     },
         { "and",       keyword_and       },

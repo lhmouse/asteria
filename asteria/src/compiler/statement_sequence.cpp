@@ -1251,7 +1251,7 @@ namespace Asteria {
         { keyword_typeof,    xop_typeof    },
         { keyword_not,       xop_notl      },
         { keyword_abs,       xop_abs       },
-        { keyword_signb,     xop_signb     },
+        { keyword_sign,      xop_sign      },
         { keyword_sqrt,      xop_sqrt      },
         { keyword_isnan,     xop_isnan     },
         { keyword_isinf,     xop_isinf     },
@@ -1295,7 +1295,7 @@ namespace Asteria {
         // prefix-operator ::=
         //   "+" | "-" | "~" | "!" | "++" | "--" |
         //   "unset" | "lengthof" | "typeof" | "not" |
-        //   "__abs" | "__sqrt" | "__signb" | "__isnan" | "__isinf" |
+        //   "__abs" | "__sqrt" | "__sign" | "__isnan" | "__isinf" |
         //   "__round" | "__floor" | "__ceil" | "__trunc" | "__iround" | "__ifloor" | "__iceil" | "__itrunc"
         auto qtok = tstrm.peek_opt();
         if(!qtok) {

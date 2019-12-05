@@ -330,7 +330,7 @@ enum Keyword : uint8_t
     keyword_isnan     = 33,  // __isnan
     keyword_isinf     = 34,  // __isinf
     keyword_abs       = 35,  // __abs
-    keyword_signb     = 36,  // __signb
+    keyword_sign      = 36,  // __sign
     keyword_round     = 37,  // __round
     keyword_floor     = 38,  // __floor
     keyword_ceil      = 39,  // __ceil
@@ -390,7 +390,7 @@ enum Xop : uint8_t
     xop_isnan     = 13,  // __isnan
     xop_isinf     = 14,  // __isinf
     xop_abs       = 15,  // __abs
-    xop_signb     = 16,  // __signb
+    xop_sign      = 16,  // __sign
     xop_round     = 17,  // __round
     xop_floor     = 18,  // __floor
     xop_ceil      = 19,  // __ceil
