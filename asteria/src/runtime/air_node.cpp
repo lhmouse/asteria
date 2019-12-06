@@ -1038,6 +1038,8 @@ DCE_Result AIR_Node::optimize_dce()
           if(!by_ref) {
             arg.convert_to_rvalue();
           }
+          // Ensure it is dereferenceable.
+          arg.read();
           // Move and pop this argument.
           args.mut(i) = rocket::move(arg);
           ctx.stack().pop();

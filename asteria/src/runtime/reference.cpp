@@ -100,7 +100,6 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       try {
         // Unwrap the function call.
         target->invoke(*this, global, rocket::move(args));
-        // The result will have been stored into `*this`.
       }
       catch(Runtime_Error& except) {
         // Append all frames that have been expanded so far and rethrow the exception.
