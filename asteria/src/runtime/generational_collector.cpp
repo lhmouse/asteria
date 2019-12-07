@@ -16,18 +16,16 @@ Generational_Collector::~Generational_Collector()
 Collector Generational_Collector::* Generational_Collector::do_locate(GC_Generation gc_gen) const
   {
     switch(gc_gen) {
+      {{
     case gc_generation_newest:
-      {
         return &Generational_Collector::m_newest;
-      }
+      }{
     case gc_generation_middle:
-      {
         return &Generational_Collector::m_middle;
-      }
+      }{
     case gc_generation_oldest:
-      {
         return &Generational_Collector::m_oldest;
-      }
+      }}
     default:
       ASTERIA_THROW("invalid GC generation: ", gc_gen);
     }
@@ -50,14 +48,9 @@ rcptr<Variable> Generational_Collector::create_variable(GC_Generation gc_hint)
 size_t Generational_Collector::collect_variables(GC_Generation gc_limit)
   {
     // Collect variables from the newest generation to the oldest.
-    auto qcoll = std::addressof(this->m_newest);
-    uint32_t index = UINT32_MAX;
-    do {
-      qcoll->collect_single_opt();
-      // Move to the next generation.
-      qcoll = qcoll->get_tied_collector_opt();
-      index++;
-    } while(qcoll && (index != gc_limit));
+    for(auto p = std::make_pair(std::addressof(this->m_newest), gc_limit + 1);
+           p.first && p.second; p.first = p.first->get_tied_collector_opt(), p.second--)
+      p.first->collect_single_opt();
     // Clear the variable pool.
     auto nvars = this->m_pool.size();
     this->m_pool.clear();

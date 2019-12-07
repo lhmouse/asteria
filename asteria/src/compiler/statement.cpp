@@ -101,8 +101,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
                                                Analytic_Context& ctx, const Compiler_Options& opts, TCO_Aware tco_aware) const
   {
     switch(this->index()) {
+      {{
     case index_expression:
-      {
         const auto& altr = this->m_stor.as<index_expression>();
         if(altr.expr.empty()) {
           // If the expression is empty, don't bother doing anything.
@@ -113,9 +113,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Evaluate the expression. Its value is discarded.
         do_generate_expression_partial(code, opts, tco_aware, ctx, altr.expr);
         return code;
-      }
+      }{
     case index_block:
-      {
         const auto& altr = this->m_stor.as<index_block>();
         // Generate code for the body.
         // This can be TCO'd.
@@ -124,9 +123,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_execute_block xnode = { rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_variables:
-      {
         const auto& altr = this->m_stor.as<index_variables>();
         // Get the number of variables to declare.
         auto nvars = altr.slocs.size();
@@ -190,9 +188,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           }
         }
         return code;
-      }
+      }{
     case index_function:
-      {
         const auto& altr = this->m_stor.as<index_function>();
         // Create a dummy reference for further name lookups.
         do_user_declare(names_opt, ctx, altr.name, "function placeholder");
@@ -206,9 +203,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_initialize_variable xnode_init = { true };
         code.emplace_back(rocket::move(xnode_init));
         return code;
-      }
+      }{
     case index_if:
-      {
         const auto& altr = this->m_stor.as<index_if>();
         // Clear the stack.
         do_generate_clear_stack(code);
@@ -224,9 +220,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_if_statement xnode = { altr.negative, rocket::move(code_true), rocket::move(code_false) };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_switch:
-      {
         const auto& altr = this->m_stor.as<index_switch>();
         // Clear the stack.
         do_generate_clear_stack(code);
@@ -256,9 +251,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_switch_statement xnode = { rocket::move(code_labels), rocket::move(code_bodies), rocket::move(names_added) };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_do_while:
-      {
         const auto& altr = this->m_stor.as<index_do_while>();
         // Generate code for the body.
         // Loop statements cannot be TCO'd.
@@ -270,9 +264,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_do_while_statement xnode = { rocket::move(code_body), altr.negative, rocket::move(code_cond) };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_while:
-      {
         const auto& altr = this->m_stor.as<index_while>();
         // Generate code for the condition.
         ROCKET_ASSERT(!altr.cond.empty());
@@ -284,9 +277,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_while_statement xnode = { altr.negative, rocket::move(code_cond), rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_for_each:
-      {
         const auto& altr = this->m_stor.as<index_for_each>();
         // Note that the key and value references outlasts every iteration, so we have to create an outer contexts here.
         Analytic_Context ctx_for(rocket::ref(ctx));
@@ -302,9 +294,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_for_each_statement xnode = { altr.name_key, altr.name_mapped, rocket::move(code_init), rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_for:
-      {
         const auto& altr = this->m_stor.as<index_for>();
         // Note that names declared in the first segment of a for-statement outlasts every iteration, so we have to create an outer contexts here.
         Analytic_Context ctx_for(rocket::ref(ctx));
@@ -319,9 +310,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_for_statement xnode = { rocket::move(code_init), rocket::move(code_cond), rocket::move(code_step), rocket::move(code_body) };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_try:
-      {
         const auto& altr = this->m_stor.as<index_try>();
         // Generate code for the `try` body.
         auto code_try = do_generate_block(opts, tco_aware, ctx, altr.body_try);
@@ -336,73 +326,64 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_try_statement xnode = { rocket::move(code_try), altr.sloc, altr.name_except, rocket::move(code_catch) };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_break:
-      {
         const auto& altr = this->m_stor.as<index_break>();
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
+          {{
         case jump_target_unspec:
-          {
             AIR_Node::S_simple_status xnode = { air_status_break_unspec };
             code.emplace_back(rocket::move(xnode));
             return code;
-          }
+          }{
         case jump_target_switch:
-          {
             AIR_Node::S_simple_status xnode = { air_status_break_switch };
             code.emplace_back(rocket::move(xnode));
             return code;
-          }
+          }{
         case jump_target_while:
-          {
             AIR_Node::S_simple_status xnode = { air_status_break_while };
             code.emplace_back(rocket::move(xnode));
             return code;
-          }
+          }{
         case jump_target_for:
-          {
             AIR_Node::S_simple_status xnode = { air_status_break_for };
             code.emplace_back(rocket::move(xnode));
             return code;
-          }
+          }}
         default:
           ASTERIA_TERMINATE("invalid target scope type (target `", altr.target, "`)");
         }
-      }
+      }{
     case index_continue:
-      {
         const auto& altr = this->m_stor.as<index_continue>();
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
+          {{
         case jump_target_unspec:
-          {
             AIR_Node::S_simple_status xnode = { air_status_continue_unspec };
             code.emplace_back(rocket::move(xnode));
             return code;
-          }
+          }{
         case jump_target_switch:
-          {
             ASTERIA_TERMINATE("`target_switch` not allowed to follow `continue`");
-          }
+          }{
         case jump_target_while:
-          {
             AIR_Node::S_simple_status xnode = { air_status_continue_while };
             code.emplace_back(rocket::move(xnode));
             return code;
-          }
+          }{
         case jump_target_for:
-          {
             AIR_Node::S_simple_status xnode = { air_status_continue_for };
             code.emplace_back(rocket::move(xnode));
             return code;
-          }
+          }}
         default:
           ASTERIA_TERMINATE("invalid target scope type (target `", altr.target, "`)");
         }
-      }
+      }{
     case index_throw:
-      {
         const auto& altr = this->m_stor.as<index_throw>();
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.empty());
@@ -411,9 +392,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_throw_statement xnode = { altr.sloc };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }{
     case index_return:
-      {
         const auto& altr = this->m_stor.as<index_return>();
         // Clear the stack.
         do_generate_clear_stack(code);
@@ -443,9 +423,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           code.emplace_back(rocket::move(xnode_ret));
         }
         return code;
-      }
+      }{
     case index_assert:
-      {
         const auto& altr = this->m_stor.as<index_assert>();
         // Generate code for the operand.
         ROCKET_ASSERT(!altr.expr.empty());
@@ -454,7 +433,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         AIR_Node::S_assert_statement xnode = { altr.sloc, altr.negative, altr.msg };
         code.emplace_back(rocket::move(xnode));
         return code;
-      }
+      }}
     default:
       ASTERIA_TERMINATE("invalid statement type (index `", this->index(), "`)");
     }

@@ -302,18 +302,17 @@ namespace Asteria {
         size_t tlen = 0;
         // Look for an explicit sign symbol.
         switch(reader.peek(tlen)) {
+          {{
         case '+':
-          {
             tstr = rocket::sref("+");
             tlen++;
             break;
-          }
+          }{
         case '-':
-          {
             tstr = rocket::sref("-");
             tlen++;
             break;
-          }
+          }}
         }
         // If a sign symbol exists in a context where an infix operator is allowed, it is treated as the latter.
         if((tlen != 0) && do_may_infix_operators_follow(tokens)) {
@@ -557,77 +556,66 @@ namespace Asteria {
           // Translate it.
           int xcnt = 0;
           switch(next) {
+            {{
           case '\'':
           case '\"':
           case '\\':
           case '?':
           case '/':
-            {
               val.push_back(next);
               break;
-            }
+            }{
           case 'a':
-            {
               val.push_back('\a');
               break;
-            }
+            }{
           case 'b':
-            {
               val.push_back('\b');
               break;
-            }
+            }{
           case 'f':
-            {
               val.push_back('\f');
               break;
-            }
+            }{
           case 'n':
-            {
               val.push_back('\n');
               break;
-            }
+            }{
           case 'r':
-            {
               val.push_back('\r');
               break;
-            }
+            }{
           case 't':
-            {
               val.push_back('\t');
               break;
-            }
+            }{
           case 'v':
-            {
               val.push_back('\v');
               break;
-            }
+            }{
           case '0':
-            {
               val.push_back('\0');
               break;
-            }
+            }{
           case 'Z':
-            {
               val.push_back('\x1A');
               break;
-            }
+            }{
           case 'e':
-            {
               val.push_back('\x1B');
               break;
-            }
+            }{
           case 'U':
-            {
               xcnt += 2;
               // Fallthrough
           case 'u':
               xcnt += 2;
               // Fallthrough
           case 'x':
-              char32_t cp = 0;
               // How many hex digits are there?
               xcnt += 2;
               // Read hex digits.
+              char32_t cp = 0;
               for(int i = 0; i < xcnt; ++i) {
                 // Read a hex digit.
                 auto digit = reader.peek(tlen);
@@ -653,7 +641,7 @@ namespace Asteria {
                 do_throw_parser_error(parser_status_escape_utf_code_point_invalid, reader, tlen);
               }
               break;
-            }
+            }}
           default:
             do_throw_parser_error(parser_status_escape_sequence_unknown, reader, tlen);
           }

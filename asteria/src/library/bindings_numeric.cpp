@@ -432,8 +432,8 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
     rocket::ascii_numput nump;
 
     switch(base.value_or(10)) {
+      {{
     case 2:
-      {
         if(!ebase) {
           nump.put_BI(value);  // binary, long
           text.append(nump.begin(), nump.end());
@@ -447,9 +447,8 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           break;
         }
         ASTERIA_THROW("invalid exponent base for binary notation (`", *ebase, "` is not 2)");
-      }
+      }{
     case 16:
-      {
         if(!ebase) {
           nump.put_XI(value);  // hexadecimal, long
           text.append(nump.begin(), nump.end());
@@ -463,9 +462,8 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           break;
         }
         ASTERIA_THROW("invalid exponent base for hexadecimal notation (`", *ebase, "` is not 2)");
-      }
+      }{
     case 10:
-      {
         if(!ebase) {
           nump.put_DI(value);  // decimal, long
           text.append(nump.begin(), nump.end());
@@ -479,7 +477,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           break;
         }
         ASTERIA_THROW("invalid exponent base for decimal notation (`", *ebase, "` is not 10)");
-      }
+      }}
     default:
       ASTERIA_THROW("invalid number base (base `", *base, "` is not one of { 2, 10, 16 })");
     }
@@ -492,8 +490,8 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
     rocket::ascii_numput nump;
 
     switch(base.value_or(10)) {
+      {{
     case 2:
-      {
         if(!ebase) {
           nump.put_BF(value);  // binary, float
           text.append(nump.begin(), nump.end());
@@ -505,9 +503,8 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           break;
         }
         ASTERIA_THROW("invalid exponent base for binary notation (`", *ebase, "` is not 2)");
-      }
+      }{
     case 16:
-      {
         if(!ebase) {
           nump.put_XF(value);  // hexadecimal, float
           text.append(nump.begin(), nump.end());
@@ -519,9 +516,8 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           break;
         }
         ASTERIA_THROW("invalid exponent base for hexadecimal notation (`", *ebase, "` is not 2)");
-      }
+      }{
     case 10:
-      {
         if(!ebase) {
           nump.put_DF(value);  // decimal, float
           text.append(nump.begin(), nump.end());
@@ -533,7 +529,7 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           break;
         }
         ASTERIA_THROW("invalid exponent base for decimal notation (`", *ebase, "` is not 10)");
-      }
+      }}
     default:
       ASTERIA_THROW("invalid number base (base `", *base, "` is not one of { 2, 10, 16 })");
     }

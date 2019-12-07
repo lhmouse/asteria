@@ -11,8 +11,8 @@ namespace Asteria {
 const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
   {
     switch(this->index()) {
+      {{
     case index_array_index:
-      {
         const auto& altr = this->m_stor.as<index_array_index>();
         if(parent.is_null()) {
           // Elements of a `null` are also `null`s.
@@ -29,9 +29,8 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         return std::addressof(arr.at(w.rindex));
-      }
+      }{
     case index_object_key:
-      {
         const auto& altr = this->m_stor.as<index_object_key>();
         if(parent.is_null()) {
           // Members of a `null` are also `null`s.
@@ -47,9 +46,8 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         return std::addressof(rit->second);
-      }
+      }{
     case index_array_tail:
-      {
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
           // Elements of a `null` are also `null`s.
@@ -64,7 +62,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         return std::addressof(arr.back());
-      }
+      }}
     default:
       ASTERIA_TERMINATE("invalid reference modifier type: ", this->index());
     }
@@ -73,8 +71,8 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
 Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) const
   {
     switch(this->index()) {
+      {{
     case index_array_index:
-      {
         const auto& altr = this->m_stor.as<index_array_index>();
         if(parent.is_null()) {
           // Create elements as needed.
@@ -101,9 +99,8 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           arr.insert(arr.end(), static_cast<size_t>(w.nappend));
         }
         return std::addressof(arr.mut(w.rindex));
-      }
+      }{
     case index_object_key:
-      {
         const auto& altr = this->m_stor.as<index_object_key>();
         if(parent.is_null()) {
           // Create members as needed.
@@ -128,9 +125,8 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           rit = obj.try_emplace(altr.key).first;
         }
         return std::addressof(rit->second);
-      }
+      }{
     case index_array_tail:
-      {
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
           // Create elements as needed.
@@ -145,7 +141,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         auto& arr = parent.open_array();
         // Append a new element to the end and return a pointer to it.
         return std::addressof(arr.emplace_back());
-      }
+      }}
     default:
       ASTERIA_TERMINATE("invalid reference modifier type: ", this->index());
     }
@@ -154,8 +150,8 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
 Value Reference_Modifier::apply_and_erase(Value& parent) const
   {
     switch(this->index()) {
+      {{
     case index_array_index:
-      {
         const auto& altr = this->m_stor.as<index_array_index>();
         if(parent.is_null()) {
           // There is nothing to erase.
@@ -174,9 +170,8 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         auto elem = rocket::move(arr.mut(w.rindex));
         arr.erase(w.rindex, 1);
         return elem;
-      }
+      }{
     case index_object_key:
-      {
         const auto& altr = this->m_stor.as<index_object_key>();
         if(parent.is_null()) {
           // There is nothing to erase.
@@ -194,9 +189,8 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         auto elem = rocket::move(rit->second);
         obj.erase(rit);
         return elem;
-      }
+      }{
     case index_array_tail:
-      {
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
           // There is nothing to erase.
@@ -213,7 +207,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         auto elem = rocket::move(arr.mut_back());
         arr.pop_back();
         return elem;
-      }
+      }}
     default:
       ASTERIA_TERMINATE("invalid reference modifier type: ", this->index());
     }

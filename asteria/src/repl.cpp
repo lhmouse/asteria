@@ -128,23 +128,20 @@ int main(int argc, char** argv)
         break;
       }
       switch(ch) {
+        {{
       case 'h':
-        {
           print_help = true;
           break;
-        }
+        }{
       case 'I':
-        {
           interactive = false;
           break;
-        }
+        }{
       case 'i':
-        {
           interactive = true;
           break;
-        }
+        }{
       case 'O':
-        {
           s = ::optarg;
           // If `-O` is specified without an argument, it is equivalent to `-O1`.
           if(!s || !*s) {
@@ -159,17 +156,15 @@ int main(int argc, char** argv)
           }
           optimization_level = std::atoi(s);
           break;
-        }
+        }{
       case 'V':
-        {
           print_version = true;
           break;
-        }
+        }{
       case 'v':
-        {
           verbose = true;
           break;
-        }
+        }}
       default:
         // `getopt()` will have written an error message to the standard error stream.
         ::fprintf(stderr, "Try `%s -h` for help.\n", *argv);

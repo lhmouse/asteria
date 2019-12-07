@@ -17,22 +17,20 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcep
       return *this;
     }
     switch(rp[0]) {
+      {{
     case '0':
-      {
         // Accept a "0".
         value = 0;
         rp += 1;
         break;
-      }
+      }{
     case '1':
-      {
         // Accept a "1".
         value = 1;
         rp += 1;
         break;
-      }
+      }{
     case 'f':
-      {
         // Check whether the string starts with "false".
         // Compare characters in a quadruple which might be optimized better.
         if(eptr - rp < 5) {
@@ -45,9 +43,8 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcep
         value = 0;
         rp += 5;
         break;
-      }
+      }{
     case 't':
-      {
         // Check whether the string starts with "false".
         // Compare characters in a quadruple which might be optimized better.
         if(eptr - rp < 4) {
@@ -60,7 +57,7 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcep
         value = 1;
         rp += 4;
         break;
-      }
+      }}
     default:
       // The character could not be consumed.
       return *this;
@@ -83,18 +80,17 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcep
           return 0;
         }
         switch(rp[0]) {
+          {{
         case '+':
-          {
             // Skip the plus sign.
             rp += 1;
             return 0;
-          }
+          }{
         case '-':
-          {
             // Skip the minus sign.
             rp += 1;
             return 1;
-          }
+          }}
         }
         // Assume the number is non-negative.
         return 0;
@@ -317,8 +313,8 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr) noexcep
       bool has_expo = false;
       // Check for the exponent.
       switch(base) {
+        {{
       case 16:
-        {
           expo *= 4;  // log2(16)
           // Fallthrough
       case 2:
@@ -330,9 +326,8 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr) noexcep
             has_expo = true;
           }
           break;
-        }
+        }{
       case 10:
-        {
           erdx = true;
           // A decimal exponent is expected.
           if((eptr - rp >= 1) && do_match_char_ci(rp[0], 'e')) {
@@ -341,7 +336,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr) noexcep
             has_expo = true;
           }
           break;
-        }
+        }}
       }
       if(has_expo) {
         // Get the sign of the exponent, which is optional.
@@ -391,8 +386,8 @@ ascii_numget& ascii_numget::cast_U(uint64_t& value, uint64_t lower, uint64_t upp
     this->m_stat = 0;
     // Try casting the value.
     switch(this->m_vcls) {
+      {{
     case 0:  // finite
-      {
         uint64_t ireg = this->m_mant;
         if(ireg == 0) {
           // The value is effectively zero.
@@ -448,9 +443,8 @@ ascii_numget& ascii_numget::cast_U(uint64_t& value, uint64_t lower, uint64_t upp
         // Set the value.
         value = ireg;
         break;
-      }
+      }{
     case 1:  // infinitesimal
-      {
         // Truncate the value to zero.
         value = 0;
         // If the value is negative we still have to set the overflow flag.
@@ -461,24 +455,22 @@ ascii_numget& ascii_numget::cast_U(uint64_t& value, uint64_t lower, uint64_t upp
         this->m_udfl = true;
         this->m_inxc = true;
         break;
-      }
+      }{
     case 2:  // infinity
-      {
         // Return the maximum value.
         value = numeric_limits<uint64_t>::max();
         // For integers this always overflows and is always inexact.
         this->m_ovfl = true;
         this->m_inxc = true;
         break;
-      }
+      }{
     default:  // quiet NaN
-      {
         // Return zero.
         value = 0;
         // For integers this is always inexact.
         this->m_inxc = true;
         break;
-      }
+      }}
     }
     // Set the overflow flag if the value is out of range.
     if(value < lower) {
@@ -502,8 +494,8 @@ ascii_numget& ascii_numget::cast_I(int64_t& value, int64_t lower, int64_t upper)
     this->m_stat = 0;
     // Try casting the value.
     switch(this->m_vcls) {
+      {{
     case 0:  // finite
-      {
         uint64_t ireg = this->m_mant;
         if(ireg == 0) {
           // The value is effectively zero.
@@ -568,33 +560,30 @@ ascii_numget& ascii_numget::cast_I(int64_t& value, int64_t lower, int64_t upper)
           value = static_cast<int64_t>(+ireg);
         }
         break;
-      }
+      }{
     case 1:  // infinitesimal
-      {
         // Truncate the value to zero.
         value = 0;
         // For integers this always underflows and is always inexact.
         this->m_udfl = true;
         this->m_inxc = true;
         break;
-      }
+      }{
     case 2:  // infinity
-      {
         // Return the maximum value.
         value = numeric_limits<int64_t>::max();
         // For integers this always overflows and is always inexact.
         this->m_ovfl = true;
         this->m_inxc = true;
         break;
-      }
+      }{
     default:  // quiet NaN
-      {
         // Return zero.
         value = 0;
         // For integers this is always inexact.
         this->m_inxc = true;
         break;
-      }
+      }}
     }
     // Set the overflow flag if the value is out of range.
     if(value < lower) {
@@ -1333,8 +1322,8 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
     double sign = -(this->m_sign);
     // Try casting the value.
     switch(this->m_vcls) {
+      {{
     case 0:  // finite
-      {
         uint64_t ireg = this->m_mant;
         if(ireg == 0) {
           // The value is effectively zero.
@@ -1417,27 +1406,24 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
         // Set the value.
         value = ::std::copysign(freg, sign);
         break;
-      }
+      }{
     case 1:  // infinitesimal
-      {
         // Truncate the value to zero.
         value = ::std::copysign(0.0, sign);
         // For floating-point numbers this always underflows.
         this->m_udfl = true;
         break;
-      }
+      }{
     case 2:  // infinity
-      {
         // Return a signed infinity.
         value = ::std::copysign(numeric_limits<double>::infinity(), sign);
         break;
-      }
+      }{
     default:  // quiet NaN
-      {
         // Return a signed QNaN.
         value = ::std::copysign(numeric_limits<double>::quiet_NaN(), sign);
         break;
-      }
+      }}
     }
     // Set the overflow flag if the value is out of range.
     // Watch out for NaNs.

@@ -119,43 +119,36 @@ namespace Asteria {
           }
           // Escape double quotes, backslashes, and control characters.
           switch(cp) {
+            {{
           case '\"':
-            {
               fmt << "\\\"";
               break;
-            }
+            }{
           case '\\':
-            {
               fmt << "\\\\";
               break;
-            }
+            }{
           case '\b':
-            {
               fmt << "\\b";
               break;
-            }
+            }{
           case '\f':
-            {
               fmt << "\\f";
               break;
-            }
+            }{
           case '\n':
-            {
               fmt << "\\n";
               break;
-            }
+            }{
           case '\r':
-            {
               fmt << "\\r";
               break;
-            }
+            }{
           case '\t':
-            {
               fmt << "\\t";
               break;
-            }
+            }{
           default:
-            {
               if((0x20 <= cp) && (cp <= 0x7E)) {
                 // Write printable characters as is.
                 fmt << static_cast<char>(cp);
@@ -174,7 +167,7 @@ namespace Asteria {
                 fmt << rocket::sref(seq, 6);
               }
               break;
-            }
+            }}
           }
         }
         fmt << '\"';

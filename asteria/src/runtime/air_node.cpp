@@ -50,15 +50,14 @@ namespace Asteria {
 DCE_Result AIR_Node::optimize_dce()
   {
     switch(this->m_stor.index()) {
+      {{
     case index_execute_block:
-      {
         auto& altr = this->m_stor.as<index_execute_block>();
         // The node has no effect if the body is empty.
         auto dce = do_dce_recurse(altr.code_body);
         return dce;
-      }
+      }{
     case index_if_statement:
-      {
         auto& altr = this->m_stor.as<index_if_statement>();
         // The node has no effect if both branches are empty.
         // Note that the condition is not part of this node.
@@ -68,9 +67,8 @@ DCE_Result AIR_Node::optimize_dce()
           return dce_true;
         }
         return dce_none;
-      }
+      }{
     case index_switch_statement:
-      {
         auto& altr = this->m_stor.as<index_switch_statement>();
         // The node has no effect if there are no clauses.
         // Note that the condition is not part of this node.
@@ -81,37 +79,32 @@ DCE_Result AIR_Node::optimize_dce()
           do_dce_recurse(altr.code_bodies.mut(i));
         }
         return dce_none;
-      }
+      }{
     case index_while_statement:
-      {
         auto& altr = this->m_stor.as<index_while_statement>();
         // Loop statements cannot be DCE'd.
         do_dce_recurse(altr.code_body);
         return dce_none;
-      }
+      }{
     case index_do_while_statement:
-      {
         auto& altr = this->m_stor.as<index_do_while_statement>();
         // Loop statements cannot be DCE'd.
         do_dce_recurse(altr.code_body);
         return dce_none;
-      }
+      }{
     case index_for_each_statement:
-      {
         auto& altr = this->m_stor.as<index_for_each_statement>();
         // Loop statements cannot be DCE'd.
         do_dce_recurse(altr.code_body);
         return dce_none;
-      }
+      }{
     case index_for_statement:
-      {
         auto& altr = this->m_stor.as<index_for_statement>();
         // Loop statements cannot be DCE'd.
         do_dce_recurse(altr.code_body);
         return dce_none;
-      }
+      }{
     case index_try_statement:
-      {
         auto& altr = this->m_stor.as<index_try_statement>();
         // The node has no effect if the `try` block is empty.
         auto dce_try = do_dce_recurse(altr.code_try);
@@ -123,37 +116,31 @@ DCE_Result AIR_Node::optimize_dce()
           return dce_try;
         }
         return dce_none;
-      }
+      }{
     case index_throw_statement:
-      {
         return dce_prune;
-      }
+      }{
     case index_simple_status:
-      {
         auto& altr = this->m_stor.as<index_simple_status>();
         // The node has no effect if it equals `air_status_next`, which is effectively a no-op.
         if(altr.status == air_status_next) {
           return dce_empty;
         }
         return dce_prune;
-      }
+      }{
     case index_return_by_value:
-      {
         return dce_prune;
-      }
+      }{
     case index_function_call:
-      {
         auto& altr = this->m_stor.as<index_function_call>();
         // This node is part of an expression.
         if(altr.tco_aware != tco_aware_none) {
           return dce_prune;
         }
         return dce_none;
-      }
+      }}
     default:
-      {
-        return dce_none;
-      }
+      return dce_none;
     }
   }
 
@@ -2148,18 +2135,23 @@ DCE_Result AIR_Node::optimize_dce()
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
         switch(comp) {
+          {{
         case compare_greater:
-          rhs = G_integer(+1);
-          break;
+            rhs = G_integer(+1);
+            break;
+          }{
         case compare_less:
-          rhs = G_integer(-1);
-          break;
+            rhs = G_integer(-1);
+            break;
+          }{
         case compare_equal:
-          rhs = G_integer(0);
-          break;
+            rhs = G_integer(0);
+            break;
+          }{
         case compare_unordered:
-          rhs = G_string(rocket::sref("<unordered>"));
-          break;
+            rhs = G_string(rocket::sref("<unordered>"));
+            break;
+          }}
         default:
           ROCKET_ASSERT(false);
         }
@@ -2650,8 +2642,8 @@ DCE_Result AIR_Node::optimize_dce()
 AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
   {
     switch(this->index()) {
+      {{
     case index_clear_stack:
-      {
         const auto& altr = this->m_stor.as<index_clear_stack>();
         // There is no parameter.
         AVMC_Appender<void> avmcp;
@@ -2662,9 +2654,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         (void)altr;
         // Push a new node.
         return avmcp.output<do_clear_stack>(queue);
-      }
+      }{
     case index_execute_block:
-      {
         const auto& altr = this->m_stor.as<index_execute_block>();
         // `paramu` is unused.
         // `params` points to the body.
@@ -2676,9 +2667,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         do_solidify_queue(avmcp.queues[0], altr.code_body);
         // Push a new node.
         return avmcp.output<do_execute_block>(queue);
-      }
+      }{
     case index_declare_variable:
-      {
         const auto& altr = this->m_stor.as<index_declare_variable>();
         // `paramu` is unused.
         // `params` points to the source location and name.
@@ -2691,9 +2681,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_declare_variable>(queue);
-      }
+      }{
     case index_initialize_variable:
-      {
         const auto& altr = this->m_stor.as<index_initialize_variable>();
         // `paramu.u8s[0]` is `immutable`.
         // `params` is unused.
@@ -2705,9 +2694,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.paramu.u8s[0] = altr.immutable;
         // Push a new node.
         return avmcp.output<do_initialize_variable>(queue);
-      }
+      }{
     case index_if_statement:
-      {
         const auto& altr = this->m_stor.as<index_if_statement>();
         // `paramu.u8s[0]` is `negative`.
         // `params` points to the two branches.
@@ -2721,9 +2709,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         do_solidify_queue(avmcp.queues[1], altr.code_false);
         // Push a new node.
         return avmcp.output<do_if_statement>(queue);
-      }
+      }{
     case index_switch_statement:
-      {
         const auto& altr = this->m_stor.as<index_switch_statement>();
         // `paramu` is unused.
         // `params` points to all clauses.
@@ -2739,9 +2726,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.names_added = altr.names_added;
         // Push a new node.
         return avmcp.output<do_switch_statement>(queue);
-      }
+      }{
     case index_do_while_statement:
-      {
         const auto& altr = this->m_stor.as<index_do_while_statement>();
         // `paramu.u8s[0]` is `negative`.
         // `params` points to the body and the condition.
@@ -2755,9 +2741,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         do_solidify_queue(avmcp.queues[1], altr.code_cond);
         // Push a new node.
         return avmcp.output<do_do_while_statement>(queue);
-      }
+      }{
     case index_while_statement:
-      {
         const auto& altr = this->m_stor.as<index_while_statement>();
         // `paramu.u8s[0]` is `negative`.
         // `params` points to the condition and the body.
@@ -2771,9 +2756,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         do_solidify_queue(avmcp.queues[1], altr.code_body);
         // Push a new node.
         return avmcp.output<do_while_statement>(queue);
-      }
+      }{
     case index_for_each_statement:
-      {
         const auto& altr = this->m_stor.as<index_for_each_statement>();
         // `paramu` is unused.
         // `params` points to the range initializer and the body.
@@ -2788,9 +2772,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         do_solidify_queue(avmcp.queue_body, altr.code_body);
         // Push a new node.
         return avmcp.output<do_for_each_statement>(queue);
-      }
+      }{
     case index_for_statement:
-      {
         const auto& altr = this->m_stor.as<index_for_statement>();
         // `paramu` is unused.
         // `params` points to the triplet and the body.
@@ -2805,9 +2788,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         do_solidify_queue(avmcp.queues[3], altr.code_body);
         // Push a new node.
         return avmcp.output<do_for_statement>(queue);
-      }
+      }{
     case index_try_statement:
-      {
         const auto& altr = this->m_stor.as<index_try_statement>();
         // `paramu` is unused.
         // `params` points to the clauses.
@@ -2822,9 +2804,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         do_solidify_queue(avmcp.queue_catch, altr.code_catch);
         // Push a new node.
         return avmcp.output<do_try_statement>(queue);
-      }
+      }{
     case index_throw_statement:
-      {
         const auto& altr = this->m_stor.as<index_throw_statement>();
         // `paramu` is unused.
         // `params` points to the source location.
@@ -2836,9 +2817,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.sloc = altr.sloc;
         // Push a new node.
         return avmcp.output<do_throw_statement>(queue);
-      }
+      }{
     case index_assert_statement:
-      {
         const auto& altr = this->m_stor.as<index_assert_statement>();
         // `paramu.u8s[0]` is `negative`.
         // `params` points to the source location and the message.
@@ -2852,9 +2832,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.msg = altr.msg;
         // Push a new node.
         return avmcp.output<do_assert_statement>(queue);
-      }
+      }{
     case index_simple_status:
-      {
         const auto& altr = this->m_stor.as<index_simple_status>();
         // `paramu.u8s[0] ` is `status`.
         // `params` is unused.
@@ -2866,9 +2845,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.paramu.u8s[0] = altr.status;
         // Push a new node.
         return avmcp.output<do_simple_status>(queue);
-      }
+      }{
     case index_return_by_value:
-      {
         const auto& altr = this->m_stor.as<index_return_by_value>();
         // There is no parameter.
         AVMC_Appender<void> avmcp;
@@ -2879,9 +2857,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         (void)altr;
         // Push a new node.
         return avmcp.output<do_return_by_value>(queue);
-      }
+      }{
     case index_push_literal:
-      {
         const auto& altr = this->m_stor.as<index_push_literal>();
         // `paramu` is unused.
         // `params` points to a copy of `val`.
@@ -2893,9 +2870,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         static_cast<Value&>(avmcp) = altr.val;
         // Push a new node.
         return avmcp.output<do_push_literal>(queue);
-      }
+      }{
     case index_push_global_reference:
-      {
         const auto& altr = this->m_stor.as<index_push_global_reference>();
         // `paramu` is unused.
         // `params` points to the name.
@@ -2907,9 +2883,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_push_global_reference>(queue);
-      }
+      }{
     case index_push_local_reference:
-      {
         const auto& altr = this->m_stor.as<index_push_local_reference>();
         // `paramu.x32` is `depth`.
         // `params` points to the name.
@@ -2922,9 +2897,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_push_local_reference>(queue);
-      }
+      }{
     case index_push_bound_reference:
-      {
         const auto& altr = this->m_stor.as<index_push_bound_reference>();
         // `paramu` is unused.
         // `params` points to a copy of `ref`.
@@ -2936,9 +2910,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         static_cast<Reference&>(avmcp) = altr.ref;
         // Push a new node.
         return avmcp.output<do_push_bound_reference>(queue);
-      }
+      }{
     case index_instantiate_function:
-      {
         const auto& altr = this->m_stor.as<index_instantiate_function>();
         // `paramu` is unused.
         // `params` points to the name, the parameter list, and the body of the function.
@@ -2950,9 +2923,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.xnode = altr;
         // Push a new node.
         return avmcp.output<do_instantiate_function>(queue);
-      }
+      }{
     case index_branch_expression:
-      {
         const auto& altr = this->m_stor.as<index_branch_expression>();
         // `param.u8s[0]` is `assign`.
         // `params` points to the two branches.
@@ -2966,9 +2938,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.paramu.u8s[0] = altr.assign;
         // Push a new node.
         return avmcp.output<do_branch_expression>(queue);
-      }
+      }{
     case index_coalescence:
-      {
         const auto& altr = this->m_stor.as<index_coalescence>();
         // `param.u8s[0]` is `assign`.
         // `params` points to the alternative.
@@ -2981,9 +2952,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.paramu.u8s[0] = altr.assign;
         // Push a new node.
         return avmcp.output<do_coalescence>(queue);
-      }
+      }{
     case index_function_call:
-      {
         const auto& altr = this->m_stor.as<index_function_call>();
         // `paramu.u8s[0]` is `tco_aware`.
         // `params` points to the source location and the argument avmcp.cifier vector.
@@ -2997,9 +2967,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.paramu.u8s[0] = altr.tco_aware;
         // Push a new node.
         return avmcp.output<do_function_call>(queue);
-      }
+      }{
     case index_member_access:
-      {
         const auto& altr = this->m_stor.as<index_member_access>();
         // `paramu` is unused.
         // `params` points to the name.
@@ -3011,9 +2980,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_member_access>(queue);
-      }
+      }{
     case index_push_unnamed_array:
-      {
         const auto& altr = this->m_stor.as<index_push_unnamed_array>();
         // `paramu.x32` is `nelems`.
         // `params` is unused.
@@ -3025,9 +2993,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.paramu.x32 = altr.nelems;
         // Push a new node.
         return avmcp.output<do_push_unnamed_array>(queue);
-      }
+      }{
     case index_push_unnamed_object:
-      {
         const auto& altr = this->m_stor.as<index_push_unnamed_object>();
         // `paramu` is unused.
         // `params` points to the keys.
@@ -3039,9 +3006,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.names = altr.keys;
         // Push a new node.
         return avmcp.output<do_push_unnamed_object>(queue);
-      }
+      }{
     case index_apply_operator:
-      {
         const auto& altr = this->m_stor.as<index_apply_operator>();
         // `paramu.u8s[0]` is `assign`. Other fields may be used depending on the operator.
         // `params` is unused.
@@ -3051,250 +3017,197 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         }
         // Encode arguments.
         switch(rocket::weaken_enum(altr.xop)) {
+          {{
         case xop_cmp_eq:
-          {
             avmcp.paramu.u8s[0] = altr.assign;
             avmcp.paramu.u8s[1] = compare_equal;
             avmcp.paramu.u8s[2] = false;
             break;
-          }
+          }{
         case xop_cmp_ne:
-          {
             avmcp.paramu.u8s[0] = altr.assign;
             avmcp.paramu.u8s[1] = compare_equal;
             avmcp.paramu.u8s[2] = true;
             break;
-          }
+          }{
         case xop_cmp_lt:
-          {
             avmcp.paramu.u8s[0] = altr.assign;
             avmcp.paramu.u8s[1] = compare_less;
             avmcp.paramu.u8s[2] = false;
             break;
-          }
+          }{
         case xop_cmp_gt:
-          {
             avmcp.paramu.u8s[0] = altr.assign;
             avmcp.paramu.u8s[1] = compare_greater;
             avmcp.paramu.u8s[2] = false;
             break;
-          }
+          }{
         case xop_cmp_lte:
-          {
             avmcp.paramu.u8s[0] = altr.assign;
             avmcp.paramu.u8s[1] = compare_greater;
             avmcp.paramu.u8s[2] = true;
             break;
-          }
+          }{
         case xop_cmp_gte:
-          {
             avmcp.paramu.u8s[0] = altr.assign;
             avmcp.paramu.u8s[1] = compare_less;
             avmcp.paramu.u8s[2] = true;
             break;
-          }
+          }{
         default:
-          {
             avmcp.paramu.u8s[0] = altr.assign;
             break;
-          }
+          }}
         }
         // Push a new node.
         switch(altr.xop) {
+          {{
         case xop_inc_post:
-          {
             return avmcp.output<do_apply_xop_inc_post>(queue);
-          }
+          }{
         case xop_dec_post:
-          {
             return avmcp.output<do_apply_xop_dec_post>(queue);
-          }
+          }{
         case xop_subscr:
-          {
             return avmcp.output<do_apply_xop_subscr>(queue);
-          }
+          }{
         case xop_pos:
-          {
             return avmcp.output<do_apply_xop_pos>(queue);
-          }
+          }{
         case xop_neg:
-          {
             return avmcp.output<do_apply_xop_neg>(queue);
-          }
+          }{
         case xop_notb:
-          {
             return avmcp.output<do_apply_xop_notb>(queue);
-          }
+          }{
         case xop_notl:
-          {
             return avmcp.output<do_apply_xop_notl>(queue);
-          }
+          }{
         case xop_inc_pre:
-          {
             return avmcp.output<do_apply_xop_inc_pre>(queue);
-          }
+          }{
         case xop_dec_pre:
-          {
             return avmcp.output<do_apply_xop_dec_pre>(queue);
-          }
+          }{
         case xop_unset:
-          {
             return avmcp.output<do_apply_xop_unset>(queue);
-          }
+          }{
         case xop_lengthof:
-          {
             return avmcp.output<do_apply_xop_lengthof>(queue);
-          }
+          }{
         case xop_typeof:
-          {
             return avmcp.output<do_apply_xop_typeof>(queue);
-          }
+          }{
         case xop_sqrt:
-          {
             return avmcp.output<do_apply_xop_sqrt>(queue);
-          }
+          }{
         case xop_isnan:
-          {
             return avmcp.output<do_apply_xop_isnan>(queue);
-          }
+          }{
         case xop_isinf:
-          {
             return avmcp.output<do_apply_xop_isinf>(queue);
-          }
+          }{
         case xop_abs:
-          {
             return avmcp.output<do_apply_xop_abs>(queue);
-          }
+          }{
         case xop_sign:
-          {
             return avmcp.output<do_apply_xop_sign>(queue);
-          }
+          }{
         case xop_round:
-          {
             return avmcp.output<do_apply_xop_round>(queue);
-          }
+          }{
         case xop_floor:
-          {
             return avmcp.output<do_apply_xop_floor>(queue);
-          }
+          }{
         case xop_ceil:
-          {
             return avmcp.output<do_apply_xop_ceil>(queue);
-          }
+          }{
         case xop_trunc:
-          {
             return avmcp.output<do_apply_xop_trunc>(queue);
-          }
+          }{
         case xop_iround:
-          {
             return avmcp.output<do_apply_xop_iround>(queue);
-          }
+          }{
         case xop_ifloor:
-          {
             return avmcp.output<do_apply_xop_ifloor>(queue);
-          }
+          }{
         case xop_iceil:
-          {
             return avmcp.output<do_apply_xop_iceil>(queue);
-          }
+          }{
         case xop_itrunc:
-          {
             return avmcp.output<do_apply_xop_itrunc>(queue);
-          }
+          }{
         case xop_cmp_eq:
-          {
             return avmcp.output<do_apply_xop_cmp_xeq>(queue);
-          }
+          }{
         case xop_cmp_ne:
-          {
             return avmcp.output<do_apply_xop_cmp_xeq>(queue);
-          }
+          }{
         case xop_cmp_lt:
-          {
             return avmcp.output<do_apply_xop_cmp_xrel>(queue);
-          }
+          }{
         case xop_cmp_gt:
-          {
             return avmcp.output<do_apply_xop_cmp_xrel>(queue);
-          }
+          }{
         case xop_cmp_lte:
-          {
             return avmcp.output<do_apply_xop_cmp_xrel>(queue);
-          }
+          }{
         case xop_cmp_gte:
-          {
             return avmcp.output<do_apply_xop_cmp_xrel>(queue);
-          }
+          }{
         case xop_cmp_3way:
-          {
             return avmcp.output<do_apply_xop_cmp_3way>(queue);
-          }
+          }{
         case xop_add:
-          {
             return avmcp.output<do_apply_xop_add>(queue);
-          }
+          }{
         case xop_sub:
-          {
             return avmcp.output<do_apply_xop_sub>(queue);
-          }
+          }{
         case xop_mul:
-          {
             return avmcp.output<do_apply_xop_mul>(queue);
-          }
+          }{
         case xop_div:
-          {
             return avmcp.output<do_apply_xop_div>(queue);
-          }
+          }{
         case xop_mod:
-          {
             return avmcp.output<do_apply_xop_mod>(queue);
-          }
+          }{
         case xop_sll:
-          {
             return avmcp.output<do_apply_xop_sll>(queue);
-          }
+          }{
         case xop_srl:
-          {
             return avmcp.output<do_apply_xop_srl>(queue);
-          }
+          }{
         case xop_sla:
-          {
             return avmcp.output<do_apply_xop_sla>(queue);
-          }
+          }{
         case xop_sra:
-          {
             return avmcp.output<do_apply_xop_sra>(queue);
-          }
+          }{
         case xop_andb:
-          {
             return avmcp.output<do_apply_xop_andb>(queue);
-          }
+          }{
         case xop_orb:
-          {
             return avmcp.output<do_apply_xop_orb>(queue);
-          }
+          }{
         case xop_xorb:
-          {
             return avmcp.output<do_apply_xop_xorb>(queue);
-          }
+          }{
         case xop_assign:
-          {
             return avmcp.output<do_apply_xop_assign>(queue);
-          }
+          }{
         case xop_fma_3:
-          {
             return avmcp.output<do_apply_xop_fma>(queue);
-          }
+          }{
         case xop_tail:
-          {
             return avmcp.output<do_apply_xop_tail>(queue);
-          }
+          }}
         default:
           ASTERIA_TERMINATE("invalid operator type (xop `", altr.xop, "`)");
         }
-      }
+      }{
     case index_unpack_struct_array:
-      {
         const auto& altr = this->m_stor.as<index_unpack_struct_array>();
         // `paramu.y8s[0]` is `immutable`.
         // `paramu.y32` is `nelems`.
@@ -3308,9 +3221,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.paramu.y32 = altr.nelems;
         // Push a new node.
         return avmcp.output<do_unpack_struct_array>(queue);
-      }
+      }{
     case index_unpack_struct_object:
-      {
         const auto& altr = this->m_stor.as<index_unpack_struct_object>();
         // `paramu.u8s[0]` is `immutable`.
         // `params` points to the keys.
@@ -3323,9 +3235,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.names = altr.keys;
         // Push a new node.
         return avmcp.output<do_unpack_struct_object>(queue);
-      }
+      }{
     case index_define_null_variable:
-      {
         const auto& altr = this->m_stor.as<index_define_null_variable>();
         // `paramu.u8s[0]` is `immutable`.
         // `params` points to the source location and name.
@@ -3339,7 +3250,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_define_null_variable>(queue);
-      }
+      }}
     default:
       ASTERIA_TERMINATE("invalid AIR node type (index `", this->index(), "`)");
     }
