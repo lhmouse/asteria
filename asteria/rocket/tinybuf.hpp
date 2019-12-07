@@ -216,6 +216,10 @@ template<typename charT, typename traitsT>
       }
     size_type getn(char_type* s, size_type n)
       {
+        if(n == 0) {
+          // There is nothing to do.
+          return 0;
+        }
         auto k = static_cast<size_type>(this->m_gend - this->m_gcur);
         if(ROCKET_UNEXPECT(k == 0)) {
           // If the get area is empty, try populating it.
@@ -244,6 +248,10 @@ template<typename charT, typename traitsT>
       }
     basic_tinybuf& putn(const char_type* s, size_type n)
       {
+        if(n == 0) {
+          // There is nothing to do.
+          return *this;
+        }
         auto k = static_cast<size_type>(this->m_pend - this->m_pcur);
         if(ROCKET_UNEXPECT(n >= k)) {
           // If there is no enough room in the put area, evict its contents, followed by
