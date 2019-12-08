@@ -631,7 +631,7 @@ G_array std_string_explode(aref<G_string> text, aopt<G_string> delim, aopt<G_int
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
       if(*limit <= 0) {
-        ASTERIA_THROW("max number of segments must be positive (limit `", *limit, "`)");
+        ASTERIA_THROW("max number of segments must be positive (limit `$1`)", *limit);
       }
       rlimit = static_cast<uint64_t>(*limit);
     }
@@ -1121,7 +1121,7 @@ opt<G_array> std_string_utf8_decode(aref<G_string> text, aopt<G_boolean> permiss
         // How many words will the result have?
         auto nwords = text.size() / stor_be.size();
         if(text.size() != nwords * stor_be.size()) {
-          ASTERIA_THROW("length of source string not divisible by ", stor_be.size(), " (length `", text.size(), "`)");
+          ASTERIA_THROW("invalid source string length (`$1` not divisible by `$2`)", text.size(), stor_be.size());
         }
         values.reserve(nwords);
         // Unpack integers.
@@ -1335,7 +1335,7 @@ G_string std_string_format(aref<G_string> format, const cow_vector<Value>& value
       // This will not result in overflows as `ep` points to the null terminator.
       uint32_t ch = static_cast<uint8_t>(*++pp);
       if(ch == 0) {
-        ASTERIA_THROW("placeholder incomplete (dangling `$`)");
+        ASTERIA_THROW("placeholder incomplete (dangling `$$`)");
       }
       bp = ++pp;
       // Replace the placeholder.
@@ -1354,7 +1354,7 @@ G_string std_string_format(aref<G_string> format, const cow_vector<Value>& value
         // At least one digit is required.
         ch = static_cast<uint8_t>(*pp);
         if(ch - '0' >= 10)
-          ASTERIA_THROW("placeholder invalid (`", (char)ch, "` not a digit)");
+          ASTERIA_THROW("placeholder invalid (`$1` not a digit)", (char)ch);
         index = ch - '0';
         bp = pp;
         // Look for the terminator.
@@ -1375,11 +1375,11 @@ G_string std_string_format(aref<G_string> format, const cow_vector<Value>& value
         }
         // TODO: Support the ':FORMAT' syntax.
         if(bp != pp)
-          ASTERIA_THROW("placeholder invalid (suffix `", *bp, "` not known)");
+          ASTERIA_THROW("placeholder invalid (suffix `$1` not known)", *bp);
         bp = ++pp;
       }
       else {
-        ASTERIA_THROW("placeholder invalid (`", (char)ch, "` not handled)");
+        ASTERIA_THROW("placeholder invalid (`$1` not handled)", (char)ch);
       }
       // Replace the placeholder.
       if(index == 0) {
@@ -1389,7 +1389,7 @@ G_string std_string_format(aref<G_string> format, const cow_vector<Value>& value
         values[index-1].print(out);
       }
       else
-        ASTERIA_THROW("no enough arguments (`", index, "` > `", values.size(), "`)");
+        ASTERIA_THROW("no enough arguments (`$1` > `$2`)", index, values.size());
     }
     return out.extract_string();
   }

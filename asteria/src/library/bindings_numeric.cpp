@@ -14,7 +14,7 @@ namespace Asteria {
 G_integer std_numeric_abs(aref<G_integer> value)
   {
     if(value == INT64_MIN) {
-      ASTERIA_THROW("integer absolute value overflow (value `", value, "`)");
+      ASTERIA_THROW("integer absolute value overflow (value `$1`)", value);
     }
     return std::abs(value);
   }
@@ -69,14 +69,14 @@ G_boolean std_numeric_is_nan(aref<G_real> value)
     aref<G_integer> do_verify_bounds(aref<G_integer> lower, aref<G_integer> upper)
       {
         if(!(lower <= upper)) {
-          ASTERIA_THROW("bounds not valid (lower `", lower, "`, upper `", upper, "`)");
+          ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
         }
         return upper;
       }
     aref<G_real> do_verify_bounds(aref<G_real> lower, aref<G_real> upper)
       {
         if(!std::islessequal(lower, upper)) {
-          ASTERIA_THROW("bounds not valid (lower `", lower, "`, upper `", upper, "`)");
+          ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
         }
         return upper;
       }
@@ -84,7 +84,7 @@ G_boolean std_numeric_is_nan(aref<G_real> value)
     G_integer do_cast_to_integer(aref<G_real> value)
       {
         if(!std::islessequal(-0x1p63, value) || !std::islessequal(value, 0x1p63 - 0x1p10)) {
-          ASTERIA_THROW("value not representable as an `integer` (value `", value, "`)");
+          ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
         }
         return G_integer(value);
       }
@@ -183,23 +183,26 @@ G_integer std_numeric_itrunc(aref<G_real> value)
 
 G_real std_numeric_random(const Global_Context& global, aopt<G_real> limit)
   {
-    int cls = FP_NORMAL;  // assume 1.0
-    if(limit) {
-      cls = std::fpclassify(*limit);
-    }
-    if(cls == FP_ZERO) {
-      ASTERIA_THROW("random number limit shall not be zero");
-    }
-    if(rocket::is_any_of(cls, { FP_INFINITE, FP_NAN })) {
-      ASTERIA_THROW("random number limit shall be finite");
-    }
+    // Generate a random `double` in the range [0.0,1.0).
     int64_t high = global.get_random_uint32();
     int64_t low = global.get_random_uint32();
     double ratio = static_cast<double>((high << 21) ^ low) / 0x1p53;
-    if(limit) {
-      ratio *= *limit;
+    // If a limit is specified, magnify the value.
+    // The default magnitude is 1.0 so no action is taken.
+    if(!limit) {
+      return ratio;
     }
-    return ratio;
+    switch(std::fpclassify(*limit)) {
+      {{
+    case FP_ZERO:
+        ASTERIA_THROW("random number limit shall not be zero");
+      }{
+    case FP_INFINITE:
+    case FP_NAN:
+        ASTERIA_THROW("random number limit shall be finite (limit `$1`)", *limit);
+      }}
+    }
+    return *limit * ratio;
   }
 
 G_real std_numeric_sqrt(aref<G_real> x)
@@ -446,7 +449,7 @@ G_string std_numeric_format(aref<G_integer> value, aopt<G_integer> base, aopt<G_
           do_append_exponent(text, nump, 'p', p.second);
           break;
         }
-        ASTERIA_THROW("invalid exponent base for binary notation (`", *ebase, "` is not 2)");
+        ASTERIA_THROW("invalid exponent base for binary notation (`$1` is not 2)", *ebase);
       }{
     case 16:
         if(!ebase) {
@@ -461,7 +464,7 @@ G_string std_numeric_format(aref<G_integer> value, aopt<G_integer> base, aopt<G_
           do_append_exponent(text, nump, 'p', p.second);
           break;
         }
-        ASTERIA_THROW("invalid exponent base for hexadecimal notation (`", *ebase, "` is not 2)");
+        ASTERIA_THROW("invalid exponent base for hexadecimal notation (`$1` is not 2)", *ebase);
       }{
     case 10:
         if(!ebase) {
@@ -476,10 +479,10 @@ G_string std_numeric_format(aref<G_integer> value, aopt<G_integer> base, aopt<G_
           do_append_exponent(text, nump, 'e', p.second);
           break;
         }
-        ASTERIA_THROW("invalid exponent base for decimal notation (`", *ebase, "` is not 10)");
+        ASTERIA_THROW("invalid exponent base for decimal notation (`$1` is not 10)", *ebase);
       }}
     default:
-      ASTERIA_THROW("invalid number base (base `", *base, "` is not one of { 2, 10, 16 })");
+      ASTERIA_THROW("invalid number base (base `$1` is not one of { 2, 10, 16 })", *base);
     }
     return text;
   }
@@ -502,7 +505,7 @@ G_string std_numeric_format(aref<G_real> value, aopt<G_integer> base, aopt<G_int
           text.append(nump.begin(), nump.end());
           break;
         }
-        ASTERIA_THROW("invalid exponent base for binary notation (`", *ebase, "` is not 2)");
+        ASTERIA_THROW("invalid exponent base for binary notation (`$1` is not 2)", *ebase);
       }{
     case 16:
         if(!ebase) {
@@ -515,7 +518,7 @@ G_string std_numeric_format(aref<G_real> value, aopt<G_integer> base, aopt<G_int
           text.append(nump.begin(), nump.end());
           break;
         }
-        ASTERIA_THROW("invalid exponent base for hexadecimal notation (`", *ebase, "` is not 2)");
+        ASTERIA_THROW("invalid exponent base for hexadecimal notation (`$1` is not 2)", *ebase);
       }{
     case 10:
         if(!ebase) {
@@ -528,10 +531,10 @@ G_string std_numeric_format(aref<G_real> value, aopt<G_integer> base, aopt<G_int
           text.append(nump.begin(), nump.end());
           break;
         }
-        ASTERIA_THROW("invalid exponent base for decimal notation (`", *ebase, "` is not 10)");
+        ASTERIA_THROW("invalid exponent base for decimal notation (`$1` is not 10)", *ebase);
       }}
     default:
-      ASTERIA_THROW("invalid number base (base `", *base, "` is not one of { 2, 10, 16 })");
+      ASTERIA_THROW("invalid number base (base `$1` is not one of { 2, 10, 16 })", *base);
     }
     return text;
   }

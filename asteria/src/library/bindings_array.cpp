@@ -484,8 +484,9 @@ G_boolean std_array_is_sorted(const Global_Context& global, aref<G_array> data, 
 
     namespace {
 
-    template<typename IteratorT> pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
-                                                                  aopt<G_function> comparator, const Value& target)
+    template<typename IteratorT> pair<IteratorT, bool>
+        do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
+                   aopt<G_function> comparator, const Value& target)
       {
         auto bpos = rocket::move(begin);
         auto epos = rocket::move(end);
@@ -498,7 +499,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, aref<G_array> data, 
           // Compare `target` with the element in the middle.
           auto cmp = do_compare(global, comparator, target, *mpos);
           if(cmp == compare_unordered) {
-            ASTERIA_THROW("unordered elements (operands were `", target, "` and `", *mpos, "`)");
+            ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
           }
           if(cmp == compare_equal) {
             return std::make_pair(rocket::move(mpos), true);
@@ -512,8 +513,9 @@ G_boolean std_array_is_sorted(const Global_Context& global, aref<G_array> data, 
         } while(true);
       }
 
-    template<typename IteratorT, typename PredT> IteratorT do_bound(const Global_Context& global, IteratorT begin, IteratorT end,
-                                                                    aopt<G_function> comparator, const Value& target, PredT&& pred)
+    template<typename IteratorT, typename PredT>
+        IteratorT do_bound(const Global_Context& global, IteratorT begin, IteratorT end,
+                           aopt<G_function> comparator, const Value& target, PredT&& pred)
       {
         auto bpos = rocket::move(begin);
         auto epos = rocket::move(end);
@@ -526,7 +528,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, aref<G_array> data, 
           // Compare `target` with the element in the middle.
           auto cmp = do_compare(global, comparator, target, *mpos);
           if(cmp == compare_unordered) {
-            ASTERIA_THROW("unordered elements (operands were `", target, "` and `", *mpos, "`)");
+            ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
           }
           if(rocket::forward<PredT>(pred)(cmp)) {
             epos = mpos;
@@ -612,7 +614,7 @@ pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, a
           for(;;) {
             auto cmp = do_compare(global, comparator, *(bpos[0]), *(bpos[1]));
             if(cmp == compare_unordered) {
-              ASTERIA_THROW("unordered elements (operands were `",*(bpos[0]), "` and `", *(bpos[1]), "`)");
+              ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
             }
             // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
             bi = (cmp == compare_greater);

@@ -36,7 +36,7 @@ tinyfmt& Token::print(tinyfmt& fmt) const
         return fmt << "string-literal `" << quote(this->m_stor.as<index_string_literal>().val) << "`";
       }}
     default:
-      ASTERIA_TERMINATE("invalid token type (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid token type (index `$1`)", this->index());
     }
   }
 

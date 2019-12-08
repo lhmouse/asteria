@@ -23,7 +23,7 @@ G_string std_filesystem_get_working_directory()
     while(::getcwd(cwd.mut_data(), cwd.size()) == nullptr) {
       int err = errno;
       if(err != ERANGE) {
-        ASTERIA_THROW("`getcwd()` failed (errno was `", err, "`)");
+        ASTERIA_THROW("`getcwd()` failed (errno `$1`)", err);
       }
       cwd.append(cwd.size() / 2, '*');
     }
@@ -266,7 +266,7 @@ opt<G_integer> std_filesystem_directory_remove(aref<G_string> path)
 opt<G_string> std_filesystem_file_read(aref<G_string> path, aopt<G_integer> offset, aopt<G_integer> limit)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW("negative file offset (offset `", *offset, "`)");
+      ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
@@ -318,7 +318,7 @@ opt<G_string> std_filesystem_file_read(aref<G_string> path, aopt<G_integer> offs
 bool std_filesystem_file_stream(const Global_Context& global, aref<G_string> path, aref<G_function> callback, aopt<G_integer> offset, aopt<G_integer> limit)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW("negative file offset (offset `", *offset, "`)");
+      ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     }
     int64_t roffset = offset.value_or(0);
     int64_t rlimit = rocket::clamp(limit.value_or(INT32_MAX), 0, 16777216);
@@ -363,7 +363,7 @@ bool std_filesystem_file_stream(const Global_Context& global, aref<G_string> pat
 bool std_filesystem_file_write(aref<G_string> path, aref<G_string> data, aopt<G_integer> offset)
   {
     if(offset && (*offset < 0)) {
-      ASTERIA_THROW("negative file offset (offset `", *offset, "`)");
+      ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
     }
     int64_t roffset = offset.value_or(0);
     int64_t nremaining = static_cast<int64_t>(data.size());

@@ -37,7 +37,7 @@ bool Value::test() const noexcept
         return true;
       }}
     default:
-      ASTERIA_TERMINATE("invalid value type (gtype `", this->gtype(), "`)");
+      ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
 
@@ -123,7 +123,7 @@ Compare Value::compare(const Value& other) const noexcept
         return compare_unordered;
       }}
     default:
-      ASTERIA_TERMINATE("invalid value type (gtype `", this->gtype(), "`)");
+      ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
 
@@ -155,7 +155,7 @@ bool Value::unique() const noexcept
         return this->m_stor.as<gtype_object>().unique();
       }}
     default:
-      ASTERIA_TERMINATE("invalid value type (gtype `", this->gtype(), "`)");
+      ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
 
@@ -187,7 +187,7 @@ long Value::use_count() const noexcept
         return this->m_stor.as<gtype_object>().use_count();
       }}
     default:
-      ASTERIA_TERMINATE("invalid value type (gtype `", this->gtype(), "`)");
+      ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
 
@@ -215,7 +215,7 @@ long Value::gcref_split() const noexcept
         return this->m_stor.as<gtype_object>().use_count();
       }}
     default:
-      ASTERIA_TERMINATE("invalid value type (gtype `", this->gtype(), "`)");
+      ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
 
@@ -285,7 +285,7 @@ tinyfmt& Value::print(tinyfmt& fmt, bool escape) const
         return fmt;
       }}
     default:
-      ASTERIA_TERMINATE("invalid value type (gtype `", this->gtype(), "`)");
+      ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
 
@@ -362,7 +362,7 @@ tinyfmt& Value::dump(tinyfmt& fmt, size_t indent, size_t hanging) const
         return fmt;
       }}
     default:
-      ASTERIA_TERMINATE("invalid value type (gtype `", this->gtype(), "`)");
+      ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
 
@@ -390,7 +390,7 @@ Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
         return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& p) { p.second.enumerate_variables(callback);  }), callback;
       }}
     default:
-      ASTERIA_TERMINATE("invalid value type (gtype `", this->gtype(), "`)");
+      ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
 

@@ -15,20 +15,20 @@ void Analytic_Context::do_prepare_function(const cow_vector<phsh_string>& params
   {
     // Set parameters, which are local references.
     for(size_t i = 0; i < params.size(); ++i) {
-      const auto& param = params.at(i);
-      if(param.empty()) {
+      const auto& name = params.at(i);
+      if(name.empty()) {
         continue;
       }
-      if(param == "...") {
+      if(name == "...") {
         // Nothing is set for the variadic placeholder, but the parameter list terminates here.
         ROCKET_ASSERT(i == params.size() - 1);
         break;
       }
-      if(param.rdstr().starts_with("__")) {
-        ASTERIA_THROW("reserved name not declarable (param `", param, "`)");
+      if(name.rdstr().starts_with("__")) {
+        ASTERIA_THROW("reserved name not declarable as parameter (name `", name, "`)");
       }
       // Its contents are out of interest.
-      this->open_named_reference(param) /*= Reference_Root::S_null()*/;
+      this->open_named_reference(name) /*= Reference_Root::S_null()*/;
     }
     // Set pre-defined references.
     // N.B. If you have ever changed these, remember to update 'executive_context.cpp' as well.

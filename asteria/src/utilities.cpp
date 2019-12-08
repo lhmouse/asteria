@@ -44,7 +44,7 @@ namespace Asteria {
 
     }  // namespace
 
-bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
+bool write_log_to_stderr(const char* file, long line, cow_string&& msg, const char* trailer) noexcept
   {
     cow_string str;
     str.reserve(1023);
@@ -85,6 +85,10 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
       else
         do_append_str(str, c);
     };
+    // Append the trailer.
+    if(trailer) {
+      do_append_str(str, trailer);
+    }
     // Terminate the message with a line feed.
     do_append_str(str, '\n');
     // Write the string now. Note that the string cannot be empty.

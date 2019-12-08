@@ -87,11 +87,11 @@ Precedence Infix_Element::tell_precedence() const noexcept
             return precedence_assignment;
           }}
         default:
-          ASTERIA_TERMINATE("invalid operator type (xop `", altr.xop, "`)");
+          ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
         }
       }}
     default:
-      ASTERIA_TERMINATE("invalid infix element type (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid infix element type (index `$1`)", this->index());
     }
   }
 
@@ -144,7 +144,7 @@ void Infix_Element::extract(cow_vector<Xprunit>& units)
         return;
       }}
     default:
-      ASTERIA_TERMINATE("invalid infix element type (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid infix element type (index `$1`)", this->index());
     }
   }
 
@@ -177,7 +177,7 @@ cow_vector<Xprunit>& Infix_Element::open_junction() noexcept
         return altr.rhs;
       }}
     default:
-      ASTERIA_TERMINATE("invalid infix element type (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid infix element type (index `$1`)", this->index());
     }
   }
 

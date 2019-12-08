@@ -756,7 +756,7 @@ DCE_Result AIR_Node::optimize_dce()
           }
         }
         else {
-          ASTERIA_THROW("range value not iterable (range `", range, "`)");
+          ASTERIA_THROW("range value not iterable (range `$1`)", range);
         }
         return air_status_next;
       }
@@ -926,7 +926,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Look for the name in the global context.
         auto qref = ctx.global().get_named_reference_opt(name);
         if(!qref) {
-          ASTERIA_THROW("undeclared identifier `", name, "`");
+          ASTERIA_THROW("undeclared identifier `$1`", name);
         }
         // Push a copy of it.
         ctx.stack().push(*qref);
@@ -946,7 +946,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(name);
         if(!qref) {
-          ASTERIA_THROW("undeclared identifier `", name, "`");
+          ASTERIA_THROW("undeclared identifier `$1`", name);
         }
         // Push a copy of it.
         ctx.stack().push(*qref);
@@ -1036,7 +1036,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Copy the target value, which shall be of type `function`.
         const auto value = self.read();
         if(!value.is_function()) {
-          ASTERIA_THROW("attempt to call a non-function (val `", value, "`)");
+          ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
         }
         const auto& target = value.as_function();
         // Initialize the `this` reference.
@@ -1163,7 +1163,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_neg(const G_integer& rhs)
       {
         if(rhs == INT64_MIN) {
-          ASTERIA_THROW("integer negation overflow (operand was `", rhs, "`)");
+          ASTERIA_THROW("integer negation overflow (operand was `$1`)", rhs);
         }
         return -rhs;
       }
@@ -1186,7 +1186,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_abs(const G_integer& rhs)
       {
         if(rhs == INT64_MIN) {
-          ASTERIA_THROW("integer absolute value overflow (operand was `", rhs, "`)");
+          ASTERIA_THROW("integer absolute value overflow (operand was `$1`)", rhs);
         }
         return std::abs(rhs);
       }
@@ -1199,7 +1199,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_integer& rhs)
       {
         if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
-          ASTERIA_THROW("integer addition overflow (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
         }
         return lhs + rhs;
       }
@@ -1207,7 +1207,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_sub(const G_integer& lhs, const G_integer& rhs)
       {
         if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
-          ASTERIA_THROW("integer subtraction overflow (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
         }
         return lhs - rhs;
       }
@@ -1221,7 +1221,7 @@ DCE_Result AIR_Node::optimize_dce()
           return (lhs ^ rhs) ^ 1;
         }
         if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
-          ASTERIA_THROW("integer multiplication overflow (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
         }
         if((lhs == -1) || (rhs == -1)) {
           return (lhs ^ rhs) + 1;
@@ -1232,7 +1232,7 @@ DCE_Result AIR_Node::optimize_dce()
         auto srhs = (rhs ^ m) - m;
         // `alhs` may only be positive here.
         if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)) {
-          ASTERIA_THROW("integer multiplication overflow (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer multiplication overflow (operands were `$1` and `$2`)", lhs, rhs);
         }
         return alhs * srhs;
       }
@@ -1240,10 +1240,10 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_div(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs == 0) {
-          ASTERIA_THROW("integer divided by zero (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
         }
         if((lhs == INT64_MIN) && (rhs == -1)) {
-          ASTERIA_THROW("integer division overflow (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
         }
         return lhs / rhs;
       }
@@ -1251,10 +1251,10 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_mod(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs == 0) {
-          ASTERIA_THROW("integer divided by zero (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
         }
         if((lhs == INT64_MIN) && (rhs == -1)) {
-          ASTERIA_THROW("integer division overflow (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer division overflow (operands were `$1` and `$2`)", lhs, rhs);
         }
         return lhs % rhs;
       }
@@ -1262,7 +1262,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_sll(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative shift count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
         }
         if(rhs >= 64) {
           return 0;
@@ -1273,7 +1273,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_srl(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative shift count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
         }
         if(rhs >= 64) {
           return 0;
@@ -1284,19 +1284,19 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_sla(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative shift count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
         }
         if(lhs == 0) {
           return 0;
         }
         if(rhs >= 64) {
-          ASTERIA_THROW("integer left shift overflow (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
         }
         auto bc = static_cast<int>(63 - rhs);
         auto mask_out = static_cast<uint64_t>(lhs) >> bc << bc;
         auto mask_sbt = static_cast<uint64_t>(lhs >> 63) << bc;
         if(mask_out != mask_sbt) {
-          ASTERIA_THROW("integer left shift overflow (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("integer left shift overflow (operands were `$1` and `$2`)", lhs, rhs);
         }
         return G_integer(static_cast<uint64_t>(lhs) << rhs);
       }
@@ -1304,7 +1304,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_integer do_operator_sra(const G_integer& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative shift count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
         }
         if(rhs >= 64) {
           return lhs >> 63;
@@ -1385,7 +1385,7 @@ DCE_Result AIR_Node::optimize_dce()
     G_integer do_cast_to_integer(const G_real& value)
       {
         if(!std::islessequal(-0x1p63, value) || !std::islessequal(value, 0x1p63 - 0x1p10)) {
-          ASTERIA_THROW("value not representable as an `integer` (operand was `", value, "`)");
+          ASTERIA_THROW("value not representable as an `integer` (operand was `$1`)", value);
         }
         return G_integer(value);
       }
@@ -1448,7 +1448,7 @@ DCE_Result AIR_Node::optimize_dce()
           return res;
         }
         if(nchars > res.max_size() / count) {
-          ASTERIA_THROW("string length overflow (`", nchars, "` * `", count, "` > `", res.max_size(), "`)");
+          ASTERIA_THROW("string length overflow (`$1` * `$2` > `$3`)", nchars, count, res.max_size());
         }
         auto times = static_cast<size_t>(count);
         if(nchars == 1) {
@@ -1476,7 +1476,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative duplicate count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
         }
         return do_duplicate_string(lhs, static_cast<uint64_t>(rhs));
       }
@@ -1484,7 +1484,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_integer& lhs, const G_string& rhs)
       {
         if(lhs < 0) {
-          ASTERIA_THROW("negative duplicate count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
         }
         return do_duplicate_string(rhs, static_cast<uint64_t>(lhs));
       }
@@ -1492,7 +1492,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_string do_operator_sll(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative shift count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
         }
         G_string res;
         // Reserve space for the result string.
@@ -1509,7 +1509,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_string do_operator_srl(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative shift count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
         }
         G_string res;
         // Reserve space for the result string.
@@ -1526,11 +1526,11 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_string do_operator_sla(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative shift count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
         }
         G_string res;
         if(static_cast<uint64_t>(rhs) >= res.max_size() - lhs.size()) {
-          ASTERIA_THROW("string length overflow (`", lhs.size(), "` + `", rhs, "` > `", res.max_size(), "`)");
+          ASTERIA_THROW("string length overflow (`$1` + `$2` > `$3`)", lhs.size(), rhs, res.max_size());
         }
         // Append spaces in the right and return the result.
         size_t count = static_cast<size_t>(rhs);
@@ -1542,7 +1542,7 @@ DCE_Result AIR_Node::optimize_dce()
     ROCKET_PURE_FUNCTION G_string do_operator_sra(const G_string& lhs, const G_integer& rhs)
       {
         if(rhs < 0) {
-          ASTERIA_THROW("negative shift count (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
         }
         G_string res;
         if(static_cast<uint64_t>(rhs) >= lhs.size()) {
@@ -1570,7 +1570,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_add(reg, G_real(1));
         }
         else {
-          ASTERIA_THROW("postfix increment not applicable (operand was `", lhs, "`)");
+          ASTERIA_THROW("postfix increment not applicable (operand was `$1`)", lhs);
         }
         return air_status_next;
       }
@@ -1591,7 +1591,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_sub(reg, G_real(1));
         }
         else {
-          ASTERIA_THROW("postfix decrement not applicable (operand was `", lhs, "`)");
+          ASTERIA_THROW("postfix decrement not applicable (operand was `$1`)", lhs);
         }
         return air_status_next;
       }
@@ -1614,7 +1614,7 @@ DCE_Result AIR_Node::optimize_dce()
           lref.zoom_in(rocket::move(xmod));
         }
         else {
-          ASTERIA_THROW("subscript value not valid (subscript was `", rhs, "`)");
+          ASTERIA_THROW("subscript value not valid (subscript was `$1`)", rhs);
         }
         return air_status_next;
       }
@@ -1649,7 +1649,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_neg(reg);
         }
         else {
-          ASTERIA_THROW("prefix negation not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1672,7 +1672,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_not(reg);
         }
         else {
-          ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1705,7 +1705,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_add(reg, G_real(1));
         }
         else {
-          ASTERIA_THROW("prefix increment not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix increment not applicable (operand was `$1`)", rhs);
         }
         return air_status_next;
       }
@@ -1724,7 +1724,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_sub(reg, G_real(1));
         }
         else {
-          ASTERIA_THROW("prefix decrement not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix decrement not applicable (operand was `$1`)", rhs);
         }
         return air_status_next;
       }
@@ -1763,7 +1763,7 @@ DCE_Result AIR_Node::optimize_dce()
           nelems = rhs.as_object().size();
         }
         else {
-          ASTERIA_THROW("prefix `lengthof` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `lengthof` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, G_integer(nelems));
         return air_status_next;
@@ -1799,7 +1799,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_sqrt(reg);
         }
         else {
-          ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1822,7 +1822,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_isnan(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__isnan` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1845,7 +1845,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_isinf(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__isinf` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1868,7 +1868,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_abs(reg);
         }
         else {
-          ASTERIA_THROW("prefix `__abs` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1891,7 +1891,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_sign(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__sign` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1914,7 +1914,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_round(reg);
         }
         else {
-          ASTERIA_THROW("prefix `__round` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1937,7 +1937,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_floor(reg);
         }
         else {
-          ASTERIA_THROW("prefix `__floor` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1960,7 +1960,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_ceil(reg);
         }
         else {
-          ASTERIA_THROW("prefix `__ceil` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -1983,7 +1983,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_trunc(reg);
         }
         else {
-          ASTERIA_THROW("prefix `__trunc` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2006,7 +2006,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_iround(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__iround` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__iround` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2029,7 +2029,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_ifloor(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__ifloor` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__ifloor` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2052,7 +2052,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_iceil(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__iceil` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__iceil` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2075,7 +2075,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_itrunc(rhs.as_real());
         }
         else {
-          ASTERIA_THROW("prefix `__itrunc` not applicable (operand was `", rhs, "`)");
+          ASTERIA_THROW("prefix `__itrunc` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2115,7 +2115,7 @@ DCE_Result AIR_Node::optimize_dce()
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
         if(comp == compare_unordered) {
-          ASTERIA_THROW("unordered values (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         }
         rhs = G_boolean((comp == expect) != negative);
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
@@ -2188,7 +2188,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_add(lhs.as_string(), reg);
         }
         else {
-          ASTERIA_THROW("infix addition not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix addition not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2218,7 +2218,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_sub(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else {
-          ASTERIA_THROW("infix subtraction not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix subtraction not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2257,7 +2257,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_mul(lhs.as_integer(), reg);
         }
         else {
-          ASTERIA_THROW("infix multiplication not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix multiplication not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2282,7 +2282,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_div(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else {
-          ASTERIA_THROW("infix division not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix division not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2307,7 +2307,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_mod(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else {
-          ASTERIA_THROW("infix modulo not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix modulo not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2335,7 +2335,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_sll(lhs.as_string(), rhs.as_integer());
         }
         else {
-          ASTERIA_THROW("infix logical left shift not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix logical left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2363,7 +2363,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_srl(lhs.as_string(), rhs.as_integer());
         }
         else {
-          ASTERIA_THROW("infix logical right shift not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix logical right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2391,7 +2391,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_sla(lhs.as_string(), rhs.as_integer());
         }
         else {
-          ASTERIA_THROW("infix arithmetic left shift not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix arithmetic left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2418,7 +2418,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_sra(lhs.as_string(), rhs.as_integer());
         }
         else {
-          ASTERIA_THROW("infix arithmetic right shift not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix arithmetic right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2444,7 +2444,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_and(lhs.as_integer(), reg);
         }
         else {
-          ASTERIA_THROW("infix bitwise AND not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix bitwise AND not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2470,7 +2470,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_or(lhs.as_integer(), reg);
         }
         else {
-          ASTERIA_THROW("infix bitwise OR not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix bitwise OR not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2496,7 +2496,7 @@ DCE_Result AIR_Node::optimize_dce()
           reg = do_operator_xor(lhs.as_integer(), reg);
         }
         else {
-          ASTERIA_THROW("infix bitwise XOR not defined (operands were `", lhs, "` and `", rhs, "`)");
+          ASTERIA_THROW("infix bitwise XOR not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2529,7 +2529,7 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
         }
         else {
-          ASTERIA_THROW("fused multiply-add not defined (operands were `", lhs, "`, `", mid, "` and `", rhs, "`)");
+          ASTERIA_THROW("fused multiply-add not defined (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
         }
         do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
@@ -2559,7 +2559,7 @@ DCE_Result AIR_Node::optimize_dce()
           val = G_array();
         }
         if(!val.is_array()) {
-          ASTERIA_THROW("attempt to unpack a non-`array` as an `array` (initializer was `", val, "`)");
+          ASTERIA_THROW("attempt to unpack a non-`array` as an `array` (initializer was `$1`)", val);
         }
         auto& arr = val.open_array();
         // Pop and initialize variables from right to left.
@@ -2594,7 +2594,7 @@ DCE_Result AIR_Node::optimize_dce()
           val = G_object();
         }
         if(!val.is_object()) {
-          ASTERIA_THROW("attempt to unpack a non-`object` as an `object` (initializer was `", val, "`)");
+          ASTERIA_THROW("attempt to unpack a non-`object` as an `object` (initializer was `$1`)", val);
         }
         auto& obj = val.open_object();
         // Pop and initialize variables from right to left.
@@ -3204,7 +3204,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
             return avmcp.output<do_apply_xop_tail>(queue);
           }}
         default:
-          ASTERIA_TERMINATE("invalid operator type (xop `", altr.xop, "`)");
+          ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
         }
       }{
     case index_unpack_struct_array:
@@ -3252,7 +3252,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_define_null_variable>(queue);
       }}
     default:
-      ASTERIA_TERMINATE("invalid AIR node type (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
     }
   }
 

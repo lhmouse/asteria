@@ -9,10 +9,10 @@ using namespace Asteria;
 int main()
   {
     try {
-      ASTERIA_THROW("test", ' ', "exception: ", 42, '$');
+      ASTERIA_THROW("test $1 $2 $$/end", "exception:", 42);
       std::terminate();
     }
     catch(std::exception& e) {
-      ASTERIA_TEST_CHECK(std::strstr(e.what(), "test exception: 42$") != nullptr);
+      ASTERIA_TEST_CHECK(std::strstr(e.what(), "test exception: 42 $/end") != nullptr);
     }
   }

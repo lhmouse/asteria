@@ -29,7 +29,7 @@ const Value& Reference_Root::dereference_const() const
         ASTERIA_THROW("tail call wrapper not dereferenceable");
       }}
     default:
-      ASTERIA_TERMINATE("invalid reference root type enumeration (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
     }
   }
 
@@ -41,15 +41,15 @@ Value& Reference_Root::dereference_mutable() const
         ASTERIA_THROW("attempt to modify a constant `null`");
       }{
     case index_constant:
-        ASTERIA_THROW("attempt to modify a constant `", this->m_stor.as<index_constant>().val, "`");
+        ASTERIA_THROW("attempt to modify a constant `$1`", this->m_stor.as<index_constant>().val);
       }{
     case index_temporary:
-        ASTERIA_THROW("attempt to modify a temporary `", this->m_stor.as<index_temporary>().val, "`");
+        ASTERIA_THROW("attempt to modify a temporary `$1`", this->m_stor.as<index_temporary>().val);
       }{
     case index_variable:
         const auto& var = this->m_stor.as<index_variable>().var;
         if(var->is_immutable()) {
-          ASTERIA_THROW("attempt to modify an immutable variable `", var->get_value(), "`");
+          ASTERIA_THROW("attempt to modify an immutable variable `$1`", var->get_value());
         }
         return var->open_value();
       }{
@@ -57,7 +57,7 @@ Value& Reference_Root::dereference_mutable() const
         ASTERIA_THROW("tail call wrapper not dereferenceable");
       }}
     default:
-      ASTERIA_TERMINATE("invalid reference root type enumeration (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
     }
   }
 
@@ -85,7 +85,7 @@ Variable_Callback& Reference_Root::enumerate_variables(Variable_Callback& callba
         return this->m_stor.as<index_tail_call>().tca->enumerate_variables(callback);
       }}
     default:
-      ASTERIA_TERMINATE("invalid reference root type enumeration (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid reference root type enumeration (index `$1`)", this->index());
     }
   }
 

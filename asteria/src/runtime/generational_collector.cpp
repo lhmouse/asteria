@@ -27,7 +27,7 @@ Collector Generational_Collector::* Generational_Collector::do_locate(GC_Generat
         return &Generational_Collector::m_oldest;
       }}
     default:
-      ASTERIA_THROW("invalid GC generation: ", gc_gen);
+      ASTERIA_THROW("invalid GC generation (gc_gen `$1`)", gc_gen);
     }
   }
 

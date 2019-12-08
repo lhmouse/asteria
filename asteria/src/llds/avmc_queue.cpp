@@ -73,7 +73,7 @@ void AVMC_Queue::do_reserve_delta(size_t nbytes)
     constexpr auto nbytes_hdr = sizeof(Header);
     constexpr auto nbytes_max = nbytes_hdr * nphdrs_max;
     if(nbytes > nbytes_max) {
-      ASTERIA_THROW("invalid AVMC node size (`", nbytes, "` > `", nbytes_max, "`)");
+      ASTERIA_THROW("invalid AVMC node size (`$1` > `$2`)", nbytes, nbytes_max);
     }
     auto nbytes_node = static_cast<uint32_t>(1 + (nbytes + nbytes_hdr - 1) / nbytes_hdr);
     // Reserve one header, followed by `nphdrs` headers for the parameters.

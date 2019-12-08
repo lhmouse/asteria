@@ -54,7 +54,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
         ASTERIA_THROW("stray `continue` statement");
       }}
     default:
-      ASTERIA_TERMINATE("invalid AIR status code (status `", status, "`)");
+      ASTERIA_TERMINATE("invalid AIR status code (status `$1`)", status);
     }
     return self;
   }

@@ -15,10 +15,10 @@ namespace Asteria {
     void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const phsh_string& name, const char* desc)
       {
         if(name.rdstr().empty()) {
-          ASTERIA_THROW("attempt to declare a nameless ", desc);
+          ASTERIA_THROW("attempt to declare a nameless $1", desc);
         }
         if(name.rdstr().starts_with("__")) {
-          ASTERIA_THROW("reserved name not declarable (name `", name, "` for ", desc, ")");
+          ASTERIA_THROW("reserved name not declarable as $2 (name `$1`)", name);
         }
         // Record this name.
         if(names_opt) {
@@ -353,7 +353,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             return code;
           }}
         default:
-          ASTERIA_TERMINATE("invalid target scope type (target `", altr.target, "`)");
+          ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
         }
       }{
     case index_continue:
@@ -380,7 +380,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             return code;
           }}
         default:
-          ASTERIA_TERMINATE("invalid target scope type (target `", altr.target, "`)");
+          ASTERIA_TERMINATE("invalid target scope type (target `$1`)", altr.target);
         }
       }{
     case index_throw:
@@ -435,7 +435,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         return code;
       }}
     default:
-      ASTERIA_TERMINATE("invalid statement type (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid statement type (index `$1`)", this->index());
     }
   }
 

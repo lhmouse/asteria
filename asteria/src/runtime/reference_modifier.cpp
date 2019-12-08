@@ -19,7 +19,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW("integer subscript applied to non-array: ", parent);
+          ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         }
         const auto& arr = parent.as_array();
         // Return a pointer to the element at the given index.
@@ -37,7 +37,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         if(!parent.is_object()) {
-          ASTERIA_THROW("string subscript applied to non-object: ", parent);
+          ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         }
         const auto& obj = parent.as_object();
         // Return a pointer to the value with the given key.
@@ -54,7 +54,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
           return nullptr;
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW("tail subscript applied to non-array: ", parent);
+          ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
         }
         const auto& arr = parent.as_array();
         // Returns the last element.
@@ -64,7 +64,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         return std::addressof(arr.back());
       }}
     default:
-      ASTERIA_TERMINATE("invalid reference modifier type: ", this->index());
+      ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
   }
 
@@ -82,7 +82,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           parent = G_array();
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW("integer subscript applied to non-array: ", parent);
+          ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         }
         auto& arr = parent.open_array();
         // Return a pointer to the element at the given index if the index is valid; create an element if it is out of range.
@@ -93,7 +93,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
             return nullptr;
           }
           if(nadd > arr.max_size() - arr.size()) {
-            ASTERIA_THROW("array length overflow: ", arr.size(), " + ", nadd);
+            ASTERIA_THROW("array length overflow (`$1` + `$2` > `$3`)", arr.size(), nadd, arr.max_size());
           }
           arr.insert(arr.begin(), static_cast<size_t>(w.nprepend));
           arr.insert(arr.end(), static_cast<size_t>(w.nappend));
@@ -110,7 +110,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           parent = G_object();
         }
         if(!parent.is_object()) {
-          ASTERIA_THROW("string subscript applied to non-object: ", parent);
+          ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         }
         auto& obj = parent.open_object();
         // Return a pointer to the value with the given key if it is found; create a value otherwise.
@@ -136,14 +136,14 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           parent = G_array();
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW("tail subscript applied to non-array: ", parent);
+          ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
         }
         auto& arr = parent.open_array();
         // Append a new element to the end and return a pointer to it.
         return std::addressof(arr.emplace_back());
       }}
     default:
-      ASTERIA_TERMINATE("invalid reference modifier type: ", this->index());
+      ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
   }
 
@@ -158,7 +158,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
           return nullptr;
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW("integer subscript applied to non-array: ", parent);
+          ASTERIA_THROW("integer subscript applied to non-array (parent `$1`, index `$2`)", parent, altr.index);
         }
         auto& arr = parent.open_array();
         // Erase the element at the given index and return it.
@@ -178,7 +178,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
           return nullptr;
         }
         if(!parent.is_object()) {
-          ASTERIA_THROW("string subscript applied to non-object: ", parent);
+          ASTERIA_THROW("string subscript applied to non-object (parent `$1`, key `$2`)", parent, altr.key);
         }
         auto& obj = parent.open_object();
         // Erase the value with the given key and return it.
@@ -197,7 +197,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
           return nullptr;
         }
         if(!parent.is_array()) {
-          ASTERIA_THROW("tail subscript applied to non-array: ", parent);
+          ASTERIA_THROW("tail subscript applied to non-array (parent `$1`)", parent);
         }
         auto& arr = parent.open_array();
         // Erase the last element and return it.
@@ -209,7 +209,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         return elem;
       }}
     default:
-      ASTERIA_TERMINATE("invalid reference modifier type: ", this->index());
+      ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
   }
 

@@ -5,40 +5,29 @@
 #define ASTERIA_UTILITIES_HPP_
 
 #include "fwd.hpp"
-#include <exception>
+#include "rocket/format.hpp"
 
 namespace Asteria {
 
-// Stream-style formatter
-class Formatter
+// Error handling
+extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg, const char* trailer = "") noexcept;
+
+template<typename... ParamsT> cow_string format_string(const ParamsT&... params)
   {
-  private:
-    tinyfmt_str m_fmt;
+    tinyfmt_str out;
+    format(out, params...);  // ADL intended
+    return out.extract_string();
+  }
 
-  public:
-    template<typename ValueT> Formatter& operator,(const ValueT& value)
-      {
-        return (this->m_fmt << value), *this;
-      }
-    cow_string extract_string() noexcept
-      {
-        return this->m_fmt.extract_string();
-      }
-  };
-
-#define ASTERIA_FORMAT(...)        ((::Asteria::Formatter(), __VA_ARGS__).extract_string())
-
-extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept;
-
+// Note the format string must be a string literal that contains no dollar signs.
 #define ASTERIA_TERMINATE(...)     (::Asteria::write_log_to_stderr(__FILE__, __LINE__,  \
-                                         ASTERIA_FORMAT("ASTERIA_TERMINATE: ", __VA_ARGS__,  \
-                                           "\nThis is likely a bug. Please report.")),  \
+                                       ::Asteria::format_string("ASTERIA_TERMINATE: " __VA_ARGS__),  \
+                                           "\nThis is likely a bug. Please report."),  \
                                        ::std::terminate())
-
 #define ASTERIA_THROW(...)         (::rocket::sprintf_and_throw<::std::runtime_error>(  \
                                        "%s: %s\n[thrown from native code at '%s:%ld']",  \
-                                       __func__, ASTERIA_FORMAT(__VA_ARGS__).c_str(),  \
-                                       __FILE__, (long)__LINE__))
+                                           __func__, ::Asteria::format_string("" __VA_ARGS__).c_str(),  \
+                                           __FILE__, static_cast<long>(__LINE__)))
 
 // UTF-8 conversion functions
 extern bool utf8_encode(char*& pos, char32_t cp);

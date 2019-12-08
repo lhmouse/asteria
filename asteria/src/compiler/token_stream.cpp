@@ -158,7 +158,7 @@ namespace Asteria {
         const char* data(size_t add = 0) const
           {
             if(add > this->m_str.size() - this->m_off) {
-              ASTERIA_THROW("attempt to seek past end of line (`", this->m_off, "` + `", add, "` > `", this->m_str.size(),"`)");
+              ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)", this->m_off, add, this->m_str.size());
             }
             return this->m_str.data() + (this->m_off + add);
           }
@@ -172,14 +172,14 @@ namespace Asteria {
         void consume(size_t add)
           {
             if(add > this->m_str.size() - this->m_off) {
-              ASTERIA_THROW("attempt to seek past end of line (`", this->m_off, "` + `", add, "` > `", this->m_str.size(),"`)");
+              ASTERIA_THROW("attempt to seek past end of line (`$1` + `$2` > `$3`)", this->m_off, add, this->m_str.size());
             }
             this->m_off += add;
           }
         void rewind(size_t off = 0)
           {
             if(off > this->m_str.size()) {
-              ASTERIA_THROW("invalid offset within current line (`", off, "` > `", this->m_str.size(),"`)");
+              ASTERIA_THROW("invalid offset within current line (`$1` > `$2`)", off, this->m_str.size());
             }
             this->m_off = off;
           }

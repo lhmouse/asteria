@@ -143,8 +143,8 @@ Argument_Reader& Argument_Reader::g(opt<G_boolean>& qxvalue)
     }
     if(!val.is_boolean()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `boolean` or `null`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `boolean` or `null`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -170,8 +170,8 @@ Argument_Reader& Argument_Reader::g(opt<G_integer>& qxvalue)
     }
     if(!val.is_integer()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `integer` or `null`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `integer` or `null`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -197,8 +197,8 @@ Argument_Reader& Argument_Reader::g(opt<G_real>& qxvalue)
     }
     if(!val.is_convertible_to_real()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `integer`, `real` or `null`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `integer`, `real` or `null`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -224,8 +224,8 @@ Argument_Reader& Argument_Reader::g(opt<G_string>& qxvalue)
     }
     if(!val.is_string()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `string` or `null`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `string` or `null`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -251,8 +251,8 @@ Argument_Reader& Argument_Reader::g(opt<G_opaque>& qxvalue)
     }
     if(!val.is_opaque()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `opaque` or `null`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `opaque` or `null`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -278,8 +278,8 @@ Argument_Reader& Argument_Reader::g(opt<G_function>& qxvalue)
     }
     if(!val.is_function()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `function` or `null`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `function` or `null`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -305,8 +305,8 @@ Argument_Reader& Argument_Reader::g(opt<G_array>& qxvalue)
     }
     if(!val.is_array()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `array` or `null`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `array` or `null`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -332,8 +332,8 @@ Argument_Reader& Argument_Reader::g(opt<G_object>& qxvalue)
     }
     if(!val.is_object()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `object` or `null`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `object` or `null`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -354,8 +354,8 @@ Argument_Reader& Argument_Reader::g(G_boolean& xvalue)
     const auto& val = karg->read();
     if(!val.is_boolean()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `boolean`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `boolean`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -376,8 +376,8 @@ Argument_Reader& Argument_Reader::g(G_integer& xvalue)
     const auto& val = karg->read();
     if(!val.is_integer()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `integer`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `integer`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -398,8 +398,8 @@ Argument_Reader& Argument_Reader::g(G_real& xvalue)
     const auto& val = karg->read();
     if(!val.is_convertible_to_real()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `integer` or `real`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `integer` or `real`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -420,8 +420,8 @@ Argument_Reader& Argument_Reader::g(G_string& xvalue)
     const auto& val = karg->read();
     if(!val.is_string()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `string`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `string`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -442,8 +442,8 @@ Argument_Reader& Argument_Reader::g(G_opaque& xvalue)
     const auto& val = karg->read();
     if(!val.is_opaque()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `opaque`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `opaque`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -464,8 +464,8 @@ Argument_Reader& Argument_Reader::g(G_function& xvalue)
     const auto& val = karg->read();
     if(!val.is_function()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `function`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `function`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -486,8 +486,8 @@ Argument_Reader& Argument_Reader::g(G_array& xvalue)
     const auto& val = karg->read();
     if(!val.is_array()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `array`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `array`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -508,8 +508,8 @@ Argument_Reader& Argument_Reader::g(G_object& xvalue)
     const auto& val = karg->read();
     if(!val.is_object()) {
       // If the val doesn't have the desired type, fail.
-      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument ", karg - this->m_args->data() + 1,
-                                       " (expecting `object`, got `", val.what_gtype(), "`)"); });
+      this->do_fail([&]{ ASTERIA_THROW("unexpected type of argument `$1` (expecting `object`, got `$2`)",
+                                       karg - this->m_args->data() + 1, val.what_gtype());  });
       return *this;
     }
     // Copy the val.
@@ -566,7 +566,7 @@ bool Argument_Reader::finish()
     // There shall be no more arguments than parameters.
     auto nargs = this->m_args->size();
     if(nargs > *qvoff) {
-      this->do_fail([&]{ ASTERIA_THROW("too many arguments (`", nargs, "` > `", *qvoff, "`)");  });
+      this->do_fail([&]{ ASTERIA_THROW("too many arguments (`$1` > `$2`)", nargs, *qvoff);  });
       return false;
     }
     return true;
@@ -610,8 +610,7 @@ void Argument_Reader::throw_no_matching_function_call() const
       ovlds << ']';
     }
     // Throw the exception now.
-    rocket::sprintf_and_throw<std::invalid_argument>("no matching function call for `%s(%s)`%s",
-                                                     this->m_name.c_str(), args.c_str(), ovlds.c_str());
+    ASTERIA_THROW("no matching function call for `$1($2)`$3", this->m_name, args, ovlds);
   }
 
 }  // namespace Asteria

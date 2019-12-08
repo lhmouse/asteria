@@ -18,28 +18,28 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
     size_t elps = SIZE_MAX;
     // Set parameters, which are local references.
     for(size_t i = 0; i < params.size(); ++i) {
-      const auto& param = params.at(i);
-      if(param.empty()) {
+      const auto& name = params.at(i);
+      if(name.empty()) {
         continue;
       }
-      if(param == "...") {
+      if(name == "...") {
         // Nothing is set for the parameter placeholder, but the parameter list terminates here.
         ROCKET_ASSERT(i == params.size() - 1);
         elps = i;
         break;
       }
-      if(param.rdstr().starts_with("__")) {
-        ASTERIA_THROW("reserved name not declarable (param `", param, "`)");
+      if(name.rdstr().starts_with("__")) {
+        ASTERIA_THROW("reserved name not declarable as parameter (name `$1`)", name);
       }
       // Set the parameter.
       if(ROCKET_UNEXPECT(i >= args.size()))
-        this->open_named_reference(param) = Reference_Root::S_null();
+        this->open_named_reference(name) = Reference_Root::S_null();
       else
-        this->open_named_reference(param) = rocket::move(args.mut(i));
+        this->open_named_reference(name) = rocket::move(args.mut(i));
     }
     if((elps == SIZE_MAX) && (args.size() > params.size())) {
       // Disallow exceess arguments if the function is not variadic.
-      ASTERIA_THROW("too many arguments (`", args.size(), "` > `", params.size(), "`)");
+      ASTERIA_THROW("too many arguments (`$1` > `$2`)", args.size(), params.size());
     }
     // Pack `__this` and `__varg`. This is tricky.
     args.erase(0, elps);

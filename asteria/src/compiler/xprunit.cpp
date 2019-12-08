@@ -157,7 +157,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
         return code;
       }}
     default:
-      ASTERIA_TERMINATE("invalid expression unit type (index `", this->index(), "`)");
+      ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());
     }
   }
 
