@@ -25,7 +25,6 @@ namespace Asteria {
         // Don't go past the end.
         return std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
       }
-
     pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, const G_integer& from, const opt<G_integer>& length)
       {
         auto slen = static_cast<int64_t>(text.size());
