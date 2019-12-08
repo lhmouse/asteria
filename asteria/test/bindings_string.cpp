@@ -276,6 +276,12 @@ int main()
         assert std.string.pack_64le(0x123456789ABCDEF0) == "\xF0\xDE\xBC\x9A\x78\x56\x34\x12";
         assert std.string.pack_64le([ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ]) == "\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E";
         assert std.string.unpack_64le("\xEF\xCD\xAB\x89\x67\x45\x23\x01\x10\x32\x54\x76\x98\xBA\xDC\x7E") == [ 0x0123456789ABCDEF, 0x7EDCBA9876543210 ];
+
+        assert std.string.format("1$$2") == "1$2";
+        assert std.string.format("hello $1 $2", "world", '!') == "hello world !";
+        assert std.string.format("${1} + $1 = ${2}", 5, 10) == "5 + 5 = 10";
+        assert std.string.format("funny $0 string") == "funny funny $0 string string";
+        assert std.string.format("$2345", 'x', 'y') == "y345";
       )__"), tinybuf::open_read);
 
     Simple_Script code(cbuf, rocket::sref("my_file"));
