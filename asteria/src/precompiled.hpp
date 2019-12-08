@@ -32,6 +32,7 @@
 #include "../rocket/tinyfmt.hpp"
 #include "../rocket/tinyfmt_str.hpp"
 #include "../rocket/tinyfmt_file.hpp"
+#include "../rocket/format.hpp"
 #include "../rocket/atomic_flag.hpp"
 
 #include <iterator>

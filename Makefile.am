@@ -70,6 +70,7 @@ pkginclude_rocket_HEADERS =  \
   asteria/rocket/tinyfmt.hpp  \
   asteria/rocket/tinyfmt_str.hpp  \
   asteria/rocket/tinyfmt_file.hpp  \
+  asteria/rocket/format.hpp  \
   asteria/rocket/atomic_flag.hpp
 
 pkginclude_rocket_platformdir = ${pkgincludedir}/rocket/platform
