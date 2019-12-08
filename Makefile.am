@@ -91,7 +91,8 @@ lib_librocket_la_SOURCES =  \
   asteria/rocket/ascii_numget.cpp  \
   asteria/rocket/tinyfmt.cpp  \
   asteria/rocket/tinyfmt_str.cpp  \
-  asteria/rocket/tinyfmt_file.cpp
+  asteria/rocket/tinyfmt_file.cpp  \
+  asteria/rocket/format.cpp
 
 lib_librocket_la_CXXFLAGS =  \
   ${AM_CXXFLAGS} -include .pch.hpp

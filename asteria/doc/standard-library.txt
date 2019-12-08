@@ -730,22 +730,22 @@
 	* Throws an exception if the length of `text` is not a multiple
 	  of 8.
 
-`std.string.format(format, ...)`
+`std.string.format(templ, ...)`
 
-	* Compose a `string` according to the template string `format`,
-	  as follows:
+	* Compose a `string` according to the template string `templ`, as
+	  follows:
 
 	  * A sequence of `$$` is replaced with a literal `$`.
 	  * A sequence of `${NNN}`, where `NNN` is at most three decimal
 	    numerals, is replaced with the NNN-th argument. If `NNN` is
-	    zero, it is replaced with `format` itself.
+	    zero, it is replaced with `templ` itself.
 	  * A sequence of `$N`, where `N` is a single decimal numeral,
 	    behaves the same as `${N}`.
 	  * All other characters are copied verbatim.
 
 	* Returns the composed `string`.
 
-	* Throws an exception if `format` contains invalid placeholder
+	* Throws an exception if `templ` contains invalid placeholder
 	  sequences, or when a placeholder sequence has no corresponding
 	  argument.
 
