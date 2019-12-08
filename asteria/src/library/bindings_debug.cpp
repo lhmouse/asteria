@@ -48,7 +48,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                   Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.debug.print"), rocket::ref(args));
           // Parse variadic arguments.
           cow_vector<Value> values;
@@ -89,7 +89,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                   Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.debug.dump"), rocket::ref(args));
           // Parse arguments.
           Value value;

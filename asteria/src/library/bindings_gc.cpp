@@ -103,7 +103,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global,
-                   Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.gc.tracked_count"), rocket::ref(args));
           // Parse arguments.
           G_integer generation;
@@ -142,7 +142,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global,
-                   Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.gc.get_threshold"), rocket::ref(args));
           // Parse arguments.
           G_integer generation;
@@ -186,7 +186,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global,
-                   Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.gc.set_threshold"), rocket::ref(args));
           // Parse arguments.
           G_integer generation;
@@ -227,7 +227,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](const Value& /*opaque*/, const Global_Context& global,
-                   Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.gc.collect"), rocket::ref(args));
           // Parse arguments.
           opt<G_integer> generation_limit;
