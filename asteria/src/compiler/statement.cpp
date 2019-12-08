@@ -400,7 +400,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // We don't tell empty return statements from non-empty ones here.
         if(altr.expr.empty()) {
           // If no expression is provided, return `null`.
-          AIR_Node::S_push_literal xnode_def = { G_null() };
+          AIR_Node::S_push_literal xnode_def = { nullptr };
           code.emplace_back(rocket::move(xnode_def));
           // Forward the result as is.
           AIR_Node::S_simple_status xnode_ret = { air_status_return };

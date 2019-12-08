@@ -515,7 +515,7 @@ DCE_Result AIR_Node::optimize_dce()
 
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();
-        var->reset(G_null(), true);
+        var->reset(nullptr, true);
         // Call the hook function if any.
         auto qh = ctx.global().get_hooks_opt();
         if(qh) {
@@ -2625,7 +2625,7 @@ DCE_Result AIR_Node::optimize_dce()
 
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();
-        var->reset(G_null(), immutable);
+        var->reset(nullptr, immutable);
         // Call the hook function if any.
         auto qh = ctx.global().get_hooks_opt();
         if(qh) {

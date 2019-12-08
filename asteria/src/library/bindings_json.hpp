@@ -8,9 +8,9 @@
 
 namespace Asteria {
 
-extern G_string std_json_format(const Value& value, const opt<G_string>& indent = rocket::clear);
-extern G_string std_json_format(const Value& value, const G_integer& indent);
-extern Value std_json_parse(const G_string& text);
+extern G_string std_json_format(const Value& value, aopt<G_string> indent = rocket::clear);
+extern G_string std_json_format(const Value& value, aref<G_integer> indent);
+extern Value std_json_parse(aref<G_string> text);
 
 // Create an object that is to be referenced as `std.json`.
 extern void create_bindings_json(G_object& result, API_Version version);

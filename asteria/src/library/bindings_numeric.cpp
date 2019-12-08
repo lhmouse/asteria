@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-G_integer std_numeric_abs(const G_integer& value)
+G_integer std_numeric_abs(aref<G_integer> value)
   {
     if(value == INT64_MIN) {
       ASTERIA_THROW("integer absolute value overflow (value `", value, "`)");
@@ -19,61 +19,61 @@ G_integer std_numeric_abs(const G_integer& value)
     return std::abs(value);
   }
 
-G_real std_numeric_abs(const G_real& value)
+G_real std_numeric_abs(aref<G_real> value)
   {
     return std::fabs(value);
   }
 
-G_integer std_numeric_sign(const G_integer& value)
+G_integer std_numeric_sign(aref<G_integer> value)
   {
     return value >> 63;
   }
 
-G_integer std_numeric_sign(const G_real& value)
+G_integer std_numeric_sign(aref<G_real> value)
   {
     return std::signbit(value) ? -1 : 0;
   }
 
-G_boolean std_numeric_is_finite(const G_integer& /*value*/)
+G_boolean std_numeric_is_finite(aref<G_integer> /*value*/)
   {
     return true;
   }
 
-G_boolean std_numeric_is_finite(const G_real& value)
+G_boolean std_numeric_is_finite(aref<G_real> value)
   {
     return std::isfinite(value);
   }
 
-G_boolean std_numeric_is_infinity(const G_integer& /*value*/)
+G_boolean std_numeric_is_infinity(aref<G_integer> /*value*/)
   {
     return false;
   }
 
-G_boolean std_numeric_is_infinity(const G_real& value)
+G_boolean std_numeric_is_infinity(aref<G_real> value)
   {
     return std::isinf(value);
   }
 
-G_boolean std_numeric_is_nan(const G_integer& /*value*/)
+G_boolean std_numeric_is_nan(aref<G_integer> /*value*/)
   {
     return false;
   }
 
-G_boolean std_numeric_is_nan(const G_real& value)
+G_boolean std_numeric_is_nan(aref<G_real> value)
   {
     return std::isnan(value);
   }
 
     namespace {
 
-    const G_integer& do_verify_bounds(const G_integer& lower, const G_integer& upper)
+    aref<G_integer> do_verify_bounds(aref<G_integer> lower, aref<G_integer> upper)
       {
         if(!(lower <= upper)) {
           ASTERIA_THROW("bounds not valid (lower `", lower, "`, upper `", upper, "`)");
         }
         return upper;
       }
-    const G_real& do_verify_bounds(const G_real& lower, const G_real& upper)
+    aref<G_real> do_verify_bounds(aref<G_real> lower, aref<G_real> upper)
       {
         if(!std::islessequal(lower, upper)) {
           ASTERIA_THROW("bounds not valid (lower `", lower, "`, upper `", upper, "`)");
@@ -81,7 +81,7 @@ G_boolean std_numeric_is_nan(const G_real& value)
         return upper;
       }
 
-    G_integer do_cast_to_integer(const G_real& value)
+    G_integer do_cast_to_integer(aref<G_real> value)
       {
         if(!std::islessequal(-0x1p63, value) || !std::islessequal(value, 0x1p63 - 0x1p10)) {
           ASTERIA_THROW("value not representable as an `integer` (value `", value, "`)");
@@ -91,97 +91,97 @@ G_boolean std_numeric_is_nan(const G_real& value)
 
     }  // namespace
 
-G_integer std_numeric_clamp(const G_integer& value, const G_integer& lower, const G_integer& upper)
+G_integer std_numeric_clamp(aref<G_integer> value, aref<G_integer> lower, aref<G_integer> upper)
   {
     return rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
-G_real std_numeric_clamp(const G_real& value, const G_real& lower, const G_real& upper)
+G_real std_numeric_clamp(aref<G_real> value, aref<G_real> lower, aref<G_real> upper)
   {
     return rocket::clamp(value, lower, do_verify_bounds(lower, upper));
   }
 
-G_integer std_numeric_round(const G_integer& value)
+G_integer std_numeric_round(aref<G_integer> value)
   {
     return value;
   }
 
-G_real std_numeric_round(const G_real& value)
+G_real std_numeric_round(aref<G_real> value)
   {
     return std::round(value);
   }
 
-G_integer std_numeric_floor(const G_integer& value)
+G_integer std_numeric_floor(aref<G_integer> value)
   {
     return value;
   }
 
-G_real std_numeric_floor(const G_real& value)
+G_real std_numeric_floor(aref<G_real> value)
   {
     return std::floor(value);
   }
 
-G_integer std_numeric_ceil(const G_integer& value)
+G_integer std_numeric_ceil(aref<G_integer> value)
   {
     return value;
   }
 
-G_real std_numeric_ceil(const G_real& value)
+G_real std_numeric_ceil(aref<G_real> value)
   {
     return std::ceil(value);
   }
 
-G_integer std_numeric_trunc(const G_integer& value)
+G_integer std_numeric_trunc(aref<G_integer> value)
   {
     return value;
   }
 
-G_real std_numeric_trunc(const G_real& value)
+G_real std_numeric_trunc(aref<G_real> value)
   {
     return std::trunc(value);
   }
 
-G_integer std_numeric_iround(const G_integer& value)
+G_integer std_numeric_iround(aref<G_integer> value)
   {
     return value;
   }
 
-G_integer std_numeric_iround(const G_real& value)
+G_integer std_numeric_iround(aref<G_real> value)
   {
     return do_cast_to_integer(std::round(value));
   }
 
-G_integer std_numeric_ifloor(const G_integer& value)
+G_integer std_numeric_ifloor(aref<G_integer> value)
   {
     return value;
   }
 
-G_integer std_numeric_ifloor(const G_real& value)
+G_integer std_numeric_ifloor(aref<G_real> value)
   {
     return do_cast_to_integer(std::floor(value));
   }
 
-G_integer std_numeric_iceil(const G_integer& value)
+G_integer std_numeric_iceil(aref<G_integer> value)
   {
     return value;
   }
 
-G_integer std_numeric_iceil(const G_real& value)
+G_integer std_numeric_iceil(aref<G_real> value)
   {
     return do_cast_to_integer(std::ceil(value));
   }
 
-G_integer std_numeric_itrunc(const G_integer& value)
+G_integer std_numeric_itrunc(aref<G_integer> value)
   {
     return value;
   }
 
-G_integer std_numeric_itrunc(const G_real& value)
+G_integer std_numeric_itrunc(aref<G_real> value)
   {
     return do_cast_to_integer(std::trunc(value));
   }
 
-G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit)
+G_real std_numeric_random(const Global_Context& global, aopt<G_real> limit)
   {
     int cls = FP_NORMAL;  // assume 1.0
     if(limit) {
@@ -202,52 +202,52 @@ G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit
     return ratio;
   }
 
-G_real std_numeric_sqrt(const G_real& x)
+G_real std_numeric_sqrt(aref<G_real> x)
   {
     return std::sqrt(x);
   }
 
-G_real std_numeric_fma(const G_real& x, const G_real& y, const G_real& z)
+G_real std_numeric_fma(aref<G_real> x, aref<G_real> y, aref<G_real> z)
   {
     return std::fma(x, y, z);
   }
 
-G_real std_numeric_remainder(const G_real& x, const G_real& y)
+G_real std_numeric_remainder(aref<G_real> x, aref<G_real> y)
   {
     return std::remainder(x, y);
   }
 
-pair<G_real, G_integer> std_numeric_frexp(const G_real& x)
+pair<G_real, G_integer> std_numeric_frexp(aref<G_real> x)
   {
     int exp;
     auto frac = std::frexp(x, &exp);
     return { frac, exp };
   }
 
-G_real std_numeric_ldexp(const G_real& frac, const G_integer& exp)
+G_real std_numeric_ldexp(aref<G_real> frac, aref<G_integer> exp)
   {
     int rexp = static_cast<int>(rocket::clamp(exp, INT_MIN, INT_MAX));
     return std::ldexp(frac, rexp);
   }
 
-G_integer std_numeric_addm(const G_integer& x, const G_integer& y)
+G_integer std_numeric_addm(aref<G_integer> x, aref<G_integer> y)
   {
     return G_integer(static_cast<uint64_t>(x) + static_cast<uint64_t>(y));
   }
 
-G_integer std_numeric_subm(const G_integer& x, const G_integer& y)
+G_integer std_numeric_subm(aref<G_integer> x, aref<G_integer> y)
   {
     return G_integer(static_cast<uint64_t>(x) - static_cast<uint64_t>(y));
   }
 
-G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
+G_integer std_numeric_mulm(aref<G_integer> x, aref<G_integer> y)
   {
     return G_integer(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
   }
 
     namespace {
 
-    ROCKET_PURE_FUNCTION G_integer do_saturating_add(const G_integer& lhs, const G_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_saturating_add(aref<G_integer> lhs, aref<G_integer> rhs)
       {
         if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
           return (rhs >> 63) ^ INT64_MAX;
@@ -255,7 +255,7 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION G_integer do_saturating_sub(const G_integer& lhs, const G_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_saturating_sub(aref<G_integer> lhs, aref<G_integer> rhs)
       {
         if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
           return (rhs >> 63) ^ INT64_MIN;
@@ -263,7 +263,7 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION G_integer do_saturating_mul(const G_integer& lhs, const G_integer& rhs)
+    ROCKET_PURE_FUNCTION G_integer do_saturating_mul(aref<G_integer> lhs, aref<G_integer> rhs)
       {
         if((lhs == 0) || (rhs == 0)) {
           return 0;
@@ -288,54 +288,54 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
         return alhs * srhs;
       }
 
-    ROCKET_PURE_FUNCTION G_real do_saturating_add(const G_real& lhs, const G_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_saturating_add(aref<G_real> lhs, aref<G_real> rhs)
       {
         return lhs + rhs;
       }
 
-    ROCKET_PURE_FUNCTION G_real do_saturating_sub(const G_real& lhs, const G_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_saturating_sub(aref<G_real> lhs, aref<G_real> rhs)
       {
         return lhs - rhs;
       }
 
-    ROCKET_PURE_FUNCTION G_real do_saturating_mul(const G_real& lhs, const G_real& rhs)
+    ROCKET_PURE_FUNCTION G_real do_saturating_mul(aref<G_real> lhs, aref<G_real> rhs)
       {
         return lhs * rhs;
       }
 
     }  // namespace
 
-G_integer std_numeric_adds(const G_integer& x, const G_integer& y)
+G_integer std_numeric_adds(aref<G_integer> x, aref<G_integer> y)
   {
     return do_saturating_add(x, y);
   }
 
-G_real std_numeric_adds(const G_real& x, const G_real& y)
+G_real std_numeric_adds(aref<G_real> x, aref<G_real> y)
   {
     return do_saturating_add(x, y);
   }
 
-G_integer std_numeric_subs(const G_integer& x, const G_integer& y)
+G_integer std_numeric_subs(aref<G_integer> x, aref<G_integer> y)
   {
     return do_saturating_sub(x, y);
   }
 
-G_real std_numeric_subs(const G_real& x, const G_real& y)
+G_real std_numeric_subs(aref<G_real> x, aref<G_real> y)
   {
     return do_saturating_sub(x, y);
   }
 
-G_integer std_numeric_muls(const G_integer& x, const G_integer& y)
+G_integer std_numeric_muls(aref<G_integer> x, aref<G_integer> y)
   {
     return do_saturating_mul(x, y);
   }
 
-G_real std_numeric_muls(const G_real& x, const G_real& y)
+G_real std_numeric_muls(aref<G_real> x, aref<G_real> y)
   {
     return do_saturating_mul(x, y);
   }
 
-G_integer std_numeric_lzcnt(const G_integer& x)
+G_integer std_numeric_lzcnt(aref<G_integer> x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -353,7 +353,7 @@ G_integer std_numeric_lzcnt(const G_integer& x)
     return count;
   }
 
-G_integer std_numeric_tzcnt(const G_integer& x)
+G_integer std_numeric_tzcnt(aref<G_integer> x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -371,7 +371,7 @@ G_integer std_numeric_tzcnt(const G_integer& x)
     return count;
   }
 
-G_integer std_numeric_popcnt(const G_integer& x)
+G_integer std_numeric_popcnt(aref<G_integer> x)
   {
     // TODO: Modern CPUs have intrinsics for this.
     uint64_t ireg = static_cast<uint64_t>(x);
@@ -390,7 +390,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
 
     namespace {
 
-    pair<G_integer, int> do_decompose_integer(uint8_t ebase, const G_integer& value)
+    pair<G_integer, int> do_decompose_integer(uint8_t ebase, aref<G_integer> value)
       {
         int64_t ireg = value;
         int iexp = 0;
@@ -426,7 +426,7 @@ G_integer std_numeric_popcnt(const G_integer& x)
 
     }  // namespace
 
-G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
+G_string std_numeric_format(aref<G_integer> value, aopt<G_integer> base, aopt<G_integer> ebase)
   {
     G_string text;
     rocket::ascii_numput nump;
@@ -484,7 +484,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
     return text;
   }
 
-G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
+G_string std_numeric_format(aref<G_real> value, aopt<G_integer> base, aopt<G_integer> ebase)
   {
     G_string text;
     rocket::ascii_numput nump;
@@ -536,7 +536,7 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
     return text;
   }
 
-opt<G_integer> std_numeric_parse_integer(const G_string& text)
+opt<G_integer> std_numeric_parse_integer(aref<G_string> text)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == G_string::npos) {
@@ -564,7 +564,7 @@ opt<G_integer> std_numeric_parse_integer(const G_string& text)
     return value;
   }
 
-opt<G_real> std_numeric_parse_real(const G_string& text, const opt<G_boolean>& saturating)
+opt<G_real> std_numeric_parse_real(aref<G_string> text, aopt<G_boolean> saturating)
   {
     auto tpos = text.find_first_not_of(s_spaces);
     if(tpos == G_string::npos) {

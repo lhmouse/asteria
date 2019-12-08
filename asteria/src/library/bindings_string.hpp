@@ -8,91 +8,91 @@
 
 namespace Asteria {
 
-extern G_string std_string_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length = rocket::clear);
-extern G_string std_string_replace_slice(const G_string& text, const G_integer& from, const G_string& replacement);
-extern G_string std_string_replace_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& replacement);
+extern G_string std_string_slice(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length = rocket::clear);
+extern G_string std_string_replace_slice(aref<G_string> text, aref<G_integer> from, aref<G_string> replacement);
+extern G_string std_string_replace_slice(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> replacement);
 
-extern G_integer std_string_compare(const G_string& text1, const G_string& text2, const opt<G_integer>& length = rocket::clear);
-extern G_boolean std_string_starts_with(const G_string& text, const G_string& prefix);
-extern G_boolean std_string_ends_with(const G_string& text, const G_string& suffix);
+extern G_integer std_string_compare(aref<G_string> text1, aref<G_string> text2, aopt<G_integer> length = rocket::clear);
+extern G_boolean std_string_starts_with(aref<G_string> text, aref<G_string> prefix);
+extern G_boolean std_string_ends_with(aref<G_string> text, aref<G_string> suffix);
 
-extern opt<G_integer> std_string_find(const G_string& text, const G_string& pattern);
-extern opt<G_integer> std_string_find(const G_string& text, const G_integer& from, const G_string& pattern);
-extern opt<G_integer> std_string_find(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern);
-extern opt<G_integer> std_string_rfind(const G_string& text, const G_string& pattern);
-extern opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, const G_string& pattern);
-extern opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern);
+extern opt<G_integer> std_string_find(aref<G_string> text, aref<G_string> pattern);
+extern opt<G_integer> std_string_find(aref<G_string> text, aref<G_integer> from, aref<G_string> pattern);
+extern opt<G_integer> std_string_find(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> pattern);
+extern opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_string> pattern);
+extern opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_integer> from, aref<G_string> pattern);
+extern opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> pattern);
 
-extern G_string std_string_find_and_replace(const G_string& text, const G_string& pattern, const G_string& replacement);
-extern G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const G_string& pattern, const G_string& replacement);
-extern G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern, const G_string& replacement);
+extern G_string std_string_find_and_replace(aref<G_string> text, aref<G_string> pattern, aref<G_string> replacement);
+extern G_string std_string_find_and_replace(aref<G_string> text, aref<G_integer> from, aref<G_string> pattern, aref<G_string> replacement);
+extern G_string std_string_find_and_replace(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> pattern, aref<G_string> replacement);
 
-extern opt<G_integer> std_string_find_any_of(const G_string& text, const G_string& accept);
-extern opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& from, const G_string& accept);
-extern opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& accept);
-extern opt<G_integer> std_string_find_not_of(const G_string& text, const G_string& reject);
-extern opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& from, const G_string& reject);
-extern opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& reject);
-extern opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_string& accept);
-extern opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& from, const G_string& accept);
-extern opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& accept);
-extern opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_string& reject);
-extern opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& from, const G_string& reject);
-extern opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& reject);
+extern opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_string> accept);
+extern opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_integer> from, aref<G_string> accept);
+extern opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> accept);
+extern opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_string> reject);
+extern opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_integer> from, aref<G_string> reject);
+extern opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> reject);
+extern opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_string> accept);
+extern opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_integer> from, aref<G_string> accept);
+extern opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> accept);
+extern opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_string> reject);
+extern opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_integer> from, aref<G_string> reject);
+extern opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> reject);
 
-extern G_string std_string_reverse(const G_string& text);
-extern G_string std_string_trim(const G_string& text, const opt<G_string>& reject = rocket::clear);
-extern G_string std_string_ltrim(const G_string& text, const opt<G_string>& reject = rocket::clear);
-extern G_string std_string_rtrim(const G_string& text, const opt<G_string>& reject = rocket::clear);
-extern G_string std_string_lpad(const G_string& text, const G_integer& length, const opt<G_string>& padding = rocket::clear);
-extern G_string std_string_rpad(const G_string& text, const G_integer& length, const opt<G_string>& padding = rocket::clear);
-extern G_string std_string_to_upper(const G_string& text);
-extern G_string std_string_to_lower(const G_string& text);
-extern G_string std_string_translate(const G_string& text, const G_string& inputs, const opt<G_string>& outputs = rocket::clear);
+extern G_string std_string_reverse(aref<G_string> text);
+extern G_string std_string_trim(aref<G_string> text, aopt<G_string> reject = rocket::clear);
+extern G_string std_string_ltrim(aref<G_string> text, aopt<G_string> reject = rocket::clear);
+extern G_string std_string_rtrim(aref<G_string> text, aopt<G_string> reject = rocket::clear);
+extern G_string std_string_lpad(aref<G_string> text, aref<G_integer> length, aopt<G_string> padding = rocket::clear);
+extern G_string std_string_rpad(aref<G_string> text, aref<G_integer> length, aopt<G_string> padding = rocket::clear);
+extern G_string std_string_to_upper(aref<G_string> text);
+extern G_string std_string_to_lower(aref<G_string> text);
+extern G_string std_string_translate(aref<G_string> text, aref<G_string> inputs, aopt<G_string> outputs = rocket::clear);
 
-extern G_array std_string_explode(const G_string& text, const opt<G_string>& delim, const opt<G_integer>& limit = rocket::clear);
-extern G_string std_string_implode(const G_array& segments, const opt<G_string>& delim = rocket::clear);
+extern G_array std_string_explode(aref<G_string> text, aopt<G_string> delim, aopt<G_integer> limit = rocket::clear);
+extern G_string std_string_implode(aref<G_array> segments, aopt<G_string> delim = rocket::clear);
 
-extern G_string std_string_hex_encode(const G_string& data, const opt<G_boolean>& lowercase = rocket::clear, const opt<G_string>& delim = rocket::clear);
-extern opt<G_string> std_string_hex_decode(const G_string& text);
+extern G_string std_string_hex_encode(aref<G_string> data, aopt<G_boolean> lowercase = rocket::clear, aopt<G_string> delim = rocket::clear);
+extern opt<G_string> std_string_hex_decode(aref<G_string> text);
 
-extern G_string std_string_base32_encode(const G_string& data, const opt<G_boolean>& lowercase = rocket::clear);
-extern opt<G_string> std_string_base32_decode(const G_string& text);
+extern G_string std_string_base32_encode(aref<G_string> data, aopt<G_boolean> lowercase = rocket::clear);
+extern opt<G_string> std_string_base32_decode(aref<G_string> text);
 
-extern G_string std_string_base64_encode(const G_string& data);
-extern opt<G_string> std_string_base64_decode(const G_string& text);
+extern G_string std_string_base64_encode(aref<G_string> data);
+extern opt<G_string> std_string_base64_decode(aref<G_string> text);
 
-extern opt<G_string> std_string_utf8_encode(const G_integer& code_point, const opt<G_boolean>& permissive = rocket::clear);
-extern opt<G_string> std_string_utf8_encode(const G_array& code_points, const opt<G_boolean>& permissive = rocket::clear);
-extern opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& permissive = rocket::clear);
+extern opt<G_string> std_string_utf8_encode(aref<G_integer> code_point, aopt<G_boolean> permissive = rocket::clear);
+extern opt<G_string> std_string_utf8_encode(aref<G_array> code_points, aopt<G_boolean> permissive = rocket::clear);
+extern opt<G_array> std_string_utf8_decode(aref<G_string> text, aopt<G_boolean> permissive = rocket::clear);
 
-extern G_string std_string_pack8(const G_integer& value);
-extern G_string std_string_pack8(const G_array& values);
-extern G_array std_string_unpack8(const G_string& text);
+extern G_string std_string_pack8(aref<G_integer> value);
+extern G_string std_string_pack8(aref<G_array> values);
+extern G_array std_string_unpack8(aref<G_string> text);
 
-extern G_string std_string_pack_16be(const G_integer& value);
-extern G_string std_string_pack_16be(const G_array& values);
-extern G_array std_string_unpack_16be(const G_string& text);
+extern G_string std_string_pack_16be(aref<G_integer> value);
+extern G_string std_string_pack_16be(aref<G_array> values);
+extern G_array std_string_unpack_16be(aref<G_string> text);
 
-extern G_string std_string_pack_16le(const G_integer& value);
-extern G_string std_string_pack_16le(const G_array& values);
-extern G_array std_string_unpack_16le(const G_string& text);
+extern G_string std_string_pack_16le(aref<G_integer> value);
+extern G_string std_string_pack_16le(aref<G_array> values);
+extern G_array std_string_unpack_16le(aref<G_string> text);
 
-extern G_string std_string_pack_32be(const G_integer& value);
-extern G_string std_string_pack_32be(const G_array& values);
-extern G_array std_string_unpack_32be(const G_string& text);
+extern G_string std_string_pack_32be(aref<G_integer> value);
+extern G_string std_string_pack_32be(aref<G_array> values);
+extern G_array std_string_unpack_32be(aref<G_string> text);
 
-extern G_string std_string_pack_32le(const G_integer& value);
-extern G_string std_string_pack_32le(const G_array& values);
-extern G_array std_string_unpack_32le(const G_string& text);
+extern G_string std_string_pack_32le(aref<G_integer> value);
+extern G_string std_string_pack_32le(aref<G_array> values);
+extern G_array std_string_unpack_32le(aref<G_string> text);
 
-extern G_string std_string_pack_64be(const G_integer& value);
-extern G_string std_string_pack_64be(const G_array& values);
-extern G_array std_string_unpack_64be(const G_string& text);
+extern G_string std_string_pack_64be(aref<G_integer> value);
+extern G_string std_string_pack_64be(aref<G_array> values);
+extern G_array std_string_unpack_64be(aref<G_string> text);
 
-extern G_string std_string_pack_64le(const G_integer& value);
-extern G_string std_string_pack_64le(const G_array& values);
-extern G_array std_string_unpack_64le(const G_string& text);
+extern G_string std_string_pack_64le(aref<G_integer> value);
+extern G_string std_string_pack_64le(aref<G_array> values);
+extern G_array std_string_unpack_64le(aref<G_string> text);
 
 // Create an object that is to be referenced as `std.string`.
 extern void create_bindings_string(G_object& result, API_Version version);

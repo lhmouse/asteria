@@ -155,7 +155,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         const auto& altr = this->m_stor.as<index_array_index>();
         if(parent.is_null()) {
           // There is nothing to erase.
-          return G_null();
+          return nullptr;
         }
         if(!parent.is_array()) {
           ASTERIA_THROW("integer subscript applied to non-array: ", parent);
@@ -165,7 +165,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         auto w = wrap_index(altr.index, arr.size());
         auto nadd = w.nprepend | w.nappend;
         if(nadd != 0) {
-          return G_null();
+          return nullptr;
         }
         auto elem = rocket::move(arr.mut(w.rindex));
         arr.erase(w.rindex, 1);
@@ -175,7 +175,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         const auto& altr = this->m_stor.as<index_object_key>();
         if(parent.is_null()) {
           // There is nothing to erase.
-          return G_null();
+          return nullptr;
         }
         if(!parent.is_object()) {
           ASTERIA_THROW("string subscript applied to non-object: ", parent);
@@ -194,7 +194,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
           // There is nothing to erase.
-          return G_null();
+          return nullptr;
         }
         if(!parent.is_array()) {
           ASTERIA_THROW("tail subscript applied to non-array: ", parent);

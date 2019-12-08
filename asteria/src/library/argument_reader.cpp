@@ -117,7 +117,7 @@ Argument_Reader& Argument_Reader::g(Value& val)
     // Get the next argument.
     auto karg = this->do_peek_argument_opt();
     if(!karg) {
-      val = G_null();
+      val = nullptr;
       return *this;
     }
     // Copy the val as is.

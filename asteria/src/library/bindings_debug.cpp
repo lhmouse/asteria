@@ -17,7 +17,7 @@ bool std_debug_print(const cow_vector<Value>& values)
     return succ;
   }
 
-bool std_debug_dump(const Value& value, const opt<G_integer>& indent)
+bool std_debug_dump(const Value& value, aopt<G_integer> indent)
   {
     tinyfmt_str fmt;
     value.dump(fmt, static_cast<size_t>(rocket::clamp(indent.value_or(2), 0, 10)));

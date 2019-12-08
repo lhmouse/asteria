@@ -105,7 +105,7 @@ namespace Asteria {
           }
       };
 
-    tinyfmt& do_quote_string(tinyfmt& fmt, const G_string& str)
+    tinyfmt& do_quote_string(tinyfmt& fmt, aref<G_string> str)
       {
         // Although JavaScript uses UCS-2 rather than UTF-16, the JSON specification adopts UTF-16.
         fmt << '\"';
@@ -174,7 +174,7 @@ namespace Asteria {
         return fmt;
       }
 
-    G_object::const_iterator do_find_uncensored(const G_object& object, G_object::const_iterator from)
+    G_object::const_iterator do_find_uncensored(aref<G_object> object, G_object::const_iterator from)
       {
         return std::find_if(from, object.end(),
                             [](const auto& p) { return p.second.is_boolean() || p.second.is_integer() || p.second.is_real() ||
@@ -325,14 +325,14 @@ namespace Asteria {
 
     }  // namespace
 
-G_string std_json_format(const Value& value, const opt<G_string>& indent)
+G_string std_json_format(const Value& value, aopt<G_string> indent)
   {
     // No line break is inserted if `indent` is null or empty.
     return (!indent || indent->empty()) ? do_format_nonrecursive(value, Indenter_none())
                                         : do_format_nonrecursive(value, Indenter_string(*indent));
   }
 
-G_string std_json_format(const Value& value, const G_integer& indent)
+G_string std_json_format(const Value& value, aref<G_integer> indent)
   {
     // No line break is inserted if `indent` is non-positive.
     return (indent <= 0) ? do_format_nonrecursive(value, Indenter_none())
@@ -617,7 +617,7 @@ G_string std_json_format(const Value& value, const G_integer& indent)
 
     }  // namespace
 
-Value std_json_parse(const G_string& text)
+Value std_json_parse(aref<G_string> text)
   {
     // We reuse the lexer of Asteria here, allowing quite a few extensions e.g. binary numeric literals and comments.
     Compiler_Options opts = { };
@@ -632,17 +632,17 @@ Value std_json_parse(const G_string& text)
       tstrm.reload(cbuf, rocket::sref("<JSON text>"), opts);
     }
     catch(Parser_Error& except) {
-      return G_null();
+      return nullptr;
     }
     // Parse tokens.
     auto qvalue = do_json_parse_nonrecursive_opt(tstrm);
     if(!qvalue) {
-      return G_null();
+      return nullptr;
     }
     // Check whether all tokens have been consumed.
     auto qtok = tstrm.peek_opt();
     if(qtok) {
-      return G_null();
+      return nullptr;
     }
     return rocket::move(*qvalue);
   }

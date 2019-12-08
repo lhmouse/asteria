@@ -134,6 +134,9 @@ template<typename F, typename S> using cow_bivector = rocket::cow_vector<std::pa
 template<typename E, size_t... k> using array = rocket::array<E, k...>;
 template<typename E> using ref_to = rocket::reference_wrapper<E>;
 
+template<typename T> using aref = const T&;       // argument, required
+template<typename T> using aopt = const opt<T>&;  // argument, optional
+
 // `using`-directives
 using rocket::cbegin;
 using rocket::cend;

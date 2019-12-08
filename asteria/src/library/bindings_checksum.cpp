@@ -58,7 +58,7 @@ namespace Asteria {
             return callback;
           }
 
-        void write(const G_string& data) noexcept
+        void write(aref<G_string> data) noexcept
           {
             const auto p = reinterpret_cast<const uint8_t*>(data.data());
             const auto n = data.size();
@@ -95,7 +95,7 @@ G_object std_checksum_crc32_new()
           // Description
           rocket::sref("<std.checksum.crc32_new()>.write"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -120,7 +120,7 @@ G_object std_checksum_crc32_new()
           // Description
           rocket::sref("<std.checksum.crc32_new()>.finish"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -141,7 +141,7 @@ G_object std_checksum_crc32_new()
     return r;
   }
 
-G_integer std_checksum_crc32(const G_string& data)
+G_integer std_checksum_crc32(aref<G_string> data)
   {
     CRC32::Hasher h;
     h.write(data);
@@ -176,7 +176,7 @@ G_integer std_checksum_crc32(const G_string& data)
             return callback;
           }
 
-        void write(const G_string& data) noexcept
+        void write(aref<G_string> data) noexcept
           {
             const auto p = reinterpret_cast<const uint8_t*>(data.data());
             const auto n = data.size();
@@ -213,7 +213,7 @@ G_object std_checksum_fnv1a32_new()
           // Description
           rocket::sref("<std.checksum.fnv1a32_new()>.write"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -238,7 +238,7 @@ G_object std_checksum_fnv1a32_new()
           // Description
           rocket::sref("<std.checksum.fnv1a32_new()>.finish"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -259,7 +259,7 @@ G_object std_checksum_fnv1a32_new()
     return r;
   }
 
-G_integer std_checksum_fnv1a32(const G_string& data)
+G_integer std_checksum_fnv1a32(aref<G_string> data)
   {
     FNV1a32::Hasher h;
     h.write(data);
@@ -487,7 +487,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             return callback;
           }
 
-        void write(const G_string& data) noexcept
+        void write(aref<G_string> data) noexcept
           {
             auto bp = reinterpret_cast<const uint8_t*>(data.data());
             auto ep = bp + data.size();
@@ -584,7 +584,7 @@ G_object std_checksum_md5_new()
           // Description
           rocket::sref("<std.checksum.md5_new()>.write"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -609,7 +609,7 @@ G_object std_checksum_md5_new()
           // Description
           rocket::sref("<std.checksum.md5_new()>.finish"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -630,7 +630,7 @@ G_object std_checksum_md5_new()
     return r;
   }
 
-G_string std_checksum_md5(const G_string& data)
+G_string std_checksum_md5(aref<G_string> data)
   {
     MD5::Hasher h;
     h.write(data);
@@ -797,7 +797,7 @@ G_string std_checksum_md5(const G_string& data)
             return callback;
           }
 
-        void write(const G_string& data) noexcept
+        void write(aref<G_string> data) noexcept
           {
             auto bp = reinterpret_cast<const uint8_t*>(data.data());
             auto ep = bp + data.size();
@@ -894,7 +894,7 @@ G_object std_checksum_sha1_new()
           // Description
           rocket::sref("<std.checksum.sha1_new()>.write"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -919,7 +919,7 @@ G_object std_checksum_sha1_new()
           // Description
           rocket::sref("<std.checksum.sha1_new()>.finish"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -940,7 +940,7 @@ G_object std_checksum_sha1_new()
     return r;
   }
 
-G_string std_checksum_sha1(const G_string& data)
+G_string std_checksum_sha1(aref<G_string> data)
   {
     SHA1::Hasher h;
     h.write(data);
@@ -1078,7 +1078,7 @@ G_string std_checksum_sha1(const G_string& data)
             return callback;
           }
 
-        void write(const G_string& data) noexcept
+        void write(aref<G_string> data) noexcept
           {
             auto bp = reinterpret_cast<const uint8_t*>(data.data());
             auto ep = bp + data.size();
@@ -1175,7 +1175,7 @@ G_object std_checksum_sha256_new()
           // Description
           rocket::sref("<std.checksum.sha256_new()>.write"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -1200,7 +1200,7 @@ G_object std_checksum_sha256_new()
           // Description
           rocket::sref("<std.checksum.sha256_new()>.finish"),
           // Opaque parameter
-          G_null(),
+          nullptr,
           // Definition
           [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& self, cow_vector<Reference>&& args) -> Reference
             {
@@ -1221,7 +1221,7 @@ G_object std_checksum_sha256_new()
     return r;
   }
 
-G_string std_checksum_sha256(const G_string& data)
+G_string std_checksum_sha256(aref<G_string> data)
   {
     SHA256::Hasher h;
     h.write(data);

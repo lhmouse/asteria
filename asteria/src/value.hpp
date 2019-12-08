@@ -31,7 +31,7 @@ class Value
     Xvariant m_stor;
 
   public:
-    Value() noexcept
+    Value(rocket::clear_t = rocket::clear) noexcept
       :
         m_stor()  // Initialize to `null`.
       {
@@ -40,6 +40,11 @@ class Value
       :
         m_stor(rocket::forward<XvalT>(xval))
       {
+      }
+    Value& operator=(rocket::clear_t) noexcept
+      {
+        this->m_stor = nullptr;
+        return *this;
       }
     template<typename XvalT, ASTERIA_SFINAE_ASSIGN(Xvariant, XvalT&&)> Value& operator=(XvalT&& xval)
       {
