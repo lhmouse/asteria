@@ -94,6 +94,8 @@ extern G_string std_string_pack_64le(aref<G_integer> value);
 extern G_string std_string_pack_64le(aref<G_array> values);
 extern G_array std_string_unpack_64le(aref<G_string> text);
 
+extern G_string std_string_format(aref<G_string> format, const cow_vector<Value>& values);
+
 // Create an object that is to be referenced as `std.string`.
 extern void create_bindings_string(G_object& result, API_Version version);
 

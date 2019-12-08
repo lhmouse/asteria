@@ -1315,6 +1315,85 @@ G_array std_string_unpack_64le(aref<G_string> text)
     return do_unpack_le<int64_t>(text);
   }
 
+G_string std_string_format(aref<G_string> format, const cow_vector<Value>& values)
+  {
+    tinyfmt_str out;
+    // Get the range of `format`. The end pointer points to the null terminator.
+    const char* bp = format.c_str();
+    const char* ep = bp + format.size();
+    for(;;) {
+      // Look for a placeholder sequence.
+      const char* pp = cow_string::traits_type::find(bp, static_cast<size_t>(ep - bp), '$');
+      if(!pp) {
+        // No placeholder has been found. Write all remaining characters verbatim and exit.
+        out.putn(bp, static_cast<size_t>(ep - bp));
+        break;
+      }
+      // A placeholder has been found. Write all characters preceding it.
+      out.putn(bp, static_cast<size_t>(pp - bp));
+      // Skip the dollar sign and parse the placeholder.
+      // This will not result in overflows as `ep` points to the null terminator.
+      uint32_t ch = static_cast<uint8_t>(*++pp);
+      if(ch == 0) {
+        ASTERIA_THROW("placeholder incomplete (dangling `$`)");
+      }
+      bp = ++pp;
+      // Replace the placeholder.
+      if(ch == '$') {
+        // Write a plain dollar sign.
+        out.putc('$');
+        continue;
+      }
+      // The placeholder shall contain a valid index.
+      size_t index;
+      if(ch - '0' < 10) {
+        // Accept a single decimal digit.
+        index = ch - '0';
+      }
+      else if(ch == '{') {
+        // At least one digit is required.
+        ch = static_cast<uint8_t>(*pp);
+        if(ch - '0' >= 10)
+          ASTERIA_THROW("placeholder invalid (`", (char)ch, "` not a digit)");
+        index = ch - '0';
+        bp = pp;
+        // Look for the terminator.
+        for(;;) {
+          if(*++pp == 0)
+            ASTERIA_THROW("placeholder incomplete (no matching `}`)");
+          if(*pp == '}')
+            break;
+        }
+        // Get more digits.
+        for(;;) {
+          ch = static_cast<uint8_t>(*++bp);
+          if(ch - '0' >= 10)
+            break;
+          if(index >= 999)
+            ASTERIA_THROW("argument index too large");
+          index = index * 10 + ch - '0';
+        }
+        // TODO: Support the ':FORMAT' syntax.
+        if(bp != pp)
+          ASTERIA_THROW("placeholder invalid (suffix `", *bp, "` not known)");
+        bp = ++pp;
+      }
+      else {
+        ASTERIA_THROW("placeholder invalid (`", (char)ch, "` not handled)");
+      }
+      // Replace the placeholder.
+      if(index == 0) {
+        out.putn(format.data(), format.size());
+      }
+      else if(index <= values.size()) {
+        values[index-1].print(out);
+      }
+      else
+        ASTERIA_THROW("no enough arguments (`", index, "` > `", values.size(), "`)");
+    }
+    return out.extract_string();
+  }
+
 void create_bindings_string(G_object& result, API_Version /*version*/)
   {
     //===================================================================
@@ -3380,6 +3459,54 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
             auto values = std_string_unpack_64le(text);
             // Forward the result.
             Reference_Root::S_temporary xref = { rocket::move(values) };
+            return rocket::move(xref);
+          }
+          // Fail.
+          reader.throw_no_matching_function_call();
+        })
+      ));
+    //===================================================================
+    // `std.string.format()`
+    //===================================================================
+    result.insert_or_assign(rocket::sref("format"),
+      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+        // Description
+        rocket::sref(
+          "\n"
+          "`std.string.format(format, ...)`\n"
+          "\n"
+          " * Compose a `string` according to the template string `format`,\n"
+          "   as follows:\n"
+          "\n"
+          "   * A sequence of `$$` is replaced with a literal `$`.\n"
+          "   * A sequence of `${NNN}`, where `NNN` is at most three decimal\n"
+          "     numerals, is replaced with the NNN-th argument. If `NNN` is\n"
+          "     zero, it is replaced with `format` itself.\n"
+          "   * A sequence of `$N`, where `N` is a single decimal numeral,\n"
+          "     behaves the same as `${N}`.\n"
+          "   * All other characters are copied verbatim.\n"
+          "\n"
+          " * Returns the composed `string`.\n"
+          "\n"
+          " * Throws an exception if `format` contains invalid placeholder\n"
+          "   sequences, or when a placeholder sequence has no corresponding\n"
+          "   argument.\n"
+        ),
+        // Opaque parameter
+        G_null(
+          nullptr
+        ),
+        // Definition
+        [](const Value& /*opaque*/, const Global_Context& /*global*/, Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+          Argument_Reader reader(rocket::sref("std.string.format"), rocket::ref(args));
+          // Parse arguments.
+          G_string format;
+          cow_vector<Value> values;
+          if(reader.start().g(format).finish(values)) {
+            // Call the binding function.
+            auto str = std_string_format(format, values);
+            // Forward the result.
+            Reference_Root::S_temporary xref = { rocket::move(str) };
             return rocket::move(xref);
           }
           // Fail.
