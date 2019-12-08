@@ -5,10 +5,6 @@ environment:
   PATH: C:\msys64\usr\bin
   CXX: g++
 
-  matrix:
-    - _options: ""
-    - _options: "--enable-debug-checks"
-
 build_script:
   - bash ci/build.sh
 

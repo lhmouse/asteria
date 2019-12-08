@@ -4,10 +4,6 @@ os: linux
 dist: xenial
 sudo: required
 
-env:
-  - _options=""
-  - _options="--enable-debug-checks"
-
 compiler:
   - gcc
   - clang

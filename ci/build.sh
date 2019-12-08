@@ -8,7 +8,7 @@ export CXX
 ${CXX} --version
 mkdir -p m4
 autoreconf -ifv
-./configure --disable-silent-rules ${_options}
+./configure --disable-silent-rules --enable-debug-checks
 make -j$(nproc)
 
 # test
