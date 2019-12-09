@@ -203,25 +203,26 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
     template<typename valueT>
         char* do_check_special(char*& bp, char*& ep, const valueT& value) noexcept
       {
-        // Note that this function returns a pointer to immutable strings.
-        int cls = ::std::fpclassify(value);
-        if(cls == FP_INFINITE) {
-          bp = const_cast<char*>("-infinity");
-          ep = bp + 9;
-          return bp;
+        switch(::std::fpclassify(value)) {
+          {{
+        case FP_INFINITE:
+            bp = const_cast<char*>("-infinity");
+            ep = bp + 9;
+            return bp;
+          }{
+        case FP_NAN:
+            bp = const_cast<char*>("-nan");
+            ep = bp + 4;
+            return bp;
+          }{
+        case FP_ZERO:
+            bp = const_cast<char*>("-0");
+            ep = bp + 2;
+            return bp;
+          }}
+        default:
+          return nullptr;
         }
-        if(cls == FP_NAN) {
-          bp = const_cast<char*>("-nan");
-          ep = bp + 4;
-          return bp;
-        }
-        if(cls == FP_ZERO) {
-          bp = const_cast<char*>("-0");
-          ep = bp + 2;
-          return bp;
-        }
-        // Return a null pointer to indicate that the value is finite.
-        return nullptr;
       }
 
     void do_xfrexp_F_bin(uint64_t& mant, int& exp, const double& value) noexcept
@@ -294,7 +295,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
 
     }  // namespace
 
-ascii_numput& ascii_numput::put_BF(double value) noexcept
+ascii_numput& ascii_numput::put_BF(double value, bool single) noexcept
   {
     this->clear();
     char* bp;
@@ -322,7 +323,7 @@ ascii_numput& ascii_numput::put_BF(double value) noexcept
       int exp;
       do_xfrexp_F_bin(mant, exp, value);
       // Write the broken-down number...
-      if((exp < -4) || (53 <= exp)) {
+      if((exp < -4) || ((single ? 24 : 53) <= exp)) {
         // ... in scientific notation.
         do_xput_M_bin(ep, mant, ep + 1);
         *(ep++) = 'p';
@@ -348,7 +349,7 @@ ascii_numput& ascii_numput::put_BF(double value) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_BE(double value) noexcept
+ascii_numput& ascii_numput::put_BE(double value, bool /*single*/) noexcept
   {
     this->clear();
     char* bp;
@@ -388,7 +389,7 @@ ascii_numput& ascii_numput::put_BE(double value) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_XF(double value) noexcept
+ascii_numput& ascii_numput::put_XF(double value, bool single) noexcept
   {
     this->clear();
     char* bp;
@@ -419,7 +420,7 @@ ascii_numput& ascii_numput::put_XF(double value) noexcept
       mant >>= ~exp & 3;
       exp >>= 2;
       // Write the broken-down number...
-      if((exp < -4) || (14 <= exp)) {
+      if((exp < -4) || ((single ? 6 : 14) <= exp)) {
         // ... in scientific notation.
         do_xput_M_hex(ep, mant, ep + 1);
         *(ep++) = 'p';
@@ -445,7 +446,7 @@ ascii_numput& ascii_numput::put_XF(double value) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_XE(double value) noexcept
+ascii_numput& ascii_numput::put_XE(double value, bool /*single*/) noexcept
   {
     this->clear();
     char* bp;
@@ -1200,7 +1201,7 @@ int main(void)
       };
     static_assert(noadl::countof(s_decmult_F) == 633, "");
 
-    void do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value) noexcept
+    void do_xfrexp_F_dec(uint64_t& mant, int& exp, const double& value, bool single) noexcept
       {
         // Note if `value` is not finite then the behavior is undefined.
         // Get the first digit.
@@ -1234,12 +1235,20 @@ int main(void)
         freg = ::std::ldexp(freg, mult.bexp);
         uint64_t ireg = static_cast<uint64_t>(static_cast<int64_t>(freg) | 1);
         // Multiply two 64-bit values and get the high-order half.
+        // This produces 18 significant figures.
         // TODO: Modern CPUs have intrinsics for this.
         uint64_t xhi = ireg >> 32;
         uint64_t xlo = ireg & UINT32_MAX;
         uint64_t yhi = mult.mant >> 32;
         uint64_t ylo = mult.mant & UINT32_MAX;
         ireg = xhi * yhi + (xlo * yhi >> 32) + (xhi * ylo >> 32);
+        // Truncate the mantissa in case of single precision.
+        if(ROCKET_UNEXPECT(single)) {
+          // It's gonna be 18 => 9 digits so we shift 9 digits out from the right.
+          // Just truncate the mantissa. Don't double-round it.
+          ireg /= 1'000'000'000;
+          ireg *= 1'000'000'000;
+        }
         // Return the mantissa and exponent.
         mant = ireg;
         exp = static_cast<int>(bpos) - 324;
@@ -1278,7 +1287,7 @@ int main(void)
 
     }  // namespace
 
-ascii_numput& ascii_numput::put_DF(double value) noexcept
+ascii_numput& ascii_numput::put_DF(double value, bool single) noexcept
   {
     this->clear();
     char* bp;
@@ -1301,9 +1310,9 @@ ascii_numput& ascii_numput::put_DF(double value) noexcept
       // Break the number down into fractional and exponential parts. This result is approximate.
       uint64_t mant;
       int exp;
-      do_xfrexp_F_dec(mant, exp, value);
+      do_xfrexp_F_dec(mant, exp, value, single);
       // Write the broken-down number...
-      if((exp < -4) || (17 <= exp)) {
+      if((exp < -4) || ((single ? 9 : 17) <= exp)) {
         // ... in scientific notation.
         do_xput_M_dec(ep, mant, ep + 1);
         *(ep++) = 'e';
@@ -1329,7 +1338,7 @@ ascii_numput& ascii_numput::put_DF(double value) noexcept
     return *this;
   }
 
-ascii_numput& ascii_numput::put_DE(double value) noexcept
+ascii_numput& ascii_numput::put_DE(double value, bool single) noexcept
   {
     this->clear();
     char* bp;
@@ -1352,7 +1361,7 @@ ascii_numput& ascii_numput::put_DE(double value) noexcept
       // Break the number down into fractional and exponential parts. This result is approximate.
       uint64_t mant;
       int exp;
-      do_xfrexp_F_dec(mant, exp, value);
+      do_xfrexp_F_dec(mant, exp, value, single);
       // Write the broken-down number in scientific notation.
       do_xput_M_dec(ep, mant, ep + 1);
       *(ep++) = 'e';

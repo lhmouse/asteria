@@ -1313,9 +1313,19 @@ int main(void)
       };
     static_assert(noadl::countof(s_decmult_F) == 652, "");
 
+    double do_cast_mant_I(uint64_t ireg, bool single) noexcept
+      {
+        ROCKET_ASSERT(ireg <= INT64_MAX);
+        // Round it correctly.
+        if(single)
+          return static_cast<double>(static_cast<float>(static_cast<int64_t>(ireg)));
+        else
+          return static_cast<double>(static_cast<int64_t>(ireg));
+      }
+
     }
 
-ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) noexcept
+ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper, bool single) noexcept
   {
     this->m_stat = 0;
     // Store the sign bit into a `double`.
@@ -1344,13 +1354,13 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
             if(ireg >> 62) {
               // Drop two bits from the right.
               ireg = (ireg >> 2) | (((ireg >> 1) | ireg) & 1) | this->m_madd;
-              freg = static_cast<double>(static_cast<int64_t>(ireg));
+              freg = do_cast_mant_I(ireg, single);
               freg = ::std::ldexp(freg, this->m_expo + 2);
             }
             else {
               // Shift overflowed digits into the right.
               ireg = (ireg << 1) | this->m_madd;
-              freg = static_cast<double>(static_cast<int64_t>(ireg));
+              freg = do_cast_mant_I(ireg, single);
               freg = ::std::ldexp(freg, this->m_expo - 1);
             }
             break;
@@ -1382,10 +1392,9 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
             uint64_t xlo = ireg & UINT32_MAX;
             uint64_t yhi = mult.mant >> 32;
             uint64_t ylo = mult.mant & UINT32_MAX;
-            ireg = xhi * yhi + (xlo * yhi >> 32) + (xhi * ylo >> 32);
+            ireg = (xhi * yhi + (xlo * yhi >> 32) + (xhi * ylo >> 32)) | 1;
             // Convert the mantissa to a floating-point number.
-            ROCKET_ASSERT(ireg <= INT64_MAX);
-            freg = static_cast<double>(static_cast<int64_t>(ireg | 1));
+            freg = do_cast_mant_I(ireg, single);
             freg = ::std::ldexp(freg, mult.bexp - lzcnt);
             break;
           }}
@@ -1395,31 +1404,32 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
         // Examine the value. Note that `ireg` is non-zero.
         // If the result becomes infinity, it must have overflowed.
         // If the result becomes zero, it must have underflowed.
-        int cls = ::std::fpclassify(freg);
-        if(cls == FP_INFINITE) {
-          this->m_ovfl = true;
-        }
-        else if(cls == FP_ZERO) {
-          this->m_udfl = true;
+        switch(::std::fpclassify(freg)) {
+          {{
+        case FP_INFINITE:
+            this->m_ovfl = true;
+            break;
+          }{
+        case FP_ZERO:
+            this->m_udfl = true;
+            break;
+          }}
         }
         // Set the value.
         value = ::std::copysign(freg, sign);
         break;
       }{
     case 1:  // infinitesimal
-        // Truncate the value to zero.
         value = ::std::copysign(0.0, sign);
         // For floating-point numbers this always underflows.
         this->m_udfl = true;
         break;
       }{
     case 2:  // infinity
-        // Return a signed infinity.
         value = ::std::copysign(numeric_limits<double>::infinity(), sign);
         break;
       }{
     default:  // quiet NaN
-        // Return a signed QNaN.
         value = ::std::copysign(numeric_limits<double>::quiet_NaN(), sign);
         break;
       }}

@@ -587,7 +587,7 @@ opt<G_real> std_numeric_parse_real(aref<G_string> text, aopt<G_boolean> saturati
       // `text` consists of invalid characters. Fail.
       return rocket::clear;
     }
-    if(!numg.cast_F(value, -HUGE_VAL, +HUGE_VAL)) {
+    if(!numg.cast_F(value, -HUGE_VAL, HUGE_VAL)) {
       // The value is out of range.
       // Accept infinities if `saturating` is set to `true`.
       if(!(std::isinf(value) && (saturating == true)))

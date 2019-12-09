@@ -111,7 +111,7 @@ class ascii_numget
     // * signed 64-bit integer
     ascii_numget& cast_I(int64_t& value, int64_t lower, int64_t upper) noexcept;
     // * IEEE-754 double-precision floating-point
-    ascii_numget& cast_F(double& value, double lower, double upper) noexcept;
+    ascii_numget& cast_F(double& value, double lower, double upper, bool single = false) noexcept;
 
     // default parse functions
     ascii_numget& get(bool& value, const char*& bptr, const char* eptr) noexcept
@@ -140,7 +140,8 @@ class ascii_numget
         value = 0;
         if(this->parse_U(bptr, eptr)) {
           uint64_t temp;
-          this->cast_U(temp, numeric_limits<valueT>::min(), numeric_limits<valueT>::max());
+          this->cast_U(temp, numeric_limits<valueT>::min(),
+                             numeric_limits<valueT>::max());
           value = static_cast<valueT>(temp);
         }
         return *this;
@@ -151,7 +152,8 @@ class ascii_numget
         value = 0;
         if(this->parse_I(bptr, eptr)) {
           int64_t temp;
-          this->cast_I(temp, numeric_limits<valueT>::min(), numeric_limits<valueT>::max());
+          this->cast_I(temp, numeric_limits<valueT>::min(),
+                             numeric_limits<valueT>::max());
           value = static_cast<valueT>(temp);
         }
         return *this;
@@ -162,7 +164,8 @@ class ascii_numget
         value = 0;
         if(this->parse_F(bptr, eptr)) {
           double temp;
-          this->cast_F(temp, -numeric_limits<valueT>::infinity(), numeric_limits<valueT>::infinity());
+          this->cast_F(temp, -numeric_limits<valueT>::infinity(),
+                             numeric_limits<valueT>::infinity(), is_same<valueT, float>::value);
           value = static_cast<valueT>(temp);
         }
         return *this;

@@ -80,17 +80,17 @@ class ascii_numput
     // * signed 64-bit integer in decimal
     ascii_numput& put_DI(int64_t value, size_t precision = 1) noexcept;
     // * IEEE-754 double-precision floating-point in binary
-    ascii_numput& put_BF(double value) noexcept;
+    ascii_numput& put_BF(double value, bool single = false) noexcept;
     // * IEEE-754 double-precision floating-point in binary scientific notation
-    ascii_numput& put_BE(double value) noexcept;
+    ascii_numput& put_BE(double value, bool single = false) noexcept;
     // * IEEE-754 double-precision floating-point in hexadecimal
-    ascii_numput& put_XF(double value) noexcept;
+    ascii_numput& put_XF(double value, bool single = false) noexcept;
     // * IEEE-754 double-precision floating-point in hexadecimal scientific notation
-    ascii_numput& put_XE(double value) noexcept;
+    ascii_numput& put_XE(double value, bool single = false) noexcept;
     // * IEEE-754 double-precision floating-point in decimal
-    ascii_numput& put_DF(double value) noexcept;
+    ascii_numput& put_DF(double value, bool single = false) noexcept;
     // * IEEE-754 double-precision floating-point in decimal scientific notation
-    ascii_numput& put_DE(double value) noexcept;
+    ascii_numput& put_DE(double value, bool single = false) noexcept;
 
     // default format functions
     ascii_numput& put(bool value) noexcept
@@ -118,7 +118,7 @@ class ascii_numput
     template<typename valueT, ROCKET_ENABLE_IF(is_floating_point<valueT>::value)>
         ascii_numput& put(const valueT& value) noexcept
       {
-        this->put_DF(value);
+        this->put_DF(value, is_same<valueT, float>::value);
         return *this;
       }
   };
