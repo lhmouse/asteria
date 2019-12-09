@@ -1338,8 +1338,8 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
         // Raise the mantissa accordingly.
         double freg;
         switch(base) {
+          {{
         case 2:
-          {
             // Convert the mantissa to a floating-point number. The result is exact.
             if(ireg >> 62) {
               // Drop two bits from the right.
@@ -1354,9 +1354,8 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
               freg = ::std::ldexp(freg, this->m_expo - 1);
             }
             break;
-          }
+          }{
         case 10:
-          {
             // Get the multiplier.
             uint32_t mpos = static_cast<uint32_t>(this->m_expo + 343);
             if(mpos >= INT32_MAX) {
@@ -1389,7 +1388,7 @@ ascii_numget& ascii_numget::cast_F(double& value, double lower, double upper) no
             freg = static_cast<double>(static_cast<int64_t>(ireg | 1));
             freg = ::std::ldexp(freg, mult.bexp - lzcnt);
             break;
-          }
+          }}
         default:
           ROCKET_ASSERT_MSG(false, "non-decimal floating-point parsing not implemented");
         }

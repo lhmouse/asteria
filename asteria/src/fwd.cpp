@@ -208,9 +208,8 @@ const char* stringify_punctuator(Punctuator punct) noexcept
       }{
     case punctuator_brace_op:
         return "{";
-      }
+      }{
     case punctuator_brace_cl:
-      {
         return "}";
       }{
     case punctuator_comma:
