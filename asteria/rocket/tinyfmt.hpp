@@ -74,6 +74,12 @@ template<typename charT, typename traitsT>
     basic_tinyfmt<charT, traitsT>::~basic_tinyfmt()
   = default;
 
+extern template class basic_tinyfmt<char>;
+extern template class basic_tinyfmt<wchar_t>;
+
+using tinyfmt   = basic_tinyfmt<char>;
+using wtinyfmt  = basic_tinyfmt<wchar_t>;
+
 // zero-conversion inserters
 template<typename charT, typename traitsT>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, charT c)
@@ -111,18 +117,19 @@ inline basic_tinyfmt<char>& operator<<(basic_tinyfmt<char>& fmt, const ascii_num
 
 // delegating inserters
 template<typename charT, typename traitsT, typename valueT,
-         ROCKET_ENABLE_IF(is_arithmetic<valueT>::value)>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
+         ROCKET_DISABLE_IF(is_same<charT, valueT>::value), ROCKET_ENABLE_IF(is_arithmetic<valueT>::value)>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
   {
     return fmt << ascii_numput(value);
   }
 template<typename charT, typename traitsT, typename valueT,
-         ROCKET_ENABLE_IF(is_enum<valueT>::value)>
-    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, const valueT& value)
+         ROCKET_DISABLE_IF(is_same<charT, valueT>::value), ROCKET_ENABLE_IF(is_enum<valueT>::value)>
+    basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT value)
   {
     return fmt << ascii_numput(static_cast<typename underlying_type<valueT>::type>(value));
   }
-template<typename charT, typename traitsT, typename valueT>
+template<typename charT, typename traitsT, typename valueT,
+         ROCKET_DISABLE_IF(is_same<charT, typename remove_cv<valueT>::type>::value)>
     basic_tinyfmt<charT, traitsT>& operator<<(basic_tinyfmt<charT, traitsT>& fmt, valueT* value)
   {
     return fmt << ascii_numput(static_cast<const void*>(value));
@@ -135,11 +142,37 @@ template<typename charT, typename traitsT, typename xvalueT>
     return fmt << noadl::forward<xvalueT>(xvalue);
   }
 
-extern template class basic_tinyfmt<char>;
-extern template class basic_tinyfmt<wchar_t>;
+extern template tinyfmt&  operator<<(tinyfmt&,  char);
+extern template wtinyfmt& operator<<(wtinyfmt&, wchar_t);
+extern template tinyfmt&  operator<<(tinyfmt&,  const char*);
+extern template wtinyfmt& operator<<(wtinyfmt&, const wchar_t*);
+extern template tinyfmt&  operator<<(tinyfmt&,  const ascii_numput&);
+extern template wtinyfmt& operator<<(wtinyfmt&, const ascii_numput&);
 
-using tinyfmt   = basic_tinyfmt<char>;
-using wtinyfmt  = basic_tinyfmt<wchar_t>;
+extern template tinyfmt&  operator<<(tinyfmt&,  signed char);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed char);
+extern template tinyfmt&  operator<<(tinyfmt&,  unsigned char);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned char);
+extern template tinyfmt&  operator<<(tinyfmt&,  signed short);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed short);
+extern template tinyfmt&  operator<<(tinyfmt&,  unsigned short);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned short);
+extern template tinyfmt&  operator<<(tinyfmt&,  signed);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed);
+extern template tinyfmt&  operator<<(tinyfmt&,  unsigned);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned);
+extern template tinyfmt&  operator<<(tinyfmt&,  signed long);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed long);
+extern template tinyfmt&  operator<<(tinyfmt&,  unsigned long);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned long);
+extern template tinyfmt&  operator<<(tinyfmt&,  signed long long);
+extern template wtinyfmt& operator<<(wtinyfmt&, signed long long);
+extern template tinyfmt&  operator<<(tinyfmt&,  unsigned long long);
+extern template wtinyfmt& operator<<(wtinyfmt&, unsigned long long);
+extern template tinyfmt&  operator<<(tinyfmt&,  float);
+extern template wtinyfmt& operator<<(wtinyfmt&, double);
+extern template tinyfmt&  operator<<(tinyfmt&,  const void*);
+extern template tinyfmt&  operator<<(tinyfmt&,  void*);
 
 }  // namespace rocket
 
