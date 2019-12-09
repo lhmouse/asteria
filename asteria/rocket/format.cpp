@@ -5,7 +5,7 @@
 
 namespace rocket {
 
-template tinyfmt&  vformat(tinyfmt&  fmt, const char*    templ, const formatter*  pinsts, size_t ninsts);
-template wtinyfmt& vformat(wtinyfmt& fmt, const wchar_t* templ, const wformatter* pinsts, size_t ninsts);
+template tinyfmt&  vformat(tinyfmt&,  const char*,    size_t, const formatter*,  size_t);
+template wtinyfmt& vformat(wtinyfmt&, const wchar_t*, size_t, const wformatter*, size_t);
 
 }  // namespace rocket

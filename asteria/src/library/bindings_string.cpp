@@ -1317,9 +1317,6 @@ G_array std_string_unpack_64le(aref<G_string> text)
 
 G_string std_string_format(aref<G_string> templ, const cow_vector<Value>& values)
   {
-    if(templ.find('\0') != G_string::npos) {
-      ASTERIA_THROW("null bytes not allowed in template string (templ `$1`)", templ);
-    }
     // Prepare inserters.
     cow_vector<rocket::formatter> insts;
     insts.reserve(values.size());
@@ -1331,7 +1328,7 @@ G_string std_string_format(aref<G_string> templ, const cow_vector<Value>& values
     }
     // Compose the string into a stream.
     tinyfmt_str fmt;
-    vformat(fmt, templ.c_str(), insts.data(), insts.size());
+    vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
     return fmt.extract_string();
   }
 

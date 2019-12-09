@@ -12,10 +12,13 @@ namespace rocket {
 template<typename charT, typename traitsT = char_traits<charT>> struct basic_formatter;
 
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* templ,
+    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
+                                           const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
+template<typename charT, typename traitsT>
+    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
                                            const basic_formatter<charT, traitsT>* pinsts, size_t ninsts);
 template<typename charT, typename traitsT, typename... paramsT>
-    basic_tinyfmt<charT, traitsT>& format(basic_tinyfmt<charT, traitsT>& fmt, const charT* templ,
+    basic_tinyfmt<charT, traitsT>& format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
                                           const paramsT&... params);
 
 /* Examples:
@@ -42,7 +45,7 @@ template<typename charT, typename traitsT> struct basic_formatter
   };
 
 template<typename charT, typename traitsT = char_traits<charT>, typename paramT>
-    constexpr basic_formatter<charT, traitsT> make_default_formatter(paramT& param)
+    constexpr basic_formatter<charT, traitsT> make_default_formatter(paramT& param) noexcept
   {
     return { [](basic_tinyfmt<charT, traitsT>& fmt, const void* ptr) -> basic_tinyfmt<charT, traitsT>&
                  { return fmt << *(static_cast<const paramT*>(ptr));  },
@@ -50,12 +53,12 @@ template<typename charT, typename traitsT = char_traits<charT>, typename paramT>
   }
 
 template<typename charT, typename traitsT>
-    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* templ,
+    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl, size_t ntempl,
                                            const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
   {
     // Get the range of `format`. The end pointer points to the null terminator.
-    const charT* bp = templ;
-    const charT* ep = bp + traitsT::length(templ);
+    const charT* bp = stempl;
+    const charT* ep = bp + ntempl;
     for(;;) {
       // Look for a placeholder sequence.
       const charT* pp = traitsT::find(bp, static_cast<size_t>(ep - bp), traitsT::to_char_type('$'));
@@ -67,11 +70,10 @@ template<typename charT, typename traitsT>
       // A placeholder has been found. Write all characters preceding it.
       fmt.putn(bp, static_cast<size_t>(pp - bp));
       // Skip the dollar sign and parse the placeholder.
-      // This will not result in overflows as `ep` points to the null terminator.
-      unsigned long ch = static_cast<unsigned long>(traitsT::to_int_type(*++pp));
-      if(ch == 0) {
-        noadl::sprintf_and_throw<invalid_argument>("format: placeholder incomplete (dangling `$`)");
+      if(pp == ep) {
+        noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (dangling `$`)");
       }
+      unsigned long ch = static_cast<unsigned long>(traitsT::to_int_type(*++pp));
       bp = ++pp;
       // Replace the placeholder.
       if(ch == '$') {
@@ -81,44 +83,52 @@ template<typename charT, typename traitsT>
       }
       // The placeholder shall contain a valid index.
       size_t index;
-      if(ch - '0' < 10) {
-        // Accept a single decimal digit.
-        index = ch - '0';
-      }
-      else if(ch == '{') {
-        // At least one digit is required.
-        ch = static_cast<unsigned long>(traitsT::to_int_type(*pp));
-        if(ch - '0' >= 10)
-          noadl::sprintf_and_throw<invalid_argument>("format: argument index invalid (offset `%td`)", pp - templ);
-        index = ch - '0';
-        bp = pp;
-        // Look for the terminator.
-        for(;;) {
-          if(*++pp == 0)
-            noadl::sprintf_and_throw<invalid_argument>("format: placeholder incomplete (no matching `}`)");
-          if(*pp == '}')
-            break;
-        }
-        // Get more digits.
-        for(;;) {
-          ch = static_cast<uint8_t>(*++bp);
-          if(ch - '0' >= 10)
-            break;
-          if(index >= 999)
-            noadl::sprintf_and_throw<invalid_argument>("format: argument index too large");
-          index = index * 10 + ch - '0';
-        }
-        // TODO: Support the ':FORMAT' syntax.
-        if(bp != pp)
-          noadl::sprintf_and_throw<invalid_argument>("format: excess characters in placeholder (offset `%td`)", pp - templ);
-        bp = ++pp;
-      }
-      else {
-        noadl::sprintf_and_throw<invalid_argument>("format: placeholder invalid (offset `%td`)", pp - templ);
+      switch(ch) {
+        {{
+      case '{':
+          // Look for the terminator.
+          for(;;) {
+            if(bp == ep) {
+              noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (no matching `}`)");
+            }
+            if(*(bp++) == '}')
+              break;
+          }
+          // Parse the argument index. Note that `bp` points past the terminating `}`.
+          constexpr ptrdiff_t nmaxd = 3;
+          ptrdiff_t ndigs = bp - 1 - pp;
+          if(ndigs > nmaxd) {
+            noadl::sprintf_and_throw<invalid_argument>("format: too many digits (`%td` > `%td`)", ndigs, nmaxd);
+          }
+          while(--ndigs >= 0) {
+            ch = static_cast<unsigned long>(traitsT::to_int_type(*(pp++)));
+            if(ch - '0' >= 10) {
+              noadl::sprintf_and_throw<invalid_argument>("format: invalid digit (character `%c`)", (int)ch);
+            }
+            index = index * 10 + ch - '0';
+          }
+          break;
+        }{
+      case '0':
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+      case '7':
+      case '8':
+      case '9':
+          // Accept a single decimal digit.
+          index = ch - '0';
+          break;
+        }}
+      default:
+        noadl::sprintf_and_throw<invalid_argument>("format: invalid placeholder (sequence `$%c`)", (int)ch);
       }
       // Replace the placeholder.
       if(index == 0) {
-        fmt.putn(templ, static_cast<size_t>(ep - templ));
+        fmt.putn(stempl, ntempl);
       }
       else if(index <= ninsts) {
         pinsts[index-1].submit(fmt);
@@ -129,19 +139,26 @@ template<typename charT, typename traitsT>
     return fmt;
   }
 
+template<typename charT, typename traitsT>
+    basic_tinyfmt<charT, traitsT>& vformat(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
+                                           const basic_formatter<charT, traitsT>* pinsts, size_t ninsts)
+  {
+    return noadl::vformat(fmt, stempl, traitsT::length(stempl), pinsts, ninsts);
+  }
+
 template<typename charT, typename traitsT, typename... paramsT>
-    basic_tinyfmt<charT, traitsT>& format(basic_tinyfmt<charT, traitsT>& fmt, const charT* templ,
+    basic_tinyfmt<charT, traitsT>& format(basic_tinyfmt<charT, traitsT>& fmt, const charT* stempl,
                                           const paramsT&... params)
   {
-    basic_formatter<charT, traitsT> insts[] = { make_default_formatter<charT, traitsT>(params)... };
-    return noadl::vformat(fmt, templ, insts, sizeof...(params));
+    basic_formatter<charT, traitsT> insts[] = { noadl::make_default_formatter<charT, traitsT>(params)... };
+    return noadl::vformat(fmt, stempl, traitsT::length(stempl), insts, sizeof...(params));
   }
 
 using formatter   = basic_formatter<char>;
 using wformatter  = basic_formatter<wchar_t>;
 
-extern template tinyfmt&  vformat(tinyfmt&  fmt, const char*    templ, const formatter*  pinsts, size_t ninsts);
-extern template wtinyfmt& vformat(wtinyfmt& fmt, const wchar_t* templ, const wformatter* pinsts, size_t ninsts);
+extern template tinyfmt&  vformat(tinyfmt&,  const char*,    size_t, const formatter*,  size_t);
+extern template wtinyfmt& vformat(wtinyfmt&, const wchar_t*, size_t, const wformatter*, size_t);
 
 }  // namespace rocket
 
