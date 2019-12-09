@@ -5,7 +5,8 @@
 #define ASTERIA_UTILITIES_HPP_
 
 #include "fwd.hpp"
-#include "rocket/format.hpp"
+#include "../rocket/tinyfmt_str.hpp"
+#include "../rocket/format.hpp"
 
 namespace Asteria {
 
@@ -14,7 +15,7 @@ extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg, c
 
 template<typename... ParamsT> cow_string format_string(const ParamsT&... params)
   {
-    tinyfmt_str out;
+    rocket::tinyfmt_str out;
     format(out, params...);  // ADL intended
     return out.extract_string();
   }

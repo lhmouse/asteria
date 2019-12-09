@@ -14,7 +14,7 @@ namespace Asteria {
 
     cow_string do_name_closure(long line)
       {
-        tinyfmt_str fmt;
+        rocket::tinyfmt_str fmt;
         fmt << "<closure>._" << line;
         return fmt.extract_string();
       }

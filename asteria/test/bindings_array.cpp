@@ -9,7 +9,7 @@ using namespace Asteria;
 
 int main()
   {
-    tinybuf_str cbuf;
+    rocket::tinybuf_str cbuf;
     cbuf.set_string(rocket::sref(
       R"__(
         assert std.array.slice([0,1,2,3,4], 0) == [0,1,2,3,4];

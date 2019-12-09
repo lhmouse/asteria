@@ -21,7 +21,7 @@ namespace {
 template<typename XbaseT> int do_backtrace(const XbaseT& xbase) noexcept
   try {
     const auto& except = dynamic_cast<const Runtime_Error&>(xbase);
-    tinyfmt_str fmt;
+    rocket::tinyfmt_str fmt;
     // Print stack frames to the standard error stream.
     for(unsigned long i = 0; i != except.count_frames(); ++i) {
       const auto& frm = except.frame(i);
@@ -41,7 +41,7 @@ template<typename XbaseT> int do_backtrace(const XbaseT& xbase) noexcept
 
 cow_string do_stringify_value(const Value& val) noexcept
   try {
-    tinyfmt_str fmt;
+    rocket::tinyfmt_str fmt;
     fmt << val;
     return fmt.extract_string();
   }
@@ -58,7 +58,8 @@ cow_string do_stringify_reference(const Reference& ref) noexcept
       prefix = "rvalue ";
     else
       return rocket::sref("<tail call>");
-    tinyfmt_str fmt;
+    // Read a value from the refrence and format it.
+    rocket::tinyfmt_str fmt;
     fmt << prefix << ref.read();
     return fmt.extract_string();
   }

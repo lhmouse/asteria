@@ -9,7 +9,7 @@ using namespace Asteria;
 
 int main()
   {
-    tinybuf_str cbuf;
+    rocket::tinybuf_str cbuf;
     cbuf.set_string(rocket::sref(
       R"__(
         assert std.chrono.utc_format(std.numeric.integer_min) == "1601-01-01 00:00:00";

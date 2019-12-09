@@ -218,7 +218,7 @@ namespace Asteria {
 
     G_string do_format_nonrecursive(const Value& value, Indenter& indent)
       {
-        tinyfmt_str fmt;
+        rocket::tinyfmt_str fmt;
         // Transform recursion to iteration using a handwritten stack.
         auto qvalue = std::addressof(value);
         cow_vector<Xformat> stack;
@@ -627,7 +627,7 @@ Value std_json_parse(aref<G_string> text)
     // Tokenize the source string.
     Token_Stream tstrm;
     try {
-      tinybuf_str cbuf;
+      rocket::tinybuf_str cbuf;
       cbuf.set_string(text, tinybuf::open_read);
       tstrm.reload(cbuf, rocket::sref("<JSON text>"), opts);
     }

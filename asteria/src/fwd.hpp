@@ -30,11 +30,7 @@
 #include "../rocket/optional.hpp"
 #include "../rocket/array.hpp"
 #include "../rocket/reference_wrapper.hpp"
-#include "../rocket/tinyfmt_str.hpp"
-#include "../rocket/tinyfmt_file.hpp"
-#include "../rocket/ascii_numget.hpp"
-#include "../rocket/ascii_numput.hpp"
-#include "../rocket/format.hpp"
+#include "../rocket/tinyfmt.hpp"
 
 // Macros
 #define ASTERIA_SFINAE_CONSTRUCT(T_, ...)    ROCKET_ENABLE_IF(::std::is_constructible<T_, __VA_ARGS__>::value)
@@ -116,11 +112,7 @@ using cow_u16string = rocket::cow_u16string;
 using cow_u32string = rocket::cow_u32string;
 using phsh_string = rocket::prehashed_string;
 using tinybuf = rocket::tinybuf;
-using tinybuf_str = rocket::tinybuf_str;
-using tinybuf_file = rocket::tinybuf_file;
 using tinyfmt = rocket::tinyfmt;
-using tinyfmt_str = rocket::tinyfmt_str;
-using tinyfmt_file = rocket::tinyfmt_file;
 
 template<typename E, typename D = std::default_delete<const E>> using uptr = rocket::unique_ptr<E, D>;
 template<typename E> using rcptr = rocket::refcnt_ptr<E>;

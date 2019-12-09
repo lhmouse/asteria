@@ -10,7 +10,7 @@ using namespace Asteria;
 int main()
   {
     Token_Stream ts;
-    tinybuf_str cbuf;
+    rocket::tinybuf_str cbuf;
     cbuf.set_string(rocket::sref(
       R"__(#!some shebang
         hh+++

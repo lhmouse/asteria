@@ -13,7 +13,7 @@ Runtime_Error::~Runtime_Error()
 void Runtime_Error::do_compose_message()
   {
     // Reuse the string.
-    tinyfmt_str fmt;
+    rocket::tinyfmt_str fmt;
     this->m_what.clear();
     fmt.set_string(rocket::move(this->m_what));
     // Write the value.

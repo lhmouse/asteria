@@ -11,7 +11,7 @@ namespace Asteria {
 
 bool std_debug_print(const cow_vector<Value>& values)
   {
-    tinyfmt_str fmt;
+    rocket::tinyfmt_str fmt;
     rocket::for_each(values, std::bind(&Value::print, std::placeholders::_1, std::ref(fmt), false));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     return succ;
@@ -19,7 +19,7 @@ bool std_debug_print(const cow_vector<Value>& values)
 
 bool std_debug_dump(const Value& value, aopt<G_integer> indent)
   {
-    tinyfmt_str fmt;
+    rocket::tinyfmt_str fmt;
     value.dump(fmt, static_cast<size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
     bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     return succ;

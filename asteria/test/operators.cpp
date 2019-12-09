@@ -9,7 +9,7 @@ using namespace Asteria;
 
 int main()
   {
-    tinybuf_str cbuf;
+    rocket::tinybuf_str cbuf;
     cbuf.set_string(rocket::sref(
       R"__(
         var b = false, i = 12, r = 8.5, s = "a";

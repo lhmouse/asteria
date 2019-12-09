@@ -1327,7 +1327,7 @@ G_string std_string_format(aref<G_string> templ, const cow_vector<Value>& values
       });
     }
     // Compose the string into a stream.
-    tinyfmt_str fmt;
+    rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
     return fmt.extract_string();
   }

@@ -40,7 +40,7 @@ int main()
 
     bcnt.store(0, std::memory_order_relaxed);
     {
-      tinybuf_str cbuf;
+      rocket::tinybuf_str cbuf;
       cbuf.set_string(rocket::sref(
         R"__(
           var g;

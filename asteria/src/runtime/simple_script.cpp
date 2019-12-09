@@ -34,21 +34,21 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
 
 Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name)
   {
-    tinybuf_str cbuf;
+    rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
     return this->reload(cbuf, name);
   }
 
 Simple_Script& Simple_Script::reload_file(const cow_string& path)
   {
-    tinybuf_file cbuf;
+    rocket::tinybuf_file cbuf;
     cbuf.open(path.c_str(), tinybuf::open_read);
     return this->reload(cbuf, path);
   }
 
 Simple_Script& Simple_Script::reload_stdin()
   {
-    tinybuf_file cbuf;
+    rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
     return this->reload(cbuf, rocket::sref("<stdin>"));
   }
