@@ -55,10 +55,11 @@
 
 ### `std.debug`
 
-`std.debug.print(...)`
+`std.debug.print(templ, ...)`
 
-	* Prints all arguments to the standard error stream. A line break
-	  is appended to terminate the line.
+	* Compose a `string` in the same way as `std.string.format()`,
+	  but instead of returning it, write it to the standard error
+	  stream. A line break is appended to terminate the line.
 
 	* Returns `true` if the operation succeeds, or `null` otherwise.
 

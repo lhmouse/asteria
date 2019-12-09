@@ -9,18 +9,31 @@
 
 namespace Asteria {
 
-bool std_debug_print(const cow_vector<Value>& values)
+bool std_debug_print(aref<G_string> templ, const cow_vector<Value>& values)
   {
+    // Prepare inserters.
+    cow_vector<rocket::formatter> insts;
+    insts.reserve(values.size());
+    for(size_t i = 0; i != values.size(); ++i) {
+      insts.push_back({
+        [](tinyfmt& fmt, const void* ptr) -> tinyfmt& { return static_cast<const Value*>(ptr)->print(fmt);  },
+        values.data() + i
+      });
+    }
+    // Compose the string into a stream.
     rocket::tinyfmt_str fmt;
-    rocket::for_each(values, std::bind(&Value::print, std::placeholders::_1, std::ref(fmt), false));
+    vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
     bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     return succ;
   }
 
 bool std_debug_dump(const Value& value, aopt<G_integer> indent)
   {
+    // Clamp the suggested indent so we don't produce overlong lines.
+    size_t rindent = static_cast<size_t>(rocket::clamp(indent.value_or(2), 0, 10));
+    // Format the value.
     rocket::tinyfmt_str fmt;
-    value.dump(fmt, static_cast<size_t>(rocket::clamp(indent.value_or(2), 0, 10)));
+    value.dump(fmt, rindent);
     bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     return succ;
   }
@@ -37,8 +50,9 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           "\n"
           "`std.debug.print(...)`\n"
           "\n"
-          "  * Prints all arguments to the standard error stream. A line break\n"
-          "    is appended to terminate the line.\n"
+          "  * Compose a `string` in the same way as `std.string.format()`,\n"
+          "    but instead of returning it, write it to the standard error\n"
+          "    stream. A line break is appended to terminate the line.\n"
           "\n"
           "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
         ),
@@ -51,10 +65,11 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
                   Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.debug.print"), rocket::ref(args));
           // Parse variadic arguments.
+          G_string templ;
           cow_vector<Value> values;
-          if(reader.start().finish(values)) {
+          if(reader.start().g(templ).finish(values)) {
             // Call the binding function.
-            if(!std_debug_print(values)) {
+            if(!std_debug_print(templ, values)) {
               return Reference_Root::S_null();
             }
             Reference_Root::S_temporary xref = { true };
