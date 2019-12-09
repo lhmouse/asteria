@@ -73,7 +73,7 @@ template<typename charT, typename traitsT>
       if(pp == ep) {
         noadl::sprintf_and_throw<invalid_argument>("format: incomplete placeholder (dangling `$`)");
       }
-      unsigned long ch = static_cast<unsigned long>(traitsT::to_int_type(*++pp));
+      typename traitsT::int_type ch = traitsT::to_int_type(*++pp);
       bp = ++pp;
       // Replace the placeholder.
       if(ch == '$') {
@@ -82,7 +82,7 @@ template<typename charT, typename traitsT>
         continue;
       }
       // The placeholder shall contain a valid index.
-      size_t index;
+      size_t index = 0;
       switch(ch) {
         {{
       case '{':
@@ -95,17 +95,20 @@ template<typename charT, typename traitsT>
               break;
           }
           // Parse the argument index. Note that `bp` points past the terminating `}`.
-          constexpr ptrdiff_t nmaxd = 3;
           ptrdiff_t ndigs = bp - 1 - pp;
-          if(ndigs > nmaxd) {
-            noadl::sprintf_and_throw<invalid_argument>("format: too many digits (`%td` > `%td`)", ndigs, nmaxd);
+          if(ndigs < 1) {
+            noadl::sprintf_and_throw<invalid_argument>("format: missing argument index");
           }
+          if(ndigs > 3) {
+            noadl::sprintf_and_throw<invalid_argument>("format: too many digits (`%td` > `%d`)", ndigs, 3);
+          }
+          // Collect digits.
           while(--ndigs >= 0) {
-            ch = static_cast<unsigned long>(traitsT::to_int_type(*(pp++)));
-            if(ch - '0' >= 10) {
+            ch = traitsT::to_int_type(*(pp++));
+            if((ch < '0') || ('9' < ch)) {
               noadl::sprintf_and_throw<invalid_argument>("format: invalid digit (character `%c`)", (int)ch);
             }
-            index = index * 10 + ch - '0';
+            index = index * 10 + static_cast<size_t>(ch - '0');
           }
           break;
         }{
@@ -120,7 +123,7 @@ template<typename charT, typename traitsT>
       case '8':
       case '9':
           // Accept a single decimal digit.
-          index = ch - '0';
+          index = static_cast<size_t>(ch - '0');
           break;
         }}
       default:
