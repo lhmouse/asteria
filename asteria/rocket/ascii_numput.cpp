@@ -1256,27 +1256,19 @@ int main(void)
 
     void do_xput_M_dec(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
       {
+        // Write digits in normal order.
         uint64_t ireg = mant;
-        if(ireg != 0) {
-          // Write digits in reverse order.
-          char temps[24];
-          char* tbp = end(temps);
-          while(ireg != 0) {
-            // Shift a digit out.
-            uint8_t dval = static_cast<uint8_t>(ireg % 10);
-            ireg /= 10;
-            // Write this digit unless it is amongst trailing zeroes.
-            if((tbp != end(temps)) || (dval != 0))
-              *(--tbp) = do_pdigit_D(dval);
-          }
-          // Pop digits and append them to `ep`.
-          while(tbp != end(temps)) {
-            // Insert a decimal point before `rdxp`.
-            if(ep == rdxp)
-              *(ep++) = '.';
-            // Write this digit.
-            *(ep++) = *(tbp++);
-          }
+        while(ireg != 0) {
+          // Shift a digit out.
+          uint64_t quo = ireg / 100'000'000'000'000'000;
+          ireg %= 100'000'000'000'000'000;
+          uint8_t dval = static_cast<uint8_t>(quo);
+          ireg *= 10;
+          // Insert a decimal point before `rdxp`.
+          if(ep == rdxp)
+            *(ep++) = '.';
+          // Write this digit.
+          *(ep++) = do_pdigit_X(dval);
         }
         // If `rdxp` is set, fill zeroes until it is reached,
         // if no decimal point has been added so far.
