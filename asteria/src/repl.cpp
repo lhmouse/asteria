@@ -304,7 +304,7 @@ int main(int argc, char** argv)
     int indent;
     long line;
 
-    cow_string code;
+    cow_string code, heredoc;
     bool escape;
 
     for(;;) {
@@ -330,20 +330,33 @@ int main(int argc, char** argv)
         if(ch == EOF) {
           break;
         }
-        // Backslashes not preceding line feeds are preserved as is.
-        if(escape && (ch != '\n')) {
-          code += '\\';
-        }
-        // If the character is a backslash, stash it.
-        if(ch == '\\') {
-          escape = true;
-          continue;
+        if(heredoc.empty()) {
+          // Backslashes not preceding line feeds are preserved as is.
+          if(escape && (ch != '\n')) {
+            code += '\\';
+          }
+          // If the character is a backslash, stash it.
+          if(ch == '\\') {
+            escape = true;
+            continue;
+          }
         }
         if(ch == '\n') {
-          // The current snippet is terminated by an unescaped line feed.
-          // REPL commands can't straddle multiple lines.
-          if(!escape || code.empty() || (code.front() == '\\')) {
-            break;
+          // Check for termination.
+          if(heredoc.empty()) {
+            // In normal mode, the current snippet is terminated by an unescaped line feed.
+            // REPL commands can't straddle multiple lines.
+            if(!escape || code.empty() || (code.front() == '\\')) {
+              break;
+            }
+          }
+          else {
+            // In heredoc mode, the current snippet is terminated by the user-defined terminator.
+            // The terminator must be deleted from the snippet.
+            if(code.ends_with(heredoc)) {
+              code.erase(code.size() - heredoc.size());
+              break;
+            }
           }
           // Otherwise, the preceding backslash is deleted and a line break will be appended.
           // Prompt for the next consecutive line.
