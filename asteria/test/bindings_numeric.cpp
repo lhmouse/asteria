@@ -208,6 +208,8 @@ int main()
         assert std.numeric.fma(+5, -6, +7) == -23;
         assert                (0x1.0000000000003p-461 * 0x1.0000000000007p-461 + -0x1.000000000000Ap-922) ==           0;  // no fma
         assert std.numeric.fma(0x1.0000000000003p-461,  0x1.0000000000007p-461,  -0x1.000000000000Ap-922) == 0x1.5p-1022;  // fma
+        assert                (0x1.0000000000001 * 1 + 0x0.00000000000007FF) == 0x1.0000000000001;  // no fma
+        assert std.numeric.fma(0x1.0000000000001 , 1 , 0x0.00000000000007FF) == 0x1.0000000000001;  // fma
         assert std.numeric.fma(+5, -infinity, +7) == -infinity;
         assert std.numeric.fma(+5, -6, +infinity) == +infinity;
         assert __isnan std.numeric.fma(+infinity, +6, -infinity);

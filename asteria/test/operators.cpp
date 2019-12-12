@@ -365,6 +365,20 @@ int main()
         assert a == [];
         assert unset a[$] == null;
         assert a == [];
+
+        assert __fma(+5, +6, +7) == +37;
+        assert __fma(+5, -6, +7) == -23;
+        assert      (0x1.0000000000003p-461 * 0x1.0000000000007p-461 + -0x1.000000000000Ap-922) ==           0;  // no fma
+        assert __fma(0x1.0000000000003p-461 , 0x1.0000000000007p-461 , -0x1.000000000000Ap-922) == 0x1.5p-1022;  // fma
+        assert      (0x1.0000000000001 * 1 + 0x0.00000000000007FF) == 0x1.0000000000001;  // no fma
+        assert __fma(0x1.0000000000001 , 1 , 0x0.00000000000007FF) == 0x1.0000000000001;  // fma
+        assert __fma(+5, -infinity, +7) == -infinity;
+        assert __fma(+5, -6, +infinity) == +infinity;
+        assert __isnan __fma(+infinity, +6, -infinity);
+        assert __fma(+infinity, +6, +infinity) == +infinity;
+        assert __isnan __fma(nan, 6, 7);
+        assert __isnan __fma(5, nan, 7);
+        assert __isnan __fma(5, 6, nan);
       )__"), tinybuf::open_read);
     Simple_Script code(cbuf, rocket::sref("my_file"));
     Global_Context global;
