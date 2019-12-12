@@ -8,10 +8,10 @@
 
 namespace Asteria {
 
-extern opt<G_integer> std_gc_tracked_count(const Global_Context& global, aref<G_integer> generation);
-extern opt<G_integer> std_gc_get_threshold(const Global_Context& global, aref<G_integer> generation);
-extern opt<G_integer> std_gc_set_threshold(const Global_Context& global, aref<G_integer> generation, aref<G_integer> threshold);
-extern G_integer std_gc_collect(const Global_Context& global, aopt<G_integer> generation_limit);
+extern opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation);
+extern opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation);
+extern opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold);
+extern G_integer std_gc_collect(const Global_Context& global, const opt<G_integer>& generation_limit);
 
 // Create an object that is to be referenced as `std.gc`.
 extern void create_bindings_gc(G_object& result, API_Version version);

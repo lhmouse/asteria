@@ -11,7 +11,7 @@ namespace Asteria {
 
     namespace {
 
-    pair<G_string::const_iterator, G_string::const_iterator> do_slice(aref<G_string> text, G_string::const_iterator tbegin, aopt<G_integer> length)
+    pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, G_string::const_iterator tbegin, const opt<G_integer>& length)
       {
         if(!length || (*length >= text.end() - tbegin)) {
           // Get the subrange from `tbegin` to the end.
@@ -24,7 +24,7 @@ namespace Asteria {
         // Don't go past the end.
         return std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
       }
-    pair<G_string::const_iterator, G_string::const_iterator> do_slice(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length)
+    pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length)
       {
         auto slen = static_cast<int64_t>(text.size());
         if(from >= 0) {
@@ -55,7 +55,7 @@ namespace Asteria {
 
     }  // namespace
 
-G_string std_string_slice(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length)
+G_string std_string_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length)
   {
     auto range = do_slice(text, from, length);
     if((range.first == text.begin()) && (range.second == text.end())) {
@@ -65,7 +65,7 @@ G_string std_string_slice(aref<G_string> text, aref<G_integer> from, aopt<G_inte
     return G_string(range.first, range.second);
   }
 
-G_string std_string_replace_slice(aref<G_string> text, aref<G_integer> from, aref<G_string> replacement)
+G_string std_string_replace_slice(const G_string& text, const G_integer& from, const G_string& replacement)
   {
     G_string res = text;
     auto range = do_slice(res, from, rocket::clear);
@@ -74,7 +74,7 @@ G_string std_string_replace_slice(aref<G_string> text, aref<G_integer> from, are
     return res;
   }
 
-G_string std_string_replace_slice(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> replacement)
+G_string std_string_replace_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& replacement)
   {
     G_string res = text;
     auto range = do_slice(res, from, length);
@@ -83,7 +83,7 @@ G_string std_string_replace_slice(aref<G_string> text, aref<G_integer> from, aop
     return res;
   }
 
-G_integer std_string_compare(aref<G_string> text1, aref<G_string> text2, aopt<G_integer> length)
+G_integer std_string_compare(const G_string& text1, const G_string& text2, const opt<G_integer>& length)
   {
     if(!length || (*length >= PTRDIFF_MAX)) {
       // Compare the entire strings.
@@ -97,12 +97,12 @@ G_integer std_string_compare(aref<G_string> text1, aref<G_string> text2, aopt<G_
     return text1.compare(0, static_cast<size_t>(*length), text2, 0, static_cast<size_t>(*length));
   }
 
-G_boolean std_string_starts_with(aref<G_string> text, aref<G_string> prefix)
+G_boolean std_string_starts_with(const G_string& text, const G_string& prefix)
   {
     return text.starts_with(prefix);
   }
 
-G_boolean std_string_ends_with(aref<G_string> text, aref<G_string> suffix)
+G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
   {
     return text.ends_with(suffix);
   }
@@ -141,7 +141,7 @@ G_boolean std_string_ends_with(aref<G_string> text, aref<G_string> suffix)
 
     }  // namespace
 
-opt<G_integer> std_string_find(aref<G_string> text, aref<G_string> pattern)
+opt<G_integer> std_string_find(const G_string& text, const G_string& pattern)
   {
     auto range = std::make_pair(text.begin(), text.end());
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -151,7 +151,7 @@ opt<G_integer> std_string_find(aref<G_string> text, aref<G_string> pattern)
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find(aref<G_string> text, aref<G_integer> from, aref<G_string> pattern)
+opt<G_integer> std_string_find(const G_string& text, const G_integer& from, const G_string& pattern)
   {
     auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -161,7 +161,7 @@ opt<G_integer> std_string_find(aref<G_string> text, aref<G_integer> from, aref<G
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> pattern)
+opt<G_integer> std_string_find(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(range.first, range.second, pattern.begin(), pattern.end());
@@ -171,7 +171,7 @@ opt<G_integer> std_string_find(aref<G_string> text, aref<G_integer> from, aopt<G
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_string> pattern)
+opt<G_integer> std_string_rfind(const G_string& text, const G_string& pattern)
   {
     auto range = std::make_pair(text.begin(), text.end());
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
@@ -181,7 +181,7 @@ opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_string> pattern)
     return text.rend() - *qit - pattern.ssize();
   }
 
-opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_integer> from, aref<G_string> pattern)
+opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, const G_string& pattern)
   {
     auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
@@ -191,7 +191,7 @@ opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_integer> from, aref<
     return text.rend() - *qit - pattern.ssize();
   }
 
-opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> pattern)
+opt<G_integer> std_string_rfind(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), pattern.rbegin(), pattern.rend());
@@ -201,7 +201,7 @@ opt<G_integer> std_string_rfind(aref<G_string> text, aref<G_integer> from, aopt<
     return text.rend() - *qit - pattern.ssize();
   }
 
-G_string std_string_find_and_replace(aref<G_string> text, aref<G_string> pattern, aref<G_string> replacement)
+G_string std_string_find_and_replace(const G_string& text, const G_string& pattern, const G_string& replacement)
   {
     G_string res = text;
     auto range = std::make_pair(res.begin(), res.end());
@@ -219,7 +219,7 @@ G_string std_string_find_and_replace(aref<G_string> text, aref<G_string> pattern
     return res;
   }
 
-G_string std_string_find_and_replace(aref<G_string> text, aref<G_integer> from, aref<G_string> pattern, aref<G_string> replacement)
+G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const G_string& pattern, const G_string& replacement)
   {
     G_string res = text;
     auto range = do_slice(res, from, rocket::clear);
@@ -237,7 +237,7 @@ G_string std_string_find_and_replace(aref<G_string> text, aref<G_integer> from, 
     return res;
   }
 
-G_string std_string_find_and_replace(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> pattern, aref<G_string> replacement)
+G_string std_string_find_and_replace(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& pattern, const G_string& replacement)
   {
     G_string res = text;
     auto range = do_slice(res, from, length);
@@ -257,7 +257,7 @@ G_string std_string_find_and_replace(aref<G_string> text, aref<G_integer> from, 
 
     namespace {
 
-    template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, aref<G_string> set, bool match)
+    template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const G_string& set, bool match)
       {
         // Make a lookup table.
         std::array<bool, 256> table;
@@ -273,7 +273,7 @@ G_string std_string_find_and_replace(aref<G_string> text, aref<G_integer> from, 
 
     }  // namespace
 
-opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_string> accept)
+opt<G_integer> std_string_find_any_of(const G_string& text, const G_string& accept)
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), accept, true);
     if(!qit) {
@@ -282,7 +282,7 @@ opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_string> accept
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_integer> from, aref<G_string> accept)
+opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& from, const G_string& accept)
   {
     auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
@@ -292,7 +292,7 @@ opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_integer> from,
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> accept)
+opt<G_integer> std_string_find_any_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, accept, true);
@@ -302,7 +302,7 @@ opt<G_integer> std_string_find_any_of(aref<G_string> text, aref<G_integer> from,
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_string> reject)
+opt<G_integer> std_string_find_not_of(const G_string& text, const G_string& reject)
   {
     auto qit = do_find_of_opt(text.begin(), text.end(), reject, false);
     if(!qit) {
@@ -311,7 +311,7 @@ opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_string> reject
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_integer> from, aref<G_string> reject)
+opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& from, const G_string& reject)
   {
     auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
@@ -321,7 +321,7 @@ opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_integer> from,
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> reject)
+opt<G_integer> std_string_find_not_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(range.first, range.second, reject, false);
@@ -331,7 +331,7 @@ opt<G_integer> std_string_find_not_of(aref<G_string> text, aref<G_integer> from,
     return *qit - text.begin();
   }
 
-opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_string> accept)
+opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_string& accept)
   {
     auto qit = do_find_of_opt(text.rbegin(), text.rend(), accept, true);
     if(!qit) {
@@ -340,7 +340,7 @@ opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_string> accep
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_integer> from, aref<G_string> accept)
+opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& from, const G_string& accept)
   {
     auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
@@ -350,7 +350,7 @@ opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_integer> from
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> accept)
+opt<G_integer> std_string_rfind_any_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& accept)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), accept, true);
@@ -360,7 +360,7 @@ opt<G_integer> std_string_rfind_any_of(aref<G_string> text, aref<G_integer> from
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_string> reject)
+opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_string& reject)
   {
     auto qit = do_find_of_opt(text.rbegin(), text.rend(), reject, false);
     if(!qit) {
@@ -369,7 +369,7 @@ opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_string> rejec
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_integer> from, aref<G_string> reject)
+opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& from, const G_string& reject)
   {
     auto range = do_slice(text, from, rocket::clear);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
@@ -379,7 +379,7 @@ opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_integer> from
     return text.rend() - *qit - 1;
   }
 
-opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_integer> from, aopt<G_integer> length, aref<G_string> reject)
+opt<G_integer> std_string_rfind_not_of(const G_string& text, const G_integer& from, const opt<G_integer>& length, const G_string& reject)
   {
     auto range = do_slice(text, from, length);
     auto qit = do_find_of_opt(std::make_reverse_iterator(range.second), std::make_reverse_iterator(range.first), reject, false);
@@ -389,7 +389,7 @@ opt<G_integer> std_string_rfind_not_of(aref<G_string> text, aref<G_integer> from
     return text.rend() - *qit - 1;
   }
 
-G_string std_string_reverse(aref<G_string> text)
+G_string std_string_reverse(const G_string& text)
   {
     // This is an easy matter, isn't it?
     return G_string(text.rbegin(), text.rend());
@@ -397,7 +397,7 @@ G_string std_string_reverse(aref<G_string> text)
 
     namespace {
 
-    inline G_string::shallow_type do_get_reject(aopt<G_string> reject)
+    inline G_string::shallow_type do_get_reject(const opt<G_string>& reject)
       {
         if(!reject) {
           return rocket::sref(" \t");
@@ -407,7 +407,7 @@ G_string std_string_reverse(aref<G_string> text)
 
     }  // namespace
 
-G_string std_string_trim(aref<G_string> text, aopt<G_string> reject)
+G_string std_string_trim(const G_string& text, const opt<G_string>& reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
@@ -430,7 +430,7 @@ G_string std_string_trim(aref<G_string> text, aopt<G_string> reject)
     return text.substr(start, end + 1 - start);
   }
 
-G_string std_string_ltrim(aref<G_string> text, aopt<G_string> reject)
+G_string std_string_ltrim(const G_string& text, const opt<G_string>& reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
@@ -451,7 +451,7 @@ G_string std_string_ltrim(aref<G_string> text, aopt<G_string> reject)
     return text.substr(start);
   }
 
-G_string std_string_rtrim(aref<G_string> text, aopt<G_string> reject)
+G_string std_string_rtrim(const G_string& text, const opt<G_string>& reject)
   {
     auto rchars = do_get_reject(reject);
     if(rchars.length() == 0) {
@@ -474,7 +474,7 @@ G_string std_string_rtrim(aref<G_string> text, aopt<G_string> reject)
 
     namespace {
 
-    inline G_string::shallow_type do_get_padding(aopt<G_string> padding)
+    inline G_string::shallow_type do_get_padding(const opt<G_string>& padding)
       {
         if(!padding) {
           return rocket::sref(" ");
@@ -487,7 +487,7 @@ G_string std_string_rtrim(aref<G_string> text, aopt<G_string> reject)
 
     }  // namespace
 
-G_string std_string_lpad(aref<G_string> text, aref<G_integer> length, aopt<G_string> padding)
+G_string std_string_lpad(const G_string& text, const G_integer& length, const opt<G_string>& padding)
   {
     G_string res = text;
     auto rpadding = do_get_padding(padding);
@@ -503,7 +503,7 @@ G_string std_string_lpad(aref<G_string> text, aref<G_integer> length, aopt<G_str
     return res;
   }
 
-G_string std_string_rpad(aref<G_string> text, aref<G_integer> length, aopt<G_string> padding)
+G_string std_string_rpad(const G_string& text, const G_integer& length, const opt<G_string>& padding)
   {
     G_string res = text;
     auto rpadding = do_get_padding(padding);
@@ -519,7 +519,7 @@ G_string std_string_rpad(aref<G_string> text, aref<G_integer> length, aopt<G_str
     return res;
   }
 
-G_string std_string_to_upper(aref<G_string> text)
+G_string std_string_to_upper(const G_string& text)
   {
     // Use reference counting as our advantage.
     G_string res = text;
@@ -539,7 +539,7 @@ G_string std_string_to_upper(aref<G_string> text)
     return res;
   }
 
-G_string std_string_to_lower(aref<G_string> text)
+G_string std_string_to_lower(const G_string& text)
   {
     // Use reference counting as our advantage.
     G_string res = text;
@@ -559,7 +559,7 @@ G_string std_string_to_lower(aref<G_string> text)
     return res;
   }
 
-G_string std_string_translate(aref<G_string> text, aref<G_string> inputs, aopt<G_string> outputs)
+G_string std_string_translate(const G_string& text, const G_string& inputs, const opt<G_string>& outputs)
   {
     // Use reference counting as our advantage.
     G_string res = text;
@@ -626,7 +626,7 @@ G_string std_string_translate(aref<G_string> text, aref<G_string> inputs, aopt<G
 
     }  // namespace
 
-G_array std_string_explode(aref<G_string> text, aopt<G_string> delim, aopt<G_integer> limit)
+G_array std_string_explode(const G_string& text, const opt<G_string>& delim, const opt<G_integer>& limit)
   {
     uint64_t rlimit = UINT64_MAX;
     if(limit) {
@@ -670,7 +670,7 @@ G_array std_string_explode(aref<G_string> text, aopt<G_string> delim, aopt<G_int
     return segments;
   }
 
-G_string std_string_implode(aref<G_array> segments, aopt<G_string> delim)
+G_string std_string_implode(const G_array& segments, const opt<G_string>& delim)
   {
     G_string text;
     auto nsegs = segments.size();
@@ -704,7 +704,7 @@ G_string std_string_implode(aref<G_array> segments, aopt<G_string> delim)
 
     }  // namespace
 
-G_string std_string_hex_encode(aref<G_string> data, aopt<G_boolean> lowercase, aopt<G_string> delim)
+G_string std_string_hex_encode(const G_string& data, const opt<G_boolean>& lowercase, const opt<G_string>& delim)
   {
     G_string text;
     auto rdelim = delim ? rocket::sref(*delim) : rocket::sref("");
@@ -733,7 +733,7 @@ G_string std_string_hex_encode(aref<G_string> data, aopt<G_boolean> lowercase, a
     return text;
   }
 
-opt<G_string> std_string_hex_decode(aref<G_string> text)
+opt<G_string> std_string_hex_decode(const G_string& text)
   {
     G_string data;
     // These shall be operated in big-endian order.
@@ -785,7 +785,7 @@ opt<G_string> std_string_hex_decode(aref<G_string> text)
     return rocket::move(data);
   }
 
-G_string std_string_base32_encode(aref<G_string> data, aopt<G_boolean> lowercase)
+G_string std_string_base32_encode(const G_string& data, const opt<G_boolean>& lowercase)
   {
     G_string text;
     bool rlowerc = lowercase == true;
@@ -836,7 +836,7 @@ G_string std_string_base32_encode(aref<G_string> data, aopt<G_boolean> lowercase
     return text;
   }
 
-opt<G_string> std_string_base32_decode(aref<G_string> text)
+opt<G_string> std_string_base32_decode(const G_string& text)
   {
     G_string data;
     // These shall be operated in big-endian order.
@@ -904,7 +904,7 @@ opt<G_string> std_string_base32_decode(aref<G_string> text)
     return rocket::move(data);
   }
 
-G_string std_string_base64_encode(aref<G_string> data)
+G_string std_string_base64_encode(const G_string& data)
   {
     G_string text;
     text.reserve((data.size() + 2) / 3 * 4);
@@ -954,7 +954,7 @@ G_string std_string_base64_encode(aref<G_string> data)
     return text;
   }
 
-opt<G_string> std_string_base64_decode(aref<G_string> text)
+opt<G_string> std_string_base64_decode(const G_string& text)
   {
     G_string data;
     // These shall be operated in big-endian order.
@@ -1022,7 +1022,7 @@ opt<G_string> std_string_base64_decode(aref<G_string> text)
     return rocket::move(data);
   }
 
-opt<G_string> std_string_utf8_encode(aref<G_integer> code_point, aopt<G_boolean> permissive)
+opt<G_string> std_string_utf8_encode(const G_integer& code_point, const opt<G_boolean>& permissive)
   {
     G_string text;
     text.reserve(4);
@@ -1039,7 +1039,7 @@ opt<G_string> std_string_utf8_encode(aref<G_integer> code_point, aopt<G_boolean>
     return rocket::move(text);
   }
 
-opt<G_string> std_string_utf8_encode(aref<G_array> code_points, aopt<G_boolean> permissive)
+opt<G_string> std_string_utf8_encode(const G_array& code_points, const opt<G_boolean>& permissive)
   {
     G_string text;
     text.reserve(code_points.size() * 3);
@@ -1058,7 +1058,7 @@ opt<G_string> std_string_utf8_encode(aref<G_array> code_points, aopt<G_boolean> 
     return rocket::move(text);
   }
 
-opt<G_array> std_string_utf8_decode(aref<G_string> text, aopt<G_boolean> permissive)
+opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& permissive)
   {
     G_array code_points;
     code_points.reserve(text.size());
@@ -1084,7 +1084,7 @@ opt<G_array> std_string_utf8_decode(aref<G_string> text, aopt<G_boolean> permiss
 
     namespace {
 
-    template<bool bigendT, typename WordT> bool do_pack_one_impl(G_string& text, aref<G_integer> value)
+    template<bool bigendT, typename WordT> bool do_pack_one_impl(G_string& text, const G_integer& value)
       {
         // Define temporary storage.
         std::array<char, sizeof(WordT)> stor_le;
@@ -1103,16 +1103,16 @@ opt<G_array> std_string_utf8_decode(aref<G_string> text, aopt<G_boolean> permiss
         }
         return true;
       }
-    template<typename WordT> bool do_pack_one_be(G_string& text, aref<G_integer> value)
+    template<typename WordT> bool do_pack_one_be(G_string& text, const G_integer& value)
       {
         return do_pack_one_impl<1, WordT>(text, value);
       }
-    template<typename WordT> bool do_pack_one_le(G_string& text, aref<G_integer> value)
+    template<typename WordT> bool do_pack_one_le(G_string& text, const G_integer& value)
       {
         return do_pack_one_impl<0, WordT>(text, value);
       }
 
-    template<bool bigendT, typename WordT> G_array do_unpack_impl(aref<G_string> text)
+    template<bool bigendT, typename WordT> G_array do_unpack_impl(const G_string& text)
       {
         G_array values;
         // Define temporary storage.
@@ -1143,18 +1143,18 @@ opt<G_array> std_string_utf8_decode(aref<G_string> text, aopt<G_boolean> permiss
         }
         return values;
       }
-    template<typename WordT> G_array do_unpack_be(aref<G_string> text)
+    template<typename WordT> G_array do_unpack_be(const G_string& text)
       {
         return do_unpack_impl<1, WordT>(text);
       }
-    template<typename WordT> G_array do_unpack_le(aref<G_string> text)
+    template<typename WordT> G_array do_unpack_le(const G_string& text)
       {
         return do_unpack_impl<0, WordT>(text);
       }
 
     }  // namespace
 
-G_string std_string_pack8(aref<G_integer> value)
+G_string std_string_pack8(const G_integer& value)
   {
     G_string text;
     text.reserve(1);
@@ -1162,7 +1162,7 @@ G_string std_string_pack8(aref<G_integer> value)
     return text;
   }
 
-G_string std_string_pack8(aref<G_array> values)
+G_string std_string_pack8(const G_array& values)
   {
     G_string text;
     text.reserve(values.size());
@@ -1172,12 +1172,12 @@ G_string std_string_pack8(aref<G_array> values)
     return text;
   }
 
-G_array std_string_unpack8(aref<G_string> text)
+G_array std_string_unpack8(const G_string& text)
   {
     return do_unpack_le<int8_t>(text);
   }
 
-G_string std_string_pack_16be(aref<G_integer> value)
+G_string std_string_pack_16be(const G_integer& value)
   {
     G_string text;
     text.reserve(2);
@@ -1185,7 +1185,7 @@ G_string std_string_pack_16be(aref<G_integer> value)
     return text;
   }
 
-G_string std_string_pack_16be(aref<G_array> values)
+G_string std_string_pack_16be(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 2);
@@ -1195,12 +1195,12 @@ G_string std_string_pack_16be(aref<G_array> values)
     return text;
   }
 
-G_array std_string_unpack_16be(aref<G_string> text)
+G_array std_string_unpack_16be(const G_string& text)
   {
     return do_unpack_be<int16_t>(text);
   }
 
-G_string std_string_pack_16le(aref<G_integer> value)
+G_string std_string_pack_16le(const G_integer& value)
   {
     G_string text;
     text.reserve(2);
@@ -1208,7 +1208,7 @@ G_string std_string_pack_16le(aref<G_integer> value)
     return text;
   }
 
-G_string std_string_pack_16le(aref<G_array> values)
+G_string std_string_pack_16le(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 2);
@@ -1218,12 +1218,12 @@ G_string std_string_pack_16le(aref<G_array> values)
     return text;
   }
 
-G_array std_string_unpack_16le(aref<G_string> text)
+G_array std_string_unpack_16le(const G_string& text)
   {
     return do_unpack_le<int16_t>(text);
   }
 
-G_string std_string_pack_32be(aref<G_integer> value)
+G_string std_string_pack_32be(const G_integer& value)
   {
     G_string text;
     text.reserve(4);
@@ -1231,7 +1231,7 @@ G_string std_string_pack_32be(aref<G_integer> value)
     return text;
   }
 
-G_string std_string_pack_32be(aref<G_array> values)
+G_string std_string_pack_32be(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 4);
@@ -1241,12 +1241,12 @@ G_string std_string_pack_32be(aref<G_array> values)
     return text;
   }
 
-G_array std_string_unpack_32be(aref<G_string> text)
+G_array std_string_unpack_32be(const G_string& text)
   {
     return do_unpack_be<int32_t>(text);
   }
 
-G_string std_string_pack_32le(aref<G_integer> value)
+G_string std_string_pack_32le(const G_integer& value)
   {
     G_string text;
     text.reserve(4);
@@ -1254,7 +1254,7 @@ G_string std_string_pack_32le(aref<G_integer> value)
     return text;
   }
 
-G_string std_string_pack_32le(aref<G_array> values)
+G_string std_string_pack_32le(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 4);
@@ -1264,12 +1264,12 @@ G_string std_string_pack_32le(aref<G_array> values)
     return text;
   }
 
-G_array std_string_unpack_32le(aref<G_string> text)
+G_array std_string_unpack_32le(const G_string& text)
   {
     return do_unpack_le<int32_t>(text);
   }
 
-G_string std_string_pack_64be(aref<G_integer> value)
+G_string std_string_pack_64be(const G_integer& value)
   {
     G_string text;
     text.reserve(8);
@@ -1277,7 +1277,7 @@ G_string std_string_pack_64be(aref<G_integer> value)
     return text;
   }
 
-G_string std_string_pack_64be(aref<G_array> values)
+G_string std_string_pack_64be(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 8);
@@ -1287,12 +1287,12 @@ G_string std_string_pack_64be(aref<G_array> values)
     return text;
   }
 
-G_array std_string_unpack_64be(aref<G_string> text)
+G_array std_string_unpack_64be(const G_string& text)
   {
     return do_unpack_be<int64_t>(text);
   }
 
-G_string std_string_pack_64le(aref<G_integer> value)
+G_string std_string_pack_64le(const G_integer& value)
   {
     G_string text;
     text.reserve(8);
@@ -1300,7 +1300,7 @@ G_string std_string_pack_64le(aref<G_integer> value)
     return text;
   }
 
-G_string std_string_pack_64le(aref<G_array> values)
+G_string std_string_pack_64le(const G_array& values)
   {
     G_string text;
     text.reserve(values.size() * 8);
@@ -1310,12 +1310,12 @@ G_string std_string_pack_64le(aref<G_array> values)
     return text;
   }
 
-G_array std_string_unpack_64le(aref<G_string> text)
+G_array std_string_unpack_64le(const G_string& text)
   {
     return do_unpack_le<int64_t>(text);
   }
 
-G_string std_string_format(aref<G_string> templ, const cow_vector<Value>& values)
+G_string std_string_format(const G_string& templ, const cow_vector<Value>& values)
   {
     // Prepare inserters.
     cow_vector<rocket::formatter> insts;

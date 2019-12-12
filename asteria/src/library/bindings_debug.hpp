@@ -8,8 +8,8 @@
 
 namespace Asteria {
 
-extern bool std_debug_print(aref<G_string> templ, const cow_vector<Value>& values);
-extern bool std_debug_dump(const Value& value, aopt<G_integer> indent = rocket::clear);
+extern bool std_debug_print(const G_string& templ, const cow_vector<Value>& values);
+extern bool std_debug_dump(const Value& value, const opt<G_integer>& indent = rocket::clear);
 
 // Create an object that is to be referenced as `std.debug`.
 extern void create_bindings_debug(G_object& result, API_Version version);

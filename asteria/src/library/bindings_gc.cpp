@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-opt<G_integer> std_gc_tracked_count(const Global_Context& global, aref<G_integer> generation)
+opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return rocket::clear;
@@ -27,7 +27,7 @@ opt<G_integer> std_gc_tracked_count(const Global_Context& global, aref<G_integer
     return G_integer(count);
   }
 
-opt<G_integer> std_gc_get_threshold(const Global_Context& global, aref<G_integer> generation)
+opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return rocket::clear;
@@ -43,7 +43,7 @@ opt<G_integer> std_gc_get_threshold(const Global_Context& global, aref<G_integer
     return G_integer(thres);
   }
 
-opt<G_integer> std_gc_set_threshold(const Global_Context& global, aref<G_integer> generation, aref<G_integer> threshold)
+opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return rocket::clear;
@@ -60,7 +60,7 @@ opt<G_integer> std_gc_set_threshold(const Global_Context& global, aref<G_integer
     return G_integer(thres);
   }
 
-G_integer std_gc_collect(const Global_Context& global, aopt<G_integer> generation_limit)
+G_integer std_gc_collect(const Global_Context& global, const opt<G_integer>& generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
     // Get the maximum generation to collect when `generation_limit` is specified.

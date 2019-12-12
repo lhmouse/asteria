@@ -31,7 +31,7 @@ G_string std_filesystem_get_working_directory()
     return cwd;
   }
 
-opt<G_object> std_filesystem_get_information(aref<G_string> path)
+opt<G_object> std_filesystem_get_information(const G_string& path)
   {
     struct ::stat stb;
     if(::lstat(path.c_str(), &stb) != 0) {
@@ -78,12 +78,12 @@ opt<G_object> std_filesystem_get_information(aref<G_string> path)
     return rocket::move(stat);
   }
 
-bool std_filesystem_move_from(aref<G_string> path_new, aref<G_string> path_old)
+bool std_filesystem_move_from(const G_string& path_new, const G_string& path_old)
   {
     return ::rename(path_old.c_str(), path_new.c_str()) == 0;
   }
 
-opt<G_integer> std_filesystem_remove_recursive(aref<G_string> path)
+opt<G_integer> std_filesystem_remove_recursive(const G_string& path)
   {
     if(::rmdir(path.c_str()) == 0) {
       // An empty directory has been removed.
@@ -175,7 +175,7 @@ opt<G_integer> std_filesystem_remove_recursive(aref<G_string> path)
     return count;
   }
 
-opt<G_object> std_filesystem_directory_list(aref<G_string> path)
+opt<G_object> std_filesystem_directory_list(const G_string& path)
   {
     rocket::unique_posix_dir dp(::opendir(path.c_str()), closedir);
     if(!dp) {
@@ -227,7 +227,7 @@ opt<G_object> std_filesystem_directory_list(aref<G_string> path)
     return rocket::move(entries);
   }
 
-opt<G_integer> std_filesystem_directory_create(aref<G_string> path)
+opt<G_integer> std_filesystem_directory_create(const G_string& path)
   {
     if(::mkdir(path.c_str(), 0777) == 0) {
       // A new directory has been created.
@@ -249,7 +249,7 @@ opt<G_integer> std_filesystem_directory_create(aref<G_string> path)
     return G_integer(0);
   }
 
-opt<G_integer> std_filesystem_directory_remove(aref<G_string> path)
+opt<G_integer> std_filesystem_directory_remove(const G_string& path)
   {
     if(::rmdir(path.c_str()) == 0) {
       // The directory has been removed.
@@ -263,7 +263,7 @@ opt<G_integer> std_filesystem_directory_remove(aref<G_string> path)
     return G_integer(0);
   }
 
-opt<G_string> std_filesystem_file_read(aref<G_string> path, aopt<G_integer> offset, aopt<G_integer> limit)
+opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -302,7 +302,7 @@ opt<G_string> std_filesystem_file_read(aref<G_string> path, aopt<G_integer> offs
         args.emplace_back(rocket::move(xref));
       }
 
-    void do_process_block(const Global_Context& global, aref<G_function> callback, aref<G_integer> offset, aref<G_string> data)
+    void do_process_block(const Global_Context& global, const G_function& callback, const G_integer& offset, const G_string& data)
       {
         // Set up arguments for the user-defined predictor.
         cow_vector<Reference> args;
@@ -315,7 +315,7 @@ opt<G_string> std_filesystem_file_read(aref<G_string> path, aopt<G_integer> offs
 
     }  // namespace
 
-bool std_filesystem_file_stream(const Global_Context& global, aref<G_string> path, aref<G_function> callback, aopt<G_integer> offset, aopt<G_integer> limit)
+bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -360,7 +360,7 @@ bool std_filesystem_file_stream(const Global_Context& global, aref<G_string> pat
     return true;
   }
 
-bool std_filesystem_file_write(aref<G_string> path, aref<G_string> data, aopt<G_integer> offset)
+bool std_filesystem_file_write(const G_string& path, const G_string& data, const opt<G_integer>& offset)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -402,7 +402,7 @@ bool std_filesystem_file_write(aref<G_string> path, aref<G_string> data, aopt<G_
     return true;
   }
 
-bool std_filesystem_file_append(aref<G_string> path, aref<G_string> data, aopt<G_boolean> exclusive)
+bool std_filesystem_file_append(const G_string& path, const G_string& data, const opt<G_boolean>& exclusive)
   {
     int64_t nremaining = static_cast<int64_t>(data.size());
     // Calculate the `flags` argument.
@@ -432,7 +432,7 @@ bool std_filesystem_file_append(aref<G_string> path, aref<G_string> data, aopt<G
     return true;
   }
 
-bool std_filesystem_file_copy_from(aref<G_string> path_new, aref<G_string> path_old)
+bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& path_old)
   {
     // Open the old file.
     rocket::unique_posix_fd hf_old(::open(path_old.c_str(), O_RDONLY), ::close);
@@ -485,7 +485,7 @@ bool std_filesystem_file_copy_from(aref<G_string> path_new, aref<G_string> path_
     return true;
   }
 
-bool std_filesystem_file_remove(aref<G_string> path)
+bool std_filesystem_file_remove(const G_string& path)
   {
     return ::unlink(path.c_str()) == 0;
   }

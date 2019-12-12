@@ -1750,19 +1750,25 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& rhs = ctx.stack().get_top().read();
         // Return the number of elements in the operand.
         size_t nelems;
-        if(rhs.is_null()) {
-          nelems = 0;
-        }
-        else if(rhs.is_string()) {
-          nelems = rhs.as_string().size();
-        }
-        else if(rhs.is_array()) {
-          nelems = rhs.as_array().size();
-        }
-        else if(rhs.is_object()) {
-          nelems = rhs.as_object().size();
-        }
-        else {
+        switch(rocket::weaken_enum(rhs.gtype())) {
+          {{
+        case gtype_null:
+            nelems = 0;
+            break;
+          }{
+        case gtype_string:
+            nelems = rhs.as_string().size();
+            break;
+          }{
+        case gtype_array:
+            nelems = rhs.as_array().size();
+            break;
+          }{
+        case gtype_object:
+            nelems = rhs.as_object().size();
+            break;
+          }}
+        default:
           ASTERIA_THROW("prefix `lengthof` not applicable (operand was `$1`)", rhs);
         }
         do_set_temporary(ctx.stack(), assign, G_integer(nelems));
@@ -2095,8 +2101,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Report unordered operands as being unequal.
         // N.B. This is one of the few operators that work on all types.
         auto comp = lhs.compare(rhs);
-        rhs = G_boolean((comp == expect) != negative);
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, G_boolean((comp == expect) ^ negative));
         return air_status_next;
       }
 
@@ -2117,8 +2122,7 @@ DCE_Result AIR_Node::optimize_dce()
         if(comp == compare_unordered) {
           ASTERIA_THROW("values not comparable (operands were `$1` and `$2`)", lhs, rhs);
         }
-        rhs = G_boolean((comp == expect) != negative);
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, G_boolean((comp == expect) ^ negative));
         return air_status_next;
       }
 
@@ -2137,25 +2141,24 @@ DCE_Result AIR_Node::optimize_dce()
         switch(comp) {
           {{
         case compare_greater:
-            rhs = G_integer(+1);
+            do_set_temporary(ctx.stack(), assign, G_integer(+1));
             break;
           }{
         case compare_less:
-            rhs = G_integer(-1);
+            do_set_temporary(ctx.stack(), assign, G_integer(-1));
             break;
           }{
         case compare_equal:
-            rhs = G_integer(0);
+            do_set_temporary(ctx.stack(), assign, G_integer(0));
             break;
           }{
         case compare_unordered:
-            rhs = G_string(rocket::sref("<unordered>"));
+            do_set_temporary(ctx.stack(), assign, G_string(rocket::sref("<unordered>")));
             break;
           }}
         default:
           ROCKET_ASSERT(false);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
         return air_status_next;
       }
 

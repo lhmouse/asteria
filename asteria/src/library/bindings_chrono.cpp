@@ -50,7 +50,7 @@ G_integer std_chrono_steady_now()
     return static_cast<int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000 + 0x123456789;
   }
 
-G_integer std_chrono_local_from_utc(aref<G_integer> time_utc)
+G_integer std_chrono_local_from_utc(const G_integer& time_utc)
   {
     // Handle special time values.
     if(time_utc <= -11644473600000)
@@ -71,7 +71,7 @@ G_integer std_chrono_local_from_utc(aref<G_integer> time_utc)
       return time_local;
   }
 
-G_integer std_chrono_utc_from_local(aref<G_integer> time_local)
+G_integer std_chrono_utc_from_local(const G_integer& time_local)
   {
     // Handle special time values.
     if(time_local <= -11644473600000)
@@ -152,7 +152,7 @@ G_integer std_chrono_utc_from_local(aref<G_integer> time_local)
 
     }  // namespace
 
-G_string std_chrono_utc_format(aref<G_integer> time_point, aopt<G_boolean> with_ms)
+G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>& with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
@@ -189,7 +189,7 @@ G_string std_chrono_utc_format(aref<G_integer> time_point, aopt<G_boolean> with_
     return G_string(std::make_reverse_iterator(qwt), std::make_reverse_iterator(wbuf));
   }
 
-opt<G_integer> std_chrono_utc_parse(aref<G_string> time_str)
+opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
   {
     auto n = time_str.find_first_not_of(s_spaces);
     if(n == G_string::npos) {

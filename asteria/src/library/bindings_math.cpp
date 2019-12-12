@@ -19,7 +19,7 @@ namespace Asteria {
 
     }  // namespace
 
-G_real std_math_exp(aref<G_real> y, aopt<G_real> base)
+G_real std_math_exp(const G_real& y, const opt<G_real>& base)
   {
     if(!base) {
       return std::exp(y);
@@ -33,17 +33,17 @@ G_real std_math_exp(aref<G_real> y, aopt<G_real> base)
     return std::pow(*base, y);
   }
 
-G_real std_math_expm1(aref<G_real> y)
+G_real std_math_expm1(const G_real& y)
   {
     return std::expm1(y);
   }
 
-G_real std_math_pow(aref<G_real> x, aref<G_real> y)
+G_real std_math_pow(const G_real& x, const G_real& y)
   {
     return std::pow(x, y);
   }
 
-G_real std_math_log(aref<G_real> x, aopt<G_real> base)
+G_real std_math_log(const G_real& x, const opt<G_real>& base)
   {
     if(!base) {
       return std::log(x);
@@ -60,42 +60,42 @@ G_real std_math_log(aref<G_real> x, aopt<G_real> base)
     return std::log2(x) / std::log2(*base);
   }
 
-G_real std_math_log1p(aref<G_real> x)
+G_real std_math_log1p(const G_real& x)
   {
     return std::log1p(x);
   }
 
-G_real std_math_sin(aref<G_real> x)
+G_real std_math_sin(const G_real& x)
   {
     return std::sin(x);
   }
 
-G_real std_math_cos(aref<G_real> x)
+G_real std_math_cos(const G_real& x)
   {
     return std::cos(x);
   }
 
-G_real std_math_tan(aref<G_real> x)
+G_real std_math_tan(const G_real& x)
   {
     return std::tan(x);
   }
 
-G_real std_math_asin(aref<G_real> x)
+G_real std_math_asin(const G_real& x)
   {
     return std::asin(x);
   }
 
-G_real std_math_acos(aref<G_real> x)
+G_real std_math_acos(const G_real& x)
   {
     return std::acos(x);
   }
 
-G_real std_math_atan(aref<G_real> x)
+G_real std_math_atan(const G_real& x)
   {
     return std::atan(x);
   }
 
-G_real std_math_atan2(aref<G_real> y, aref<G_real> x)
+G_real std_math_atan2(const G_real& y, const G_real& x)
   {
     return std::atan2(y, x);
   }
@@ -124,52 +124,52 @@ G_real std_math_hypot(const cow_vector<Value>& values)
     }
   }
 
-G_real std_math_sinh(aref<G_real> x)
+G_real std_math_sinh(const G_real& x)
   {
     return std::sinh(x);
   }
 
-G_real std_math_cosh(aref<G_real> x)
+G_real std_math_cosh(const G_real& x)
   {
     return std::cosh(x);
   }
 
-G_real std_math_tanh(aref<G_real> x)
+G_real std_math_tanh(const G_real& x)
   {
     return std::tanh(x);
   }
 
-G_real std_math_asinh(aref<G_real> x)
+G_real std_math_asinh(const G_real& x)
   {
     return std::asinh(x);
   }
 
-G_real std_math_acosh(aref<G_real> x)
+G_real std_math_acosh(const G_real& x)
   {
     return std::acosh(x);
   }
 
-G_real std_math_atanh(aref<G_real> x)
+G_real std_math_atanh(const G_real& x)
   {
     return std::atanh(x);
   }
 
-G_real std_math_erf(aref<G_real> x)
+G_real std_math_erf(const G_real& x)
   {
     return std::erf(x);
   }
 
-G_real std_math_cerf(aref<G_real> x)
+G_real std_math_cerf(const G_real& x)
   {
     return std::erfc(x);
   }
 
-G_real std_math_gamma(aref<G_real> x)
+G_real std_math_gamma(const G_real& x)
   {
     return std::tgamma(x);
   }
 
-G_real std_math_lgamma(aref<G_real> x)
+G_real std_math_lgamma(const G_real& x)
   {
     return std::lgamma(x);
   }
