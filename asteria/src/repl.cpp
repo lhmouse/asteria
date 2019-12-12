@@ -330,30 +330,22 @@ int main(int argc, char** argv)
         if(ch == EOF) {
           break;
         }
-        if(heredoc.empty()) {
-          // Backslashes not preceding line feeds are preserved as is.
-          if(escape && (ch != '\n')) {
-            code += '\\';
-          }
-          // If the character is a backslash, stash it.
-          if(ch == '\\') {
-            escape = true;
-            continue;
-          }
-        }
         if(ch == '\n') {
           // Check for termination.
           if(heredoc.empty()) {
             // In normal mode, the current snippet is terminated by an unescaped line feed.
+            if(!escape) {
+              break;
+            }
             // REPL commands can't straddle multiple lines.
-            if(!escape || code.empty() || (code.front() == '\\')) {
+            if(code.empty() || (code.front() == '\\')) {
               break;
             }
           }
           else {
             // In heredoc mode, the current snippet is terminated by the user-defined terminator.
-            // The terminator must be deleted from the snippet.
             if(code.ends_with(heredoc)) {
+              // The terminator must be deleted from the snippet.
               code.erase(code.size() - heredoc.size());
               break;
             }
@@ -361,6 +353,20 @@ int main(int argc, char** argv)
           // Otherwise, the preceding backslash is deleted and a line break will be appended.
           // Prompt for the next consecutive line.
           ::fprintf(stderr, "%*c%3lu> ", indent, ':', ++line);
+        }
+        else {
+          // Handle escape characters.
+          if(heredoc.empty()) {
+            // Backslashes not preceding line feeds are preserved as is.
+            if(escape) {
+              code += '\\';
+            }
+            // If the character is a backslash, stash it.
+            if(ch == '\\') {
+              escape = true;
+              continue;
+            }
+          }
         }
         // Append the character.
         code += static_cast<char>(ch);
