@@ -278,7 +278,7 @@ int main()
         }
       )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, rocket::sref("my_file"));
+    Simple_Script code(cbuf, rocket::sref(__FILE__));
     Global_Context global;
     code.execute(global);
   }

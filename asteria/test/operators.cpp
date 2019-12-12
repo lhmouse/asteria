@@ -380,7 +380,7 @@ int main()
         assert __isnan __fma(5, nan, 7);
         assert __isnan __fma(5, 6, nan);
       )__"), tinybuf::open_read);
-    Simple_Script code(cbuf, rocket::sref("my_file"));
+    Simple_Script code(cbuf, rocket::sref(__FILE__));
     Global_Context global;
     code.execute(global);
   }

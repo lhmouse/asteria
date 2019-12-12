@@ -25,7 +25,7 @@ int main()
           binary(1,2,3,4,5),   // [ 3, 4 ]
         ];
       )__"), tinybuf::open_read);
-    Simple_Script code(cbuf, rocket::sref("my_file"));
+    Simple_Script code(cbuf, rocket::sref(__FILE__));
     Global_Context global;
     auto res = code.execute(global);
     const auto& array = res.read().as_array();

@@ -206,7 +206,7 @@ int main()
         assert std.array.sort(std.array.copy_values({a:1,b:2,c:3,d:4})) == [1,2,3,4];
       )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, rocket::sref("my_file"));
+    Simple_Script code(cbuf, rocket::sref(__FILE__));
     Global_Context global;
     code.execute(global);
   }
