@@ -302,9 +302,10 @@ int main(int argc, char** argv)
     // In interactive mode (a.k.a. REPL mode), read user inputs in lines.
     unsigned long index = 0;
     int indent;
+    long line;
+
     cow_string code;
     bool escape;
-    long line;
 
     for(;;) {
       // Check for exit condition.
@@ -329,29 +330,24 @@ int main(int argc, char** argv)
         if(ch == EOF) {
           break;
         }
+        // Backslashes not preceding line feeds are preserved as is.
+        if(escape && (ch != '\n')) {
+          code += '\\';
+        }
+        // If the character is a backslash, stash it.
+        if(ch == '\\') {
+          escape = true;
+          continue;
+        }
         if(ch == '\n') {
+          // The current snippet is terminated by an unescaped line feed.
           // REPL commands can't straddle multiple lines.
-          if(code.empty() || (code.front() == '\\')) {
+          if(!escape || code.empty() || (code.front() == '\\')) {
             break;
           }
-          // If a line feed isn't escaped, the current snippet is terminated.
-          if(!escape) {
-            break;
-          }
-          // Otherwise, a line break is appended and the preceding backslash is deleted.
+          // Otherwise, the preceding backslash is deleted and a line break will be appended.
           // Prompt for the next consecutive line.
           ::fprintf(stderr, "%*c%3lu> ", indent, ':', ++line);
-        }
-        else {
-          // Backslashes not preceding line feeds are preserved as is.
-          if(escape) {
-            code += '\\';
-          }
-          // If the character is a backslash, stash it.
-          if(ch == '\\') {
-            escape = true;
-            continue;
-          }
         }
         // Append the character.
         code += static_cast<char>(ch);
