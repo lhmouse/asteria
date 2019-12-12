@@ -399,7 +399,7 @@ int main(int argc, char** argv)
       }
       if(!script) {
         // Rewrite the potential expression to a `return` statement.
-        code.insert(0, "return ");
+        code.insert(0, "return& ");
         code.append(" ;");
         try {
           // Try parsing it again.
