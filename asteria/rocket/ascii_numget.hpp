@@ -5,6 +5,8 @@
 #define ROCKET_ASCII_NUMGET_HPP_
 
 #include "utilities.hpp"
+#include <climits>
+#include <cmath>
 
 namespace rocket {
 
@@ -116,58 +118,114 @@ class ascii_numget
     // default parse functions
     ascii_numget& get(bool& value, const char*& bptr, const char* eptr) noexcept
       {
-        value = false;
-        if(this->parse_B(bptr, eptr)) {
-          uint64_t temp;
+        uint64_t temp = 0;
+        if(this->parse_B(bptr, eptr))
           this->cast_U(temp, 0, 1);
-          value = static_cast<bool>(static_cast<unsigned>(temp));
-        }
+        value = temp & 1;
         return *this;
       }
     ascii_numget& get(void*& value, const char*& bptr, const char* eptr) noexcept
       {
-        value = nullptr;
-        if(this->parse_P(bptr, eptr)) {
-          uint64_t temp;
-          this->cast_U(temp, 0, numeric_limits<uintptr_t>::max());
-          value = reinterpret_cast<void*>(static_cast<uintptr_t>(temp));
-        }
+        uint64_t temp = 0;
+        if(this->parse_P(bptr, eptr))
+          this->cast_U(temp, 0, UINTPTR_MAX);
+        value = reinterpret_cast<void*>(static_cast<uintptr_t>(temp));
         return *this;
       }
-    template<typename valueT, ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
-        ascii_numget& get(valueT& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(unsigned char& value, const char*& bptr, const char* eptr) noexcept
       {
-        value = 0;
-        if(this->parse_U(bptr, eptr)) {
-          uint64_t temp;
-          this->cast_U(temp, numeric_limits<valueT>::min(),
-                             numeric_limits<valueT>::max());
-          value = static_cast<valueT>(temp);
-        }
+        uint64_t temp = 0;
+        if(this->parse_U(bptr, eptr))
+          this->cast_U(temp, 0, UCHAR_MAX);
+        value = static_cast<unsigned char>(temp);
         return *this;
       }
-    template<typename valueT, ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
-        ascii_numget& get(valueT& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(unsigned short& value, const char*& bptr, const char* eptr) noexcept
       {
-        value = 0;
-        if(this->parse_I(bptr, eptr)) {
-          int64_t temp;
-          this->cast_I(temp, numeric_limits<valueT>::min(),
-                             numeric_limits<valueT>::max());
-          value = static_cast<valueT>(temp);
-        }
+        uint64_t temp = 0;
+        if(this->parse_U(bptr, eptr))
+          this->cast_U(temp, 0, USHRT_MAX);
+        value = static_cast<unsigned short>(temp);
         return *this;
       }
-    template<typename valueT, ROCKET_ENABLE_IF(is_floating_point<valueT>::value)>
-        ascii_numget& get(valueT& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(unsigned& value, const char*& bptr, const char* eptr) noexcept
       {
-        value = 0;
-        if(this->parse_F(bptr, eptr)) {
-          double temp;
-          this->cast_F(temp, -numeric_limits<valueT>::infinity(),
-                             numeric_limits<valueT>::infinity(), is_same<valueT, float>::value);
-          value = static_cast<valueT>(temp);
-        }
+        uint64_t temp = 0;
+        if(this->parse_U(bptr, eptr))
+          this->cast_U(temp, 0, UINT_MAX);
+        value = static_cast<unsigned>(temp);
+        return *this;
+      }
+    ascii_numget& get(unsigned long& value, const char*& bptr, const char* eptr) noexcept
+      {
+        uint64_t temp = 0;
+        if(this->parse_U(bptr, eptr))
+          this->cast_U(temp, 0, ULONG_MAX);
+        value = static_cast<unsigned long>(temp);
+        return *this;
+      }
+    ascii_numget& get(unsigned long long& value, const char*& bptr, const char* eptr) noexcept
+      {
+        uint64_t temp = 0;
+        if(this->parse_U(bptr, eptr))
+          this->cast_U(temp, 0, ULLONG_MAX);
+        value = temp;
+        return *this;
+      }
+    ascii_numget& get(signed char& value, const char*& bptr, const char* eptr) noexcept
+      {
+        int64_t temp = 0;
+        if(this->parse_I(bptr, eptr))
+          this->cast_I(temp, SCHAR_MIN, SCHAR_MAX);
+        value = static_cast<signed char>(temp);
+        return *this;
+      }
+    ascii_numget& get(signed short& value, const char*& bptr, const char* eptr) noexcept
+      {
+        int64_t temp = 0;
+        if(this->parse_I(bptr, eptr))
+          this->cast_I(temp, SHRT_MIN, SHRT_MAX);
+        value = static_cast<signed short>(temp);
+        return *this;
+      }
+    ascii_numget& get(signed& value, const char*& bptr, const char* eptr) noexcept
+      {
+        int64_t temp = 0;
+        if(this->parse_I(bptr, eptr))
+          this->cast_I(temp, INT_MIN, INT_MAX);
+        value = static_cast<signed int>(temp);
+        return *this;
+      }
+    ascii_numget& get(signed long& value, const char*& bptr, const char* eptr) noexcept
+      {
+        int64_t temp = 0;
+        if(this->parse_I(bptr, eptr))
+          this->cast_I(temp, LONG_MIN, LONG_MAX);
+        value = static_cast<signed long>(temp);
+        return *this;
+      }
+    ascii_numget& get(signed long long& value, const char*& bptr, const char* eptr) noexcept
+      {
+        int64_t temp = 0;
+        if(this->parse_I(bptr, eptr))
+          this->cast_I(temp, LLONG_MIN, LLONG_MAX);
+        value = temp;
+        return *this;
+      }
+    ascii_numget& get(float& value, const char*& bptr, const char* eptr) noexcept
+      {
+        double temp = 0;
+        if(this->parse_F(bptr, eptr))
+          this->cast_F(temp, -HUGE_VAL, HUGE_VAL, true);
+        value = static_cast<float>(temp);
+        return *this;
+      }
+    ascii_numget& get(double& value, const char*& bptr, const char* eptr) noexcept
+      {
+        double temp = 0;
+        if(this->parse_F(bptr, eptr))
+          this->cast_F(temp, -HUGE_VAL, HUGE_VAL);
+        value = temp;
         return *this;
       }
   };

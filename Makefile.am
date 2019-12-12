@@ -3,9 +3,8 @@ AM_CPPFLAGS = -pipe -pthread -Wall -Wextra  \
   -D_FILE_OFFSET_BITS=64 -D_POSIX_C_SOURCE=200809 -D_GNU_SOURCE -D_WIN32_WINNT=0x0600  \
   -f{inline-limit=2400,strict-{aliasing,overflow},merge-all-constants}  \
   -fno-{math-errno,trapping-math,devirtualize-speculatively}  \
-  -Werror={{,sign-}conversion,write-strings,return-type}  \
-  -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow}  \
-  -W{missing-field-initializers,double-promotion}  \
+  -Werror={{,sign-}conversion,write-strings,return-type,double-promotion}  \
+  -W{invalid-pch,switch-enum,suggest-attribute=noreturn,undef,shadow,missing-field-initializers}  \
   -Wunused-{function,label,local-typedefs,{,but-set-}{variable,parameter}}
 AM_CXXFLAGS = -std=gnu++14 -W{non-virtual-dtor,zero-as-null-pointer-constant,missing-declarations}
 AM_DEFAULT_SOURCE_EXT = .cpp

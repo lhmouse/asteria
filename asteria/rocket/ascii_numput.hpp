@@ -103,22 +103,64 @@ class ascii_numput
         this->put_XP(value);
         return *this;
       }
-    template<typename valueT, ROCKET_ENABLE_IF(is_integral<valueT>::value && is_unsigned<valueT>::value)>
-        ascii_numput& put(const valueT& value) noexcept
+    ascii_numput& put(unsigned char value) noexcept
       {
         this->put_DU(value);
         return *this;
       }
-    template<typename valueT, ROCKET_ENABLE_IF(is_integral<valueT>::value && is_signed<valueT>::value)>
-        ascii_numput& put(const valueT& value) noexcept
+    ascii_numput& put(unsigned short value) noexcept
+      {
+        this->put_DU(value);
+        return *this;
+      }
+    ascii_numput& put(unsigned value) noexcept
+      {
+        this->put_DU(value);
+        return *this;
+      }
+    ascii_numput& put(unsigned long value) noexcept
+      {
+        this->put_DU(value);
+        return *this;
+      }
+    ascii_numput& put(unsigned long long value) noexcept
+      {
+        this->put_DU(value);
+        return *this;
+      }
+    ascii_numput& put(signed char value) noexcept
       {
         this->put_DI(value);
         return *this;
       }
-    template<typename valueT, ROCKET_ENABLE_IF(is_floating_point<valueT>::value)>
-        ascii_numput& put(const valueT& value) noexcept
+    ascii_numput& put(signed short value) noexcept
       {
-        this->put_DF(value, is_same<valueT, float>::value);
+        this->put_DI(value);
+        return *this;
+      }
+    ascii_numput& put(signed value) noexcept
+      {
+        this->put_DI(value);
+        return *this;
+      }
+    ascii_numput& put(signed long value) noexcept
+      {
+        this->put_DI(value);
+        return *this;
+      }
+    ascii_numput& put(signed long long value) noexcept
+      {
+        this->put_DI(value);
+        return *this;
+      }
+    ascii_numput& put(float value) noexcept
+      {
+        this->put_DF(static_cast<double>(value), true);
+        return *this;
+      }
+    ascii_numput& put(double value) noexcept
+      {
+        this->put_DF(value);
         return *this;
       }
   };
