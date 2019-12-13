@@ -1534,7 +1534,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         // Append spaces in the right and return the result.
         size_t count = static_cast<size_t>(rhs);
-        res.assign(G_string::shallow_type(lhs));
+        res.assign(rocket::sref(lhs));
         res.append(count, ' ');
         return res;
       }
