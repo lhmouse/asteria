@@ -42,6 +42,7 @@ template<typename XbaseT> int do_backtrace(const XbaseT& xbase) noexcept
 cow_string do_stringify_value(const Value& val) noexcept
   try {
     rocket::tinyfmt_str fmt;
+    // Print the value with type information.
     fmt << val;
     return fmt.extract_string();
   }
@@ -51,16 +52,18 @@ cow_string do_stringify_value(const Value& val) noexcept
 
 cow_string do_stringify_reference(const Reference& ref) noexcept
   try {
-    const char* prefix;
-    if(ref.is_lvalue())
-      prefix = "lvalue ";
-    else if(ref.is_rvalue())
-      prefix = "rvalue ";
+    rocket::tinyfmt_str fmt;
+    // Write the categoryprefix.
+    if(ref.is_constant())
+      fmt << "constant ";
+    else if(ref.is_temporary())
+      fmt << "temporary ";
+    else if(ref.is_variable())
+      fmt << "variable ";
     else
       return rocket::sref("<tail call>");
-    // Read a value from the refrence and format it.
-    rocket::tinyfmt_str fmt;
-    fmt << prefix << ref.read();
+    // Write the referenced value if any.
+    fmt << ref.read();
     return fmt.extract_string();
   }
   catch(std::exception& other) {
