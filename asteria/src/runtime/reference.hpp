@@ -19,14 +19,12 @@ class Reference
   public:
     Reference() noexcept
       :
-        m_root(),
-        m_mods()
+        m_root(), m_mods()
       {
       }
     template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Reference_Root, XrootT&&)> Reference(XrootT&& xroot)
       :
-        m_root(rocket::forward<XrootT>(xroot)),
-        m_mods()
+        m_root(rocket::forward<XrootT>(xroot)), m_mods()
       {
       }
     template<typename XrootT, ASTERIA_SFINAE_ASSIGN(Reference_Root, XrootT&&)> Reference& operator=(XrootT&& xroot)
@@ -47,14 +45,27 @@ class Reference
     Reference& do_finish_call(const Global_Context& global);
 
   public:
-    // Note that a tail call wrapper is neither an lvalue nor an rvalue.
+    bool is_constant() const noexcept
+      {
+        return (this->m_root.index() == Reference_Root::index_null) ||
+               (this->m_root.index() == Reference_Root::index_constant);
+      }
+    bool is_temporary() const noexcept
+      {
+        return this->m_root.index() == Reference_Root::index_temporary;
+      }
+    bool is_variable() const noexcept
+      {
+        return this->m_root.index() == Reference_Root::index_variable;
+      }
+
     bool is_lvalue() const noexcept
       {
-        return this->m_root.is_lvalue();
+        return this->is_variable();
       }
     bool is_rvalue() const noexcept
       {
-        return this->m_root.is_rvalue();
+        return this->is_constant() || this->is_temporary();
       }
 
     template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
@@ -65,14 +76,11 @@ class Reference
       }
     Reference& zoom_out()
       {
-        if(ROCKET_EXPECT(this->m_mods.empty())) {
-          // If there is no modifier, set `this` to `null`.
+        // Drop the last modifier. If there is no modifier, set `this` to `null`.
+        if(ROCKET_EXPECT(this->m_mods.empty()))
           this->m_root = Reference_Root::S_null();
-        }
-        else {
-          // Drop the last modifier.
+        else
           this->m_mods.pop_back();
-        }
         return *this;
       }
 
@@ -119,14 +127,14 @@ class Reference
 
     rcptr<Variable> get_variable_opt() const
       {
-        if(!this->m_root.is_variable()) {
+        if(!this->is_variable()) {
           return nullptr;
         }
         return this->m_root.as_variable();
       }
     Reference& convert_to_rvalue()
       {
-        if(ROCKET_EXPECT(this->m_root.is_rvalue() && this->m_mods.empty())) {
+        if(ROCKET_EXPECT(this->is_rvalue() && this->m_mods.empty())) {
           return *this;
         }
         return this->do_convert_to_temporary();
