@@ -16,7 +16,8 @@ bool std_debug_print(const G_string& templ, const cow_vector<Value>& values)
     insts.reserve(values.size());
     for(size_t i = 0; i != values.size(); ++i) {
       insts.push_back({
-        [](tinyfmt& fmt, const void* ptr) -> tinyfmt& { return static_cast<const Value*>(ptr)->print(fmt);  },
+        [](tinyfmt& fmt, const void* ptr) -> tinyfmt&
+          { return static_cast<const Value*>(ptr)->print(fmt);  },
         values.data() + i
       });
     }
