@@ -14,16 +14,14 @@ void Runtime_Error::do_compose_message()
   {
     // Reuse the string.
     rocket::tinyfmt_str fmt;
-    this->m_what.clear();
     fmt.set_string(rocket::move(this->m_what));
-    // Write the value.
-    fmt << "asteria runtime error: " << this->m_value;
+    fmt.clear_string();
+    // Write the status code in digital form.
+    format(fmt, "asteria parser error: $1", this->m_value);
     // Append stack frames.
     for(unsigned long i = 0; i != this->m_frames.size(); ++i) {
       const auto& frm = this->m_frames[i];
-      // Write a frame.
-      fmt << "\n[frame #" << i << " at " << frm.sloc() << " (" << frm.what_type() << "): "
-          << frm.value() << "]";
+      format(fmt, "\n[frame #$1 on '$2' ($3): $4]", i, frm.sloc(), frm.what_type(), frm.value());
     }
     // Set the string.
     this->m_what = fmt.extract_string();
