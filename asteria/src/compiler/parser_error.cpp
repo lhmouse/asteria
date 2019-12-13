@@ -15,20 +15,16 @@ void Parser_Error::do_compose_message()
   {
     // Reuse the string.
     rocket::tinyfmt_str fmt;
-    this->m_what.clear();
     fmt.set_string(rocket::move(this->m_what));
+    fmt.clear_string();
     // Write the status code in digital form.
-    fmt << "asteria parser error " << this->m_stat << " at ";
+    format(fmt, "asteria parser error: ERROR $1: $2", this->m_stat, describe_parser_status(this->m_stat));
     // Append the source location.
-    if(this->m_line > 0) {
-      fmt << "line " << this->m_line << ", offset " << this->m_offset << ", length " << this->m_length;
-    }
-    else {
-      fmt << "the end of input data";
-    }
-    // Append the status description.
-    fmt << ": " << describe_parser_status(this->m_stat);
-    // Set the string.
+    if(this->m_line <= 0)
+      fmt << "\n[end of input encountered]";
+    else
+      format(fmt, "\n[line $1, offset $2, length $3]", this->m_line, this->m_offset, this->m_length);
+    // Set the new string.
     this->m_what = fmt.extract_string();
   }
 
