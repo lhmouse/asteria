@@ -96,9 +96,8 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
       {
         for(auto it = rocket::move(begin); it != end; ++it) {
           // Compare the value using the builtin 3-way comparison operator.
-          if(it->compare(target) == compare_equal) {
+          if(it->compare(target) == compare_equal)
             return rocket::move(it);
-          }
         }
         // Fail to find an element.
         return rocket::clear;
@@ -110,7 +109,8 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
         args.emplace_back(rocket::move(xref));
       }
 
-    template<typename IteratorT> opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end, const G_function& predictor, bool match)
+    template<typename IteratorT> opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end,
+                                                               const G_function& predictor, bool match)
       {
         for(auto it = rocket::move(begin); it != end; ++it) {
           // Set up arguments for the user-defined predictor.
@@ -120,9 +120,8 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
           Reference self;
           predictor->invoke(self, global, rocket::move(args));
           self.finish_call(global);
-          if(self.read().test() == match) {
+          if(self.read().test() == match)
             return rocket::move(it);
-          }
         }
         // Fail to find an element.
         return rocket::clear;
