@@ -19,12 +19,12 @@ tinyfmt& Simple_Binding_Wrapper::describe(tinyfmt& fmt) const
 
 Reference& Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const
   {
-    return self = (*(this->m_fptr))(this->m_opaque, global, rocket::move(self), rocket::move(args));
+    return self = (*(this->m_proc))(rocket::move(args), rocket::move(self), global, this->m_pval);
   }
 
 Variable_Callback& Simple_Binding_Wrapper::enumerate_variables(Variable_Callback& callback) const
   {
-    return this->m_opaque.enumerate_variables(callback);
+    return this->m_pval.enumerate_variables(callback);
   }
 
 }  // namespace Asteria

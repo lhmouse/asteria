@@ -673,13 +673,8 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
           "\n"
           "  * Returns the formatted text as a `string`.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.json.format"), rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -731,13 +726,8 @@ void create_bindings_json(G_object& result, API_Version /*version*/)
           "    JSON string, `null` is returned. There is no way to tell empty\n"
           "    or explicit `\"null\"` inputs from failures.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.json.parse"), rocket::ref(args));
           // Parse arguments.
           G_string text;
