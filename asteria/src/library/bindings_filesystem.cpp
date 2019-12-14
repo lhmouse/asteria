@@ -507,13 +507,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "  * Returns a `string` containing the path to the current working\n"
           "    directory.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.get_working_directory"), rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
@@ -556,13 +551,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "\n"
           "    On failure, `null` is returned.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.get_information"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -595,13 +585,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "  * Returns the number of files and directories that have been\n"
           "    successfully removed in total, or `null` on failure.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.remove_recursive"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -633,13 +618,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "\n"
           "  * Returns `true` on success, or `null` on failure.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.move_from"), rocket::ref(args));
           // Parse arguments.
           G_string path_new;
@@ -680,13 +660,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "\n"
           "    On failure, `null` is returned.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.directory_list"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -721,13 +696,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "  * Returns `1` if a new directory has been created successfully,\n"
           "    `0` if the directory already exists, or `null` on failure.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.directory_create"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -760,13 +730,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "  * Returns `1` if the directory has been removed successfully, `0`\n"
           "    if it is not empty, or `null` on failure.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.directory_remove"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -804,13 +769,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "\n"
           "  * Throws an exception if `offset` is negative.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_read"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -857,13 +817,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "\n"
           "  * Throws an exception if `offset` is negative.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& global,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_stream"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -904,13 +859,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "\n"
           "  * Throws an exception if `offset` is negative.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_write"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -947,13 +897,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "  * Returns `true` if all data have been written successfully, or\n"
           "    `null` on failure.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_append"), rocket::ref(args));
           // Parse arguments.
           G_string path;
@@ -988,13 +933,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "\n"
           "  * Returns `true` on success, or `null` on failure.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_copy_from"), rocket::ref(args));
           // Parse arguments.
           G_string path_new;
@@ -1027,13 +967,8 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "  * Returns `true` if the file has been removed successfully, or\n"
           "    `null` on failure.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.filesystem.file_remove"), rocket::ref(args));
           // Parse arguments.
           G_string path;

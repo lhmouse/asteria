@@ -57,13 +57,8 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           "\n"
           "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.debug.print"), rocket::ref(args));
           // Parse variadic arguments.
           G_string templ;
@@ -99,13 +94,8 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
           "\n"
           "  * Returns `true` if the operation succeeds, or `null` otherwise.\n"
         ),
-        // Opaque parameter
-        G_null(
-          nullptr
-        ),
         // Definition
-        [](const Value& /*opaque*/, const Global_Context& /*global*/,
-                  Reference&& /*self*/, cow_vector<Reference>&& args) -> Reference {
+        [](cow_vector<Reference>&& args) -> Reference {
           Argument_Reader reader(rocket::sref("std.debug.dump"), rocket::ref(args));
           // Parse arguments.
           Value value;
