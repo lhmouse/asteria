@@ -47,7 +47,7 @@ class ascii_numget
         this->clear();
       }
     template<typename valueT, ROCKET_ENABLE_IF(is_scalar<valueT>::value)>
-        ascii_numget(valueT& value, const char*& bptr, const char* eptr) noexcept
+        ascii_numget(valueT& value, const char*& bptr, const char* eptr)
       {
         this->get(value, bptr, eptr);
       }
@@ -97,15 +97,15 @@ class ascii_numget
 
     // explicit parse functions
     // * boolean
-    ascii_numget& parse_B(const char*& bptr, const char* eptr) noexcept;
+    ascii_numget& parse_B(const char*& bptr, const char* eptr);
     // * pointer
-    ascii_numget& parse_P(const char*& bptr, const char* eptr) noexcept;
+    ascii_numget& parse_P(const char*& bptr, const char* eptr);
     // * unsigned 64-bit integer
-    ascii_numget& parse_U(const char*& bptr, const char* eptr) noexcept;
+    ascii_numget& parse_U(const char*& bptr, const char* eptr, uint8_t ibase = 0);
     // * signed 64-bit integer
-    ascii_numget& parse_I(const char*& bptr, const char* eptr) noexcept;
+    ascii_numget& parse_I(const char*& bptr, const char* eptr, uint8_t ibase = 0);
     // * IEEE-754 double-precision floating-point
-    ascii_numget& parse_F(const char*& bptr, const char* eptr) noexcept;
+    ascii_numget& parse_F(const char*& bptr, const char* eptr, uint8_t ibase = 0);
 
     // explicit case functions
     // * unsigned 64-bit integer
@@ -116,7 +116,7 @@ class ascii_numget
     ascii_numget& cast_F(double& value, double lower, double upper, bool single = false) noexcept;
 
     // default parse functions
-    ascii_numget& get(bool& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(bool& value, const char*& bptr, const char* eptr)
       {
         uint64_t temp = 0;
         if(this->parse_B(bptr, eptr))
@@ -124,7 +124,7 @@ class ascii_numget
         value = temp & 1;
         return *this;
       }
-    ascii_numget& get(void*& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(void*& value, const char*& bptr, const char* eptr)
       {
         uint64_t temp = 0;
         if(this->parse_P(bptr, eptr))
@@ -132,7 +132,7 @@ class ascii_numget
         value = reinterpret_cast<void*>(static_cast<uintptr_t>(temp));
         return *this;
       }
-    ascii_numget& get(unsigned char& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(unsigned char& value, const char*& bptr, const char* eptr)
       {
         uint64_t temp = 0;
         if(this->parse_U(bptr, eptr))
@@ -140,7 +140,7 @@ class ascii_numget
         value = static_cast<unsigned char>(temp);
         return *this;
       }
-    ascii_numget& get(unsigned short& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(unsigned short& value, const char*& bptr, const char* eptr)
       {
         uint64_t temp = 0;
         if(this->parse_U(bptr, eptr))
@@ -148,7 +148,7 @@ class ascii_numget
         value = static_cast<unsigned short>(temp);
         return *this;
       }
-    ascii_numget& get(unsigned& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(unsigned& value, const char*& bptr, const char* eptr)
       {
         uint64_t temp = 0;
         if(this->parse_U(bptr, eptr))
@@ -156,7 +156,7 @@ class ascii_numget
         value = static_cast<unsigned>(temp);
         return *this;
       }
-    ascii_numget& get(unsigned long& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(unsigned long& value, const char*& bptr, const char* eptr)
       {
         uint64_t temp = 0;
         if(this->parse_U(bptr, eptr))
@@ -164,7 +164,7 @@ class ascii_numget
         value = static_cast<unsigned long>(temp);
         return *this;
       }
-    ascii_numget& get(unsigned long long& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(unsigned long long& value, const char*& bptr, const char* eptr)
       {
         uint64_t temp = 0;
         if(this->parse_U(bptr, eptr))
@@ -172,7 +172,7 @@ class ascii_numget
         value = temp;
         return *this;
       }
-    ascii_numget& get(signed char& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(signed char& value, const char*& bptr, const char* eptr)
       {
         int64_t temp = 0;
         if(this->parse_I(bptr, eptr))
@@ -180,7 +180,7 @@ class ascii_numget
         value = static_cast<signed char>(temp);
         return *this;
       }
-    ascii_numget& get(signed short& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(signed short& value, const char*& bptr, const char* eptr)
       {
         int64_t temp = 0;
         if(this->parse_I(bptr, eptr))
@@ -188,7 +188,7 @@ class ascii_numget
         value = static_cast<signed short>(temp);
         return *this;
       }
-    ascii_numget& get(signed& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(signed& value, const char*& bptr, const char* eptr)
       {
         int64_t temp = 0;
         if(this->parse_I(bptr, eptr))
@@ -196,7 +196,7 @@ class ascii_numget
         value = static_cast<signed int>(temp);
         return *this;
       }
-    ascii_numget& get(signed long& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(signed long& value, const char*& bptr, const char* eptr)
       {
         int64_t temp = 0;
         if(this->parse_I(bptr, eptr))
@@ -204,7 +204,7 @@ class ascii_numget
         value = static_cast<signed long>(temp);
         return *this;
       }
-    ascii_numget& get(signed long long& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(signed long long& value, const char*& bptr, const char* eptr)
       {
         int64_t temp = 0;
         if(this->parse_I(bptr, eptr))
@@ -212,7 +212,7 @@ class ascii_numget
         value = temp;
         return *this;
       }
-    ascii_numget& get(float& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(float& value, const char*& bptr, const char* eptr)
       {
         double temp = 0;
         if(this->parse_F(bptr, eptr))
@@ -220,7 +220,7 @@ class ascii_numget
         value = static_cast<float>(temp);
         return *this;
       }
-    ascii_numget& get(double& value, const char*& bptr, const char* eptr) noexcept
+    ascii_numget& get(double& value, const char*& bptr, const char* eptr)
       {
         double temp = 0;
         if(this->parse_F(bptr, eptr))

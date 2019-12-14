@@ -7,7 +7,7 @@
 
 namespace rocket {
 
-ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcept
+ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr)
   {
     this->clear();
     const char* rp = bptr;
@@ -73,7 +73,12 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcep
 
     namespace {
 
-    bool do_get_sign(const char*& rp, const char* eptr) noexcept
+    constexpr bool do_match_char_ci(char ch, char cmp) noexcept
+      {
+        return static_cast<uint8_t>(ch | 0x20) == static_cast<uint8_t>(cmp);
+      }
+
+    bool do_get_sign(const char*& rp, const char* eptr)
       {
         // Look ahead for at most 1 character.
         if(eptr - rp < 1) {
@@ -96,31 +101,35 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcep
         return 0;
       }
 
-    constexpr bool do_match_char_ci(char ch, char cmp) noexcept
+    uint8_t do_get_base(const char*& rp, const char* eptr, uint8_t ibase)
       {
-        return static_cast<uint8_t>(ch | 0x20) == static_cast<uint8_t>(cmp);
-      }
-
-    uint8_t do_get_base(const char*& rp, const char* eptr) noexcept
-      {
-        // Look ahead for at most 2 characters.
-        if(eptr - rp < 2) {
-          return 10;
+        switch(ibase) {
+          {{
+        case 0:
+            // Look ahead for at most 2 characters.
+            if((eptr - rp >= 2) && (rp[0] == '0')) {
+              // Check for binary and hexadecimal prefixes.
+              if(do_match_char_ci(rp[1], 'b')) {
+                rp += 2;
+                return 2;
+              }
+              if(do_match_char_ci(rp[1], 'x')) {
+                rp += 2;
+                return 16;
+              }
+            }
+            // Assume the number is decimal.
+            return 10;
+          }{
+        case 2:
+        case 10:
+        case 16:
+            // Prefer `ibase` if it is specified explicitly.
+            return ibase;
+          }}
+        default:
+          noadl::sprintf_and_throw<invalid_argument>("ascii_numget: invalid radix (`%d` not 2, 10 or 16)", ibase);
         }
-        if(rp[0] != '0') {
-          return 10;
-        }
-        // Check for binary and hexadecimal prefixes.
-        if(do_match_char_ci(rp[1], 'b')) {
-          rp += 2;
-          return 2;
-        }
-        if(do_match_char_ci(rp[1], 'x')) {
-          rp += 2;
-          return 16;
-        }
-        // Assume the number is decimal.
-        return 10;
       }
 
     struct mantissa
@@ -150,8 +159,7 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcep
         255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
       };
 
-    size_t do_collect_U(mantissa& m, const char*& rp, const char* eptr,
-                        uint8_t base, uint64_t limit) noexcept
+    size_t do_collect_U(mantissa& m, const char*& rp, const char* eptr, uint8_t base, uint64_t limit)
       {
         size_t nread = 0;
         for(;;) {
@@ -185,12 +193,12 @@ ascii_numget& ascii_numget::parse_B(const char*& bptr, const char* eptr) noexcep
 
     }
 
-ascii_numget& ascii_numget::parse_P(const char*& bptr, const char* eptr) noexcept
+ascii_numget& ascii_numget::parse_P(const char*& bptr, const char* eptr)
   {
     this->clear();
     const char* rp = bptr;
     // Check for the "0x" prefix, which is required.
-    uint8_t base = do_get_base(rp, eptr);
+    uint8_t base = do_get_base(rp, eptr, 0);
     if(base != 16) {
       return *this;
     }
@@ -214,12 +222,12 @@ ascii_numget& ascii_numget::parse_P(const char*& bptr, const char* eptr) noexcep
     return *this;
   }
 
-ascii_numget& ascii_numget::parse_U(const char*& bptr, const char* eptr) noexcept
+ascii_numget& ascii_numget::parse_U(const char*& bptr, const char* eptr, uint8_t ibase)
   {
     this->clear();
     const char* rp = bptr;
     // Check for the base prefix, which is optional.
-    uint8_t base = do_get_base(rp, eptr);
+    uint8_t base = do_get_base(rp, eptr, ibase);
     // Get the mantissa.
     mantissa m = { };
     if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0) {
@@ -240,14 +248,14 @@ ascii_numget& ascii_numget::parse_U(const char*& bptr, const char* eptr) noexcep
     return *this;
   }
 
-ascii_numget& ascii_numget::parse_I(const char*& bptr, const char* eptr) noexcept
+ascii_numget& ascii_numget::parse_I(const char*& bptr, const char* eptr, uint8_t ibase)
   {
     this->clear();
     const char* rp = bptr;
     // Check for the sign.
     bool sign = do_get_sign(rp, eptr);
     // Check for the base prefix, which is optional.
-    uint8_t base = do_get_base(rp, eptr);
+    uint8_t base = do_get_base(rp, eptr, ibase);
     // Get the mantissa.
     mantissa m = { };
     if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0) {
@@ -269,7 +277,7 @@ ascii_numget& ascii_numget::parse_I(const char*& bptr, const char* eptr) noexcep
     return *this;
   }
 
-ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr) noexcept
+ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr, uint8_t ibase)
   {
     this->clear();
     const char* rp = bptr;
@@ -290,7 +298,7 @@ ascii_numget& ascii_numget::parse_F(const char*& bptr, const char* eptr) noexcep
     }
     else {
       // Check for the base prefix, which is optional.
-      uint8_t base = do_get_base(rp, eptr);
+      uint8_t base = do_get_base(rp, eptr, ibase);
       // Get the mantissa.
       mantissa m = { };
       if(do_collect_U(m, rp, eptr, base, UINT64_MAX) == 0) {
