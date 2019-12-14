@@ -8,91 +8,61 @@
 
 namespace Asteria {
 
-    namespace {
-
-    void do_ltoa_fixed(cow_string& str, long num, size_t width)
-      {
-        std::array<char, 64> cbuf;
-        auto spos = cbuf.end();
-        // Write digits from the right to the left.
-        long reg = num;
-        for(size_t i = 0; i != width; ++i) {
-          long d = reg % 10;
-          reg /= 10;
-          *--spos = static_cast<char>('0' + d);
-        }
-        // Append the formatted string.
-        str.append(spos, cbuf.end());
-      }
-
-    constexpr char s_ctrl_reps[][8] =
-      {
-        "[NUL]",  "[SOH]",  "[STX]",  "[ETX]",  "[EOT]",  "[ENQ]",  "[ACK]",  "[BEL]",
-        "[BS]",   "\t",     "\n\t",   "[VT]",   "[FF]",   "\r",     "[SO]",   "[SI]",
-        "[DLE]",  "[DC1]",  "[DC2]",  "[DC3]",  "[DC4]",  "[NAK]",  "[SYN]",  "[ETB]",
-        "[CAN]",  "[EM]",   "[SUB]",  "[ESC]",  "[FS]",   "[GS]",   "[RS]",   "[US]",
-      };
-
-    template<typename ParamT> inline void do_append_str(cow_string& str, ParamT&& param)
-      {
-        str.append(rocket::forward<ParamT>(param));
-      }
-    inline void do_append_str(cow_string& str, char c)
-      {
-        str.push_back(c);
-      }
-
-    }  // namespace
-
 bool write_log_to_stderr(const char* file, long line, cow_string&& msg, const char* trailer) noexcept
   {
-    cow_string str;
-    str.reserve(1023);
+    rocket::tinyfmt_str fmt;
+    fmt.set_string(cow_string(1023, '/'));
+    fmt.clear_string();
+
     // Append the timestamp.
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
-    // YYYY-MM-DD hh:mm:ss.sss
-    do_ltoa_fixed(str, tr.tm_year + 1900, 4);
-    do_append_str(str, '-');
-    do_ltoa_fixed(str, tr.tm_mon + 1, 2);
-    do_append_str(str, '-');
-    do_ltoa_fixed(str, tr.tm_mday, 2);
-    do_append_str(str, ' ');
-    do_ltoa_fixed(str, tr.tm_hour, 2);
-    do_append_str(str, ':');
-    do_ltoa_fixed(str, tr.tm_min, 2);
-    do_append_str(str, ':');
-    do_ltoa_fixed(str, tr.tm_sec, 2);
-    do_append_str(str, '.');
-    do_ltoa_fixed(str, ts.tv_nsec / 1000000, 3);
-    // Append the file name and line number.
-    do_append_str(str, " @@ ");
-    do_append_str(str, file);
-    do_append_str(str, ':');
-    do_ltoa_fixed(str, line, 1);
-    // Start a new line for the user-defined message.
-    do_append_str(str, "\n\t");
-    // Neutralize control characters and indent paragraphs.
-    for(char c : msg) {
+    // 'yyyy-mmmm-dd HH:MM:SS.sss'
+    rocket::ascii_numput nump;
+    fmt << nump.put_DU(static_cast<uint32_t>(tr.tm_year + 1900), 4)
+        << '-'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_mon + 1), 2)
+        << '-'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_mday), 2)
+        << ' '
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_hour), 2)
+        << ':'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_min), 2)
+        << ':'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_sec), 2)
+        << '.'
+        << nump.put_DU(static_cast<uint32_t>(ts.tv_nsec / 1000000), 3);
+    // Append the file name and line number, followed by a LF.
+    fmt << " @@ " << file << ':' << line << "\n\t";
+
+    // Neutralize control characters.
+    static constexpr char s_lchars[][6] =
+      {
+        "[NUL]",  "[SOH]",  "[STX]",  "[ETX]",  "[EOT]",  "[ENQ]",  "[ACK]",  "[BEL]",
+        "[BS]",   "\t",     "\n\t",   "[VT]",   "[FF]",   "",       "[SO]",   "[SI]",
+        "[DLE]",  "[DC1]",  "[DC2]",  "[DC3]",  "[DC4]",  "[NAK]",  "[SYN]",  "[ETB]",
+        "[CAN]",  "[EM]",   "[SUB]",  "[ESC]",  "[FS]",   "[GS]",   "[RS]",   "[US]",
+      };
+    for(size_t i = 0; i != msg.size(); ++i) {
+      size_t ch = msg[i] & 0xFF;
       // Control characters are ['\x00','\x1F'] and '\x7F'.
-      size_t ch = c & 0xFF;
-      if(ch == 0x7F)
-        do_append_str(str, "[DEL]");
-      else if(ch <= 0x1F)
-        do_append_str(str, s_ctrl_reps[ch]);
+      if(ch <= 0x1F)
+        fmt << s_lchars[ch];
+      else if(ch == 0x7F)
+        fmt << "[DEL]";
       else
-        do_append_str(str, c);
-    };
+        fmt << static_cast<char>(ch);
+    }
     // Append the trailer.
     if(trailer) {
-      do_append_str(str, trailer);
+      fmt << trailer;
     }
     // Terminate the message with a line feed.
-    do_append_str(str, '\n');
+    fmt << '\n';
     // Write the string now. Note that the string cannot be empty.
-    return ::fwrite(str.data(), str.size(), 1, stderr) == 1;
+    return ::fwrite(fmt.get_c_string(), fmt.get_length(), 1, stderr) == 1;
   }
 
 bool utf8_encode(char*& pos, char32_t cp)
@@ -291,9 +261,12 @@ bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
     return true;
   }
 
-    namespace {
-
-    constexpr char s_quote_table[][5] =
+tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
+  {
+    // Insert the leading quote mark.
+    fmt << '\"';
+    // Quote all bytes from the source string.
+    static constexpr char s_escapes[][5] =
       {
         "\\0",    "\\x01",  "\\x02",  "\\x03",  "\\x04",  "\\x05",  "\\x06",  "\\a",
         "\\b",    "\\t",    "\\n",    "\\v",    "\\f",    "\\r",    "\\x0E",  "\\x0F",
@@ -328,19 +301,11 @@ bool utf16_decode(char32_t& cp, const cow_u16string& text, size_t& offset)
         "\\xF0",  "\\xF1",  "\\xF2",  "\\xF3",  "\\xF4",  "\\xF5",  "\\xF6",  "\\xF7",
         "\\xF8",  "\\xF9",  "\\xFA",  "\\xFB",  "\\xFC",  "\\xFD",  "\\xFE",  "\\xFF",
       };
-
-    }  // namespace
-
-tinyfmt& operator<<(tinyfmt& fmt, const Quote_Wrapper& q)
-  {
-    // Insert the leading quote mark.
-    fmt << '\"';
-    // Quote all bytes from the source string.
     for(size_t i = 0; i != q.len; ++i) {
       size_t ch = q.str[i] & 0xFF;
       // Insert this quoted sequence.
       // Optimize the operation a little if it consists of only one character.
-      const auto& sq = s_quote_table[ch];
+      const auto& sq = s_escapes[ch];
       if(ROCKET_EXPECT(sq[1] == 0))
         fmt << sq[0];
       else
