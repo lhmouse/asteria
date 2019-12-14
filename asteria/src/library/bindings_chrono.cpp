@@ -122,7 +122,7 @@ G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>
       return rocket::sref(s_max_str[pms]);
     }
     // Split the timepoint into second and millisecond parts.
-    double secs = static_cast<double>(time_point) / 1000 + 0.0001;
+    double secs = (static_cast<double>(time_point) + 0.01) / 1000;
     double intg = std::floor(secs);
     // Note that the number of seconds shall be rounded towards negative infinity.
     ::time_t tp = static_cast<::time_t>(intg);
@@ -246,7 +246,7 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
       if(!numg.parse_F(bp, ep, 10) || !numg.cast_F(msecs, 0, 59.9999) || (bp != ep)) {
         return rocket::clear;
       }
-      msecs = (msecs - static_cast<int>(temp)) * 1000;
+      msecs = (msecs - static_cast<int>(temp)) * 1000 + 0.01;
     }
     // Ensure all characters have been consumed.
     if(bp != ep) {
