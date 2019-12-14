@@ -162,6 +162,10 @@ template<typename charT, typename traitsT, typename allocT>
       {
         return this->m_stor.c_str();
       }
+    size_type get_length() const noexcept
+      {
+        return this->m_stor.length();
+      }
     void clear_string(open_mode mode)
       {
         this->do_purge_areas();

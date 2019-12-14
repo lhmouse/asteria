@@ -70,6 +70,10 @@ template<typename charT, typename traitsT,
       {
         return this->m_buf.get_c_string();
      }
+    size_type get_length() const noexcept
+      {
+        return this->m_buf.get_length();
+     }
     basic_tinyfmt_str& clear_string(open_mode mode = tinybuf_base::open_write)
       {
         return this->m_buf.clear_string(mode), *this;
