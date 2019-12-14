@@ -3,6 +3,7 @@
 
 #include "ascii_numget.hpp"
 #include "assert.hpp"
+#include "throw.hpp"
 #include <cmath>
 
 namespace rocket {
