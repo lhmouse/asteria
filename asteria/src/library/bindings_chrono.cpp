@@ -15,8 +15,10 @@ G_integer std_chrono_utc_now()
     // Get UTC time from the system.
     ::timespec ts;
     ::clock_gettime(CLOCK_REALTIME, &ts);
-    // Convert it to the number of milliseconds.
-    return static_cast<int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
+    // We return the time in milliseconds rather than seconds.
+    auto secs = static_cast<int64_t>(ts.tv_sec);
+    auto msecs = ts.tv_nsec / 1'000'000;
+    return secs * 1000 + msecs;
   }
 
 G_integer std_chrono_local_now()
@@ -26,8 +28,10 @@ G_integer std_chrono_local_now()
     ::clock_gettime(CLOCK_REALTIME, &ts);
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
-    // Convert it to the number of milliseconds.
-    return (static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff) * 1000 + ts.tv_nsec / 1000000;
+    // We return the time in milliseconds rather than seconds.
+    auto secs = static_cast<int64_t>(ts.tv_sec) + tr.tm_gmtoff;
+    auto msecs = ts.tv_nsec / 1'000'000;
+    return secs * 1000 + msecs;
   }
 
 G_real std_chrono_hires_now()
@@ -35,9 +39,11 @@ G_real std_chrono_hires_now()
     // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    // Convert it to the number of milliseconds.
+    // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
-    return static_cast<double>(ts.tv_sec) * 1000 + static_cast<double>(ts.tv_nsec) / 1000000 + 0x987654321;
+    auto secs = static_cast<double>(ts.tv_sec);
+    auto msecs = static_cast<double>(ts.tv_nsec) / 1'000'000.0;
+    return secs * 1000 + msecs + 1234567890123456;
   }
 
 G_integer std_chrono_steady_now()
@@ -45,210 +51,220 @@ G_integer std_chrono_steady_now()
     // Get the time since the system was started.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC_COARSE, &ts);
-    // Convert it to the number of milliseconds.
+    // We return the time in milliseconds rather than seconds.
     // Add a random offset to the result to help debugging.
-    return static_cast<int64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000 + 0x123456789;
+    auto secs = static_cast<int64_t>(ts.tv_sec);
+    auto msecs = ts.tv_nsec / 1'000'000;
+    return secs * 1000 + msecs + 6543210987654321;
   }
 
 G_integer std_chrono_local_from_utc(const G_integer& time_utc)
   {
     // Handle special time values.
-    if(time_utc <= -11644473600000)
+    if(time_utc <= -11644473600000) {
       return INT64_MIN;
-    if(time_utc >= 253370764800000)
+    }
+    if(time_utc >= 253370764800000) {
       return INT64_MAX;
+    }
     // Calculate the local time.
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    int64_t time_local = time_utc + tr.tm_gmtoff * 1000;
-    // Handle results that are out of the finite range.
-    if(time_local <= -11644473600000)
+    G_integer time_local = time_utc + tr.tm_gmtoff * 1000;
+    // Ensure the value is within the range of finite values.
+    if(time_local <= -11644473600000) {
       return INT64_MIN;
-    if(time_local >= 253370764800000)
+    }
+    if(time_local >= 253370764800000) {
       return INT64_MAX;
-    else
-      return time_local;
+    }
+    return time_local;
   }
 
 G_integer std_chrono_utc_from_local(const G_integer& time_local)
   {
     // Handle special time values.
-    if(time_local <= -11644473600000)
+    if(time_local <= -11644473600000) {
       return INT64_MIN;
-    if(time_local >= 253370764800000)
+    }
+    if(time_local >= 253370764800000) {
       return INT64_MAX;
-    // Calculate the UTC time.
+    }
+    // Calculate the local time.
     ::time_t tp = 0;
     ::tm tr;
     ::localtime_r(&tp, &tr);
-    int64_t time_utc = time_local - tr.tm_gmtoff * 1000;
-    // Handle results that are out of the finite range.
-    if(time_utc <= -11644473600000)
+    G_integer time_utc = time_local - tr.tm_gmtoff * 1000;
+    // Ensure the value is within the range of finite values.
+    if(time_utc <= -11644473600000) {
       return INT64_MIN;
-    if(time_utc >= 253370764800000)
+    }
+    if(time_utc >= 253370764800000) {
       return INT64_MAX;
-    else
-      return time_utc;
+    }
+    return time_utc;
   }
-
-    namespace {
-
-    constexpr char s_min_str[2][32] = { "1601-01-01 00:00:00", "1601-01-01 00:00:00.000" };
-    constexpr char s_max_str[2][32] = { "9999-01-01 00:00:00", "9999-01-01 00:00:00.000" };
-    constexpr char s_spaces[] = " \f\n\r\t\v";
-
-    template<typename InputT> bool do_rput(char*& p, InputT in, size_t width)
-      {
-        uint32_t reg = 0;
-        // Load the value, ignoring any overflows.
-        reg = static_cast<uint32_t>(in);
-        // Write digits backwards.
-        for(size_t i = 0; i < width; ++i) {
-          char c = static_cast<char>('0' + reg % 10);
-          reg /= 10;
-          p[i] = c;
-        }
-        // Succeed.
-        p += width;
-        return true;
-      }
-    bool do_rput(char*& p, char c)
-      {
-        // Write a character.
-        p[0] = c;
-        // Succeed.
-        p += 1;
-        return true;
-      }
-
-    template<typename OutputT> bool do_getx(const char*& p, OutputT& out, size_t width)
-      {
-        uint32_t reg = 0;
-        // Read digits forwards.
-        for(size_t i = 0; i < width; ++i) {
-          char c = p[i];
-          if((c < '0') || ('9' < c))
-            return false;
-          reg *= 10;
-          reg += static_cast<uint32_t>(c - '0');
-        }
-        // Save the value, ignoring any overflows.
-        out = static_cast<OutputT>(reg);
-        // Succeed.
-        p += width;
-        return true;
-      }
-    bool do_getx(const char*& p, std::initializer_list<char> accept)
-      {
-        // Read a character.
-        char c = p[0];
-        if(rocket::is_none_of(c, accept))
-          return false;
-        // Succeed.
-        p += 1;
-        return true;
-      }
-
-    }  // namespace
 
 G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>& with_ms)
   {
     // No millisecond part is added by default.
     bool pms = with_ms.value_or(false);
-    // Deal with special time points.
-    if(time_point <= -11644473600000)
+    // Handle special time points.
+    if(time_point <= -11644473600000) {
+      static constexpr char s_min_str[][32] = { "1601-01-01 00:00:00",
+                                                "1601-01-01 00:00:00.000" };
       return rocket::sref(s_min_str[pms]);
-    if(time_point >= 253370764800000)
-      return rocket::sref(s_max_str[pms]);
-    // Write the string backwards.
-    char wbuf[32];
-    char* qwt = wbuf;
-    // Write fields backwards.
-    // Get the second and millisecond parts.
-    // Note that the number of seconds shall be rounded towards negative infinity.
-    int ms = static_cast<int>((static_cast<uint64_t>(time_point) + 9223372036854775000) % 1000);
-    ::time_t tp = static_cast<::time_t>((time_point - ms) / 1000);
-    if(pms) {
-      do_rput(qwt, ms, 3);
-      do_rput(qwt, '.');
     }
+    if(time_point >= 253370764800000) {
+      static constexpr char s_max_str[][32] = { "9999-01-01 00:00:00",
+                                                "9999-01-01 00:00:00.000" };
+      return rocket::sref(s_max_str[pms]);
+    }
+    // Split the timepoint into second and millisecond parts.
+    double secs = static_cast<double>(time_point) / 1000 + 0.0001;
+    double intg = std::floor(secs);
+    // Note that the number of seconds shall be rounded towards negative infinity.
+    ::time_t tp = static_cast<::time_t>(intg);
     ::tm tr;
     ::gmtime_r(&tp, &tr);
-    do_rput(qwt, tr.tm_sec, 2);
-    do_rput(qwt, ':');
-    do_rput(qwt, tr.tm_min, 2);
-    do_rput(qwt, ':');
-    do_rput(qwt, tr.tm_hour, 2);
-    do_rput(qwt, ' ');
-    do_rput(qwt, tr.tm_mday, 2);
-    do_rput(qwt, '-');
-    do_rput(qwt, tr.tm_mon + 1, 2);
-    do_rput(qwt, '-');
-    do_rput(qwt, tr.tm_year + 1900, 4);
-    return G_string(std::make_reverse_iterator(qwt), std::make_reverse_iterator(wbuf));
+    // Compose a string without milliseconds.
+    rocket::ascii_numput nump;
+    rocket::tinyfmt_str fmt;
+    fmt << nump.put_DU(static_cast<uint32_t>(tr.tm_year + 1900), 4)
+        << '-'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_mon + 1), 2)
+        << '-'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_mday), 2)
+        << ' '
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_hour), 2)
+        << ':'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_min), 2)
+        << ':'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_sec), 2);
+    // If a millisecond part is requested, append it.
+    if(pms) {
+      fmt << '.'
+          << nump.put_DU(static_cast<uint32_t>((secs - intg) * 1000), 3);
+    }
+    return fmt.extract_string();
   }
 
 opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
   {
-    auto n = time_str.find_first_not_of(s_spaces);
-    if(n == G_string::npos) {
-      // `time_str` consists of only spaces. Fail.
+    // Trim leading and trailing spaces. Fail if the string becomes empty.
+    static constexpr char s_spaces[] = " \f\n\r\t\v";
+    size_t off = time_str.find_first_not_of(s_spaces);
+    if(off == G_string::npos) {
       return rocket::clear;
     }
-    const char* qrd = time_str.data() + n;
-    n = time_str.find_last_not_of(s_spaces) + 1 - n;
-    if(n < std::strlen(s_min_str[0])) {
-      // `time_str` contains too few characters. Fail.
+    // The shortest form is '1234-67-90 23:56:89' which contains 19 characters.
+    const char* bp = time_str.data() + off;
+    off = time_str.find_last_not_of(s_spaces) + 1;
+    if(time_str.data() + off - bp < 19) {
       return rocket::clear;
     }
-    const char* qend = qrd + n;
-    // Parse the shortest acceptable substring, i.e. the substring without milliseconds.
-    ::tm tr;
-    bool succ = do_getx(qrd, tr.tm_year, 4) &&
-                do_getx(qrd, { '-', '/' }) &&
-                do_getx(qrd, tr.tm_mon, 2) &&
-                do_getx(qrd, { '-', '/' }) &&
-                do_getx(qrd, tr.tm_mday, 2) &&
-                do_getx(qrd, { ' ', 'T' }) &&
-                do_getx(qrd, tr.tm_hour, 2) &&
-                do_getx(qrd, { ':' }) &&
-                do_getx(qrd, tr.tm_min, 2) &&
-                do_getx(qrd, { ':' }) &&
-                do_getx(qrd, tr.tm_sec, 2);
-    if(!succ)
+    // Declare the timepoint value as two parts: 'yyyy-mm-dd HH:MM:SS' and '.sss'.
+    ::tm tr = { };
+    double msecs = 0;
+    // Parse individual parts.
+    rocket::ascii_numget numg;
+    const char* ep = bp;
+    uint64_t temp;
+    // 'yyyy'
+    ep += 4;
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 9999) || (bp != ep)) {
       return rocket::clear;
-    if(tr.tm_year < 1600)
-      return INT64_MIN;
-    if(tr.tm_year > 9998)
-      return INT64_MAX;
-    // Assemble the parts without milliseconds.
-    tr.tm_year -= 1900;
-    tr.tm_mon -= 1;
-    tr.tm_isdst = 0;
-    ::time_t tp = ::timegm(&tr);
-    if(tp == static_cast<::time_t>(-1))
+    }
+    tr.tm_year = static_cast<int>(temp - 1900);
+    // '-' or '/'
+    ep += 1;
+    if(!rocket::is_any_of(*bp, { '-', '/' })) {
       return rocket::clear;
-    // Convert it to the number of milliseconds.
-    auto time_point = static_cast<int64_t>(tp) * 1000;
-    // Parse the subsecond part if any.
-    if(do_getx(qrd, { '.', ',' })) {
-      // Parse milliseconds backwards.
-      double r = 0;
-      while(qend > qrd) {
-        char c = *--qend;
-        if((c < '0') || ('9' < c))
-          return rocket::clear;
-        r += c - '0';
-        r /= 10;
+    }
+    bp += 1;
+    // 'mm'
+    ep += 2;
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 1, 12) || (bp != ep)) {
+      return rocket::clear;
+    }
+    tr.tm_mon = static_cast<int>(temp - 1);
+    // '-' or '/'
+    ep += 1;
+    if(!rocket::is_any_of(*bp, { '-', '/' })) {
+      return rocket::clear;
+    }
+    bp += 1;
+    // 'dd'
+    ep += 2;
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 1, 31) || (bp != ep)) {
+      return rocket::clear;
+    }
+    tr.tm_mday = static_cast<int>(temp);
+    // ' ' or 'T'
+    ep += 1;
+    if(!rocket::is_any_of(*bp, { ' ', 'T' })) {
+      return rocket::clear;
+    }
+    bp += 1;
+    // 'HH'
+    ep += 2;
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 23) || (bp != ep)) {
+      return rocket::clear;
+    }
+    tr.tm_hour = static_cast<int>(temp);
+    // ':'
+    ep += 1;
+    if(!rocket::is_any_of(*bp, { ':' })) {
+      return rocket::clear;
+    }
+    bp += 1;
+    // 'MM'
+    ep += 2;
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 59) || (bp != ep)) {
+      return rocket::clear;
+    }
+    tr.tm_min = static_cast<int>(temp);
+    // ':'
+    ep += 1;
+    if(!rocket::is_any_of(*bp, { ':' })) {
+      return rocket::clear;
+    }
+    bp += 1;
+    // 'SS'
+    // Note leap seconds.
+    ep += 2;
+    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 60) || (bp != ep)) {
+      return rocket::clear;
+    }
+    tr.tm_sec = static_cast<int>(temp);
+    // Check for the millisecond part.
+    ep = time_str.data() + off;
+    if(*bp == '.') {
+      // 'SS.sss'
+      bp -= 2;
+      if(!numg.parse_F(bp, ep, 10) || !numg.cast_F(msecs, 0, 59.9999) || (bp != ep)) {
+        return rocket::clear;
       }
-      time_point += std::lround(r * 1000);
+      msecs = (msecs - static_cast<int>(temp)) * 1000;
     }
-    if(qrd != qend) {
-      // Reject invalid characters at the end of `time_str`.
+    // Ensure all characters have been consumed.
+    if(bp != ep) {
       return rocket::clear;
     }
-    return time_point;
+    // Handle special time values.
+    if(tr.tm_year + 1900 < 1600) {
+      return INT64_MIN;
+    }
+    if(tr.tm_year + 1900 > 9998) {
+      return INT64_MAX;
+    }
+    // Assemble all parts.
+    ::time_t tp = ::timegm(&tr);
+    if(tp == ::time_t(-1)) {
+      return rocket::clear;
+    }
+    return static_cast<int64_t>(tp) * 1000 + static_cast<int64_t>(msecs);
   }
 
 void create_bindings_chrono(G_object& result, API_Version /*version*/)
