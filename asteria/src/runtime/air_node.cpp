@@ -325,12 +325,12 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& body = xnode.body;
 
         // Create the prototype string.
-        cow_string func;
-        func << name;
+        cow_string func = name;
+        size_t epos;
         // XXX: The parameter list is only appended if the name really looks like a function.
         //      Placeholders such as `<file>` or `<native>` do not precede parameter lists.
-        auto epos = name.find_last_of("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
-        if((epos != cow_string::npos) && (epos == name.size() - 1)) {
+        static constexpr char s_idchars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
+        if(!name.empty() && std::memchr(s_idchars, name.back(), rocket::countof(s_idchars) - 1)) {
           // Append the parameter list. Parameters are separated by commas.
           func << '(';
           epos = params.size() - 1;
