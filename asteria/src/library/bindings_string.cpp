@@ -260,15 +260,14 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
     template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const G_string& set, bool match)
       {
         // Make a lookup table.
-        std::array<bool, 256> table;
-        table.fill(false);
-        std::for_each(set.begin(), set.end(), [&](char c) { table[(c & 0xFF)] = true;  });
+        std::array<bool, 256> table = { };
+        rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
         // Search the range.
-        auto pos = std::find_if(begin, end, [&](char c) { return table[(c & 0xFF)] == match;  });
-        if(pos == end) {
-          return rocket::clear;
+        for(auto it = rocket::move(begin); it != end; ++it) {
+          if(table[uint8_t(*it)] == match)
+            return rocket::move(it);
         }
-        return rocket::move(pos);
+        return rocket::clear;
       }
 
     }  // namespace
@@ -697,9 +696,16 @@ G_string std_string_implode(const G_array& segments, const opt<G_string>& delim)
     constexpr char s_base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/==";
     constexpr char s_spaces[] = " \f\n\r\t\v";
 
-    template<size_t sizeT> constexpr const char* do_slitchr(const char (&str)[sizeT], char c) noexcept
+    const char* do_xstrchr(const char* str, char c) noexcept
       {
-        return std::find(str, str + sizeT - 1, c);
+        const char* p = str;
+        for(;;) {
+          if(*p == 0)
+            return nullptr;
+          if(*p == c)
+            return p;
+          ++p;
+        }
       }
 
     }  // namespace
@@ -744,8 +750,8 @@ opt<G_string> std_string_hex_decode(const G_string& text)
     while(nread != text.size()) {
       // Read and identify a character.
       char c = text[nread++];
-      auto pos = do_slitchr(s_spaces, c);
-      if(*pos) {
+      const char* pos = do_xstrchr(s_spaces, c);
+      if(pos) {
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
@@ -761,8 +767,8 @@ opt<G_string> std_string_hex_decode(const G_string& text)
       }
       // Decode the current encoding unit if it has been filled up.
       for(size_t i = 0; i != 2; ++i) {
-        pos = do_slitchr(s_base16_table, unit[i]);
-        if(!*pos) {
+        pos = do_xstrchr(s_base16_table, unit[i]);
+        if(!pos) {
           // The character is invalid.
           return rocket::clear;
         }
@@ -847,8 +853,8 @@ opt<G_string> std_string_base32_decode(const G_string& text)
     while(nread != text.size()) {
       // Read and identify a character.
       char c = text[nread++];
-      auto pos = do_slitchr(s_spaces, c);
-      if(*pos) {
+      const char* pos = do_xstrchr(s_spaces, c);
+      if(pos) {
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
@@ -877,8 +883,8 @@ opt<G_string> std_string_base32_decode(const G_string& text)
       }
       // Decode the current encoding unit.
       for(size_t i = 0; i != p; ++i) {
-        pos = do_slitchr(s_base32_table, unit[i]);
-        if(!*pos) {
+        pos = do_xstrchr(s_base32_table, unit[i]);
+        if(!pos) {
           // The character is invalid.
           return rocket::clear;
         }
@@ -965,8 +971,8 @@ opt<G_string> std_string_base64_decode(const G_string& text)
     while(nread != text.size()) {
       // Read and identify a character.
       char c = text[nread++];
-      auto pos = do_slitchr(s_spaces, c);
-      if(*pos) {
+      const char* pos = do_xstrchr(s_spaces, c);
+      if(pos) {
         // The character is a whitespace.
         if(unit.size() != 0) {
           // Fail if it occurs in the middle of a encoding unit.
@@ -995,8 +1001,8 @@ opt<G_string> std_string_base64_decode(const G_string& text)
       }
       // Decode the current encoding unit.
       for(size_t i = 0; i != p; ++i) {
-        pos = do_slitchr(s_base64_table, unit[i]);
-        if(!*pos) {
+        pos = do_xstrchr(s_base64_table, unit[i]);
+        if(!pos) {
           // The character is invalid.
           return rocket::clear;
         }
