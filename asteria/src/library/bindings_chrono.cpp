@@ -250,7 +250,7 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
     if(*bp == '.') {
       // 'SS.sss'
       bp -= 2;
-      if(!numg.parse_F(bp, ep, 10) || !numg.cast_F(msecs, 0, 59.9999) || (bp != ep)) {
+      if(!numg.parse_F(bp, ep, 10) || !numg.cast_F(msecs, 0, 60.9999) || (bp != ep)) {
         return ::rocket::clear;
       }
       msecs = (msecs - static_cast<int>(temp)) * 1000 + 0.01;
