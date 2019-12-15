@@ -35,30 +35,9 @@ enum Exit_Code : uint8_t
     ::quick_exit(static_cast<int>(code));
   }
 
-int do_backtrace(const Runtime_Error& except) noexcept
+cow_string do_stringify(const Value& val) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-
-    for(unsigned long i = 0; i != except.count_frames(); ++i) {
-      const auto& f = except.frame(i);
-      // Format the value.
-      fmt.clear_string();
-      fmt << f.value();
-      // Print a line of backtrace.
-      ::fprintf(stderr, "\t[%lu] %s:%ld (%s) -- %s\n",
-                        i, f.sloc().file().c_str(), f.sloc().line(), f.what_type(),
-                        fmt.get_c_string());
-    }
-    return ::fprintf(stderr, "\t-- end of backtrace\n");
-  }
-  catch(::std::exception& stdex) {
-    return ::fprintf(stderr, "\t-- no backtrace available\n");
-  }
-
-cow_string do_stringify_value(const Value& val) noexcept
-  try {
-    ::rocket::tinyfmt_str fmt;
-
     fmt << val;
     return fmt.extract_string();
   }
@@ -66,10 +45,9 @@ cow_string do_stringify_value(const Value& val) noexcept
     return ::rocket::sref("<invalid value>");
   }
 
-cow_string do_stringify_reference(const Reference& ref) noexcept
+cow_string do_stringify(const Reference& ref) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-
     if(ref.is_constant())
       fmt << "constant ";
     else if(ref.is_temporary())
@@ -78,12 +56,44 @@ cow_string do_stringify_reference(const Reference& ref) noexcept
       fmt << "variable ";
     else
       return ::rocket::sref("<tail call>");
-
     fmt << ref.read();
     return fmt.extract_string();
   }
   catch(::std::exception& other) {
     return ::rocket::sref("<invalid reference>");
+  }
+
+cow_string do_stringify(const Runtime_Error& except) noexcept
+  try {
+    ::rocket::tinyfmt_str fmt;
+    if(except.value().is_string())
+      fmt << except.value().as_string();
+    else
+      fmt << except.value();
+    return fmt.extract_string();
+  }
+  catch(::std::exception& other) {
+    return ::rocket::sref("<invalid exception>");
+  }
+
+int do_backtrace(const Runtime_Error& except) noexcept
+  try {
+    ::rocket::tinyfmt_str fmt;
+    ::fprintf(stderr, "\t-- backtrace:\n");
+    for(unsigned long i = 0; i != except.count_frames(); ++i) {
+      const auto& f = except.frame(i);
+      // Format the value.
+      fmt.clear_string();
+      fmt << f.value();
+      // Print a line of backtrace.
+      ::fprintf(stderr, "\t * [%lu] %s:%ld (%s) -- %s\n",
+                        i, f.sloc().file().c_str(), f.sloc().line(), f.what_type(),
+                        fmt.get_c_string());
+    }
+    return ::fprintf(stderr, "\t-- end of backtrace\n");
+  }
+  catch(::std::exception& stdex) {
+    return ::fprintf(stderr, "\t-- no backtrace available\n");
   }
 
 // These hooks just print everything to standard error.
@@ -101,21 +111,21 @@ struct Debug_Hooks : Abstract_Hooks
       {
         ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- initiating function call: %s\n",
                           sloc.file().c_str(), sloc.line(), inside.c_str(),
-                          do_stringify_value(target).c_str());
+                          do_stringify(target).c_str());
       }
     void on_function_return(const Source_Location& sloc, const phsh_string& inside,
                             const Reference& result) noexcept override
       {
         ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- returned from function call: %s\n",
                           sloc.file().c_str(), sloc.line(), inside.c_str(),
-                          do_stringify_reference(result).c_str());
+                          do_stringify(result).c_str());
       }
     void on_function_except(const Source_Location& sloc, const phsh_string& inside,
                             const Runtime_Error& except) noexcept override
       {
         ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- caught exception from function call: %s\n",
                           sloc.file().c_str(), sloc.line(), inside.c_str(),
-                          do_stringify_value(except.value()).c_str());
+                          do_stringify(except).c_str());
       }
   };
 
@@ -449,11 +459,11 @@ void do_handle_repl_command(cow_string&& cmd)
       try {
         const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
         // Print the result.
-        ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify_reference(ref).c_str());
+        ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify(ref).c_str());
       }
       catch(Runtime_Error& except) {
         // If an exception was thrown, print something informative.
-        ::fprintf(stderr, "! runtime error: %s\n", do_stringify_value(except.value()).c_str());
+        ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
         do_backtrace(except);
       }
       catch(::std::exception& stdex) {
@@ -493,7 +503,7 @@ void do_handle_repl_command(cow_string&& cmd)
     }
     catch(Runtime_Error& except) {
       // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! runtime error: %s\n", do_stringify_value(except.value()).c_str());
+      ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
       do_backtrace(except);
       do_quick_exit(exit_runtime_error);
     }
