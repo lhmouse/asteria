@@ -131,19 +131,26 @@ G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>
     // Compose a string without milliseconds.
     ::rocket::ascii_numput nump;
     ::rocket::tinyfmt_str fmt;
-    fmt << nump.put_DU(static_cast<uint32_t>(tr.tm_year + 1900), 4)
-        << '-'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_mon + 1), 2)
-        << '-'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_mday), 2)
-        << ' '
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_hour), 2)
-        << ':'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_min), 2)
-        << ':'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_sec), 2);
+    // 'yyyy'
+    fmt << nump.put_DU(static_cast<uint32_t>(tr.tm_year + 1900), 4);
+    // '-mm'
+    fmt << '-'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_mon + 1), 2);
+    // '-dd'
+    fmt << '-'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_mday), 2);
+    // ' HH'
+    fmt << ' '
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_hour), 2);
+    // ':MM'
+    fmt << ':'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_min), 2);
+    // ':SS'
+    fmt << ':'
+        << nump.put_DU(static_cast<uint32_t>(tr.tm_sec), 2);;
     // If a millisecond part is requested, append it.
     if(pms) {
+      // '.sss'
       fmt << '.'
           << nump.put_DU(static_cast<uint32_t>((secs - intg) * 1000), 3);
     }
