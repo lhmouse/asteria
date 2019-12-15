@@ -12,37 +12,53 @@
 #include "compiler/parser_error.hpp"
 #include <unistd.h>
 #include <signal.h>
+#include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 using namespace Asteria;
 
 namespace {
 
-template<typename XbaseT> int do_backtrace(const XbaseT& xbase) noexcept
+enum Exit_Code : uint8_t
+  {
+    exit_success            = 0,
+    exit_unspecified        = 1,
+    exit_invalid_argument   = 2,
+    exit_parser_error       = 3,
+    exit_runtime_error      = 4,
+  };
+
+[[noreturn]] void do_quick_exit(Exit_Code code) noexcept
+  {
+    ::fflush(nullptr);
+    ::quick_exit(static_cast<int>(code));
+  }
+
+int do_backtrace(const Runtime_Error& except) noexcept
   try {
-    const auto& except = dynamic_cast<const Runtime_Error&>(xbase);
     ::rocket::tinyfmt_str fmt;
-    // Print stack frames to the standard error stream.
+
     for(unsigned long i = 0; i != except.count_frames(); ++i) {
-      const auto& frm = except.frame(i);
+      const auto& f = except.frame(i);
       // Format the value.
       fmt.clear_string();
-      fmt << frm.value();
+      fmt << f.value();
       // Print a line of backtrace.
-      ::fprintf(stderr, "  [%lu] %s:%ld (%s) -- %s\n",
-                        i, frm.sloc().file().c_str(), frm.sloc().line(), frm.what_type(),
+      ::fprintf(stderr, "\t[%lu] %s:%ld (%s) -- %s\n",
+                        i, f.sloc().file().c_str(), f.sloc().line(), f.what_type(),
                         fmt.get_c_string());
     }
-    return ::fprintf(stderr, "  -- end of backtrace\n");
+    return ::fprintf(stderr, "\t-- end of backtrace\n");
   }
   catch(::std::exception& stdex) {
-    return ::fprintf(stderr, "  -- no backtrace available\n");
+    return ::fprintf(stderr, "\t-- no backtrace available\n");
   }
 
 cow_string do_stringify_value(const Value& val) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-    // Print the value with type information.
+
     fmt << val;
     return fmt.extract_string();
   }
@@ -53,7 +69,7 @@ cow_string do_stringify_value(const Value& val) noexcept
 cow_string do_stringify_reference(const Reference& ref) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-    // Write the categoryprefix.
+
     if(ref.is_constant())
       fmt << "constant ";
     else if(ref.is_temporary())
@@ -62,7 +78,7 @@ cow_string do_stringify_reference(const Reference& ref) noexcept
       fmt << "variable ";
     else
       return ::rocket::sref("<tail call>");
-    // Write the referenced value if any.
+
     fmt << ref.read();
     return fmt.extract_string();
   }
@@ -70,7 +86,7 @@ cow_string do_stringify_reference(const Reference& ref) noexcept
     return ::rocket::sref("<invalid reference>");
   }
 
-// These hooks just print everything to the standard error stream.
+// These hooks just print everything to standard error.
 struct Debug_Hooks : Abstract_Hooks
   {
     void on_variable_declare(const Source_Location& sloc, const phsh_string& inside,
@@ -103,38 +119,49 @@ struct Debug_Hooks : Abstract_Hooks
       }
   };
 
-}
+// Define command-line options here.
+struct Command_Line_Options
+  {
+    bool help = false;
+    bool version = false;
 
-int main(int argc, char** argv)
-  try {
-    // Add neutral options here.
-    bool print_version = false;
-    bool print_help = false;
+    uint8_t optimize = 0;
+    bool verbose = false;
+    bool interactive = false;
 
-    // Add source options here.
+    cow_string path;
+    cow_vector<Value> args;
+  };
+
+// These may also be automatic objects. They are declared here for convenience.
+Command_Line_Options cmdline;
+Compiler_Options options;
+Simple_Script script;
+Global_Context global;
+
+volatile ::sig_atomic_t interrupted;   // ... except this one, of course.
+cow_string heredoc;
+
+void do_parse_command_line(int argc, char** argv)
+  {
+    opt<bool> help;
+    opt<bool> version;
+    opt<long> optimize;
+    opt<bool> verbose;
     opt<bool> interactive;
     opt<cow_string> path;
     cow_vector<Value> args;
 
-    // Add miscellaneous options here.
-    opt<int> optimization_level;
-    bool verbose = false;
-
-    // Parse command line options.
-    const char* s;
-    int ch;
-    size_t n;
-
     for(;;) {
-      ch = ::getopt(argc, argv, "+hIiO::Vv");
+      int ch = ::getopt(argc, argv, "+hIiO::Vv");
       if(ch == -1) {
-        // There is no more argument.
+        // There are no more arguments.
         break;
       }
       switch(ch) {
         {{
       case 'h':
-          print_help = true;
+          help = true;
           break;
         }{
       case 'I':
@@ -146,23 +173,24 @@ int main(int argc, char** argv)
           break;
         }{
       case 'O':
-          s = ::optarg;
           // If `-O` is specified without an argument, it is equivalent to `-O1`.
-          if(!s || !*s) {
-            optimization_level = 1;
+          const char* arg = ::optarg;
+          if(!arg || !*arg) {
+            optimize = 1;
             break;
           }
           // Parse the level.
-          n = ::std::strspn(s, "0123456789");
-          if((s[n] != 0) || (n >= 4)) {
-            ::fprintf(stderr, "%s: invalid argument for `-%c` -- '%s'\n", *argv, ch, s);
-            return 127;
+          char* eptr;
+          long ival = ::strtol(arg, &eptr, 10);
+          if((*eptr != 0) || (ival < 0) || (ival > 99)) {
+            ::fprintf(stderr, "%s: invalid optimization level -- '%s'\n", argv[0], arg);
+            do_quick_exit(exit_invalid_argument);
           }
-          optimization_level = ::std::atoi(s);
+          optimize = ival;
           break;
         }{
       case 'V':
-          print_version = true;
+          version = true;
           break;
         }{
       case 'v':
@@ -170,173 +198,166 @@ int main(int argc, char** argv)
           break;
         }}
       default:
-        // `getopt()` will have written an error message to the standard error stream.
-        ::fprintf(stderr, "Try `%s -h` for help.\n", *argv);
-        return 127;
+        // `getopt()` will have written an error message to standard error.
+        ::fprintf(stderr, "Try `%s -h` for help.\n", argv[0]);
+        do_quick_exit(exit_invalid_argument);
       }
     }
     if(::optind < argc) {
       // The first non-option argument is the filename to execute. `-` is not special.
-      n = static_cast<uint32_t>(::optind);
-      path = G_string(argv[n]);
+      path = G_string(argv[::optind]);
       // All subsequent arguments are passed to the script verbatim.
-      while(++n != static_cast<uint32_t>(argc))
-        args.emplace_back(G_string(argv[n]));
+      ::std::for_each(argv + ::optind + 1, argv + argc,
+                    [&](const char* arg) { args.emplace_back(G_string(arg));  });
     }
 
-    // If version or help information is requested, write it to the standard output then exit.
-    if(print_version) {
-      // Print version information and exit.
-      // Utilize macros from automake.
-      ::printf("%s [built on %s]\n"
-               "\n"
-               "Visit the homepage at <%s>.\n"
-               "Report bugs to <%s>.\n",
-               PACKAGE_STRING, __DATE__,
-               PACKAGE_URL,
-               PACKAGE_BUGREPORT);
-      return 0;
-    }
-    if(print_help) {
-      // Print help information and exit.
-      //       |0        1         2         3         4         5         6         7      |
-      //       |1234567890123456789012345678901234567890123456789012345678901234567890123456|
-      ::printf("Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]\n"
-               "\n"
-               "OPTIONS\n"
-               "  -h       show help message then exit\n"
-               "  -I       suppress interactive mode [default is auto-detecting]\n"
-               "  -i       force interactive mode [default is auto-detecting]\n"
-               "  -O       equivalent to `-O1`\n"
-               "  -O[LVL]  set optimization level to the integer LVL [default is 2]\n"
-               "  -V       show version information then exit\n"
-               "  -v       print execution details to the standard error\n"
-               "\n"
-               "Source code is read from the standard input if no FILE is specified or `-`\n"
-               "is given as FILE, and from FILE otherwise. All ARGUMENTS following FILE are\n"
-               "passed to the script verbatim.\n"
-               "\n"
-               "If neither `-I` or `-i` is set, interactive mode is enabled when no FILE is\n"
-               "given (not even `-`) and the standard input is connected to a terminal, and\n"
-               "otherwise it is disabled.\n"
-               "\n"
-               "When running in non-interactive mode, characters are read from FILE, then\n"
-               "compiled and executed. If the script returns an `integer`, it is truncated\n"
-               "to 8 bits as an unsigned integer and the result denotes the exit status. If\n"
-               "the script returns `null`, the exit status is zero. If the script returns a\n"
-               "value that is neither an `integer` nor `null`, or throws an exception, the\n"
-               "exit status is non-zero.\n"
-               "\n"
-               "Visit the homepage at <%s>.\n"
-               "Report bugs to <%s>.\n",
-               *argv,
-               PACKAGE_URL,
-               PACKAGE_BUGREPORT);
-      return 0;
-    }
-
-    // Interactive mode is enabled when no FILE is given (not even `-`) and the standard input is
+    // Copy options into `*this`.
+    ::cmdline.help = help.value_or(false);
+    ::cmdline.version = version.value_or(false);
+    // The default optimization level is `2`.
+    // Note again that `-O` without an argument is equivalent to `-O1`, which effectively decreases
+    // optimization in comparison to when it wasn't specified.
+    ::cmdline.optimize = static_cast<uint8_t>(::rocket::clamp(optimize.value_or(2), 0, UINT8_MAX));
+    ::cmdline.verbose = verbose.value_or(false);
+    // Interactive mode is enabled when no FILE is given (not even `-`) and standard input is
     // connected to a terminal.
-    if(!interactive) {
-      interactive = !path && ::isatty(STDIN_FILENO);
-    }
-    // Read the standard input if no path is specified.
-    if(!path) {
-      path = ::rocket::sref("-");
-    }
-    // Set the default optimization level if no one has been specified.
-    // The default optimization level is `2`. Note again that `-O` without an argument is equivalent
-    // to `-O1`, which effectively decreases optimization.
-    if(!optimization_level) {
-      optimization_level = 2;
-    }
+    ::cmdline.interactive = interactive ? *interactive : (!path && ::isatty(STDIN_FILENO));
+    ::cmdline.path = path.move_value_or(::rocket::sref("-"));
+    ::cmdline.args = ::rocket::move(args);
+  }
 
-    // Prepare compiler options.
-    Compiler_Options opts = { };
-    // An optimization level of zero disables all optimizations.
-    if(*optimization_level == 0) {
-      opts.no_optimization = true;
-    }
+[[noreturn]] void do_print_help_and_exit(const char* self)
+  {
+    ::printf(
+      //        1         2         3         4         5         6         7      |
+      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
+      "Usage: %s [OPTIONS] [[--] FILE [ARGUMENTS]...]\n"
+      "\n"
+      "OPTIONS\n"
+      "  -h      show help message then exit\n"
+      "  -I      suppress interactive mode [default = auto]\n"
+      "  -i      force interactive mode [default = auto]\n"
+      "  -O      equivalent to `-O1`\n"
+      "  -O[nn]  set optimization level to `nn` [default = 2]\n"
+      "  -V      show version information then exit\n"
+      "  -v      print execution details to standard error\n"
+      "\n"
+      "Source code is read from standard input if no FILE is specified or `-` is\n"
+      "given as FILE, and from FILE otherwise. ARGUMENTS following FILE are passed\n"
+      "to the script as `string`s verbatim, which can be retrieved via `__varg`.\n"
+      "\n"
+      "If neither `-I` or `-i` is set, interactive mode is enabled when no FILE is\n"
+      "specified and standard input is connected to a terminal, and is disabled\n"
+      "otherwise. Be advised that specifying `-` explicitly disables interactive\n"
+      "mode.\n"
+      "\n"
+      "When running in non-interactive mode, characters are read from FILE, then\n"
+      "compiled and executed. If the script returns an `integer`, it is truncated\n"
+      "to 8 bits as an unsigned integer and the result denotes the exit status. If\n"
+      "the script returns `null`, the exit status is zero. If the script returns a\n"
+      "value that is neither an `integer` nor `null`, or throws an exception, the\n"
+      "exit status is non-zero.\n"
+      "\n"
+      "Visit the homepage at <%s>.\n"
+      "Report bugs to <%s>.\n"
+      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
+      //        1         2         3         4         5         6         7      |
+      ,
+      self,
+      PACKAGE_URL,
+      PACKAGE_BUGREPORT
+    );
+    do_quick_exit(exit_success);
+  }
 
-    // Prepare the global context.
-    Global_Context global;
-    // Set a hook struct as requested.
-    if(verbose) {
-      global.set_hooks(::rocket::make_refcnt<Debug_Hooks>());
-    }
+[[noreturn]] void do_print_version_and_exit()
+  {
+    ::printf(
+      //        1         2         3         4         5         6         7      |
+      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
+      "%s [built on %s]\n"
+      "\n"
+      "Visit the homepage at <%s>.\n"
+      "Report bugs to <%s>.\n"
+      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
+      //        1         2         3         4         5         6         7      |
+      ,
+      PACKAGE_STRING, __DATE__,
+      PACKAGE_URL,
+      PACKAGE_BUGREPORT
+    );
+    do_quick_exit(exit_success);
+  }
 
-    if(!*interactive) {
-      // Read the script directly from the input stream.
-      Simple_Script script;
-      script.set_options(opts);
-      if(*path == "-")
-        script.reload_stdin();
-      else
-        script.reload_file(*path);
-      // Execute the script.
-      // The script returns a `Reference` so let's dereference it.
-      const auto ref = script.execute(global, ::rocket::move(args));
-      // If the script returns an `integer`, forward its lower 8 bits.
-      const auto& val = ref.read();
-      if(val.is_integer()) {
-        return val.as_integer() & 0xFF;
-      }
-      // Otherwise, `null` indicates success and all other values indicate failure.
-      // N.B. Both boolean values indicate failure.
-      return !val.is_null();
-    }
+void do_trap_sigint()
+  {
+    // Trap Ctrl-C. Failure to set the signal handler is ignored.
+    struct ::sigaction sa = { };
+    sa.sa_handler = [](int) { ::interrupted = 1;  };
+    sa.sa_flags = 0;  // non-restartable
+    ::sigaction(SIGINT, &sa, nullptr);
+  }
 
-    // Write the version information to the standard error stream.
-    //                |0        1         2         3         4         5         6         7      |
-    //                |1234567890123456789012345678901234567890123456789012345678901234567890123456|
-    ::fprintf(stderr, "%s [built on %s]\n"
-                      "\n"
-                      "  All REPL commands start with a backslash. Type `\\help` for instructions.\n"
-                      "  Multiple lines may be joined together using trailing backslashes.\n",
-                      PACKAGE_STRING, __DATE__);
+void do_handle_repl_command(cow_string&& cmd)
+  {
+    ::printf("TODO: REPL CMD %s\n", cmd.c_str());
+  }
+
+[[noreturn]] void do_repl_noreturn()
+  {
+    // Write the title to standard error.
+    ::fprintf(stderr,
+      //        1         2         3         4         5         6         7      |
+      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
+      "%s [built on %s]\n"
+      "\n"
+      "  All REPL commands start with a backslash. Type `\\help` for instructions.\n"
+      "  Multiple lines may be joined together using trailing backslashes.\n"
+      // 34567890123456789012345678901234567890123456789012345678901234567890123456|
+      //        1         2         3         4         5         6         7      |
+      ,
+      PACKAGE_STRING, __DATE__
+    );
 
     // Trap Ctrl-C. Failure to set the signal handler is ignored.
-    static volatile ::sig_atomic_t s_sigint;
-    struct ::sigaction sigact = { };
-    sigact.sa_handler = [](int) { s_sigint = 1;  };
-    sigact.sa_flags = 0;  // non-restartable
-    ::sigaction(SIGINT, &sigact, nullptr);
+    // This also makes I/O functions fail immediately, instead of attempting to try again.
+    do_trap_sigint();
 
     // In interactive mode (a.k.a. REPL mode), read user inputs in lines.
+    // Outputs from the script go into standard output. Others go into standard error.
     unsigned long index = 0;
-    int indent;
+    int indent, ch;
     long line;
-
-    cow_string code, heredoc;
     bool escape;
+    cow_string code;
 
-    for(;;) {
+    do {
       // Check for exit condition.
       if(::ferror(stdin)) {
         ::fprintf(stderr, "\n! error reading standard input\n");
-        break;
+        do_quick_exit(exit_unspecified);
       }
       if(::feof(stdin)) {
-        ::fprintf(stderr, "\n~ have a nice day\n");
-        break;
+        ::fprintf(stderr, "\n~ have a nice day :)\n");
+        do_quick_exit(exit_success);
       }
       // Move on and read the next snippet.
+      ::interrupted = 0;
       code.clear();
       escape = false;
       line = 0;
       ::fprintf(stderr, "\n#%lu%n:%3lu> ", ++index, &indent, ++line);
-      s_sigint = 0;
 
       for(;;) {
         // Read a character. Break upon read errors.
-        ch = ::getc(stdin);
+        ch = ::fgetc(stdin);
         if(ch == EOF) {
           break;
         }
         if(ch == '\n') {
           // Check for termination.
           if(heredoc.empty()) {
-            // In normal mode, the current snippet is terminated by an unescaped line feed.
+            // In line input mode, the current snippet is terminated by an unescaped line feed.
             if(!escape) {
               break;
             }
@@ -346,112 +367,170 @@ int main(int argc, char** argv)
             }
           }
           else {
-            // In heredoc mode, the current snippet is terminated by the user-defined terminator.
+            // In heredoc mode, the current snippet is terminated by a line consisting of the
+            // user-defined terminator, which is not part of the snippet and must be removed.
             if(code.ends_with(heredoc)) {
-              // The terminator must be deleted from the snippet.
               code.erase(code.size() - heredoc.size());
+              heredoc.clear();
               break;
             }
           }
-          // Otherwise, the preceding backslash is deleted and a line break will be appended.
+          // The line feed should be preserved. It'll be appended later.
           // Prompt for the next consecutive line.
           ::fprintf(stderr, "%*c%3lu> ", indent, ':', ++line);
         }
-        else {
-          // Handle escape characters.
-          if(heredoc.empty()) {
-            // Backslashes not preceding line feeds are preserved as is.
-            if(escape) {
-              code += '\\';
-            }
-            // If the character is a backslash, stash it.
-            if(ch == '\\') {
-              escape = true;
-              continue;
-            }
+        else if(heredoc.empty()) {
+          // In line input mode, backslashes that precede line feeds are deleted. Those that
+          // do not precede line feeds are kept as is.
+          if(escape) {
+            code.push_back('\\');
+          }
+          if(ch == '\\') {
+            escape = true;
+            continue;
           }
         }
         // Append the character.
-        code += static_cast<char>(ch);
+        code.push_back(static_cast<char>(ch));
         escape = false;
       }
-      if(s_sigint) {
-        // An interrupt has been received. Recover the stream.
+      if(::interrupted) {
+        // Discard this snippet. Recover the stream so we can read the next one.
         ::clearerr(stdin);
-        // Discard all characters that have been read so far.
         ::fprintf(stderr, "\n! interrupted\n");
         continue;
       }
       if(code.empty()) {
-        // There is nothing to do.
         continue;
       }
 
-      // Handle REPL commands.
+      // Check for REPL commands.
       if(code.front() == '\\') {
-        // TODO
-        ::printf("! CMD = %s\n", code.c_str());
+        code.erase(0, 1);
+        do_handle_repl_command(::rocket::move(code));
         continue;
       }
 
       // Name the snippet.
-      cow_string name(64, '*');
-      n = (unsigned)::sprintf(name.mut_data(), "snippet #%lu", index);
-      name.erase(n);
+      char name[32];
+      ch = ::std::sprintf(name, "snippet #%lu", index);
+      ::cmdline.path.assign(name, static_cast<unsigned>(ch));
 
-      // Compile the snippet.
-      Simple_Script script;
-      script.set_options(opts);
+      // The snippet might be a statement list or an expression.
+      // First, try parsing it as the former.
+      ::script.set_options(::options);
       try {
-        // The user may input a complete snippet or merely an expression.
-        // First, try parsing it as a statement list.
-        script.reload_string(code, name);
+        ::script.reload_string(code, ::cmdline.path);
       }
       catch(Parser_Error& except) {
-        // We only want to make a second attempt in the case of absence of a semicolon at the end.
-        if((except.status() != parser_status_semicolon_expected) || (except.line() > 0)) {
-          // Bail out upon irrecoverable errors.
-          ::fprintf(stderr, "! parser error: %s\n", except.what());
-          continue;
-        }
-      }
-      if(!script) {
-        // Rewrite the potential expression to a `return` statement.
-        code.insert(0, "return& ");
-        code.append(" ;");
-        try {
+        // We only want to make another attempt in the case of absence of a semicolon at the end.
+        bool retry = (except.status() == parser_status_semicolon_expected) &&
+                     (except.line() <= 0);
+        if(retry) {
+          // Rewrite the potential expression to a `return` statement.
+          code.insert(0, "return& ( ");
+          code.append(" );");
           // Try parsing it again.
-          script.reload_string(code, name);
+          try {
+            ::script.reload_string(code, ::cmdline.path);
+          }
+          catch(Parser_Error& /*other*/) {
+            // If we fail again, it is the previous exception that we are interested in.
+            retry = false;
+          }
         }
-        catch(Parser_Error& except) {
+        if(!retry) {
           // Bail out upon irrecoverable errors.
           ::fprintf(stderr, "! parser error: %s\n", except.what());
           continue;
         }
       }
-      // Execute the script.
+      // Execute the script as a function, which returns a `Reference`.
       try {
-        // The script returns a `Reference` so let's dereference it.
-        const auto ref = script.execute(global, ::rocket::move(args));
-        // Print the value.
-        ::fprintf(stderr, "* value #%lu: %s\n", index, do_stringify_reference(ref).c_str());
+        const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
+        // Print the result.
+        ::fprintf(stderr, "* result #%lu: %s\n", index, do_stringify_reference(ref).c_str());
       }
       catch(Runtime_Error& except) {
-        // Print the exception and discard this snippet.
+        // If an exception was thrown, print something informative.
         ::fprintf(stderr, "! runtime error: %s\n", do_stringify_value(except.value()).c_str());
         do_backtrace(except);
       }
       catch(::std::exception& stdex) {
-        // Print the exception and discard this snippet.
-        ::fprintf(stderr, "! runtime error: %s\n", stdex.what());
-        do_backtrace(stdex);
+        // If an exception was thrown, print something informative.
+        ::fprintf(stderr, "! unhandled exception: %s\n", stdex.what());
       }
+    } while(true);
+  }
+
+[[noreturn]] void do_single_noreturn()
+  {
+    // Consume all data from standard input.
+    ::script.set_options(::options);
+    try {
+      if(::cmdline.path == "-")
+        ::script.reload_stdin();
+      else
+        ::script.reload_file(::cmdline.path);
     }
-    return 0;
+    catch(Parser_Error& except) {
+      // Report the error and exit.
+      ::fprintf(stderr, "! parser error: %s\n", except.what());
+      do_quick_exit(exit_parser_error);
+    }
+
+    // Execute the script.
+    Exit_Code status;
+    try {
+      const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
+      const auto& val = ref.read();
+      // If the script returned an `integer`, forward its lower 8 bits.
+      // Otherwise, `null` indicates success and all other values indicate failure.
+      if(val.is_integer())
+        status = static_cast<Exit_Code>(val.as_integer());
+      else
+        status = val.is_null() ? exit_success : exit_unspecified;
+    }
+    catch(Runtime_Error& except) {
+      // If an exception was thrown, print something informative.
+      ::fprintf(stderr, "! runtime error: %s\n", do_stringify_value(except.value()).c_str());
+      do_backtrace(except);
+      do_quick_exit(exit_runtime_error);
+    }
+
+    // We have consumed all data so exit now.
+    do_quick_exit(status);
+  }
+
+}  // namespace
+
+int main(int argc, char** argv)
+  try {
+    // Note that this function shall not return in case of errors.
+    do_parse_command_line(argc, argv);
+
+    // Check for early exit conditions.
+    if(::cmdline.help) {
+      do_print_help_and_exit(argv[0]);
+    }
+    if(::cmdline.version) {
+      do_print_version_and_exit();
+    }
+
+    // Set debug hooks if verbose mode is enabled. This is sticky.
+    if(::cmdline.verbose) {
+      global.set_hooks(::rocket::make_refcnt<Debug_Hooks>());
+    }
+
+    // Call other functions which are declared `noreturn`. `main()` itself is not `noreturn` so we
+    // don't get stupid warngings like 'function declared `noreturn` has a `return` statement'.
+    if(::cmdline.interactive)
+      do_repl_noreturn();
+    else
+      do_single_noreturn();
   }
   catch(::std::exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
     ::fprintf(stderr, "! unhandled exception: %s\n", stdex.what());
-    do_backtrace(stdex);
-    return 3;
+    do_quick_exit(exit_unspecified);
   }
