@@ -35,11 +35,21 @@ enum Exit_Code : uint8_t
     ::quick_exit(static_cast<int>(code));
   }
 
+cow_string&& do_xindent(cow_string&& str)
+  {
+    size_t i, bpos = 0;
+    while((i = str.find('\n', bpos)) != cow_string::npos) {
+      bpos = i + 2;
+      str.replace(i, 1, "\n\t");
+    }
+    return ::rocket::move(str);
+  }
+
 cow_string do_stringify(const Value& val) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
     fmt << val;
-    return fmt.extract_string();
+    return do_xindent(fmt.extract_string());
   }
   catch(::std::exception& stdex) {
     return ::rocket::sref("<invalid value>");
@@ -57,7 +67,7 @@ cow_string do_stringify(const Reference& ref) noexcept
     else
       return ::rocket::sref("<tail call>");
     fmt << ref.read();
-    return fmt.extract_string();
+    return do_xindent(fmt.extract_string());
   }
   catch(::std::exception& other) {
     return ::rocket::sref("<invalid reference>");
@@ -70,7 +80,7 @@ cow_string do_stringify(const Runtime_Error& except) noexcept
       fmt << except.value().as_string();
     else
       fmt << except.value();
-    return fmt.extract_string();
+    return do_xindent(fmt.extract_string());
   }
   catch(::std::exception& other) {
     return ::rocket::sref("<invalid exception>");
@@ -468,7 +478,7 @@ void do_handle_repl_command(cow_string&& cmd)
       }
       catch(::std::exception& stdex) {
         // If an exception was thrown, print something informative.
-        ::fprintf(stderr, "! unhandled exception: %s\n", stdex.what());
+        ::fprintf(stderr, "! unhandled exception: %s\n", do_xindent(::rocket::sref(stdex.what())).c_str());
       }
     } while(true);
   }
@@ -541,6 +551,6 @@ int main(int argc, char** argv)
   }
   catch(::std::exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
-    ::fprintf(stderr, "! unhandled exception: %s\n", stdex.what());
+    ::fprintf(stderr, "! unhandled exception: %s\n", do_xindent(::rocket::sref(stdex.what())).c_str());
     do_quick_exit(exit_unspecified);
   }
