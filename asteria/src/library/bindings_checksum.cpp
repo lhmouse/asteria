@@ -19,18 +19,18 @@ namespace Asteria {
       {
       };
     template<uint32_t valueT, uint32_t divisorT>
-        struct Generator<valueT, divisorT, 8> : std::integral_constant<uint32_t, valueT>
+        struct Generator<valueT, divisorT, 8> : ::std::integral_constant<uint32_t, valueT>
       {
       };
     template<uint32_t divisorT, size_t... indicesT>
-        constexpr array<uint32_t, sizeof...(indicesT)> do_generate_table_impl(const std::index_sequence<indicesT...>&) noexcept
+        constexpr array<uint32_t, sizeof...(indicesT)> do_generate_table_impl(const ::std::index_sequence<indicesT...>&) noexcept
       {
         return {{ Generator<uint8_t(indicesT), divisorT, 0>::value... }};
       }
     template<uint32_t divisorT>
         constexpr array<uint32_t, 256> do_generate_table() noexcept
       {
-        return do_generate_table_impl<divisorT>(std::make_index_sequence<256>());
+        return do_generate_table_impl<divisorT>(::std::make_index_sequence<256>());
       }
     constexpr auto s_iso3309_table = do_generate_table<0xEDB88320>();
 
@@ -85,21 +85,21 @@ namespace Asteria {
 G_object std_checksum_crc32_new()
   {
     G_object r;
-    r.insert_or_assign(rocket::sref("!p"),  // details
+    r.insert_or_assign(::rocket::sref("!p"),  // details
       G_opaque(
-        rocket::make_refcnt<CRC32::Hasher>()
+        ::rocket::make_refcnt<CRC32::Hasher>()
       ));
-    r.insert_or_assign(rocket::sref("write"),
+    r.insert_or_assign(::rocket::sref("write"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.crc32_new()>.write"),
+          ::rocket::sref("<std.checksum.crc32_new()>.write"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.write"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.crc32_new()>.write"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<CRC32::Hasher>());
             // Parse arguments.
             G_string data;
@@ -111,22 +111,22 @@ G_object std_checksum_crc32_new()
           }
         )
       ));
-    r.insert_or_assign(rocket::sref("finish"),
+    r.insert_or_assign(::rocket::sref("finish"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.crc32_new()>.finish"),
+          ::rocket::sref("<std.checksum.crc32_new()>.finish"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.crc32_new()>.finish"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.crc32_new()>.finish"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<CRC32::Hasher>());
             // Parse arguments.
             if(reader.start().finish()) {
               Reference_Root::S_temporary xref = { p.finish() };
-              return rocket::move(xref);
+              return ::rocket::move(xref);
             }
             reader.throw_no_matching_function_call();
           }
@@ -197,21 +197,21 @@ G_integer std_checksum_crc32(const G_string& data)
 G_object std_checksum_fnv1a32_new()
   {
     G_object r;
-    r.insert_or_assign(rocket::sref("!p"),  // details
+    r.insert_or_assign(::rocket::sref("!p"),  // details
       G_opaque(
-        rocket::make_refcnt<FNV1a32::Hasher>()
+        ::rocket::make_refcnt<FNV1a32::Hasher>()
       ));
-    r.insert_or_assign(rocket::sref("write"),
+    r.insert_or_assign(::rocket::sref("write"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.fnv1a32_new()>.write"),
+          ::rocket::sref("<std.checksum.fnv1a32_new()>.write"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.write"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.fnv1a32_new()>.write"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<FNV1a32::Hasher>());
             // Parse arguments.
             G_string data;
@@ -223,22 +223,22 @@ G_object std_checksum_fnv1a32_new()
           }
         )
       ));
-    r.insert_or_assign(rocket::sref("finish"),
+    r.insert_or_assign(::rocket::sref("finish"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.fnv1a32_new()>.finish"),
+          ::rocket::sref("<std.checksum.fnv1a32_new()>.finish"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.fnv1a32_new()>.finish"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.fnv1a32_new()>.finish"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<FNV1a32::Hasher>());
             // Parse arguments.
             if(reader.start().finish()) {
               Reference_Root::S_temporary xref = { p.finish() };
-              return rocket::move(xref);
+              return ::rocket::move(xref);
             }
             reader.throw_no_matching_function_call();
           }
@@ -256,23 +256,23 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
     namespace {
 
-    template<uint8_t valueT> struct Hexdigit : std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
+    template<uint8_t valueT> struct Hexdigit : ::std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
       {
       };
     template<uint8_t valueT> constexpr array<char, 2> do_generate_hex_digits_for_byte() noexcept
       {
         return {{ Hexdigit<uint8_t(valueT / 16)>::value, Hexdigit<uint8_t(valueT % 16)>::value }};
       };
-    template<size_t... indicesT> constexpr array<char, 256, 2> do_generate_hexdigits_impl(const std::index_sequence<indicesT...>&) noexcept
+    template<size_t... indicesT> constexpr array<char, 256, 2> do_generate_hexdigits_impl(const ::std::index_sequence<indicesT...>&) noexcept
       {
         return {{ do_generate_hex_digits_for_byte<uint8_t(indicesT)>()... }};
       }
-    constexpr auto s_hexdigits = do_generate_hexdigits_impl(std::make_index_sequence<256>());
+    constexpr auto s_hexdigits = do_generate_hexdigits_impl(::std::make_index_sequence<256>());
 
     template<bool bigendT, typename WordT> G_string& do_pdigits_impl(G_string& str, const WordT& ref)
       {
-        static_assert(std::is_unsigned<WordT>::value, "");
-        std::array<uint8_t, sizeof(WordT)> stor_le;
+        static_assert(::std::is_unsigned<WordT>::value, "");
+        ::std::array<uint8_t, sizeof(WordT)> stor_le;
         uint64_t word = static_cast<uint64_t>(ref);
         // Write the word in little-endian order.
         for(auto& byte : stor_le) {
@@ -281,10 +281,10 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         }
         // Append hexadecimal digits.
         if(bigendT) {
-          std::for_each(stor_le.rbegin(), stor_le.rend(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
+          ::std::for_each(stor_le.rbegin(), stor_le.rend(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
         }
         else {
-          std::for_each(stor_le.begin(), stor_le.end(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
+          ::std::for_each(stor_le.begin(), stor_le.end(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
         }
         return str;
       }
@@ -299,15 +299,15 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
     template<bool bigendT, typename WordT> WordT& do_load_impl(WordT& ref, const uint8_t* ptr)
       {
-        static_assert(std::is_unsigned<WordT>::value, "");
-        std::array<uint8_t, sizeof(WordT)> stor_be;
+        static_assert(::std::is_unsigned<WordT>::value, "");
+        ::std::array<uint8_t, sizeof(WordT)> stor_be;
         uint64_t word = 0;
         // Re-arrange bytes.
         if(bigendT) {
-          std::copy_n(ptr, stor_be.size(), stor_be.begin());
+          ::std::copy_n(ptr, stor_be.size(), stor_be.begin());
         }
         else {
-          std::copy_n(ptr, stor_be.size(), stor_be.rbegin());
+          ::std::copy_n(ptr, stor_be.size(), stor_be.rbegin());
         }
         // Assemble the word.
         for(const auto& byte : stor_be) {
@@ -332,9 +332,9 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         return static_cast<WordT>(sum);
       }
 
-    template<typename WordT, size_t sizeT> inline void do_padd(std::array<WordT, sizeT>& lhs, const std::array<WordT, sizeT>& rhs)
+    template<typename WordT, size_t sizeT> inline void do_padd(::std::array<WordT, sizeT>& lhs, const ::std::array<WordT, sizeT>& rhs)
       {
-        rocket::ranged_for(size_t(0), sizeT, [&](size_t i) { lhs[i] += rhs[i];  });
+        ::rocket::ranged_for(size_t(0), sizeT, [&](size_t i) { lhs[i] += rhs[i];  });
       }
 
     }  // namespace
@@ -342,14 +342,14 @@ G_integer std_checksum_fnv1a32(const G_string& data)
     namespace {
     namespace MD5 {
 
-    constexpr std::array<uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
+    constexpr ::std::array<uint32_t, 4> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 }};
 
     class Hasher final : public Abstract_Opaque
       {
       private:
-        std::array<uint32_t, 4> m_regs;
+        ::std::array<uint32_t, 4> m_regs;
         uint64_t m_size;
-        std::array<uint8_t, 64> m_chunk;
+        ::std::array<uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -485,8 +485,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             // If the last chunk was not empty, ...
             if(bc != this->m_chunk.begin()) {
               // ... append data to the last chunk, ...
-              n = rocket::min(ep - bp, ec - bc);
-              std::copy_n(bp, n, bc);
+              n = ::rocket::min(ep - bp, ec - bc);
+              ::std::copy_n(bp, n, bc);
               this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
@@ -509,7 +509,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             // Append any bytes remaining to the last chunk.
             n = ep - bp;
             if(n != 0) {
-              std::copy_n(bp, n, bc);
+              ::std::copy_n(bp, n, bc);
               this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
@@ -527,14 +527,14 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             n = ec - bc;
             if(n < 8) {
               // Wrap.
-              std::fill_n(bc, n, 0);
+              ::std::fill_n(bc, n, 0);
               this->do_consume_chunk(this->m_chunk.data());
               bc = this->m_chunk.begin();
             }
             n = ec - bc - 8;
             if(n > 0) {
               // Fill zeroes.
-              std::fill_n(bc, n, 0);
+              ::std::fill_n(bc, n, 0);
               bc += n;
             }
             ROCKET_ASSERT(ec - bc == 8);
@@ -548,7 +548,7 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             // Get the checksum.
             G_string ck;
             ck.reserve(this->m_regs.size() * 8);
-            rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_le(ck, w);  });
+            ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_le(ck, w);  });
             // Reset internal states.
             this->m_regs = s_init;
             this->m_size = 0;
@@ -562,21 +562,21 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 G_object std_checksum_md5_new()
   {
     G_object r;
-    r.insert_or_assign(rocket::sref("!p"),  // details
+    r.insert_or_assign(::rocket::sref("!p"),  // details
       G_opaque(
-        rocket::make_refcnt<MD5::Hasher>()
+        ::rocket::make_refcnt<MD5::Hasher>()
       ));
-    r.insert_or_assign(rocket::sref("write"),
+    r.insert_or_assign(::rocket::sref("write"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.md5_new()>.write"),
+          ::rocket::sref("<std.checksum.md5_new()>.write"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.md5_new()>.write"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.md5_new()>.write"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<MD5::Hasher>());
             // Parse arguments.
             G_string data;
@@ -588,22 +588,22 @@ G_object std_checksum_md5_new()
           }
         )
       ));
-    r.insert_or_assign(rocket::sref("finish"),
+    r.insert_or_assign(::rocket::sref("finish"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.md5_new()>.finish"),
+          ::rocket::sref("<std.checksum.md5_new()>.finish"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.md5_new()>.finish"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.md5_new()>.finish"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<MD5::Hasher>());
             // Parse arguments.
             if(reader.start().finish()) {
               Reference_Root::S_temporary xref = { p.finish() };
-              return rocket::move(xref);
+              return ::rocket::move(xref);
             }
             reader.throw_no_matching_function_call();
           }
@@ -622,14 +622,14 @@ G_string std_checksum_md5(const G_string& data)
     namespace {
     namespace SHA1 {
 
-    constexpr std::array<uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
+    constexpr ::std::array<uint32_t, 5> s_init = {{ 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }};
 
     class Hasher final : public Abstract_Opaque
       {
       private:
-        std::array<uint32_t, 5> m_regs;
+        ::std::array<uint32_t, 5> m_regs;
         uint64_t m_size;
-        std::array<uint8_t, 64> m_chunk;
+        ::std::array<uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -641,7 +641,7 @@ G_string std_checksum_md5(const G_string& data)
       private:
         void do_consume_chunk(const uint8_t* p) noexcept
           {
-            std::array<uint32_t, 80> w;
+            ::std::array<uint32_t, 80> w;
             uint32_t f, k;
             // https://en.wikipedia.org/wiki/SHA-1
             for(size_t i =  0; i < 16; ++i) {
@@ -789,8 +789,8 @@ G_string std_checksum_md5(const G_string& data)
             // If the last chunk was not empty, ...
             if(bc != this->m_chunk.begin()) {
               // ... append data to the last chunk, ...
-              n = rocket::min(ep - bp, ec - bc);
-              std::copy_n(bp, n, bc);
+              n = ::rocket::min(ep - bp, ec - bc);
+              ::std::copy_n(bp, n, bc);
               this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
@@ -813,7 +813,7 @@ G_string std_checksum_md5(const G_string& data)
             // Append any bytes remaining to the last chunk.
             n = ep - bp;
             if(n != 0) {
-              std::copy_n(bp, n, bc);
+              ::std::copy_n(bp, n, bc);
               this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
@@ -831,14 +831,14 @@ G_string std_checksum_md5(const G_string& data)
             n = ec - bc;
             if(n < 8) {
               // Wrap.
-              std::fill_n(bc, n, 0);
+              ::std::fill_n(bc, n, 0);
               this->do_consume_chunk(this->m_chunk.data());
               bc = this->m_chunk.begin();
             }
             n = ec - bc - 8;
             if(n > 0) {
               // Fill zeroes.
-              std::fill_n(bc, n, 0);
+              ::std::fill_n(bc, n, 0);
               bc += n;
             }
             ROCKET_ASSERT(ec - bc == 8);
@@ -852,7 +852,7 @@ G_string std_checksum_md5(const G_string& data)
             // Get the checksum.
             G_string ck;
             ck.reserve(this->m_regs.size() * 8);
-            rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
+            ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
             // Reset internal states.
             this->m_regs = s_init;
             this->m_size = 0;
@@ -866,21 +866,21 @@ G_string std_checksum_md5(const G_string& data)
 G_object std_checksum_sha1_new()
   {
     G_object r;
-    r.insert_or_assign(rocket::sref("!p"),  // details
+    r.insert_or_assign(::rocket::sref("!p"),  // details
       G_opaque(
-        rocket::make_refcnt<SHA1::Hasher>()
+        ::rocket::make_refcnt<SHA1::Hasher>()
       ));
-    r.insert_or_assign(rocket::sref("write"),
+    r.insert_or_assign(::rocket::sref("write"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.sha1_new()>.write"),
+          ::rocket::sref("<std.checksum.sha1_new()>.write"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.write"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.sha1_new()>.write"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<SHA1::Hasher>());
             // Parse arguments.
             G_string data;
@@ -892,22 +892,22 @@ G_object std_checksum_sha1_new()
           }
         )
       ));
-    r.insert_or_assign(rocket::sref("finish"),
+    r.insert_or_assign(::rocket::sref("finish"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.sha1_new()>.finish"),
+          ::rocket::sref("<std.checksum.sha1_new()>.finish"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.sha1_new()>.finish"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.sha1_new()>.finish"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<SHA1::Hasher>());
             // Parse arguments.
             if(reader.start().finish()) {
               Reference_Root::S_temporary xref = { p.finish() };
-              return rocket::move(xref);
+              return ::rocket::move(xref);
             }
             reader.throw_no_matching_function_call();
           }
@@ -926,15 +926,15 @@ G_string std_checksum_sha1(const G_string& data)
     namespace {
     namespace SHA256 {
 
-    constexpr std::array<uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+    constexpr ::std::array<uint32_t, 8> s_init = {{ 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
                                                   0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19 }};
 
     class Hasher final : public Abstract_Opaque
       {
       private:
-        std::array<uint32_t, 8> m_regs;
+        ::std::array<uint32_t, 8> m_regs;
         uint64_t m_size;
-        std::array<uint8_t, 64> m_chunk;
+        ::std::array<uint8_t, 64> m_chunk;
 
       public:
         Hasher() noexcept
@@ -946,7 +946,7 @@ G_string std_checksum_sha1(const G_string& data)
       private:
         void do_consume_chunk(const uint8_t* p) noexcept
           {
-            std::array<uint32_t, 64> w;
+            ::std::array<uint32_t, 64> w;
             uint32_t s0, maj, t2, s1, ch, t1;
             // https://en.wikipedia.org/wiki/SHA-2
             for(size_t i =  0; i < 16; ++i) {
@@ -1065,8 +1065,8 @@ G_string std_checksum_sha1(const G_string& data)
             // If the last chunk was not empty, ...
             if(bc != this->m_chunk.begin()) {
               // ... append data to the last chunk, ...
-              n = rocket::min(ep - bp, ec - bc);
-              std::copy_n(bp, n, bc);
+              n = ::rocket::min(ep - bp, ec - bc);
+              ::std::copy_n(bp, n, bc);
               this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
@@ -1089,7 +1089,7 @@ G_string std_checksum_sha1(const G_string& data)
             // Append any bytes remaining to the last chunk.
             n = ep - bp;
             if(n != 0) {
-              std::copy_n(bp, n, bc);
+              ::std::copy_n(bp, n, bc);
               this->m_size += static_cast<uint64_t>(n);
               bp += n;
               bc += n;
@@ -1107,14 +1107,14 @@ G_string std_checksum_sha1(const G_string& data)
             n = ec - bc;
             if(n < 8) {
               // Wrap.
-              std::fill_n(bc, n, 0);
+              ::std::fill_n(bc, n, 0);
               this->do_consume_chunk(this->m_chunk.data());
               bc = this->m_chunk.begin();
             }
             n = ec - bc - 8;
             if(n > 0) {
               // Fill zeroes.
-              std::fill_n(bc, n, 0);
+              ::std::fill_n(bc, n, 0);
               bc += n;
             }
             ROCKET_ASSERT(ec - bc == 8);
@@ -1128,7 +1128,7 @@ G_string std_checksum_sha1(const G_string& data)
             // Get the checksum.
             G_string ck;
             ck.reserve(this->m_regs.size() * 8);
-            rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
+            ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
             // Reset internal states.
             this->m_regs = s_init;
             this->m_size = 0;
@@ -1142,21 +1142,21 @@ G_string std_checksum_sha1(const G_string& data)
 G_object std_checksum_sha256_new()
   {
     G_object r;
-    r.insert_or_assign(rocket::sref("!p"),  // details
+    r.insert_or_assign(::rocket::sref("!p"),  // details
       G_opaque(
-        rocket::make_refcnt<SHA256::Hasher>()
+        ::rocket::make_refcnt<SHA256::Hasher>()
       ));
-    r.insert_or_assign(rocket::sref("write"),
+    r.insert_or_assign(::rocket::sref("write"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.sha256_new()>.write"),
+          ::rocket::sref("<std.checksum.sha256_new()>.write"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.write"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.sha256_new()>.write"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<SHA256::Hasher>());
             // Parse arguments.
             G_string data;
@@ -1168,22 +1168,22 @@ G_object std_checksum_sha256_new()
           }
         )
       ));
-    r.insert_or_assign(rocket::sref("finish"),
+    r.insert_or_assign(::rocket::sref("finish"),
       G_function(
-        rocket::make_refcnt<Simple_Binding_Wrapper>(
+        ::rocket::make_refcnt<Simple_Binding_Wrapper>(
           // Description
-          rocket::sref("<std.checksum.sha256_new()>.finish"),
+          ::rocket::sref("<std.checksum.sha256_new()>.finish"),
           // Definition
           [](cow_vector<Reference>&& args, Reference&& self) -> Reference {
-            Argument_Reader reader(rocket::sref("<std.checksum.sha256_new()>.finish"), rocket::ref(args));
+            Argument_Reader reader(::rocket::sref("<std.checksum.sha256_new()>.finish"), ::rocket::ref(args));
             // Get the hasher.
-            Reference_Modifier::S_object_key xmod = { rocket::sref("!p") };
-            self.zoom_in(rocket::move(xmod));
+            Reference_Modifier::S_object_key xmod = { ::rocket::sref("!p") };
+            self.zoom_in(::rocket::move(xmod));
             auto& p = *(self.open().as_opaque()->share_this<SHA256::Hasher>());
             // Parse arguments.
             if(reader.start().finish()) {
               Reference_Root::S_temporary xref = { p.finish() };
-              return rocket::move(xref);
+              return ::rocket::move(xref);
             }
             reader.throw_no_matching_function_call();
           }
@@ -1204,10 +1204,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.crc32_new()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("crc32_new"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("crc32_new"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.crc32_new()`\n"
           "\n"
@@ -1229,12 +1229,12 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.crc32_new"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.crc32_new"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_crc32_new() };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1243,10 +1243,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.crc32()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("crc32"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("crc32"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.crc32(data)`\n"
           "\n"
@@ -1269,13 +1269,13 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.crc32"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.crc32"), ::rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_crc32(data) };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1284,10 +1284,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.fnv1a32_new()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("fnv1a32_new"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("fnv1a32_new"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.fnv1a32_new()`\n"
           "\n"
@@ -1310,12 +1310,12 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.fnv1a32_new"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32_new"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_fnv1a32_new() };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1324,10 +1324,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.fnv1a32()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("fnv1a32"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("fnv1a32"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.fnv1a32(data)`\n"
           "\n"
@@ -1350,13 +1350,13 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.fnv1a32"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.fnv1a32"), ::rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_fnv1a32(data) };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1365,10 +1365,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.md5_new()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("md5_new"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("md5_new"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.md5_new()`\n"
           "\n"
@@ -1389,12 +1389,12 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.md5_new"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.md5_new"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_md5_new() };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1403,10 +1403,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.md5()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("md5"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("md5"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.md5(data)`\n"
           "\n"
@@ -1429,13 +1429,13 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.md5"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.md5"), ::rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_md5(data) };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1444,10 +1444,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.sha1_new()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("sha1_new"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("sha1_new"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.sha1_new()`\n"
           "\n"
@@ -1468,12 +1468,12 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.sha1_new"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.sha1_new"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_sha1_new() };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1482,10 +1482,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.sha1()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("sha1"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("sha1"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.sha1(data)`\n"
           "\n"
@@ -1508,13 +1508,13 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.sha1"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.sha1"), ::rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_sha1(data) };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1523,10 +1523,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.sha256_new()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("sha256_new"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("sha256_new"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.sha256_new()`\n"
           "\n"
@@ -1547,12 +1547,12 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.sha256_new"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.sha256_new"), ::rocket::ref(args));
           // Parse arguments.
           if(reader.start().finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_sha256_new() };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -1561,10 +1561,10 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.checksum.sha256()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("sha256"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("sha256"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.checksum.sha256(data)`\n"
           "\n"
@@ -1587,13 +1587,13 @@ void create_bindings_checksum(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.checksum.sha256"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.checksum.sha256"), ::rocket::ref(args));
           // Parse arguments.
           G_string data;
           if(reader.start().g(data).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_checksum_sha256(data) };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();

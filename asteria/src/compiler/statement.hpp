@@ -144,7 +144,7 @@ class Statement
         , S_return      // 14,
         , S_assert      // 15,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;
@@ -152,12 +152,12 @@ class Statement
   public:
     template<typename XstmtT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XstmtT&&)> Statement(XstmtT&& stmt)
       :
-        m_stor(rocket::forward<XstmtT>(stmt))
+        m_stor(::rocket::forward<XstmtT>(stmt))
       {
       }
     template<typename XstmtT, ASTERIA_SFINAE_ASSIGN(Xvariant, XstmtT&&)> Statement& operator=(XstmtT&& stmt)
       {
-        this->m_stor = rocket::forward<XstmtT>(stmt);
+        this->m_stor = ::rocket::forward<XstmtT>(stmt);
         return *this;
       }
 

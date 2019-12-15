@@ -20,42 +20,42 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     // Parse tokens.
     Statement_Sequence stmseq(tstrm, xnode.opts);
     // Initialize arguments for the function object.
-    xnode.sloc = std::make_pair(name, 1);
-    xnode.name = rocket::sref("<file scope>");
-    xnode.params.emplace_back(rocket::sref("..."));
+    xnode.sloc = ::std::make_pair(name, 1);
+    xnode.name = ::rocket::sref("<file scope>");
+    xnode.params.emplace_back(::rocket::sref("..."));
     xnode.body = stmseq.get_statements();
     // Construct an IR node so we can reuse its code somehow.
-    AIR_Node node(rocket::move(xnode));
+    AIR_Node node(::rocket::move(xnode));
     auto qtarget = node.instantiate_function(nullptr);
     // Accept it.
-    this->m_cptr = rocket::move(qtarget);
+    this->m_cptr = ::rocket::move(qtarget);
     return *this;
   }
 
 Simple_Script& Simple_Script::reload_string(const cow_string& code, const cow_string& name)
   {
-    rocket::tinybuf_str cbuf;
+    ::rocket::tinybuf_str cbuf;
     cbuf.set_string(code, tinybuf::open_read);
     return this->reload(cbuf, name);
   }
 
 Simple_Script& Simple_Script::reload_file(const cow_string& path)
   {
-    rocket::tinybuf_file cbuf;
+    ::rocket::tinybuf_file cbuf;
     cbuf.open(path.c_str(), tinybuf::open_read);
     return this->reload(cbuf, path);
   }
 
 Simple_Script& Simple_Script::reload_stdin()
   {
-    rocket::tinybuf_file cbuf;
+    ::rocket::tinybuf_file cbuf;
     cbuf.reset(stdin, nullptr);
-    return this->reload(cbuf, rocket::sref("<stdin>"));
+    return this->reload(cbuf, ::rocket::sref("<stdin>"));
   }
 
 rcptr<Abstract_Function> Simple_Script::copy_function_opt() const noexcept
   {
-    return rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
+    return ::rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
   }
 
 Reference Simple_Script::execute(const Global_Context& global, cow_vector<Reference>&& args) const
@@ -65,7 +65,7 @@ Reference Simple_Script::execute(const Global_Context& global, cow_vector<Refere
       ASTERIA_THROW("no script loaded");
     }
     Reference self;
-    qtarget->invoke(self, global, rocket::move(args));
+    qtarget->invoke(self, global, ::rocket::move(args));
     self.finish_call(global);
     return self;
   }
@@ -76,9 +76,9 @@ Reference Simple_Script::execute(const Global_Context& global, cow_vector<Value>
     args.resize(vals.size());
     for(size_t i = 0; i != args.size(); ++i) {
       Reference_Root::S_temporary xref = { vals[i] };
-      args.mut(i) = rocket::move(xref);
+      args.mut(i) = ::rocket::move(xref);
     }
-    return this->execute(global, rocket::move(args));
+    return this->execute(global, ::rocket::move(args));
   }
 
 Reference Simple_Script::execute(const Global_Context& global) const

@@ -24,9 +24,9 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
   {
     // Create the stack and context for this function.
     Evaluation_Stack stack;
-    Executive_Context ctx_func(rocket::ref(global), rocket::ref(stack), rocket::ref(*(this->m_zvarg)),
-                               this->m_params, rocket::move(self), rocket::move(args));
-    stack.reserve(rocket::move(args));
+    Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(*(this->m_zvarg)),
+                               this->m_params, ::rocket::move(self), ::rocket::move(args));
+    stack.reserve(::rocket::move(args));
     // Execute the function body.
     auto status = this->m_queue.execute(ctx_func);
     // Handle the return reference.
@@ -39,7 +39,7 @@ Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& 
       }{
     case air_status_return:
         // Return the reference at the top of `stack`.
-        self = rocket::move(stack.open_top());
+        self = ::rocket::move(stack.open_top());
         break;
       }{
     case air_status_break_unspec:

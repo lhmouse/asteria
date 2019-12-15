@@ -10,9 +10,9 @@ int main()
   {
     try {
       ASTERIA_THROW("test $1 $2 $$/end", "exception:", 42);
-      std::terminate();
+      ::std::terminate();
     }
-    catch(std::exception& e) {
-      ASTERIA_TEST_CHECK(std::strstr(e.what(), "test exception: 42 $/end") != nullptr);
+    catch(::std::exception& e) {
+      ASTERIA_TEST_CHECK(::std::strstr(e.what(), "test exception: 42 $/end") != nullptr);
     }
   }

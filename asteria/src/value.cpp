@@ -21,7 +21,7 @@ bool Value::test() const noexcept
         return this->m_stor.as<gtype_integer>() != 0;
       }{
     case gtype_real:
-        return std::fpclassify(this->m_stor.as<gtype_integer>()) != FP_ZERO;
+        return ::std::fpclassify(this->m_stor.as<gtype_integer>()) != FP_ZERO;
       }{
     case gtype_string:
         return this->m_stor.as<gtype_string>().size() != 0;
@@ -43,7 +43,7 @@ bool Value::test() const noexcept
 
     namespace {
 
-    template<typename ValT, ROCKET_ENABLE_IF(std::is_integral<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
+    template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
       {
         if(lhs < rhs) {
           return compare_less;
@@ -53,15 +53,15 @@ bool Value::test() const noexcept
         }
         return compare_equal;
       }
-    template<typename ValT, ROCKET_ENABLE_IF(std::is_floating_point<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
+    template<typename ValT, ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
       {
-        if(std::isless(lhs, rhs)) {
+        if(::std::isless(lhs, rhs)) {
           return compare_less;
         }
-        if(std::isgreater(lhs, rhs)) {
+        if(::std::isgreater(lhs, rhs)) {
           return compare_greater;
         }
-        if(std::isunordered(lhs, rhs)) {
+        if(::std::isunordered(lhs, rhs)) {
           return compare_unordered;
         }
         return compare_equal;
@@ -111,7 +111,7 @@ Compare Value::compare(const Value& other) const noexcept
         const auto& rhs = other.m_stor.as<gtype_array>();
         // Perform lexicographical comparison on the longest initial sequences of the same length.
         auto cmp = compare_equal;
-        std::mismatch(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
+        ::std::mismatch(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(),
                       [&](const Value& x, const Value& y) { return (cmp = x.compare(y)) == compare_equal;  });
         if(cmp != compare_equal) {
           return cmp;
@@ -384,10 +384,10 @@ Variable_Callback& Value::enumerate_variables(Variable_Callback& callback) const
         return this->m_stor.as<gtype_function>()->enumerate_variables(callback);
       }{
     case gtype_array:
-        return rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& e) { e.enumerate_variables(callback);  }), callback;
+        return ::rocket::for_each(this->m_stor.as<gtype_array>(), [&](const auto& e) { e.enumerate_variables(callback);  }), callback;
       }{
     case gtype_object:
-        return rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& p) { p.second.enumerate_variables(callback);  }), callback;
+        return ::rocket::for_each(this->m_stor.as<gtype_object>(), [&](const auto& p) { p.second.enumerate_variables(callback);  }), callback;
       }}
     default:
       ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());

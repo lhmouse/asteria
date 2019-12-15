@@ -35,7 +35,7 @@ class Reference_Modifier
         , S_object_key   // 1,
         , S_array_tail   // 2,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;
@@ -43,12 +43,12 @@ class Reference_Modifier
   public:
     template<typename XmodT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XmodT&&)> Reference_Modifier(XmodT&& xmod)
       :
-        m_stor(rocket::forward<XmodT>(xmod))
+        m_stor(::rocket::forward<XmodT>(xmod))
       {
       }
     template<typename XmodT, ASTERIA_SFINAE_ASSIGN(Xvariant, XmodT&&)> Reference_Modifier& operator=(XmodT&& xmod)
       {
-        this->m_stor = rocket::forward<XmodT>(xmod);
+        this->m_stor = ::rocket::forward<XmodT>(xmod);
         return *this;
       }
 

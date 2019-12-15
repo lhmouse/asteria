@@ -15,7 +15,7 @@ extern G_integer std_chrono_steady_now();
 
 extern G_integer std_chrono_local_from_utc(const G_integer& time_utc);
 extern G_integer std_chrono_utc_from_local(const G_integer& time_local);
-extern G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>& with_ms = rocket::clear);
+extern G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>& with_ms = ::rocket::clear);
 extern opt<G_integer> std_chrono_utc_parse(const G_string& time_str);
 
 // Initialize an object that is to be referenced as `std.chrono`.

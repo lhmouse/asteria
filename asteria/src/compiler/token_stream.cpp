@@ -235,7 +235,7 @@ namespace Asteria {
 
     template<typename XtokenT> bool do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XtokenT&& xtoken)
       {
-        tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, rocket::forward<XtokenT>(xtoken));
+        tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, ::rocket::forward<XtokenT>(xtoken));
         reader.consume(tlen);
         return true;
       }
@@ -249,12 +249,12 @@ namespace Asteria {
         const auto& p = tokens.back();
         if(p.is_keyword()) {
           // Infix operators may follow if the keyword denotes a value or reference.
-          return rocket::is_any_of(p.as_keyword(),{ keyword_null, keyword_true, keyword_false,
+          return ::rocket::is_any_of(p.as_keyword(),{ keyword_null, keyword_true, keyword_false,
                                                     keyword_nan, keyword_infinity, keyword_this });
         }
         if(p.is_punctuator()) {
           // Infix operators may follow if the punctuator can terminate an expression.
-          return rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec, punctuator_tail,
+          return ::rocket::is_any_of(p.as_punctuator(), { punctuator_inc, punctuator_dec, punctuator_tail,
                                                         punctuator_parenth_cl, punctuator_bracket_cl,
                                                         punctuator_brace_cl });
         }
@@ -304,12 +304,12 @@ namespace Asteria {
         switch(reader.peek(tlen)) {
           {{
         case '+':
-            tstr = rocket::sref("+");
+            tstr = ::rocket::sref("+");
             tlen++;
             break;
           }{
         case '-':
-            tstr = rocket::sref("-");
+            tstr = ::rocket::sref("-");
             tlen++;
             break;
           }}
@@ -330,7 +330,7 @@ namespace Asteria {
           tstr += reader.peek(tlen);
           tlen++;
           // Check the radix identifier.
-          if(rocket::is_any_of(static_cast<uint8_t>(reader.peek(tlen) | 0x20), { 'b', 'x' })) {
+          if(::rocket::is_any_of(static_cast<uint8_t>(reader.peek(tlen) | 0x20), { 'b', 'x' })) {
             tstr += reader.peek(tlen);
             tlen++;
             // Accept the radix identifier.
@@ -353,7 +353,7 @@ namespace Asteria {
           tstr += reader.peek(tlen);
           tlen++;
           // Check for an optional sign symbol.
-          if(rocket::is_any_of(reader.peek(tlen), { '+', '-' })) {
+          if(::rocket::is_any_of(reader.peek(tlen), { '+', '-' })) {
             tstr += reader.peek(tlen);
             tlen++;
           }
@@ -365,7 +365,7 @@ namespace Asteria {
         do_collect_digits(tstr, reader, tlen, cctype_alpha | cctype_digit);
         // Convert the token to a literal.
         // We always parse the literal as a floating-point number.
-        rocket::ascii_numget numg;
+        ::rocket::ascii_numget numg;
         const char* bp = tstr.c_str();
         const char* ep = bp + tstr.size();
         if(!numg.parse_F(bp, ep)) {
@@ -389,7 +389,7 @@ namespace Asteria {
           if(!numg) {
             do_throw_parser_error(parser_status_numeric_literal_invalid, reader, tlen);
           }
-          return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
+          return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
         }
         else {
           // Try casting the value to a `real`.
@@ -405,7 +405,7 @@ namespace Asteria {
           if(!numg) {
             do_throw_parser_error(parser_status_numeric_literal_invalid, reader, tlen);
           }
-          return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
+          return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
         }
       }
 
@@ -413,15 +413,15 @@ namespace Asteria {
       {
         template<typename ElementT> bool operator()(const ElementT& lhs, const ElementT& rhs) const noexcept
           {
-            return rocket::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
+            return ::rocket::char_traits<char>::compare(lhs.first, rhs.first, sizeof(lhs.first)) < 0;
           }
         template<typename ElementT> bool operator()(char lhs, const ElementT& rhs) const noexcept
           {
-            return rocket::char_traits<char>::lt(lhs, rhs.first[0]);
+            return ::rocket::char_traits<char>::lt(lhs, rhs.first[0]);
           }
         template<typename ElementT> bool operator()(const ElementT& lhs, char rhs) const noexcept
           {
-            return rocket::char_traits<char>::lt(lhs.first[0], rhs);
+            return ::rocket::char_traits<char>::lt(lhs.first[0], rhs);
           }
       };
 
@@ -493,11 +493,11 @@ namespace Asteria {
     bool do_accept_punctuator(cow_vector<Token>& tokens, Line_Reader& reader)
       {
 #ifdef ROCKET_DEBUG
-        ROCKET_ASSERT(std::is_sorted(begin(s_punctuators), end(s_punctuators), Prefix_Comparator()));
+        ROCKET_ASSERT(::std::is_sorted(begin(s_punctuators), end(s_punctuators), Prefix_Comparator()));
 #endif
         // For two elements X and Y, if X is in front of Y, then X is potential a prefix of Y.
         // Traverse the range backwards to prevent premature matches, as a token is defined to be the longest valid character sequence.
-        auto range = std::equal_range(begin(s_punctuators), end(s_punctuators), reader.peek(), Prefix_Comparator());
+        auto range = ::std::equal_range(begin(s_punctuators), end(s_punctuators), reader.peek(), Prefix_Comparator());
         for(;;) {
           if(range.first == range.second) {
             // No matching punctuator has been found so far.
@@ -505,11 +505,11 @@ namespace Asteria {
           }
           const auto& cur = range.second[-1];
           // Has a match been found?
-          auto tlen = std::strlen(cur.first);
-          if((tlen <= reader.navail()) && (std::memcmp(reader.data(), cur.first, tlen) == 0)) {
+          auto tlen = ::std::strlen(cur.first);
+          if((tlen <= reader.navail()) && (::std::memcmp(reader.data(), cur.first, tlen) == 0)) {
             // A punctuator has been found.
             Token::S_punctuator xtoken = { cur.second };
-            return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
+            return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
           }
           range.second--;
         }
@@ -646,8 +646,8 @@ namespace Asteria {
             do_throw_parser_error(parser_status_escape_sequence_unknown, reader, tlen);
           }
         }
-        Token::S_string_literal xtoken = { rocket::move(val) };
-        return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
+        Token::S_string_literal xtoken = { ::rocket::move(val) };
+        return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
       }
 
     struct Keyword_Element
@@ -727,23 +727,23 @@ namespace Asteria {
         if(keywords_as_identifiers) {
           // Do not check for identifiers.
           Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-          return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
+          return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
         }
 #ifdef ROCKET_DEBUG
-        ROCKET_ASSERT(std::is_sorted(begin(s_keywords), end(s_keywords), Prefix_Comparator()));
+        ROCKET_ASSERT(::std::is_sorted(begin(s_keywords), end(s_keywords), Prefix_Comparator()));
 #endif
-        auto range = std::equal_range(begin(s_keywords), end(s_keywords), reader.peek(), Prefix_Comparator());
+        auto range = ::std::equal_range(begin(s_keywords), end(s_keywords), reader.peek(), Prefix_Comparator());
         for(;;) {
           if(range.first == range.second) {
             // No matching keyword has been found so far.
             Token::S_identifier xtoken = { cow_string(reader.data(), tlen) };
-            return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
+            return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
           }
           const auto& cur = range.first[0];
-          if((std::strlen(cur.first) == tlen) && (std::memcmp(reader.data(), cur.first, tlen) == 0)) {
+          if((::std::strlen(cur.first) == tlen) && (::std::memcmp(reader.data(), cur.first, tlen) == 0)) {
             // A keyword has been found.
             Token::S_keyword xtoken = { cur.second };
-            return do_push_token(tokens, reader, tlen, rocket::move(xtoken));
+            return do_push_token(tokens, reader, tlen, ::rocket::move(xtoken));
           }
           range.first++;
         }
@@ -762,10 +762,10 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
     // Save the position of an unterminated block comment.
     Tack bcomm;
     // Read source code line by line.
-    Line_Reader reader(rocket::ref(cbuf), file);
+    Line_Reader reader(::rocket::ref(cbuf), file);
     while(reader.advance()) {
       // Discard the first line if it looks like a shebang.
-      if((reader.line() == 1) && (reader.navail() >= 2) && (std::memcmp(reader.data(), "#!", 2) == 0)) {
+      if((reader.line() == 1) && (reader.navail() >= 2) && (::std::memcmp(reader.data(), "#!", 2) == 0)) {
         continue;
       }
       // Ensure this line is a valid UTF-8 string.
@@ -790,7 +790,7 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
         // Are we inside a block comment?
         if(bcomm) {
           // Search for the terminator of this block comment.
-          auto tptr = std::strstr(reader.data(), "*/");
+          auto tptr = ::std::strstr(reader.data(), "*/");
           if(!tptr) {
             // The block comment will not end in this line. Stop.
             break;
@@ -835,9 +835,9 @@ Token_Stream& Token_Stream::reload(tinybuf& cbuf, const cow_string& file, const 
       throw Parser_Error(parser_status_block_comment_unclosed, bcomm.line(), bcomm.offset(), bcomm.length());
     }
     // Reverse the token sequence now.
-    std::reverse(tokens.mut_begin(), tokens.mut_end());
+    ::std::reverse(tokens.mut_begin(), tokens.mut_end());
     // Succeed.
-    this->m_rtoks = rocket::move(tokens);
+    this->m_rtoks = ::rocket::move(tokens);
     return *this;
   }
 

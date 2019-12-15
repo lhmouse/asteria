@@ -21,7 +21,7 @@ class Instantiated_Function final : public Abstract_Function
   public:
     Instantiated_Function(const cow_vector<phsh_string>& params, ckptr<Variadic_Arguer>&& zvarg, AVMC_Queue&& queue)
       :
-        m_params(params), m_zvarg(rocket::move(zvarg)), m_queue(rocket::move(queue))
+        m_params(params), m_zvarg(::rocket::move(zvarg)), m_queue(::rocket::move(queue))
       {
       }
     ~Instantiated_Function() override;

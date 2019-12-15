@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::tinybuf_str cbuf;
-    cbuf.set_string(rocket::sref(
+    ::rocket::tinybuf_str cbuf;
+    cbuf.set_string(::rocket::sref(
       R"__(
         const chars = "0123456789abcdefghijklmnopqrstuvwxyz";
         // We presume these random strings will never match any real files.
@@ -98,7 +98,7 @@ int main()
         assert std.filesystem.directory_remove(fname) == 1;
       )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, rocket::sref(__FILE__));
+    Simple_Script code(cbuf, ::rocket::sref(__FILE__));
     Global_Context global;
     code.execute(global);
   }

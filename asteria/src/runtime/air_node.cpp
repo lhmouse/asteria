@@ -159,12 +159,12 @@ DCE_Result AIR_Node::optimize_dce()
         auto& ref = stack.open_top();
         if(assign) {
           // Write the value to the top refernce.
-          ref.open() = rocket::forward<XvalT>(xval);
+          ref.open() = ::rocket::forward<XvalT>(xval);
           return ref;
         }
         // Replace the top reference with a temporary reference to the value.
-        Reference_Root::S_temporary xref = { rocket::forward<XvalT>(xval) };
-        return ref = rocket::move(xref);
+        Reference_Root::S_temporary xref = { ::rocket::forward<XvalT>(xval) };
+        return ref = ::rocket::move(xref);
       }
 
     AIR_Status do_execute_block(const AVMC_Queue& queue, /*const*/ Executive_Context& ctx)
@@ -174,7 +174,7 @@ DCE_Result AIR_Node::optimize_dce()
           return air_status_next;
         }
         // Execute the queue on a new context.
-        Executive_Context ctx_next(rocket::ref(ctx));
+        Executive_Context ctx_next(::rocket::ref(ctx));
         auto status = queue.execute(ctx_next);
         // Forward the status as is.
         return status;
@@ -209,11 +209,11 @@ DCE_Result AIR_Node::optimize_dce()
           return air_status_next;
         }
         // Execute the queue on a new context.
-        Executive_Context ctx_next(rocket::ref(ctx));
+        Executive_Context ctx_next(::rocket::ref(ctx));
         // Set the exception reference.
         {
           Reference_Root::S_temporary xref = { except.value() };
-          ctx_next.open_named_reference(name_except) = rocket::move(xref);
+          ctx_next.open_named_reference(name_except) = ::rocket::move(xref);
         }
         // Set backtrace frames.
         {
@@ -223,15 +223,15 @@ DCE_Result AIR_Node::optimize_dce()
             const auto& frame = except.frame(i);
             // Translate each frame into a human-readable format.
             r.clear();
-            r.try_emplace(rocket::sref("frame"), G_string(rocket::sref(frame.what_type())));
-            r.try_emplace(rocket::sref("file"), G_string(frame.file()));
-            r.try_emplace(rocket::sref("line"), G_integer(frame.line()));
-            r.try_emplace(rocket::sref("value"), frame.value());
+            r.try_emplace(::rocket::sref("frame"), G_string(::rocket::sref(frame.what_type())));
+            r.try_emplace(::rocket::sref("file"), G_string(frame.file()));
+            r.try_emplace(::rocket::sref("line"), G_integer(frame.line()));
+            r.try_emplace(::rocket::sref("value"), frame.value());
             // Append this frame.
-            backtrace.emplace_back(rocket::move(r));
+            backtrace.emplace_back(::rocket::move(r));
           }
-          Reference_Root::S_constant xref = { rocket::move(backtrace) };
-          ctx_next.open_named_reference(rocket::sref("__backtrace")) = rocket::move(xref);
+          Reference_Root::S_constant xref = { ::rocket::move(backtrace) };
+          ctx_next.open_named_reference(::rocket::sref("__backtrace")) = ::rocket::move(xref);
         }
         return queue.execute(ctx_next);
       }
@@ -311,8 +311,8 @@ DCE_Result AIR_Node::optimize_dce()
 
     AVMC_Queue& do_solidify_queue(AVMC_Queue& queue, const cow_vector<AIR_Node>& code)
       {
-        rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
-        rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
+        ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
+        ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
         return queue;
       }
 
@@ -330,7 +330,7 @@ DCE_Result AIR_Node::optimize_dce()
         // XXX: The parameter list is only appended if the name really looks like a function.
         //      Placeholders such as `<file>` or `<native>` do not precede parameter lists.
         static constexpr char s_idchars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
-        if(!name.empty() && std::memchr(s_idchars, name.back(), rocket::countof(s_idchars) - 1)) {
+        if(!name.empty() && ::std::memchr(s_idchars, name.back(), ::rocket::countof(s_idchars) - 1)) {
           // Append the parameter list. Parameters are separated by commas.
           func << '(';
           epos = params.size() - 1;
@@ -345,7 +345,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Create the zero-ary argument getter, which serves two purposes:
         // 0) It is copied as `__varg` whenever its parent function is called with no variadic argument as an optimization.
         // 1) It provides storage for `__file`, `__line` and `__func` for its parent function.
-        auto zvarg = rocket::make_refcnt<Variadic_Arguer>(sloc, rocket::move(func));
+        auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(sloc, ::rocket::move(func));
 
         // Generate IR nodes for the function body.
         cow_vector<AIR_Node> code_func;
@@ -372,7 +372,7 @@ DCE_Result AIR_Node::optimize_dce()
         do_solidify_queue(queue, code_func);
 
         // Create the function now.
-        return rocket::make_refcnt<Instantiated_Function>(params, rocket::move(zvarg), rocket::move(queue));
+        return ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), ::rocket::move(queue));
       }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -385,7 +385,7 @@ DCE_Result AIR_Node::optimize_dce()
 
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const
           {
-            rocket::for_each(this->queues, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
+            ::rocket::for_each(this->queues, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
             return callback;
           }
       };
@@ -398,8 +398,8 @@ DCE_Result AIR_Node::optimize_dce()
 
         Variable_Callback& enumerate_variables(Variable_Callback& callback) const
           {
-            rocket::for_each(this->queues_labels, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
-            rocket::for_each(this->queues_bodies, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
+            ::rocket::for_each(this->queues_labels, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
+            ::rocket::for_each(this->queues_bodies, [&](const AVMC_Queue& queue) { queue.enumerate_variables(callback);  });
             return callback;
           }
       };
@@ -438,21 +438,21 @@ DCE_Result AIR_Node::optimize_dce()
       {
         phsh_string name;
 
-        using nonenumerable = std::true_type;
+        using nonenumerable = ::std::true_type;
       };
 
     struct Params_names
       {
         cow_vector<phsh_string> names;
 
-        using nonenumerable = std::true_type;
+        using nonenumerable = ::std::true_type;
       };
 
     struct Params_sloc
       {
         Source_Location sloc;
 
-        using nonenumerable = std::true_type;
+        using nonenumerable = ::std::true_type;
       };
 
     struct Params_sloc_name
@@ -460,7 +460,7 @@ DCE_Result AIR_Node::optimize_dce()
         Source_Location sloc;
         phsh_string name;
 
-        using nonenumerable = std::true_type;
+        using nonenumerable = ::std::true_type;
       };
 
     struct Params_sloc_msg
@@ -468,14 +468,14 @@ DCE_Result AIR_Node::optimize_dce()
         Source_Location sloc;
         cow_string msg;
 
-        using nonenumerable = std::true_type;
+        using nonenumerable = ::std::true_type;
       };
 
     struct Params_func
       {
         AIR_Node::S_instantiate_function xnode;
 
-        using nonenumerable = std::true_type;
+        using nonenumerable = ::std::true_type;
       };
 
     struct Params_call
@@ -483,7 +483,7 @@ DCE_Result AIR_Node::optimize_dce()
         Source_Location sloc;
         cow_vector<bool> args_by_refs;
 
-        using nonenumerable = std::true_type;
+        using nonenumerable = ::std::true_type;
       };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -522,10 +522,10 @@ DCE_Result AIR_Node::optimize_dce()
           qh->on_variable_declare(sloc, inside, name);
         }
         // Inject the variable into the current context.
-        Reference_Root::S_variable xref = { rocket::move(var) };
+        Reference_Root::S_variable xref = { ::rocket::move(var) };
         ctx.open_named_reference(name) = xref;
         // Push a copy of the reference onto the stack.
-        ctx.stack().push(rocket::move(xref));
+        ctx.stack().push(::rocket::move(xref));
         return air_status_next;
       }
 
@@ -544,7 +544,7 @@ DCE_Result AIR_Node::optimize_dce()
         ROCKET_ASSERT(var->get_value().is_null());
         ctx.stack().pop();
         // Initialize it.
-        var->reset(rocket::move(val), immutable);
+        var->reset(::rocket::move(val), immutable);
         return air_status_next;
       }
 
@@ -605,15 +605,15 @@ DCE_Result AIR_Node::optimize_dce()
 
         // Jump to the clause denoted by `target`.
         // Note that all clauses share the same context.
-        Executive_Context ctx_body(rocket::ref(ctx));
+        Executive_Context ctx_body(::rocket::ref(ctx));
         // Fly over all clauses that precede `target`.
         for(size_t i = 0; i != target; ++i) {
-          rocket::for_each(names_added[i], [&](const phsh_string& name) { ctx_body.open_named_reference(name) = Reference_Root::S_null();  });
+          ::rocket::for_each(names_added[i], [&](const phsh_string& name) { ctx_body.open_named_reference(name) = Reference_Root::S_null();  });
         }
         // Execute all clauses from `target`.
         for(size_t i = target; i != nclauses; ++i) {
           auto status = queues_bodies[i].execute(ctx_body);
-          if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_switch })) {
             break;
           }
           if(status != air_status_next) {
@@ -634,10 +634,10 @@ DCE_Result AIR_Node::optimize_dce()
         for(;;) {
           // Execute the body.
           auto status = do_execute_block(queue_body, ctx);
-          if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
             break;
           }
-          if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while })) {
+          if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while })) {
             return status;
           }
           // Check the condition.
@@ -669,10 +669,10 @@ DCE_Result AIR_Node::optimize_dce()
           }
           // Execute the body.
           status = do_execute_block(queue_body, ctx);
-          if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_while })) {
             break;
           }
-          if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while })) {
+          if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_while })) {
             return status;
           }
         }
@@ -688,13 +688,13 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& queue_body = do_pcast<Params_for_each>(params)->queue_body;
 
         // We have to create an outer context due to the fact that the key and mapped references outlast every iteration.
-        Executive_Context ctx_for(rocket::ref(ctx));
+        Executive_Context ctx_for(::rocket::ref(ctx));
         // Create a variable for the key.
         // Important: As long as this variable is immutable, there cannot be circular reference.
-        auto key = rocket::make_refcnt<Variable>();
+        auto key = ::rocket::make_refcnt<Variable>();
         {
           Reference_Root::S_variable xref = { key };
-          ctx_for.open_named_reference(name_key) = rocket::move(xref);
+          ctx_for.open_named_reference(name_key) = ::rocket::move(xref);
         }
         // Create the mapped reference.
         auto& mapped = ctx_for.open_named_reference(name_mapped);
@@ -704,7 +704,7 @@ DCE_Result AIR_Node::optimize_dce()
         auto status = queue_init.execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
         // Set the range up.
-        mapped = rocket::move(ctx_for.stack().open_top());
+        mapped = ::rocket::move(ctx_for.stack().open_top());
         auto range = mapped.read();
 
         // The range value has been saved.
@@ -718,14 +718,14 @@ DCE_Result AIR_Node::optimize_dce()
             // Be advised that the mapped parameter is a reference rather than a value.
             {
               Reference_Modifier::S_array_index xmod = { i };
-              mapped.zoom_in(rocket::move(xmod));
+              mapped.zoom_in(::rocket::move(xmod));
             }
             // Execute the loop body.
             status = do_execute_block(queue_body, ctx_for);
-            if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+            if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
               break;
             }
-            if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
+            if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
               return status;
             }
             // Restore the mapped reference.
@@ -741,14 +741,14 @@ DCE_Result AIR_Node::optimize_dce()
             // Be advised that the mapped parameter is a reference rather than a value.
             {
               Reference_Modifier::S_object_key xmod = { q->first };
-              mapped.zoom_in(rocket::move(xmod));
+              mapped.zoom_in(::rocket::move(xmod));
             }
             // Execute the loop body.
             status = do_execute_block(queue_body, ctx_for);
-            if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+            if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
               break;
             }
-            if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
+            if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
               return status;
             }
             // Restore the mapped reference.
@@ -771,7 +771,7 @@ DCE_Result AIR_Node::optimize_dce()
 
         // This is the same as the `for` statement in C.
         // We have to create an outer context due to the fact that names declared in the first segment outlast every iteration.
-        Executive_Context ctx_for(rocket::ref(ctx));
+        Executive_Context ctx_for(::rocket::ref(ctx));
         // Execute the loop initializer, which shall only be a definition or an expression statement.
         auto status = queue_init.execute(ctx_for);
         ROCKET_ASSERT(status == air_status_next);
@@ -788,10 +788,10 @@ DCE_Result AIR_Node::optimize_dce()
           }
           // Execute the body.
           status = do_execute_block(queue_body, ctx_for);
-          if(rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
+          if(::rocket::is_any_of(status, { air_status_break_unspec, air_status_break_for })) {
             break;
           }
-          if(rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
+          if(::rocket::is_none_of(status, { air_status_next, air_status_continue_unspec, air_status_continue_for })) {
             return status;
           }
           // Execute the increment.
@@ -824,15 +824,15 @@ DCE_Result AIR_Node::optimize_dce()
           // Reuse the exception object. Don't bother allocating a new one.
           except.push_frame_catch(sloc);
           // This branch must be executed inside this `catch` block.
-          // User-provided bindings may obtain the current exception using `std::current_exception`.
+          // User-provided bindings may obtain the current exception using `::std::current_exception`.
           return do_execute_catch(queue_catch, name_except, except, ctx);
         }
-        catch(std::exception& stdex) {
+        catch(::std::exception& stdex) {
           // Translate the exception.
           Runtime_Error except(stdex);
           except.push_frame_catch(sloc);
           // This branch must be executed inside this `catch` block.
-          // User-provided bindings may obtain the current exception using `std::current_exception`.
+          // User-provided bindings may obtain the current exception using `::std::current_exception`.
           return do_execute_catch(queue_catch, name_except, except, ctx);
         }
       }
@@ -847,24 +847,24 @@ DCE_Result AIR_Node::optimize_dce()
         auto value = ctx.stack().get_top().read();
         try {
           // Unpack nested exceptions, if any.
-          auto eptr = std::current_exception();
+          auto eptr = ::std::current_exception();
           if(eptr) {
-            std::rethrow_exception(eptr);
+            ::std::rethrow_exception(eptr);
           }
         }
         catch(Runtime_Error& except) {
           // Modify it in place. Don't bother allocating a new one.
-          except.push_frame_throw(sloc, rocket::move(value));
+          except.push_frame_throw(sloc, ::rocket::move(value));
           throw;
         }
-        catch(std::exception& stdex) {
+        catch(::std::exception& stdex) {
           // Translate the exception.
           Runtime_Error except(stdex);
-          except.push_frame_throw(sloc, rocket::move(value));
+          except.push_frame_throw(sloc, ::rocket::move(value));
           throw except;
         }
         // If no nested exception exists, construct a fresh one.
-        Runtime_Error except(sloc, rocket::move(value));
+        Runtime_Error except(sloc, ::rocket::move(value));
         throw except;
       }
 
@@ -881,7 +881,7 @@ DCE_Result AIR_Node::optimize_dce()
           return air_status_next;
         }
         // Throw a `runtime_error`.
-        rocket::sprintf_and_throw<std::runtime_error>("assertion failure: %s\n"
+        ::rocket::sprintf_and_throw<::std::runtime_error>("assertion failure: %s\n"
                                                       "[declared at '%s:%ld']",
                                                       msg.c_str(), sloc.file().c_str(), sloc.line());
       }
@@ -914,7 +914,7 @@ DCE_Result AIR_Node::optimize_dce()
 
         // Push a constant.
         Reference_Root::S_constant xref = { val };
-        ctx.stack().push(rocket::move(xref));
+        ctx.stack().push(::rocket::move(xref));
         return air_status_next;
       }
 
@@ -940,8 +940,8 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& name = do_pcast<Params_name>(params)->name;
 
         // Get the context.
-        const Executive_Context* qctx = std::addressof(ctx);
-        rocket::ranged_for(uint32_t(0), depth, [&](size_t) { qctx = qctx->get_parent_opt();  });
+        const Executive_Context* qctx = ::std::addressof(ctx);
+        ::rocket::ranged_for(uint32_t(0), depth, [&](size_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
         // Look for the name in the context.
         auto qref = qctx->get_named_reference_opt(name);
@@ -969,10 +969,10 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& xnode = do_pcast<Params_func>(params)->xnode;
 
         // Instantiate the function.
-        auto qtarget = do_instantiate_function(xnode, std::addressof(ctx));
+        auto qtarget = do_instantiate_function(xnode, ::std::addressof(ctx));
         // Push the function as a temporary.
-        Reference_Root::S_temporary xref = { G_function(rocket::move(qtarget)) };
-        ctx.stack().push(rocket::move(xref));
+        Reference_Root::S_temporary xref = { G_function(::rocket::move(qtarget)) };
+        ctx.stack().push(::rocket::move(xref));
         return air_status_next;
       }
 
@@ -1028,7 +1028,7 @@ DCE_Result AIR_Node::optimize_dce()
           // Ensure it is dereferenceable.
           arg.read();
           // Move and pop this argument.
-          args.mut(i) = rocket::move(arg);
+          args.mut(i) = ::rocket::move(arg);
           ctx.stack().pop();
         }
         // Get the target reference.
@@ -1045,12 +1045,12 @@ DCE_Result AIR_Node::optimize_dce()
         // Call the function now.
         if(tco_aware != tco_aware_none) {
           // Pack arguments for this proper tail call.
-          args.emplace_back(rocket::move(self));
+          args.emplace_back(::rocket::move(self));
           // Create a TCO wrapper.
-          auto tca = rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, tco_aware, target, rocket::move(args));
+          auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, tco_aware, target, ::rocket::move(args));
           // Return it.
-          Reference_Root::S_tail_call xref = { rocket::move(tca) };
-          self = rocket::move(xref);
+          Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
+          self = ::rocket::move(xref);
           // Force `air_status_return` if control flow reaches the end of a function.
           // Otherwise a null reference is returned instead of this TCO wrapper, which can then never be unpacked.
           return air_status_return;
@@ -1062,7 +1062,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         try {
           // Perform a non-proper call.
-          target->invoke(self, ctx.global(), rocket::move(args));
+          target->invoke(self, ctx.global(), ::rocket::move(args));
           self.finish_call(ctx.global());
         }
         catch(Runtime_Error& except) {
@@ -1074,7 +1074,7 @@ DCE_Result AIR_Node::optimize_dce()
           }
           throw;
         }
-        catch(std::exception& stdex) {
+        catch(::std::exception& stdex) {
           // Translate the exception, append the current frame, and throw the new exception.
           Runtime_Error except(stdex);
           except.push_frame_func(sloc, inside);
@@ -1098,7 +1098,7 @@ DCE_Result AIR_Node::optimize_dce()
 
         // Append a modifier to the reference at the top.
         Reference_Modifier::S_object_key xmod = { name };
-        ctx.stack().open_top().zoom_in(rocket::move(xmod));
+        ctx.stack().open_top().zoom_in(::rocket::move(xmod));
         return air_status_next;
       }
 
@@ -1116,8 +1116,8 @@ DCE_Result AIR_Node::optimize_dce()
           ctx.stack().pop();
         }
         // Push the array as a temporary.
-        Reference_Root::S_temporary xref = { rocket::move(array) };
-        ctx.stack().push(rocket::move(xref));
+        Reference_Root::S_temporary xref = { ::rocket::move(array) };
+        ctx.stack().push(::rocket::move(xref));
         return air_status_next;
       }
 
@@ -1135,8 +1135,8 @@ DCE_Result AIR_Node::optimize_dce()
           ctx.stack().pop();
         }
         // Push the object as a temporary.
-        Reference_Root::S_temporary xref = { rocket::move(object) };
-        ctx.stack().push(rocket::move(xref));
+        Reference_Root::S_temporary xref = { ::rocket::move(object) };
+        ctx.stack().push(::rocket::move(xref));
         return air_status_next;
       }
 
@@ -1170,7 +1170,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     ROCKET_PURE_FUNCTION G_real do_operator_sqrt(const G_integer& rhs)
       {
-        return std::sqrt(G_real(rhs));
+        return ::std::sqrt(G_real(rhs));
       }
 
     ROCKET_PURE_FUNCTION G_boolean do_operator_isinf(const G_integer& /*rhs*/)
@@ -1188,7 +1188,7 @@ DCE_Result AIR_Node::optimize_dce()
         if(rhs == INT64_MIN) {
           ASTERIA_THROW("integer absolute value overflow (operand was `$1`)", rhs);
         }
-        return std::abs(rhs);
+        return ::std::abs(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_sign(const G_integer& rhs)
@@ -1339,52 +1339,52 @@ DCE_Result AIR_Node::optimize_dce()
 
     ROCKET_PURE_FUNCTION G_real do_operator_sqrt(const G_real& rhs)
       {
-        return std::sqrt(rhs);
+        return ::std::sqrt(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_boolean do_operator_isinf(const G_real& rhs)
       {
-        return std::isinf(rhs);
+        return ::std::isinf(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_boolean do_operator_isnan(const G_real& rhs)
       {
-        return std::isnan(rhs);
+        return ::std::isnan(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_abs(const G_real& rhs)
       {
-        return std::fabs(rhs);
+        return ::std::fabs(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_sign(const G_real& rhs)
       {
-        return std::signbit(rhs) ? -1 : 0;
+        return ::std::signbit(rhs) ? -1 : 0;
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_round(const G_real& rhs)
       {
-        return std::round(rhs);
+        return ::std::round(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_floor(const G_real& rhs)
       {
-        return std::floor(rhs);
+        return ::std::floor(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_ceil(const G_real& rhs)
       {
-        return std::ceil(rhs);
+        return ::std::ceil(rhs);
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_trunc(const G_real& rhs)
       {
-        return std::trunc(rhs);
+        return ::std::trunc(rhs);
       }
 
     G_integer do_cast_to_integer(const G_real& value)
       {
-        if(!std::islessequal(-0x1p63, value) || !std::islessequal(value, 0x1p63 - 0x1p10)) {
+        if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
           ASTERIA_THROW("value not representable as an `integer` (operand was `$1`)", value);
         }
         return G_integer(value);
@@ -1392,22 +1392,22 @@ DCE_Result AIR_Node::optimize_dce()
 
     ROCKET_PURE_FUNCTION G_integer do_operator_iround(const G_real& rhs)
       {
-        return do_cast_to_integer(std::round(rhs));
+        return do_cast_to_integer(::std::round(rhs));
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_ifloor(const G_real& rhs)
       {
-        return do_cast_to_integer(std::floor(rhs));
+        return do_cast_to_integer(::std::floor(rhs));
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_iceil(const G_real& rhs)
       {
-        return do_cast_to_integer(std::ceil(rhs));
+        return do_cast_to_integer(::std::ceil(rhs));
       }
 
     ROCKET_PURE_FUNCTION G_integer do_operator_itrunc(const G_real& rhs)
       {
-        return do_cast_to_integer(std::trunc(rhs));
+        return do_cast_to_integer(::std::trunc(rhs));
       }
 
     ROCKET_PURE_FUNCTION G_real do_operator_add(const G_real& lhs, const G_real& rhs)
@@ -1432,7 +1432,7 @@ DCE_Result AIR_Node::optimize_dce()
 
     ROCKET_PURE_FUNCTION G_real do_operator_mod(const G_real& lhs, const G_real& rhs)
       {
-        return std::fmod(lhs, rhs);
+        return ::std::fmod(lhs, rhs);
       }
 
     ROCKET_PURE_FUNCTION G_string do_operator_add(const G_string& lhs, const G_string& rhs)
@@ -1459,15 +1459,15 @@ DCE_Result AIR_Node::optimize_dce()
         // Reserve space for the result string.
         char* ptr = res.assign(nchars * times, '*').mut_data();
         // Copy the source string once.
-        std::memcpy(ptr, source.data(), nchars);
+        ::std::memcpy(ptr, source.data(), nchars);
         // Append the result string to itself, doubling its length, until more than half of the result string has been populated.
         while(nchars <= res.size() / 2) {
-          std::memcpy(ptr + nchars, ptr, nchars);
+          ::std::memcpy(ptr + nchars, ptr, nchars);
           nchars *= 2;
         }
         // Copy remaining characters, if any.
         if(nchars < res.size()) {
-          std::memcpy(ptr + nchars, ptr, res.size() - nchars);
+          ::std::memcpy(ptr + nchars, ptr, res.size() - nchars);
           nchars = res.size();
         }
         return res;
@@ -1502,7 +1502,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         // Copy the substring in the right.
         size_t count = static_cast<size_t>(rhs);
-        std::memcpy(ptr, lhs.data() + count, lhs.size() - count);
+        ::std::memcpy(ptr, lhs.data() + count, lhs.size() - count);
         return res;
       }
 
@@ -1519,7 +1519,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         // Copy the substring in the left.
         size_t count = static_cast<size_t>(rhs);
-        std::memcpy(ptr + count, lhs.data(), lhs.size() - count);
+        ::std::memcpy(ptr + count, lhs.data(), lhs.size() - count);
         return res;
       }
 
@@ -1534,7 +1534,7 @@ DCE_Result AIR_Node::optimize_dce()
         }
         // Append spaces in the right and return the result.
         size_t count = static_cast<size_t>(rhs);
-        res.assign(rocket::sref(lhs));
+        res.assign(::rocket::sref(lhs));
         res.append(count, ' ');
         return res;
       }
@@ -1561,12 +1561,12 @@ DCE_Result AIR_Node::optimize_dce()
         // Increment the operand and return the old value. `assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.open_integer();
-          do_set_temporary(ctx.stack(), false, rocket::move(lhs));
+          do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
           reg = do_operator_add(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
           auto& reg = lhs.open_real();
-          do_set_temporary(ctx.stack(), false, rocket::move(lhs));
+          do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
           reg = do_operator_add(reg, G_real(1));
         }
         else {
@@ -1582,12 +1582,12 @@ DCE_Result AIR_Node::optimize_dce()
         // Decrement the operand and return the old value. `assign` is ignored.
         if(lhs.is_integer()) {
           auto& reg = lhs.open_integer();
-          do_set_temporary(ctx.stack(), false, rocket::move(lhs));
+          do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
           reg = do_operator_sub(reg, G_integer(1));
         }
         else if(lhs.is_real()) {
           auto& reg = lhs.open_real();
-          do_set_temporary(ctx.stack(), false, rocket::move(lhs));
+          do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
           reg = do_operator_sub(reg, G_real(1));
         }
         else {
@@ -1605,13 +1605,13 @@ DCE_Result AIR_Node::optimize_dce()
         // Append a reference modifier. `assign` is ignored.
         if(rhs.is_integer()) {
           auto& reg = rhs.open_integer();
-          Reference_Modifier::S_array_index xmod = { rocket::move(reg) };
-          lref.zoom_in(rocket::move(xmod));
+          Reference_Modifier::S_array_index xmod = { ::rocket::move(reg) };
+          lref.zoom_in(::rocket::move(xmod));
         }
         else if(rhs.is_string()) {
           auto& reg = rhs.open_string();
-          Reference_Modifier::S_object_key xmod = { rocket::move(reg) };
-          lref.zoom_in(rocket::move(xmod));
+          Reference_Modifier::S_object_key xmod = { ::rocket::move(reg) };
+          lref.zoom_in(::rocket::move(xmod));
         }
         else {
           ASTERIA_THROW("subscript value not valid (subscript was `$1`)", rhs);
@@ -1628,7 +1628,7 @@ DCE_Result AIR_Node::optimize_dce()
         auto rhs = ctx.stack().get_top().read();
         // Copy the operand to create a temporary value, then return it.
         // N.B. This is one of the few operators that work on all types.
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1651,7 +1651,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1674,7 +1674,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1737,7 +1737,7 @@ DCE_Result AIR_Node::optimize_dce()
         // This operator is unary.
         auto rhs = ctx.stack().get_top().unset();
         // Unset the reference and return the old value.
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1750,7 +1750,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& rhs = ctx.stack().get_top().read();
         // Return the number of elements in the operand.
         size_t nelems;
-        switch(rocket::weaken_enum(rhs.gtype())) {
+        switch(::rocket::weaken_enum(rhs.gtype())) {
           {{
         case gtype_null:
             nelems = 0;
@@ -1784,7 +1784,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& rhs = ctx.stack().get_top().read();
         // Return the type name of the operand.
         // N.B. This is one of the few operators that work on all types.
-        do_set_temporary(ctx.stack(), assign, G_string(rocket::sref(rhs.what_gtype())));
+        do_set_temporary(ctx.stack(), assign, G_string(::rocket::sref(rhs.what_gtype())));
         return air_status_next;
       }
 
@@ -1807,7 +1807,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1830,7 +1830,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1853,7 +1853,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1876,7 +1876,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1899,7 +1899,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1922,7 +1922,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1945,7 +1945,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1968,7 +1968,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -1991,7 +1991,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2014,7 +2014,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__iround` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2037,7 +2037,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__ifloor` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2060,7 +2060,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__iceil` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2083,7 +2083,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("prefix `__itrunc` not applicable (operand was `$1`)", rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2153,7 +2153,7 @@ DCE_Result AIR_Node::optimize_dce()
             break;
           }{
         case compare_unordered:
-            do_set_temporary(ctx.stack(), assign, G_string(rocket::sref("<unordered>")));
+            do_set_temporary(ctx.stack(), assign, G_string(::rocket::sref("<unordered>")));
             break;
           }}
         default:
@@ -2193,7 +2193,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix addition not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2223,7 +2223,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix subtraction not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2262,7 +2262,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix multiplication not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2287,7 +2287,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix division not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2312,7 +2312,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix modulo not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2340,7 +2340,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix logical left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2368,7 +2368,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix logical right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2396,7 +2396,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix arithmetic left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2423,7 +2423,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix arithmetic right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2449,7 +2449,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix bitwise AND not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2475,7 +2475,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix bitwise OR not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2501,7 +2501,7 @@ DCE_Result AIR_Node::optimize_dce()
         else {
           ASTERIA_THROW("infix bitwise XOR not defined (operands were `$1` and `$2`)", lhs, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2511,7 +2511,7 @@ DCE_Result AIR_Node::optimize_dce()
         auto rhs = ctx.stack().get_top().read();
         ctx.stack().pop();
         // Copy the value to the LHS operand which is write-only. `assign` is ignored.
-        do_set_temporary(ctx.stack(), true, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), true, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2529,12 +2529,12 @@ DCE_Result AIR_Node::optimize_dce()
         if(lhs.is_convertible_to_real() && mid.is_convertible_to_real() && rhs.is_convertible_to_real()) {
           // Calculate the fused multiply-add result of the operands.
           // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
-          rhs = std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
+          rhs = ::std::fma(lhs.convert_to_real(), mid.convert_to_real(), rhs.convert_to_real());
         }
         else {
           ASTERIA_THROW("fused multiply-add not defined (operands were `$1`, `$2` and `$3`)", lhs, mid, rhs);
         }
-        do_set_temporary(ctx.stack(), assign, rocket::move(rhs));
+        do_set_temporary(ctx.stack(), assign, ::rocket::move(rhs));
         return air_status_next;
       }
 
@@ -2543,7 +2543,7 @@ DCE_Result AIR_Node::optimize_dce()
         // This operator is unary.
         auto& lref = ctx.stack().open_top();
         Reference_Modifier::S_array_tail xmod = { };
-        lref.zoom_in(rocket::move(xmod));
+        lref.zoom_in(::rocket::move(xmod));
         return air_status_next;
       }
 
@@ -2577,7 +2577,7 @@ DCE_Result AIR_Node::optimize_dce()
           if(!qelem) {
             continue;
           }
-          var->reset(rocket::move(*qelem), immutable);
+          var->reset(::rocket::move(*qelem), immutable);
         }
         return air_status_next;
       }
@@ -2613,7 +2613,7 @@ DCE_Result AIR_Node::optimize_dce()
             var->set_immutable(immutable);
             continue;
           }
-          var->reset(rocket::move(*qelem), immutable);
+          var->reset(::rocket::move(*qelem), immutable);
         }
         return air_status_next;
       }
@@ -2635,8 +2635,8 @@ DCE_Result AIR_Node::optimize_dce()
           qh->on_variable_declare(sloc, inside, name);
         }
         // Inject the variable into the current context.
-        Reference_Root::S_variable xref = { rocket::move(var) };
-        ctx.open_named_reference(name) = rocket::move(xref);
+        Reference_Root::S_variable xref = { ::rocket::move(var) };
+        ctx.open_named_reference(name) = ::rocket::move(xref);
         return air_status_next;
       }
 
@@ -3019,7 +3019,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
           return avmcp.request(queue);
         }
         // Encode arguments.
-        switch(rocket::weaken_enum(altr.xop)) {
+        switch(::rocket::weaken_enum(altr.xop)) {
           {{
         case xop_cmp_eq:
             avmcp.paramu.u8s[0] = altr.assign;

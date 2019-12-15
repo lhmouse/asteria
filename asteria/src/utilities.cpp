@@ -10,7 +10,7 @@ namespace Asteria {
 
 bool write_log_to_stderr(const char* file, long line, cow_string&& msg, const char* trailer) noexcept
   {
-    rocket::tinyfmt_str fmt;
+    ::rocket::tinyfmt_str fmt;
     fmt.set_string(cow_string(1023, '/'));
     fmt.clear_string();
 
@@ -20,7 +20,7 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg, const ch
     ::tm tr;
     ::localtime_r(&(ts.tv_sec), &tr);
     // 'yyyy-mmmm-dd HH:MM:SS.sss'
-    rocket::ascii_numput nump;
+    ::rocket::ascii_numput nump;
     fmt << nump.put_DU(static_cast<uint32_t>(tr.tm_year + 1900), 4)
         << '-'
         << nump.put_DU(static_cast<uint32_t>(tr.tm_mon + 1), 2)
@@ -340,7 +340,7 @@ Wrapped_Index wrap_index(int64_t index, size_t size) noexcept
     auto ssize = static_cast<int64_t>(size);
     if(index >= 0) {
       // Append elements as needed.
-      auto nappend = rocket::max(index, ssize - 1) - (ssize - 1);
+      auto nappend = ::rocket::max(index, ssize - 1) - (ssize - 1);
       w.nprepend = 0;
       w.nappend = static_cast<uint64_t>(nappend);
       // `index` is truncated if it does not fit in `size_t`, but in this case it shouldn't be used.
@@ -348,7 +348,7 @@ Wrapped_Index wrap_index(int64_t index, size_t size) noexcept
     }
     else {
       // Prepend elements as needed.
-      auto nprepend = rocket::max(index - 1, ~ssize) - (index - 1);
+      auto nprepend = ::rocket::max(index - 1, ~ssize) - (index - 1);
       w.nprepend = static_cast<uint64_t>(nprepend);
       w.nappend = 0;
       // `index + ssize` cannot overflow when `index` is negative and `ssize` is not.

@@ -60,7 +60,7 @@ void Random_Number_Generator::do_update() noexcept
 
     size_t do_read_random_device(void* data, size_t size) noexcept
       {
-        rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY), ::close);
+        ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY), ::close);
         if(!fd) {
           return 0;
         }
@@ -128,7 +128,7 @@ void Random_Number_Generator::reset() noexcept
     this->m_bb = 0;
     this->m_cc = 0;
     // Initialize the pool with some entropy from the system.
-    std::memset(this->m_mm, '/', sizeof(m_mm));
+    ::std::memset(this->m_mm, '/', sizeof(m_mm));
     do_read_random_device(this->m_mm, sizeof(m_mm));
     // Scramble words.
     Scrambler regs;

@@ -26,7 +26,7 @@ class Tail_Call_Arguments final : public virtual Rcbase
                         const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args_self)
       :
         m_sloc(sloc), m_inside(inside), m_tco_aware(tco_aware),
-        m_target(target), m_args_self(rocket::move(args_self))
+        m_target(target), m_args_self(::rocket::move(args_self))
       {
       }
     ~Tail_Call_Arguments() override;

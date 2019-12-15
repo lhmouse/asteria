@@ -15,7 +15,7 @@ void AVMC_Queue::do_deallocate_storage() const
     // Destroy all nodes.
     auto next = bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = std::exchange(next, next + 1 + next->nphdrs);
+      auto qnode = ::std::exchange(next, next + 1 + next->nphdrs);
       // Call the destructor for this node.
       auto dtor = qnode->has_vtbl ? qnode->vtbl->dtor : nullptr;
       if(ROCKET_UNEXPECT(dtor)) {
@@ -35,7 +35,7 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
     // Execute all nodes.
     auto next = bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = std::exchange(next, next + 1 + next->nphdrs);
+      auto qnode = ::std::exchange(next, next + 1 + next->nphdrs);
       // Call the executor function for this node.
       auto exec = qnode->has_vtbl ? qnode->vtbl->exec : qnode->exec;
       ROCKET_ASSERT(exec);
@@ -54,7 +54,7 @@ void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
     // Enumerate variables from all nodes.
     auto next = bptr;
     while(ROCKET_EXPECT(next != eptr)) {
-      auto qnode = std::exchange(next, next + 1 + next->nphdrs);
+      auto qnode = ::std::exchange(next, next + 1 + next->nphdrs);
       // Call the enumerator function for this node.
       auto vnum = qnode->has_vtbl ? qnode->vtbl->vnum : nullptr;
       if(ROCKET_UNEXPECT(vnum)) {
@@ -113,7 +113,7 @@ void AVMC_Queue::do_append_trivial(Executor* exec, AVMC_Queue::ParamU paramu, si
     qnode->exec = exec;
     // Copy source data if any.
     if(nbytes != 0) {
-      std::memcpy(qnode->params, source, nbytes);
+      ::std::memcpy(qnode->params, source, nbytes);
     }
     // Finish the initialization.
     this->m_stor.nused += nbytes_node;

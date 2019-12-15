@@ -25,7 +25,7 @@ class Value
         , G_array     // 7,
         , G_object    // 8,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;
@@ -38,12 +38,12 @@ class Value
       }
     template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XvalT&&)> Value(XvalT&& xval)
       :
-        m_stor(rocket::forward<XvalT>(xval))
+        m_stor(::rocket::forward<XvalT>(xval))
       {
       }
     template<typename XvalT, ASTERIA_SFINAE_ASSIGN(Xvariant, XvalT&&)> Value& operator=(XvalT&& xval)
       {
-        this->m_stor = rocket::forward<XvalT>(xval);
+        this->m_stor = ::rocket::forward<XvalT>(xval);
         return *this;
       }
 

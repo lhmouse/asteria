@@ -10,7 +10,7 @@ namespace Asteria {
 template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
   {
     if(this->m_throw_on_failure) {
-      rocket::forward<HandlerT>(handler)();
+      ::rocket::forward<HandlerT>(handler)();
     }
     this->m_state.succeeded = false;
   }
@@ -79,12 +79,12 @@ const Reference* Argument_Reader::do_peek_argument_opt() const
 opt<size_t> Argument_Reader::do_check_finish_opt() const
   {
     if(!this->m_state.succeeded) {
-      return rocket::clear;
+      return ::rocket::clear;
     }
     // Before calling this function, the current overload must have been finished.
     auto index = this->m_state.nparams;
     // Return the beginning of variadic arguments.
-    return rocket::min(index, this->m_args->size());
+    return ::rocket::min(index, this->m_args->size());
   }
 
 Argument_Reader& Argument_Reader::start() noexcept
@@ -531,7 +531,7 @@ bool Argument_Reader::finish(cow_vector<Reference>& vargs)
     // Copy variadic arguments, if any.
     auto nargs = this->m_args->size();
     if(nargs > *qvoff) {
-      rocket::ranged_for(*qvoff, nargs, [&](size_t i) { vargs.emplace_back(this->m_args->data()[i]);  });
+      ::rocket::ranged_for(*qvoff, nargs, [&](size_t i) { vargs.emplace_back(this->m_args->data()[i]);  });
     }
     return true;
   }
@@ -550,7 +550,7 @@ bool Argument_Reader::finish(cow_vector<Value>& vargs)
     // Copy variadic arguments, if any.
     auto nargs = this->m_args->size();
     if(nargs > *qvoff) {
-      rocket::ranged_for(*qvoff, nargs, [&](size_t i) { vargs.emplace_back(this->m_args->data()[i].read());  });
+      ::rocket::ranged_for(*qvoff, nargs, [&](size_t i) { vargs.emplace_back(this->m_args->data()[i].read());  });
     }
     return true;
   }
@@ -595,7 +595,7 @@ void Argument_Reader::throw_no_matching_function_call() const
         ovlds << '`' << this->m_name << '(';
         // Get the current parameter list.
         const char* s = this->m_ovlds.data() + k;
-        size_t n = std::strlen(s);
+        size_t n = ::std::strlen(s);
         // If the parameter list is not empty, it always start with a ", ".
         if(n != 0) {
           ovlds.append(s + 2, n - 2);

@@ -74,7 +74,7 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
       public:
         explicit Callback_Wrapper(FuncT&& func)
           :
-            m_func(rocket::forward<FuncT>(func))
+            m_func(::rocket::forward<FuncT>(func))
           {
           }
 
@@ -88,7 +88,7 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
     template<typename ContT, typename FuncT> void do_enumerate_variables(const ContT& cont, FuncT&& func)
       {
         // The callback has to be an lvalue.
-        Callback_Wrapper<FuncT> callback(rocket::forward<FuncT>(func));
+        Callback_Wrapper<FuncT> callback(::rocket::forward<FuncT>(func));
         // Call the `enumerate_variables()` member function.
         cont.enumerate_variables(callback);
       }
@@ -100,7 +100,7 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 Collector* Collector::collect_single_opt()
   {
     // Ignore recursive requests.
-    Recursion_Sentry sentry(rocket::ref(this->m_recur));
+    Recursion_Sentry sentry(::rocket::ref(this->m_recur));
     if(!sentry) {
       return nullptr;
     }

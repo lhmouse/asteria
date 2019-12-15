@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::tinybuf_str cbuf;
-    cbuf.set_string(rocket::sref(
+    ::rocket::tinybuf_str cbuf;
+    cbuf.set_string(::rocket::sref(
       R"__(
         assert std.json.format(null) == "null";
         assert std.json.format(true) == "true";
@@ -77,7 +77,7 @@ int main()
         assert std.json.format(r) == '[' * depth + ']' * depth;
       )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, rocket::sref(__FILE__));
+    Simple_Script code(cbuf, ::rocket::sref(__FILE__));
     Global_Context global;
     code.execute(global);
   }

@@ -38,7 +38,7 @@ class AVMC_Queue
         Executor* exec;
         Enumerator* vnum;
       };
-    static_assert(std::is_trivial<Vtable>::value, "");
+    static_assert(::std::is_trivial<Vtable>::value, "");
 
   private:
     enum : size_t
@@ -90,7 +90,7 @@ class AVMC_Queue
           this->do_deallocate_storage();
         }
 #ifdef ROCKET_DEBUG
-        std::memset(std::addressof(this->m_stor), 0xE5, sizeof(m_stor));
+        ::std::memset(::std::addressof(this->m_stor), 0xE5, sizeof(m_stor));
 #endif
       }
 
@@ -111,14 +111,14 @@ class AVMC_Queue
     void do_append_nontrivial(ref_to<const Vtable> vtbl, ParamU paramu, size_t nbytes, Constructor* ctor, intptr_t source);
 
     template<Executor execT, nullptr_t, typename XnodeT>
-        void do_dispatch_append(std::true_type, ParamU paramu, XnodeT&& xnode)
+        void do_dispatch_append(::std::true_type, ParamU paramu, XnodeT&& xnode)
       {
         // The parameter type is trivial and no vtable is required.
         // Append a node with a trivial parameter.
-        this->do_append_trivial(execT, paramu, sizeof(xnode), std::addressof(xnode));
+        this->do_append_trivial(execT, paramu, sizeof(xnode), ::std::addressof(xnode));
       }
     template<Executor execT, Enumerator* enumT, typename XnodeT>
-        void do_dispatch_append(std::false_type, ParamU paramu, XnodeT&& xnode)
+        void do_dispatch_append(::std::false_type, ParamU paramu, XnodeT&& xnode)
       {
         // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real' function pointers.
         // Those converted from non-capturing lambdas are not an option.
@@ -127,13 +127,13 @@ class AVMC_Queue
             static void construct(ParamU /*paramu*/, void* params, intptr_t source)
               {
                 // Construct the bound parameter using perfect forwarding.
-                rocket::construct_at(static_cast<typename rocket::remove_cvref<XnodeT>::type*>(params),
-                                     rocket::forward<XnodeT>(*(typename std::remove_reference<XnodeT>::type*)source));
+                ::rocket::construct_at(static_cast<typename ::rocket::remove_cvref<XnodeT>::type*>(params),
+                                     ::rocket::forward<XnodeT>(*(typename ::std::remove_reference<XnodeT>::type*)source));
               }
             static void destroy(ParamU /*paramu*/, void* params) noexcept
               {
                 // Destroy the bound parameter.
-                rocket::destroy_at(static_cast<typename rocket::remove_cvref<XnodeT>::type*>(params));
+                ::rocket::destroy_at(static_cast<typename ::rocket::remove_cvref<XnodeT>::type*>(params));
               }
           };
         static constexpr Vtable s_vtbl =
@@ -141,8 +141,8 @@ class AVMC_Queue
             H::destroy, execT, enumT
           };
         // Append a node with a non-trivial parameter.
-        this->do_append_nontrivial(rocket::ref(s_vtbl), paramu, sizeof(xnode), H::construct,
-                                   reinterpret_cast<intptr_t>(std::addressof(xnode)));
+        this->do_append_nontrivial(::rocket::ref(s_vtbl), paramu, sizeof(xnode), H::construct,
+                                   reinterpret_cast<intptr_t>(::std::addressof(xnode)));
       }
 
   public:
@@ -183,14 +183,14 @@ class AVMC_Queue
     template<Executor execT, typename XnodeT> AVMC_Queue& append(ParamU paramu, XnodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XnodeT>`.
-        this->do_dispatch_append<execT, nullptr>(std::is_trivial<typename std::remove_reference<XnodeT>::type>(),
-                                                     paramu, rocket::forward<XnodeT>(xnode));
+        this->do_dispatch_append<execT, nullptr>(::std::is_trivial<typename ::std::remove_reference<XnodeT>::type>(),
+                                                     paramu, ::rocket::forward<XnodeT>(xnode));
         return *this;
       }
     template<Executor execT, Enumerator enumT, typename XnodeT> AVMC_Queue& append(ParamU paramu, XnodeT&& xnode)
       {
         // Append a node with a parameter of type `remove_cvref_t<XnodeT>`.
-        this->do_dispatch_append<execT, enumT>(std::false_type(), paramu, rocket::forward<XnodeT>(xnode));
+        this->do_dispatch_append<execT, enumT>(::std::false_type(), paramu, ::rocket::forward<XnodeT>(xnode));
         return *this;
       }
     AVMC_Queue& append_trivial(Executor* exec, ParamU paramu, const void* data, size_t size)

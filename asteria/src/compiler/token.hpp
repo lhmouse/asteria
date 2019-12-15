@@ -55,7 +55,7 @@ class Token
         , S_real_literal     // 4,
         , S_string_literal   // 5,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     cow_string m_file;
@@ -69,7 +69,7 @@ class Token
         Token(const cow_string& xfile, int32_t xline, size_t xoffset, size_t xlength, XtokT&& xtok)
       :
         m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
-        m_stor(rocket::forward<XtokT>(xtok))
+        m_stor(::rocket::forward<XtokT>(xtok))
       {
       }
 

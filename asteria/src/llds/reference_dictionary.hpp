@@ -59,7 +59,7 @@ class Reference_Dictionary
           ::operator delete(this->m_stor.bptr);
         }
 #ifdef ROCKET_DEBUG
-        std::memset(std::addressof(this->m_stor), 0xB4, sizeof(m_stor));
+        ::std::memset(::std::addressof(this->m_stor), 0xB4, sizeof(m_stor));
 #endif
       }
 

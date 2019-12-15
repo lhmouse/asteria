@@ -37,7 +37,7 @@ class Executive_Context final : public Abstract_Context
         m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
       {
-        this->do_prepare_function(params, rocket::move(self), rocket::move(args));
+        this->do_prepare_function(params, ::rocket::move(self), ::rocket::move(args));
       }
     ~Executive_Context() override;
 

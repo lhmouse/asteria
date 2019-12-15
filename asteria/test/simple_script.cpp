@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::tinybuf_str cbuf;
-    cbuf.set_string(rocket::sref(
+    ::rocket::tinybuf_str cbuf;
+    cbuf.set_string(::rocket::sref(
       R"__(
         var one = 1;
         const two = 2;
@@ -23,7 +23,7 @@ int main()
         return con.value + con.const;
       )__"), tinybuf::open_read);
     Simple_Script code;
-    code.reload(cbuf, rocket::sref("<test>"));
+    code.reload(cbuf, ::rocket::sref("<test>"));
     Global_Context global;
     auto res = code.execute(global);
     ASTERIA_TEST_CHECK(res.read().as_integer() == 90);

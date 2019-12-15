@@ -61,7 +61,7 @@ class Infix_Element
         , S_coalescence  // 4,
         , S_general      // 5,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;
@@ -69,12 +69,12 @@ class Infix_Element
   public:
     template<typename XelemT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XelemT&&)> Infix_Element(XelemT&& elem)
       :
-        m_stor(rocket::forward<XelemT>(elem))
+        m_stor(::rocket::forward<XelemT>(elem))
       {
       }
     template<typename XelemT, ASTERIA_SFINAE_ASSIGN(Xvariant, XelemT&&)> Infix_Element& operator=(XelemT&& elem)
       {
-        this->m_stor = rocket::forward<XelemT>(elem);
+        this->m_stor = ::rocket::forward<XelemT>(elem);
         return *this;
       }
 

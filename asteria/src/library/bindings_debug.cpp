@@ -12,7 +12,7 @@ namespace Asteria {
 bool std_debug_print(const G_string& templ, const cow_vector<Value>& values)
   {
     // Prepare inserters.
-    cow_vector<rocket::formatter> insts;
+    cow_vector<::rocket::formatter> insts;
     insts.reserve(values.size());
     for(size_t i = 0; i != values.size(); ++i) {
       insts.push_back({
@@ -22,7 +22,7 @@ bool std_debug_print(const G_string& templ, const cow_vector<Value>& values)
       });
     }
     // Compose the string into a stream.
-    rocket::tinyfmt_str fmt;
+    ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
     bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     return succ;
@@ -31,9 +31,9 @@ bool std_debug_print(const G_string& templ, const cow_vector<Value>& values)
 bool std_debug_dump(const Value& value, const opt<G_integer>& indent)
   {
     // Clamp the suggested indent so we don't produce overlong lines.
-    size_t rindent = static_cast<size_t>(rocket::clamp(indent.value_or(2), 0, 10));
+    size_t rindent = static_cast<size_t>(::rocket::clamp(indent.value_or(2), 0, 10));
     // Format the value.
-    rocket::tinyfmt_str fmt;
+    ::rocket::tinyfmt_str fmt;
     value.dump(fmt, rindent);
     bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
     return succ;
@@ -44,10 +44,10 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.debug.print()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("print"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("print"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.debug.print(...)`\n"
           "\n"
@@ -59,7 +59,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.debug.print"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.debug.print"), ::rocket::ref(args));
           // Parse variadic arguments.
           G_string templ;
           cow_vector<Value> values;
@@ -69,7 +69,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
               return Reference_Root::S_null();
             }
             Reference_Root::S_temporary xref = { true };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -78,10 +78,10 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.debug.dump()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("dump"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("dump"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.debug.dump(value, [indent])`\n"
           "\n"
@@ -96,7 +96,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(rocket::sref("std.debug.dump"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.debug.dump"), ::rocket::ref(args));
           // Parse arguments.
           Value value;
           opt<G_integer> indent;
@@ -106,7 +106,7 @@ void create_bindings_debug(G_object& result, API_Version /*version*/)
               return Reference_Root::S_null();
             }
             Reference_Root::S_temporary xref = { true };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();

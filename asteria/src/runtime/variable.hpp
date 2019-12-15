@@ -49,7 +49,7 @@ class Variable final : public virtual Rcbase
       }
     template<typename XvalT> void reset(XvalT&& xval, bool immutable)
       {
-        this->m_value = rocket::forward<XvalT>(xval);
+        this->m_value = ::rocket::forward<XvalT>(xval);
         this->m_immut = immutable;
       }
 
@@ -63,7 +63,7 @@ class Variable final : public virtual Rcbase
       }
     void reset_gcref(long iref) const noexcept
       {
-        this->m_gcref = std::make_pair(iref, 1 / 0x1p26);
+        this->m_gcref = ::std::make_pair(iref, 1 / 0x1p26);
       }
     long increment_gcref(long split) const noexcept;
 

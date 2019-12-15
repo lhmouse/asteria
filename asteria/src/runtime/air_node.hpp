@@ -234,7 +234,7 @@ class AIR_Node
         , S_unpack_struct_object   // 28,
         , S_define_null_variable   // 29,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;
@@ -242,12 +242,12 @@ class AIR_Node
   public:
     template<typename XnodeT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XnodeT&&)> AIR_Node(XnodeT&& xnode)
       :
-        m_stor(rocket::forward<XnodeT>(xnode))
+        m_stor(::rocket::forward<XnodeT>(xnode))
       {
       }
     template<typename XnodeT, ASTERIA_SFINAE_ASSIGN(Xvariant, XnodeT&&)> AIR_Node& operator=(XnodeT&& xnode)
       {
-        this->m_stor = rocket::forward<XnodeT>(xnode);
+        this->m_stor = ::rocket::forward<XnodeT>(xnode);
         return *this;
       }
 

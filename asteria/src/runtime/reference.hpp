@@ -24,12 +24,12 @@ class Reference
       }
     template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Reference_Root, XrootT&&)> Reference(XrootT&& xroot)
       :
-        m_root(rocket::forward<XrootT>(xroot)), m_mods()
+        m_root(::rocket::forward<XrootT>(xroot)), m_mods()
       {
       }
     template<typename XrootT, ASTERIA_SFINAE_ASSIGN(Reference_Root, XrootT&&)> Reference& operator=(XrootT&& xroot)
       {
-        this->m_root = rocket::forward<XrootT>(xroot);
+        this->m_root = ::rocket::forward<XrootT>(xroot);
         this->m_mods.clear();
         return *this;
       }
@@ -71,7 +71,7 @@ class Reference
     template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
       {
         // Append a modifier.
-        this->m_mods.emplace_back(rocket::forward<XmodT>(xmod));
+        this->m_mods.emplace_back(::rocket::forward<XmodT>(xmod));
         return *this;
       }
     Reference& zoom_out()

@@ -10,11 +10,11 @@ namespace Asteria {
 
 void Abstract_Context::Cleaner::operator()(Rcbase* base) noexcept
   try {
-    auto coll = rocket::dynamic_pointer_cast<Generational_Collector>(rcptr<Rcbase>(base));
+    auto coll = ::rocket::dynamic_pointer_cast<Generational_Collector>(rcptr<Rcbase>(base));
     ROCKET_ASSERT(coll);
     coll->collect_variables(gc_generation_oldest);
   }
-  catch(std::exception& stdex) {
+  catch(::std::exception& stdex) {
   }
 
 Abstract_Context::~Abstract_Context()
@@ -28,7 +28,7 @@ rcptr<Generational_Collector> Abstract_Context::get_tied_collector_opt() const n
 
 void Abstract_Context::tie_collector(const rcptr<Generational_Collector>& coll_opt) noexcept
   {
-    this->m_coll_opt.reset(rocket::static_pointer_cast<Rcbase>(coll_opt).release());
+    this->m_coll_opt.reset(::rocket::static_pointer_cast<Rcbase>(coll_opt).release());
   }
 
 }  // namespace Asteria

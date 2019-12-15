@@ -53,7 +53,7 @@ class Simple_Binding_Wrapper final : public Abstract_Function
       }
     template<typename XpvalT> Simple_Binding_Wrapper(const cow_string& desc, Prototype_4* proc, XpvalT&& xpval)
       :
-        m_desc(desc), m_proc(proc), m_pval(rocket::forward<XpvalT>(xpval))
+        m_desc(desc), m_proc(proc), m_pval(::rocket::forward<XpvalT>(xpval))
       {
       }
     ~Simple_Binding_Wrapper() override;

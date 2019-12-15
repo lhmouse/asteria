@@ -28,7 +28,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         if(nadd != 0) {
           return nullptr;
         }
-        return std::addressof(arr.at(w.rindex));
+        return ::std::addressof(arr.at(w.rindex));
       }{
     case index_object_key:
         const auto& altr = this->m_stor.as<index_object_key>();
@@ -45,7 +45,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         if(rit == obj.end()) {
           return nullptr;
         }
-        return std::addressof(rit->second);
+        return ::std::addressof(rit->second);
       }{
     case index_array_tail:
         // We have to verify that the parent value is actually an `array` or `null`.
@@ -61,7 +61,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         if(arr.empty()) {
           return nullptr;
         }
-        return std::addressof(arr.back());
+        return ::std::addressof(arr.back());
       }}
     default:
       ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
@@ -98,7 +98,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
           arr.insert(arr.begin(), static_cast<size_t>(w.nprepend));
           arr.insert(arr.end(), static_cast<size_t>(w.nappend));
         }
-        return std::addressof(arr.mut(w.rindex));
+        return ::std::addressof(arr.mut(w.rindex));
       }{
     case index_object_key:
         const auto& altr = this->m_stor.as<index_object_key>();
@@ -124,7 +124,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         else {
           rit = obj.try_emplace(altr.key).first;
         }
-        return std::addressof(rit->second);
+        return ::std::addressof(rit->second);
       }{
     case index_array_tail:
         // We have to verify that the parent value is actually an `array` or `null`.
@@ -140,7 +140,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         }
         auto& arr = parent.open_array();
         // Append a new element to the end and return a pointer to it.
-        return std::addressof(arr.emplace_back());
+        return ::std::addressof(arr.emplace_back());
       }}
     default:
       ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
@@ -167,7 +167,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         if(nadd != 0) {
           return nullptr;
         }
-        auto elem = rocket::move(arr.mut(w.rindex));
+        auto elem = ::rocket::move(arr.mut(w.rindex));
         arr.erase(w.rindex, 1);
         return elem;
       }{
@@ -186,7 +186,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         if(rit == obj.end()) {
           return nullptr;
         }
-        auto elem = rocket::move(rit->second);
+        auto elem = ::rocket::move(rit->second);
         obj.erase(rit);
         return elem;
       }{
@@ -204,7 +204,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         if(arr.empty()) {
           return nullptr;
         }
-        auto elem = rocket::move(arr.mut_back());
+        auto elem = ::rocket::move(arr.mut_back());
         arr.pop_back();
         return elem;
       }}

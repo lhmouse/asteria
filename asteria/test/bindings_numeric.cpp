@@ -9,8 +9,8 @@ using namespace Asteria;
 
 int main()
   {
-    rocket::tinybuf_str cbuf;
-    cbuf.set_string(rocket::sref(
+    ::rocket::tinybuf_str cbuf;
+    cbuf.set_string(::rocket::sref(
       R"__(
         assert std.numeric.abs(+42) == 42;
         assert std.numeric.abs(-42) == 42;
@@ -471,7 +471,7 @@ int main()
         assert std.numeric.parse_real("0x100000000000008000000") == 0x1.0p80;
       )__"), tinybuf::open_read);
 
-    Simple_Script code(cbuf, rocket::sref(__FILE__));
+    Simple_Script code(cbuf, ::rocket::sref(__FILE__));
     Global_Context global;
     code.execute(global);
   }

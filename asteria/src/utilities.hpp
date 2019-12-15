@@ -15,7 +15,7 @@ extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg, c
 
 template<typename... ParamsT> cow_string format_string(const ParamsT&... params)
   {
-    rocket::tinyfmt_str out;
+    ::rocket::tinyfmt_str out;
     format(out, params...);  // ADL intended
     return out.extract_string();
   }
@@ -55,7 +55,7 @@ constexpr Quote_Wrapper quote(const char* str, size_t len) noexcept
   }
 inline Quote_Wrapper quote(const char* str) noexcept
   {
-    return quote(str, std::strlen(str));
+    return quote(str, ::std::strlen(str));
   }
 inline Quote_Wrapper quote(const cow_string& str) noexcept
   {

@@ -12,7 +12,7 @@
 #  error Please turn off `-ffast-math`.
 #endif
 
-#include <utility>  // std::pair<>, rocket::move(), rocket::forward()
+#include <utility>  // ::std::pair<>, ::rocket::move(), ::rocket::forward()
 #include <cstddef>  // nullptr_t
 #include <cstdint>  // uint8_t, int64_t
 #include <climits>
@@ -89,51 +89,51 @@ class Argument_Reader;
 class Simple_Binding_Wrapper;
 
 // Aliases
-using std::nullptr_t;
-using std::max_align_t;
-using std::int8_t;
-using std::uint8_t;
-using std::int16_t;
-using std::uint16_t;
-using std::int32_t;
-using std::uint32_t;
-using std::int64_t;
-using std::uint64_t;
-using std::intptr_t;
-using std::uintptr_t;
-using std::intmax_t;
-using std::uintmax_t;
-using std::ptrdiff_t;
-using std::size_t;
+using ::std::nullptr_t;
+using ::std::max_align_t;
+using ::std::int8_t;
+using ::std::uint8_t;
+using ::std::int16_t;
+using ::std::uint16_t;
+using ::std::int32_t;
+using ::std::uint32_t;
+using ::std::int64_t;
+using ::std::uint64_t;
+using ::std::intptr_t;
+using ::std::uintptr_t;
+using ::std::intmax_t;
+using ::std::uintmax_t;
+using ::std::ptrdiff_t;
+using ::std::size_t;
 
-using cow_string = rocket::cow_string;
-using cow_wstring = rocket::cow_wstring;
-using cow_u16string = rocket::cow_u16string;
-using cow_u32string = rocket::cow_u32string;
-using phsh_string = rocket::prehashed_string;
-using tinybuf = rocket::tinybuf;
-using tinyfmt = rocket::tinyfmt;
+using cow_string = ::rocket::cow_string;
+using cow_wstring = ::rocket::cow_wstring;
+using cow_u16string = ::rocket::cow_u16string;
+using cow_u32string = ::rocket::cow_u32string;
+using phsh_string = ::rocket::prehashed_string;
+using tinybuf = ::rocket::tinybuf;
+using tinyfmt = ::rocket::tinyfmt;
 
-template<typename E, typename D = std::default_delete<const E>> using uptr = rocket::unique_ptr<E, D>;
-template<typename E> using rcptr = rocket::refcnt_ptr<E>;
-template<typename E> using ckptr = rocket::checked_ptr<rocket::refcnt_ptr<E>>;
-template<typename E> using cow_vector = rocket::cow_vector<E>;
-template<typename K, typename V, typename H> using cow_hashmap = rocket::cow_hashmap<K, V, H, std::equal_to<void>>;
-template<typename E, size_t k> using sso_vector = rocket::static_vector<E, k>;
-template<typename... P> using variant = rocket::variant<P...>;
-template<typename T> using opt = rocket::optional<T>;
-template<typename F, typename S> using pair = std::pair<F, S>;
-template<typename F, typename S> using cow_bivector = rocket::cow_vector<std::pair<F, S>>;
-template<typename E, size_t... k> using array = rocket::array<E, k...>;
-template<typename E> using ref_to = rocket::reference_wrapper<E>;
+template<typename E, typename D = ::std::default_delete<const E>> using uptr = ::rocket::unique_ptr<E, D>;
+template<typename E> using rcptr = ::rocket::refcnt_ptr<E>;
+template<typename E> using ckptr = ::rocket::checked_ptr<::rocket::refcnt_ptr<E>>;
+template<typename E> using cow_vector = ::rocket::cow_vector<E>;
+template<typename K, typename V, typename H> using cow_hashmap = ::rocket::cow_hashmap<K, V, H, ::std::equal_to<void>>;
+template<typename E, size_t k> using sso_vector = ::rocket::static_vector<E, k>;
+template<typename... P> using variant = ::rocket::variant<P...>;
+template<typename T> using opt = ::rocket::optional<T>;
+template<typename F, typename S> using pair = ::std::pair<F, S>;
+template<typename F, typename S> using cow_bivector = ::rocket::cow_vector<::std::pair<F, S>>;
+template<typename E, size_t... k> using array = ::rocket::array<E, k...>;
+template<typename E> using ref_to = ::rocket::reference_wrapper<E>;
 
 // `using`-directives
-using rocket::cbegin;
-using rocket::cend;
-using rocket::begin;
-using rocket::end;
-using rocket::xswap;
-using rocket::swap;
+using ::rocket::cbegin;
+using ::rocket::cend;
+using ::rocket::begin;
+using ::rocket::end;
+using ::rocket::xswap;
+using ::rocket::swap;
 
 // Fundamental types
 using G_null      = nullptr_t;

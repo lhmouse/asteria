@@ -17,7 +17,7 @@ Value Reference::do_throw_unset_no_modifier() const
 
 const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
-    auto qref = std::addressof(this->m_root.dereference_const());
+    auto qref = ::std::addressof(this->m_root.dereference_const());
     for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_const_opt(*qref);
@@ -33,7 +33,7 @@ const Value& Reference::do_read(const Reference_Modifier* mods, size_t nmod, con
 
 Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
-    auto qref = std::addressof(this->m_root.dereference_mutable());
+    auto qref = ::std::addressof(this->m_root.dereference_mutable());
     for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, true);  // create new
@@ -47,7 +47,7 @@ Value& Reference::do_open(const Reference_Modifier* mods, size_t nmod, const Ref
 
 Value Reference::do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const
   {
-    auto qref = std::addressof(this->m_root.dereference_mutable());
+    auto qref = ::std::addressof(this->m_root.dereference_mutable());
     for(size_t i = 0; i != nmod; ++i) {
       // Apply a modifier.
       qref = mods[i].apply_mutable_opt(*qref, false);  // no create
@@ -62,7 +62,7 @@ Reference& Reference::do_convert_to_temporary()
   {
     // Replace `*this` with a reference to temporary.
     Reference_Root::S_temporary xref = { this->read() };
-    *this = rocket::move(xref);
+    *this = ::rocket::move(xref);
     return *this;
   }
 
@@ -86,8 +86,8 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       // Unpack the function reference.
       const auto& target = tca->get_target();
       // Unpack arguments.
-      auto args = rocket::move(tca->open_arguments_and_self());
-      *this = rocket::move(args.mut_back());
+      auto args = ::rocket::move(tca->open_arguments_and_self());
+      *this = ::rocket::move(args.mut_back());
       args.pop_back();
       // Call the function now.
       const auto& sloc = tca->sloc();
@@ -99,21 +99,21 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       }
       try {
         // Unwrap the function call.
-        target->invoke(*this, global, rocket::move(args));
+        target->invoke(*this, global, ::rocket::move(args));
       }
       catch(Runtime_Error& except) {
         // Append all frames that have been expanded so far and rethrow the exception.
-        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
+        ::std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
         if(qh) {
           qh->on_function_except(sloc, inside, except);
         }
         throw;
       }
-      catch(std::exception& stdex) {
+      catch(::std::exception& stdex) {
         // Translate the exception, append all frames that have been expanded so far, and throw the new exception.
         Runtime_Error except(stdex);
-        std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
+        ::std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
         if(qh) {
           qh->on_function_except(sloc, inside, except);

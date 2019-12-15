@@ -39,7 +39,7 @@ rcptr<Variable> Generational_Collector::create_variable(GC_Generation gc_hint)
     auto var = this->m_pool.erase_random_opt();
     if(ROCKET_UNEXPECT(!var)) {
       // Create a new one if the pool has been exhausted.
-      var = rocket::make_refcnt<Variable>();
+      var = ::rocket::make_refcnt<Variable>();
     }
     coll.track_variable(var);
     return var;
@@ -48,7 +48,7 @@ rcptr<Variable> Generational_Collector::create_variable(GC_Generation gc_hint)
 size_t Generational_Collector::collect_variables(GC_Generation gc_limit)
   {
     // Collect variables from the newest generation to the oldest.
-    for(auto p = std::make_pair(std::addressof(this->m_newest), gc_limit + 1);
+    for(auto p = ::std::make_pair(::std::addressof(this->m_newest), gc_limit + 1);
            p.first && p.second; p.first = p.first->get_tied_collector_opt(), p.second--)
       p.first->collect_single_opt();
     // Clear the variable pool.

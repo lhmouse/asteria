@@ -51,7 +51,7 @@ class Reference_Root
         , S_variable   // 3,
         , S_tail_call  // 4,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;
@@ -64,12 +64,12 @@ class Reference_Root
       }
     template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XrootT&&)> Reference_Root(XrootT&& xroot)
       :
-        m_stor(rocket::forward<XrootT>(xroot))
+        m_stor(::rocket::forward<XrootT>(xroot))
       {
       }
     template<typename XrootT, ASTERIA_SFINAE_ASSIGN(Xvariant, XrootT&&)> Reference_Root& operator=(XrootT&& xroot)
       {
-        this->m_stor = rocket::forward<XrootT>(xroot);
+        this->m_stor = ::rocket::forward<XrootT>(xroot);
         return *this;
       }
 

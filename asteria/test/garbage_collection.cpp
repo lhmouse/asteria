@@ -7,15 +7,15 @@
 
 using namespace Asteria;
 
-std::atomic<long> bcnt;
+::std::atomic<long> bcnt;
 
 void* operator new(size_t cb)
   {
-    auto ptr = std::malloc(cb);
+    auto ptr = ::std::malloc(cb);
     if(!ptr) {
-      throw std::bad_alloc();
+      throw ::std::bad_alloc();
     }
-    bcnt.fetch_add(1, std::memory_order_relaxed);
+    bcnt.fetch_add(1, ::std::memory_order_relaxed);
     return ptr;
   }
 
@@ -24,8 +24,8 @@ void operator delete(void* ptr) noexcept
     if(!ptr) {
       return;
     }
-    bcnt.fetch_sub(1, std::memory_order_relaxed);
-    std::free(ptr);
+    bcnt.fetch_sub(1, ::std::memory_order_relaxed);
+    ::std::free(ptr);
   }
 
 void operator delete(void* ptr, size_t) noexcept
@@ -36,12 +36,12 @@ void operator delete(void* ptr, size_t) noexcept
 int main()
   {
     // Ignore leaks of emutls, emergency pool, etc.
-    rocket::make_unique<int>().reset();
+    ::rocket::make_unique<int>().reset();
 
-    bcnt.store(0, std::memory_order_relaxed);
+    bcnt.store(0, ::std::memory_order_relaxed);
     {
-      rocket::tinybuf_str cbuf;
-      cbuf.set_string(rocket::sref(
+      ::rocket::tinybuf_str cbuf;
+      cbuf.set_string(::rocket::sref(
         R"__(
           var g;
           func leak() {
@@ -53,9 +53,9 @@ int main()
             leak();
           }
         )__"), tinybuf::open_read);
-      Simple_Script code(cbuf, rocket::sref(__FILE__));
+      Simple_Script code(cbuf, ::rocket::sref(__FILE__));
       Global_Context global;
       code.execute(global);
     }
-    ASTERIA_TEST_CHECK(bcnt.load(std::memory_order_relaxed) == 0);
+    ASTERIA_TEST_CHECK(bcnt.load(::std::memory_order_relaxed) == 0);
   }

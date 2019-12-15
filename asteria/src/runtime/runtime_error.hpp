@@ -10,7 +10,7 @@
 
 namespace Asteria {
 
-class Runtime_Error : public std::exception
+class Runtime_Error : public ::std::exception
   {
   private:
     Value m_value;
@@ -22,16 +22,16 @@ class Runtime_Error : public std::exception
     template<typename XvalT, ASTERIA_SFINAE_CONSTRUCT(Value, XvalT&&)>
         Runtime_Error(const Source_Location& sloc, XvalT&& xval)
       :
-        m_value(rocket::forward<XvalT>(xval))
+        m_value(::rocket::forward<XvalT>(xval))
       {
         this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
         this->do_compose_message();
       }
-    explicit Runtime_Error(const std::exception& stdex)
+    explicit Runtime_Error(const ::std::exception& stdex)
       :
         m_value(G_string(stdex.what()))
       {
-        this->m_frames.emplace_back(frame_type_native, rocket::sref("<native code>"), -1, this->m_value);
+        this->m_frames.emplace_back(frame_type_native, ::rocket::sref("<native code>"), -1, this->m_value);
         this->do_compose_message();
       }
     ~Runtime_Error() override;
@@ -61,7 +61,7 @@ class Runtime_Error : public std::exception
     template<typename XvalT> Backtrace_Frame& push_frame_throw(const Source_Location& sloc, XvalT&& xval)
       {
         // The value also replaces the one in `*this`.
-        this->m_value = rocket::forward<XvalT>(xval);
+        this->m_value = ::rocket::forward<XvalT>(xval);
         auto& frm = this->m_frames.emplace_back(frame_type_throw, sloc, this->m_value);
         this->do_compose_message();
         return frm;

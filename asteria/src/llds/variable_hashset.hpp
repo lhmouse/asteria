@@ -58,7 +58,7 @@ class Variable_HashSet
           ::operator delete(this->m_stor.bptr);
         }
 #ifdef ROCKET_DEBUG
-        std::memset(std::addressof(this->m_stor), 0xD2, sizeof(m_stor));
+        ::std::memset(::std::addressof(this->m_stor), 0xD2, sizeof(m_stor));
 #endif
       }
 
@@ -161,7 +161,7 @@ class Variable_HashSet
           return nullptr;
         }
         // Detach this variable and return it.
-        auto var = rocket::move(qbkt->kstor[0]);
+        auto var = ::rocket::move(qbkt->kstor[0]);
         this->do_detach(qbkt);
         return var;
       }

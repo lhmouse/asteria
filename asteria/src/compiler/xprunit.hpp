@@ -93,7 +93,7 @@ class Xprunit
         , S_coalescence       //  9,
         , S_operator_fma      // 10,
       )>;
-    static_assert(std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
   private:
     Xvariant m_stor;
@@ -101,12 +101,12 @@ class Xprunit
   public:
     template<typename XunitT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XunitT&&)> Xprunit(XunitT&& unit)
       :
-        m_stor(rocket::forward<XunitT>(unit))
+        m_stor(::rocket::forward<XunitT>(unit))
       {
       }
     template<typename XunitT, ASTERIA_SFINAE_ASSIGN(Xvariant, XunitT&&)> Xprunit& operator=(XunitT&& unit)
       {
-        this->m_stor = rocket::forward<XunitT>(unit);
+        this->m_stor = ::rocket::forward<XunitT>(unit);
         return *this;
       }
 

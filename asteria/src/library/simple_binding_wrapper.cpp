@@ -19,7 +19,7 @@ tinyfmt& Simple_Binding_Wrapper::describe(tinyfmt& fmt) const
 
 Reference& Simple_Binding_Wrapper::invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const
   {
-    return self = (*(this->m_proc))(rocket::move(args), rocket::move(self), global, this->m_pval);
+    return self = (*(this->m_proc))(::rocket::move(args), ::rocket::move(self), global, this->m_pval);
   }
 
 Variable_Callback& Simple_Binding_Wrapper::enumerate_variables(Variable_Callback& callback) const

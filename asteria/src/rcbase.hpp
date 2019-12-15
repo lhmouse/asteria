@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-class Rcbase : public rocket::refcnt_base<Rcbase>
+class Rcbase : public ::rocket::refcnt_base<Rcbase>
   {
   public:
     Rcbase() noexcept
@@ -19,17 +19,17 @@ class Rcbase : public rocket::refcnt_base<Rcbase>
   public:
     bool unique() const noexcept
       {
-        return rocket::refcnt_base<Rcbase>::unique();
+        return ::rocket::refcnt_base<Rcbase>::unique();
       }
     long use_count() const noexcept
       {
-        return rocket::refcnt_base<Rcbase>::use_count();
+        return ::rocket::refcnt_base<Rcbase>::use_count();
       }
 
     template<typename TargetT> rcptr<const TargetT> share_this() const
       {
-        auto ptr = rocket::dynamic_pointer_cast<const TargetT>(
-                     this->rocket::refcnt_base<Rcbase>::share_this<Rcbase>());
+        auto ptr = ::rocket::dynamic_pointer_cast<const TargetT>(
+                     this->::rocket::refcnt_base<Rcbase>::share_this<Rcbase>());
         if(!ptr) {
           this->do_throw_bad_cast(typeid(TargetT), typeid(*this));
         }
@@ -37,8 +37,8 @@ class Rcbase : public rocket::refcnt_base<Rcbase>
       }
     template<typename TargetT> rcptr<TargetT> share_this()
       {
-        auto ptr = rocket::dynamic_pointer_cast<TargetT>(
-                     this->rocket::refcnt_base<Rcbase>::share_this<Rcbase>());
+        auto ptr = ::rocket::dynamic_pointer_cast<TargetT>(
+                     this->::rocket::refcnt_base<Rcbase>::share_this<Rcbase>());
         if(!ptr) {
           this->do_throw_bad_cast(typeid(TargetT), typeid(*this));
         }

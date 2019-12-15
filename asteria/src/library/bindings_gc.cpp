@@ -14,13 +14,13 @@ namespace Asteria {
 opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
-      return rocket::clear;
+      return ::rocket::clear;
     }
     auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(gc_gen);
     if(!qcoll) {
-      return rocket::clear;
+      return ::rocket::clear;
     }
     // Get the current number of variables being tracked.
     auto count = qcoll->count_tracked_variables();
@@ -30,13 +30,13 @@ opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_intege
 opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
-      return rocket::clear;
+      return ::rocket::clear;
     }
     auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(gc_gen);
     if(!qcoll) {
-      return rocket::clear;
+      return ::rocket::clear;
     }
     // Get the current threshold.
     auto thres = qcoll->get_threshold();
@@ -46,17 +46,17 @@ opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_intege
 opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
-      return rocket::clear;
+      return ::rocket::clear;
     }
     auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
     auto qcoll = global.get_collector_opt(gc_gen);
     if(!qcoll) {
-      return rocket::clear;
+      return ::rocket::clear;
     }
     // Set the threshold and return its old value.
     auto thres = qcoll->get_threshold();
-    qcoll->set_threshold(static_cast<uint32_t>(rocket::clamp(threshold, 0, UINT32_MAX)));
+    qcoll->set_threshold(static_cast<uint32_t>(::rocket::clamp(threshold, 0, UINT32_MAX)));
     return G_integer(thres);
   }
 
@@ -83,10 +83,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.gc.tracked_count()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("tracked_count"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("tracked_count"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.gc.count_tracked(generation)`\n"
           "\n"
@@ -99,7 +99,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
-          Argument_Reader reader(rocket::sref("std.gc.tracked_count"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.gc.tracked_count"), ::rocket::ref(args));
           // Parse arguments.
           G_integer generation;
           if(reader.start().g(generation).finish()) {
@@ -109,7 +109,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
               return Reference_Root::S_null();
             }
             Reference_Root::S_temporary xref = { *qthres };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -118,10 +118,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.gc.get_threshold()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("get_threshold"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("get_threshold"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.gc.get_threshold(generation)`\n"
           "\n"
@@ -133,7 +133,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
-          Argument_Reader reader(rocket::sref("std.gc.get_threshold"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.gc.get_threshold"), ::rocket::ref(args));
           // Parse arguments.
           G_integer generation;
           if(reader.start().g(generation).finish()) {
@@ -143,7 +143,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
               return Reference_Root::S_null();
             }
             Reference_Root::S_temporary xref = { *qthres };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -152,10 +152,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.gc.set_threshold()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("set_threshold"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("set_threshold"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.gc.set_threshold(generation, threshold)`\n"
           "\n"
@@ -172,7 +172,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
-          Argument_Reader reader(rocket::sref("std.gc.set_threshold"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.gc.set_threshold"), ::rocket::ref(args));
           // Parse arguments.
           G_integer generation;
           G_integer threshold;
@@ -183,7 +183,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
               return Reference_Root::S_null();
             }
             Reference_Root::S_temporary xref = { *qoldthres };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();
@@ -192,10 +192,10 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
     //===================================================================
     // `std.gc.collect()`
     //===================================================================
-    result.insert_or_assign(rocket::sref("collect"),
-      G_function(rocket::make_refcnt<Simple_Binding_Wrapper>(
+    result.insert_or_assign(::rocket::sref("collect"),
+      G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
-        rocket::sref(
+        ::rocket::sref(
           "\n"
           "`std.gc.collect([generation_limit])`\n"
           "\n"
@@ -208,13 +208,13 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
-          Argument_Reader reader(rocket::sref("std.gc.collect"), rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.gc.collect"), ::rocket::ref(args));
           // Parse arguments.
           opt<G_integer> generation_limit;
           if(reader.start().g(generation_limit).finish()) {
             // Call the binding function.
             Reference_Root::S_temporary xref = { std_gc_collect(global, generation_limit) };
-            return rocket::move(xref);
+            return ::rocket::move(xref);
           }
           // Fail.
           reader.throw_no_matching_function_call();

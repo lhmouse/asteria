@@ -21,7 +21,7 @@ namespace {
 template<typename XbaseT> int do_backtrace(const XbaseT& xbase) noexcept
   try {
     const auto& except = dynamic_cast<const Runtime_Error&>(xbase);
-    rocket::tinyfmt_str fmt;
+    ::rocket::tinyfmt_str fmt;
     // Print stack frames to the standard error stream.
     for(unsigned long i = 0; i != except.count_frames(); ++i) {
       const auto& frm = except.frame(i);
@@ -35,24 +35,24 @@ template<typename XbaseT> int do_backtrace(const XbaseT& xbase) noexcept
     }
     return ::fprintf(stderr, "  -- end of backtrace\n");
   }
-  catch(std::exception& stdex) {
+  catch(::std::exception& stdex) {
     return ::fprintf(stderr, "  -- no backtrace available\n");
   }
 
 cow_string do_stringify_value(const Value& val) noexcept
   try {
-    rocket::tinyfmt_str fmt;
+    ::rocket::tinyfmt_str fmt;
     // Print the value with type information.
     fmt << val;
     return fmt.extract_string();
   }
-  catch(std::exception& stdex) {
-    return rocket::sref("<invalid value>");
+  catch(::std::exception& stdex) {
+    return ::rocket::sref("<invalid value>");
   }
 
 cow_string do_stringify_reference(const Reference& ref) noexcept
   try {
-    rocket::tinyfmt_str fmt;
+    ::rocket::tinyfmt_str fmt;
     // Write the categoryprefix.
     if(ref.is_constant())
       fmt << "constant ";
@@ -61,13 +61,13 @@ cow_string do_stringify_reference(const Reference& ref) noexcept
     else if(ref.is_variable())
       fmt << "variable ";
     else
-      return rocket::sref("<tail call>");
+      return ::rocket::sref("<tail call>");
     // Write the referenced value if any.
     fmt << ref.read();
     return fmt.extract_string();
   }
-  catch(std::exception& other) {
-    return rocket::sref("<invalid reference>");
+  catch(::std::exception& other) {
+    return ::rocket::sref("<invalid reference>");
   }
 
 // These hooks just print everything to the standard error stream.
@@ -153,12 +153,12 @@ int main(int argc, char** argv)
             break;
           }
           // Parse the level.
-          n = std::strspn(s, "0123456789");
+          n = ::std::strspn(s, "0123456789");
           if((s[n] != 0) || (n >= 4)) {
             ::fprintf(stderr, "%s: invalid argument for `-%c` -- '%s'\n", *argv, ch, s);
             return 127;
           }
-          optimization_level = std::atoi(s);
+          optimization_level = ::std::atoi(s);
           break;
         }{
       case 'V':
@@ -242,7 +242,7 @@ int main(int argc, char** argv)
     }
     // Read the standard input if no path is specified.
     if(!path) {
-      path = rocket::sref("-");
+      path = ::rocket::sref("-");
     }
     // Set the default optimization level if no one has been specified.
     // The default optimization level is `2`. Note again that `-O` without an argument is equivalent
@@ -262,7 +262,7 @@ int main(int argc, char** argv)
     Global_Context global;
     // Set a hook struct as requested.
     if(verbose) {
-      global.set_hooks(rocket::make_refcnt<Debug_Hooks>());
+      global.set_hooks(::rocket::make_refcnt<Debug_Hooks>());
     }
 
     if(!*interactive) {
@@ -275,7 +275,7 @@ int main(int argc, char** argv)
         script.reload_file(*path);
       // Execute the script.
       // The script returns a `Reference` so let's dereference it.
-      const auto ref = script.execute(global, rocket::move(args));
+      const auto ref = script.execute(global, ::rocket::move(args));
       // If the script returns an `integer`, forward its lower 8 bits.
       const auto& val = ref.read();
       if(val.is_integer()) {
@@ -432,7 +432,7 @@ int main(int argc, char** argv)
       // Execute the script.
       try {
         // The script returns a `Reference` so let's dereference it.
-        const auto ref = script.execute(global, rocket::move(args));
+        const auto ref = script.execute(global, ::rocket::move(args));
         // Print the value.
         ::fprintf(stderr, "* value #%lu: %s\n", index, do_stringify_reference(ref).c_str());
       }
@@ -441,7 +441,7 @@ int main(int argc, char** argv)
         ::fprintf(stderr, "! runtime error: %s\n", do_stringify_value(except.value()).c_str());
         do_backtrace(except);
       }
-      catch(std::exception& stdex) {
+      catch(::std::exception& stdex) {
         // Print the exception and discard this snippet.
         ::fprintf(stderr, "! runtime error: %s\n", stdex.what());
         do_backtrace(stdex);
@@ -449,7 +449,7 @@ int main(int argc, char** argv)
     }
     return 0;
   }
-  catch(std::exception& stdex) {
+  catch(::std::exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
     ::fprintf(stderr, "! unhandled exception: %s\n", stdex.what());
     do_backtrace(stdex);
