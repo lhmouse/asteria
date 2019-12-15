@@ -275,17 +275,15 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         ::std::array<uint8_t, sizeof(WordT)> stor_le;
         uint64_t word = static_cast<uint64_t>(ref);
         // Write the word in little-endian order.
-        for(auto& byte : stor_le) {
+        for(uint8_t& byte : stor_le) {
           byte = word & 0xFF;
           word >>= 8;
         }
         // Append hexadecimal digits.
-        if(bigendT) {
+        if(bigendT)
           ::std::for_each(stor_le.rbegin(), stor_le.rend(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
-        }
-        else {
+        else
           ::std::for_each(stor_le.begin(), stor_le.end(), [&](uint8_t b) { str.append(s_hexdigits[b].data(), 2);  });
-        }
         return str;
       }
     template<typename WordT> G_string& do_pdigits_be(G_string& str, const WordT& ref)
@@ -303,14 +301,12 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         ::std::array<uint8_t, sizeof(WordT)> stor_be;
         uint64_t word = 0;
         // Re-arrange bytes.
-        if(bigendT) {
+        if(bigendT)
           ::std::copy_n(ptr, stor_be.size(), stor_be.begin());
-        }
-        else {
+        else
           ::std::copy_n(ptr, stor_be.size(), stor_be.rbegin());
-        }
         // Assemble the word.
-        for(const auto& byte : stor_be) {
+        for(uint8_t byte : stor_be) {
           word <<= 8;
           word |= byte;
         }
@@ -364,29 +360,30 @@ G_integer std_checksum_fnv1a32(const G_string& data)
             uint32_t w;
             uint32_t f, g;
             // https://en.wikipedia.org/wiki/MD5
-            auto update = [&](uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, uint32_t k, uint8_t r)
+            auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c,
+                              uint32_t& d, uint32_t k, uint8_t r)
               {
                 specx(i, b, c, d);
                 do_load_le(w, p + g * 4);
                 w = a + f + k + w;
                 a = b + do_rotl(w, r);
               };
-            auto spec0 = [&](uint32_t i, auto& b, auto& c, auto& d)
+            auto spec0 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
               {
                 f = d ^ (b & (c ^ d));
                 g = i;
               };
-            auto spec1 = [&](uint32_t i, auto& b, auto& c, auto& d)
+            auto spec1 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
               {
                 f = c ^ (d & (b ^ c));
                 g = (5 * i + 1) % 16;
               };
-            auto spec2 = [&](uint32_t i, auto& b, auto& c, auto& d)
+            auto spec2 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
               {
                 f = b ^ c ^ d;
                 g = (3 * i + 5) % 16;
               };
-            auto spec3 = [&](uint32_t i, auto& b, auto& c, auto& d)
+            auto spec3 = [&](uint32_t i, uint32_t& b, uint32_t& c, uint32_t& d)
               {
                 f = c ^ (b | ~d);
                 g = (7 * i) % 16;
@@ -653,28 +650,29 @@ G_string std_checksum_md5(const G_string& data)
             for(size_t i = 32; i < 80; ++i) {
               w[i] = do_rotl(w[i-6] ^ w[i-16] ^ w[i-28] ^ w[i-32], 2);
             }
-            auto update = [&](uint32_t i, auto&& specx, auto& a, auto& b, auto& c, auto& d, auto& e)
+            auto update = [&](uint32_t i, auto&& specx, uint32_t& a, uint32_t& b, uint32_t& c,
+                              uint32_t& d, uint32_t& e)
               {
                 specx(b, c, d);
                 e += do_rotl(a, 5) + f + k + w[i];
                 b = do_rotl(b, 30);
               };
-            auto spec0 = [&](auto& b, auto& c, auto& d)
+            auto spec0 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
               {
                 f = d ^ (b & (c ^ d));
                 k = 0x5A827999;
               };
-            auto spec1 = [&](auto& b, auto& c, auto& d)
+            auto spec1 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
               {
                 f = b ^ c ^ d;
                 k = 0x6ED9EBA1;
               };
-            auto spec2 = [&](auto& b, auto& c, auto& d)
+            auto spec2 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
               {
                 f = (b & (c | d)) | (c & d);
                 k = 0x8F1BBCDC;
               };
-            auto spec3 = [&](auto& b, auto& c, auto& d)
+            auto spec3 = [&](uint32_t& b, uint32_t& c, uint32_t& d)
               {
                 f = b ^ c ^ d;
                 k = 0xCA62C1D6;
@@ -959,8 +957,8 @@ G_string std_checksum_sha1(const G_string& data)
               s1 = do_rotl(t2, 13) ^ do_rotl(t2, 15) ^ (t2 >> 10);
               w[i] = w[i-16] + w[i-7] + s0 + s1;
             }
-            auto update = [&](uint32_t i, auto& a, auto& b, auto& c, auto& d, auto& e,
-                              auto& f, auto& g, auto& h, uint32_t k)
+            auto update = [&](uint32_t i, uint32_t& a, uint32_t& b, uint32_t& c, uint32_t& d,
+                              uint32_t& e, uint32_t& f, uint32_t& g, uint32_t& h, uint32_t k)
               {
                 s0 = do_rotl(a, 10) ^ do_rotl(a, 19) ^ do_rotl(a, 30);
                 maj = (a & b) | (c & (a ^ b));
