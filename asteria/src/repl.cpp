@@ -362,11 +362,11 @@ void do_handle_repl_command(cow_string&& cmd)
         do_quick_exit(exit_success);
       }
       // Move on and read the next snippet.
-      ::interrupted = 0;
       code.clear();
       escape = false;
       line = 0;
       ::fprintf(stderr, "\n#%lu%n:%3lu> ", ++index, &indent, ++line);
+      ::interrupted = 0;
 
       for(;;) {
         // Read a character. Break upon read errors.
@@ -500,7 +500,7 @@ void do_handle_repl_command(cow_string&& cmd)
     }
 
     // Execute the script.
-    Exit_Code status;
+    Exit_Code status = exit_runtime_error;
     try {
       const auto ref = ::script.execute(::global, ::rocket::move(::cmdline.args));
       const auto& val = ref.read();
@@ -515,10 +515,11 @@ void do_handle_repl_command(cow_string&& cmd)
       // If an exception was thrown, print something informative.
       ::fprintf(stderr, "! runtime error: %s\n", do_stringify(except).c_str());
       do_backtrace(except);
-      do_quick_exit(exit_runtime_error);
     }
-
-    // We have consumed all data so exit now.
+    catch(::std::exception& stdex) {
+      // If an exception was thrown, print something informative.
+      ::fprintf(stderr, "! unhandled exception: %s\n", do_xindent(::rocket::sref(stdex.what())).c_str());
+    }
     do_quick_exit(status);
   }
 
