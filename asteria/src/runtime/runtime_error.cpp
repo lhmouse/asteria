@@ -16,8 +16,12 @@ void Runtime_Error::do_compose_message()
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(::rocket::move(this->m_what));
     fmt.clear_string();
-    // Write the status code in digital form.
-    format(fmt, "asteria parser error: $1", this->m_value);
+    // Write the value. Strings are written as is. ALl other values are prettified.
+    fmt << "asteria runtime error: ";
+    if(this->m_value.is_string())
+      fmt << this->m_value.as_string();
+    else
+      fmt << this->m_value;
     // Append stack frames.
     for(unsigned long i = 0; i != this->m_frames.size(); ++i) {
       const auto& frm = this->m_frames[i];
