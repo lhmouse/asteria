@@ -67,14 +67,14 @@ class Infix_Element
     Xvariant m_stor;
 
   public:
-    template<typename XelemT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XelemT&&)> Infix_Element(XelemT&& elem)
+    ASTERIA_VARIANT_CONSTRUCTOR(Infix_Element, Xvariant, XelemT, xelem)
       :
-        m_stor(::rocket::forward<XelemT>(elem))
+        m_stor(::rocket::forward<XelemT>(xelem))
       {
       }
-    template<typename XelemT, ASTERIA_SFINAE_ASSIGN(Xvariant, XelemT&&)> Infix_Element& operator=(XelemT&& elem)
+    ASTERIA_VARIANT_ASSIGNMENT(Infix_Element, Xvariant, XelemT, xelem)
       {
-        this->m_stor = ::rocket::forward<XelemT>(elem);
+        this->m_stor = ::rocket::forward<XelemT>(xelem);
         return *this;
       }
 

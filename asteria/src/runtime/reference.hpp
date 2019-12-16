@@ -22,12 +22,12 @@ class Reference
         m_root(), m_mods()
       {
       }
-    template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Reference_Root, XrootT&&)> Reference(XrootT&& xroot)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_Root, XrootT, xroot)
       :
         m_root(::rocket::forward<XrootT>(xroot)), m_mods()
       {
       }
-    template<typename XrootT, ASTERIA_SFINAE_ASSIGN(Reference_Root, XrootT&&)> Reference& operator=(XrootT&& xroot)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference, Reference_Root, XrootT, xroot)
       {
         this->m_root = ::rocket::forward<XrootT>(xroot);
         this->m_mods.clear();

@@ -37,8 +37,8 @@ namespace Asteria {
 
     }
 
-cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code,
-                                             const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx) const
+cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                                             TCO_Aware tco_aware, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
       {{

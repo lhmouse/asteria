@@ -39,6 +39,9 @@ namespace Asteria {
 #define ASTERIA_SFINAE_ASSIGN(T, ...)       ROCKET_ENABLE_IF(::rocket::is_lvalue_assignable<T, __VA_ARGS__>::value)
 #define ASTERIA_SFINAE_CONVERT(T, ...)      ROCKET_ENABLE_IF(::std::is_convertible<T, __VA_ARGS__>::value)
 
+#define ASTERIA_VARIANT_CONSTRUCTOR(C, V, T, t)   template<typename T, ASTERIA_SFINAE_CONSTRUCT(V, T&&)> C(T&& t)
+#define ASTERIA_VARIANT_ASSIGNMENT(C, V, T, t)    template<typename T, ASTERIA_SFINAE_ASSIGN(V, T&&)> C& operator=(T&& t)
+
 #define ASTERIA_VOID_T(...)        typename ::rocket::make_void<__VA_ARGS__>::type
 #define ASTERIA_VOID_OF(...)       typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
 

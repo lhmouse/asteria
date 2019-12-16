@@ -99,14 +99,14 @@ class Xprunit
     Xvariant m_stor;
 
   public:
-    template<typename XunitT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XunitT&&)> Xprunit(XunitT&& unit)
+    ASTERIA_VARIANT_CONSTRUCTOR(Xprunit, Xvariant, XunitT, xunit)
       :
-        m_stor(::rocket::forward<XunitT>(unit))
+        m_stor(::rocket::forward<XunitT>(xunit))
       {
       }
-    template<typename XunitT, ASTERIA_SFINAE_ASSIGN(Xvariant, XunitT&&)> Xprunit& operator=(XunitT&& unit)
+    ASTERIA_VARIANT_ASSIGNMENT(Xprunit, Xvariant, XunitT, xunit)
       {
-        this->m_stor = ::rocket::forward<XunitT>(unit);
+        this->m_stor = ::rocket::forward<XunitT>(xunit);
         return *this;
       }
 
@@ -122,8 +122,8 @@ class Xprunit
         return *this;
       }
 
-    cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code,
-                                        const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx) const;
+    cow_vector<AIR_Node>& generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                                        TCO_Aware tco_aware, const Analytic_Context& ctx) const;
   };
 
 inline void swap(Xprunit& lhs, Xprunit& rhs) noexcept

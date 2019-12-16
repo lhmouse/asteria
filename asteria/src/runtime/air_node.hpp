@@ -240,12 +240,12 @@ class AIR_Node
     Xvariant m_stor;
 
   public:
-    template<typename XnodeT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XnodeT&&)> AIR_Node(XnodeT&& xnode)
+    ASTERIA_VARIANT_CONSTRUCTOR(AIR_Node, Xvariant, XnodeT, xnode)
       :
         m_stor(::rocket::forward<XnodeT>(xnode))
       {
       }
-    template<typename XnodeT, ASTERIA_SFINAE_ASSIGN(Xvariant, XnodeT&&)> AIR_Node& operator=(XnodeT&& xnode)
+    ASTERIA_VARIANT_ASSIGNMENT(AIR_Node, Xvariant, XnodeT, xnode)
       {
         this->m_stor = ::rocket::forward<XnodeT>(xnode);
         return *this;

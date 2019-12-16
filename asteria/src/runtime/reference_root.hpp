@@ -62,12 +62,12 @@ class Reference_Root
         m_stor()  // Initialize to a null reference.
       {
       }
-    template<typename XrootT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XrootT&&)> Reference_Root(XrootT&& xroot)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference_Root, Xvariant, XrootT, xroot)
       :
         m_stor(::rocket::forward<XrootT>(xroot))
       {
       }
-    template<typename XrootT, ASTERIA_SFINAE_ASSIGN(Xvariant, XrootT&&)> Reference_Root& operator=(XrootT&& xroot)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference_Root, Xvariant, XrootT, xroot)
       {
         this->m_stor = ::rocket::forward<XrootT>(xroot);
         return *this;

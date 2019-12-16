@@ -150,14 +150,14 @@ class Statement
     Xvariant m_stor;
 
   public:
-    template<typename XstmtT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XstmtT&&)> Statement(XstmtT&& stmt)
+    ASTERIA_VARIANT_CONSTRUCTOR(Statement, Xvariant, XstmtT, xstmt)
       :
-        m_stor(::rocket::forward<XstmtT>(stmt))
+        m_stor(::rocket::forward<XstmtT>(xstmt))
       {
       }
-    template<typename XstmtT, ASTERIA_SFINAE_ASSIGN(Xvariant, XstmtT&&)> Statement& operator=(XstmtT&& stmt)
+    ASTERIA_VARIANT_ASSIGNMENT(Statement, Xvariant, XstmtT, xstmt)
       {
-        this->m_stor = ::rocket::forward<XstmtT>(stmt);
+        this->m_stor = ::rocket::forward<XstmtT>(xstmt);
         return *this;
       }
 
