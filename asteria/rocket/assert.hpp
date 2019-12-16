@@ -16,10 +16,10 @@ namespace rocket {
 #else
 #  define ROCKET_XASSERT_FAIL_(...)        ROCKET_UNREACHABLE()
 #endif
-#define ROCKET_XASSERT_(cond_, str_, m_)   ((cond_) ? void(0) : ROCKET_XASSERT_FAIL_(str_, __FILE__, __LINE__, m_))
+#define ROCKET_XASSERT_(cond, str, mt)     ((cond) ? void(0) : ROCKET_XASSERT_FAIL_(str, __FILE__, __LINE__, mt))
 
-#define ROCKET_ASSERT(expr_)               ROCKET_XASSERT_(expr_, #expr_, "")
-#define ROCKET_ASSERT_MSG(expr_, m_)       ROCKET_XASSERT_(expr_, #expr_, m_)
+#define ROCKET_ASSERT(expr)                ROCKET_XASSERT_(expr, #expr, "")
+#define ROCKET_ASSERT_MSG(expr, mt)        ROCKET_XASSERT_(expr, #expr, mt)
 
 }  // namespace rocket
 
