@@ -32,15 +32,15 @@
 #include "../rocket/reference_wrapper.hpp"
 #include "../rocket/tinyfmt.hpp"
 
+namespace Asteria {
+
 // Macros
-#define ASTERIA_SFINAE_CONSTRUCT(T_, ...)    ROCKET_ENABLE_IF(::std::is_constructible<T_, __VA_ARGS__>::value)
-#define ASTERIA_SFINAE_ASSIGN(T_, ...)       ROCKET_ENABLE_IF(::rocket::is_lvalue_assignable<T_, __VA_ARGS__>::value)
-#define ASTERIA_SFINAE_CONVERT(T_, ...)      ROCKET_ENABLE_IF(::std::is_convertible<T_, __VA_ARGS__>::value)
+#define ASTERIA_SFINAE_CONSTRUCT(T, ...)    ROCKET_ENABLE_IF(::std::is_constructible<T, __VA_ARGS__>::value)
+#define ASTERIA_SFINAE_ASSIGN(T, ...)       ROCKET_ENABLE_IF(::rocket::is_lvalue_assignable<T, __VA_ARGS__>::value)
+#define ASTERIA_SFINAE_CONVERT(T, ...)      ROCKET_ENABLE_IF(::std::is_convertible<T, __VA_ARGS__>::value)
 
 #define ASTERIA_VOID_T(...)        typename ::rocket::make_void<__VA_ARGS__>::type
 #define ASTERIA_VOID_OF(...)       typename ::rocket::make_void<decltype(__VA_ARGS__)>::type
-
-namespace Asteria {
 
 // Low-level Data Structure
 class Variable_HashSet;
