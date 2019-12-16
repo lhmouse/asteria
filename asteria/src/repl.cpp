@@ -228,7 +228,7 @@ void do_parse_command_line(int argc, char** argv)
       path = G_string(argv[::optind]);
       // All subsequent arguments are passed to the script verbatim.
       ::std::for_each(argv + ::optind + 1, argv + argc,
-                    [&](const char* arg) { args.emplace_back(G_string(arg));  });
+                      [&](const char* arg) { args.emplace_back(G_string(arg));  });
     }
 
     // Copy options into `*this`.
@@ -346,26 +346,28 @@ void do_handle_repl_command(cow_string&& cmd)
     // In interactive mode (a.k.a. REPL mode), read user inputs in lines.
     // Outputs from the script go into standard output. Others go into standard error.
     unsigned long index = 0;
-    int indent, ch;
     long line;
+    int indent, ch;
     bool escape;
     cow_string code;
 
     do {
+      // Clear output.
+      ::fputc('\n', stderr);
       // Check for exit condition.
       if(::ferror(stdin)) {
-        ::fprintf(stderr, "\n! error reading standard input\n");
+        ::fprintf(stderr, "! error reading standard input\n");
         do_quick_exit(exit_unspecified);
       }
       if(::feof(stdin)) {
-        ::fprintf(stderr, "\n~ have a nice day :)\n");
+        ::fprintf(stderr, "~ have a nice day :)\n");
         do_quick_exit(exit_success);
       }
       // Move on and read the next snippet.
       code.clear();
       escape = false;
       line = 0;
-      ::fprintf(stderr, "\n#%lu%n:%3lu> ", ++index, &indent, ++line);
+      ::fprintf(stderr, "#%lu:%2lu%n> ", ++index, ++line, &indent);
       ::interrupted = 0;
 
       for(;;) {
@@ -397,7 +399,7 @@ void do_handle_repl_command(cow_string&& cmd)
           }
           // The line feed should be preserved. It'll be appended later.
           // Prompt for the next consecutive line.
-          ::fprintf(stderr, "%*c%3lu> ", indent, ':', ++line);
+          ::fprintf(stderr, "%*lu> ", indent, ++line);
         }
         else if(heredoc.empty()) {
           // In line input mode, backslashes that precede line feeds are deleted. Those that
