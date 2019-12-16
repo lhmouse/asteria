@@ -112,12 +112,12 @@ G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>
     bool pms = with_ms.value_or(false);
     // Handle special time points.
     if(time_point <= -11644473600000) {
-      static constexpr char s_min_str[][32] = { "1601-01-01 00:00:00",
+      static constexpr char s_min_str[][24] = { "1601-01-01 00:00:00",
                                                 "1601-01-01 00:00:00.000" };
       return ::rocket::sref(s_min_str[pms]);
     }
     if(time_point >= 253370764800000) {
-      static constexpr char s_max_str[][32] = { "9999-01-01 00:00:00",
+      static constexpr char s_max_str[][24] = { "9999-01-01 00:00:00",
                                                 "9999-01-01 00:00:00.000" };
       return ::rocket::sref(s_max_str[pms]);
     }
@@ -128,33 +128,37 @@ G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>
     ::time_t tp = static_cast<::time_t>(intg);
     ::tm tr;
     ::gmtime_r(&tp, &tr);
-    // Compose a string without milliseconds.
+    // Combine all parts into a single number.
     ::rocket::ascii_numput nump;
-    ::rocket::tinyfmt_str fmt;
+    uint64_t temp = 0;
     // 'yyyy'
-    fmt << nump.put_DU(static_cast<uint32_t>(tr.tm_year + 1900), 4);
-    // '-mm'
-    fmt << '-'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_mon + 1), 2);
-    // '-dd'
-    fmt << '-'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_mday), 2);
-    // ' HH'
-    fmt << ' '
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_hour), 2);
-    // ':MM'
-    fmt << ':'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_min), 2);
-    // ':SS'
-    fmt << ':'
-        << nump.put_DU(static_cast<uint32_t>(tr.tm_sec), 2);;
-    // If a millisecond part is requested, append it.
-    if(pms) {
-      // '.sss'
-      fmt << '.'
-          << nump.put_DU(static_cast<uint32_t>((secs - intg) * 1000), 3);
-    }
-    return fmt.extract_string();
+    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_year + 1900))
+            * 1'00'00'00'00'00'000;
+    // 'mm'
+    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_mon + 1))
+            *    1'00'00'00'00'000;
+    // 'dd'
+    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_mday))
+            *       1'00'00'00'000;
+    // 'HH'
+    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_hour))
+            *          1'00'00'000;
+    // 'MM'
+    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_min))
+            *             1'00'000;
+    // 'SS'
+    temp += static_cast<uint64_t>(static_cast<unsigned>(tr.tm_sec))
+            *                1'000;
+    // 'sss'
+    temp += static_cast<uint64_t>(static_cast<int64_t>((secs - intg) * 1000));
+    // Compose the string.
+    const char* bp = nump.put_DU(temp, 17).data();
+    char tstr[] = {
+      bp[0], bp[1], bp[2], bp[3], '-', bp[4], bp[5], '-', bp[6], bp[7],  // 'yyyy-mm-dd'  10
+      ' ', bp[8], bp[9], ':', bp[10], bp[11], ':', bp[12], bp[13],       // ' HH:MM:SS'    9
+      '.', bp[14], bp[15], bp[16]                                        // '.sss'         4
+    };
+    return cow_string(tstr, pms ? 23 : 19);
   }
 
 opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
