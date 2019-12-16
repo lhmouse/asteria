@@ -22,14 +22,14 @@ class Reference
         m_root(), m_mods()
       {
       }
-    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_Root, XrootT, xroot)
+    ASTERIA_VARIANT_CONSTRUCTOR(Reference, Reference_Root, XRootT, xroot)
       :
-        m_root(::rocket::forward<XrootT>(xroot)), m_mods()
+        m_root(::rocket::forward<XRootT>(xroot)), m_mods()
       {
       }
-    ASTERIA_VARIANT_ASSIGNMENT(Reference, Reference_Root, XrootT, xroot)
+    ASTERIA_VARIANT_ASSIGNMENT(Reference, Reference_Root, XRootT, xroot)
       {
-        this->m_root = ::rocket::forward<XrootT>(xroot);
+        this->m_root = ::rocket::forward<XRootT>(xroot);
         this->m_mods.clear();
         return *this;
       }
@@ -68,10 +68,10 @@ class Reference
         return this->is_constant() || this->is_temporary();
       }
 
-    template<typename XmodT> Reference& zoom_in(XmodT&& xmod)
+    template<typename XModT> Reference& zoom_in(XModT&& xmod)
       {
         // Append a modifier.
-        this->m_mods.emplace_back(::rocket::forward<XmodT>(xmod));
+        this->m_mods.emplace_back(::rocket::forward<XModT>(xmod));
         return *this;
       }
     Reference& zoom_out()

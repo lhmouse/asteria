@@ -233,9 +233,9 @@ namespace Asteria {
           }
       };
 
-    template<typename XtokenT> bool do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XtokenT&& xtoken)
+    template<typename XTokenT> bool do_push_token(cow_vector<Token>& tokens, Line_Reader& reader, size_t tlen, XTokenT&& xtoken)
       {
-        tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, ::rocket::forward<XtokenT>(xtoken));
+        tokens.emplace_back(reader.file(), reader.line(), reader.offset(), tlen, ::rocket::forward<XTokenT>(xtoken));
         reader.consume(tlen);
         return true;
       }

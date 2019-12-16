@@ -154,16 +154,16 @@ DCE_Result AIR_Node::optimize_dce()
     // Auxiliary functions
     ///////////////////////////////////////////////////////////////////////////
 
-    template<typename XvalT> Reference& do_set_temporary(Evaluation_Stack& stack, bool assign, XvalT&& xval)
+    template<typename XValT> Reference& do_set_temporary(Evaluation_Stack& stack, bool assign, XValT&& xval)
       {
         auto& ref = stack.open_top();
         if(assign) {
           // Write the value to the top refernce.
-          ref.open() = ::rocket::forward<XvalT>(xval);
+          ref.open() = ::rocket::forward<XValT>(xval);
           return ref;
         }
         // Replace the top reference with a temporary reference to the value.
-        Reference_Root::S_temporary xref = { ::rocket::forward<XvalT>(xval) };
+        Reference_Root::S_temporary xref = { ::rocket::forward<XValT>(xval) };
         return ref = ::rocket::move(xref);
       }
 

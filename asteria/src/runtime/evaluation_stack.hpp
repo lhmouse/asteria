@@ -60,17 +60,17 @@ class Evaluation_Stack
         ROCKET_ASSERT(offset < this->size());
         return this->m_etop[~offset];
       }
-    template<typename XrefT> Reference& push(XrefT&& xref)
+    template<typename XRefT> Reference& push(XRefT&& xref)
       {
         if(ROCKET_EXPECT(this->size() < this->m_refs.size())) {
           // Overwrite the next element.
           auto& ref = this->m_etop[0];
-          ref = ::rocket::forward<XrefT>(xref);
+          ref = ::rocket::forward<XRefT>(xref);
           this->m_etop++;
           return ref;
         }
         // Push a new element.
-        auto& ref = this->m_refs.emplace_back(::rocket::forward<XrefT>(xref));
+        auto& ref = this->m_refs.emplace_back(::rocket::forward<XRefT>(xref));
         this->m_etop = ::std::addressof(ref);
         this->m_etop++;
         return ref;

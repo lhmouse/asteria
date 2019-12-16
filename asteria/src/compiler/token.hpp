@@ -46,7 +46,7 @@ class Token
         index_real_literal     = 4,
         index_string_literal   = 5,
       };
-    using Xvariant = variant<
+    using XVariant = variant<
       ROCKET_CDR(
         , S_keyword          // 0,
         , S_punctuator       // 1,
@@ -55,22 +55,22 @@ class Token
         , S_real_literal     // 4,
         , S_string_literal   // 5,
       )>;
-    static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
+    static_assert(::std::is_nothrow_copy_assignable<XVariant>::value, "");
 
   private:
     cow_string m_file;
     long m_line;
     size_t m_offset;
     size_t m_length;
-    Xvariant m_stor;
+    XVariant m_stor;
 
   public:
-    template<typename XtokT, ASTERIA_SFINAE_CONSTRUCT(Xvariant, XtokT&&)>
+    template<typename XTokT, ASTERIA_SFINAE_CONSTRUCT(XVariant, XTokT&&)>
         Token(const cow_string& xfile, int32_t xline, size_t xoffset, size_t xlength,
-              XtokT&& xtok)
+              XTokT&& xtok)
       :
         m_file(xfile), m_line(xline), m_offset(xoffset), m_length(xlength),
-        m_stor(::rocket::forward<XtokT>(xtok))
+        m_stor(::rocket::forward<XTokT>(xtok))
       {
       }
 

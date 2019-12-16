@@ -110,15 +110,15 @@ class AVMC_Queue
     void do_append_trivial(Executor* exec, ParamU paramu, size_t nbytes, const void* source);
     void do_append_nontrivial(ref_to<const Vtable> vtbl, ParamU paramu, size_t nbytes, Constructor* ctor, intptr_t source);
 
-    template<Executor execT, nullptr_t, typename XnodeT>
-        void do_dispatch_append(::std::true_type, ParamU paramu, XnodeT&& xnode)
+    template<Executor execT, nullptr_t, typename XNodeT>
+        void do_dispatch_append(::std::true_type, ParamU paramu, XNodeT&& xnode)
       {
         // The parameter type is trivial and no vtable is required.
         // Append a node with a trivial parameter.
         this->do_append_trivial(execT, paramu, sizeof(xnode), ::std::addressof(xnode));
       }
-    template<Executor execT, Enumerator* enumT, typename XnodeT>
-        void do_dispatch_append(::std::false_type, ParamU paramu, XnodeT&& xnode)
+    template<Executor execT, Enumerator* enumT, typename XNodeT>
+        void do_dispatch_append(::std::false_type, ParamU paramu, XNodeT&& xnode)
       {
         // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real' function pointers.
         // Those converted from non-capturing lambdas are not an option.
@@ -127,13 +127,13 @@ class AVMC_Queue
             static void construct(ParamU /*paramu*/, void* params, intptr_t source)
               {
                 // Construct the bound parameter using perfect forwarding.
-                ::rocket::construct_at(static_cast<typename ::rocket::remove_cvref<XnodeT>::type*>(params),
-                                     ::rocket::forward<XnodeT>(*(typename ::std::remove_reference<XnodeT>::type*)source));
+                ::rocket::construct_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(params),
+                                     ::rocket::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));
               }
             static void destroy(ParamU /*paramu*/, void* params) noexcept
               {
                 // Destroy the bound parameter.
-                ::rocket::destroy_at(static_cast<typename ::rocket::remove_cvref<XnodeT>::type*>(params));
+                ::rocket::destroy_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(params));
               }
           };
         static constexpr Vtable s_vtbl =
@@ -180,17 +180,17 @@ class AVMC_Queue
         this->do_append_trivial(execT, paramu, 0, nullptr);
         return *this;
       }
-    template<Executor execT, typename XnodeT> AVMC_Queue& append(ParamU paramu, XnodeT&& xnode)
+    template<Executor execT, typename XNodeT> AVMC_Queue& append(ParamU paramu, XNodeT&& xnode)
       {
-        // Append a node with a parameter of type `remove_cvref_t<XnodeT>`.
-        this->do_dispatch_append<execT, nullptr>(::std::is_trivial<typename ::std::remove_reference<XnodeT>::type>(),
-                                                     paramu, ::rocket::forward<XnodeT>(xnode));
+        // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
+        this->do_dispatch_append<execT, nullptr>(::std::is_trivial<typename ::std::remove_reference<XNodeT>::type>(),
+                                                     paramu, ::rocket::forward<XNodeT>(xnode));
         return *this;
       }
-    template<Executor execT, Enumerator enumT, typename XnodeT> AVMC_Queue& append(ParamU paramu, XnodeT&& xnode)
+    template<Executor execT, Enumerator enumT, typename XNodeT> AVMC_Queue& append(ParamU paramu, XNodeT&& xnode)
       {
-        // Append a node with a parameter of type `remove_cvref_t<XnodeT>`.
-        this->do_dispatch_append<execT, enumT>(::std::false_type(), paramu, ::rocket::forward<XnodeT>(xnode));
+        // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
+        this->do_dispatch_append<execT, enumT>(::std::false_type(), paramu, ::rocket::forward<XNodeT>(xnode));
         return *this;
       }
     AVMC_Queue& append_trivial(Executor* exec, ParamU paramu, const void* data, size_t size)

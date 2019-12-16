@@ -47,9 +47,9 @@ class Variable final : public virtual Rcbase
       {
         this->m_immut = immutable;
       }
-    template<typename XvalT> void reset(XvalT&& xval, bool immutable)
+    template<typename XValT> void reset(XValT&& xval, bool immutable)
       {
-        this->m_value = ::rocket::forward<XvalT>(xval);
+        this->m_value = ::rocket::forward<XValT>(xval);
         this->m_immut = immutable;
       }
 
