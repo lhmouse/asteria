@@ -180,10 +180,9 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
     double msecs = 0;
     // Parse individual parts.
     ::rocket::ascii_numget numg;
-    const char* ep = bp;
-    uint64_t temp;
+    uint64_t temp = 0;
     // 'yyyy'
-    ep += 4;
+    const char* ep = bp + 4;
     if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 9999) || (bp != ep)) {
       return ::rocket::clear;
     }
