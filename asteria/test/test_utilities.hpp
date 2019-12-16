@@ -5,48 +5,36 @@
 #define ASTERIA_TEST_UTILITIES_HPP_
 
 #include "../src/fwd.hpp"
-#include "../src/runtime/runtime_error.hpp"
 #include "../src/utilities.hpp"
 
-#define ASTERIA_TEST_CHECK(expr_)  \
+#define ASTERIA_TEST_CHECK(expr)  \
     do {  \
       try {  \
-        if(expr_) {  \
-          /* success */  \
+        if(expr) {  \
+          /* successful */  \
           break;  \
         }  \
-        /* failure */  \
-        ::std::fprintf(stderr, "ASTERIA_TEST_CHECK() failed: %s\n  at %s:%ld\n",  \
-                               #expr_, __FILE__, (long)__LINE__);  \
-        ::std::terminate();  \
-        /* unreachable */  \
+        /* failed */  \
+        ASTERIA_TERMINATE("ASTERIA_TEST_CHECK: $1\n  failed", #expr);  \
       }  \
-      catch(::std::exception& e_) {  \
-        /* failure */  \
-        ::std::fprintf(stderr, "ASTERIA_TEST_CHECK() caught an exception: %s\n  what = %s\n  at %s:%ld\n",  \
-                               #expr_, e_.what(), __FILE__, (long)__LINE__);  \
-        ::std::terminate();  \
+      catch(::std::exception& stdex) {  \
+        /* failed */  \
+        ASTERIA_TERMINATE("ASTERIA_TEST_CHECK: $1\n  caught an exception: $2", #expr, stdex.what());  \
       }  \
       /* unreachable */  \
     } while(false)
 
-#define ASTERIA_TEST_CHECK_CATCH(expr_)  \
+#define ASTERIA_TEST_CHECK_CATCH(expr)  \
     do {  \
       try {  \
-        static_cast<void>(expr_);  \
-        /* failure */  \
+        static_cast<void>(expr);  \
+        /* failed */  \
+        ASTERIA_TERMINATE("ASTERIA_TEST_CHECK_CATCH: $1\n  didn't catch an exception", #expr);  \
       }  \
-      catch(::Asteria::Runtime_Error& e_) {  \
-        /* success */  \
+      catch(::std::exception& /*stdex*/) {  \
+        /* successful */  \
         break;  \
       }  \
-      catch(::std::exception& e_) {  \
-        /* success */  \
-        break;  \
-      }  \
-      ::std::fprintf(stderr, "ASTERIA_TEST_CHECK_CATCH() didn't catch an exception: %s\n  at %s:%ld\n",  \
-                             #expr_, __FILE__, (long)__LINE__);  \
-      ::std::terminate();  \
       /* unreachable */  \
     } while(false)
 
