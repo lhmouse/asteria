@@ -8,7 +8,7 @@
 
 namespace Asteria {
 
-bool write_log_to_stderr(const char* file, long line, cow_string&& msg, const char* trailer) noexcept
+bool write_log_to_stderr(const char* file, long line, cow_string&& msg) noexcept
   {
     ::rocket::tinyfmt_str fmt;
     fmt.set_string(cow_string(1023, '/'));
@@ -54,10 +54,6 @@ bool write_log_to_stderr(const char* file, long line, cow_string&& msg, const ch
         fmt << "[DEL]";
       else
         fmt << static_cast<char>(ch);
-    }
-    // Append the trailer.
-    if(trailer) {
-      fmt << trailer;
     }
     // Terminate the message with a line feed.
     fmt << '\n';
