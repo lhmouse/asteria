@@ -36,27 +36,27 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 
     namespace {
 
-    class Recursion_Sentry
+    class Reentrant_Guard
       {
       private:
         long m_old;
         ref_to<long> m_ref;
 
       public:
-        explicit Recursion_Sentry(ref_to<long> ref) noexcept
+        explicit Reentrant_Guard(long& ref) noexcept
           :
             m_old(ref), m_ref(ref)
           {
             this->m_ref++;
           }
-        ~Recursion_Sentry()
+        ~Reentrant_Guard()
           {
             this->m_ref--;
           }
 
-        Recursion_Sentry(const Recursion_Sentry&)
+        Reentrant_Guard(const Reentrant_Guard&)
           = delete;
-        Recursion_Sentry& operator=(const Recursion_Sentry&)
+        Reentrant_Guard& operator=(const Reentrant_Guard&)
           = delete;
 
       public:
@@ -66,7 +66,8 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
           }
       };
 
-    template<typename FuncT> class Callback_Wrapper final : public Variable_Callback
+    template<typename FuncT>
+        class Callback_Wrapper final : public Variable_Callback
       {
       private:
         FuncT m_func;  // If `FuncT` is a reference type then this is a reference.
@@ -85,7 +86,8 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
           }
       };
 
-    template<typename ContT, typename FuncT> void do_enumerate_variables(const ContT& cont, FuncT&& func)
+    template<typename ContT, typename FuncT>
+        void do_enumerate_variables(const ContT& cont, FuncT&& func)
       {
         // The callback has to be an lvalue.
         Callback_Wrapper<FuncT> callback(::rocket::forward<FuncT>(func));
@@ -100,8 +102,8 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
 Collector* Collector::collect_single_opt()
   {
     // Ignore recursive requests.
-    Recursion_Sentry sentry(::rocket::ref(this->m_recur));
-    if(!sentry) {
+    Reentrant_Guard guard(this->m_recur);
+    if(!guard) {
       return nullptr;
     }
     Collector* next = nullptr;
@@ -109,8 +111,8 @@ Collector* Collector::collect_single_opt()
     auto tied = this->m_tied_opt;
     // The algorithm here is basically described at
     //   https://pythoninternal.wordpress.com/2014/08/04/the-garbage-collector/
-    // We initialize `gcref` to zero then increment it, rather than initialize `gcref` to the reference count then decrement it.
-    // This saves a phase below for us.
+    // We initialize `gcref` to zero then increment it, rather than initialize `gcref` to
+    // the reference count then decrement it. This saves a phase below for us.
     this->m_staging.clear();
     ///////////////////////////////////////////////////////////////////////////
     // Phase 1
@@ -120,13 +122,15 @@ Collector* Collector::collect_single_opt()
     do_enumerate_variables(this->m_tracked,
       [&](const rcptr<Variable>& root) {
         // Add a variable that is reachable directly.
-        // The reference from `m_tracked` should be excluded, so we initialize the gcref counter to 1.
+        // The reference from `m_tracked` should be excluded, so we initialize the gcref
+        // counter to 1.
         root->reset_gcref(1);
         // If this variable has been inserted indirectly, finish.
         if(!this->m_staging.insert(root)) {
           return false;
         }
-        // If `root` is the last reference to this variable, it can be marked for collection immediately.
+        // If `root` is the last reference to this variable, it can be marked for collection
+        // immediately.
         auto nref = root->use_count();
         if(nref <= 1) {
           root->reset(s_defunct_value, true);
@@ -140,7 +144,8 @@ Collector* Collector::collect_single_opt()
               return false;
             }
             // Initialize the gcref counter.
-            // N.B. If this variable is encountered later from `m_tracked`, the gcref counter will be overwritten with 1.
+            // N.B. If this variable is encountered later from `m_tracked`, the gcref counter
+            // will be overwritten with 1.
             child->reset_gcref(0);
             // Decend into grandchildren.
             return true;
