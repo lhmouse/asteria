@@ -13,7 +13,7 @@ namespace Asteria {
 // Error handling
 extern bool write_log_to_stderr(const char* file, long line, cow_string&& msg, const char* trailer = "") noexcept;
 
-template<typename... ParamsT> cow_string format_string(const ParamsT&... params)
+template<typename... ParamsT> ROCKET_NOINLINE cow_string format_string(const ParamsT&... params)
   {
     ::rocket::tinyfmt_str out;
     format(out, params...);  // ADL intended
