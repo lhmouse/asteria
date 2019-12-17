@@ -53,6 +53,7 @@ class AVMC_Queue;
 // Runtime
 class Rcbase;
 class Source_Location;
+class Recursion_Sentry;
 class Value;
 class Abstract_Opaque;
 class Abstract_Function;
