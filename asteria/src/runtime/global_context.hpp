@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "../rcbase.hpp"
+#include "../recursion_sentry.hpp"
 #include "abstract_context.hpp"
 
 namespace Asteria {
@@ -13,6 +14,7 @@ namespace Asteria {
 class Global_Context final : public virtual Rcbase, public Abstract_Context
   {
   private:
+    Recursion_Sentry m_sentry;
     rcptr<Rcbase> m_prng;  // the global pseudo random number generator
     rcptr<Rcbase> m_stdv;  // the `std` variable
     rcptr<Rcbase> m_hooks_opt;  // the hook callback dispatcher
@@ -37,6 +39,20 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
     const Abstract_Context* get_parent_opt() const noexcept
       {
         return nullptr;
+      }
+
+    // This provides stack overflow protection.
+    Recursion_Sentry copy_recursion_sentry() const
+      {
+        return this->m_sentry;
+      }
+    const void* get_recursion_base() const noexcept
+      {
+        return this->m_sentry.get_base();
+      }
+    Global_Context& set_recursion_base(const void* base) noexcept
+      {
+        return this->m_sentry.set_base(base), *this;
       }
 
     // Get the maximum API version that is supported when this library is built.

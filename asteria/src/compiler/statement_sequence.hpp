@@ -24,6 +24,8 @@ class Statement_Sequence
       }
 
   public:
+    // These are accessors to the statements in this sequence.
+    // Note that the sequence cannot be modified.
     bool empty() const noexcept
       {
         return this->m_stmts.size();
@@ -32,9 +34,6 @@ class Statement_Sequence
       {
         return this->m_stmts.clear(), *this;
       }
-
-    // These are accessors to the statements in this sequence.
-    // Note that the sequence cannot be modified.
     size_t size() const noexcept
       {
         return this->m_stmts.size();
