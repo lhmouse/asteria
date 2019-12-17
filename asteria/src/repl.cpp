@@ -367,7 +367,7 @@ void do_handle_repl_command(cow_string&& cmd)
       code.clear();
       escape = false;
       line = 0;
-      ::fprintf(stderr, "#%lu:%2lu%n> ", ++index, ++line, &indent);
+      ::fprintf(stderr, "#%lu:%lu%n> ", ++index, ++line, &indent);
       ::interrupted = 0;
 
       for(;;) {
