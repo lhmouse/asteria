@@ -1780,15 +1780,15 @@ namespace Asteria {
         if(!kpunct) {
           return ::rocket::clear;
         }
-        auto qbtrue = do_accept_expression_opt(tstrm);
-        if(!qbtrue) {
+        cow_vector<Xprunit> btrue;
+        if(!do_accept_expression(btrue, tstrm)) {
           do_throw_parser_error(parser_status_expression_expected, tstrm);
         }
         kpunct = do_accept_punctuator_opt(tstrm, { punctuator_quest, punctuator_colon });
         if(!kpunct) {
           do_throw_parser_error(parser_status_colon_expected, tstrm);
         }
-        Infix_Element::S_ternary xelem = { *kpunct == punctuator_quest_eq, ::rocket::move(*qbtrue), ::rocket::clear };
+        Infix_Element::S_ternary xelem = { *kpunct == punctuator_quest_eq, ::rocket::move(btrue), ::rocket::clear };
         return ::rocket::move(xelem);
       }
 
