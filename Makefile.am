@@ -104,6 +104,7 @@ pkginclude_HEADERS =  \
   asteria/src/rcbase.hpp  \
   asteria/src/abstract_opaque.hpp  \
   asteria/src/abstract_function.hpp  \
+  asteria/src/recursion_sentry.hpp  \
   asteria/src/value.hpp  \
   asteria/src/source_location.hpp
 
@@ -169,6 +170,7 @@ lib_libasteria_la_SOURCES =  \
   asteria/src/rcbase.cpp  \
   asteria/src/abstract_opaque.cpp  \
   asteria/src/abstract_function.cpp  \
+  asteria/src/recursion_sentry.cpp  \
   asteria/src/value.cpp  \
   asteria/src/source_location.cpp  \
   asteria/src/llds/variable_hashset.cpp  \
