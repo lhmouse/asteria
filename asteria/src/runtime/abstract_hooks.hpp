@@ -18,7 +18,8 @@ class Abstract_Hooks : public virtual Rcbase
     ~Abstract_Hooks() override;
 
   public:
-    // This hook is called when a variable (mutable or immutable) or function is declared, before its initializer is evaluated.
+    // This hook is called when a variable (mutable or immutable) or function is declared,
+    // before its initializer is evaluated.
     virtual void on_variable_declare(const Source_Location& sloc, const phsh_string& inside,
                                      const phsh_string& name);
     // This hook is called before every function call (whether native or not) from Asteria.
