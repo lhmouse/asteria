@@ -5,6 +5,7 @@
 #define ASTERIA_COMPILER_TOKEN_STREAM_HPP_
 
 #include "../fwd.hpp"
+#include "../recursion_sentry.hpp"
 #include "token.hpp"
 
 namespace Asteria {
@@ -12,16 +13,16 @@ namespace Asteria {
 class Token_Stream
   {
   private:
+    Recursion_Sentry m_sentry;
     cow_vector<Token> m_rtoks;  // Tokens are stored in reverse order.
 
   public:
     Token_Stream() noexcept
-      :
-        m_rtoks()
       {
       }
 
   public:
+    // These are accessors and modifiers of tokens in this stream.
     bool empty() const noexcept
       {
         return this->m_rtoks.empty();
@@ -30,8 +31,6 @@ class Token_Stream
       {
         return this->m_rtoks.clear(), *this;
       }
-
-    // These are accessors and modifiers of tokens in this stream.
     size_t size() const noexcept
       {
         return this->m_rtoks.size();
@@ -43,6 +42,20 @@ class Token_Stream
     Token_Stream& shift(size_t count = 1)
       {
         return this->m_rtoks.pop_back(count), *this;
+      }
+
+    // This provides stack overflow protection.
+    Recursion_Sentry copy_recursion_sentry() const
+      {
+        return this->m_sentry;
+      }
+    const void* get_recursion_base() const noexcept
+      {
+        return this->m_sentry.get_base();
+      }
+    Token_Stream& set_recursion_base(const void* base) noexcept
+      {
+        return this->m_sentry.set_base(base), *this;
       }
 
     // This function parses characters from the input stream and fills tokens into `*this`.

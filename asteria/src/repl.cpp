@@ -544,6 +544,8 @@ int main(int argc, char** argv)
     if(::cmdline.verbose) {
       global.set_hooks(::rocket::make_refcnt<Debug_Hooks>());
     }
+    // Protect against stack overflows.
+    global.set_recursion_base(&argc);
 
     // Call other functions which are declared `noreturn`. `main()` itself is not `noreturn` so we
     // don't get stupid warngings like 'function declared `noreturn` has a `return` statement'.

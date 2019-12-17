@@ -1210,6 +1210,8 @@ namespace Asteria {
 
     opt<Statement> do_accept_statement_opt(Token_Stream& tstrm)
       {
+        // Check for stack overflows.
+        const auto sentry = tstrm.copy_recursion_sentry();
         // statement ::=
         //   block | nonblock-statement
         auto qstmt = do_accept_block_statement_opt(tstrm);
@@ -1225,6 +1227,8 @@ namespace Asteria {
 
     opt<cow_vector<Statement>> do_accept_statement_as_block_opt(Token_Stream& tstrm)
       {
+        // Check for stack overflows.
+        const auto sentry = tstrm.copy_recursion_sentry();
         // statement ::=
         //   block | nonblock-statement
         auto qblock = do_accept_block_opt(tstrm);
@@ -1932,6 +1936,8 @@ namespace Asteria {
 
     bool do_accept_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)
       {
+        // Check for stack overflows.
+        const auto sentry = tstrm.copy_recursion_sentry();
         // expression ::=
         //   infix-head infix-carriage-list-opt
         // infix-carriage-list-opt ::=

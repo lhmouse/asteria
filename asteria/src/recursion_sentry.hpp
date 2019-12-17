@@ -40,6 +40,9 @@ class Recursion_Sentry
         if(ROCKET_UNEXPECT(usage >= max_stack_usage))
           this->do_throw_stack_overflow(usage, max_stack_usage);
       }
+    ~Recursion_Sentry()
+      {
+      }
     Recursion_Sentry& operator=(const Recursion_Sentry&)  // not assignable
       = delete;
 

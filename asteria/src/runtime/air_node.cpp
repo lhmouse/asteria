@@ -1015,6 +1015,8 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& tco_aware = static_cast<TCO_Aware>(paramu.u8s[0]);
         const auto& inside = ctx.zvarg().func();
 
+        // Check for stack overflows.
+        const auto sentry = ctx.global().copy_recursion_sentry();
         // Pop arguments off the stack backwards.
         cow_vector<Reference> args;
         args.resize(args_by_refs.size());
