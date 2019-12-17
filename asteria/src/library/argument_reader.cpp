@@ -18,7 +18,7 @@ template<typename HandlerT> void Argument_Reader::do_fail(HandlerT&& handler)
 void Argument_Reader::do_record_parameter_required(Gtype gtype)
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("argument sentry finished and disposed");
+      ASTERIA_THROW("argument reader finished and disposed");
     }
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", " << describe_gtype(gtype);
@@ -28,7 +28,7 @@ void Argument_Reader::do_record_parameter_required(Gtype gtype)
 void Argument_Reader::do_record_parameter_optional(Gtype gtype)
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("argument sentry finished and disposed");
+      ASTERIA_THROW("argument reader finished and disposed");
     }
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", [" << describe_gtype(gtype) << ']';
@@ -38,7 +38,7 @@ void Argument_Reader::do_record_parameter_optional(Gtype gtype)
 void Argument_Reader::do_record_parameter_generic()
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("argument sentry finished and disposed");
+      ASTERIA_THROW("argument reader finished and disposed");
     }
     // Record a parameter and increment the number of parameters in total.
     this->m_state.history << ", <generic>";
@@ -48,7 +48,7 @@ void Argument_Reader::do_record_parameter_generic()
 void Argument_Reader::do_record_parameter_variadic()
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("argument sentry finished and disposed");
+      ASTERIA_THROW("argument reader finished and disposed");
     }
     // Terminate the parameter list.
     this->m_state.history << ", ...";
@@ -57,7 +57,7 @@ void Argument_Reader::do_record_parameter_variadic()
 void Argument_Reader::do_record_parameter_finish()
   {
     if(this->m_state.finished) {
-      ASTERIA_THROW("argument sentry finished and disposed");
+      ASTERIA_THROW("argument reader finished and disposed");
     }
     // Terminate this overload.
     this->m_state.history.push_back('\0');
