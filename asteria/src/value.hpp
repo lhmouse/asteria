@@ -15,15 +15,15 @@ class Value
   public:
     using Xvariant = variant<
       ROCKET_CDR(
-        , G_null      // 0,
-        , G_boolean   // 1,
-        , G_integer   // 2,
-        , G_real      // 3,
-        , G_string    // 4,
-        , G_opaque    // 5,
-        , G_function  // 6,
-        , G_array     // 7,
-        , G_object    // 8,
+      , G_null      // 0,
+      , G_boolean   // 1,
+      , G_integer   // 2,
+      , G_real      // 3,
+      , G_string    // 4,
+      , G_opaque    // 5,
+      , G_function  // 6,
+      , G_array     // 7,
+      , G_object    // 8,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 

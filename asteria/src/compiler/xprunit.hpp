@@ -81,17 +81,17 @@ class Xprunit
       };
     using Xvariant = variant<
       ROCKET_CDR(
-        , S_literal           //  0,
-        , S_named_reference   //  1,
-        , S_closure_function  //  2,
-        , S_branch            //  3,
-        , S_function_call     //  4,
-        , S_member_access     //  5,
-        , S_operator_rpn      //  6,
-        , S_unnamed_array     //  7,
-        , S_unnamed_object    //  8,
-        , S_coalescence       //  9,
-        , S_operator_fma      // 10,
+      , S_literal           //  0,
+      , S_named_reference   //  1,
+      , S_closure_function  //  2,
+      , S_branch            //  3,
+      , S_function_call     //  4,
+      , S_member_access     //  5,
+      , S_operator_rpn      //  6,
+      , S_unnamed_array     //  7,
+      , S_unnamed_object    //  8,
+      , S_coalescence       //  9,
+      , S_operator_fma      // 10,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 

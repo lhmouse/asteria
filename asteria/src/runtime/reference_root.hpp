@@ -45,11 +45,11 @@ class Reference_Root
       };
     using Xvariant = variant<
       ROCKET_CDR(
-        , S_null       // 0,
-        , S_constant   // 1,
-        , S_temporary  // 2,
-        , S_variable   // 3,
-        , S_tail_call  // 4,
+      , S_null       // 0,
+      , S_constant   // 1,
+      , S_temporary  // 2,
+      , S_variable   // 3,
+      , S_tail_call  // 4,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 
