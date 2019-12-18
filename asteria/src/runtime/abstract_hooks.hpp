@@ -33,6 +33,10 @@ class Abstract_Hooks : public virtual Rcbase
     // N.B. It is suggested that you should not throw exceptions from this hook.
     virtual void on_function_except(const Source_Location& sloc, const phsh_string& inside,
                                     const Runtime_Error& except);
+    // This hook is called before every statement, condition, etc.
+    // Be advised that single-step traps require code generation support, which can be
+    // disabled by setting `no_single_step_traps` in `Compiler_Options`.
+    virtual void on_single_step_trap(const Source_Location& sloc, const phsh_string& inside);
   };
 
 }  // namespace Asteria

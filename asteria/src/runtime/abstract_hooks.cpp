@@ -31,4 +31,8 @@ void Abstract_Hooks::on_function_except(const Source_Location& /*sloc*/, const p
   {
   }
 
+void Abstract_Hooks::on_single_step_trap(const Source_Location& /*sloc*/, const phsh_string& /*inside*/)
+  {
+  }
+
 }  // namespace Asteria
