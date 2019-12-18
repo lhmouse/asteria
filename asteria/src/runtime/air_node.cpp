@@ -876,14 +876,12 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& msg = do_pcast<Params_sloc_msg>(params)->msg;
 
         // Check the value of the condition.
-        if(ctx.stack().get_top().read().test() != negative) {
+        if(ROCKET_EXPECT(ctx.stack().get_top().read().test() != negative)) {
           // When the assertion succeeds, there is nothing to do.
           return air_status_next;
         }
         // Throw a `runtime_error`.
-        ::rocket::sprintf_and_throw<::std::runtime_error>("assertion failure: %s\n"
-                                                      "[declared at '%s:%ld']",
-                                                      msg.c_str(), sloc.file().c_str(), sloc.line());
+        ASTERIA_THROW("assertion failure: $1\n[declared at '$2']", msg, sloc);
       }
 
     AIR_Status do_simple_status(Executive_Context& /*ctx*/, ParamU paramu, const void* /*params*/)
