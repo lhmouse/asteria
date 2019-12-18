@@ -579,7 +579,8 @@ namespace Asteria {
         if(!qbody) {
           do_throw_parser_error(parser_status_open_brace_expected, tstrm);
         }
-        Statement::S_function xstmt = { ::rocket::move(sloc), ::rocket::move(*qname), ::rocket::move(*kparams), ::rocket::move(*qbody) };
+        Statement::S_function xstmt = { ::rocket::move(sloc), ::rocket::move(*qname), ::rocket::move(*kparams),
+                                        ::rocket::move(*qbody) };
         return ::rocket::move(xstmt);
       }
 
@@ -830,7 +831,8 @@ namespace Asteria {
         if(!qbody) {
           do_throw_parser_error(parser_status_statement_expected, tstrm);
         }
-        Statement::S_for_each xstmt = { ::rocket::move(*qkname), ::rocket::move(*qmname), ::rocket::move(*qinit), ::rocket::move(*qbody) };
+        Statement::S_for_each xstmt = { ::rocket::move(*qkname), ::rocket::move(*qmname), ::rocket::move(*qinit),
+                                        ::rocket::move(*qbody) };
         return ::rocket::move(xstmt);
       }
 
@@ -883,7 +885,8 @@ namespace Asteria {
         }
         cow_vector<Statement> rvinit;
         rvinit.emplace_back(::rocket::move(*qinit));
-        Statement::S_for xstmt = { ::rocket::move(rvinit), ::rocket::move(*qcond), ::rocket::move(*kstep), ::rocket::move(*qbody) };
+        Statement::S_for xstmt = { ::rocket::move(rvinit), ::rocket::move(*qcond), ::rocket::move(*kstep),
+                                   ::rocket::move(*qbody) };
         return ::rocket::move(xstmt);
       }
 
@@ -1128,7 +1131,8 @@ namespace Asteria {
         if(!qbcatch) {
           do_throw_parser_error(parser_status_statement_expected, tstrm);
         }
-        Statement::S_try xstmt = { ::rocket::move(*qbtry), ::rocket::move(sloc), ::rocket::move(*kexcept), ::rocket::move(*qbcatch) };
+        Statement::S_try xstmt = { ::rocket::move(*qbtry), ::rocket::move(sloc), ::rocket::move(*kexcept),
+                                   ::rocket::move(*qbcatch) };
         return ::rocket::move(xstmt);
       }
 
