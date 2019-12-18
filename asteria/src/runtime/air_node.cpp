@@ -2649,7 +2649,7 @@ DCE_Result AIR_Node::optimize_dce()
         // Call the hook function if any.
         auto qh = ctx.global().get_hooks_opt();
         if(qh) {
-          qh->on_single_step_trap(sloc, inside);
+          qh->on_single_step_trap(sloc, inside, ctx);
         }
         return air_status_next;
       }

@@ -36,7 +36,8 @@ class Abstract_Hooks : public virtual Rcbase
     // This hook is called before every statement, condition, etc.
     // Be advised that single-step traps require code generation support, which can be
     // disabled by setting `no_single_step_traps` in `Compiler_Options`.
-    virtual void on_single_step_trap(const Source_Location& sloc, const phsh_string& inside);
+    virtual void on_single_step_trap(const Source_Location& sloc, const phsh_string& inside,
+                                     Executive_Context& ctx);
   };
 
 }  // namespace Asteria

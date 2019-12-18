@@ -172,7 +172,8 @@ struct REPL_Hooks : Abstract_Hooks
                           sloc.c_file(), sloc.line(), inside.c_str(),
                           do_stringify(except).c_str());
       }
-    void on_single_step_trap(const Source_Location& sloc, const phsh_string& inside)
+    void on_single_step_trap(const Source_Location& sloc, const phsh_string& inside,
+                             Executive_Context& /*ctx*/)
       {
         if(ROCKET_EXPECT(!::interrupted)) {
           return;
