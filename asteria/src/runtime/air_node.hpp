@@ -167,6 +167,10 @@ class AIR_Node
         Source_Location sloc;
         phsh_string name;
       };
+    struct S_single_step_trap
+      {
+        Source_Location sloc;
+      };
 
     enum Index : uint8_t
       {
@@ -200,6 +204,7 @@ class AIR_Node
         index_unpack_struct_array    = 27,
         index_unpack_struct_object   = 28,
         index_define_null_variable   = 29,
+        index_single_step_trap       = 30,
       };
     using Xvariant = variant<
       ROCKET_CDR(
@@ -233,6 +238,7 @@ class AIR_Node
       , S_unpack_struct_array    // 27,
       , S_unpack_struct_object   // 28,
       , S_define_null_variable   // 29,
+      , S_single_step_trap       // 30,
       )>;
     static_assert(::std::is_nothrow_copy_assignable<Xvariant>::value, "");
 

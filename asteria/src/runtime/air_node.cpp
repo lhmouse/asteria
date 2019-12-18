@@ -2640,6 +2640,20 @@ DCE_Result AIR_Node::optimize_dce()
         return air_status_next;
       }
 
+    AIR_Status do_single_step_trap(Executive_Context& ctx, ParamU /*paramu*/, const void* params)
+      {
+        // Unpack arguments.
+        const auto& sloc = do_pcast<Params_sloc>(params)->sloc;
+        const auto& inside = ctx.zvarg().func();
+
+        // Call the hook function if any.
+        auto qh = ctx.global().get_hooks_opt();
+        if(qh) {
+          qh->on_single_step_trap(sloc, inside);
+        }
+        return air_status_next;
+      }
+
     }
 
 AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
@@ -3253,6 +3267,19 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         avmcp.name = altr.name;
         // Push a new node.
         return avmcp.output<do_define_null_variable>(queue);
+      }{
+    case index_single_step_trap:
+        const auto& altr = this->m_stor.as<index_single_step_trap>();
+        // `paramu.u8s[0]` is unused.
+        // `params` points to the source location.
+        AVMC_Appender<Params_sloc> avmcp;
+        if(ipass == 0) {
+          return avmcp.request(queue);
+        }
+        // Encode arguments.
+        avmcp.sloc = altr.sloc;
+        // Push a new node.
+        return avmcp.output<do_single_step_trap>(queue);
       }}
     default:
       ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
