@@ -177,7 +177,7 @@ struct REPL_Hooks : Abstract_Hooks
         if(ROCKET_EXPECT(!::interrupted)) {
           return;
         }
-        ASTERIA_THROW("interrupt\n[received at '$1' inside `$2`]", sloc, inside);
+        ASTERIA_THROW("interrupt received\n[received at '$1' inside `$2`]", sloc, inside);
       }
   };
 

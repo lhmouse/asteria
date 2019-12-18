@@ -14,18 +14,20 @@ class Statement
   public:
     struct S_expression
       {
-        cow_vector<Xprunit> expr;
+        Source_Location sloc;
+        cow_vector<Xprunit> units;
       };
     struct S_block
       {
-        cow_vector<Statement> body;
+        Source_Location sloc;
+        cow_vector<Statement> stmts;
       };
     struct S_variables
       {
         bool immutable;
         cow_vector<Source_Location> slocs;
         cow_vector<cow_vector<phsh_string>> decls;
-        cow_vector<cow_vector<Xprunit>> inits;
+        cow_vector<S_expression> inits;
       };
     struct S_function
       {
@@ -37,72 +39,72 @@ class Statement
     struct S_if
       {
         bool negative;
-        cow_vector<Xprunit> cond;
-        cow_vector<Statement> branch_true;
-        cow_vector<Statement> branch_false;
+        S_expression cond;
+        S_block branch_true;
+        S_block branch_false;
       };
     struct S_switch
       {
-        cow_vector<Xprunit> ctrl;
-        cow_vector<cow_vector<Xprunit>> labels;
-        cow_vector<cow_vector<Statement>> bodies;
+        S_expression ctrl;
+        cow_vector<S_expression> labels;
+        cow_vector<S_block> bodies;
       };
     struct S_do_while
       {
-        cow_vector<Statement> body;
+        S_block body;
         bool negative;
-        cow_vector<Xprunit> cond;
+        S_expression cond;
       };
     struct S_while
       {
         bool negative;
-        cow_vector<Xprunit> cond;
-        cow_vector<Statement> body;
+        S_expression cond;
+        S_block body;
       };
     struct S_for_each
       {
         phsh_string name_key;
         phsh_string name_mapped;
-        cow_vector<Xprunit> init;
-        cow_vector<Statement> body;
+        S_expression init;
+        S_block body;
       };
     struct S_for
       {
-        cow_vector<Statement> init;
-        cow_vector<Xprunit> cond;
-        cow_vector<Xprunit> step;
-        cow_vector<Statement> body;
+        S_block init;
+        S_expression cond;
+        S_expression step;
+        S_block body;
       };
     struct S_try
       {
-        cow_vector<Statement> body_try;
+        S_block body_try;
         Source_Location sloc;
         phsh_string name_except;
-        cow_vector<Statement> body_catch;
+        S_block body_catch;
       };
     struct S_break
       {
+        Source_Location sloc;
         Jump_Target target;
       };
     struct S_continue
       {
+        Source_Location sloc;
         Jump_Target target;
       };
     struct S_throw
       {
-        Source_Location sloc;
-        cow_vector<Xprunit> expr;
+        S_expression expr;
       };
     struct S_return
       {
         bool by_ref;
-        cow_vector<Xprunit> expr;
+        S_expression expr;
       };
     struct S_assert
       {
-        Source_Location sloc;
         bool negative;
-        cow_vector<Xprunit> expr;
+        S_expression expr;
         cow_string msg;
       };
 
@@ -168,7 +170,7 @@ class Statement
       }
     bool is_empty_return() const noexcept
       {
-        return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.empty();
+        return (this->m_stor.index() == index_return) && this->m_stor.as<index_return>().expr.units.empty();
       }
 
     Statement& swap(Statement& other) noexcept

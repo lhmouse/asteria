@@ -32,6 +32,13 @@ namespace Asteria {
         ctx.open_named_reference(name) /*= Reference_Root::S_null()*/;
       }
 
+    cow_vector<AIR_Node>& do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Source_Location& sloc)
+      {
+        AIR_Node::S_single_step_trap xnode = { sloc };
+        code.emplace_back(::rocket::move(xnode));
+        return code;
+      }
+
     cow_vector<AIR_Node>& do_generate_clear_stack(cow_vector<AIR_Node>& code)
       {
         AIR_Node::S_clear_stack xnode = { };
@@ -41,57 +48,63 @@ namespace Asteria {
 
     cow_vector<AIR_Node>& do_generate_expression_partial(cow_vector<AIR_Node>& code,
                                                          const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
-                                                         const cow_vector<Xprunit>& units)
+                                                         const Statement::S_expression& expr)
       {
-        size_t epos = units.size() - 1;
+        size_t epos = expr.units.size() - 1;
         if(epos != SIZE_MAX) {
+          // Generate a single-step trap unless disabled.
+          if(!opts.no_single_step_traps) {
+            do_generate_single_step_trap(code, expr.sloc);
+          }
           // Expression units other than the last one cannot be TCO'd.
           for(size_t i = 0; i != epos; ++i) {
-            units[i].generate_code(code, opts, tco_aware_none, ctx);
+            expr.units[i].generate_code(code, opts, tco_aware_none, ctx);
           }
-          // The last unit may be TCO'd.
-          units[epos].generate_code(code, opts, tco_aware, ctx);
+          expr.units[epos].generate_code(code, opts, tco_aware, ctx);
         }
         return code;
       }
 
     cow_vector<AIR_Node> do_generate_expression_partial(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
-                                                        const cow_vector<Xprunit>& units)
+                                                        const Statement::S_expression& expr)
       {
         cow_vector<AIR_Node> code;
-        do_generate_expression_partial(code, opts, tco_aware, ctx, units);
+        do_generate_expression_partial(code, opts, tco_aware, ctx, expr);
         return code;
       }
 
     cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                     const Compiler_Options& opts, TCO_Aware tco_aware, const cow_vector<Statement>& stmts)
+                                                     const Compiler_Options& opts, TCO_Aware tco_aware, const Statement::S_block& block)
       {
-        size_t epos = stmts.size() - 1;
+        size_t epos = block.stmts.size() - 1;
         if(epos != SIZE_MAX) {
+          // Generate a single-step trap unless disabled.
+          if(!opts.no_single_step_traps) {
+            do_generate_single_step_trap(code, block.sloc);
+          }
           // Statements other than the last one cannot be the end of function.
           for(size_t i = 0; i != epos; ++i) {
-            stmts[i].generate_code(code, names_opt, ctx, opts, stmts[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
+            block.stmts[i].generate_code(code, names_opt, ctx, opts, block.stmts[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
           }
-          // The last statement may be TCO'd.
-          stmts[epos].generate_code(code, names_opt, ctx, opts, tco_aware);
+          block.stmts[epos].generate_code(code, names_opt, ctx, opts, tco_aware);
         }
         return code;
       }
 
     cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                    const Compiler_Options& opts, TCO_Aware tco_aware, const cow_vector<Statement>& stmts)
+                                                    const Compiler_Options& opts, TCO_Aware tco_aware, const Statement::S_block& block)
       {
         cow_vector<AIR_Node> code;
-        do_generate_statement_list(code, names_opt, ctx, opts, tco_aware, stmts);
+        do_generate_statement_list(code, names_opt, ctx, opts, tco_aware, block);
         return code;
       }
 
     cow_vector<AIR_Node> do_generate_block(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
-                                           const cow_vector<Statement>& stmts)
+                                           const Statement::S_block& block)
       {
         // Create a new context for the block. No new names are injected into `ctx`.
         Analytic_Context ctx_stmts(::rocket::ref(ctx));
-        auto code = do_generate_statement_list(nullptr, ctx_stmts, opts, tco_aware, stmts);
+        auto code = do_generate_statement_list(nullptr, ctx_stmts, opts, tco_aware, block);
         return code;
       }
 
@@ -104,21 +117,24 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
       {{
     case index_expression:
         const auto& altr = this->m_stor.as<index_expression>();
-        if(altr.expr.empty()) {
+        if(altr.units.empty()) {
           // If the expression is empty, don't bother doing anything.
           return code;
         }
         // Clear the stack.
         do_generate_clear_stack(code);
         // Evaluate the expression. Its value is discarded.
-        do_generate_expression_partial(code, opts, tco_aware, ctx, altr.expr);
+        do_generate_expression_partial(code, opts, tco_aware, ctx, altr);
         return code;
       }{
     case index_block:
         const auto& altr = this->m_stor.as<index_block>();
-        // Generate code for the body.
-        // This can be TCO'd.
-        auto code_body = do_generate_block(opts, tco_aware, ctx, altr.body);
+        if(altr.stmts.empty()) {
+          // If the block is empty, don't bother doing anything.
+          return code;
+        }
+        // Generate code for the body. This can be TCO'd.
+        auto code_body = do_generate_block(opts, tco_aware, ctx, altr);
         // Encode arguments.
         AIR_Node::S_execute_block xnode = { ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode));
@@ -140,7 +156,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             do_user_declare(names_opt, ctx, name, "variable placeholder");
           }
           // Declare the variables which will have been initialized to `null`.
-          if(altr.inits[i].empty()) {
+          if(altr.inits[i].units.empty()) {
             // If no initializer is provided, no further initialization is required.
             for(const auto& name : altr.decls[i]) {
               if(::rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
@@ -209,7 +225,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Clear the stack.
         do_generate_clear_stack(code);
         // Generate code for the condition.
-        ROCKET_ASSERT(!altr.cond.empty());
+        ROCKET_ASSERT(!altr.cond.units.empty());
         do_generate_expression_partial(code, opts, tco_aware_none, ctx, altr.cond);
         // The result will have been pushed onto the top of the stack.
         // Generate code for both branches.
@@ -226,7 +242,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Clear the stack.
         do_generate_clear_stack(code);
         // Generate code for the control expression.
-        ROCKET_ASSERT(!altr.ctrl.empty());
+        ROCKET_ASSERT(!altr.ctrl.units.empty());
         do_generate_expression_partial(code, opts, tco_aware_none, ctx, altr.ctrl);
         // Generate code for all clauses.
         cow_vector<cow_vector<AIR_Node>> code_labels;
@@ -244,7 +260,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
           do_generate_expression_partial(code_labels.emplace_back(), opts, tco_aware_none, ctx_body, altr.labels[i]);
           // Generate code for the clause and accumulate names.
           // This cannot be TCO'd.
-          do_generate_statement_list(code_bodies.emplace_back(), ::std::addressof(names), ctx_body, opts, tco_aware_none, altr.bodies[i]);
+          do_generate_statement_list(code_bodies.emplace_back(), &names, ctx_body, opts, tco_aware_none, altr.bodies[i]);
           names_added.emplace_back(names);
         }
         // Encode arguments.
@@ -258,7 +274,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Loop statements cannot be TCO'd.
         auto code_body = do_generate_block(opts, tco_aware_none, ctx, altr.body);
         // Generate code for the condition.
-        ROCKET_ASSERT(!altr.cond.empty());
+        ROCKET_ASSERT(!altr.cond.units.empty());
         auto code_cond = do_generate_expression_partial(opts, tco_aware_none, ctx, altr.cond);
         // Encode arguments.
         AIR_Node::S_do_while_statement xnode = { ::rocket::move(code_body), altr.negative, ::rocket::move(code_cond) };
@@ -268,7 +284,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     case index_while:
         const auto& altr = this->m_stor.as<index_while>();
         // Generate code for the condition.
-        ROCKET_ASSERT(!altr.cond.empty());
+        ROCKET_ASSERT(!altr.cond.units.empty());
         auto code_cond = do_generate_expression_partial(opts, tco_aware_none, ctx, altr.cond);
         // Generate code for the body.
         // Loop statements cannot be TCO'd.
@@ -285,7 +301,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         do_user_declare(names_opt, ctx_for, altr.name_key, "key placeholder");
         do_user_declare(names_opt, ctx_for, altr.name_mapped, "value placeholder");
         // Generate code for the range initializer.
-        ROCKET_ASSERT(!altr.init.empty());
+        ROCKET_ASSERT(!altr.init.units.empty());
         auto code_init = do_generate_expression_partial(opts, tco_aware_none, ctx_for, altr.init);
         // Generate code for the body.
         // Loop statements cannot be TCO'd.
@@ -329,6 +345,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
       }{
     case index_break:
         const auto& altr = this->m_stor.as<index_break>();
+        // Generate a single-step trap unless disabled.
+        if(!opts.no_single_step_traps) {
+          do_generate_single_step_trap(code, altr.sloc);
+        }
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
           {{
@@ -358,6 +378,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
       }{
     case index_continue:
         const auto& altr = this->m_stor.as<index_continue>();
+        // Generate a single-step trap unless disabled.
+        if(!opts.no_single_step_traps) {
+          do_generate_single_step_trap(code, altr.sloc);
+        }
         // Translate jump targets to AIR status codes.
         switch(altr.target) {
           {{
@@ -386,10 +410,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     case index_throw:
         const auto& altr = this->m_stor.as<index_throw>();
         // Generate code for the operand.
-        ROCKET_ASSERT(!altr.expr.empty());
+        ROCKET_ASSERT(!altr.expr.units.empty());
         do_generate_expression_partial(code, opts, tco_aware_none, ctx, altr.expr);
         // Encode arguments.
-        AIR_Node::S_throw_statement xnode = { altr.sloc };
+        AIR_Node::S_throw_statement xnode = { altr.expr.sloc };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
@@ -398,7 +422,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Clear the stack.
         do_generate_clear_stack(code);
         // We don't tell empty return statements from non-empty ones here.
-        if(altr.expr.empty()) {
+        if(altr.expr.units.empty()) {
           // If no expression is provided, return `null`.
           AIR_Node::S_push_literal xnode_def = { nullptr };
           code.emplace_back(::rocket::move(xnode_def));
@@ -427,10 +451,10 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     case index_assert:
         const auto& altr = this->m_stor.as<index_assert>();
         // Generate code for the operand.
-        ROCKET_ASSERT(!altr.expr.empty());
+        ROCKET_ASSERT(!altr.expr.units.empty());
         do_generate_expression_partial(code, opts, tco_aware_none, ctx, altr.expr);
         // Encode arguments.
-        AIR_Node::S_assert_statement xnode = { altr.sloc, altr.negative, altr.msg };
+        AIR_Node::S_assert_statement xnode = { altr.expr.sloc, altr.negative, altr.msg };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }}
