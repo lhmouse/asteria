@@ -25,14 +25,9 @@ class Source_Location
         m_file(::rocket::move(xfile)), m_line(xline)
       {
       }
-    template<typename... PairT> Source_Location(const pair<PairT...>& xpair) noexcept
+    Source_Location(pair<cow_string, long> pair) noexcept
       :
-        m_file(xpair.first), m_line(xpair.second)
-      {
-      }
-    template<typename... PairT> Source_Location(pair<PairT...>&& xpair) noexcept
-      :
-        m_file(::rocket::move(xpair.first)), m_line(xpair.second)
+        m_file(::rocket::move(pair.first)), m_line(pair.second)
       {
       }
 
