@@ -347,9 +347,9 @@ DCE_Result AIR_Node::optimize_dce()
         // 1) It provides storage for `__file`, `__line` and `__func` for its parent function.
         auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(sloc, ::rocket::move(func));
 
-        // Generate IR nodes for the function body.
         cow_vector<AIR_Node> code_func;
         Analytic_Context ctx_func(ctx_opt, params);
+        // Generate IR nodes for the function body.
         epos = body.size() - 1;
         if(epos != SIZE_MAX) {
           for(size_t i = 0; i != epos; ++i) {
@@ -358,11 +358,9 @@ DCE_Result AIR_Node::optimize_dce()
           body[epos].generate_code(code_func, nullptr, ctx_func, opts, tco_aware_nullify);
         }
         // Optimize the body.
+        // Note that `no_optimization`, if set, suppresses ALL optimizations, even those explicitly enabled.
         if(!opts.no_optimization) {
-          // Note that `no_optimization`, if set, suppresses ALL optimizations, even those explicitly enabled.
-
           // TODO: Insert more optimization passes here.
-
           if(!opts.no_dead_code_elimination) {
             do_dce_recurse(code_func);
           }
