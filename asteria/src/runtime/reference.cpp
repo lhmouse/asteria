@@ -73,9 +73,18 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     cow_vector<rcptr<Tail_Call_Arguments>> frames;
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     TCO_Aware tco_conj = tco_aware_by_ref;
+    // Prepare hooks.
+    const auto& qhooks = global.get_hooks_opt();
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
+      // Unpack a frame.
       auto& tca = frames.emplace_back(this->m_root.as_tail_call());
+      const auto& sloc = tca->sloc();
+      const auto& inside = tca->inside();
+      // Generate a single-step trap.
+      if(qhooks) {
+        qhooks->on_single_step_trap(sloc, inside, nullptr);
+      }
       // Tell out how to forward the result.
       if((tca->tco_aware() == tco_aware_by_val) && (tco_conj == tco_aware_by_ref)) {
         tco_conj = tco_aware_by_val;
@@ -89,24 +98,20 @@ Reference& Reference::do_finish_call(const Global_Context& global)
       auto args = ::rocket::move(tca->open_arguments_and_self());
       *this = ::rocket::move(args.mut_back());
       args.pop_back();
-      // Call the function now.
-      const auto& sloc = tca->sloc();
-      const auto& inside = tca->inside();
       // Call the hook function if any.
-      auto qh = global.get_hooks_opt();
-      if(qh) {
-        qh->on_function_call(sloc, inside, target);
+      if(qhooks) {
+        qhooks->on_function_call(sloc, inside, target);
       }
+      // Unwrap the function call.
       try {
-        // Unwrap the function call.
         target->invoke(*this, global, ::rocket::move(args));
       }
       catch(Runtime_Error& except) {
         // Append all frames that have been expanded so far and rethrow the exception.
         ::std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
-        if(qh) {
-          qh->on_function_except(sloc, inside, except);
+        if(qhooks) {
+          qhooks->on_function_except(sloc, inside, except);
         }
         throw;
       }
@@ -115,14 +120,14 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         Runtime_Error except(stdex);
         ::std::for_each(frames.rbegin(), frames.rend(), [&](const auto& p) { except.push_frame_func(p->sloc(), p->inside());  });
         // Call the hook function if any.
-        if(qh) {
-          qh->on_function_except(sloc, inside, except);
+        if(qhooks) {
+          qhooks->on_function_except(sloc, inside, except);
         }
         throw except;
       }
       // Call the hook function if any.
-      if(qh) {
-        qh->on_function_return(sloc, inside, *this);
+      if(qhooks) {
+        qhooks->on_function_return(sloc, inside, *this);
       }
     }
     if(tco_conj == tco_aware_by_val) {

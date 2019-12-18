@@ -173,7 +173,7 @@ struct REPL_Hooks : Abstract_Hooks
                           do_stringify(except).c_str());
       }
     void on_single_step_trap(const Source_Location& sloc, const phsh_string& inside,
-                             Executive_Context& /*ctx*/)
+                             Executive_Context* /*ctx*/) override
       {
         if(ROCKET_EXPECT(!::interrupted)) {
           return;

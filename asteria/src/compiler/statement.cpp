@@ -53,7 +53,7 @@ namespace Asteria {
         size_t epos = expr.units.size() - 1;
         if(epos != SIZE_MAX) {
           // Generate a single-step trap unless disabled.
-          if(!opts.no_single_step_traps) {
+          if(!opts.no_plain_single_step_traps) {
             do_generate_single_step_trap(code, expr.sloc);
           }
           // Expression units other than the last one cannot be TCO'd.
@@ -79,7 +79,7 @@ namespace Asteria {
         size_t epos = block.stmts.size() - 1;
         if(epos != SIZE_MAX) {
           // Generate a single-step trap unless disabled.
-          if(!opts.no_single_step_traps) {
+          if(!opts.no_plain_single_step_traps) {
             do_generate_single_step_trap(code, block.sloc);
           }
           // Statements other than the last one cannot be the end of function.
@@ -346,7 +346,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     case index_break:
         const auto& altr = this->m_stor.as<index_break>();
         // Generate a single-step trap unless disabled.
-        if(!opts.no_single_step_traps) {
+        if(!opts.no_plain_single_step_traps) {
           do_generate_single_step_trap(code, altr.sloc);
         }
         // Translate jump targets to AIR status codes.
@@ -379,7 +379,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
     case index_continue:
         const auto& altr = this->m_stor.as<index_continue>();
         // Generate a single-step trap unless disabled.
-        if(!opts.no_single_step_traps) {
+        if(!opts.no_plain_single_step_traps) {
           do_generate_single_step_trap(code, altr.sloc);
         }
         // Translate jump targets to AIR status codes.

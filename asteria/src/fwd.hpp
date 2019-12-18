@@ -516,8 +516,8 @@ template<> struct Compiler_Options_fragment<1>
     bool no_optimization : 1;
     // Do not remove unreachable or insignificant code.
     bool no_dead_code_elimination : 1;
-    // Do not generate code for single-step traps.
-    bool no_single_step_traps : 1;
+    // Do not generate code for single-step traps other than on function calls.
+    bool no_plain_single_step_traps : 1;
 
     // Note: Please keep this struct as compact as possible.
   };

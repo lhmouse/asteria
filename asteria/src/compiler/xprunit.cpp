@@ -23,13 +23,12 @@ namespace Asteria {
                                                  const cow_vector<Xprunit>& units)
       {
         cow_vector<AIR_Node> code;
+        // Expression units other than the last one cannot be TCO'd.
         size_t epos = units.size() - 1;
         if(epos != SIZE_MAX) {
-          // Expression units other than the last one cannot be TCO'd.
           for(size_t i = 0; i != epos; ++i) {
             units[i].generate_code(code, opts, tco_aware_none, ctx);
           }
-          // The last unit may be TCO'd.
           units[epos].generate_code(code, opts, tco_aware, ctx);
         }
         return code;

@@ -510,14 +510,14 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
         const auto& name = do_pcast<Params_sloc_name>(params)->name;
         const auto& inside = ctx.zvarg().func();
+        const auto& qhooks = ctx.global().get_hooks_opt();
 
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();
         var->reset(nullptr, true);
         // Call the hook function if any.
-        auto qh = ctx.global().get_hooks_opt();
-        if(qh) {
-          qh->on_variable_declare(sloc, inside, name);
+        if(qhooks) {
+          qhooks->on_variable_declare(sloc, inside, name);
         }
         // Inject the variable into the current context.
         Reference_Root::S_variable xref = { ::rocket::move(var) };
@@ -1010,9 +1010,14 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& args_by_refs = do_pcast<Params_call>(params)->args_by_refs;
         const auto& tco_aware = static_cast<TCO_Aware>(paramu.u8s[0]);
         const auto& inside = ctx.zvarg().func();
+        const auto& qhooks = ctx.global().get_hooks_opt();
 
         // Check for stack overflows.
         const auto sentry = ctx.global().copy_recursion_sentry();
+        // Generate a single-step trap.
+        if(qhooks) {
+          qhooks->on_single_step_trap(sloc, inside, &ctx);
+        }
         // Pop arguments off the stack backwards.
         cow_vector<Reference> args;
         args.resize(args_by_refs.size());
@@ -1054,12 +1059,11 @@ DCE_Result AIR_Node::optimize_dce()
           return air_status_return;
         }
         // Call the hook function if any.
-        auto qh = ctx.global().get_hooks_opt();
-        if(qh) {
-          qh->on_function_call(sloc, inside, target);
+        if(qhooks) {
+          qhooks->on_function_call(sloc, inside, target);
         }
+        // Perform a non-proper call.
         try {
-          // Perform a non-proper call.
           target->invoke(self, ctx.global(), ::rocket::move(args));
           self.finish_call(ctx.global());
         }
@@ -1067,8 +1071,8 @@ DCE_Result AIR_Node::optimize_dce()
           // Append the current frame and rethrow the exception.
           except.push_frame_func(sloc, inside);
           // Call the hook function if any.
-          if(qh) {
-            qh->on_function_except(sloc, inside, except);
+          if(qhooks) {
+            qhooks->on_function_except(sloc, inside, except);
           }
           throw;
         }
@@ -1077,14 +1081,14 @@ DCE_Result AIR_Node::optimize_dce()
           Runtime_Error except(stdex);
           except.push_frame_func(sloc, inside);
           // Call the hook function if any.
-          if(qh) {
-            qh->on_function_except(sloc, inside, except);
+          if(qhooks) {
+            qhooks->on_function_except(sloc, inside, except);
           }
           throw except;
         }
         // Call the hook function if any.
-        if(qh) {
-          qh->on_function_return(sloc, inside, self);
+        if(qhooks) {
+          qhooks->on_function_return(sloc, inside, self);
         }
         return air_status_next;
       }
@@ -2623,14 +2627,14 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& sloc = do_pcast<Params_sloc_name>(params)->sloc;
         const auto& name = do_pcast<Params_sloc_name>(params)->name;
         const auto& inside = ctx.zvarg().func();
+        const auto& qhooks = ctx.global().get_hooks_opt();
 
         // Allocate a variable and initialize it to `null`.
         auto var = ctx.global().create_variable();
         var->reset(nullptr, immutable);
         // Call the hook function if any.
-        auto qh = ctx.global().get_hooks_opt();
-        if(qh) {
-          qh->on_variable_declare(sloc, inside, name);
+        if(qhooks) {
+          qhooks->on_variable_declare(sloc, inside, name);
         }
         // Inject the variable into the current context.
         Reference_Root::S_variable xref = { ::rocket::move(var) };
@@ -2643,11 +2647,11 @@ DCE_Result AIR_Node::optimize_dce()
         // Unpack arguments.
         const auto& sloc = do_pcast<Params_sloc>(params)->sloc;
         const auto& inside = ctx.zvarg().func();
+        const auto& qhooks = ctx.global().get_hooks_opt();
 
         // Call the hook function if any.
-        auto qh = ctx.global().get_hooks_opt();
-        if(qh) {
-          qh->on_single_step_trap(sloc, inside, ctx);
+        if(qhooks) {
+          qhooks->on_single_step_trap(sloc, inside, &ctx);
         }
         return air_status_next;
       }
