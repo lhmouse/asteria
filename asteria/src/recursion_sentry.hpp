@@ -13,7 +13,7 @@ class Recursion_Sentry
   public:
     enum : size_t
       {
-        max_stack_usage  = 0x3FFFF  // 256 KiB
+        max_stack_usage  = 0x40000,  // 256 KiB
       };
 
   private:
@@ -36,7 +36,7 @@ class Recursion_Sentry
       {
         // Estimate stack usage.
         size_t usage = static_cast<size_t>(::std::abs(reinterpret_cast<const char*>(this) -
-                                                       reinterpret_cast<const char*>(this->m_base)));
+                                                      reinterpret_cast<const char*>(this->m_base)));
         if(ROCKET_UNEXPECT(usage >= max_stack_usage))
           this->do_throw_stack_overflow(usage, max_stack_usage);
       }
