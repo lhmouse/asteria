@@ -97,7 +97,7 @@ int do_backtrace(const Runtime_Error& except) noexcept
       fmt << f.value();
       // Print a line of backtrace.
       ::fprintf(stderr, "\t * [%lu] %s:%ld (%s) -- %s\n",
-                        i, f.sloc().file().c_str(), f.sloc().line(), f.what_type(),
+                        i, f.sloc().c_file(), f.sloc().line(), f.what_type(),
                         fmt.get_c_string());
     }
     return ::fprintf(stderr, "\t-- end of backtrace\n");
@@ -105,39 +105,6 @@ int do_backtrace(const Runtime_Error& except) noexcept
   catch(::std::exception& stdex) {
     return ::fprintf(stderr, "\t-- no backtrace available\n");
   }
-
-// These hooks just print everything to standard error.
-struct Debug_Hooks : Abstract_Hooks
-  {
-    void on_variable_declare(const Source_Location& sloc, const phsh_string& inside,
-                             const phsh_string& name) noexcept override
-      {
-        ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- declaring variable: %s\n",
-                          sloc.file().c_str(), sloc.line(), inside.c_str(),
-                          name.c_str());
-      }
-    void on_function_call(const Source_Location& sloc, const phsh_string& inside,
-                          const ckptr<Abstract_Function>& target) noexcept override
-      {
-        ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- initiating function call: %s\n",
-                          sloc.file().c_str(), sloc.line(), inside.c_str(),
-                          do_stringify(target).c_str());
-      }
-    void on_function_return(const Source_Location& sloc, const phsh_string& inside,
-                            const Reference& result) noexcept override
-      {
-        ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- returned from function call: %s\n",
-                          sloc.file().c_str(), sloc.line(), inside.c_str(),
-                          do_stringify(result).c_str());
-      }
-    void on_function_except(const Source_Location& sloc, const phsh_string& inside,
-                            const Runtime_Error& except) noexcept override
-      {
-        ::fprintf(stderr, "~ running: %s:%ld [inside `%s`] -- caught exception from function call: %s\n",
-                          sloc.file().c_str(), sloc.line(), inside.c_str(),
-                          do_stringify(except).c_str());
-      }
-  };
 
 // Define command-line options here.
 struct Command_Line_Options
@@ -161,6 +128,58 @@ Global_Context global;
 
 volatile ::sig_atomic_t interrupted;   // ... except this one, of course.
 cow_string heredoc;
+
+// These hooks help debugging
+struct REPL_Hooks : Abstract_Hooks
+  {
+    void on_variable_declare(const Source_Location& sloc, const phsh_string& inside,
+                             const phsh_string& name) noexcept override
+      {
+        if(ROCKET_EXPECT(!::cmdline.verbose)) {
+          return;
+        }
+        ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] declaring variable: %s\n",
+                          sloc.c_file(), sloc.line(), inside.c_str(),
+                          name.c_str());
+      }
+    void on_function_call(const Source_Location& sloc, const phsh_string& inside,
+                          const ckptr<Abstract_Function>& target) noexcept override
+      {
+        if(ROCKET_EXPECT(!::cmdline.verbose)) {
+          return;
+        }
+        ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] initiating function call: %s\n",
+                          sloc.c_file(), sloc.line(), inside.c_str(),
+                          do_stringify(target).c_str());
+      }
+    void on_function_return(const Source_Location& sloc, const phsh_string& inside,
+                            const Reference& result) noexcept override
+      {
+        if(ROCKET_EXPECT(!::cmdline.verbose)) {
+          return;
+        }
+        ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] returned from function call: %s\n",
+                          sloc.c_file(), sloc.line(), inside.c_str(),
+                          do_stringify(result).c_str());
+      }
+    void on_function_except(const Source_Location& sloc, const phsh_string& inside,
+                            const Runtime_Error& except) noexcept override
+      {
+        if(ROCKET_EXPECT(!::cmdline.verbose)) {
+          return;
+        }
+        ::fprintf(stderr, "~ running: ['%s:%ld' inside `%s`] caught exception from function call: %s\n",
+                          sloc.c_file(), sloc.line(), inside.c_str(),
+                          do_stringify(except).c_str());
+      }
+    void on_single_step_trap(const Source_Location& sloc, const phsh_string& inside)
+      {
+        if(ROCKET_EXPECT(!::interrupted)) {
+          return;
+        }
+        ASTERIA_THROW("interrupt\n[received at '$1' inside `$2`]", sloc, inside);
+      }
+  };
 
 void do_parse_command_line(int argc, char** argv)
   {
@@ -539,10 +558,8 @@ int main(int argc, char** argv)
       do_print_version_and_exit();
     }
 
-    // Set debug hooks if verbose mode is enabled. This is sticky.
-    if(::cmdline.verbose) {
-      global.set_hooks(::rocket::make_refcnt<Debug_Hooks>());
-    }
+    // Set up runtime hooks. This is sticky.
+    global.set_hooks(::rocket::make_refcnt<REPL_Hooks>());
     // Protect against stack overflows.
     global.set_recursion_base(&argc);
 
