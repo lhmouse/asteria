@@ -30,6 +30,12 @@ class Source_Location
         m_file(::rocket::move(pair.first)), m_line(pair.second)
       {
       }
+    Source_Location& operator=(pair<cow_string, long> pair) noexcept
+      {
+        this->m_file = ::rocket::move(pair.first);
+        this->m_line = pair.second;
+        return *this;
+      }
 
   public:
     const cow_string& file() const noexcept
