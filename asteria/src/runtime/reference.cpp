@@ -73,14 +73,13 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     cow_vector<rcptr<Tail_Call_Arguments>> frames;
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
     TCO_Aware tco_conj = tco_aware_by_ref;
-    // Prepare hooks.
-    const auto& qhooks = global.get_hooks_opt();
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
       // Unpack a frame.
       auto& tca = frames.emplace_back(this->m_root.as_tail_call());
       const auto& sloc = tca->sloc();
       const auto& inside = tca->inside();
+      const auto& qhooks = global.get_hooks_opt();
       // Generate a single-step trap.
       if(qhooks) {
         qhooks->on_single_step_trap(sloc, inside, nullptr);
