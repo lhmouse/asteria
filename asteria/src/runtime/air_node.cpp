@@ -10,10 +10,259 @@
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
 #include "runtime_error.hpp"
-#include "../compiler/statement.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
+
+    namespace {
+
+    bool& do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
+      {
+        for(size_t i = 0; i != code.size(); ++i) {
+          auto qnode = code.at(i).rebind_opt(ctx);
+          if(!qnode) {
+            continue;
+          }
+          dirty |= true;
+          code.mut(i) = ::rocket::move(*qnode);
+        }
+        return dirty;
+      }
+
+    }
+
+opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
+  {
+    switch(this->index()) {
+      {{
+    case index_clear_stack:
+        // There is nothing to bind.
+        return ::rocket::clear;
+      }{
+    case index_execute_block:
+        const auto& altr = this->m_stor.as<index_execute_block>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_body(::rocket::ref(ctx));
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_declare_variable:
+    case index_initialize_variable:
+        // There is nothing to bind.
+        return ::rocket::clear;
+      }{
+    case index_if_statement:
+        const auto& altr = this->m_stor.as<index_if_statement>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_body(::rocket::ref(ctx));
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_true, ctx_body);
+        do_rebind_nodes(dirty, altr_bound.code_false, ctx_body);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_switch_statement:
+        const auto& altr = this->m_stor.as<index_switch_statement>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_body(::rocket::ref(ctx));
+        bool dirty = false;
+        auto altr_bound = altr;
+        for(size_t i = 0; i != altr.code_labels.size(); ++i) {
+          bool dirty_r = false;
+          auto code_bound_r = altr_bound.code_labels.at(i);
+          do_rebind_nodes(dirty_r, code_bound_r, ctx_body);
+          if(!dirty_r) {
+            continue;
+          }
+          dirty |= true;
+          altr_bound.code_labels.mut(i) = ::rocket::move(code_bound_r);
+        }
+        for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
+          bool dirty_r = false;
+          auto code_bound_r = altr_bound.code_bodies.at(i);
+          do_rebind_nodes(dirty_r, code_bound_r, ctx_body);
+          if(!dirty_r) {
+            continue;
+          }
+          dirty |= true;
+          altr_bound.code_bodies.mut(i) = ::rocket::move(code_bound_r);
+        }
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_do_while_statement:
+        const auto& altr = this->m_stor.as<index_do_while_statement>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_body(::rocket::ref(ctx));
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        do_rebind_nodes(dirty, altr_bound.code_cond, ctx_body);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_while_statement:
+        const auto& altr = this->m_stor.as<index_while_statement>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_body(::rocket::ref(ctx));
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_cond, ctx_body);
+        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_for_each_statement:
+        const auto& altr = this->m_stor.as<index_for_each_statement>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_for(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx_for));
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_init, ctx_for);
+        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_for_statement:
+        const auto& altr = this->m_stor.as<index_for_statement>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_for(::rocket::ref(ctx));
+        Analytic_Context ctx_body(::rocket::ref(ctx_for));
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_init, ctx_for);
+        do_rebind_nodes(dirty, altr_bound.code_cond, ctx_for);
+        do_rebind_nodes(dirty, altr_bound.code_step, ctx_for);
+        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_try_statement:
+        const auto& altr = this->m_stor.as<index_try_statement>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_body(::rocket::ref(ctx));
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_try, ctx_body);
+        do_rebind_nodes(dirty, altr_bound.code_catch, ctx_body);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_throw_statement:
+    case index_assert_statement:
+    case index_simple_status:
+    case index_return_by_value:
+    case index_push_literal:
+    case index_push_global_reference:
+        // There is nothing to bind.
+        return ::rocket::clear;
+      }{
+    case index_push_local_reference:
+        const auto& altr = this->m_stor.as<index_push_local_reference>();
+        // Get the context.
+        const Abstract_Context* qctx = ::std::addressof(ctx);
+        ::rocket::ranged_for(uint32_t(0), altr.depth, [&](uint32_t) { qctx = qctx->get_parent_opt();  });
+        ROCKET_ASSERT(qctx);
+        // Don't bind references in analytic contexts.
+        if(qctx->is_analytic()) {
+          return ::rocket::clear;
+        }
+        // Look for the name in the context.
+        auto qref = qctx->get_named_reference_opt(altr.name);
+        if(!qref) {
+          return ::rocket::clear;
+        }
+        // Bind it now.
+        S_push_bound_reference altr_bound = { *qref };
+        return ::rocket::move(altr_bound);
+      }{
+    case index_push_bound_reference:
+        // There is nothing to bind.
+        return ::rocket::clear;
+      }{
+    case index_define_function:
+        const auto& altr = this->m_stor.as<index_define_function>();
+        // Check for rebinds recursively.
+        Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_body, ctx_func);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_branch_expression:
+        const auto& altr = this->m_stor.as<index_branch_expression>();
+        // Check for rebinds recursively.
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_true, ctx);
+        do_rebind_nodes(dirty, altr_bound.code_false, ctx);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_coalescence:
+        const auto& altr = this->m_stor.as<index_coalescence>();
+        // Check for rebinds recursively.
+        bool dirty = false;
+        auto altr_bound = altr;
+        do_rebind_nodes(dirty, altr_bound.code_null, ctx);
+        if(!dirty) {
+          return ::rocket::clear;
+        }
+        // Return the bound node.
+        return ::rocket::move(altr_bound);
+      }{
+    case index_function_call:
+    case index_member_access:
+    case index_push_unnamed_array:
+    case index_push_unnamed_object:
+    case index_apply_operator:
+    case index_unpack_struct_array:
+    case index_unpack_struct_object:
+    case index_define_null_variable:
+    case index_single_step_trap:
+        // There is nothing to bind.
+        return ::rocket::clear;
+      }}
+    default:
+      ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
+    }
+  }
 
     namespace {
 
@@ -107,14 +356,14 @@ namespace Asteria {
         return queue.execute(ctx_next);
       }
 
-    template<typename PvT> inline const PvT* do_pcast(const void* params) noexcept
+    template<typename PvT> inline const PvT* do_pcast(const void* pv) noexcept
       {
-        return static_cast<const PvT*>(params);
+        return static_cast<const PvT*>(pv);
       }
 
-    template<typename PvT> Variable_Callback& do_pcast_enumerate(Variable_Callback& callback, ParamU /*pu*/, const void* params)
+    template<typename PvT> Variable_Callback& do_penum(Variable_Callback& callback, ParamU /*pu*/, const void* pv)
       {
-        return do_pcast<PvT>(params)->enumerate_variables(callback);
+        return do_pcast<PvT>(pv)->enumerate_variables(callback);
       }
 
     // This is the trait struct for parameter types that implement `enumerate_variables()`.
@@ -134,7 +383,7 @@ namespace Asteria {
           }
         template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
           {
-            return queue.append<executorT, do_pcast_enumerate<PvT>>(this->pu, static_cast<PvT&&>(*this));
+            return queue.append<executorT, do_penum<PvT>>(this->pu, static_cast<PvT&&>(*this));
           }
       };
 
@@ -185,60 +434,6 @@ namespace Asteria {
         ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
         ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
         return queue;
-      }
-
-    rcptr<Abstract_Function> do_instantiate_function(const AIR_Node::S_instantiate_function& xnode, const Abstract_Context* ctx_opt)
-      {
-        const auto& opts = xnode.opts;
-        const auto& sloc = xnode.sloc;
-        const auto& name = xnode.name;
-        const auto& params = xnode.params;
-        const auto& body = xnode.body;
-
-        // Create the prototype string.
-        cow_string func = name;
-        size_t epos;
-        // XXX: The parameter list is only appended if the name really looks like a function.
-        //      Placeholders such as `<file>` or `<native>` do not precede parameter lists.
-        static constexpr char s_idchars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_";
-        if(!name.empty() && ::std::memchr(s_idchars, name.back(), ::rocket::countof(s_idchars) - 1)) {
-          // Append the parameter list. Parameters are separated by commas.
-          func << '(';
-          epos = params.size() - 1;
-          if(epos != SIZE_MAX) {
-            for(size_t i = 0; i != epos; ++i) {
-              func << params[i] << ", ";
-            }
-            func << params[epos];
-          }
-          func << ')';
-        }
-        // Create the zero-ary argument getter, which serves two purposes:
-        // 0) It is copied as `__varg` whenever its parent function is called with no variadic argument as an optimization.
-        // 1) It provides storage for `__file`, `__line` and `__func` for its parent function.
-        auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(sloc, ::rocket::move(func));
-
-        cow_vector<AIR_Node> code_func;
-        Analytic_Context ctx_func(ctx_opt, params);
-        // Generate IR nodes for the function body.
-        epos = body.size() - 1;
-        if(epos != SIZE_MAX) {
-          for(size_t i = 0; i != epos; ++i) {
-            body[i].generate_code(code_func, nullptr, ctx_func, opts, body[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
-          }
-          body[epos].generate_code(code_func, nullptr, ctx_func, opts, tco_aware_nullify);
-        }
-        // Optimize the body.
-        // Note that `no_optimization`, if set, suppresses ALL optimizations, even those explicitly enabled.
-        if(!opts.no_optimization) {
-          // TODO: Insert more optimization passes here.
-        }
-        // Solidify IR nodes.
-        AVMC_Queue queue;
-        do_solidify_queue(queue, code_func);
-
-        // Create the function now.
-        return ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), ::rocket::move(queue));
       }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -300,6 +495,20 @@ namespace Asteria {
           }
       };
 
+    struct Pv_func
+      {
+        Source_Location sloc;
+        cow_string func;
+        cow_vector<phsh_string> params;
+        cow_vector<AIR_Node> code_body;
+
+        Variable_Callback& enumerate_variables(Variable_Callback& callback) const
+          {
+            ::rocket::for_each(this->code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+            return callback;
+          }
+      };
+
     struct Pv_name
       {
         phsh_string name;
@@ -333,13 +542,6 @@ namespace Asteria {
       {
         Source_Location sloc;
         cow_string msg;
-
-        using nonenumerable = ::std::true_type;
-      };
-
-    struct Params_func
-      {
-        AIR_Node::S_instantiate_function xnode;
 
         using nonenumerable = ::std::true_type;
       };
@@ -827,13 +1029,29 @@ namespace Asteria {
         return air_status_next;
       }
 
-    AIR_Status do_instantiate_function(Executive_Context& ctx, ParamU /*pu*/, const void* params)
+    AIR_Status do_define_function(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
       {
         // Unpack arguments.
-        const auto& xnode = do_pcast<Params_func>(params)->xnode;
+        const auto& sloc = do_pcast<Pv_func>(pv)->sloc;
+        const auto& func = do_pcast<Pv_func>(pv)->func;
+        const auto& params = do_pcast<Pv_func>(pv)->params;
+        const auto& code_body = do_pcast<Pv_func>(pv)->code_body;
 
+        // Create the zero-ary argument getter, which serves two purposes:
+        // 0) It is copied as `__varg` whenever its parent function is called with no variadic argument as an optimization.
+        // 1) It provides storage for `__file`, `__line` and `__func` for its parent function.
+        auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(sloc, func);
+        // Rewrite nodes in the body as necessary.
+        // Don't trigger copy-on-write unless a node needs rewriting.
+        Analytic_Context ctx_func(::std::addressof(ctx), params);
+        bool dirty = false;
+        auto code_bound = code_body;
+        do_rebind_nodes(dirty, code_bound, ctx_func);
+        // Solidify IR nodes.
+        AVMC_Queue queue;
+        do_solidify_queue(queue, code_bound);
         // Instantiate the function.
-        auto qtarget = do_instantiate_function(xnode, &ctx);
+        auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), ::rocket::move(queue));
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(::rocket::move(qtarget)) };
         ctx.stack().push(::rocket::move(xref));
@@ -2799,18 +3017,21 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Push a new node.
         return avmcp.output<do_push_bound_reference>(queue);
       }{
-    case index_instantiate_function:
-        const auto& altr = this->m_stor.as<index_instantiate_function>();
+    case index_define_function:
+        const auto& altr = this->m_stor.as<index_define_function>();
         // `pu` is unused.
-        // `params` points to the name, the parameter list, and the body of the function.
-        AVMC_Appender<Params_func> avmcp;
+        // `pv` points to the name, the parameter list, and the body of the function.
+        AVMC_Appender<Pv_func> avmcp;
         if(ipass == 0) {
           return avmcp.request(queue);
         }
         // Encode arguments.
-        avmcp.xnode = altr;
+        avmcp.sloc = altr.sloc;
+        avmcp.func = altr.func;
+        avmcp.params = altr.params;
+        avmcp.code_body = altr.code_body;
         // Push a new node.
-        return avmcp.output<do_instantiate_function>(queue);
+        return avmcp.output<do_define_function>(queue);
       }{
     case index_branch_expression:
         const auto& altr = this->m_stor.as<index_branch_expression>();
@@ -3157,9 +3378,112 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     }
   }
 
-rcptr<Abstract_Function> AIR_Node::instantiate_function(const Abstract_Context* ctx_opt) const
+Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) const
   {
-    return do_instantiate_function(this->m_stor.as<index_instantiate_function>(), ctx_opt);
+    switch(this->index()) {
+      {{
+    case index_clear_stack:
+        return callback;
+      }{
+    case index_execute_block:
+        const auto& altr = this->m_stor.as<index_execute_block>();
+        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_declare_variable:
+    case index_initialize_variable:
+        return callback;
+      }{
+    case index_if_statement:
+        const auto& altr = this->m_stor.as<index_if_statement>();
+        ::rocket::for_each(altr.code_true, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_false, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_switch_statement:
+        const auto& altr = this->m_stor.as<index_switch_statement>();
+        for(size_t i = 0; i != altr.code_labels.size(); ++i) {
+          ::rocket::for_each(altr.code_labels.at(i), [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+          ::rocket::for_each(altr.code_bodies.at(i), [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        }
+        return callback;
+      }{
+    case index_do_while_statement:
+        const auto& altr = this->m_stor.as<index_do_while_statement>();
+        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_while_statement:
+        const auto& altr = this->m_stor.as<index_while_statement>();
+        ::rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_for_each_statement:
+        const auto& altr = this->m_stor.as<index_for_each_statement>();
+        ::rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_for_statement:
+        const auto& altr = this->m_stor.as<index_for_statement>();
+        ::rocket::for_each(altr.code_init, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_cond, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_step, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_try_statement:
+        const auto& altr = this->m_stor.as<index_try_statement>();
+        ::rocket::for_each(altr.code_try, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_catch, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_throw_statement:
+    case index_assert_statement:
+    case index_simple_status:
+    case index_return_by_value:
+    case index_push_literal:
+    case index_push_global_reference:
+    case index_push_local_reference:
+        return callback;
+      }{
+    case index_push_bound_reference:
+        const auto& altr = this->m_stor.as<index_push_bound_reference>();
+        altr.ref.enumerate_variables(callback);
+        return callback;
+      }{
+    case index_define_function:
+        const auto& altr = this->m_stor.as<index_define_function>();
+        ::rocket::for_each(altr.code_body, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_branch_expression:
+        const auto& altr = this->m_stor.as<index_branch_expression>();
+        ::rocket::for_each(altr.code_true, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        ::rocket::for_each(altr.code_false, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_coalescence:
+        const auto& altr = this->m_stor.as<index_coalescence>();
+        ::rocket::for_each(altr.code_null, [&](const AIR_Node& node) { node.enumerate_variables(callback);  });
+        return callback;
+      }{
+    case index_function_call:
+    case index_member_access:
+    case index_push_unnamed_array:
+    case index_push_unnamed_object:
+    case index_apply_operator:
+    case index_unpack_struct_array:
+    case index_unpack_struct_object:
+    case index_define_null_variable:
+    case index_single_step_trap:
+        return callback;
+      }}
+    default:
+      ASTERIA_TERMINATE("invalid AIR node type (index `$1`)", this->index());
+    }
   }
 
 }  // namespace Asteria

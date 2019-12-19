@@ -38,10 +38,6 @@ class Statement_Sequence
       {
         return this->m_stmts.at(index);
       }
-    const cow_vector<Statement>& get_statements() const noexcept
-      {
-        return this->m_stmts;
-      }
 
     // This function parses tokens from the input stream and fills statements into `*this`.
     // The contents of `*this` are destroyed prior to any further operation.
