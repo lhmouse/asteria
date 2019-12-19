@@ -50,7 +50,8 @@ namespace Asteria {
           // Return an empty range.
           return ::std::make_pair(text.begin(), text.begin());
         }
-        // Get a subrange excluding the part before the beginning. Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
+        // Get a subrange excluding the part before the beginning.
+        // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
         return do_slice(text, text.begin(), rfrom + *length);
       }
 

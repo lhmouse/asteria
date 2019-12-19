@@ -2253,7 +2253,8 @@ DCE_Result AIR_Node::optimize_dce()
           rhs = do_operator_mul(lhs.convert_to_real(), rhs.convert_to_real());
         }
         else if(lhs.is_string() && rhs.is_integer()) {
-          // If either operand has type `string` and the other has type `integer`, duplicate the string up to the specified number of times and return the result.
+          // If either operand has type `string` and the other has type `integer`, duplicate the string up to
+          // the specified number of times and return the result.
           // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
           rhs = do_operator_mul(lhs.as_string(), rhs.as_integer());
         }
