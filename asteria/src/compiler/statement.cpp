@@ -209,8 +209,34 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         // Declare the function, which is effectively an immutable variable.
         AIR_Node::S_declare_variable xnode_decl = { altr.sloc, altr.name };
         code.emplace_back(::rocket::move(xnode_decl));
-        // Instantiate the function body.
-        AIR_Node::S_instantiate_function xnode_defn = { opts, altr.sloc, altr.name, altr.params, altr.body };
+        // Prettify the function name.
+        ::rocket::tinyfmt_str fmt;
+        fmt << altr.name << '(';
+        // Append the parameter list. Parameters are separated by commas.
+        size_t epos = altr.params.size() - 1;
+        if(epos != SIZE_MAX) {
+          for(size_t i = 0; i != epos; ++i) {
+            fmt << altr.params[i] << ',';
+          }
+          fmt << altr.params[epos];
+        }
+        fmt << ')';
+        auto func = fmt.extract_string();
+        // Generate code for the body.
+        cow_vector<AIR_Node> code_body;
+        epos = altr.body.size() - 1;
+        if(epos != SIZE_MAX) {
+          Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
+          // Generate code with regard to proper tail calls.
+          for(size_t i = 0; i != epos; ++i) {
+            altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
+                                       altr.body[i + 1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
+          }
+          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, tco_aware_nullify);
+        }
+        // TODO: Insert optimization passes.
+        // Encode arguments.
+        AIR_Node::S_define_function xnode_defn = { altr.sloc, ::rocket::move(func), altr.params, ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode_defn));
         // Initialize the function.
         AIR_Node::S_initialize_variable xnode_init = { true };

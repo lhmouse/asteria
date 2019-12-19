@@ -12,13 +12,6 @@ namespace Asteria {
 
     namespace {
 
-    cow_string do_name_closure(long line)
-      {
-        ::rocket::tinyfmt_str fmt;
-        fmt << "<closure>._" << line;
-        return fmt.extract_string();
-      }
-
     cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware,
                                                  const Analytic_Context& ctx, const cow_vector<Xprunit>& units)
       {
@@ -87,8 +80,34 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
       }{
     case index_closure_function:
         const auto& altr = this->m_stor.as<index_closure_function>();
+        // Name the closure.
+        ::rocket::tinyfmt_str fmt;
+        fmt << "<closure>._" << altr.sloc.line() << '(';
+        // Append the parameter list. Parameters are separated by commas.
+        size_t epos = altr.params.size() - 1;
+        if(epos != SIZE_MAX) {
+          for(size_t i = 0; i != epos; ++i) {
+            fmt << altr.params[i] << ',';
+          }
+          fmt << altr.params[epos];
+        }
+        fmt << ')';
+        auto func = fmt.extract_string();
+        // Generate code for the body.
+        cow_vector<AIR_Node> code_body;
+        epos = altr.body.size() - 1;
+        if(epos != SIZE_MAX) {
+          Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
+          // Generate code with regard to proper tail calls.
+          for(size_t i = 0; i != epos; ++i) {
+            altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
+                                       altr.body[i + 1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
+          }
+          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, tco_aware_nullify);
+        }
+        // TODO: Insert optimization passes.
         // Encode arguments.
-        AIR_Node::S_instantiate_function xnode = { opts, altr.sloc, do_name_closure(altr.sloc.line()), altr.params, altr.body };
+        AIR_Node::S_define_function xnode = { altr.sloc, ::rocket::move(func), altr.params, ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{

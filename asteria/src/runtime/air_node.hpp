@@ -109,13 +109,12 @@ class AIR_Node
       {
         Reference ref;
       };
-    struct S_instantiate_function
+    struct S_define_function
       {
-        Compiler_Options opts;
         Source_Location sloc;
-        cow_string name;
+        cow_string func;
         cow_vector<phsh_string> params;
-        cow_vector<Statement> body;
+        cow_vector<AIR_Node> code_body;
       };
     struct S_branch_expression
       {
@@ -193,7 +192,7 @@ class AIR_Node
         index_push_global_reference  = 16,
         index_push_local_reference   = 17,
         index_push_bound_reference   = 18,
-        index_instantiate_function   = 19,
+        index_define_function        = 19,
         index_branch_expression      = 20,
         index_coalescence            = 21,
         index_function_call          = 22,
@@ -227,7 +226,7 @@ class AIR_Node
       , S_push_global_reference  // 16,
       , S_push_local_reference   // 17,
       , S_push_bound_reference   // 18,
-      , S_instantiate_function   // 19,
+      , S_define_function        // 19,
       , S_branch_expression      // 20,
       , S_coalescence            // 21,
       , S_function_call          // 22,
@@ -269,15 +268,19 @@ class AIR_Node
         return *this;
       }
 
+    // Rebind this node.
+    // If this node refers to a local reference, which has been allocated in an executive context now,
+    // we need to replace `*this` with a copy of it.
+    opt<AIR_Node> rebind_opt(const Abstract_Context& ctx) const;
+
     // Compress this IR node.
     // Be advised that solid nodes cannot be copied or moved because they occupy variant numbers of bytes.
     // Solidification is performed as two passes: The total number of bytes is calculated, which are allocated
     // as a whole at the end of the first pass, where nodes are constructed in the second pass.
     // The argument for `ipass` shall be `0` for the first pass and `1` for the second pass.
     AVMC_Queue& solidify(AVMC_Queue& queue, uint8_t ipass) const;
-    // Instantiate this IR node to create a function. This node must hold a value of type `S_instantiate_function`.
-    // This function is provided merely for convenience elsewhere. It is not intended for public use.
-    rcptr<Abstract_Function> instantiate_function(const Abstract_Context* ctx_opt) const;
+
+    Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
   };
 
 inline void swap(AIR_Node& lhs, AIR_Node& rhs) noexcept

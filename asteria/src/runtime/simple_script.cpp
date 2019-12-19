@@ -4,6 +4,10 @@
 #include "../precompiled.hpp"
 #include "simple_script.hpp"
 #include "air_node.hpp"
+#include "analytic_context.hpp"
+#include "instantiated_function.hpp"
+#include "variadic_arguer.hpp"
+#include "../llds/avmc_queue.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/statement_sequence.hpp"
 #include "../utilities.hpp"
@@ -12,23 +16,38 @@ namespace Asteria {
 
 Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
   {
-    AIR_Node::S_instantiate_function xnode = { };
-    xnode.opts = this->m_opts;
     // Tokenize the character stream.
     Token_Stream tstrm;
-    tstrm.reload(cbuf, name, xnode.opts);
+    tstrm.reload(cbuf, name, this->m_opts);
     // Parse tokens.
-    Statement_Sequence stmseq;
-    stmseq.reload(tstrm, xnode.opts);
-    // Initialize arguments for the function object.
-    xnode.sloc = Source_Location(name, 1);
-    xnode.name = ::rocket::sref("<file scope>");
-    xnode.params.emplace_back(::rocket::sref("..."));
-    xnode.body = stmseq.get_statements();
-    // Construct an IR node so we can reuse its code somehow.
-    AIR_Node node(::rocket::move(xnode));
-    auto qtarget = node.instantiate_function(nullptr);
-    // Accept it.
+    Statement_Sequence stmtq;
+    stmtq.reload(tstrm, this->m_opts);
+
+    // The script behaves like a function accepting variadic arguments.
+    cow_vector<phsh_string> params;
+    params.emplace_back(::rocket::sref("..."));
+    // Create the zero-ary argument getter.
+    auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(name, 1, ::rocket::sref("<simple script>"));
+    // Generate IR nodes for the function body.
+    // TODO: Move this elsewhere.
+    cow_vector<AIR_Node> code_body;
+    size_t epos = stmtq.size() - 1;
+    if(epos != SIZE_MAX) {
+      Analytic_Context ctx_func(nullptr, params);
+      // Generate code with regard to proper tail calls.
+      for(size_t i = 0; i != epos; ++i) {
+        stmtq.at(i).generate_code(code_body, nullptr, ctx_func, this->m_opts,
+                                  stmtq.at(i + 1).is_empty_return() ? tco_aware_nullify : tco_aware_none);
+      }
+      stmtq.at(epos).generate_code(code_body, nullptr, ctx_func, this->m_opts, tco_aware_nullify);
+    }
+    // TODO: Insert optimization passes.
+    // Solidify IR nodes.
+    AVMC_Queue queue;
+    ::rocket::for_each(code_body, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
+    ::rocket::for_each(code_body, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
+    // Instantiate the function.
+    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), ::rocket::move(queue));
     this->m_cptr = ::rocket::move(qtarget);
     return *this;
   }
