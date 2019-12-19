@@ -150,18 +150,16 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
         for(size_t i = 0; i != nvars; ++i) {
           // Create dummy references for further name lookups.
           for(const auto& name : altr.decls[i]) {
-            if(::rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
+            if(::rocket::is_any_of(name[0], { '[', ']', '{', '}' }))
               continue;
-            }
             do_user_declare(names_opt, ctx, name, "variable placeholder");
           }
           // Declare the variables which will have been initialized to `null`.
           if(altr.inits[i].units.empty()) {
             // If no initializer is provided, no further initialization is required.
             for(const auto& name : altr.decls[i]) {
-              if(::rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
+              if(::rocket::is_any_of(name[0], { '[', ']', '{', '}' }))
                 continue;
-              }
               AIR_Node::S_define_null_variable xnode_decl = { altr.immutable, altr.slocs[i], name };
               code.emplace_back(::rocket::move(xnode_decl));
             }
@@ -171,9 +169,8 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
             do_generate_clear_stack(code);
             // Declare the variables as immutable before the initialization is completed.
             for(const auto& name : altr.decls[i]) {
-              if(::rocket::is_any_of(name[0], { '[', ']', '{', '}' })) {
+              if(::rocket::is_any_of(name[0], { '[', ']', '{', '}' }))
                 continue;
-              }
               AIR_Node::S_declare_variable xnode_decl = { altr.slocs[i], name };
               code.emplace_back(::rocket::move(xnode_decl));
             }
@@ -189,7 +186,7 @@ cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_v
               code.emplace_back(::rocket::move(xnode_init));
             }
             else if(altr.decls[i][0] == "{") {
-              // THe keys does not include the leading "{" or the trailing "}".
+              // The keys does not include the leading "{" or the trailing "}".
               ROCKET_ASSERT(altr.decls[i].back() == "}");
               cow_vector<phsh_string> keys(altr.decls[i].begin() + 1, altr.decls[i].end() - 1);
               // Unpack the structured binding for objects.
