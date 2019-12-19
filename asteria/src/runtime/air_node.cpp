@@ -936,7 +936,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& name = do_pcast<Params_name>(params)->name;
 
         // Get the context.
-        const Executive_Context* qctx = ::std::addressof(ctx);
+        const Executive_Context* qctx = &ctx;
         ::rocket::ranged_for(uint32_t(0), depth, [&](size_t) { qctx = qctx->get_parent_opt();  });
         ROCKET_ASSERT(qctx);
         // Look for the name in the context.
@@ -965,7 +965,7 @@ DCE_Result AIR_Node::optimize_dce()
         const auto& xnode = do_pcast<Params_func>(params)->xnode;
 
         // Instantiate the function.
-        auto qtarget = do_instantiate_function(xnode, ::std::addressof(ctx));
+        auto qtarget = do_instantiate_function(xnode, &ctx);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(::rocket::move(qtarget)) };
         ctx.stack().push(::rocket::move(xref));
@@ -3289,9 +3289,9 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
     }
   }
 
-rcptr<Abstract_Function> AIR_Node::instantiate_function(const Abstract_Context* parent_opt) const
+rcptr<Abstract_Function> AIR_Node::instantiate_function(const Abstract_Context* ctx_opt) const
   {
-    return do_instantiate_function(this->m_stor.as<index_instantiate_function>(), parent_opt);
+    return do_instantiate_function(this->m_stor.as<index_instantiate_function>(), ctx_opt);
   }
 
 }  // namespace Asteria

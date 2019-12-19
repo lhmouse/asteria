@@ -281,7 +281,7 @@ class AIR_Node
     AVMC_Queue& solidify(AVMC_Queue& queue, uint8_t ipass) const;
     // Instantiate this IR node to create a function. This node must hold a value of type `S_instantiate_function`.
     // This function is provided merely for convenience elsewhere. It is not intended for public use.
-    rcptr<Abstract_Function> instantiate_function(const Abstract_Context* parent_opt) const;
+    rcptr<Abstract_Function> instantiate_function(const Abstract_Context* ctx_opt) const;
   };
 
 inline void swap(AIR_Node& lhs, AIR_Node& rhs) noexcept

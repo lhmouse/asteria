@@ -53,8 +53,8 @@ void Reference_Dictionary::do_xrelocate_but(Reference_Dictionary::Bucket* qxcld)
       // Only probe non-erased buckets.
       bptr, qxcld, qxcld + 1, eptr,
       // Relocate every bucket found.
-      [&](Bucket& r) {
-        auto qbkt = ::std::addressof(r);
+      [&](Bucket& rb) {
+        auto qbkt = &rb;
         // Move the old name and reference out, then destroy the bucket.
         ROCKET_ASSERT(*qbkt);
         auto name = ::rocket::move(qbkt->kstor[0]);

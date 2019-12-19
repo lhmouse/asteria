@@ -55,8 +55,8 @@ void Variable_HashSet::do_xrelocate_but(Variable_HashSet::Bucket* qxcld) noexcep
       // Only probe non-erased buckets.
       bptr, qxcld, qxcld + 1, eptr,
       // Relocate every bucket found.
-      [&](Bucket& r) {
-        auto qbkt = ::std::addressof(r);
+      [&](Bucket& rb) {
+        auto qbkt = &rb;
         // Transfer ownership of the old variable, then detach the bucket.
         ROCKET_ASSERT(*qbkt);
         auto var = ::rocket::move(qbkt->kstor[0]);
