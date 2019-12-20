@@ -32,8 +32,8 @@ void Runtime_Error::do_compose_message()
   }
 
 static_assert(::rocket::conjunction<::std::is_nothrow_copy_constructible<Runtime_Error>,
-                                  ::std::is_nothrow_move_constructible<Runtime_Error>,
-                                  ::std::is_nothrow_copy_assignable<Runtime_Error>,
-                                  ::std::is_nothrow_move_assignable<Runtime_Error>>::value, "");
+                                    ::std::is_nothrow_move_constructible<Runtime_Error>,
+                                    ::std::is_nothrow_copy_assignable<Runtime_Error>,
+                                    ::std::is_nothrow_move_assignable<Runtime_Error>>::value, "");
 
 }  // namespace Asteria
