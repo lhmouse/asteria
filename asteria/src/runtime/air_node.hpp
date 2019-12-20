@@ -269,10 +269,6 @@ class AIR_Node
         return *this;
       }
 
-    // Perform dead code elimination on this node.
-    // This function is meant to be called recursively.
-    DCE_Result optimize_dce();
-
     // Compress this IR node.
     // Be advised that solid nodes cannot be copied or moved because they occupy variant numbers of bytes.
     // Solidification is performed as two passes: The total number of bytes is calculated, which are allocated

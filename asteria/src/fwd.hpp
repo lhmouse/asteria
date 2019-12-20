@@ -173,14 +173,6 @@ enum TCO_Aware : uint8_t
     tco_aware_nullify  = 3,  // The tail call is forwarded but its result is discarded.
   };
 
-// Dead code elimination (DCE) results
-enum DCE_Result : uint8_t
-  {
-    dce_none   = 0,  // The current node should be left intact.
-    dce_empty  = 1,  // The current node is empty and can be removed.
-    dce_prune  = 2,  // All nodes following the current one are unreachable and can be removed.
-  };
-
 // Stack frame types
 enum Frame_Type : uint8_t
   {
@@ -514,8 +506,6 @@ template<> struct Compiler_Options_fragment<1>
     bool no_proper_tail_calls : 1;
     // Suppress all optimization techniques.
     bool no_optimization : 1;
-    // Do not remove unreachable or insignificant code.
-    bool no_dead_code_elimination : 1;
     // Do not generate code for single-step traps other than on function calls.
     bool no_plain_single_step_traps : 1;
 
