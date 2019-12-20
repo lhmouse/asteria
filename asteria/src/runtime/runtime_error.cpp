@@ -25,7 +25,7 @@ void Runtime_Error::do_compose_message()
     // Append stack frames.
     for(unsigned long i = 0; i != this->m_frames.size(); ++i) {
       const auto& frm = this->m_frames[i];
-      format(fmt, "\n[frame #$1 on '$2' ($3): $4]", i, frm.sloc(), frm.what_type(), frm.value());
+      format(fmt, "\n[frame #$1 at '$2' ($3): $4]", i, frm.sloc(), frm.what_type(), frm.value());
     }
     // Set the string.
     this->m_what = fmt.extract_string();
