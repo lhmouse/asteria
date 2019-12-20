@@ -1091,7 +1091,7 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
 
     namespace {
 
-    template<bool bigendT, typename WordT> bool do_pack_one_impl(G_string& text, const G_integer& value)
+    template<bool bigendT, typename WordT> G_string& do_pack_one_impl(G_string& text, const G_integer& value)
       {
         // Define temporary storage.
         ::std::array<char, sizeof(WordT)> stor_le;
@@ -1102,19 +1102,18 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
           word >>= 8;
         }
         // Append this word.
-        if(bigendT) {
+        if(bigendT)
           text.append(stor_le.rbegin(), stor_le.rend());
-        }
-        else {
+        else
           text.append(stor_le.begin(), stor_le.end());
-        }
-        return true;
+        // Return  the output string.
+        return text;
       }
-    template<typename WordT> bool do_pack_one_be(G_string& text, const G_integer& value)
+    template<typename WordT> G_string& do_pack_one_be(G_string& text, const G_integer& value)
       {
         return do_pack_one_impl<1, WordT>(text, value);
       }
-    template<typename WordT> bool do_pack_one_le(G_string& text, const G_integer& value)
+    template<typename WordT> G_string& do_pack_one_le(G_string& text, const G_integer& value)
       {
         return do_pack_one_impl<0, WordT>(text, value);
       }
@@ -1134,12 +1133,10 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
         // Unpack integers.
         for(size_t i = 0; i < nwords; ++i) {
           // Read some bytes in big-endian order.
-          if(bigendT) {
+          if(bigendT)
             ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.begin());
-          }
-          else {
+          else
             ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.rbegin());
-          }
           // Assemble the word.
           for(const auto& byte : stor_be) {
             word <<= 8;
