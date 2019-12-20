@@ -256,14 +256,17 @@ G_integer std_checksum_fnv1a32(const G_string& data)
 
     namespace {
 
-    template<uint8_t valueT> struct Hexdigit : ::std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
+    template<uint8_t valueT>
+        struct Hexdigit : ::std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
       {
       };
-    template<uint8_t valueT> constexpr array<char, 2> do_generate_hex_digits_for_byte() noexcept
+    template<uint8_t valueT>
+        constexpr array<char, 2> do_generate_hex_digits_for_byte() noexcept
       {
         return {{ Hexdigit<uint8_t(valueT / 16)>::value, Hexdigit<uint8_t(valueT % 16)>::value }};
       };
-    template<size_t... indicesT> constexpr array<char, 256, 2> do_generate_hexdigits_impl(const ::std::index_sequence<indicesT...>&) noexcept
+    template<size_t... indicesT>
+        constexpr array<char, 256, 2> do_generate_hexdigits_impl(const ::std::index_sequence<indicesT...>&) noexcept
       {
         return {{ do_generate_hex_digits_for_byte<uint8_t(indicesT)>()... }};
       }
@@ -328,7 +331,8 @@ G_integer std_checksum_fnv1a32(const G_string& data)
         return static_cast<WordT>(sum);
       }
 
-    template<typename WordT, size_t sizeT> inline void do_padd(::std::array<WordT, sizeT>& lhs, const ::std::array<WordT, sizeT>& rhs)
+    template<typename WordT, size_t sizeT>
+        inline void do_padd(::std::array<WordT, sizeT>& lhs, const ::std::array<WordT, sizeT>& rhs)
       {
         ::rocket::ranged_for(size_t(0), sizeT, [&](size_t i) { lhs[i] += rhs[i];  });
       }
