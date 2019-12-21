@@ -19,8 +19,8 @@ namespace Asteria {
         return fmt.extract_string();
       }
 
-    cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
-                                                 const cow_vector<Xprunit>& units)
+    cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware,
+                                                 const Analytic_Context& ctx, const cow_vector<Xprunit>& units)
       {
         cow_vector<AIR_Node> code;
         // Expression units other than the last one cannot be TCO'd.
@@ -52,9 +52,9 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         const auto& altr = this->m_stor.as<index_named_reference>();
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
-        const Abstract_Context* qctx = &ctx;
-        uint32_t depth = 0;
         const Reference* qref;
+        const Abstract_Context* qctx = ::std::addressof(ctx);
+        uint32_t depth = 0;
         for(;;) {
           // Look for the name in the current context.
           qref = qctx->get_named_reference_opt(altr.name);

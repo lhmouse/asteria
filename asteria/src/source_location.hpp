@@ -20,21 +20,10 @@ class Source_Location
         m_file(::rocket::sref("<empty>")), m_line(-1)
       {
       }
-    Source_Location(cow_string xfile, long xline) noexcept
+    Source_Location(const cow_string& xfile, long xline) noexcept
       :
-        m_file(::rocket::move(xfile)), m_line(xline)
+        m_file(xfile), m_line(xline)
       {
-      }
-    Source_Location(pair<cow_string, long> pair) noexcept
-      :
-        m_file(::rocket::move(pair.first)), m_line(pair.second)
-      {
-      }
-    Source_Location& operator=(pair<cow_string, long> pair) noexcept
-      {
-        this->m_file = ::rocket::move(pair.first);
-        this->m_line = pair.second;
-        return *this;
       }
 
   public:

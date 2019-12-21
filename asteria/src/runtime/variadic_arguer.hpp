@@ -19,15 +19,22 @@ class Variadic_Arguer final : public Abstract_Function
     cow_vector<Reference> m_vargs;
 
   public:
-    template<typename... XvargsT> Variadic_Arguer(const Source_Location& xsloc, const cow_string& xfunc,
-                                                  XvargsT&&... xvargs)
+    template<typename... XvargsT>
+        Variadic_Arguer(const Source_Location& xsloc, const cow_string& xfunc, XvargsT&&... xvargs)
       :
         m_sloc(xsloc), m_func(xfunc),
         m_vargs(::rocket::forward<XvargsT>(xvargs)...)
       {
       }
-    template<typename... XvargsT> Variadic_Arguer(const Variadic_Arguer& other,
-                                                  XvargsT&&... xvargs)
+    template<typename... XvargsT>
+        Variadic_Arguer(const cow_string& xfile, long xline, const cow_string& xfunc, XvargsT&&... xvargs)
+      :
+        m_sloc(xfile, xline), m_func(xfunc),
+        m_vargs(::rocket::forward<XvargsT>(xvargs)...)
+      {
+      }
+    template<typename... XvargsT>
+        Variadic_Arguer(const Variadic_Arguer& other, XvargsT&&... xvargs)
       :
         m_sloc(other.m_sloc), m_func(other.m_func),
         m_vargs(::rocket::forward<XvargsT>(xvargs)...)

@@ -46,8 +46,8 @@ namespace Asteria {
         return code;
       }
 
-    cow_vector<AIR_Node>& do_generate_expression_partial(cow_vector<AIR_Node>& code,
-                                                         const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
+    cow_vector<AIR_Node>& do_generate_expression_partial(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                                                         TCO_Aware tco_aware, const Analytic_Context& ctx,
                                                          const Statement::S_expression& expr)
       {
         size_t epos = expr.units.size() - 1;

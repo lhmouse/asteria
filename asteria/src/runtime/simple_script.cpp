@@ -18,9 +18,10 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     Token_Stream tstrm;
     tstrm.reload(cbuf, name, xnode.opts);
     // Parse tokens.
-    Statement_Sequence stmseq(tstrm, xnode.opts);
+    Statement_Sequence stmseq;
+    stmseq.reload(tstrm, xnode.opts);
     // Initialize arguments for the function object.
-    xnode.sloc = ::std::make_pair(name, 1);
+    xnode.sloc = Source_Location(name, 1);
     xnode.name = ::rocket::sref("<file scope>");
     xnode.params.emplace_back(::rocket::sref("..."));
     xnode.body = stmseq.get_statements();

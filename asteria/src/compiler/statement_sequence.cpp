@@ -576,12 +576,12 @@ namespace Asteria {
         if(!kparams) {
           do_throw_parser_error(parser_status_open_parenthesis_expected, tstrm);
         }
-        auto qblock = do_accept_block_opt(tstrm);
-        if(!qblock) {
+        auto qbody = do_accept_block_opt(tstrm);
+        if(!qbody) {
           do_throw_parser_error(parser_status_open_brace_expected, tstrm);
         }
         Statement::S_function xstmt = { ::rocket::move(sloc), ::rocket::move(*qname), ::rocket::move(*kparams),
-                                        ::rocket::move(qblock->stmts) };
+                                        ::rocket::move(qbody->stmts) };
         return ::rocket::move(xstmt);
       }
 

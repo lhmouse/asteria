@@ -18,10 +18,6 @@ class Statement_Sequence
     Statement_Sequence() noexcept
       {
       }
-    Statement_Sequence(Token_Stream& tstrm, const Compiler_Options& opts)
-      {
-        this->reload(tstrm, opts);
-      }
 
   public:
     // These are accessors to the statements in this sequence.
