@@ -16,15 +16,32 @@ namespace Asteria {
 
     namespace {
 
-    bool& do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
+    bool do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
       {
+        bool dirty_add = false;
         for(size_t i = 0; i != code.size(); ++i) {
           auto qnode = code.at(i).rebind_opt(ctx);
           if(!qnode) {
             continue;
           }
+          dirty_add |= true;
           dirty |= true;
           code.mut(i) = ::rocket::move(*qnode);
+        }
+        return dirty_add;
+      }
+
+    bool do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, const Abstract_Context& ctx)
+      {
+        bool dirty_add = false;
+        for(size_t i = 0; i != code.size(); ++i) {
+          auto nested = code.at(i);
+          if(!do_rebind_nodes(dirty, nested, ctx)) {
+            continue;
+          }
+          dirty_add |= true;
+          dirty |= true;
+          code.mut(i) = ::rocket::move(nested);
         }
         return dirty;
       }
@@ -44,13 +61,13 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_declare_variable:
     case index_initialize_variable:
@@ -62,74 +79,56 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_true, ctx_body);
-        do_rebind_nodes(dirty, altr_bound.code_false, ctx_body);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_true, ctx_body);
+        do_rebind_nodes(dirty, xaltr.code_false, ctx_body);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_switch_statement:
         const auto& altr = this->m_stor.as<index_switch_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
-        auto altr_bound = altr;
-        for(size_t i = 0; i != altr.code_labels.size(); ++i) {
-          bool dirty_r = false;
-          auto code_bound_r = altr_bound.code_labels.at(i);
-          do_rebind_nodes(dirty_r, code_bound_r, ctx_body);
-          if(!dirty_r) {
-            continue;
-          }
-          dirty |= true;
-          altr_bound.code_labels.mut(i) = ::rocket::move(code_bound_r);
-        }
-        for(size_t i = 0; i != altr.code_bodies.size(); ++i) {
-          bool dirty_r = false;
-          auto code_bound_r = altr_bound.code_bodies.at(i);
-          do_rebind_nodes(dirty_r, code_bound_r, ctx_body);
-          if(!dirty_r) {
-            continue;
-          }
-          dirty |= true;
-          altr_bound.code_bodies.mut(i) = ::rocket::move(code_bound_r);
-        }
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_labels, ctx_body);
+        do_rebind_nodes(dirty, xaltr.code_bodies, ctx_body);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_do_while_statement:
         const auto& altr = this->m_stor.as<index_do_while_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
-        do_rebind_nodes(dirty, altr_bound.code_cond, ctx_body);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
+        do_rebind_nodes(dirty, xaltr.code_cond, ctx_body);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_while_statement:
         const auto& altr = this->m_stor.as<index_while_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_cond, ctx_body);
-        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_cond, ctx_body);
+        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_for_each_statement:
         const auto& altr = this->m_stor.as<index_for_each_statement>();
@@ -137,14 +136,14 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         Analytic_Context ctx_for(::rocket::ref(ctx));
         Analytic_Context ctx_body(::rocket::ref(ctx_for));
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_init, ctx_for);
-        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_init, ctx_for);
+        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_for_statement:
         const auto& altr = this->m_stor.as<index_for_statement>();
@@ -152,30 +151,30 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         Analytic_Context ctx_for(::rocket::ref(ctx));
         Analytic_Context ctx_body(::rocket::ref(ctx_for));
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_init, ctx_for);
-        do_rebind_nodes(dirty, altr_bound.code_cond, ctx_for);
-        do_rebind_nodes(dirty, altr_bound.code_step, ctx_for);
-        do_rebind_nodes(dirty, altr_bound.code_body, ctx_body);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_init, ctx_for);
+        do_rebind_nodes(dirty, xaltr.code_cond, ctx_for);
+        do_rebind_nodes(dirty, xaltr.code_step, ctx_for);
+        do_rebind_nodes(dirty, xaltr.code_body, ctx_body);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_try_statement:
         const auto& altr = this->m_stor.as<index_try_statement>();
         // Check for rebinds recursively.
         Analytic_Context ctx_body(::rocket::ref(ctx));
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_try, ctx_body);
-        do_rebind_nodes(dirty, altr_bound.code_catch, ctx_body);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_try, ctx_body);
+        do_rebind_nodes(dirty, xaltr.code_catch, ctx_body);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_throw_statement:
     case index_assert_statement:
@@ -202,8 +201,8 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
           return ::rocket::clear;
         }
         // Bind it now.
-        S_push_bound_reference altr_bound = { *qref };
-        return ::rocket::move(altr_bound);
+        S_push_bound_reference xaltr = { *qref };
+        return ::rocket::move(xaltr);
       }{
     case index_push_bound_reference:
         // There is nothing to bind.
@@ -214,38 +213,38 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         // Check for rebinds recursively.
         Analytic_Context ctx_func(::std::addressof(ctx), altr.params);
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_body, ctx_func);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_body, ctx_func);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_branch_expression:
         const auto& altr = this->m_stor.as<index_branch_expression>();
         // Check for rebinds recursively.
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_true, ctx);
-        do_rebind_nodes(dirty, altr_bound.code_false, ctx);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_true, ctx);
+        do_rebind_nodes(dirty, xaltr.code_false, ctx);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_coalescence:
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Check for rebinds recursively.
         bool dirty = false;
-        auto altr_bound = altr;
-        do_rebind_nodes(dirty, altr_bound.code_null, ctx);
+        auto xaltr = altr;
+        do_rebind_nodes(dirty, xaltr.code_null, ctx);
         if(!dirty) {
           return ::rocket::clear;
         }
         // Return the bound node.
-        return ::rocket::move(altr_bound);
+        return ::rocket::move(xaltr);
       }{
     case index_function_call:
     case index_member_access:
