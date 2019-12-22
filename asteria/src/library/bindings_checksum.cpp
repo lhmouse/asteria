@@ -21,7 +21,7 @@ template<uint32_t valueT, uint32_t divisorT>
   {
   };
 template<uint32_t divisorT, size_t... indicesT>
-    constexpr array<uint32_t, sizeof...(indicesT)> do_generate_CRC32_table_impl(const ::std::index_sequence<indicesT...>&) noexcept
+    constexpr array<uint32_t, sizeof...(indicesT)> do_generate_CRC32_table_impl(const index_sequence<indicesT...>&) noexcept
   {
     return {{ CRC32_Generator<uint8_t(indicesT), divisorT, 0>::value... }};
   }
@@ -133,7 +133,7 @@ template<uint8_t valueT>
     return {{ Hexdigit<uint8_t(valueT / 16)>::value, Hexdigit<uint8_t(valueT % 16)>::value }};
   };
 template<size_t... indicesT>
-    constexpr array<char, 256, 2> do_generate_hexdigits_impl(const ::std::index_sequence<indicesT...>&) noexcept
+    constexpr array<char, 256, 2> do_generate_hexdigits_impl(const index_sequence<indicesT...>&) noexcept
   {
     return {{ do_generate_hex_digits_for_byte<uint8_t(indicesT)>()... }};
   }

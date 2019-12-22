@@ -31,7 +31,7 @@ inline Source_Location do_tell_source_location(const Token_Stream& tstrm)
     return Source_Location(qtok->file(), qtok->line());
   }
 
-opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, ::std::initializer_list<Keyword> accept)
+opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, initializer_list<Keyword> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -50,7 +50,7 @@ opt<Keyword> do_accept_keyword_opt(Token_Stream& tstrm, ::std::initializer_list<
     return keyword;
   }
 
-opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, ::std::initializer_list<Punctuator> accept)
+opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {

@@ -12,7 +12,8 @@
 #  error Please turn off `-ffast-math`.
 #endif
 
-#include <utility>  // ::std::pair<>, ::rocket::move(), ::rocket::forward()
+#include <initializer_list>  // ::std::initializer_list<>
+#include <utility>  // ::std::pair<>, ::std::move(), ::std::forward(), ::std::integer_sequence<>
 #include <cstddef>  // nullptr_t
 #include <cstdint>  // uint8_t, int64_t
 #include <climits>
@@ -93,6 +94,9 @@ class Argument_Reader;
 class Simple_Binding_Wrapper;
 
 // Aliases
+using ::std::initializer_list;
+using ::std::integer_sequence;
+using ::std::index_sequence;
 using ::std::nullptr_t;
 using ::std::max_align_t;
 using ::std::int8_t;

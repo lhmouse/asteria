@@ -323,7 +323,7 @@ G_string do_format_nonrecursive(const Value& value, Indenter&& indent)
     return do_format_nonrecursive(value, indent);
   }
 
-opt<G_string> do_accept_identifier_opt(Token_Stream& tstrm, ::std::initializer_list<const char*> accept)
+opt<G_string> do_accept_identifier_opt(Token_Stream& tstrm, initializer_list<const char*> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
@@ -340,7 +340,7 @@ opt<G_string> do_accept_identifier_opt(Token_Stream& tstrm, ::std::initializer_l
     return ::rocket::clear;
   }
 
-opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, ::std::initializer_list<Punctuator> accept)
+opt<Punctuator> do_accept_punctuator_opt(Token_Stream& tstrm, initializer_list<Punctuator> accept)
   {
     auto qtok = tstrm.peek_opt();
     if(!qtok) {
