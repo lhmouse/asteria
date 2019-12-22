@@ -1046,11 +1046,8 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
         bool dirty = false;
         auto code_bound = code_body;
         do_rebind_nodes(dirty, code_bound, ctx_func);
-        // Solidify IR nodes.
-        AVMC_Queue queue;
-        do_solidify_queue(queue, code_bound);
         // Instantiate the function.
-        auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), ::rocket::move(queue));
+        auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), code_bound);
         // Push the function as a temporary.
         Reference_Root::S_temporary xref = { G_function(::rocket::move(qtarget)) };
         ctx.stack().push(::rocket::move(xref));

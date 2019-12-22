@@ -7,7 +7,6 @@
 #include "analytic_context.hpp"
 #include "instantiated_function.hpp"
 #include "variadic_arguer.hpp"
-#include "../llds/avmc_queue.hpp"
 #include "../compiler/token_stream.hpp"
 #include "../compiler/statement_sequence.hpp"
 #include "../utilities.hpp"
@@ -42,12 +41,8 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
       stmtq.at(epos).generate_code(code_body, nullptr, ctx_func, this->m_opts, tco_aware_nullify);
     }
     // TODO: Insert optimization passes.
-    // Solidify IR nodes.
-    AVMC_Queue queue;
-    ::rocket::for_each(code_body, [&](const AIR_Node& node) { node.solidify(queue, 0);  });  // 1st pass
-    ::rocket::for_each(code_body, [&](const AIR_Node& node) { node.solidify(queue, 1);  });  // 2nd pass
     // Instantiate the function.
-    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), ::rocket::move(queue));
+    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), code_body);
     this->m_cptr = ::rocket::move(qtarget);
     return *this;
   }

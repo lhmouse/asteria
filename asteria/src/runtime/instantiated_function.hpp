@@ -19,12 +19,17 @@ class Instantiated_Function final : public Abstract_Function
     AVMC_Queue m_queue;
 
   public:
-    Instantiated_Function(const cow_vector<phsh_string>& params, ckptr<Variadic_Arguer>&& zvarg, AVMC_Queue&& queue)
+    Instantiated_Function(const cow_vector<phsh_string>& params, ckptr<Variadic_Arguer>&& zvarg,
+                          const cow_vector<AIR_Node>& code)
       :
-        m_params(params), m_zvarg(::rocket::move(zvarg)), m_queue(::rocket::move(queue))
+        m_params(params), m_zvarg(::rocket::move(zvarg))
       {
+        this->do_solidify_code(code);
       }
     ~Instantiated_Function() override;
+
+  private:
+    void do_solidify_code(const cow_vector<AIR_Node>& code);
 
   public:
     const Source_Location& get_source_location() const noexcept
