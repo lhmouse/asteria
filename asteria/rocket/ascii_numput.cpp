@@ -1242,12 +1242,21 @@ int main(void)
         uint64_t yhi = mult.mant >> 32;
         uint64_t ylo = mult.mant & UINT32_MAX;
         ireg = xhi * yhi + (xlo * yhi >> 32) + (xhi * ylo >> 32);
-        // Truncate the mantissa in case of single precision.
+        // Round the mantissa. We now have 18 digits.
+        // In the case of single precision we have to drop 8 digits before rounding.
         if(ROCKET_UNEXPECT(single)) {
-          // It's gonna be 18 => 9 digits so we shift 9 digits out from the right.
-          // Just truncate the mantissa. Don't double-round it.
-          ireg /= 1'000'000'000;
-          ireg *= 1'000'000'000;
+          ireg /= 100'000'000;
+        }
+        // Note that the last digit should be rounded to even.
+        ylo = ireg % 10;
+        ireg /= 10;
+        if(ylo >= 5) {
+          ireg += (ylo > 5) || (ylo & 1);
+        }
+        ireg *= 10;
+        // Re-fill zeroes in the case of single precision.
+        if(ROCKET_UNEXPECT(single)) {
+          ireg *= 100'000'000;
         }
         // Return the mantissa and exponent.
         mant = ireg;
