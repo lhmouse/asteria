@@ -15,6 +15,27 @@
 #include <errno.h>  // errno
 
 namespace Asteria {
+namespace {
+
+inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
+  {
+    Reference_Root::S_temporary xref = { value };
+    args.emplace_back(::rocket::move(xref));
+  }
+
+void do_process_block(const Global_Context& global, const G_function& callback,
+                      const G_integer& offset, const G_string& data)
+  {
+    // Set up arguments for the user-defined predictor.
+    cow_vector<Reference> args;
+    do_push_argument(args, offset);
+    do_push_argument(args, data);
+    // Call the predictor function, but discard the return value.
+    Reference self;
+    callback->invoke(self, global, ::rocket::move(args));
+  }
+
+}  // namespace
 
 G_string std_filesystem_get_working_directory()
   {
@@ -293,27 +314,6 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
     data.erase(static_cast<size_t>(nread));
     return ::rocket::move(data);
   }
-
-    namespace {
-
-    inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
-      {
-        Reference_Root::S_temporary xref = { value };
-        args.emplace_back(::rocket::move(xref));
-      }
-
-    void do_process_block(const Global_Context& global, const G_function& callback, const G_integer& offset, const G_string& data)
-      {
-        // Set up arguments for the user-defined predictor.
-        cow_vector<Reference> args;
-        do_push_argument(args, offset);
-        do_push_argument(args, data);
-        // Call the predictor function, but discard the return value.
-        Reference self;
-        callback->invoke(self, global, ::rocket::move(args));
-      }
-
-    }  // namespace
 
 bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
