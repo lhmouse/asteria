@@ -79,6 +79,22 @@ pkginclude_rocket_platform_HEADERS =  \
   asteria/rocket/platform/compiler_gcc.h  \
   asteria/rocket/platform/compiler_msvc.h
 
+pkginclude_rocket_detailsdir = ${pkgincludedir}/rocket/details
+pkginclude_rocket_details_HEADERS =  \
+  asteria/rocket/details/utilities.tcc  \
+  asteria/rocket/details/allocator_utilities.tcc  \
+  asteria/rocket/details/variant.tcc  \
+  asteria/rocket/details/unique_handle.tcc  \
+  asteria/rocket/details/cow_string.tcc  \
+  asteria/rocket/details/cow_vector.tcc  \
+  asteria/rocket/details/cow_hashmap.tcc  \
+  asteria/rocket/details/prehashed_string.tcc  \
+  asteria/rocket/details/unique_ptr.tcc  \
+  asteria/rocket/details/refcnt_ptr.tcc  \
+  asteria/rocket/details/static_vector.tcc  \
+  asteria/rocket/details/array.tcc  \
+  asteria/rocket/details/linear_buffer.tcc
+
 lib_librocket_la_SOURCES =  \
   asteria/rocket/assert.cpp  \
   asteria/rocket/throw.cpp  \
