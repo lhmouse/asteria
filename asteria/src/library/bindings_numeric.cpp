@@ -10,6 +10,123 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
+
+const G_integer& do_verify_bounds(const G_integer& lower, const G_integer& upper)
+  {
+    if(!(lower <= upper)) {
+      ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
+    }
+    return upper;
+  }
+
+const G_real& do_verify_bounds(const G_real& lower, const G_real& upper)
+  {
+    if(!::std::islessequal(lower, upper)) {
+      ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
+    }
+    return upper;
+  }
+
+G_integer do_cast_to_integer(const G_real& value)
+  {
+    if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
+      ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
+    }
+    return G_integer(value);
+  }
+
+ROCKET_PURE_FUNCTION G_integer do_saturating_add(const G_integer& lhs, const G_integer& rhs)
+  {
+    if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
+      return (rhs >> 63) ^ INT64_MAX;
+    }
+    return lhs + rhs;
+  }
+
+ROCKET_PURE_FUNCTION G_integer do_saturating_sub(const G_integer& lhs, const G_integer& rhs)
+  {
+    if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
+      return (rhs >> 63) ^ INT64_MIN;
+    }
+    return lhs - rhs;
+  }
+
+ROCKET_PURE_FUNCTION G_integer do_saturating_mul(const G_integer& lhs, const G_integer& rhs)
+  {
+    if((lhs == 0) || (rhs == 0)) {
+      return 0;
+    }
+    if((lhs == 1) || (rhs == 1)) {
+      return (lhs ^ rhs) ^ 1;
+    }
+    if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
+      return (lhs >> 63) ^ (rhs >> 63) ^ INT64_MAX;
+    }
+    if((lhs == -1) || (rhs == -1)) {
+      return (lhs ^ rhs) + 1;
+    }
+    // absolute lhs and signed rhs
+    auto m = lhs >> 63;
+    auto alhs = (lhs ^ m) - m;
+    auto srhs = (rhs ^ m) - m;
+    // `alhs` may only be positive here.
+    if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)) {
+      return (srhs >> 63) ^ INT64_MAX;
+    }
+    return alhs * srhs;
+  }
+
+ROCKET_PURE_FUNCTION G_real do_saturating_add(const G_real& lhs, const G_real& rhs)
+  {
+    return lhs + rhs;
+  }
+
+ROCKET_PURE_FUNCTION G_real do_saturating_sub(const G_real& lhs, const G_real& rhs)
+  {
+    return lhs - rhs;
+  }
+
+ROCKET_PURE_FUNCTION G_real do_saturating_mul(const G_real& lhs, const G_real& rhs)
+  {
+    return lhs * rhs;
+  }
+
+pair<G_integer, int> do_decompose_integer(uint8_t ebase, const G_integer& value)
+  {
+    int64_t ireg = value;
+    int iexp = 0;
+    for(;;) {
+      if(ireg == 0) {
+        break;
+      }
+      auto next = ireg / ebase;
+      if(ireg % ebase != 0) {
+        break;
+      }
+      ireg = next;
+      iexp++;
+    }
+    return ::std::make_pair(ireg, iexp);
+  }
+
+G_string& do_append_exponent(G_string& text, ::rocket::ascii_numput& nump, char delim, int exp)
+  {
+    // Write the delimiter.
+    text.push_back(delim);
+    // If the exponent is non-negative, ensure there is a plus sign.
+    if(exp >= 0)
+      text.push_back('+');
+    // Format the integer. If the exponent is negative, a minus sign will have been added.
+    nump.put_DI(exp, 2);
+    // Append significant figures.
+    text.append(nump.begin(), nump.end());
+    return text;
+  }
+
+constexpr char s_spaces[] = " \f\n\r\t\v";
+
+}  // namespace
 
 G_integer std_numeric_abs(const G_integer& value)
   {
@@ -63,33 +180,6 @@ G_boolean std_numeric_is_nan(const G_real& value)
   {
     return ::std::isnan(value);
   }
-
-    namespace {
-
-    const G_integer& do_verify_bounds(const G_integer& lower, const G_integer& upper)
-      {
-        if(!(lower <= upper)) {
-          ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
-        }
-        return upper;
-      }
-    const G_real& do_verify_bounds(const G_real& lower, const G_real& upper)
-      {
-        if(!::std::islessequal(lower, upper)) {
-          ASTERIA_THROW("bounds not valid (`$1` is not less than or equal to `$2`)", lower, upper);
-        }
-        return upper;
-      }
-
-    G_integer do_cast_to_integer(const G_real& value)
-      {
-        if(!::std::islessequal(-0x1p63, value) || !::std::islessequal(value, 0x1p63 - 0x1p10)) {
-          ASTERIA_THROW("`real` value not representable as an `integer` (value `$1`)", value);
-        }
-        return G_integer(value);
-      }
-
-    }  // namespace
 
 G_integer std_numeric_clamp(const G_integer& value, const G_integer& lower, const G_integer& upper)
   {
@@ -248,66 +338,6 @@ G_integer std_numeric_mulm(const G_integer& x, const G_integer& y)
     return G_integer(static_cast<uint64_t>(x) * static_cast<uint64_t>(y));
   }
 
-    namespace {
-
-    ROCKET_PURE_FUNCTION G_integer do_saturating_add(const G_integer& lhs, const G_integer& rhs)
-      {
-        if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
-          return (rhs >> 63) ^ INT64_MAX;
-        }
-        return lhs + rhs;
-      }
-
-    ROCKET_PURE_FUNCTION G_integer do_saturating_sub(const G_integer& lhs, const G_integer& rhs)
-      {
-        if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
-          return (rhs >> 63) ^ INT64_MIN;
-        }
-        return lhs - rhs;
-      }
-
-    ROCKET_PURE_FUNCTION G_integer do_saturating_mul(const G_integer& lhs, const G_integer& rhs)
-      {
-        if((lhs == 0) || (rhs == 0)) {
-          return 0;
-        }
-        if((lhs == 1) || (rhs == 1)) {
-          return (lhs ^ rhs) ^ 1;
-        }
-        if((lhs == INT64_MIN) || (rhs == INT64_MIN)) {
-          return (lhs >> 63) ^ (rhs >> 63) ^ INT64_MAX;
-        }
-        if((lhs == -1) || (rhs == -1)) {
-          return (lhs ^ rhs) + 1;
-        }
-        // absolute lhs and signed rhs
-        auto m = lhs >> 63;
-        auto alhs = (lhs ^ m) - m;
-        auto srhs = (rhs ^ m) - m;
-        // `alhs` may only be positive here.
-        if((srhs >= 0) ? (alhs > INT64_MAX / srhs) : (alhs > INT64_MIN / srhs)) {
-          return (srhs >> 63) ^ INT64_MAX;
-        }
-        return alhs * srhs;
-      }
-
-    ROCKET_PURE_FUNCTION G_real do_saturating_add(const G_real& lhs, const G_real& rhs)
-      {
-        return lhs + rhs;
-      }
-
-    ROCKET_PURE_FUNCTION G_real do_saturating_sub(const G_real& lhs, const G_real& rhs)
-      {
-        return lhs - rhs;
-      }
-
-    ROCKET_PURE_FUNCTION G_real do_saturating_mul(const G_real& lhs, const G_real& rhs)
-      {
-        return lhs * rhs;
-      }
-
-    }  // namespace
-
 G_integer std_numeric_adds(const G_integer& x, const G_integer& y)
   {
     return do_saturating_add(x, y);
@@ -390,44 +420,6 @@ G_integer std_numeric_popcnt(const G_integer& x)
     }
     return count;
   }
-
-    namespace {
-
-    pair<G_integer, int> do_decompose_integer(uint8_t ebase, const G_integer& value)
-      {
-        int64_t ireg = value;
-        int iexp = 0;
-        for(;;) {
-          if(ireg == 0) {
-            break;
-          }
-          auto next = ireg / ebase;
-          if(ireg % ebase != 0) {
-            break;
-          }
-          ireg = next;
-          iexp++;
-        }
-        return ::std::make_pair(ireg, iexp);
-      }
-
-    G_string& do_append_exponent(G_string& text, ::rocket::ascii_numput& nump, char delim, int exp)
-      {
-        // Write the delimiter.
-        text.push_back(delim);
-        // If the exponent is non-negative, ensure there is a plus sign.
-        if(exp >= 0)
-          text.push_back('+');
-        // Format the integer. If the exponent is negative, a minus sign will have been added.
-        nump.put_DI(exp, 2);
-        // Append significant figures.
-        text.append(nump.begin(), nump.end());
-        return text;
-      }
-
-    constexpr char s_spaces[] = " \f\n\r\t\v";
-
-    }  // namespace
 
 G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, const opt<G_integer>& ebase)
   {
