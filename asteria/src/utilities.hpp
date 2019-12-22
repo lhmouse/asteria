@@ -88,7 +88,7 @@ struct Wrapped_Index
 
 extern Wrapped_Index wrap_index(int64_t index, size_t size) noexcept;
 
-// Note that the return value may be either positive or negative.
+// Note that all bits in the result are filled.
 extern uint64_t generate_random_seed() noexcept;
 
 }  // namespace Asteria

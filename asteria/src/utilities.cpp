@@ -358,7 +358,7 @@ uint64_t generate_random_seed() noexcept
     // Get the system time of very high resolution.
     ::timespec ts;
     ::clock_gettime(CLOCK_MONOTONIC, &ts);
-    uint64_t source = static_cast<uint32_t>(ts.tv_nsec);
+    uint64_t source = (static_cast<uint64_t>(ts.tv_sec) << 30) + static_cast<uint32_t>(ts.tv_nsec);
     // Hash it using FNV-1a to erase sensitive information.
     //   https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
     // The source is read in little-endian byte order.
