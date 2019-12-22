@@ -42,8 +42,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     }
     // TODO: Insert optimization passes.
     // Instantiate the function.
-    auto qtarget = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), code_body);
-    this->m_cptr = ::rocket::move(qtarget);
+    this->m_cptr = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), code_body);
     return *this;
   }
 
