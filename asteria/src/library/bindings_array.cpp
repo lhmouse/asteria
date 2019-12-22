@@ -9,53 +9,231 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
 
-    namespace {
-
-    pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, G_array::const_iterator tbegin, const opt<G_integer>& length)
-      {
-        if(!length || (*length >= text.end() - tbegin)) {
-          // Get the subrange from `tbegin` to the end.
-          return ::std::make_pair(tbegin, text.end());
-        }
-        if(*length <= 0) {
-          // Return an empty range.
-          return ::std::make_pair(tbegin, tbegin);
-        }
-        // Don't go past the end.
-        return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
+pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, G_array::const_iterator tbegin, const opt<G_integer>& length)
+  {
+    if(!length || (*length >= text.end() - tbegin)) {
+      // Get the subrange from `tbegin` to the end.
+      return ::std::make_pair(tbegin, text.end());
+    }
+    if(*length <= 0) {
+      // Return an empty range.
+      return ::std::make_pair(tbegin, tbegin);
+    }
+    // Don't go past the end.
+    return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
+  }
+pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, const G_integer& from, const opt<G_integer>& length)
+  {
+    auto slen = static_cast<int64_t>(text.size());
+    if(from >= 0) {
+      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is greater than `text.size()`.
+      if(from >= slen) {
+        return ::std::make_pair(text.end(), text.end());
       }
-    pair<G_array::const_iterator, G_array::const_iterator> do_slice(const G_array& text, const G_integer& from, const opt<G_integer>& length)
-      {
-        auto slen = static_cast<int64_t>(text.size());
-        if(from >= 0) {
-          // Behave like `::std::string::substr()` except that no exception is thrown when `from` is greater than `text.size()`.
-          if(from >= slen) {
-            return ::std::make_pair(text.end(), text.end());
+      return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
+    }
+    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
+    auto rfrom = from + slen;
+    if(rfrom >= 0) {
+      // Get a subrange from the wrapped index.
+      return do_slice(text, text.begin() + static_cast<ptrdiff_t>(rfrom), length);
+    }
+    // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
+    if(!length) {
+      // Get the subrange from the beginning to the end.
+      return ::std::make_pair(text.begin(), text.end());
+    }
+    if(*length <= 0) {
+      // Return an empty range.
+      return ::std::make_pair(text.begin(), text.begin());
+    }
+    // Get a subrange excluding the part before the beginning.
+    // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
+    return do_slice(text, text.begin(), rfrom + *length);
+  }
+
+template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT begin, IteratorT end, const Value& target)
+  {
+    for(auto it = ::rocket::move(begin); it != end; ++it) {
+      // Compare the value using the builtin 3-way comparison operator.
+      if(it->compare(target) == compare_equal)
+        return ::rocket::move(it);
+    }
+    // Fail to find an element.
+    return ::rocket::clear;
+  }
+
+inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
+  {
+    Reference_Root::S_temporary xref = { value };
+    args.emplace_back(::rocket::move(xref));
+  }
+
+template<typename IteratorT> opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end,
+                                                           const G_function& predictor, bool match)
+  {
+    for(auto it = ::rocket::move(begin); it != end; ++it) {
+      // Set up arguments for the user-defined predictor.
+      cow_vector<Reference> args;
+      do_push_argument(args, *it);
+      // Call the predictor function and check the return value.
+      Reference self;
+      predictor->invoke(self, global, ::rocket::move(args));
+      self.finish_call(global);
+      if(self.read().test() == match)
+        return ::rocket::move(it);
+    }
+    // Fail to find an element.
+    return ::rocket::clear;
+  }
+
+Compare do_compare(const Global_Context& global, const G_function& comp, const Value& lhs, const Value& rhs)
+  {
+    // Set up arguments for the user-defined comparator.
+    cow_vector<Reference> args;
+    do_push_argument(args, lhs);
+    do_push_argument(args, rhs);
+    // Call the predictor function and compare the result with `0`.
+    Reference self;
+    comp->invoke(self, global, ::rocket::move(args));
+    self.finish_call(global);
+    return self.read().compare(G_integer(0));
+  }
+
+Compare do_compare(const Global_Context& global, const opt<G_function>& comp, const Value& lhs, const Value& rhs)
+  {
+    return ROCKET_UNEXPECT(comp) ? do_compare(global, *comp, lhs, rhs) : lhs.compare(rhs);
+  }
+
+template<typename IteratorT>
+    pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
+                                     const opt<G_function>& comparator, const Value& target)
+  {
+    auto bpos = ::rocket::move(begin);
+    auto epos = ::rocket::move(end);
+    do {
+      auto dist = epos - bpos;
+      if(dist <= 0) {
+        return ::std::make_pair(::rocket::move(bpos), false);
+      }
+      auto mpos = bpos + dist / 2;
+      // Compare `target` with the element in the middle.
+      auto cmp = do_compare(global, comparator, target, *mpos);
+      if(cmp == compare_unordered) {
+        ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
+      }
+      if(cmp == compare_equal) {
+        return ::std::make_pair(::rocket::move(mpos), true);
+      }
+      if(cmp == compare_less)
+        epos = mpos;
+      else
+        bpos = mpos + 1;
+    } while(true);
+  }
+
+template<typename IteratorT, typename PredT>
+    IteratorT do_bound(const Global_Context& global, IteratorT begin, IteratorT end,
+                       const opt<G_function>& comparator, const Value& target, PredT&& pred)
+  {
+    auto bpos = ::rocket::move(begin);
+    auto epos = ::rocket::move(end);
+    do {
+      auto dist = epos - bpos;
+      if(dist <= 0) {
+        return ::rocket::move(bpos);
+      }
+      auto mpos = bpos + dist / 2;
+      // Compare `target` with the element in the middle.
+      auto cmp = do_compare(global, comparator, target, *mpos);
+      if(cmp == compare_unordered) {
+        ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
+      }
+      if(::rocket::forward<PredT>(pred)(cmp))
+        epos = mpos;
+      else
+        bpos = mpos + 1;
+    } while(true);
+  }
+
+void do_unique_move(G_array::iterator& opos, const Global_Context& global, const opt<G_function>& comparator,
+                    G_array::iterator ibegin, G_array::iterator iend, bool unique)
+  {
+    for(auto ipos = ibegin; ipos != iend; ++ipos) {
+      if(unique && (do_compare(global, comparator, *ipos, opos[-1]) == compare_equal)) {
+        continue;
+      }
+      *(opos++) = ::rocket::move(*ipos);
+    }
+  }
+
+G_array::iterator do_merge_blocks(G_array& output, const Global_Context& global, const opt<G_function>& comparator,
+                                  G_array&& input, ptrdiff_t bsize, bool unique)
+  {
+    ROCKET_ASSERT(output.size() >= input.size());
+    // Define the range information for a pair of contiguous blocks.
+    G_array::iterator bpos[2];
+    G_array::iterator bend[2];
+    // Merge adjacent blocks of `bsize` elements.
+    auto opos = output.mut_begin();
+    auto ipos = input.mut_begin();
+    auto iend = input.mut_end();
+    for(;;) {
+      // Get the block of the first block to merge.
+      bpos[0] = ipos;
+      if(iend - ipos <= bsize) {
+        // Copy all remaining elements.
+        ROCKET_ASSERT(opos != output.begin());
+        do_unique_move(opos, global, comparator, ipos, iend, unique);
+        break;
+      }
+      ipos += bsize;
+      bend[0] = ipos;
+      // Get the range of the second block to merge.
+      bpos[1] = ipos;
+      ipos += ::rocket::min(iend - ipos, bsize);
+      bend[1] = ipos;
+      // Merge elements one by one, until either block has been exhausted, then store the index of it here.
+      size_t bi;
+      for(;;) {
+        auto cmp = do_compare(global, comparator, *(bpos[0]), *(bpos[1]));
+        if(cmp == compare_unordered) {
+          ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
+        }
+        // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
+        bi = (cmp == compare_greater);
+        // Move this element unless uniqueness is requested and it is equal to the previous output.
+        if(!(unique && (opos != output.begin()) && (do_compare(global, comparator, *(bpos[bi]), opos[-1]) == compare_equal))) {
+          *(opos++) = ::rocket::move(*(bpos[bi]));
+        }
+        bpos[bi]++;
+        // When uniqueness is requested, if elements from the two blocks are equal, discard the one from the second block.
+        // This may exhaust the second block.
+        if(unique && (cmp == compare_equal)) {
+          size_t oi = bi ^ 1;
+          bpos[oi]++;
+          if(bpos[oi] == bend[oi]) {
+            // `bi` is the index of the block that has been exhausted.
+            bi = oi;
+            break;
           }
-          return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
         }
-        // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
-        auto rfrom = from + slen;
-        if(rfrom >= 0) {
-          // Get a subrange from the wrapped index.
-          return do_slice(text, text.begin() + static_cast<ptrdiff_t>(rfrom), length);
+        if(bpos[bi] == bend[bi]) {
+          // `bi` is the index of the block that has been exhausted.
+          break;
         }
-        // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
-        if(!length) {
-          // Get the subrange from the beginning to the end.
-          return ::std::make_pair(text.begin(), text.end());
-        }
-        if(*length <= 0) {
-          // Return an empty range.
-          return ::std::make_pair(text.begin(), text.begin());
-        }
-        // Get a subrange excluding the part before the beginning.
-        // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
-        return do_slice(text, text.begin(), rfrom + *length);
       }
+      // Move all elements from the other block.
+      ROCKET_ASSERT(opos != output.begin());
+      bi ^= 1;
+      do_unique_move(opos, global, comparator, bpos[bi], bend[bi], unique);
+    }
+    return opos;
+  }
 
-    }  // namespace
+}  // namespace
 
 G_array std_array_slice(const G_array& data, const G_integer& from, const opt<G_integer>& length)
   {
@@ -90,45 +268,6 @@ G_array std_array_replace_slice(const G_array& data, const G_integer& from, cons
     res.append(range.second, data.end());
     return res;
   }
-
-    namespace {
-
-    template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT begin, IteratorT end, const Value& target)
-      {
-        for(auto it = ::rocket::move(begin); it != end; ++it) {
-          // Compare the value using the builtin 3-way comparison operator.
-          if(it->compare(target) == compare_equal)
-            return ::rocket::move(it);
-        }
-        // Fail to find an element.
-        return ::rocket::clear;
-      }
-
-    inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
-      {
-        Reference_Root::S_temporary xref = { value };
-        args.emplace_back(::rocket::move(xref));
-      }
-
-    template<typename IteratorT> opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end,
-                                                               const G_function& predictor, bool match)
-      {
-        for(auto it = ::rocket::move(begin); it != end; ++it) {
-          // Set up arguments for the user-defined predictor.
-          cow_vector<Reference> args;
-          do_push_argument(args, *it);
-          // Call the predictor function and check the return value.
-          Reference self;
-          predictor->invoke(self, global, ::rocket::move(args));
-          self.finish_call(global);
-          if(self.read().test() == match)
-            return ::rocket::move(it);
-        }
-        // Fail to find an element.
-        return ::rocket::clear;
-      }
-
-    }  // namespace
 
 opt<G_integer> std_array_find(const G_array& data, const Value& target)
   {
@@ -445,27 +584,6 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
     return count;
   }
 
-    namespace {
-
-    Compare do_compare(const Global_Context& global, const G_function& comp, const Value& lhs, const Value& rhs)
-      {
-        // Set up arguments for the user-defined comparator.
-        cow_vector<Reference> args;
-        do_push_argument(args, lhs);
-        do_push_argument(args, rhs);
-        // Call the predictor function and compare the result with `0`.
-        Reference self;
-        comp->invoke(self, global, ::rocket::move(args));
-        self.finish_call(global);
-        return self.read().compare(G_integer(0));
-      }
-    Compare do_compare(const Global_Context& global, const opt<G_function>& comp, const Value& lhs, const Value& rhs)
-      {
-        return ROCKET_UNEXPECT(comp) ? do_compare(global, *comp, lhs, rhs) : lhs.compare(rhs);
-      }
-
-    }  // namespace
-
 G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data, const opt<G_function>& comparator)
   {
     if(data.size() <= 1) {
@@ -480,61 +598,6 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
     }
     return true;
   }
-
-    namespace {
-
-    template<typename IteratorT>
-        pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
-                                         const opt<G_function>& comparator, const Value& target)
-      {
-        auto bpos = ::rocket::move(begin);
-        auto epos = ::rocket::move(end);
-        do {
-          auto dist = epos - bpos;
-          if(dist <= 0) {
-            return ::std::make_pair(::rocket::move(bpos), false);
-          }
-          auto mpos = bpos + dist / 2;
-          // Compare `target` with the element in the middle.
-          auto cmp = do_compare(global, comparator, target, *mpos);
-          if(cmp == compare_unordered) {
-            ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
-          }
-          if(cmp == compare_equal) {
-            return ::std::make_pair(::rocket::move(mpos), true);
-          }
-          if(cmp == compare_less)
-            epos = mpos;
-          else
-            bpos = mpos + 1;
-        } while(true);
-      }
-
-    template<typename IteratorT, typename PredT>
-        IteratorT do_bound(const Global_Context& global, IteratorT begin, IteratorT end,
-                           const opt<G_function>& comparator, const Value& target, PredT&& pred)
-      {
-        auto bpos = ::rocket::move(begin);
-        auto epos = ::rocket::move(end);
-        do {
-          auto dist = epos - bpos;
-          if(dist <= 0) {
-            return ::rocket::move(bpos);
-          }
-          auto mpos = bpos + dist / 2;
-          // Compare `target` with the element in the middle.
-          auto cmp = do_compare(global, comparator, target, *mpos);
-          if(cmp == compare_unordered) {
-            ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
-          }
-          if(::rocket::forward<PredT>(pred)(cmp))
-            epos = mpos;
-          else
-            bpos = mpos + 1;
-        } while(true);
-      }
-
-    }  // namespace
 
 opt<G_integer> std_array_binary_search(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
@@ -564,85 +627,6 @@ pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, c
     auto upos = do_bound(global, pair.first, data.end(), comparator, target, [](Compare cmp) { return cmp == compare_less;  });
     return { lpos - data.begin(), upos - data.begin() };
   }
-
-    namespace {
-
-    void do_unique_move(G_array::iterator& opos, const Global_Context& global, const opt<G_function>& comparator,
-                        G_array::iterator ibegin, G_array::iterator iend, bool unique)
-      {
-        for(auto ipos = ibegin; ipos != iend; ++ipos) {
-          if(unique && (do_compare(global, comparator, *ipos, opos[-1]) == compare_equal)) {
-            continue;
-          }
-          *(opos++) = ::rocket::move(*ipos);
-        }
-      }
-
-    G_array::iterator do_merge_blocks(G_array& output, const Global_Context& global, const opt<G_function>& comparator,
-                                      G_array&& input, ptrdiff_t bsize, bool unique)
-      {
-        ROCKET_ASSERT(output.size() >= input.size());
-        // Define the range information for a pair of contiguous blocks.
-        G_array::iterator bpos[2];
-        G_array::iterator bend[2];
-        // Merge adjacent blocks of `bsize` elements.
-        auto opos = output.mut_begin();
-        auto ipos = input.mut_begin();
-        auto iend = input.mut_end();
-        for(;;) {
-          // Get the block of the first block to merge.
-          bpos[0] = ipos;
-          if(iend - ipos <= bsize) {
-            // Copy all remaining elements.
-            ROCKET_ASSERT(opos != output.begin());
-            do_unique_move(opos, global, comparator, ipos, iend, unique);
-            break;
-          }
-          ipos += bsize;
-          bend[0] = ipos;
-          // Get the range of the second block to merge.
-          bpos[1] = ipos;
-          ipos += ::rocket::min(iend - ipos, bsize);
-          bend[1] = ipos;
-          // Merge elements one by one, until either block has been exhausted, then store the index of it here.
-          size_t bi;
-          for(;;) {
-            auto cmp = do_compare(global, comparator, *(bpos[0]), *(bpos[1]));
-            if(cmp == compare_unordered) {
-              ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", *(bpos[0]), *(bpos[1]));
-            }
-            // For Merge Sort to be stable, the two elements will only be swapped if the first one is greater than the second one.
-            bi = (cmp == compare_greater);
-            // Move this element unless uniqueness is requested and it is equal to the previous output.
-            if(!(unique && (opos != output.begin()) && (do_compare(global, comparator, *(bpos[bi]), opos[-1]) == compare_equal))) {
-              *(opos++) = ::rocket::move(*(bpos[bi]));
-            }
-            bpos[bi]++;
-            // When uniqueness is requested, if elements from the two blocks are equal, discard the one from the second block.
-            // This may exhaust the second block.
-            if(unique && (cmp == compare_equal)) {
-              size_t oi = bi ^ 1;
-              bpos[oi]++;
-              if(bpos[oi] == bend[oi]) {
-                // `bi` is the index of the block that has been exhausted.
-                bi = oi;
-                break;
-              }
-            }
-            if(bpos[bi] == bend[bi]) {
-              // `bi` is the index of the block that has been exhausted.
-              break;
-            }
-          }
-          // Move all elements from the other block.
-          ROCKET_ASSERT(opos != output.begin());
-          bi ^= 1;
-          do_unique_move(opos, global, comparator, bpos[bi], bend[bi], unique);
-        }
-        return opos;
-      }
-
-    }  // namespace
 
 G_array std_array_sort(const Global_Context& global, const G_array& data, const opt<G_function>& comparator)
   {
