@@ -8,53 +8,233 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
 
-    namespace {
+pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, G_string::const_iterator tbegin, const opt<G_integer>& length)
+  {
+    if(!length || (*length >= text.end() - tbegin)) {
+      // Get the subrange from `tbegin` to the end.
+      return ::std::make_pair(tbegin, text.end());
+    }
+    if(*length <= 0) {
+      // Return an empty range.
+      return ::std::make_pair(tbegin, tbegin);
+    }
+    // Don't go past the end.
+    return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
+  }
 
-    pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, G_string::const_iterator tbegin, const opt<G_integer>& length)
-      {
-        if(!length || (*length >= text.end() - tbegin)) {
-          // Get the subrange from `tbegin` to the end.
-          return ::std::make_pair(tbegin, text.end());
-        }
-        if(*length <= 0) {
-          // Return an empty range.
-          return ::std::make_pair(tbegin, tbegin);
-        }
-        // Don't go past the end.
-        return ::std::make_pair(tbegin, tbegin + static_cast<ptrdiff_t>(*length));
+pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length)
+  {
+    auto slen = static_cast<int64_t>(text.size());
+    if(from >= 0) {
+      // Behave like `::std::string::substr()` except that no exception is thrown when `from` is greater than `text.size()`.
+      if(from >= slen) {
+        return ::std::make_pair(text.end(), text.end());
       }
-    pair<G_string::const_iterator, G_string::const_iterator> do_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length)
-      {
-        auto slen = static_cast<int64_t>(text.size());
-        if(from >= 0) {
-          // Behave like `::std::string::substr()` except that no exception is thrown when `from` is greater than `text.size()`.
-          if(from >= slen) {
-            return ::std::make_pair(text.end(), text.end());
-          }
-          return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
-        }
-        // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
-        auto rfrom = from + slen;
-        if(rfrom >= 0) {
-          // Get a subrange from the wrapped index.
-          return do_slice(text, text.begin() + static_cast<ptrdiff_t>(rfrom), length);
-        }
-        // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
-        if(!length) {
-          // Get the subrange from the beginning to the end.
-          return ::std::make_pair(text.begin(), text.end());
-        }
-        if(*length <= 0) {
-          // Return an empty range.
-          return ::std::make_pair(text.begin(), text.begin());
-        }
-        // Get a subrange excluding the part before the beginning.
-        // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
-        return do_slice(text, text.begin(), rfrom + *length);
-      }
+      return do_slice(text, text.begin() + static_cast<ptrdiff_t>(from), length);
+    }
+    // Wrap `from` from the end. Notice that `from + slen` will not overflow when `from` is negative and `slen` is not.
+    auto rfrom = from + slen;
+    if(rfrom >= 0) {
+      // Get a subrange from the wrapped index.
+      return do_slice(text, text.begin() + static_cast<ptrdiff_t>(rfrom), length);
+    }
+    // Get a subrange from the beginning of `text`, if the wrapped index is before the first byte.
+    if(!length) {
+      // Get the subrange from the beginning to the end.
+      return ::std::make_pair(text.begin(), text.end());
+    }
+    if(*length <= 0) {
+      // Return an empty range.
+      return ::std::make_pair(text.begin(), text.begin());
+    }
+    // Get a subrange excluding the part before the beginning.
+    // Notice that `rfrom + *length` will not overflow when `rfrom` is negative and `*length` is not.
+    return do_slice(text, text.begin(), rfrom + *length);
+  }
 
-    }  // namespace
+template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, IteratorT tend, IteratorT pbegin, IteratorT pend)
+  {
+    // https://en.wikipedia.org/wiki/Boyer-Moore-Horspool_algorithm
+    auto plen = ::std::distance(pbegin, pend);
+    if(plen <= 0) {
+      // Return a match at the the beginning if the pattern is empty.
+      return tbegin;
+    }
+    // Build a table according to the Bad Character Rule.
+    ::std::array<ptrdiff_t, 0x100> bcr_table;
+    for(size_t i = 0; i != 0x100; ++i) {
+      bcr_table[i] = plen;
+    }
+    for(ptrdiff_t i = plen - 1; i != 0; --i) {
+      bcr_table[(pend[~i] & 0xFF)] = i;
+    }
+    // Search for the pattern.
+    auto tpos = tbegin;
+    for(;;) {
+      if(tend - tpos < plen) {
+        return ::rocket::clear;
+      }
+      if(::std::equal(pbegin, pend, tpos)) {
+        break;
+      }
+      tpos += bcr_table[(tpos[(plen - 1)] & 0xFF)];
+    }
+    return ::rocket::move(tpos);
+  }
+
+template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const G_string& set, bool match)
+  {
+    // Make a lookup table.
+    ::std::array<bool, 256> table = { };
+    ::rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
+    // Search the range.
+    for(auto it = ::rocket::move(begin); it != end; ++it) {
+      if(table[uint8_t(*it)] == match)
+        return ::rocket::move(it);
+    }
+    return ::rocket::clear;
+  }
+
+inline G_string::shallow_type do_get_reject(const opt<G_string>& reject)
+  {
+    if(!reject) {
+      return ::rocket::sref(" \t");
+    }
+    return ::rocket::sref(*reject);
+  }
+
+inline G_string::shallow_type do_get_padding(const opt<G_string>& padding)
+  {
+    if(!padding) {
+      return ::rocket::sref(" ");
+    }
+    if(padding->empty()) {
+      ASTERIA_THROW("empty padding string not valid");
+    }
+    return ::rocket::sref(*padding);
+  }
+
+constexpr char s_char_table[][2] =
+  {
+    "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07",
+    "\x08", "\x09", "\x0A", "\x0B", "\x0C", "\x0D", "\x0E", "\x0F",
+    "\x10", "\x11", "\x12", "\x13", "\x14", "\x15", "\x16", "\x17",
+    "\x18", "\x19", "\x1A", "\x1B", "\x1C", "\x1D", "\x1E", "\x1F",
+    "\x20", "\x21", "\x22", "\x23", "\x24", "\x25", "\x26", "\x27",
+    "\x28", "\x29", "\x2A", "\x2B", "\x2C", "\x2D", "\x2E", "\x2F",
+    "\x30", "\x31", "\x32", "\x33", "\x34", "\x35", "\x36", "\x37",
+    "\x38", "\x39", "\x3A", "\x3B", "\x3C", "\x3D", "\x3E", "\x3F",
+    "\x40", "\x41", "\x42", "\x43", "\x44", "\x45", "\x46", "\x47",
+    "\x48", "\x49", "\x4A", "\x4B", "\x4C", "\x4D", "\x4E", "\x4F",
+    "\x50", "\x51", "\x52", "\x53", "\x54", "\x55", "\x56", "\x57",
+    "\x58", "\x59", "\x5A", "\x5B", "\x5C", "\x5D", "\x5E", "\x5F",
+    "\x60", "\x61", "\x62", "\x63", "\x64", "\x65", "\x66", "\x67",
+    "\x68", "\x69", "\x6A", "\x6B", "\x6C", "\x6D", "\x6E", "\x6F",
+    "\x70", "\x71", "\x72", "\x73", "\x74", "\x75", "\x76", "\x77",
+    "\x78", "\x79", "\x7A", "\x7B", "\x7C", "\x7D", "\x7E", "\x7F",
+    "\x80", "\x81", "\x82", "\x83", "\x84", "\x85", "\x86", "\x87",
+    "\x88", "\x89", "\x8A", "\x8B", "\x8C", "\x8D", "\x8E", "\x8F",
+    "\x90", "\x91", "\x92", "\x93", "\x94", "\x95", "\x96", "\x97",
+    "\x98", "\x99", "\x9A", "\x9B", "\x9C", "\x9D", "\x9E", "\x9F",
+    "\xA0", "\xA1", "\xA2", "\xA3", "\xA4", "\xA5", "\xA6", "\xA7",
+    "\xA8", "\xA9", "\xAA", "\xAB", "\xAC", "\xAD", "\xAE", "\xAF",
+    "\xB0", "\xB1", "\xB2", "\xB3", "\xB4", "\xB5", "\xB6", "\xB7",
+    "\xB8", "\xB9", "\xBA", "\xBB", "\xBC", "\xBD", "\xBE", "\xBF",
+    "\xC0", "\xC1", "\xC2", "\xC3", "\xC4", "\xC5", "\xC6", "\xC7",
+    "\xC8", "\xC9", "\xCA", "\xCB", "\xCC", "\xCD", "\xCE", "\xCF",
+    "\xD0", "\xD1", "\xD2", "\xD3", "\xD4", "\xD5", "\xD6", "\xD7",
+    "\xD8", "\xD9", "\xDA", "\xDB", "\xDC", "\xDD", "\xDE", "\xDF",
+    "\xE0", "\xE1", "\xE2", "\xE3", "\xE4", "\xE5", "\xE6", "\xE7",
+    "\xE8", "\xE9", "\xEA", "\xEB", "\xEC", "\xED", "\xEE", "\xEF",
+    "\xF0", "\xF1", "\xF2", "\xF3", "\xF4", "\xF5", "\xF6", "\xF7",
+    "\xF8", "\xF9", "\xFA", "\xFB", "\xFC", "\xFD", "\xFE", "\xFF",
+  };
+
+constexpr char s_base16_table[] = "00112233445566778899AaBbCcDdEeFf";
+constexpr char s_base32_table[] = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz223344556677==";
+constexpr char s_base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/==";
+constexpr char s_spaces[] = " \f\n\r\t\v";
+
+const char* do_xstrchr(const char* str, char c) noexcept
+  {
+    const char* p = str;
+    for(;;) {
+      if(*p == 0)
+        return nullptr;
+      if(*p == c)
+        return p;
+      ++p;
+    }
+  }
+
+template<bool bigendT, typename WordT> G_string& do_pack_one_impl(G_string& text, const G_integer& value)
+  {
+    // Define temporary storage.
+    ::std::array<char, sizeof(WordT)> stor_le;
+    uint64_t word = static_cast<uint64_t>(value);
+    // Write it in little-endian order.
+    for(auto& byte : stor_le) {
+      byte = static_cast<char>(word);
+      word >>= 8;
+    }
+    // Append this word.
+    if(bigendT)
+      text.append(stor_le.rbegin(), stor_le.rend());
+    else
+      text.append(stor_le.begin(), stor_le.end());
+    // Return  the output string.
+    return text;
+  }
+template<typename WordT> G_string& do_pack_one_be(G_string& text, const G_integer& value)
+  {
+    return do_pack_one_impl<1, WordT>(text, value);
+  }
+template<typename WordT> G_string& do_pack_one_le(G_string& text, const G_integer& value)
+  {
+    return do_pack_one_impl<0, WordT>(text, value);
+  }
+
+template<bool bigendT, typename WordT> G_array do_unpack_impl(const G_string& text)
+  {
+    G_array values;
+    // Define temporary storage.
+    ::std::array<char, sizeof(WordT)> stor_be;
+    uint64_t word = 0;
+    // How many words will the result have?
+    auto nwords = text.size() / stor_be.size();
+    if(text.size() != nwords * stor_be.size()) {
+      ASTERIA_THROW("invalid source string length (`$1` not divisible by `$2`)", text.size(), stor_be.size());
+    }
+    values.reserve(nwords);
+    // Unpack integers.
+    for(size_t i = 0; i < nwords; ++i) {
+      // Read some bytes in big-endian order.
+      if(bigendT)
+        ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.begin());
+      else
+        ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.rbegin());
+      // Assemble the word.
+      for(const auto& byte : stor_be) {
+        word <<= 8;
+        word |= static_cast<uint8_t>(byte);
+      }
+      // Append the word.
+      values.emplace_back(G_integer(static_cast<WordT>(word)));
+    }
+    return values;
+  }
+template<typename WordT> G_array do_unpack_be(const G_string& text)
+  {
+    return do_unpack_impl<1, WordT>(text);
+  }
+template<typename WordT> G_array do_unpack_le(const G_string& text)
+  {
+    return do_unpack_impl<0, WordT>(text);
+  }
+
+}  // namespace
 
 G_string std_string_slice(const G_string& text, const G_integer& from, const opt<G_integer>& length)
   {
@@ -107,40 +287,6 @@ G_boolean std_string_ends_with(const G_string& text, const G_string& suffix)
   {
     return text.ends_with(suffix);
   }
-
-    namespace {
-
-    // https://en.wikipedia.org/wiki/Boyer-Moore-Horspool_algorithm
-    template<typename IteratorT> opt<IteratorT> do_find_opt(IteratorT tbegin, IteratorT tend, IteratorT pbegin, IteratorT pend)
-      {
-        auto plen = ::std::distance(pbegin, pend);
-        if(plen <= 0) {
-          // Return a match at the the beginning if the pattern is empty.
-          return tbegin;
-        }
-        // Build a table according to the Bad Character Rule.
-        ::std::array<ptrdiff_t, 0x100> bcr_table;
-        for(size_t i = 0; i != 0x100; ++i) {
-          bcr_table[i] = plen;
-        }
-        for(ptrdiff_t i = plen - 1; i != 0; --i) {
-          bcr_table[(pend[~i] & 0xFF)] = i;
-        }
-        // Search for the pattern.
-        auto tpos = tbegin;
-        for(;;) {
-          if(tend - tpos < plen) {
-            return ::rocket::clear;
-          }
-          if(::std::equal(pbegin, pend, tpos)) {
-            break;
-          }
-          tpos += bcr_table[(tpos[(plen - 1)] & 0xFF)];
-        }
-        return ::rocket::move(tpos);
-      }
-
-    }  // namespace
 
 opt<G_integer> std_string_find(const G_string& text, const G_string& pattern)
   {
@@ -255,23 +401,6 @@ G_string std_string_find_and_replace(const G_string& text, const G_integer& from
     }
     return res;
   }
-
-    namespace {
-
-    template<typename IteratorT> opt<IteratorT> do_find_of_opt(IteratorT begin, IteratorT end, const G_string& set, bool match)
-      {
-        // Make a lookup table.
-        ::std::array<bool, 256> table = { };
-        ::rocket::for_each(set, [&](char c) { table[uint8_t(c)] = true;  });
-        // Search the range.
-        for(auto it = ::rocket::move(begin); it != end; ++it) {
-          if(table[uint8_t(*it)] == match)
-            return ::rocket::move(it);
-        }
-        return ::rocket::clear;
-      }
-
-    }  // namespace
 
 opt<G_integer> std_string_find_any_of(const G_string& text, const G_string& accept)
   {
@@ -395,18 +524,6 @@ G_string std_string_reverse(const G_string& text)
     return G_string(text.rbegin(), text.rend());
   }
 
-    namespace {
-
-    inline G_string::shallow_type do_get_reject(const opt<G_string>& reject)
-      {
-        if(!reject) {
-          return ::rocket::sref(" \t");
-        }
-        return ::rocket::sref(*reject);
-      }
-
-    }  // namespace
-
 G_string std_string_trim(const G_string& text, const opt<G_string>& reject)
   {
     auto rchars = do_get_reject(reject);
@@ -471,21 +588,6 @@ G_string std_string_rtrim(const G_string& text, const opt<G_string>& reject)
     // Return the remaining part of `text`.
     return text.substr(0, end + 1);
   }
-
-    namespace {
-
-    inline G_string::shallow_type do_get_padding(const opt<G_string>& padding)
-      {
-        if(!padding) {
-          return ::rocket::sref(" ");
-        }
-        if(padding->empty()) {
-          ASTERIA_THROW("empty padding string not valid");
-        }
-        return ::rocket::sref(*padding);
-      }
-
-    }  // namespace
 
 G_string std_string_lpad(const G_string& text, const G_integer& length, const opt<G_string>& padding)
   {
@@ -586,46 +688,6 @@ G_string std_string_translate(const G_string& text, const G_string& inputs, cons
     return res;
   }
 
-    namespace {
-
-    constexpr char s_char_table[][2] =
-      {
-        "\x00", "\x01", "\x02", "\x03", "\x04", "\x05", "\x06", "\x07",
-        "\x08", "\x09", "\x0A", "\x0B", "\x0C", "\x0D", "\x0E", "\x0F",
-        "\x10", "\x11", "\x12", "\x13", "\x14", "\x15", "\x16", "\x17",
-        "\x18", "\x19", "\x1A", "\x1B", "\x1C", "\x1D", "\x1E", "\x1F",
-        "\x20", "\x21", "\x22", "\x23", "\x24", "\x25", "\x26", "\x27",
-        "\x28", "\x29", "\x2A", "\x2B", "\x2C", "\x2D", "\x2E", "\x2F",
-        "\x30", "\x31", "\x32", "\x33", "\x34", "\x35", "\x36", "\x37",
-        "\x38", "\x39", "\x3A", "\x3B", "\x3C", "\x3D", "\x3E", "\x3F",
-        "\x40", "\x41", "\x42", "\x43", "\x44", "\x45", "\x46", "\x47",
-        "\x48", "\x49", "\x4A", "\x4B", "\x4C", "\x4D", "\x4E", "\x4F",
-        "\x50", "\x51", "\x52", "\x53", "\x54", "\x55", "\x56", "\x57",
-        "\x58", "\x59", "\x5A", "\x5B", "\x5C", "\x5D", "\x5E", "\x5F",
-        "\x60", "\x61", "\x62", "\x63", "\x64", "\x65", "\x66", "\x67",
-        "\x68", "\x69", "\x6A", "\x6B", "\x6C", "\x6D", "\x6E", "\x6F",
-        "\x70", "\x71", "\x72", "\x73", "\x74", "\x75", "\x76", "\x77",
-        "\x78", "\x79", "\x7A", "\x7B", "\x7C", "\x7D", "\x7E", "\x7F",
-        "\x80", "\x81", "\x82", "\x83", "\x84", "\x85", "\x86", "\x87",
-        "\x88", "\x89", "\x8A", "\x8B", "\x8C", "\x8D", "\x8E", "\x8F",
-        "\x90", "\x91", "\x92", "\x93", "\x94", "\x95", "\x96", "\x97",
-        "\x98", "\x99", "\x9A", "\x9B", "\x9C", "\x9D", "\x9E", "\x9F",
-        "\xA0", "\xA1", "\xA2", "\xA3", "\xA4", "\xA5", "\xA6", "\xA7",
-        "\xA8", "\xA9", "\xAA", "\xAB", "\xAC", "\xAD", "\xAE", "\xAF",
-        "\xB0", "\xB1", "\xB2", "\xB3", "\xB4", "\xB5", "\xB6", "\xB7",
-        "\xB8", "\xB9", "\xBA", "\xBB", "\xBC", "\xBD", "\xBE", "\xBF",
-        "\xC0", "\xC1", "\xC2", "\xC3", "\xC4", "\xC5", "\xC6", "\xC7",
-        "\xC8", "\xC9", "\xCA", "\xCB", "\xCC", "\xCD", "\xCE", "\xCF",
-        "\xD0", "\xD1", "\xD2", "\xD3", "\xD4", "\xD5", "\xD6", "\xD7",
-        "\xD8", "\xD9", "\xDA", "\xDB", "\xDC", "\xDD", "\xDE", "\xDF",
-        "\xE0", "\xE1", "\xE2", "\xE3", "\xE4", "\xE5", "\xE6", "\xE7",
-        "\xE8", "\xE9", "\xEA", "\xEB", "\xEC", "\xED", "\xEE", "\xEF",
-        "\xF0", "\xF1", "\xF2", "\xF3", "\xF4", "\xF5", "\xF6", "\xF7",
-        "\xF8", "\xF9", "\xFA", "\xFB", "\xFC", "\xFD", "\xFE", "\xFF",
-      };
-
-    }  // namespace
-
 G_array std_string_explode(const G_string& text, const opt<G_string>& delim, const opt<G_integer>& limit)
   {
     uint64_t rlimit = UINT64_MAX;
@@ -689,27 +751,6 @@ G_string std_string_implode(const G_array& segments, const opt<G_string>& delim)
     }
     return text;
   }
-
-    namespace {
-
-    constexpr char s_base16_table[] = "00112233445566778899AaBbCcDdEeFf";
-    constexpr char s_base32_table[] = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz223344556677==";
-    constexpr char s_base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/==";
-    constexpr char s_spaces[] = " \f\n\r\t\v";
-
-    const char* do_xstrchr(const char* str, char c) noexcept
-      {
-        const char* p = str;
-        for(;;) {
-          if(*p == 0)
-            return nullptr;
-          if(*p == c)
-            return p;
-          ++p;
-        }
-      }
-
-    }  // namespace
 
 G_string std_string_hex_encode(const G_string& data, const opt<G_boolean>& lowercase, const opt<G_string>& delim)
   {
@@ -1088,75 +1129,6 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
     }
     return ::rocket::move(code_points);
   }
-
-    namespace {
-
-    template<bool bigendT, typename WordT> G_string& do_pack_one_impl(G_string& text, const G_integer& value)
-      {
-        // Define temporary storage.
-        ::std::array<char, sizeof(WordT)> stor_le;
-        uint64_t word = static_cast<uint64_t>(value);
-        // Write it in little-endian order.
-        for(auto& byte : stor_le) {
-          byte = static_cast<char>(word);
-          word >>= 8;
-        }
-        // Append this word.
-        if(bigendT)
-          text.append(stor_le.rbegin(), stor_le.rend());
-        else
-          text.append(stor_le.begin(), stor_le.end());
-        // Return  the output string.
-        return text;
-      }
-    template<typename WordT> G_string& do_pack_one_be(G_string& text, const G_integer& value)
-      {
-        return do_pack_one_impl<1, WordT>(text, value);
-      }
-    template<typename WordT> G_string& do_pack_one_le(G_string& text, const G_integer& value)
-      {
-        return do_pack_one_impl<0, WordT>(text, value);
-      }
-
-    template<bool bigendT, typename WordT> G_array do_unpack_impl(const G_string& text)
-      {
-        G_array values;
-        // Define temporary storage.
-        ::std::array<char, sizeof(WordT)> stor_be;
-        uint64_t word = 0;
-        // How many words will the result have?
-        auto nwords = text.size() / stor_be.size();
-        if(text.size() != nwords * stor_be.size()) {
-          ASTERIA_THROW("invalid source string length (`$1` not divisible by `$2`)", text.size(), stor_be.size());
-        }
-        values.reserve(nwords);
-        // Unpack integers.
-        for(size_t i = 0; i < nwords; ++i) {
-          // Read some bytes in big-endian order.
-          if(bigendT)
-            ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.begin());
-          else
-            ::std::copy_n(text.data() + i * stor_be.size(), stor_be.size(), stor_be.rbegin());
-          // Assemble the word.
-          for(const auto& byte : stor_be) {
-            word <<= 8;
-            word |= static_cast<uint8_t>(byte);
-          }
-          // Append the word.
-          values.emplace_back(G_integer(static_cast<WordT>(word)));
-        }
-        return values;
-      }
-    template<typename WordT> G_array do_unpack_be(const G_string& text)
-      {
-        return do_unpack_impl<1, WordT>(text);
-      }
-    template<typename WordT> G_array do_unpack_le(const G_string& text)
-      {
-        return do_unpack_impl<0, WordT>(text);
-      }
-
-    }  // namespace
 
 G_string std_string_pack8(const G_integer& value)
   {
