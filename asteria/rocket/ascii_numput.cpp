@@ -1249,10 +1249,10 @@ int main(void)
         }
         // Note that the last digit should be rounded to even.
         ylo = ireg % 10;
-        ireg /= 10;
-        if(ylo >= 5)
-          ireg += (ylo > 5) || (ireg & 1);
-        ireg *= 10;
+        ireg -= ylo;
+        if((ylo != 5) ? (ylo > 5) : (ireg % 20)) {
+          ireg += 10;
+        }
         // Re-fill zeroes in the case of single precision.
         if(ROCKET_UNEXPECT(single)) {
           ireg *= 100'000'000;
