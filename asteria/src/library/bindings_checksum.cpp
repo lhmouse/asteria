@@ -21,26 +21,24 @@ template<uint32_t valueT, uint32_t divisorT>
   {
   };
 template<uint32_t divisorT, size_t... indicesT>
-    constexpr array<uint32_t, sizeof...(indicesT)> do_generate_CRC32_table_impl(const index_sequence<indicesT...>&) noexcept
+    constexpr array<uint32_t, 256> do_CRC32_table_impl(const index_sequence<indicesT...>&) noexcept
   {
-    return {{ CRC32_Generator<uint8_t(indicesT), divisorT, 0>::value... }};
+    return { CRC32_Generator<uint8_t(indicesT), divisorT, 0>::value... };
   }
 template<uint32_t divisorT>
-    constexpr array<uint32_t, 256> do_generate_CRC32_table() noexcept
+    constexpr array<uint32_t, 256> do_CRC32_table() noexcept
   {
-    return do_generate_CRC32_table_impl<divisorT>(::std::make_index_sequence<256>());
+    return do_CRC32_table_impl<divisorT>(::std::make_index_sequence<256>());
   }
-constexpr auto s_iso3309_CRC32_table = do_generate_CRC32_table<0xEDB88320>();
+constexpr auto s_iso3309_CRC32_table = do_CRC32_table<0xEDB88320>();
 
 class CRC32_Hasher final : public Abstract_Opaque
   {
   private:
-    uint32_t m_reg;
+    uint32_t m_reg = UINT32_MAX;
 
   public:
     CRC32_Hasher() noexcept
-      :
-        m_reg(UINT32_MAX)
       {
       }
 
@@ -58,7 +56,7 @@ class CRC32_Hasher final : public Abstract_Opaque
       {
         const auto p = reinterpret_cast<const uint8_t*>(data.data());
         const auto n = data.size();
-        auto r = this->m_reg;
+        uint32_t r = this->m_reg;
         // Hash bytes one by one.
         for(size_t i = 0; i != n; ++i) {
           r = s_iso3309_CRC32_table[((r ^ p[i]) & 0xFF)] ^ (r >> 8);
@@ -69,7 +67,7 @@ class CRC32_Hasher final : public Abstract_Opaque
     G_integer finish() noexcept
       {
         // Get the checksum.
-        auto ck = ~this->m_reg;
+        uint32_t ck = ~(this->m_reg);
         // Reset internal states.
         this->m_reg = UINT32_MAX;
         return ck;
@@ -82,12 +80,10 @@ class FNV1a32_Hasher final : public Abstract_Opaque
     static constexpr uint32_t prime = 16777619;
     static constexpr uint32_t offset = 2166136261;
 
-    uint32_t m_reg;
+    uint32_t m_reg = offset;
 
   public:
     FNV1a32_Hasher() noexcept
-      :
-        m_reg(offset)
       {
       }
 
@@ -105,7 +101,7 @@ class FNV1a32_Hasher final : public Abstract_Opaque
       {
         const auto p = reinterpret_cast<const uint8_t*>(data.data());
         const auto n = data.size();
-        auto r = this->m_reg;
+        uint32_t r = this->m_reg;
         // Hash bytes one by one.
         for(size_t i = 0; i != n; ++i) {
           r = (r ^ p[i]) * prime;
@@ -116,26 +112,26 @@ class FNV1a32_Hasher final : public Abstract_Opaque
     G_integer finish() noexcept
       {
         // Get the checksum.
-        auto ck = this->m_reg;
+        uint32_t ck = this->m_reg;
         // Reset internal states.
         this->m_reg = offset;
         return ck;
       }
   };
 
-template<uint8_t valueT>
-    struct Hexdigit : ::std::integral_constant<char, char((valueT < 10) ? ('0' + valueT) : ('A' + valueT - 10))>
+template<uint32_t valueT>
+    struct Hexdigit : ::std::integral_constant<char, char('0' + valueT + ((9 - valueT) >> 29))>
   {
   };
-template<uint8_t valueT>
+template<uint32_t valueT>
     constexpr array<char, 2> do_generate_hex_digits_for_byte() noexcept
   {
-    return {{ Hexdigit<uint8_t(valueT / 16)>::value, Hexdigit<uint8_t(valueT % 16)>::value }};
+    return { Hexdigit<valueT/16>::value, Hexdigit<valueT%16>::value };
   };
 template<size_t... indicesT>
     constexpr array<char, 256, 2> do_generate_hexdigits_impl(const index_sequence<indicesT...>&) noexcept
   {
-    return {{ do_generate_hex_digits_for_byte<uint8_t(indicesT)>()... }};
+    return { do_generate_hex_digits_for_byte<uint8_t(indicesT)>()... };
   }
 constexpr auto s_hexdigits = do_generate_hexdigits_impl(::std::make_index_sequence<256>());
 
@@ -211,18 +207,17 @@ template<typename WordT, size_t sizeT>
 class MD5_Hasher final : public Abstract_Opaque
   {
   private:
-    static constexpr ::std::array<uint32_t, 4> init = {{
-      0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476
-    }};
+    static constexpr ::std::array<uint32_t, 4> init() noexcept
+      {
+        return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476 };
+      }
 
-    ::std::array<uint32_t, 4> m_regs;
-    uint64_t m_size;
+    ::std::array<uint32_t, 4> m_regs = init();
+    uint64_t m_size = 0;
     ::std::array<uint8_t, 64> m_chunk;
 
   public:
     MD5_Hasher() noexcept
-      :
-        m_regs(init), m_size(0)
       {
       }
 
@@ -420,7 +415,7 @@ class MD5_Hasher final : public Abstract_Opaque
         ck.reserve(this->m_regs.size() * 8);
         ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_le(ck, w);  });
         // Reset internal states.
-        this->m_regs = init;
+        this->m_regs = init();
         this->m_size = 0;
         return ck;
       }
@@ -429,18 +424,17 @@ class MD5_Hasher final : public Abstract_Opaque
 class SHA1_Hasher final : public Abstract_Opaque
   {
   private:
-    static constexpr ::std::array<uint32_t, 5> init = {{
-      0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0
-    }};
+    static constexpr ::std::array<uint32_t, 5> init() noexcept
+      {
+        return { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 };
+      }
 
-    ::std::array<uint32_t, 5> m_regs;
-    uint64_t m_size;
+    ::std::array<uint32_t, 5> m_regs = init();
+    uint64_t m_size = 0;
     ::std::array<uint8_t, 64> m_chunk;
 
   public:
     SHA1_Hasher() noexcept
-      :
-        m_regs(init), m_size(0)
       {
       }
 
@@ -662,7 +656,7 @@ class SHA1_Hasher final : public Abstract_Opaque
         ck.reserve(this->m_regs.size() * 8);
         ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
         // Reset internal states.
-        this->m_regs = init;
+        this->m_regs = init();
         this->m_size = 0;
         return ck;
       }
@@ -671,19 +665,18 @@ class SHA1_Hasher final : public Abstract_Opaque
 class SHA256_Hasher final : public Abstract_Opaque
   {
   private:
-    static constexpr ::std::array<uint32_t, 8> init = {{
-        0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
-        0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19
-    }};
+    static constexpr ::std::array<uint32_t, 8> init() noexcept
+      {
+        return { 0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C,
+                 0x1F83D9AB, 0x5BE0CD19 };
+      }
 
-    ::std::array<uint32_t, 8> m_regs;
-    uint64_t m_size;
+    ::std::array<uint32_t, 8> m_regs = init();
+    uint64_t m_size = 0;
     ::std::array<uint8_t, 64> m_chunk;
 
   public:
     SHA256_Hasher() noexcept
-      :
-        m_regs(init), m_size(0)
       {
       }
 
@@ -874,7 +867,7 @@ class SHA256_Hasher final : public Abstract_Opaque
         ck.reserve(this->m_regs.size() * 8);
         ::rocket::for_each(this->m_regs, [&](uint32_t w) { do_pdigits_be(ck, w);  });
         // Reset internal states.
-        this->m_regs = init;
+        this->m_regs = init();
         this->m_size = 0;
         return ck;
       }
