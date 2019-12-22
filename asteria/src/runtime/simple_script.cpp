@@ -97,7 +97,8 @@ Reference Simple_Script::execute(const Global_Context& global, cow_vector<Value>
 
 Reference Simple_Script::execute(const Global_Context& global) const
   {
-    return this->execute(global, cow_vector<Reference>());
+    cow_vector<Reference> args;
+    return this->execute(global, ::rocket::move(args));
   }
 
 }  // namespace Asteria
