@@ -9,25 +9,24 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
 
-    namespace {
-
-    cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware,
-                                                 const Analytic_Context& ctx, const cow_vector<Xprunit>& units)
-      {
-        cow_vector<AIR_Node> code;
-        // Expression units other than the last one cannot be TCO'd.
-        size_t epos = units.size() - 1;
-        if(epos != SIZE_MAX) {
-          for(size_t i = 0; i != epos; ++i) {
-            units[i].generate_code(code, opts, tco_aware_none, ctx);
-          }
-          units[epos].generate_code(code, opts, tco_aware, ctx);
-        }
-        return code;
+cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware,
+                                             const Analytic_Context& ctx, const cow_vector<Xprunit>& units)
+  {
+    cow_vector<AIR_Node> code;
+    // Expression units other than the last one cannot be TCO'd.
+    size_t epos = units.size() - 1;
+    if(epos != SIZE_MAX) {
+      for(size_t i = 0; i != epos; ++i) {
+        units[i].generate_code(code, opts, tco_aware_none, ctx);
       }
-
+      units[epos].generate_code(code, opts, tco_aware, ctx);
     }
+    return code;
+  }
+
+}  // namespace
 
 cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
                                              TCO_Aware tco_aware, const Analytic_Context& ctx) const

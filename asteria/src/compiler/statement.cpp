@@ -9,106 +9,105 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
 
-    namespace {
-
-    void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const phsh_string& name, const char* desc)
-      {
-        if(name.rdstr().empty()) {
-          ASTERIA_THROW("attempt to declare a nameless $1", desc);
-        }
-        if(name.rdstr().starts_with("__")) {
-          ASTERIA_THROW("reserved name not declarable as $2 (name `$1`)", name);
-        }
-        // Record this name.
-        if(names_opt) {
-          auto oldp = ::std::find(names_opt->begin(), names_opt->end(), name);
-          if(oldp != names_opt->end()) {
-            names_opt->erase(oldp);
-          }
-          names_opt->emplace_back(name);
-        }
-        // Just ensure the name exists.
-        ctx.open_named_reference(name) /*= Reference_Root::S_null()*/;
-      }
-
-    cow_vector<AIR_Node>& do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Source_Location& sloc)
-      {
-        AIR_Node::S_single_step_trap xnode = { sloc };
-        code.emplace_back(::rocket::move(xnode));
-        return code;
-      }
-
-    cow_vector<AIR_Node>& do_generate_clear_stack(cow_vector<AIR_Node>& code)
-      {
-        AIR_Node::S_clear_stack xnode = { };
-        code.emplace_back(::rocket::move(xnode));
-        return code;
-      }
-
-    cow_vector<AIR_Node>& do_generate_expression_partial(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                                         TCO_Aware tco_aware, const Analytic_Context& ctx,
-                                                         const Statement::S_expression& expr)
-      {
-        size_t epos = expr.units.size() - 1;
-        if(epos != SIZE_MAX) {
-          // Generate a single-step trap unless disabled.
-          if(!opts.no_plain_single_step_traps) {
-            do_generate_single_step_trap(code, expr.sloc);
-          }
-          // Expression units other than the last one cannot be TCO'd.
-          for(size_t i = 0; i != epos; ++i) {
-            expr.units[i].generate_code(code, opts, tco_aware_none, ctx);
-          }
-          expr.units[epos].generate_code(code, opts, tco_aware, ctx);
-        }
-        return code;
-      }
-
-    cow_vector<AIR_Node> do_generate_expression_partial(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
-                                                        const Statement::S_expression& expr)
-      {
-        cow_vector<AIR_Node> code;
-        do_generate_expression_partial(code, opts, tco_aware, ctx, expr);
-        return code;
-      }
-
-    cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                     const Compiler_Options& opts, TCO_Aware tco_aware, const Statement::S_block& block)
-      {
-        size_t epos = block.stmts.size() - 1;
-        if(epos != SIZE_MAX) {
-          // Generate a single-step trap unless disabled.
-          if(!opts.no_plain_single_step_traps) {
-            do_generate_single_step_trap(code, block.sloc);
-          }
-          // Statements other than the last one cannot be the end of function.
-          for(size_t i = 0; i != epos; ++i) {
-            block.stmts[i].generate_code(code, names_opt, ctx, opts, block.stmts[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
-          }
-          block.stmts[epos].generate_code(code, names_opt, ctx, opts, tco_aware);
-        }
-        return code;
-      }
-
-    cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
-                                                    const Compiler_Options& opts, TCO_Aware tco_aware, const Statement::S_block& block)
-      {
-        cow_vector<AIR_Node> code;
-        do_generate_statement_list(code, names_opt, ctx, opts, tco_aware, block);
-        return code;
-      }
-
-    cow_vector<AIR_Node> do_generate_block(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
-                                           const Statement::S_block& block)
-      {
-        // Create a new context for the block. No new names are injected into `ctx`.
-        Analytic_Context ctx_stmts(::rocket::ref(ctx));
-        auto code = do_generate_statement_list(nullptr, ctx_stmts, opts, tco_aware, block);
-        return code;
-      }
-
+void do_user_declare(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx, const phsh_string& name, const char* desc)
+  {
+    if(name.rdstr().empty()) {
+      ASTERIA_THROW("attempt to declare a nameless $1", desc);
     }
+    if(name.rdstr().starts_with("__")) {
+      ASTERIA_THROW("reserved name not declarable as $2 (name `$1`)", name);
+    }
+    // Record this name.
+    if(names_opt) {
+      auto oldp = ::std::find(names_opt->begin(), names_opt->end(), name);
+      if(oldp != names_opt->end()) {
+        names_opt->erase(oldp);
+      }
+      names_opt->emplace_back(name);
+    }
+    // Just ensure the name exists.
+    ctx.open_named_reference(name) /*= Reference_Root::S_null()*/;
+  }
+
+cow_vector<AIR_Node>& do_generate_single_step_trap(cow_vector<AIR_Node>& code, const Source_Location& sloc)
+  {
+    AIR_Node::S_single_step_trap xnode = { sloc };
+    code.emplace_back(::rocket::move(xnode));
+    return code;
+  }
+
+cow_vector<AIR_Node>& do_generate_clear_stack(cow_vector<AIR_Node>& code)
+  {
+    AIR_Node::S_clear_stack xnode = { };
+    code.emplace_back(::rocket::move(xnode));
+    return code;
+  }
+
+cow_vector<AIR_Node>& do_generate_expression_partial(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
+                                                     TCO_Aware tco_aware, const Analytic_Context& ctx,
+                                                     const Statement::S_expression& expr)
+  {
+    size_t epos = expr.units.size() - 1;
+    if(epos != SIZE_MAX) {
+      // Generate a single-step trap unless disabled.
+      if(!opts.no_plain_single_step_traps) {
+        do_generate_single_step_trap(code, expr.sloc);
+      }
+      // Expression units other than the last one cannot be TCO'd.
+      for(size_t i = 0; i != epos; ++i) {
+        expr.units[i].generate_code(code, opts, tco_aware_none, ctx);
+      }
+      expr.units[epos].generate_code(code, opts, tco_aware, ctx);
+    }
+    return code;
+  }
+
+cow_vector<AIR_Node> do_generate_expression_partial(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
+                                                    const Statement::S_expression& expr)
+  {
+    cow_vector<AIR_Node> code;
+    do_generate_expression_partial(code, opts, tco_aware, ctx, expr);
+    return code;
+  }
+
+cow_vector<AIR_Node>& do_generate_statement_list(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                                                 const Compiler_Options& opts, TCO_Aware tco_aware, const Statement::S_block& block)
+  {
+    size_t epos = block.stmts.size() - 1;
+    if(epos != SIZE_MAX) {
+      // Generate a single-step trap unless disabled.
+      if(!opts.no_plain_single_step_traps) {
+        do_generate_single_step_trap(code, block.sloc);
+      }
+      // Statements other than the last one cannot be the end of function.
+      for(size_t i = 0; i != epos; ++i) {
+        block.stmts[i].generate_code(code, names_opt, ctx, opts, block.stmts[i+1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
+      }
+      block.stmts[epos].generate_code(code, names_opt, ctx, opts, tco_aware);
+    }
+    return code;
+  }
+
+cow_vector<AIR_Node> do_generate_statement_list(cow_vector<phsh_string>* names_opt, Analytic_Context& ctx,
+                                                const Compiler_Options& opts, TCO_Aware tco_aware, const Statement::S_block& block)
+  {
+    cow_vector<AIR_Node> code;
+    do_generate_statement_list(code, names_opt, ctx, opts, tco_aware, block);
+    return code;
+  }
+
+cow_vector<AIR_Node> do_generate_block(const Compiler_Options& opts, TCO_Aware tco_aware, const Analytic_Context& ctx,
+                                       const Statement::S_block& block)
+  {
+    // Create a new context for the block. No new names are injected into `ctx`.
+    Analytic_Context ctx_stmts(::rocket::ref(ctx));
+    auto code = do_generate_statement_list(nullptr, ctx_stmts, opts, tco_aware, block);
+    return code;
+  }
+
+}  // namespace
 
 cow_vector<AIR_Node>& Statement::generate_code(cow_vector<AIR_Node>& code, cow_vector<phsh_string>* names_opt,
                                                Analytic_Context& ctx, const Compiler_Options& opts, TCO_Aware tco_aware) const
