@@ -11,94 +11,95 @@
 
 namespace rocket {
 
-template<typename handleT, typename closerT> class unique_handle;
-template<typename charT, typename traitsT> class basic_tinyfmt;
-
 /* Requirements:
  * 1. Handles must be trivial types other than arrays.
  * 2. Closers shall be copy-constructible.
- *    The following operations are required, all of which, as well as copy/move construction/assignment and swap, shall not throw exceptions.
+ *    The following operations are required, all of which, as well as copy/move construction/assignment and swap,
+ *    shall not throw exceptions.
  *    1) `Closer().null()` returns a handle value called the 'null handle value'.
  *    2) `Closer().is_null()` returns `true` if the argument is a 'null handle value' and `false` otherwise.
- *       N.B. There could more than one null handle values. It is required that `Closer().is_null(Closer().null())` is always `true`.
+ *       N.B. There could more than one null handle value. It is required that `Closer().is_null(Closer().null())`
+ *            is always `true`.
  *    3) `Closer().close(hv)` closes the handle `hv`. Null handle values will not be passed to this function.
  */
+template<typename handleT, typename closerT> class unique_handle;
+template<typename charT, typename traitsT> class basic_tinyfmt;
 
-    namespace details_unique_handle {
+namespace details_unique_handle {
 
-    template<typename handleT, typename closerT>
-        class stored_handle : private allocator_wrapper_base_for<closerT>::type
+template<typename handleT, typename closerT>
+    class stored_handle : private allocator_wrapper_base_for<closerT>::type
+  {
+  public:
+    using handle_type  = handleT;
+    using closer_type  = closerT;
+
+  private:
+    using closer_base = typename allocator_wrapper_base_for<closerT>::type;
+
+  private:
+    handle_type m_hv;
+
+  public:
+    constexpr stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
+      :
+        closer_base(),
+        m_hv(this->as_closer().null())
       {
-      public:
-        using handle_type  = handleT;
-        using closer_type  = closerT;
+      }
+    explicit constexpr stored_handle(const closer_type& cl) noexcept
+      :
+        closer_base(cl),
+        m_hv(this->as_closer().null())
+      {
+      }
+    explicit constexpr stored_handle(closer_type&& cl) noexcept
+      :
+        closer_base(noadl::move(cl)),
+        m_hv(this->as_closer().null())
+      {
+      }
+    ~stored_handle()
+      {
+        this->reset(this->as_closer().null());
+      }
 
-      private:
-        using closer_base = typename allocator_wrapper_base_for<closerT>::type;
+    stored_handle(const stored_handle&)
+      = delete;
+    stored_handle& operator=(const stored_handle&)
+      = delete;
 
-      private:
-        handle_type m_hv;
+  public:
+    const closer_type& as_closer() const noexcept
+      {
+        return static_cast<const closer_base&>(*this);
+      }
+    closer_type& as_closer() noexcept
+      {
+        return static_cast<closer_base&>(*this);
+      }
 
-      public:
-        constexpr stored_handle() noexcept(is_nothrow_constructible<closer_type>::value)
-          :
-            closer_base(),
-            m_hv(this->as_closer().null())
-          {
-          }
-        explicit constexpr stored_handle(const closer_type& cl) noexcept
-          :
-            closer_base(cl),
-            m_hv(this->as_closer().null())
-          {
-          }
-        explicit constexpr stored_handle(closer_type&& cl) noexcept
-          :
-            closer_base(noadl::move(cl)),
-            m_hv(this->as_closer().null())
-          {
-          }
-        ~stored_handle()
-          {
-            this->reset(this->as_closer().null());
-          }
+    constexpr const handle_type& get() const noexcept
+      {
+        return this->m_hv;
+      }
+    handle_type release() noexcept
+      {
+        return ::std::exchange(this->m_hv, this->as_closer().null());
+      }
+    void reset(handle_type hv_new) noexcept
+      {
+        auto hv_old = ::std::exchange(this->m_hv, noadl::move(hv_new));
+        if(!this->as_closer().is_null(hv_old))
+          this->as_closer().close(noadl::move(hv_old));
+      }
+    void exchange_with(stored_handle& other) noexcept
+      {
+        xswap(this->m_hv, other.m_hv);
+      }
+  };
 
-        stored_handle(const stored_handle&)
-          = delete;
-        stored_handle& operator=(const stored_handle&)
-          = delete;
-
-      public:
-        const closer_type& as_closer() const noexcept
-          {
-            return static_cast<const closer_base&>(*this);
-          }
-        closer_type& as_closer() noexcept
-          {
-            return static_cast<closer_base&>(*this);
-          }
-
-        constexpr const handle_type& get() const noexcept
-          {
-            return this->m_hv;
-          }
-        handle_type release() noexcept
-          {
-            return ::std::exchange(this->m_hv, this->as_closer().null());
-          }
-        void reset(handle_type hv_new) noexcept
-          {
-            auto hv_old = ::std::exchange(this->m_hv, noadl::move(hv_new));
-            if(!this->as_closer().is_null(hv_old))
-              this->as_closer().close(noadl::move(hv_old));
-          }
-        void exchange_with(stored_handle& other) noexcept
-          {
-            xswap(this->m_hv, other.m_hv);
-          }
-      };
-
-    }  // namespace details_unique_handle
+}  // namespace details_unique_handle
 
 template<typename handleT, typename closerT> class unique_handle
   {

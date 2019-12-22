@@ -11,26 +11,25 @@
 
 namespace rocket {
 
-template<typename valueT, size_t capacityT, size_t... nestedT> class array;
-
 /* Differences from `std::array`:
  * 1. Multi-dimensional arrays are supported natively.
  * 2. `fill()` takes different parameters.
  * 3. Comparison operators are not provided.
  */
+template<typename valueT, size_t capacityT, size_t... nestedT> class array;
 
-    namespace details_array {
+namespace details_array {
 
-    template<typename valueT, size_t capacityT, size_t... nestedT>
-        struct element_type_of : enable_if<1, array<valueT, nestedT...>>
-      {
-      };
-    template<typename valueT, size_t capacityT>
-        struct element_type_of<valueT, capacityT> : enable_if<1, valueT>
-      {
-      };
+template<typename valueT, size_t capacityT, size_t... nestedT>
+    struct element_type_of : enable_if<1, array<valueT, nestedT...>>
+  {
+  };
+template<typename valueT, size_t capacityT>
+    struct element_type_of<valueT, capacityT> : enable_if<1, valueT>
+  {
+  };
 
-    }
+}  // namespace details_array
 
 template<typename valueT, size_t capacityT, size_t... nestedT> class array
   {

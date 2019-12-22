@@ -22,8 +22,6 @@
 
 namespace rocket {
 
-    namespace noadl = ::rocket;
-
 using ::std::nullptr_t;
 using ::std::ptrdiff_t;
 using ::std::size_t;
@@ -133,6 +131,8 @@ using ::std::begin;
 using ::std::end;
 using ::std::swap;
 
+namespace noadl = ::rocket;
+
 #define ROCKET_ENABLE_IF(...)            typename ::std::enable_if<+bool(__VA_ARGS__)>::type* = nullptr
 #define ROCKET_DISABLE_IF(...)           typename ::std::enable_if<!bool(__VA_ARGS__)>::type* = nullptr
 
@@ -162,6 +162,117 @@ template<typename targetT, typename argT, ROCKET_ENABLE_IF(is_reference<argT>::v
   {
     return static_cast<targetT&&>(arg);
   }
+
+namespace details_utilities {
+
+// `estimate_distance()`
+template<typename iteratorT>
+    constexpr size_t estimate_distance_aux(input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
+  {
+    return 0;
+  }
+template<typename iteratorT>
+    size_t estimate_distance_aux(forward_iterator_tag, iteratorT first, iteratorT last)
+  {
+    size_t total = 0;
+    for(auto qit = noadl::move(first); qit != last; ++qit)
+      ++total;
+    return total;
+  }
+template<typename iteratorT>
+    constexpr size_t estimate_distance_aux(random_access_iterator_tag, iteratorT first, iteratorT last)
+  {
+    return static_cast<size_t>(last - first);
+  }
+
+// `for_each()`
+template<typename containerT, typename callbackT>
+    void for_each_nonconstexpr(containerT&& cont, callbackT&& callback)
+  {
+    for(auto&& qelem : cont)
+      noadl::forward<callbackT>(callback)(qelem);
+  }
+
+// `any_of()`
+template<typename containerT, typename callbackT>
+    bool any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
+  {
+    for(auto&& qelem : cont) {
+      if(noadl::forward<callbackT>(callback)(qelem))
+        return true;
+    }
+    return false;
+  }
+
+// `none_of()`
+template<typename containerT, typename callbackT>
+    bool none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
+  {
+    for(auto&& qelem : cont) {
+      if(noadl::forward<callbackT>(callback)(qelem))
+        return false;
+    }
+    return true;
+  }
+
+// `is_any_of()`
+template<typename targetT, typename containerT>
+    bool is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
+  {
+    for(auto&& qelem : cont) {
+      if(noadl::forward<targetT>(targ) == qelem)
+        return true;
+    }
+    return false;
+  }
+
+// `is_none_of()`
+template<typename targetT, typename containerT>
+    bool is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
+  {
+    for(auto&& qelem : cont) {
+      if(noadl::forward<targetT>(targ) == qelem)
+        return false;
+    }
+    return true;
+  }
+
+// `lowest_signed` and `lowest_unsigned`
+template<typename integerT, integerT valueT, typename... candidatesT>
+    struct integer_selector  // Be SFINAE-friendly.
+  {
+  };
+template<typename integerT, integerT valueT, typename firstT, typename... remainingT>
+    struct integer_selector<integerT, valueT, firstT, remainingT...>
+      : conditional<firstT(valueT) != valueT,
+                    integer_selector<integerT, valueT, remainingT...>,
+                    enable_if<1, firstT>>::type
+  {
+  };
+
+// `static_or_dynamic_cast()`
+template<typename targetT, typename sourceT, typename = void>
+   struct can_static_cast_aux : false_type
+  {
+  };
+template<typename targetT, typename sourceT>
+   struct can_static_cast_aux<targetT, sourceT,
+     decltype(static_cast<void>(static_cast<targetT>(::std::declval<sourceT>())))> : true_type
+  {
+  };
+
+template<typename targetT, typename sourceT>
+    constexpr targetT static_or_dynamic_cast_aux(true_type, sourceT&& src)
+  {
+    return static_cast<targetT>(noadl::forward<sourceT>(src));
+  }
+template<typename targetT, typename sourceT>
+    constexpr targetT static_or_dynamic_cast_aux(false_type, sourceT&& src)
+  {
+    return dynamic_cast<targetT>(noadl::forward<sourceT>(src));
+  }
+
+}  // namespace details_utilities
 
 template<typename typeT>
     struct remove_cvref : remove_cv<typename remove_reference<typeT>::type>
@@ -246,29 +357,6 @@ template<typename firstT, typename... restT>
     struct disjunction<firstT, restT...> : conditional<bool(firstT::value), firstT, disjunction<restT...>>::type
   {
   };
-
-    namespace details_utilities {
-
-    template<typename iteratorT>
-        constexpr size_t estimate_distance_aux(input_iterator_tag, iteratorT /*first*/, iteratorT /*last*/)
-      {
-        return 0;
-      }
-    template<typename iteratorT>
-        size_t estimate_distance_aux(forward_iterator_tag, iteratorT first, iteratorT last)
-      {
-        size_t total = 0;
-        for(auto qit = noadl::move(first); qit != last; ++qit)
-          ++total;
-        return total;
-      }
-    template<typename iteratorT>
-        constexpr size_t estimate_distance_aux(random_access_iterator_tag, iteratorT first, iteratorT last)
-      {
-        return static_cast<size_t>(last - first);
-      }
-
-    }  // namespace details_utilities
 
 template<typename iteratorT>
     constexpr size_t estimate_distance(iteratorT first, iteratorT last)
@@ -364,17 +452,6 @@ template<typename elementT> void rotate(elementT* ptr, size_t begin, size_t seek
     } while(bot != stp);
   }
 
-    namespace details_utilities {
-
-    template<typename containerT, typename callbackT>
-        void for_each_nonconstexpr(containerT&& cont, callbackT&& callback)
-      {
-        for(auto&& qelem : cont)
-          noadl::forward<callbackT>(callback)(qelem);
-      }
-
-    }  // namespace details_utilities
-
 template<typename containerT, typename callbackT>
     void for_each(containerT&& cont, callbackT&& callback)
   {
@@ -386,20 +463,6 @@ template<typename elementT, typename callbackT>
   {
     return details_utilities::for_each_nonconstexpr(init, noadl::forward<callbackT>(callback));
   }
-
-    namespace details_utilities {
-
-    template<typename containerT, typename callbackT>
-        bool any_of_nonconstexpr(containerT&& cont, callbackT&& callback)
-      {
-        for(auto&& qelem : cont) {
-          if(noadl::forward<callbackT>(callback)(qelem))
-            return true;
-        }
-        return false;
-      }
-
-    }  // namespace details_utilities
 
 template<typename containerT, typename callbackT>
     constexpr bool any_of(containerT&& cont, callbackT&& callback)
@@ -413,20 +476,6 @@ template<typename elementT, typename callbackT>
     return details_utilities::any_of_nonconstexpr(init, noadl::forward<callbackT>(callback));
   }
 
-    namespace details_utilities {
-
-    template<typename containerT, typename callbackT>
-        bool none_of_nonconstexpr(containerT&& cont, callbackT&& callback)
-      {
-        for(auto&& qelem : cont) {
-          if(noadl::forward<callbackT>(callback)(qelem))
-            return false;
-        }
-        return true;
-      }
-
-    }  // namespace details_utilities
-
 template<typename containerT, typename callbackT>
     constexpr bool none_of(containerT&& cont, callbackT&& callback)
   {
@@ -439,20 +488,6 @@ template<typename elementT, typename callbackT>
     return details_utilities::none_of_nonconstexpr(init, noadl::forward<callbackT>(callback));
   }
 
-    namespace details_utilities {
-
-    template<typename targetT, typename containerT>
-        bool is_any_of_nonconstexpr(targetT&& targ, containerT&& cont)
-      {
-        for(auto&& qelem : cont) {
-          if(noadl::forward<targetT>(targ) == qelem)
-            return true;
-        }
-        return false;
-      }
-
-    }  // namespace details_utilities
-
 template<typename targetT, typename containerT>
     constexpr bool is_any_of(targetT&& targ, containerT&& cont)
   {
@@ -464,20 +499,6 @@ template<typename targetT, typename elementT>
   {
     return details_utilities::is_any_of_nonconstexpr(noadl::forward<targetT>(targ), init);
   }
-
-    namespace details_utilities {
-
-    template<typename targetT, typename containerT>
-        bool is_none_of_nonconstexpr(targetT&& targ, containerT&& cont)
-      {
-        for(auto&& qelem : cont) {
-          if(noadl::forward<targetT>(targ) == qelem)
-            return false;
-        }
-        return true;
-      }
-
-    }  // namespace details_utilities
 
 template<typename targetT, typename containerT>
     constexpr bool is_none_of(targetT&& targ, containerT&& cont)
@@ -503,33 +524,17 @@ template<typename elementT, size_t countT>
     return countT;
   }
 
-    namespace details_utilities {
-
-    template<typename integerT, integerT valueT, typename... candidatesT>
-        struct integer_selector  // Be SFINAE-friendly.
-      {
-      };
-    template<typename integerT, integerT valueT, typename firstT, typename... remainingT>
-        struct integer_selector<integerT, valueT, firstT, remainingT...>
-          : conditional<firstT(valueT) != valueT,
-                        integer_selector<integerT, valueT, remainingT...>,
-                        enable_if<1, firstT>>::type
-      {
-      };
-
-    }  // namespace details_utilities
-
 template<intmax_t valueT>
     struct lowest_signed
       : details_utilities::integer_selector<intmax_t, valueT,
-          signed char, signed short, signed, signed long, signed long long>
+              signed char, signed short, signed, signed long, signed long long>
   {
   };
 
 template<uintmax_t valueT>
-     struct lowest_unsigned
-        : details_utilities::integer_selector<uintmax_t, valueT,
-            unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
+    struct lowest_unsigned
+      : details_utilities::integer_selector<uintmax_t, valueT,
+              unsigned char, unsigned short, unsigned, unsigned long, unsigned long long>
   {
   };
 
@@ -545,31 +550,6 @@ template<typename pointerT>
   {
     return ptr ? ::std::addressof(*ptr) : nullptr;
   }
-
-    namespace details_utilities {
-
-    template<typename targetT, typename sourceT, typename = void>
-       struct can_static_cast_aux : false_type
-      {
-      };
-    template<typename targetT, typename sourceT>
-       struct can_static_cast_aux<targetT, sourceT,
-         decltype(static_cast<void>(static_cast<targetT>(::std::declval<sourceT>())))> : true_type
-      {
-      };
-
-    template<typename targetT, typename sourceT>
-        constexpr targetT static_or_dynamic_cast_aux(true_type, sourceT&& src)
-      {
-        return static_cast<targetT>(noadl::forward<sourceT>(src));
-      }
-    template<typename targetT, typename sourceT>
-        constexpr targetT static_or_dynamic_cast_aux(false_type, sourceT&& src)
-      {
-        return dynamic_cast<targetT>(noadl::forward<sourceT>(src));
-      }
-
-    }
 
 template<typename targetT, typename sourceT>
     struct can_static_cast : details_utilities::can_static_cast_aux<targetT, sourceT>
