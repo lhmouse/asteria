@@ -475,18 +475,17 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
     for(auto it = data.begin() + 1; it != data.end(); ++it) {
       // Compare the two elements.
       auto cmp = do_compare(global, comparator, it[-1], it[0]);
-      if((cmp == compare_greater) || (cmp == compare_unordered)) {
+      if((cmp == compare_greater) || (cmp == compare_unordered))
         return false;
-      }
     }
     return true;
   }
 
     namespace {
 
-    template<typename IteratorT> pair<IteratorT, bool>
-        do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
-                   const opt<G_function>& comparator, const Value& target)
+    template<typename IteratorT>
+        pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
+                                         const opt<G_function>& comparator, const Value& target)
       {
         auto bpos = ::rocket::move(begin);
         auto epos = ::rocket::move(end);
@@ -504,12 +503,10 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           if(cmp == compare_equal) {
             return ::std::make_pair(::rocket::move(mpos), true);
           }
-          if(cmp == compare_less) {
+          if(cmp == compare_less)
             epos = mpos;
-          }
-          else {
+          else
             bpos = mpos + 1;
-          }
         } while(true);
       }
 
@@ -530,12 +527,10 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
           if(cmp == compare_unordered) {
             ASTERIA_THROW("unordered elements (operands were `$1` and `$2`)", target, *mpos);
           }
-          if(::rocket::forward<PredT>(pred)(cmp)) {
+          if(::rocket::forward<PredT>(pred)(cmp))
             epos = mpos;
-          }
-          else {
+          else
             bpos = mpos + 1;
-          }
         } while(true);
       }
 
