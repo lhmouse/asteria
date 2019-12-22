@@ -10,14 +10,13 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
 
-    namespace {
+constexpr G_real s_const_e    = 2.7182818284590452353602874713526624977572470937000;
+constexpr G_real s_const_pi   = 3.1415926535897932384626433832795028841971693993751;
+constexpr G_real s_const_lb10 = 3.3219280948873623478703194294893901758648313930246;
 
-    constexpr G_real s_const_e    = 2.7182818284590452353602874713526624977572470937000;
-    constexpr G_real s_const_pi   = 3.1415926535897932384626433832795028841971693993751;
-    constexpr G_real s_const_lb10 = 3.3219280948873623478703194294893901758648313930246;
-
-    }  // namespace
+}  // namespace
 
 G_real std_math_exp(const G_real& y, const opt<G_real>& base)
   {
