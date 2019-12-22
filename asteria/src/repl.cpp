@@ -58,14 +58,23 @@ cow_string do_stringify(const Value& val) noexcept
 cow_string do_stringify(const Reference& ref) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
-    if(ref.is_constant())
-      fmt << "constant ";
-    else if(ref.is_temporary())
-      fmt << "temporary ";
-    else if(ref.is_variable())
-      fmt << "variable ";
-    else
-      return ::rocket::sref("<tail call>");
+    auto var = ref.get_variable_opt();
+    if(var) {
+      // variable
+      if(var->is_immutable())
+        fmt << "immutable variable: ";
+      else
+        fmt << "variable: ";
+    }
+    else {
+      // non-variable
+      if(ref.is_constant())
+        fmt << "constant: ";
+      else if(ref.is_temporary())
+        fmt << "temporary: ";
+      else
+        return ::rocket::sref("<tail call>");
+    }
     fmt << ref.read();
     return do_xindent(fmt.extract_string());
   }
