@@ -35,13 +35,13 @@ ascii_numput& ascii_numput::put_TB(bool value) noexcept
         return static_cast<typename make_unsigned<valueT>::type>(value);
       }
 
-    constexpr char do_pdigit_D(uint8_t dval) noexcept
+    constexpr char do_pdigit_D(uint32_t dval) noexcept
       {
         return static_cast<char>('0' + dval);
       }
-    constexpr char do_pdigit_X(uint8_t dval) noexcept
+    constexpr char do_pdigit_X(uint32_t dval) noexcept
       {
-        return static_cast<char>('0' + dval + (static_cast<uint8_t>(9 - dval) >> 5));
+        return static_cast<char>('0' + dval + ((9 - dval) >> 29));
       }
 
     void do_xput_U_bkwd(char*& bp, const uint64_t& value, uint8_t base, size_t precision) noexcept
@@ -231,7 +231,7 @@ ascii_numput& ascii_numput::put_DI(int64_t value, size_t precision) noexcept
         int bexp;
         double frac = ::std::frexp(::std::fabs(value), &bexp);
         exp = bexp - 1;
-        mant = static_cast<uint64_t>(static_cast<int64_t>(frac * 0x1p53)) << 11;
+        mant = (uint64_t)(int64_t)(frac * 0x1p53) << 11;
       }
 
     void do_xput_M_bin(char*& ep, const uint64_t& mant, const char* rdxp) noexcept
@@ -1233,7 +1233,7 @@ int main(void)
         const auto& mult = s_decmult_F[bpos];
         // Extract the mantissa.
         freg = ::std::ldexp(freg, mult.bexp);
-        uint64_t ireg = static_cast<uint64_t>(static_cast<int64_t>(freg) | 1);
+        uint64_t ireg = (uint64_t)(int64_t)freg | 1;
         // Multiply two 64-bit values and get the high-order half.
         // This produces 18 significant figures.
         // TODO: Modern CPUs have intrinsics for this.

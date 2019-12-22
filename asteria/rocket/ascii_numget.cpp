@@ -1326,10 +1326,10 @@ int main(void)
       {
         ROCKET_ASSERT(ireg <= INT64_MAX);
         // Round it correctly.
-        if(single)
-          return static_cast<double>(static_cast<float>(static_cast<int64_t>(ireg)));
+        if(ROCKET_UNEXPECT(single))
+          return (double)(float)(int64_t)ireg;
         else
-          return static_cast<double>(static_cast<int64_t>(ireg));
+          return (double)(int64_t)ireg;
       }
 
     }
