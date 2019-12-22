@@ -8,6 +8,70 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
+
+class Reentrance_Guard
+  {
+  private:
+    long m_old;
+    ref_to<long> m_ref;
+
+  public:
+    explicit Reentrance_Guard(long& ref) noexcept
+      :
+        m_old(ref), m_ref(ref)
+      {
+        this->m_ref++;
+      }
+    ~Reentrance_Guard()
+      {
+        this->m_ref--;
+      }
+
+    Reentrance_Guard(const Reentrance_Guard&)
+      = delete;
+    Reentrance_Guard& operator=(const Reentrance_Guard&)
+      = delete;
+
+  public:
+    explicit operator bool () const noexcept
+      {
+        return this->m_old == 0;
+      }
+  };
+
+template<typename FuncT>
+    class Callback_Wrapper final : public Variable_Callback
+  {
+  private:
+    FuncT m_func;  // If `FuncT` is a reference type then this is a reference.
+
+  public:
+    explicit Callback_Wrapper(FuncT&& func)
+      :
+        m_func(::rocket::forward<FuncT>(func))
+      {
+      }
+
+  public:
+    bool operator()(const rcptr<Variable>& var) const override
+      {
+        return this->m_func(var);
+      }
+  };
+
+template<typename ContT, typename FuncT>
+    void do_enumerate_variables(const ContT& cont, FuncT&& func)
+  {
+    // The callback has to be an lvalue.
+    Callback_Wrapper<FuncT> callback(::rocket::forward<FuncT>(func));
+    // Call the `enumerate_variables()` member function.
+    cont.enumerate_variables(callback);
+  }
+
+constexpr G_integer s_defunct_value = 0x7EEDFACECAFEBEEF;
+
+}  // namespace
 
 bool Collector::track_variable(const rcptr<Variable>& var)
   {
@@ -34,75 +98,10 @@ bool Collector::untrack_variable(const rcptr<Variable>& var) noexcept
     return true;
   }
 
-    namespace {
-
-    class Reentrant_Guard
-      {
-      private:
-        long m_old;
-        ref_to<long> m_ref;
-
-      public:
-        explicit Reentrant_Guard(long& ref) noexcept
-          :
-            m_old(ref), m_ref(ref)
-          {
-            this->m_ref++;
-          }
-        ~Reentrant_Guard()
-          {
-            this->m_ref--;
-          }
-
-        Reentrant_Guard(const Reentrant_Guard&)
-          = delete;
-        Reentrant_Guard& operator=(const Reentrant_Guard&)
-          = delete;
-
-      public:
-        explicit operator bool () const noexcept
-          {
-            return this->m_old == 0;
-          }
-      };
-
-    template<typename FuncT>
-        class Callback_Wrapper final : public Variable_Callback
-      {
-      private:
-        FuncT m_func;  // If `FuncT` is a reference type then this is a reference.
-
-      public:
-        explicit Callback_Wrapper(FuncT&& func)
-          :
-            m_func(::rocket::forward<FuncT>(func))
-          {
-          }
-
-      public:
-        bool operator()(const rcptr<Variable>& var) const override
-          {
-            return this->m_func(var);
-          }
-      };
-
-    template<typename ContT, typename FuncT>
-        void do_enumerate_variables(const ContT& cont, FuncT&& func)
-      {
-        // The callback has to be an lvalue.
-        Callback_Wrapper<FuncT> callback(::rocket::forward<FuncT>(func));
-        // Call the `enumerate_variables()` member function.
-        cont.enumerate_variables(callback);
-      }
-
-    constexpr G_integer s_defunct_value = 0x7EEDFACECAFEBEEF;
-
-    }  // namespace
-
 Collector* Collector::collect_single_opt()
   {
     // Ignore recursive requests.
-    Reentrant_Guard guard(this->m_recur);
+    Reentrance_Guard guard(this->m_recur);
     if(!guard) {
       return nullptr;
     }

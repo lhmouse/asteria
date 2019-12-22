@@ -8,24 +8,80 @@
 #include <unistd.h>  // ::close(), ::read()
 
 namespace Asteria {
+namespace {
+
+constexpr uint32_t do_sll(uint32_t reg, int bits) noexcept
+  {
+    return reg << bits;
+  }
+
+constexpr uint32_t do_srl(uint32_t reg, int bits) noexcept
+  {
+    return reg >> bits;
+  }
+
+size_t do_read_random_device(void* data, size_t size) noexcept
+  {
+    ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY), ::close);
+    if(!fd) {
+      return 0;
+    }
+    ::ssize_t nread = ::read(fd, data, size);
+    if(nread < 0) {
+      return 0;
+    }
+    return static_cast<size_t>(nread);
+  }
+
+class Scrambler
+  {
+  private:
+    ::std::array<uint32_t, 8> m_regs;
+
+  public:
+    Scrambler() noexcept
+      {
+        this->m_regs.fill(0x9E3779B9);
+
+        for(size_t i = 0; i < 4; ++i)
+          this->mix();
+      }
+
+  public:
+    void combine(const uint32_t* src) noexcept
+      {
+        for(size_t i = 0; i < 8; ++i)
+          this->m_regs[i] += src[i];
+      }
+    void mix() noexcept
+      {
+        auto step = [&](size_t r, auto shift, int b)
+          {
+            this->m_regs[r] ^= shift(this->m_regs[(r+1)%8], b);
+            this->m_regs[(r+3)%8] += this->m_regs[r];
+            this->m_regs[(r+1)%8] += this->m_regs[(r+2)%8];
+          };
+        step(0, do_sll, 11);
+        step(1, do_srl,  2);
+        step(2, do_sll,  8);
+        step(3, do_srl, 16);
+        step(4, do_sll, 10);
+        step(5, do_srl,  4);
+        step(6, do_sll,  8);
+        step(7, do_srl,  9);
+      }
+    void output(uint32_t* out) const noexcept
+      {
+        for(size_t i = 0; i < 8; ++i)
+          out[i] = this->m_regs[i];
+      }
+  };
+
+}  // namespace
 
 Random_Number_Generator::~Random_Number_Generator()
   {
   }
-
-    namespace {
-
-    constexpr uint32_t do_sll(uint32_t reg, int bits) noexcept
-      {
-        return reg << bits;
-      }
-
-    constexpr uint32_t do_srl(uint32_t reg, int bits) noexcept
-      {
-        return reg >> bits;
-      }
-
-    }  // namespace
 
 void Random_Number_Generator::do_update() noexcept
   {
@@ -55,71 +111,6 @@ void Random_Number_Generator::do_update() noexcept
     // Mark this round ready for consumption.
     this->m_ngot = 0;
   }
-
-    namespace {
-
-    size_t do_read_random_device(void* data, size_t size) noexcept
-      {
-        ::rocket::unique_posix_fd fd(::open("/dev/urandom", O_RDONLY), ::close);
-        if(!fd) {
-          return 0;
-        }
-        ::ssize_t nread = ::read(fd, data, size);
-        if(nread < 0) {
-          return 0;
-        }
-        return static_cast<size_t>(nread);
-      }
-
-    class Scrambler
-      {
-      private:
-        uint32_t m_regs[8];
-
-      public:
-        Scrambler() noexcept
-          {
-            for(size_t i = 0; i < 8; ++i) {
-              this->m_regs[i] = 0x9E3779B9;
-            }
-            for(size_t i = 0; i < 4; ++i) {
-              this->mix();
-            }
-          }
-
-      public:
-        void combine(const uint32_t* src) noexcept
-          {
-            for(size_t i = 0; i < 8; ++i) {
-              this->m_regs[i] += src[i];
-            }
-          }
-        void mix() noexcept
-          {
-            auto step = [&](size_t r, auto shift, int b)
-              {
-                this->m_regs[r] ^= shift(this->m_regs[(r+1)%8], b);
-                this->m_regs[(r+3)%8] += this->m_regs[r];
-                this->m_regs[(r+1)%8] += this->m_regs[(r+2)%8];
-              };
-            step(0, do_sll, 11);
-            step(1, do_srl,  2);
-            step(2, do_sll,  8);
-            step(3, do_srl, 16);
-            step(4, do_sll, 10);
-            step(5, do_srl,  4);
-            step(6, do_sll,  8);
-            step(7, do_srl,  9);
-          }
-        void output(uint32_t* out) const noexcept
-          {
-            for(size_t i = 0; i < 8; ++i) {
-              out[i] = this->m_regs[i];
-            }
-          }
-      };
-
-    }  // namespace
 
 void Random_Number_Generator::reset() noexcept
   {

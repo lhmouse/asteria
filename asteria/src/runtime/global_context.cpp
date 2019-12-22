@@ -21,6 +21,47 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
+
+// N.B. Please keep this list sorted by the `version` member.
+struct Module
+  {
+    API_Version version;
+    const char* name;
+    void (*init)(G_object&, API_Version);
+  }
+constexpr s_modules[] =
+  {
+    { api_version_none,       "",            nullptr                     },
+    { api_version_0001_0000,  "gc",          create_bindings_gc          },
+    { api_version_0001_0000,  "debug",       create_bindings_debug       },
+    { api_version_0001_0000,  "chrono",      create_bindings_chrono      },
+    { api_version_0001_0000,  "string",      create_bindings_string      },
+    { api_version_0001_0000,  "array",       create_bindings_array       },
+    { api_version_0001_0000,  "numeric",     create_bindings_numeric     },
+    { api_version_0001_0000,  "math",        create_bindings_math        },
+    { api_version_0001_0000,  "filesystem",  create_bindings_filesystem  },
+    { api_version_0001_0000,  "checksum",    create_bindings_checksum    },
+    { api_version_0001_0000,  "json",        create_bindings_json        },
+  };
+
+struct Module_Comparator
+  {
+    bool operator()(const Module& lhs, const Module& rhs) const noexcept
+      {
+        return lhs.version < rhs.version;
+      }
+    bool operator()(API_Version lhs, const Module& rhs) const noexcept
+      {
+        return lhs < rhs.version;
+      }
+    bool operator()(const Module& lhs, API_Version rhs) const noexcept
+      {
+        return lhs.version < rhs;
+      }
+  };
+
+}  // namespace
 
 Global_Context::~Global_Context()
   {
@@ -40,48 +81,6 @@ Reference* Global_Context::do_lazy_lookup_opt(Reference_Dictionary& /*named_refs
   {
     return nullptr;
   }
-
-    namespace {
-
-    // N.B. Please keep this list sorted by the `version` member.
-    struct Module
-      {
-        API_Version version;
-        const char* name;
-        void (*init)(G_object&, API_Version);
-      }
-    constexpr s_modules[] =
-      {
-        { api_version_none,       "",            nullptr                     },
-        { api_version_0001_0000,  "gc",          create_bindings_gc          },
-        { api_version_0001_0000,  "debug",       create_bindings_debug       },
-        { api_version_0001_0000,  "chrono",      create_bindings_chrono      },
-        { api_version_0001_0000,  "string",      create_bindings_string      },
-        { api_version_0001_0000,  "array",       create_bindings_array       },
-        { api_version_0001_0000,  "numeric",     create_bindings_numeric     },
-        { api_version_0001_0000,  "math",        create_bindings_math        },
-        { api_version_0001_0000,  "filesystem",  create_bindings_filesystem  },
-        { api_version_0001_0000,  "checksum",    create_bindings_checksum    },
-        { api_version_0001_0000,  "json",        create_bindings_json        },
-      };
-
-    struct Module_Comparator
-      {
-        bool operator()(const Module& lhs, const Module& rhs) const noexcept
-          {
-            return lhs.version < rhs.version;
-          }
-        bool operator()(API_Version lhs, const Module& rhs) const noexcept
-          {
-            return lhs < rhs.version;
-          }
-        bool operator()(const Module& lhs, API_Version rhs) const noexcept
-          {
-            return lhs.version < rhs;
-          }
-      };
-
-    }  // namespace
 
 API_Version Global_Context::max_api_version() const noexcept
   {

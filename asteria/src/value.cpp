@@ -6,6 +6,34 @@
 #include "utilities.hpp"
 
 namespace Asteria {
+namespace {
+
+template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
+  {
+    if(lhs < rhs) {
+      return compare_less;
+    }
+    if(lhs > rhs) {
+      return compare_greater;
+    }
+    return compare_equal;
+  }
+
+template<typename ValT, ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
+  {
+    if(::std::isless(lhs, rhs)) {
+      return compare_less;
+    }
+    if(::std::isgreater(lhs, rhs)) {
+      return compare_greater;
+    }
+    if(::std::isunordered(lhs, rhs)) {
+      return compare_unordered;
+    }
+    return compare_equal;
+  }
+
+}  // namespace
 
 bool Value::test() const noexcept
   {
@@ -40,34 +68,6 @@ bool Value::test() const noexcept
       ASTERIA_TERMINATE("invalid value type (gtype `$1`)", this->gtype());
     }
   }
-
-    namespace {
-
-    template<typename ValT, ROCKET_ENABLE_IF(::std::is_integral<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
-      {
-        if(lhs < rhs) {
-          return compare_less;
-        }
-        if(lhs > rhs) {
-          return compare_greater;
-        }
-        return compare_equal;
-      }
-    template<typename ValT, ROCKET_ENABLE_IF(::std::is_floating_point<ValT>::value)> Compare do_3way_compare(const ValT& lhs, const ValT& rhs) noexcept
-      {
-        if(::std::isless(lhs, rhs)) {
-          return compare_less;
-        }
-        if(::std::isgreater(lhs, rhs)) {
-          return compare_greater;
-        }
-        if(::std::isunordered(lhs, rhs)) {
-          return compare_unordered;
-        }
-        return compare_equal;
-      }
-
-    }  // namespace
 
 Compare Value::compare(const Value& other) const noexcept
   {
