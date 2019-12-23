@@ -25,30 +25,28 @@ using Enumerator  = AVMC_Queue::Enumerator;
 
 bool do_rebind_nodes(bool& dirty, cow_vector<AIR_Node>& code, const Abstract_Context& ctx)
   {
-    bool dirty_add = false;
     for(size_t i = 0; i != code.size(); ++i) {
       auto qnode = code.at(i).rebind_opt(ctx);
       if(!qnode) {
         continue;
       }
-      dirty_add |= true;
       dirty |= true;
       code.mut(i) = ::rocket::move(*qnode);
     }
-    return dirty_add;
+    return dirty;
   }
 
 bool do_rebind_nodes(bool& dirty, cow_vector<cow_vector<AIR_Node>>& code, const Abstract_Context& ctx)
   {
-    bool dirty_add = false;
     for(size_t i = 0; i != code.size(); ++i) {
-      auto nested = code.at(i);
-      if(!do_rebind_nodes(dirty, nested, ctx)) {
-        continue;
+      for(size_t k = 0; k != code.at(i).size(); ++k) {
+        auto qnode = code.at(i).at(k).rebind_opt(ctx);
+        if(!qnode) {
+          continue;
+        }
+        dirty |= true;
+        code.mut(i).mut(k) = ::rocket::move(*qnode);
       }
-      dirty_add |= true;
-      dirty |= true;
-      code.mut(i) = ::rocket::move(nested);
     }
     return dirty;
   }
