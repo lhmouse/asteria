@@ -13,4 +13,4 @@ make -j$(nproc)
 
 # test
 ./check_includes.sh
-make -j$(nproc) check || (cat ./test-suite.log; false)
+make -j$(nproc) distcheck || (cat ./test-suite.log; false)
