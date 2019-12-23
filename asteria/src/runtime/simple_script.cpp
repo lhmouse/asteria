@@ -22,9 +22,10 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     Statement_Sequence stmtq;
     stmtq.reload(tstrm, this->m_opts);
 
-    // The script behaves like a function accepting variadic arguments.
-    cow_vector<phsh_string> params;
-    params.emplace_back(::rocket::sref("..."));
+    // Initialize the parameter list. This is the same for all scripts so we only do this once.
+    if(ROCKET_UNEXPECT(this->m_params.empty())) {
+      this->m_params.emplace_back(::rocket::sref("..."));
+    }
     // Create the zero-ary argument getter.
     auto zvarg = ::rocket::make_refcnt<Variadic_Arguer>(name, 1, ::rocket::sref("<simple script>"));
     // Generate IR nodes for the function body.
@@ -32,7 +33,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     cow_vector<AIR_Node> code_body;
     size_t epos = stmtq.size() - 1;
     if(epos != SIZE_MAX) {
-      Analytic_Context ctx_func(nullptr, params);
+      Analytic_Context ctx_func(nullptr, this->m_params);
       // Generate code with regard to proper tail calls.
       for(size_t i = 0; i != epos; ++i) {
         stmtq.at(i).generate_code(code_body, nullptr, ctx_func, this->m_opts,
@@ -42,7 +43,7 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
     }
     // TODO: Insert optimization passes.
     // Instantiate the function.
-    this->m_cptr = ::rocket::make_refcnt<Instantiated_Function>(params, ::rocket::move(zvarg), code_body);
+    this->m_cptr = ::rocket::make_refcnt<Instantiated_Function>(this->m_params, ::rocket::move(zvarg), code_body);
     return *this;
   }
 

@@ -12,11 +12,12 @@ namespace Asteria {
 class Simple_Script
   {
   private:
+    cow_vector<phsh_string> m_params;  // constant
     Compiler_Options m_opts = { };
     rcptr<Rcbase> m_cptr;  // note type erasure
 
   public:
-    Simple_Script()
+    Simple_Script() noexcept
       {
       }
     Simple_Script(tinybuf& cbuf, const cow_string& name)
