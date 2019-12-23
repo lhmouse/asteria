@@ -36,7 +36,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
     case index_literal:
         const auto& altr = this->m_stor.as<index_literal>();
         // Encode arguments.
-        AIR_Node::S_push_literal xnode = { altr.val };
+        AIR_Node::S_push_immediate xnode = { altr.val };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{

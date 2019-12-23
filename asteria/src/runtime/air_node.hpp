@@ -92,7 +92,7 @@ class AIR_Node
     struct S_return_by_value
       {
       };
-    struct S_push_literal
+    struct S_push_immediate
       {
         Value val;
       };
@@ -188,7 +188,7 @@ class AIR_Node
         index_assert_statement       = 12,
         index_simple_status          = 13,
         index_return_by_value        = 14,
-        index_push_literal           = 15,
+        index_push_immediate         = 15,
         index_push_global_reference  = 16,
         index_push_local_reference   = 17,
         index_push_bound_reference   = 18,
@@ -222,7 +222,7 @@ class AIR_Node
       , S_assert_statement       // 12,
       , S_simple_status          // 13,
       , S_return_by_value        // 14,
-      , S_push_literal           // 15,
+      , S_push_immediate         // 15,
       , S_push_global_reference  // 16,
       , S_push_local_reference   // 17,
       , S_push_bound_reference   // 18,

@@ -750,7 +750,7 @@ AIR_Status do_return_by_value(Executive_Context& ctx, ParamU /*pu*/, const void*
     return air_status_return;
   }
 
-AIR_Status do_push_literal(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
+AIR_Status do_push_immediate(Executive_Context& ctx, ParamU /*pu*/, const void* pv)
   {
     // Unpack arguments.
     const auto& val = do_pcast<Value>(pv)[0];
@@ -2661,7 +2661,7 @@ opt<AIR_Node> AIR_Node::rebind_opt(const Abstract_Context& ctx) const
     case index_assert_statement:
     case index_simple_status:
     case index_return_by_value:
-    case index_push_literal:
+    case index_push_immediate:
     case index_push_global_reference:
         // There is nothing to bind.
         return ::rocket::clear;
@@ -2985,8 +2985,8 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         return avmcp.output<do_return_by_value>(queue);
       }{
 
-    case index_push_literal:
-        const auto& altr = this->m_stor.as<index_push_literal>();
+    case index_push_immediate:
+        const auto& altr = this->m_stor.as<index_push_immediate>();
         // `pu` is unused.
         // `pv` points to a copy of `val`.
         AVMC_Appender<Value> avmcp;
@@ -2996,7 +2996,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Encode arguments.
         static_cast<Value&>(avmcp) = altr.val;
         // Push a new node.
-        return avmcp.output<do_push_literal>(queue);
+        return avmcp.output<do_push_immediate>(queue);
       }{
 
     case index_push_global_reference:
@@ -3491,7 +3491,15 @@ Variable_Callback& AIR_Node::enumerate_variables(Variable_Callback& callback) co
     case index_assert_statement:
     case index_simple_status:
     case index_return_by_value:
-    case index_push_literal:
+        return callback;
+      }{
+
+    case index_push_immediate:
+        const auto& altr = this->m_stor.as<index_push_immediate>();
+        altr.val.enumerate_variables(callback);
+        return callback;
+      }{
+
     case index_push_global_reference:
     case index_push_local_reference:
         return callback;
