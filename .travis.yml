@@ -8,7 +8,7 @@ compiler:
   - gcc
   - clang
 
-install:
+script:
   - bash ci/build.sh
 
 notifications:
