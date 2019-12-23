@@ -11,7 +11,7 @@ Variable::~Variable()
   {
   }
 
-long Variable::increment_gcref(long split) const noexcept
+long Variable::increment_gcref(long split) noexcept
   {
     if(ROCKET_EXPECT(split <= 1)) {
       // Update the integral part only.

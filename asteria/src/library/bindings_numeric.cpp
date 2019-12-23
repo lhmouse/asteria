@@ -276,7 +276,7 @@ G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit
     // Generate a random `double` in the range [0.0,1.0).
     int64_t high = global.get_random_uint32();
     int64_t low = global.get_random_uint32();
-    double ratio = static_cast<double>((high << 21) ^ low) / 0x1p53;
+    double ratio = static_cast<double>((high << 21) ^ low) * 0x1p-53;
     // If a limit is specified, magnify the value.
     // The default magnitude is 1.0 so no action is taken.
     if(!limit) {

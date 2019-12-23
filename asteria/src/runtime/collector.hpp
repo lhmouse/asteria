@@ -41,27 +41,27 @@ class Collector
       {
         return this->m_output_opt;
       }
-    void set_output_pool(Variable_HashSet* output_opt) noexcept
+    Collector& set_output_pool(Variable_HashSet* output_opt) noexcept
       {
-        this->m_output_opt = output_opt;
+        return this->m_output_opt = output_opt, *this;
       }
 
     Collector* get_tied_collector_opt() const noexcept
       {
         return this->m_tied_opt;
       }
-    void tie_collector(Collector* tied_opt) noexcept
+    Collector& tie_collector(Collector* tied_opt) noexcept
       {
-        this->m_tied_opt = tied_opt;
+        return this->m_tied_opt = tied_opt, *this;
       }
 
     uint32_t get_threshold() const noexcept
       {
         return this->m_threshold;
       }
-    void set_threshold(uint32_t threshold) noexcept
+    Collector& set_threshold(uint32_t threshold) noexcept
       {
-        this->m_threshold = threshold;
+        return this->m_threshold = threshold, *this;
       }
 
     size_t count_tracked_variables() const noexcept

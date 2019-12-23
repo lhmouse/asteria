@@ -17,7 +17,7 @@ class Variable final : public virtual Rcbase
     Value m_value;
     bool m_immut = true;
     // garbage collection support
-    mutable pair<long, double> m_gcref;
+    pair<long, double> m_gcref;
 
   public:
     Variable() noexcept
@@ -43,14 +43,15 @@ class Variable final : public virtual Rcbase
       {
         return this->m_immut;
       }
-    void set_immutable(bool immutable) noexcept
+    Variable& set_immutable(bool immutable) noexcept
       {
-        this->m_immut = immutable;
+        return this->m_immut = immutable, *this;
       }
-    template<typename XValT> void reset(XValT&& xval, bool immutable)
+    template<typename XValT> Variable& reset(XValT&& xval, bool immutable)
       {
         this->m_value = ::rocket::forward<XValT>(xval);
         this->m_immut = immutable;
+        return *this;
       }
 
     long gcref_split() const noexcept
@@ -61,11 +62,11 @@ class Variable final : public virtual Rcbase
       {
         return this->m_gcref.first;
       }
-    void reset_gcref(long iref) const noexcept
+    Variable& reset_gcref(long iref) noexcept
       {
-        this->m_gcref = ::std::make_pair(iref, 1 / 0x1p26);
+        return this->m_gcref = ::std::make_pair(iref, 0x1p-26), *this;
       }
-    long increment_gcref(long split) const noexcept;
+    long increment_gcref(long split) noexcept;
 
     Variable_Callback& enumerate_variables(Variable_Callback& callback) const;
   };

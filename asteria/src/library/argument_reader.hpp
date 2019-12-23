@@ -74,9 +74,9 @@ class Argument_Reader
       {
         return this->m_throw_on_failure;
       }
-    void set_throw_on_failure(bool throw_on_failure = true) noexcept
+    Argument_Reader& set_throw_on_failure(bool throw_on_failure = true) noexcept
       {
-        this->m_throw_on_failure = throw_on_failure;
+        return this->m_throw_on_failure = throw_on_failure, *this;
       }
 
     const Argument_Reader& save(State& state) const noexcept

@@ -734,18 +734,18 @@ G_array std_array_shuffle(const G_array& data, const opt<G_integer>& seed)
       return data;
     }
     // Create a linear congruential generator.
-    auto lcgst = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
+    auto lcg = seed ? static_cast<uint64_t>(*seed) : generate_random_seed();
     // Shuffle elements.
     G_array res = data;
     for(size_t i = 0; i < res.size(); ++i) {
       // These arguments are the same as glibc's `drand48()` function.
       //   https://en.wikipedia.org/wiki/Linear_congruential_generator#Parameters_in_common_use
-      lcgst *= 0x5DEECE66D;     // a
-      lcgst += 0xB;             // c
-      lcgst &= 0xFFFFFFFFFFFF;  // m
+      lcg *= 0x5DEECE66D;     // a
+      lcg += 0xB;             // c
+      lcg &= 0xFFFFFFFFFFFF;  // m
       // N.B. Conversion from an unsigned type to a floating-point type would result in performance penalty.
       // ratio <= [0.0, 1.0)
-      auto ratio = static_cast<double>(static_cast<int64_t>(lcgst)) / 0x1p48;
+      double ratio = static_cast<double>(static_cast<int64_t>(lcg)) * 0x1p-48;
       // k <= [0, res.size())
       auto k = static_cast<size_t>(static_cast<int64_t>(ratio * static_cast<double>(data.ssize())));
       if(k == i) {

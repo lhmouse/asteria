@@ -54,9 +54,9 @@ class Recursion_Sentry
       {
         return this->m_base;
       }
-    void set_base(const void* base) noexcept
+    Recursion_Sentry& set_base(const void* base) noexcept
       {
-        this->m_base = base;
+        return this->m_base = base, *this;
       }
   };
 
