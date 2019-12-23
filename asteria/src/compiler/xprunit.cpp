@@ -40,6 +40,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_named_reference:
         const auto& altr = this->m_stor.as<index_named_reference>();
         // Perform early lookup when the expression is defined.
@@ -77,6 +78,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         }
         return code;
       }{
+
     case index_closure_function:
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Name the closure.
@@ -110,6 +112,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_branch:
         const auto& altr = this->m_stor.as<index_branch>();
         // Generate code for both branches.
@@ -121,6 +124,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_function_call:
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
@@ -128,6 +132,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_member_access:
         const auto& altr = this->m_stor.as<index_member_access>();
         // Encode arguments.
@@ -135,6 +140,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_operator_rpn:
         const auto& altr = this->m_stor.as<index_operator_rpn>();
         // Encode arguments.
@@ -142,6 +148,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_unnamed_array:
         const auto& altr = this->m_stor.as<index_unnamed_array>();
         // Encode arguments.
@@ -149,6 +156,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_unnamed_object:
         const auto& altr = this->m_stor.as<index_unnamed_object>();
         // Encode arguments.
@@ -156,6 +164,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_coalescence:
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Generate code for the branch.
@@ -166,6 +175,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
+
     case index_operator_fma:
         const auto& altr = this->m_stor.as<index_operator_fma>();
         // Encode arguments.
@@ -173,6 +183,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         code.emplace_back(::rocket::move(xnode));
         return code;
       }}
+
     default:
       ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());
     }

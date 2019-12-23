@@ -30,6 +30,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         }
         return ::std::addressof(arr.at(w.rindex));
       }{
+
     case index_object_key:
         const auto& altr = this->m_stor.as<index_object_key>();
         if(parent.is_null()) {
@@ -47,6 +48,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         }
         return ::std::addressof(rit->second);
       }{
+
     case index_array_tail:
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
@@ -63,6 +65,7 @@ const Value* Reference_Modifier::apply_const_opt(const Value& parent) const
         }
         return ::std::addressof(arr.back());
       }}
+
     default:
       ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
@@ -100,6 +103,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         }
         return ::std::addressof(arr.mut(w.rindex));
       }{
+
     case index_object_key:
         const auto& altr = this->m_stor.as<index_object_key>();
         if(parent.is_null()) {
@@ -126,6 +130,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         }
         return ::std::addressof(rit->second);
       }{
+
     case index_array_tail:
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
@@ -142,6 +147,7 @@ Value* Reference_Modifier::apply_mutable_opt(Value& parent, bool create_new) con
         // Append a new element to the end and return a pointer to it.
         return ::std::addressof(arr.emplace_back());
       }}
+
     default:
       ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
@@ -171,6 +177,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         arr.erase(w.rindex, 1);
         return elem;
       }{
+
     case index_object_key:
         const auto& altr = this->m_stor.as<index_object_key>();
         if(parent.is_null()) {
@@ -190,6 +197,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         obj.erase(rit);
         return elem;
       }{
+
     case index_array_tail:
         // We have to verify that the parent value is actually an `array` or `null`.
         if(parent.is_null()) {
@@ -208,6 +216,7 @@ Value Reference_Modifier::apply_and_erase(Value& parent) const
         arr.pop_back();
         return elem;
       }}
+
     default:
       ASTERIA_TERMINATE("invalid reference modifier type (index `$1`)", this->index());
     }
