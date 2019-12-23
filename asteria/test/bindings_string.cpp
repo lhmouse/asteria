@@ -249,9 +249,9 @@ int main()
         assert std.string.utf8_decode("\xFF\xFE\x62") == null;
         assert std.string.utf8_decode("\xFF\xFE\x62", true) == [ 255, 254, 98 ];
 
-        assert std.string.pack8(0x1234) == "\x34";
-        assert std.string.pack8([ 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF ]) == "\x01\x23\x45\x67\x89\xAB\xCD\xEF";
-        assert std.string.unpack8("\x01\x23\x45\x67\x89\xAB\xCD\xEF") == [ 0x01, 0x23, 0x45, 0x67, -0x1p8 | 0x89, -0x1p8 | 0xAB, -0x1p8 | 0xCD, -0x1p8 | 0xEF ];
+        assert std.string.pack_8(0x1234) == "\x34";
+        assert std.string.pack_8([ 0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF ]) == "\x01\x23\x45\x67\x89\xAB\xCD\xEF";
+        assert std.string.unpack_8("\x01\x23\x45\x67\x89\xAB\xCD\xEF") == [ 0x01, 0x23, 0x45, 0x67, -0x1p8 | 0x89, -0x1p8 | 0xAB, -0x1p8 | 0xCD, -0x1p8 | 0xEF ];
 
         assert std.string.pack_16be(0x1234) == "\x12\x34";
         assert std.string.pack_16be([ 0x0123, 0x4567, 0x89AB, 0xCDEF ]) == "\x01\x23\x45\x67\x89\xAB\xCD\xEF";

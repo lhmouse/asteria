@@ -66,9 +66,9 @@ extern opt<G_string> std_string_utf8_encode(const G_integer& code_point, const o
 extern opt<G_string> std_string_utf8_encode(const G_array& code_points, const opt<G_boolean>& permissive = ::rocket::clear);
 extern opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& permissive = ::rocket::clear);
 
-extern G_string std_string_pack8(const G_integer& value);
-extern G_string std_string_pack8(const G_array& values);
-extern G_array std_string_unpack8(const G_string& text);
+extern G_string std_string_pack_8(const G_integer& value);
+extern G_string std_string_pack_8(const G_array& values);
+extern G_array std_string_unpack_8(const G_string& text);
 
 extern G_string std_string_pack_16be(const G_integer& value);
 extern G_string std_string_pack_16be(const G_array& values);

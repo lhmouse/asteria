@@ -1130,7 +1130,7 @@ opt<G_array> std_string_utf8_decode(const G_string& text, const opt<G_boolean>& 
     return ::rocket::move(code_points);
   }
 
-G_string std_string_pack8(const G_integer& value)
+G_string std_string_pack_8(const G_integer& value)
   {
     G_string text;
     text.reserve(1);
@@ -1138,7 +1138,7 @@ G_string std_string_pack8(const G_integer& value)
     return text;
   }
 
-G_string std_string_pack8(const G_array& values)
+G_string std_string_pack_8(const G_array& values)
   {
     G_string text;
     text.reserve(values.size());
@@ -1148,7 +1148,7 @@ G_string std_string_pack8(const G_array& values)
     return text;
   }
 
-G_array std_string_unpack8(const G_string& text)
+G_array std_string_unpack_8(const G_string& text)
   {
     return do_unpack_le<int8_t>(text);
   }
@@ -2668,14 +2668,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         })
       ));
     //===================================================================
-    // `std.string.pack8()`
+    // `std.string.pack_8()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("pack8"),
+    result.insert_or_assign(::rocket::sref("pack_8"),
       G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
-          "`std.string.pack8(values)`\n"
+          "`std.string.pack_8(values)`\n"
           "\n"
           "  * Packs a series of 8-bit integers into a `string`. `values` can\n"
           "    be either an `integer` or an `array` of `integer`s, all of\n"
@@ -2685,12 +2685,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(::rocket::sref("std.string.pack8"), ::rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.string.pack_8"), ::rocket::ref(args));
           // Parse arguments.
           G_integer value;
           if(reader.start().g(value).finish()) {
             // Call the binding function.
-            auto text = std_string_pack8(value);
+            auto text = std_string_pack_8(value);
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2698,7 +2698,7 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
           G_array values;
           if(reader.start().g(values).finish()) {
             // Call the binding function.
-            auto text = std_string_pack8(values);
+            auto text = std_string_pack_8(values);
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(text) };
             return ::rocket::move(xref);
@@ -2708,14 +2708,14 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         })
       ));
     //===================================================================
-    // `std.string.unpack8()`
+    // `std.string.unpack_8()`
     //===================================================================
-    result.insert_or_assign(::rocket::sref("unpack8"),
+    result.insert_or_assign(::rocket::sref("unpack_8"),
       G_function(::rocket::make_refcnt<Simple_Binding_Wrapper>(
         // Description
         ::rocket::sref(
           "\n"
-          "`std.string.unpack8(text)`\n"
+          "`std.string.unpack_8(text)`\n"
           "\n"
           "  * Unpacks 8-bit integers from a `string`. The contents of `text`\n"
           "    are re-interpreted as contiguous signed 8-bit integers, all of\n"
@@ -2725,12 +2725,12 @@ void create_bindings_string(G_object& result, API_Version /*version*/)
         ),
         // Definition
         [](cow_vector<Reference>&& args) -> Reference {
-          Argument_Reader reader(::rocket::sref("std.string.unpack8"), ::rocket::ref(args));
+          Argument_Reader reader(::rocket::sref("std.string.unpack_8"), ::rocket::ref(args));
           // Parse arguments.
           G_string text;
           if(reader.start().g(text).finish()) {
             // Call the binding function.
-            auto values = std_string_unpack8(text);
+            auto values = std_string_unpack_8(text);
             // Forward the result.
             Reference_Root::S_temporary xref = { ::rocket::move(values) };
             return ::rocket::move(xref);
