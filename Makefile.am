@@ -281,7 +281,7 @@ check_PROGRAMS =  \
 TESTS = ${check_PROGRAMS}
 
 EXTRA_DIST =  \
-  doc/operator-precedence.txt  \
-  doc/standard-library.txt  \
-  doc/syntax.txt  \
-  doc/examples.txt
+  asteria/doc/operator-precedence.txt  \
+  asteria/doc/standard-library.txt  \
+  asteria/doc/syntax.txt  \
+  asteria/doc/examples.txt
