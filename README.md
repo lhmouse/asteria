@@ -15,7 +15,76 @@
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
 
-# The Asteria Programming Language
+### Concepts
+
+I started learning programming from **ActionScript** since **Flash 5** days. It was not sooner (and not strange, either) that I learned **JavaScript**, because they are so similar. I admit that **JavaScript** is a fascinating language, but also has quite a few drawbacks when we look at it today:
+
+1. There is no 64-bit integer type. While some data exchange formats (such as **Protocol Buffers**) do have 64-bit integers, they cannot be stored as `Number`s safely. Some implementations split 64-bit integers into higher and lower parts, which is not very handy, as the lower part suddenly becomes signed and may be negative.
+2. There are no binary strings. `String`s are in **UCS-2** (rather than **UTF-16**), while `ArrayBuffer`s are not resizable.
+3. `NaN` and `Infinity` are neither keywords nor constants. They are properties of the global object and may be overwritten. Moreover, `Boolean(Nan)` yields `false` unlike other languages.
+
+Here is an issue that is shared by almost all common languages, including **C** and **Python**:
+
+```javascript
+let a = [ ];
+let b = [ ];
+
+function test(x, y) {
+  x.length = 0, x[0] = "hello";  // modifies the array that `x` would reference
+  y = [ "hello" ];               // modifies `y` instead of the argument
+}
+test(a, b);  // arguments are in effect pointers
+
+console.log("a = ", a);   // [ 'hello' ]
+console.log("b = ", b);   // []
+```
+
+But comparing to typed languages such as **Java**, **JavaScript** has a few advantages:
+
+1. A number is always a `Number`. There are no integer types of varieties of widths which simplifies programming. Unlike integers, `Number`s never overflow.
+2. Being untyped, a function can be passed around like objects without knowing its parameters.
+
+**Asteria** is highly inspired by **JavaScript** but has been designed to be free of such issues.
+
+### Data Types
+
+There are 9 types:
+
+```text
+           // Equivalents in:
+           //   JavaScript     Java         C++
+null       //   `undefined`    N/A          `std::nullptr_t`
+boolean    //   `boolean`      `boolean`    `bool`
+integer    //   N/A            `long`       `std::int64_t`
+real       //   `number`       `double`     `double`
+string     //   N/A            `byte[]`     `std::string`
+opaque     //   N/A            `Object`     `std::any`
+function   //   `function`     N/A          N/A
+array      //   `array`        N/A          `std::vector<std::any>`
+object     //   `object`       N/A          `std::unordered_map<std::string, std::any>`
+```
+
+### Expression Categories
+
+```go
+var foo;
+// `foo` refers to a "variable" holding `null`.
+
+const inc = 42;
+// `inc` refers to an "immutable variable" holding an `integer` of `42`.
+
+var bar = func() { return false;  };   // return by value
+// `bar` refers to an "immutable variable" holding a function.
+// `bar()` refers to a "temporary" holding a `boolean` of `false`.
+
+func add(x) { return& x + inc;  }      // return by reference
+// `add` refers to an "immutable variable" holding a function.
+// `add(5)` refers to a "temporary" holding an `integer` of `47`.
+```
+
+### WIP
+
+# Features
 
 1. Sane and clean.
 2. Self-consistent.
@@ -23,7 +92,7 @@
 4. Lightweight.
 5. Procedural.
 6. Dynamically typed.
-7. Easy to integrate in a C++ project. (C++14 is required.)
+7. Easy to integrate in a C++ project. (C++14 and hexadecimal floating-point literals are required.)
 8. Native to C++ exceptions, particularly `std::bad_alloc`.
 
 # Characteristics
