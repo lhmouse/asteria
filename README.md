@@ -15,7 +15,7 @@
 
 ![GNU nano for the win!](https://raw.githubusercontent.com/lhmouse/poseidon/master/gnu-nano-ftw.png)
 
-### Concepts
+# Concepts
 
 I started learning programming from **ActionScript** since **Flash 5** days. It was not sooner (and not strange, either) that I learned **JavaScript**, because they are so similar. I admit that **JavaScript** is a fascinating language, but also has quite a few drawbacks when we look at it today:
 
