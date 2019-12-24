@@ -46,7 +46,7 @@ But comparing to typed languages such as **Java**, **JavaScript** has a few adva
 
 **Asteria** is highly inspired by **JavaScript** but has been designed to be free of such issues.
 
-### Data Types
+# Data Types
 
 There are 9 types:
 
@@ -64,7 +64,7 @@ array      //   `array`        N/A          `std::vector<std::any>`
 object     //   `object`       N/A          `std::unordered_map<std::string, std::any>`
 ```
 
-### Expression Categories
+# Expression Categories
 
 ```go
 var foo;
@@ -82,7 +82,7 @@ func add(x) { return x + inc;  };   // return by value
 // `add(5)` refers to a "temporary" holding an `integer` of `47`.
 ```
 
-### WIP
+# WIP
 
 # Features
 
