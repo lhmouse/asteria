@@ -11,17 +11,17 @@
 namespace Asteria {
 namespace {
 
-cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_Aware tco_aware,
+cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, PTC_Aware ptc_aware,
                                              const Analytic_Context& ctx, const cow_vector<Xprunit>& units)
   {
     cow_vector<AIR_Node> code;
-    // Expression units other than the last one cannot be TCO'd.
+    // Expression units other than the last one cannot be PTC'd.
     size_t epos = units.size() - 1;
     if(epos != SIZE_MAX) {
       for(size_t i = 0; i != epos; ++i) {
-        units[i].generate_code(code, opts, tco_aware_none, ctx);
+        units[i].generate_code(code, opts, ptc_aware_none, ctx);
       }
-      units[epos].generate_code(code, opts, tco_aware, ctx);
+      units[epos].generate_code(code, opts, ptc_aware, ctx);
     }
     return code;
   }
@@ -29,7 +29,7 @@ cow_vector<AIR_Node> do_generate_code_branch(const Compiler_Options& opts, TCO_A
 }  // namespace
 
 cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const Compiler_Options& opts,
-                                             TCO_Aware tco_aware, const Analytic_Context& ctx) const
+                                             PTC_Aware ptc_aware, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
       {{
@@ -102,9 +102,9 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
           // Generate code with regard to proper tail calls.
           for(size_t i = 0; i != epos; ++i) {
             altr.body[i].generate_code(code_body, nullptr, ctx_func, opts,
-                                       altr.body[i + 1].is_empty_return() ? tco_aware_nullify : tco_aware_none);
+                                       altr.body[i + 1].is_empty_return() ? ptc_aware_nullify : ptc_aware_none);
           }
-          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, tco_aware_nullify);
+          altr.body[epos].generate_code(code_body, nullptr, ctx_func, opts, ptc_aware_nullify);
         }
         // TODO: Insert optimization passes.
         // Encode arguments.
@@ -116,9 +116,9 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
     case index_branch:
         const auto& altr = this->m_stor.as<index_branch>();
         // Generate code for both branches.
-        // Both branches may be TCO'd.
-        auto code_true = do_generate_code_branch(opts, tco_aware, ctx, altr.branch_true);
-        auto code_false = do_generate_code_branch(opts, tco_aware, ctx, altr.branch_false);
+        // Both branches may be PTC'd.
+        auto code_true = do_generate_code_branch(opts, ptc_aware, ctx, altr.branch_true);
+        auto code_false = do_generate_code_branch(opts, ptc_aware, ctx, altr.branch_false);
         // Encode arguments.
         AIR_Node::S_branch_expression xnode = { ::rocket::move(code_true), ::rocket::move(code_false), altr.assign };
         code.emplace_back(::rocket::move(xnode));
@@ -128,7 +128,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
     case index_function_call:
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
-        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, opts.no_proper_tail_calls ? tco_aware_none : tco_aware };
+        AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, opts.no_proper_tail_calls ? ptc_aware_none : ptc_aware };
         code.emplace_back(::rocket::move(xnode));
         return code;
       }{
@@ -168,8 +168,8 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
     case index_coalescence:
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Generate code for the branch.
-        // This branch may be TCO'd.
-        auto code_null = do_generate_code_branch(opts, tco_aware, ctx, altr.branch_null);
+        // This branch may be PTC'd.
+        auto code_null = do_generate_code_branch(opts, ptc_aware, ctx, altr.branch_null);
         // Encode arguments.
         AIR_Node::S_coalescence xnode = { ::rocket::move(code_null), altr.assign };
         code.emplace_back(::rocket::move(xnode));

@@ -131,7 +131,7 @@ class AIR_Node
       {
         Source_Location sloc;
         cow_vector<bool> args_by_refs;
-        TCO_Aware tco_aware;
+        PTC_Aware ptc_aware;
       };
     struct S_member_access
       {

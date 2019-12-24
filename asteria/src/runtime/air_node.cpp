@@ -96,7 +96,7 @@ AIR_Status do_evaluate_branch(const AVMC_Queue& queue, bool assign, /*const*/ Ex
     // Discard the top which will be overwritten anyway.
     ctx.stack().pop();
     // Evaluate the branch.
-    // Be advised that you must forward the status code as is, because TCO'd expressions may return `air_status_return`.
+    // Be advised that you must forward the status code as is, because PTCs may return `air_status_return`.
     return queue.execute(ctx);
   }
 
@@ -660,7 +660,7 @@ AIR_Status do_try_statement(Executive_Context& ctx, ParamU /*pu*/, const void* p
       // Execute the `try` block. If no exception is thrown, this will have little overhead.
       auto status = do_execute_block(queue_try, ctx);
       if(status == air_status_return) {
-        // This cannot be TCO'd, otherwise exceptions thrown from tail calls won't be caught.
+        // This cannot be PTC'd, otherwise exceptions thrown from tail calls won't be caught.
         ctx.stack().open_top().finish_call(ctx.global());
       }
       return status;
@@ -743,7 +743,7 @@ AIR_Status do_return_by_value(Executive_Context& ctx, ParamU /*pu*/, const void*
     // The result will have been pushed onto the top.
     auto& self = ctx.stack().open_top();
     // Convert the result to an rvalue.
-    // TCO wrappers are forwarded as is.
+    // PTC wrappers are forwarded as is.
     if(ROCKET_UNEXPECT(self.is_lvalue())) {
       self.convert_to_rvalue();
     }
@@ -868,7 +868,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_call>(pv)->sloc;
     const auto& args_by_refs = do_pcast<Pv_call>(pv)->args_by_refs;
-    const auto& tco_aware = static_cast<TCO_Aware>(pu.u8s[0]);
+    const auto& ptc_aware = static_cast<PTC_Aware>(pu.u8s[0]);
     const auto& inside = ctx.zvarg().func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
@@ -906,16 +906,16 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     self.zoom_out();
 
     // Call the function now.
-    if(tco_aware != tco_aware_none) {
+    if(ptc_aware != ptc_aware_none) {
       // Pack arguments for this proper tail call.
       args.emplace_back(::rocket::move(self));
-      // Create a TCO wrapper.
-      auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, tco_aware, target, ::rocket::move(args));
+      // Create a PTC wrapper.
+      auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, ptc_aware, target, ::rocket::move(args));
       // Return it.
       Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
       self = ::rocket::move(xref);
       // Force `air_status_return` if control flow reaches the end of a function.
-      // Otherwise a null reference is returned instead of this TCO wrapper, which can then never be unpacked.
+      // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
       return air_status_return;
     }
     // Call the hook function if any.
@@ -3092,7 +3092,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
 
     case index_function_call:
         const auto& altr = this->m_stor.as<index_function_call>();
-        // `pu.u8s[0]` is `tco_aware`.
+        // `pu.u8s[0]` is `ptc_aware`.
         // `pv` points to the source location and the argument avmcp.cifier vector.
         AVMC_Appender<Pv_call> avmcp;
         if(ipass == 0) {
@@ -3101,7 +3101,7 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Encode arguments.
         avmcp.sloc = altr.sloc;
         avmcp.args_by_refs = altr.args_by_refs;
-        avmcp.pu.u8s[0] = altr.tco_aware;
+        avmcp.pu.u8s[0] = altr.ptc_aware;
         // Push a new node.
         return avmcp.output<do_function_call>(queue);
       }{

@@ -72,7 +72,7 @@ Reference& Reference::do_finish_call(const Global_Context& global)
     // We must rebuild the backtrace using this queue if an exception is thrown.
     cow_vector<rcptr<Tail_Call_Arguments>> frames;
     // The function call shall yield an rvalue unless all wrapped calls return by reference.
-    TCO_Aware tco_conj = tco_aware_by_ref;
+    PTC_Aware ptc_conj = ptc_aware_by_ref;
     // Unpack all tail call wrappers.
     while(this->m_root.is_tail_call()) {
       // Unpack a frame.
@@ -85,11 +85,11 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         qhooks->on_single_step_trap(sloc, inside, nullptr);
       }
       // Tell out how to forward the result.
-      if((tca->tco_aware() == tco_aware_by_val) && (tco_conj == tco_aware_by_ref)) {
-        tco_conj = tco_aware_by_val;
+      if((tca->ptc_aware() == ptc_aware_by_val) && (ptc_conj == ptc_aware_by_ref)) {
+        ptc_conj = ptc_aware_by_val;
       }
-      else if(tca->tco_aware() == tco_aware_nullify) {
-        tco_conj = tco_aware_nullify;
+      else if(tca->ptc_aware() == ptc_aware_nullify) {
+        ptc_conj = ptc_aware_nullify;
       }
       // Unpack the function reference.
       const auto& target = tca->get_target();
@@ -129,11 +129,11 @@ Reference& Reference::do_finish_call(const Global_Context& global)
         qhooks->on_function_return(sloc, inside, *this);
       }
     }
-    if(tco_conj == tco_aware_by_val) {
+    if(ptc_conj == ptc_aware_by_val) {
       // Convert the result to an rvalue if it shouldn't be passed by reference.
       this->convert_to_rvalue();
     }
-    else if(tco_conj == tco_aware_nullify) {
+    else if(ptc_conj == ptc_aware_nullify) {
       // Return a `null`.
       *this = Reference_Root::S_null();
     }

@@ -37,9 +37,9 @@ Simple_Script& Simple_Script::reload(tinybuf& cbuf, const cow_string& name)
       // Generate code with regard to proper tail calls.
       for(size_t i = 0; i != epos; ++i) {
         stmtq.at(i).generate_code(code_body, nullptr, ctx_func, this->m_opts,
-                                  stmtq.at(i + 1).is_empty_return() ? tco_aware_nullify : tco_aware_none);
+                                  stmtq.at(i + 1).is_empty_return() ? ptc_aware_nullify : ptc_aware_none);
       }
-      stmtq.at(epos).generate_code(code_body, nullptr, ctx_func, this->m_opts, tco_aware_nullify);
+      stmtq.at(epos).generate_code(code_body, nullptr, ctx_func, this->m_opts, ptc_aware_nullify);
     }
     // TODO: Insert optimization passes.
     // Instantiate the function.
