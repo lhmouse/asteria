@@ -271,7 +271,7 @@ G_integer std_numeric_itrunc(const G_real& value)
     return do_cast_to_integer(::std::trunc(value));
   }
 
-G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit)
+G_real std_numeric_random(Global_Context& global, const opt<G_real>& limit)
   {
     // Generate a random `double` in the range [0.0,1.0).
     int64_t high = global.get_random_uint32();
@@ -1195,7 +1195,7 @@ void create_bindings_numeric(G_object& result, API_Version /*version*/)
           "  * Throws an exception if `limit` is zero or non-finite.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.numeric.random"), ::rocket::ref(args));
           // Parse arguments.
           opt<G_real> limit;

@@ -66,7 +66,7 @@ Reference& Reference::do_convert_to_temporary()
     return *this;
   }
 
-Reference& Reference::do_finish_call(const Global_Context& global)
+Reference& Reference::do_finish_call(Global_Context& global)
   {
     // Note that `*this` is overwritten before the wrapped function is called.
     // We must rebuild the backtrace using this queue if an exception is thrown.

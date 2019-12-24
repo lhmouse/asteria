@@ -42,7 +42,7 @@ extern G_integer std_numeric_iceil(const G_real& value);
 extern G_integer std_numeric_itrunc(const G_integer& value);
 extern G_integer std_numeric_itrunc(const G_real& value);
 
-extern G_real std_numeric_random(const Global_Context& global, const opt<G_real>& limit = ::rocket::clear);
+extern G_real std_numeric_random(Global_Context& global, const opt<G_real>& limit = ::rocket::clear);
 
 extern G_real std_numeric_sqrt(const G_real& x);
 extern G_real std_numeric_fma(const G_real& x, const G_real& y, const G_real& z);

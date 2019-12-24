@@ -19,7 +19,7 @@ extern opt<G_integer> std_filesystem_directory_create(const G_string& path);
 extern opt<G_integer> std_filesystem_directory_remove(const G_string& path);
 
 extern opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer>& offset = ::rocket::clear, const opt<G_integer>& limit = ::rocket::clear);
-extern bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset = ::rocket::clear, const opt<G_integer>& limit = ::rocket::clear);
+extern bool std_filesystem_file_stream(Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset = ::rocket::clear, const opt<G_integer>& limit = ::rocket::clear);
 extern bool std_filesystem_file_write(const G_string& path, const G_string& data, const opt<G_integer>& offset = ::rocket::clear);
 extern bool std_filesystem_file_append(const G_string& path, const G_string& data, const opt<G_boolean>& exclusive = ::rocket::clear);
 extern bool std_filesystem_file_copy_from(const G_string& path_new, const G_string& path_old);

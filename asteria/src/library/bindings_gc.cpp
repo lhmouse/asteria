@@ -11,7 +11,7 @@
 
 namespace Asteria {
 
-opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_integer& generation)
+opt<G_integer> std_gc_tracked_count(Global_Context& global, const G_integer& generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return ::rocket::clear;
@@ -27,7 +27,7 @@ opt<G_integer> std_gc_tracked_count(const Global_Context& global, const G_intege
     return G_integer(count);
   }
 
-opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_integer& generation)
+opt<G_integer> std_gc_get_threshold(Global_Context& global, const G_integer& generation)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return ::rocket::clear;
@@ -43,7 +43,7 @@ opt<G_integer> std_gc_get_threshold(const Global_Context& global, const G_intege
     return G_integer(thres);
   }
 
-opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_integer& generation, const G_integer& threshold)
+opt<G_integer> std_gc_set_threshold(Global_Context& global, const G_integer& generation, const G_integer& threshold)
   {
     if((generation < gc_generation_newest) || (generation > gc_generation_oldest)) {
       return ::rocket::clear;
@@ -60,7 +60,7 @@ opt<G_integer> std_gc_set_threshold(const Global_Context& global, const G_intege
     return G_integer(thres);
   }
 
-G_integer std_gc_collect(const Global_Context& global, const opt<G_integer>& generation_limit)
+G_integer std_gc_collect(Global_Context& global, const opt<G_integer>& generation_limit)
   {
     auto gc_limit = gc_generation_oldest;
     // Get the maximum generation to collect when `generation_limit` is specified.
@@ -98,7 +98,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           "    is not valid, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.gc.tracked_count"), ::rocket::ref(args));
           // Parse arguments.
           G_integer generation;
@@ -132,7 +132,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           "    returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.gc.get_threshold"), ::rocket::ref(args));
           // Parse arguments.
           G_integer generation;
@@ -171,7 +171,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           "    valid, `null` is returned.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.gc.set_threshold"), ::rocket::ref(args));
           // Parse arguments.
           G_integer generation;
@@ -207,7 +207,7 @@ void create_bindings_gc(G_object& result, API_Version /*version*/)
           "    total.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.gc.collect"), ::rocket::ref(args));
           // Parse arguments.
           opt<G_integer> generation_limit;

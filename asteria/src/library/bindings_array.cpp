@@ -71,7 +71,7 @@ inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
     args.emplace_back(::rocket::move(xref));
   }
 
-template<typename IteratorT> opt<IteratorT> do_find_if_opt(const Global_Context& global, IteratorT begin, IteratorT end,
+template<typename IteratorT> opt<IteratorT> do_find_if_opt(Global_Context& global, IteratorT begin, IteratorT end,
                                                            const G_function& predictor, bool match)
   {
     for(auto it = ::rocket::move(begin); it != end; ++it) {
@@ -89,7 +89,7 @@ template<typename IteratorT> opt<IteratorT> do_find_if_opt(const Global_Context&
     return ::rocket::clear;
   }
 
-Compare do_compare(const Global_Context& global, const G_function& comp, const Value& lhs, const Value& rhs)
+Compare do_compare(Global_Context& global, const G_function& comp, const Value& lhs, const Value& rhs)
   {
     // Set up arguments for the user-defined comparator.
     cow_vector<Reference> args;
@@ -102,13 +102,13 @@ Compare do_compare(const Global_Context& global, const G_function& comp, const V
     return self.read().compare(G_integer(0));
   }
 
-Compare do_compare(const Global_Context& global, const opt<G_function>& comp, const Value& lhs, const Value& rhs)
+Compare do_compare(Global_Context& global, const opt<G_function>& comp, const Value& lhs, const Value& rhs)
   {
     return ROCKET_UNEXPECT(comp) ? do_compare(global, *comp, lhs, rhs) : lhs.compare(rhs);
   }
 
 template<typename IteratorT>
-    pair<IteratorT, bool> do_bsearch(const Global_Context& global, IteratorT begin, IteratorT end,
+    pair<IteratorT, bool> do_bsearch(Global_Context& global, IteratorT begin, IteratorT end,
                                      const opt<G_function>& comparator, const Value& target)
   {
     auto bpos = ::rocket::move(begin);
@@ -135,7 +135,7 @@ template<typename IteratorT>
   }
 
 template<typename IteratorT, typename PredT>
-    IteratorT do_bound(const Global_Context& global, IteratorT begin, IteratorT end,
+    IteratorT do_bound(Global_Context& global, IteratorT begin, IteratorT end,
                        const opt<G_function>& comparator, const Value& target, PredT&& pred)
   {
     auto bpos = ::rocket::move(begin);
@@ -158,7 +158,7 @@ template<typename IteratorT, typename PredT>
     } while(true);
   }
 
-void do_unique_move(G_array::iterator& opos, const Global_Context& global, const opt<G_function>& comparator,
+void do_unique_move(G_array::iterator& opos, Global_Context& global, const opt<G_function>& comparator,
                     G_array::iterator ibegin, G_array::iterator iend, bool unique)
   {
     for(auto ipos = ibegin; ipos != iend; ++ipos) {
@@ -169,7 +169,7 @@ void do_unique_move(G_array::iterator& opos, const Global_Context& global, const
     }
   }
 
-G_array::iterator do_merge_blocks(G_array& output, const Global_Context& global, const opt<G_function>& comparator,
+G_array::iterator do_merge_blocks(G_array& output, Global_Context& global, const opt<G_function>& comparator,
                                   G_array&& input, ptrdiff_t bsize, bool unique)
   {
     ROCKET_ASSERT(output.size() >= input.size());
@@ -299,7 +299,7 @@ opt<G_integer> std_array_find(const G_array& data, const G_integer& from, const 
     return *qit - data.begin();
   }
 
-opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_function& predictor)
+opt<G_integer> std_array_find_if(Global_Context& global, const G_array& data, const G_function& predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -309,7 +309,7 @@ opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& da
     return *qit - data.begin();
   }
 
-opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
+opt<G_integer> std_array_find_if(Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     auto range = do_slice(data, from, ::rocket::clear);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -319,7 +319,7 @@ opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& da
     return *qit - data.begin();
   }
 
-opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
+opt<G_integer> std_array_find_if(Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, true);
@@ -329,7 +329,7 @@ opt<G_integer> std_array_find_if(const Global_Context& global, const G_array& da
     return *qit - data.begin();
   }
 
-opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_function& predictor)
+opt<G_integer> std_array_find_if_not(Global_Context& global, const G_array& data, const G_function& predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -339,7 +339,7 @@ opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array
     return *qit - data.begin();
   }
 
-opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
+opt<G_integer> std_array_find_if_not(Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     auto range = do_slice(data, from, ::rocket::clear);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -349,7 +349,7 @@ opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array
     return *qit - data.begin();
   }
 
-opt<G_integer> std_array_find_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
+opt<G_integer> std_array_find_if_not(Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, range.first, range.second, predictor, false);
@@ -389,7 +389,7 @@ opt<G_integer> std_array_rfind(const G_array& data, const G_integer& from, const
     return data.rend() - *qit - 1;
   }
 
-opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_function& predictor)
+opt<G_integer> std_array_rfind_if(Global_Context& global, const G_array& data, const G_function& predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), predictor, true);
@@ -399,7 +399,7 @@ opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& d
     return data.rend() - *qit - 1;
   }
 
-opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
+opt<G_integer> std_array_rfind_if(Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     auto range = do_slice(data, from, ::rocket::clear);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), predictor, true);
@@ -409,7 +409,7 @@ opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& d
     return data.rend() - *qit - 1;
   }
 
-opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
+opt<G_integer> std_array_rfind_if(Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), predictor, true);
@@ -419,7 +419,7 @@ opt<G_integer> std_array_rfind_if(const Global_Context& global, const G_array& d
     return data.rend() - *qit - 1;
   }
 
-opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_function& predictor)
+opt<G_integer> std_array_rfind_if_not(Global_Context& global, const G_array& data, const G_function& predictor)
   {
     auto range = ::std::make_pair(data.begin(), data.end());
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), predictor, false);
@@ -429,7 +429,7 @@ opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_arra
     return data.rend() - *qit - 1;
   }
 
-opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
+opt<G_integer> std_array_rfind_if_not(Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     auto range = do_slice(data, from, ::rocket::clear);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), predictor, false);
@@ -439,7 +439,7 @@ opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_arra
     return data.rend() - *qit - 1;
   }
 
-opt<G_integer> std_array_rfind_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
+opt<G_integer> std_array_rfind_if_not(Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
   {
     auto range = do_slice(data, from, length);
     auto qit = do_find_if_opt(global, ::std::make_reverse_iterator(range.second), ::std::make_reverse_iterator(range.first), predictor, false);
@@ -494,7 +494,7 @@ G_integer std_array_count(const G_array& data, const G_integer& from, const opt<
     return count;
   }
 
-G_integer std_array_count_if(const Global_Context& global, const G_array& data, const G_function& predictor)
+G_integer std_array_count_if(Global_Context& global, const G_array& data, const G_function& predictor)
   {
     G_integer count = 0;
     auto range = ::std::make_pair(data.begin(), data.end());
@@ -509,7 +509,7 @@ G_integer std_array_count_if(const Global_Context& global, const G_array& data, 
     return count;
   }
 
-G_integer std_array_count_if(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
+G_integer std_array_count_if(Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     G_integer count = 0;
     auto range = do_slice(data, from, ::rocket::clear);
@@ -524,7 +524,7 @@ G_integer std_array_count_if(const Global_Context& global, const G_array& data, 
     return count;
   }
 
-G_integer std_array_count_if(const Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
+G_integer std_array_count_if(Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
   {
     G_integer count = 0;
     auto range = do_slice(data, from, length);
@@ -539,7 +539,7 @@ G_integer std_array_count_if(const Global_Context& global, const G_array& data, 
     return count;
   }
 
-G_integer std_array_count_if_not(const Global_Context& global, const G_array& data, const G_function& predictor)
+G_integer std_array_count_if_not(Global_Context& global, const G_array& data, const G_function& predictor)
   {
     G_integer count = 0;
     auto range = ::std::make_pair(data.begin(), data.end());
@@ -554,7 +554,7 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
     return count;
   }
 
-G_integer std_array_count_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
+G_integer std_array_count_if_not(Global_Context& global, const G_array& data, const G_integer& from, const G_function& predictor)
   {
     G_integer count = 0;
     auto range = do_slice(data, from, ::rocket::clear);
@@ -569,7 +569,7 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
     return count;
   }
 
-G_integer std_array_count_if_not(const Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
+G_integer std_array_count_if_not(Global_Context& global, const G_array& data, const G_integer& from, const opt<G_integer>& length, const G_function& predictor)
   {
     G_integer count = 0;
     auto range = do_slice(data, from, length);
@@ -584,7 +584,7 @@ G_integer std_array_count_if_not(const Global_Context& global, const G_array& da
     return count;
   }
 
-G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data, const opt<G_function>& comparator)
+G_boolean std_array_is_sorted(Global_Context& global, const G_array& data, const opt<G_function>& comparator)
   {
     if(data.size() <= 1) {
       // If `data` contains no more than 2 elements, it is considered sorted.
@@ -599,7 +599,7 @@ G_boolean std_array_is_sorted(const Global_Context& global, const G_array& data,
     return true;
   }
 
-opt<G_integer> std_array_binary_search(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
+opt<G_integer> std_array_binary_search(Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
     if(!pair.second) {
@@ -608,19 +608,19 @@ opt<G_integer> std_array_binary_search(const Global_Context& global, const G_arr
     return pair.first - data.begin();
   }
 
-G_integer std_array_lower_bound(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
+G_integer std_array_lower_bound(Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
     auto lpos = do_bound(global, data.begin(), data.end(), comparator, target, [](Compare cmp) { return cmp != compare_greater;  });
     return lpos - data.begin();
   }
 
-G_integer std_array_upper_bound(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
+G_integer std_array_upper_bound(Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
     auto upos = do_bound(global, data.begin(), data.end(), comparator, target, [](Compare cmp) { return cmp == compare_less;  });
     return upos - data.begin();
   }
 
-pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
+pair<G_integer, G_integer> std_array_equal_range(Global_Context& global, const G_array& data, const Value& target, const opt<G_function>& comparator)
   {
     auto pair = do_bsearch(global, data.begin(), data.end(), comparator, target);
     auto lpos = do_bound(global, data.begin(), pair.first, comparator, target, [](Compare cmp) { return cmp != compare_greater;  });
@@ -628,7 +628,7 @@ pair<G_integer, G_integer> std_array_equal_range(const Global_Context& global, c
     return { lpos - data.begin(), upos - data.begin() };
   }
 
-G_array std_array_sort(const Global_Context& global, const G_array& data, const opt<G_function>& comparator)
+G_array std_array_sort(Global_Context& global, const G_array& data, const opt<G_function>& comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
@@ -647,7 +647,7 @@ G_array std_array_sort(const Global_Context& global, const G_array& data, const 
     return res;
   }
 
-G_array std_array_sortu(const Global_Context& global, const G_array& data, const opt<G_function>& comparator)
+G_array std_array_sortu(Global_Context& global, const G_array& data, const opt<G_function>& comparator)
   {
     if(data.size() <= 1) {
       // Use reference counting as our advantage.
@@ -669,7 +669,7 @@ G_array std_array_sortu(const Global_Context& global, const G_array& data, const
     return res;
   }
 
-Value std_array_max_of(const Global_Context& global, const G_array& data, const opt<G_function>& comparator)
+Value std_array_max_of(Global_Context& global, const G_array& data, const opt<G_function>& comparator)
   {
     auto qmax = data.begin();
     if(qmax == data.end()) {
@@ -686,7 +686,7 @@ Value std_array_max_of(const Global_Context& global, const G_array& data, const 
     return *qmax;
   }
 
-Value std_array_min_of(const Global_Context& global, const G_array& data, const opt<G_function>& comparator)
+Value std_array_min_of(Global_Context& global, const G_array& data, const opt<G_function>& comparator)
   {
     auto qmin = data.begin();
     if(qmin == data.end()) {
@@ -709,7 +709,7 @@ G_array std_array_reverse(const G_array& data)
     return G_array(data.rbegin(), data.rend());
   }
 
-G_array std_array_generate(const Global_Context& global, const G_function& generator, const G_integer& length)
+G_array std_array_generate(Global_Context& global, const G_function& generator, const G_integer& length)
   {
     G_array res;
     res.reserve(static_cast<size_t>(length));
@@ -981,7 +981,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    one is found, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.find_if"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1057,7 +1057,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    one is found, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.find_if_not"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1209,7 +1209,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    one is found, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.rfind_if"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1285,7 +1285,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    one is found, or `null` otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.rfind_if_not"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1424,7 +1424,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    always non-negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.count_if"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1490,7 +1490,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    always non-negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.count_if_not"), ::rocket::ref(args));
           Argument_Reader::State state;
           // Parse arguments.
@@ -1543,7 +1543,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    otherwise.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.is_sorted"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1581,7 +1581,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    exception will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.binary_search"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1626,7 +1626,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    exception will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.lower_bound"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1667,7 +1667,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    exception will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.upper_bound"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1707,7 +1707,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    exception will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.lower_bound"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1751,7 +1751,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.sort"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1789,7 +1789,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    will be thrown or not.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.sortu"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1822,7 +1822,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    empty.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.max_of"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1855,7 +1855,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "    empty.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.min_of"), ::rocket::ref(args));
           // Parse arguments.
           G_array data;
@@ -1919,7 +1919,7 @@ void create_bindings_array(G_object& result, API_Version /*version*/)
           "  * Returns an `array` containing all values generated.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.array.generate"), ::rocket::ref(args));
           // Parse arguments.
           G_function generator;

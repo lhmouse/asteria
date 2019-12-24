@@ -73,7 +73,7 @@ rcptr<Abstract_Function> Simple_Script::copy_function_opt() const noexcept
     return ::rocket::dynamic_pointer_cast<Abstract_Function>(this->m_cptr);
   }
 
-Reference Simple_Script::execute(const Global_Context& global, cow_vector<Reference>&& args) const
+Reference Simple_Script::execute(Global_Context& global, cow_vector<Reference>&& args) const
   {
     auto qtarget = this->copy_function_opt();
     if(!qtarget) {
@@ -85,7 +85,7 @@ Reference Simple_Script::execute(const Global_Context& global, cow_vector<Refere
     return self;
   }
 
-Reference Simple_Script::execute(const Global_Context& global, cow_vector<Value>&& vals) const
+Reference Simple_Script::execute(Global_Context& global, cow_vector<Value>&& vals) const
   {
     cow_vector<Reference> args;
     args.resize(vals.size());
@@ -96,7 +96,7 @@ Reference Simple_Script::execute(const Global_Context& global, cow_vector<Value>
     return this->execute(global, ::rocket::move(args));
   }
 
-Reference Simple_Script::execute(const Global_Context& global) const
+Reference Simple_Script::execute(Global_Context& global) const
   {
     cow_vector<Reference> args;
     return this->execute(global, ::rocket::move(args));

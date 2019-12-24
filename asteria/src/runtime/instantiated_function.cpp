@@ -26,7 +26,7 @@ tinyfmt& Instantiated_Function::describe(tinyfmt& fmt) const
     return fmt << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
   }
 
-Reference& Instantiated_Function::invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const
+Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const
   {
     // Create the stack and context for this function.
     Evaluation_Stack stack;

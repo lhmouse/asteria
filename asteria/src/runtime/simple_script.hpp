@@ -59,9 +59,9 @@ class Simple_Script
 
     rcptr<Abstract_Function> copy_function_opt() const noexcept;
 
-    Reference execute(const Global_Context& global, cow_vector<Reference>&& args) const;
-    Reference execute(const Global_Context& global, cow_vector<Value>&& vals) const;
-    Reference execute(const Global_Context& global) const;
+    Reference execute(Global_Context& global, cow_vector<Reference>&& args) const;
+    Reference execute(Global_Context& global, cow_vector<Value>&& vals) const;
+    Reference execute(Global_Context& global) const;
   };
 
 }  // namespace Asteria

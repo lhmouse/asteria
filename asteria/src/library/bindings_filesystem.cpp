@@ -23,7 +23,7 @@ inline void do_push_argument(cow_vector<Reference>& args, const Value& value)
     args.emplace_back(::rocket::move(xref));
   }
 
-void do_process_block(const Global_Context& global, const G_function& callback,
+void do_process_block(Global_Context& global, const G_function& callback,
                       const G_integer& offset, const G_string& data)
   {
     // Set up arguments for the user-defined predictor.
@@ -315,7 +315,7 @@ opt<G_string> std_filesystem_file_read(const G_string& path, const opt<G_integer
     return ::rocket::move(data);
   }
 
-bool std_filesystem_file_stream(const Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset, const opt<G_integer>& limit)
+bool std_filesystem_file_stream(Global_Context& global, const G_string& path, const G_function& callback, const opt<G_integer>& offset, const opt<G_integer>& limit)
   {
     if(offset && (*offset < 0)) {
       ASTERIA_THROW("negative file offset (offset `$1`)", *offset);
@@ -818,7 +818,7 @@ void create_bindings_filesystem(G_object& result, API_Version /*version*/)
           "  * Throws an exception if `offset` is negative.\n"
         ),
         // Definition
-        [](cow_vector<Reference>&& args, Reference&& /*self*/, const Global_Context& global) -> Reference {
+        [](cow_vector<Reference>&& args, Reference&& /*self*/, Global_Context& global) -> Reference {
           Argument_Reader reader(::rocket::sref("std.filesystem.file_stream"), ::rocket::ref(args));
           // Parse arguments.
           G_string path;

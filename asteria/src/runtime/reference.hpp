@@ -42,7 +42,7 @@ class Reference
     Value do_unset(const Reference_Modifier* mods, size_t nmod, const Reference_Modifier& last) const;
 
     Reference& do_convert_to_temporary();
-    Reference& do_finish_call(const Global_Context& global);
+    Reference& do_finish_call(Global_Context& global);
 
   public:
     bool is_constant() const noexcept
@@ -139,7 +139,7 @@ class Reference
         }
         return this->do_convert_to_temporary();
       }
-    Reference& finish_call(const Global_Context& global)
+    Reference& finish_call(Global_Context& global)
       {
         if(ROCKET_EXPECT(!this->m_root.is_tail_call())) {
           return *this;

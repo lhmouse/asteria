@@ -19,7 +19,7 @@ class Abstract_Function : public virtual Rcbase
 
   public:
     virtual tinyfmt& describe(tinyfmt& fmt) const = 0;
-    virtual Reference& invoke(Reference& self, const Global_Context& global, cow_vector<Reference>&& args) const = 0;
+    virtual Reference& invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const = 0;
     virtual Variable_Callback& enumerate_variables(Variable_Callback& callback) const = 0;
   };
 

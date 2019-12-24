@@ -13,7 +13,7 @@ tinyfmt& Variadic_Arguer::describe(tinyfmt& fmt) const
     return fmt << "<built-in>.__varg([index]) @ " << this->m_sloc;
   }
 
-Reference& Variadic_Arguer::invoke(Reference& self, const Global_Context& /*global*/, cow_vector<Reference>&& args) const
+Reference& Variadic_Arguer::invoke(Reference& self, Global_Context& /*global*/, cow_vector<Reference>&& args) const
   {
     Argument_Reader reader(::rocket::sref("<built-in>.__varg"), ::rocket::ref(args));
     // Extract arguments.
