@@ -283,14 +283,13 @@ G_real std_numeric_random(Global_Context& global, const opt<G_real>& limit)
       return ratio;
     }
     switch(::std::fpclassify(*limit)) {
-      {{
-    case FP_ZERO:
+    case FP_ZERO: {
         ASTERIA_THROW("random number limit shall not be zero");
-      }{
+      }
     case FP_INFINITE:
-    case FP_NAN:
+    case FP_NAN: {
         ASTERIA_THROW("random number limit shall be finite (limit `$1`)", *limit);
-      }}
+      }
     }
     return *limit * ratio;
   }
@@ -427,8 +426,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
     ::rocket::ascii_numput nump;
 
     switch(base.value_or(10)) {
-      {{
-    case 2:
+    case 2: {
         if(!ebase) {
           nump.put_BI(value);  // binary, long
           text.append(nump.begin(), nump.end());
@@ -442,8 +440,8 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           break;
         }
         ASTERIA_THROW("invalid exponent base for binary notation (`$1` is not 2)", *ebase);
-      }{
-    case 16:
+      }
+    case 16: {
         if(!ebase) {
           nump.put_XI(value);  // hexadecimal, long
           text.append(nump.begin(), nump.end());
@@ -457,8 +455,8 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           break;
         }
         ASTERIA_THROW("invalid exponent base for hexadecimal notation (`$1` is not 2)", *ebase);
-      }{
-    case 10:
+      }
+    case 10: {
         if(!ebase) {
           nump.put_DI(value);  // decimal, long
           text.append(nump.begin(), nump.end());
@@ -472,7 +470,7 @@ G_string std_numeric_format(const G_integer& value, const opt<G_integer>& base, 
           break;
         }
         ASTERIA_THROW("invalid exponent base for decimal notation (`$1` is not 10)", *ebase);
-      }}
+      }
     default:
       ASTERIA_THROW("invalid number base (base `$1` is not one of { 2, 10, 16 })", *base);
     }
@@ -485,8 +483,7 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
     ::rocket::ascii_numput nump;
 
     switch(base.value_or(10)) {
-      {{
-    case 2:
+    case 2: {
         if(!ebase) {
           nump.put_BF(value);  // binary, float
           text.append(nump.begin(), nump.end());
@@ -498,8 +495,8 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           break;
         }
         ASTERIA_THROW("invalid exponent base for binary notation (`$1` is not 2)", *ebase);
-      }{
-    case 16:
+      }
+    case 16: {
         if(!ebase) {
           nump.put_XF(value);  // hexadecimal, float
           text.append(nump.begin(), nump.end());
@@ -511,8 +508,8 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           break;
         }
         ASTERIA_THROW("invalid exponent base for hexadecimal notation (`$1` is not 2)", *ebase);
-      }{
-    case 10:
+      }
+    case 10: {
         if(!ebase) {
           nump.put_DF(value);  // decimal, float
           text.append(nump.begin(), nump.end());
@@ -524,7 +521,7 @@ G_string std_numeric_format(const G_real& value, const opt<G_integer>& base, con
           break;
         }
         ASTERIA_THROW("invalid exponent base for decimal notation (`$1` is not 10)", *ebase);
-      }}
+      }
     default:
       ASTERIA_THROW("invalid number base (base `$1` is not one of { 2, 10, 16 })", *base);
     }

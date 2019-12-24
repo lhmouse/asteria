@@ -301,17 +301,16 @@ bool do_accept_numeric_literal(cow_vector<Token>& tokens, Line_Reader& reader, b
     size_t tlen = 0;
     // Look for an explicit sign symbol.
     switch(reader.peek(tlen)) {
-      {{
-    case '+':
+    case '+': {
         tstr = ::rocket::sref("+");
         tlen++;
         break;
-      }{
-    case '-':
+      }
+    case '-': {
         tstr = ::rocket::sref("-");
         tlen++;
         break;
-      }}
+      }
     }
     // If a sign symbol exists in a context where an infix operator is allowed, it is treated as the latter.
     if((tlen != 0) && do_may_infix_operators_follow(tokens)) {
@@ -555,56 +554,55 @@ bool do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, ch
       // Translate it.
       int xcnt = 0;
       switch(next) {
-        {{
-      case '\'':
+      case '\'': {
       case '\"':
       case '\\':
       case '?':
       case '/':
           val.push_back(next);
           break;
-        }{
-      case 'a':
+        }
+      case 'a': {
           val.push_back('\a');
           break;
-        }{
-      case 'b':
+        }
+      case 'b': {
           val.push_back('\b');
           break;
-        }{
-      case 'f':
+        }
+      case 'f': {
           val.push_back('\f');
           break;
-        }{
-      case 'n':
+        }
+      case 'n': {
           val.push_back('\n');
           break;
-        }{
-      case 'r':
+        }
+      case 'r': {
           val.push_back('\r');
           break;
-        }{
-      case 't':
+        }
+      case 't': {
           val.push_back('\t');
           break;
-        }{
-      case 'v':
+        }
+      case 'v': {
           val.push_back('\v');
           break;
-        }{
-      case '0':
+        }
+      case '0': {
           val.push_back('\0');
           break;
-        }{
-      case 'Z':
+        }
+      case 'Z': {
           val.push_back('\x1A');
           break;
-        }{
-      case 'e':
+        }
+      case 'e': {
           val.push_back('\x1B');
           break;
-        }{
-      case 'U':
+        }
+      case 'U': {
           xcnt += 2;
           // Fallthrough
       case 'u':
@@ -640,7 +638,7 @@ bool do_accept_string_literal(cow_vector<Token>& tokens, Line_Reader& reader, ch
             do_throw_parser_error(parser_status_escape_utf_code_point_invalid, reader, tlen);
           }
           break;
-        }}
+        }
       default:
         do_throw_parser_error(parser_status_escape_sequence_unknown, reader, tlen);
       }

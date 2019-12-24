@@ -32,16 +32,15 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
                                              PTC_Aware ptc_aware, const Analytic_Context& ctx) const
   {
     switch(this->index()) {
-      {{
-    case index_literal:
+    case index_literal: {
         const auto& altr = this->m_stor.as<index_literal>();
         // Encode arguments.
         AIR_Node::S_push_immediate xnode = { altr.val };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_named_reference:
+    case index_named_reference: {
         const auto& altr = this->m_stor.as<index_named_reference>();
         // Perform early lookup when the expression is defined.
         // If a named reference is found, it will not be replaced or hidden by a later-declared one.
@@ -77,9 +76,9 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
           code.emplace_back(::rocket::move(xnode));
         }
         return code;
-      }{
+      }
 
-    case index_closure_function:
+    case index_closure_function: {
         const auto& altr = this->m_stor.as<index_closure_function>();
         // Name the closure.
         ::rocket::tinyfmt_str fmt;
@@ -111,9 +110,9 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         AIR_Node::S_define_function xnode = { altr.sloc, ::rocket::move(func), altr.params, ::rocket::move(code_body) };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_branch:
+    case index_branch: {
         const auto& altr = this->m_stor.as<index_branch>();
         // Generate code for both branches.
         // Both branches may be PTC'd.
@@ -123,49 +122,49 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         AIR_Node::S_branch_expression xnode = { ::rocket::move(code_true), ::rocket::move(code_false), altr.assign };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_function_call:
+    case index_function_call: {
         const auto& altr = this->m_stor.as<index_function_call>();
         // Encode arguments.
         AIR_Node::S_function_call xnode = { altr.sloc, altr.args_by_refs, opts.no_proper_tail_calls ? ptc_aware_none : ptc_aware };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_member_access:
+    case index_member_access: {
         const auto& altr = this->m_stor.as<index_member_access>();
         // Encode arguments.
         AIR_Node::S_member_access xnode = { altr.name };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_operator_rpn:
+    case index_operator_rpn: {
         const auto& altr = this->m_stor.as<index_operator_rpn>();
         // Encode arguments.
         AIR_Node::S_apply_operator xnode = { altr.xop, altr.assign };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_unnamed_array:
+    case index_unnamed_array: {
         const auto& altr = this->m_stor.as<index_unnamed_array>();
         // Encode arguments.
         AIR_Node::S_push_unnamed_array xnode = { altr.nelems };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_unnamed_object:
+    case index_unnamed_object: {
         const auto& altr = this->m_stor.as<index_unnamed_object>();
         // Encode arguments.
         AIR_Node::S_push_unnamed_object xnode = { altr.keys };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_coalescence:
+    case index_coalescence: {
         const auto& altr = this->m_stor.as<index_coalescence>();
         // Generate code for the branch.
         // This branch may be PTC'd.
@@ -174,23 +173,23 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         AIR_Node::S_coalescence xnode = { ::rocket::move(code_null), altr.assign };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_operator_fma:
+    case index_operator_fma: {
         const auto& altr = this->m_stor.as<index_operator_fma>();
         // Encode arguments.
         AIR_Node::S_apply_operator xnode = { xop_fma_3, altr.assign };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }{
+      }
 
-    case index_global_reference:
+    case index_global_reference: {
         const auto& altr = this->m_stor.as<index_global_reference>();
         // This name is always looked up in the global context.
         AIR_Node::S_push_global_reference xnode = { altr.name };
         code.emplace_back(::rocket::move(xnode));
         return code;
-      }}
+      }
 
     default:
       ASTERIA_TERMINATE("invalid expression unit type (index `$1`)", this->index());

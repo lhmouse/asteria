@@ -102,16 +102,15 @@ G_real std_math_atan2(const G_real& y, const G_real& x)
 G_real std_math_hypot(const cow_vector<Value>& values)
   {
     switch(values.size()) {
-      {{
-    case 0:
+    case 0: {
         // Return zero if no argument is provided.
         return 0;
-      }{
-    case 1:
+      }
+    case 1: {
         // Return the absolute value of the only argument.
         return ::std::fabs(values[0].convert_to_real());
-      }{
-    default:
+      }
+    default: {
         // Call the C `hypot()` function.
         auto result = ::std::hypot(values[0].convert_to_real(), values[1].convert_to_real());
         // Sum up all the other values.
@@ -119,7 +118,7 @@ G_real std_math_hypot(const cow_vector<Value>& values)
           result = ::std::hypot(result, values[i].convert_to_real());
         }
         return result;
-      }}
+      }
     }
   }
 

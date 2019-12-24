@@ -37,28 +37,27 @@ Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global
     auto status = this->m_queue.execute(ctx_func);
     // Handle the return reference.
     switch(status) {
-      {{
-    case air_status_next:
+    case air_status_next: {
         // Return `null` if the control flow reached the end of the function.
         self = Reference_Root::S_null();
         break;
-      }{
-    case air_status_return:
+      }
+    case air_status_return: {
         // Return the reference at the top of `stack`.
         self = ::rocket::move(stack.open_top());
         break;
-      }{
-    case air_status_break_unspec:
+      }
+    case air_status_break_unspec: {
     case air_status_break_switch:
     case air_status_break_while:
     case air_status_break_for:
         ASTERIA_THROW("stray `break` statement");
-      }{
-    case air_status_continue_unspec:
+      }
+    case air_status_continue_unspec: {
     case air_status_continue_while:
     case air_status_continue_for:
         ASTERIA_THROW("stray `continue` statement");
-      }}
+      }
     default:
       ASTERIA_TERMINATE("invalid AIR status code (status `$1`)", status);
     }

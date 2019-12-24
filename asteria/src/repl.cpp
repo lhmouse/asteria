@@ -216,20 +216,19 @@ void do_parse_command_line(int argc, char** argv)
         break;
       }
       switch(ch) {
-        {{
-      case 'h':
+      case 'h': {
           help = true;
           break;
-        }{
-      case 'I':
+        }
+      case 'I': {
           interactive = false;
           break;
-        }{
-      case 'i':
+        }
+      case 'i': {
           interactive = true;
           break;
-        }{
-      case 'O':
+        }
+      case 'O': {
           // If `-O` is specified without an argument, it is equivalent to `-O1`.
           const char* arg = ::optarg;
           if(!arg || !*arg) {
@@ -245,15 +244,15 @@ void do_parse_command_line(int argc, char** argv)
           }
           optimize = ival;
           break;
-        }{
-      case 'V':
+        }
+      case 'V': {
           version = true;
           break;
-        }{
-      case 'v':
+        }
+      case 'v': {
           verbose = true;
           break;
-        }}
+        }
       default:
         // `getopt()` will have written an error message to standard error.
         ::fprintf(stderr, "Try `%s -h` for help.\n", argv[0]);

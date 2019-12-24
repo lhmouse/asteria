@@ -118,36 +118,35 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const G_string& str)
       }
       // Escape double quotes, backslashes, and control characters.
       switch(cp) {
-        {{
-      case '\"':
+      case '\"': {
           fmt << "\\\"";
           break;
-        }{
-      case '\\':
+        }
+      case '\\': {
           fmt << "\\\\";
           break;
-        }{
-      case '\b':
+        }
+      case '\b': {
           fmt << "\\b";
           break;
-        }{
-      case '\f':
+        }
+      case '\f': {
           fmt << "\\f";
           break;
-        }{
-      case '\n':
+        }
+      case '\n': {
           fmt << "\\n";
           break;
-        }{
-      case '\r':
+        }
+      case '\r': {
           fmt << "\\r";
           break;
-        }{
-      case '\t':
+        }
+      case '\t': {
           fmt << "\\t";
           break;
-        }{
-      default:
+        }
+      default: {
           if((0x20 <= cp) && (cp <= 0x7E)) {
             // Write printable characters as is.
             fmt << static_cast<char>(cp);
@@ -166,7 +165,7 @@ tinyfmt& do_quote_string(tinyfmt& fmt, const G_string& str)
             fmt << ::rocket::sref(seq, 6);
           }
           break;
-        }}
+        }
       }
     }
     fmt << '\"';
