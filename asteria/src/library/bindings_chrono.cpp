@@ -152,12 +152,13 @@ G_string std_chrono_utc_format(const G_integer& time_point, const opt<G_boolean>
     // 'sss'
     temp += static_cast<uint64_t>(static_cast<int64_t>((secs - intg) * 1000));
     // Compose the string.
-    const char* bp = nump.put_DU(temp, 17).data();
-    char tstr[] = {
-      bp[0], bp[1], bp[2], bp[3], '-', bp[4], bp[5], '-', bp[6], bp[7],  // 'yyyy-mm-dd'  10
-      ' ', bp[8], bp[9], ':', bp[10], bp[11], ':', bp[12], bp[13],       // ' HH:MM:SS'    9
-      '.', bp[14], bp[15], bp[16]                                        // '.sss'         4
-    };
+    const char* p = nump.put_DU(temp, 17).data();
+    char tstr[] =
+      {
+        *(p++), *(p++), *(p++), *(p++), '-', *(p++), *(p++), '-', *(p++), *(p++),  // 'yyyy-mm-dd'  10
+        ' ',            *(p++), *(p++), ':', *(p++), *(p++), ':', *(p++), *(p++),  // ' HH:MM:SS'    9
+        '.',            *(p++), *(p++), *(p++)                                     // '.sss'         4
+      };
     return cow_string(tstr, pms ? 23 : 19);
   }
 
@@ -170,9 +171,9 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
       return ::rocket::clear;
     }
     // The shortest form is '1234-67-90 23:56:89' which contains 19 characters.
-    const char* bp = time_str.data() + off;
+    const char* p = time_str.data() + off;
     off = time_str.find_last_not_of(s_spaces) + 1;
-    if(time_str.data() + off - bp < 19) {
+    if(time_str.data() + off - p < 19) {
       return ::rocket::clear;
     }
     // Declare the timepoint value as two parts: 'yyyy-mm-dd HH:MM:SS' and '.sss'.
@@ -181,85 +182,60 @@ opt<G_integer> std_chrono_utc_parse(const G_string& time_str)
     // Parse individual parts.
     ::rocket::ascii_numget numg;
     uint64_t temp = 0;
+    auto xget = [&](int& val, size_t w, unsigned min, unsigned max, unsigned sub)
+      {
+        const char* ep = p + w;
+        if(!numg.parse_U(p, ep, 10) || !numg.cast_U(temp, min, max) || (p != ep))
+          return false;
+        val = static_cast<int>(temp - sub);
+        return true;
+      };
     // 'yyyy'
-    const char* ep = bp + 4;
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 9999) || (bp != ep)) {
+    if(!xget(tr.tm_year, 4, 0, 9999, 1900))
       return ::rocket::clear;
-    }
-    tr.tm_year = static_cast<int>(temp - 1900);
     // '-' or '/'
-    ep += 1;
-    if(!::rocket::is_any_of(*bp, { '-', '/' })) {
+    if(!::rocket::is_any_of(*(p++), { '-', '/' }))
       return ::rocket::clear;
-    }
-    bp += 1;
     // 'mm'
-    ep += 2;
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 1, 12) || (bp != ep)) {
+    if(!xget(tr.tm_mon, 2, 1, 12, 1))
       return ::rocket::clear;
-    }
-    tr.tm_mon = static_cast<int>(temp - 1);
     // '-' or '/'
-    ep += 1;
-    if(!::rocket::is_any_of(*bp, { '-', '/' })) {
+    if(!::rocket::is_any_of(*(p++), { '-', '/' }))
       return ::rocket::clear;
-    }
-    bp += 1;
     // 'dd'
-    ep += 2;
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 1, 31) || (bp != ep)) {
+    if(!xget(tr.tm_mday, 2, 1, 31, 0))
       return ::rocket::clear;
-    }
-    tr.tm_mday = static_cast<int>(temp);
     // ' ' or 'T'
-    ep += 1;
-    if(!::rocket::is_any_of(*bp, { ' ', 'T' })) {
+    if(!::rocket::is_any_of(*(p++), { ' ', 'T' }))
       return ::rocket::clear;
-    }
-    bp += 1;
     // 'HH'
-    ep += 2;
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 23) || (bp != ep)) {
+    if(!xget(tr.tm_hour, 2, 0, 23, 0))
       return ::rocket::clear;
-    }
-    tr.tm_hour = static_cast<int>(temp);
     // ':'
-    ep += 1;
-    if(!::rocket::is_any_of(*bp, { ':' })) {
+    if(!::rocket::is_any_of(*(p++), { ':' }))
       return ::rocket::clear;
-    }
-    bp += 1;
     // 'MM'
-    ep += 2;
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 59) || (bp != ep)) {
+    if(!xget(tr.tm_min, 2, 0, 59, 0))
       return ::rocket::clear;
-    }
-    tr.tm_min = static_cast<int>(temp);
     // ':'
-    ep += 1;
-    if(!::rocket::is_any_of(*bp, { ':' })) {
+    if(!::rocket::is_any_of(*(p++), { ':' }))
       return ::rocket::clear;
-    }
-    bp += 1;
     // 'SS'
     // Note leap seconds.
-    ep += 2;
-    if(!numg.parse_U(bp, ep, 10) || !numg.cast_U(temp, 0, 60) || (bp != ep)) {
+    if(!xget(tr.tm_sec, 2, 0, 60, 0))
       return ::rocket::clear;
-    }
-    tr.tm_sec = static_cast<int>(temp);
     // Check for the millisecond part.
-    ep = time_str.data() + off;
-    if(*bp == '.') {
+    const char* ep = time_str.data() + off;
+    if(*p == '.') {
+      // Parse the second and millisecond parts as a whole.
+      p -= 2;
       // 'SS.sss'
-      bp -= 2;
-      if(!numg.parse_F(bp, ep, 10) || !numg.cast_F(msecs, 0, 60.9999) || (bp != ep)) {
+      if(!numg.parse_F(p, ep, 10) || !numg.cast_F(msecs, 0, 60.9999) || (p != ep))
         return ::rocket::clear;
-      }
-      msecs = (msecs - static_cast<int>(temp)) * 1000 + 0.01;
+      msecs = (msecs - tr.tm_sec) * 1000 + 0.01;
     }
     // Ensure all characters have been consumed.
-    if(bp != ep) {
+    if(p != ep) {
       return ::rocket::clear;
     }
     // Handle special time values.
