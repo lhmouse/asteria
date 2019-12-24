@@ -21,7 +21,7 @@ I started learning programming from **ActionScript** since **Flash 5** days. It 
 
 1. There is no 64-bit integer type. While some data exchange formats (such as **Protocol Buffers**) do have 64-bit integers, they cannot be stored as `Number`s safely. Some implementations split 64-bit integers into higher and lower parts, which is not very handy, as the lower part suddenly becomes signed and may be negative.
 2. There are no binary strings. `String`s are in **UCS-2** (rather than **UTF-16**), while `ArrayBuffer`s are not resizable.
-3. `NaN` and `Infinity` are neither keywords nor constants. They are properties of the global object and may be overwritten. Moreover, `Boolean(Nan)` yields `false` unlike other languages.
+3. `NaN` and `Infinity` are neither keywords nor constants. They are properties of the global object and may be overwritten. Moreover, `Boolean(NaN)` yields `false` unlike other languages.
 
 Here is an issue that is shared by almost all common languages, including **C** and **Python**:
 
