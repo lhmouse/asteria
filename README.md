@@ -44,25 +44,25 @@ But comparing to typed languages such as **Java**, **JavaScript** has a few adva
 1. A number is always a `Number`. There are no integer types of varieties of widths which simplifies programming. Unlike integers, `Number`s never overflow.
 2. Being untyped, a function can be passed around like objects without knowing its parameters.
 
-**Asteria** is highly inspired by **JavaScript** but has been designed to be free of such issues.
+**Asteria** is highly inspired by **JavaScript** but has been designed to address such issues.
 
 # Data Types
 
-There are 9 types:
+**Asteria** is _untyped_. _Variables_ do not have types. Only _values_ in variables have types. In this sense functions are considered opaque data.
 
-```text
-           // Equivalents in:
-           //   JavaScript     Java         C++
-null       //   `undefined`    N/A          `std::nullptr_t`
-boolean    //   `boolean`      `boolean`    `bool`
-integer    //   N/A            `long`       `std::int64_t`
-real       //   `number`       `double`     `double`
-string     //   N/A            `byte[]`     `std::string`
-opaque     //   N/A            `Object`     `std::any`
-function   //   `function`     N/A          N/A
-array      //   `array`        N/A          `std::vector<std::any>`
-object     //   `object`       N/A          `std::unordered_map<std::string, std::any>`
-```
+There are 9 data types:
+
+|**Asteria**  |**JavaScript**  |**Java**   |**C++**                       |**Remarks**                                        |
+|:------------|:---------------|:----------|:-----------------------------|:--------------------------------------------------|
+|`null`       |`undefined`     |N/A        |`std::nullptr_t`              |                                                   |
+|`boolean`    |`Boolean`       |`boolean`  |`bool`                        |                                                   |
+|`integer`    |N/A             |`long`     |`std::int64_t`                |signed 64-bit integer in two's complement          |
+|`real`       |`Number`        |`double`   |`double`                      |IEEE-754 double-precision floating-point number    |
+|`string`     |N/A             |`byte[]`   |`std::string`                 |octet string, commonly refered as byte string      |
+|`opaque`     |N/A             |`Object`   |`std::any`                    |opaque value used by bindings                      |
+|`function`   |`Function`      |N/A        |N/A                           |functions and closures                             |
+|`array`      |`Array`         |N/A        |`std::vector<`<br/>&emsp;`std::any>`       |                                                   |
+|`object`     |`Object`        |N/A        |`std::unordered_map<`<br/>&emsp;`std::string,`<br/>&emsp;`std::any>`  |order of elements not preserved                   |
 
 # Expression Categories
 
