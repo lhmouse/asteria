@@ -1364,6 +1364,23 @@ bool do_accept_named_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
     return true;
   }
 
+bool do_accept_global_reference(cow_vector<Xprunit>& units, Token_Stream& tstrm)
+  {
+    // global-identifier ::=
+    //   "." identifier
+    auto kpunct = do_accept_punctuator_opt(tstrm, { punctuator_dot });
+    if(!kpunct) {
+      return false;
+    }
+    auto qname = do_accept_identifier_opt(tstrm);
+    if(!qname) {
+      do_throw_parser_error(parser_status_identifier_expected, tstrm);
+    }
+    Xprunit::S_global_reference xunit = { ::rocket::move(*qname) };
+    units.emplace_back(::rocket::move(xunit));
+    return true;
+  }
+
 bool do_accept_literal(cow_vector<Xprunit>& units, Token_Stream& tstrm)
   {
     // Get a literal as a `Value`.
@@ -1573,9 +1590,13 @@ bool do_accept_fused_multiply_add(cow_vector<Xprunit>& units, Token_Stream& tstr
 bool do_accept_primary_expression(cow_vector<Xprunit>& units, Token_Stream& tstrm)
   {
     // primary-expression ::=
-    //   identifier | literal | "this" | closure-function | unnamed-array | unnamed-object | nested-expression |
-    //   fused-multiply-add
+    //   identifier | global-identifier | literal | "this" | closure-function | unnamed-array | unnamed-object |
+    //   nested-expression | fused-multiply-add
     bool succ = do_accept_named_reference(units, tstrm);
+    if(succ) {
+      return succ;
+    }
+    succ = do_accept_global_reference(units, tstrm);
     if(succ) {
       return true;
     }

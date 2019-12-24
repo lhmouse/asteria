@@ -182,6 +182,14 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         AIR_Node::S_apply_operator xnode = { xop_fma_3, altr.assign };
         code.emplace_back(::rocket::move(xnode));
         return code;
+      }{
+
+    case index_global_reference:
+        const auto& altr = this->m_stor.as<index_global_reference>();
+        // This name is always looked up in the global context.
+        AIR_Node::S_push_global_reference xnode = { altr.name };
+        code.emplace_back(::rocket::move(xnode));
+        return code;
       }}
 
     default:
