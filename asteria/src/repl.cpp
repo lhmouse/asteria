@@ -35,12 +35,12 @@ enum Exit_Code : uint8_t
     ::quick_exit(static_cast<int>(code));
   }
 
-cow_string&& do_xindent(cow_string&& str)
+cow_string do_xindent(cow_string&& str)
   {
-    size_t i, bpos = 0;
-    while((i = str.find('\n', bpos)) != cow_string::npos) {
-      bpos = i + 2;
-      str.replace(i, 1, "\n\t");
+    size_t bp = 0;
+    while((bp = str.find('\n', bp)) != cow_string::npos) {
+      str.replace(bp, 1, "\n\t");
+      bp += 2;
     }
     return ::rocket::move(str);
   }
@@ -59,22 +59,18 @@ cow_string do_stringify(const Reference& ref) noexcept
   try {
     ::rocket::tinyfmt_str fmt;
     auto var = ref.get_variable_opt();
-    if(var) {
-      // variable
+    if(var)
       if(var->is_immutable())
         fmt << "immutable variable: ";
       else
         fmt << "variable: ";
-    }
-    else {
-      // non-variable
+    else
       if(ref.is_constant())
         fmt << "constant: ";
       else if(ref.is_temporary())
         fmt << "temporary: ";
       else
         return ::rocket::sref("<tail call>");
-    }
     fmt << ref.read();
     return do_xindent(fmt.extract_string());
   }
@@ -89,6 +85,18 @@ cow_string do_stringify(const Runtime_Error& except) noexcept
       fmt << except.value().as_string();
     else
       fmt << except.value();
+    fmt << "\n[exception class `" << typeid(except).name() << "`]";
+    return do_xindent(fmt.extract_string());
+  }
+  catch(::std::exception& other) {
+    return ::rocket::sref("<invalid exception>");
+  }
+
+cow_string do_stringify(const ::std::exception& stdex) noexcept
+  try {
+    ::rocket::tinyfmt_str fmt;
+    fmt << stdex.what();
+    fmt << "\n[exception class `" << typeid(stdex).name() << "`]";
     return do_xindent(fmt.extract_string());
   }
   catch(::std::exception& other) {
@@ -491,7 +499,7 @@ void do_handle_repl_command(cow_string&& cmd)
       }
       if(!retry) {
         // Bail out upon irrecoverable errors.
-        ::fprintf(stderr, "! parser error: %s\n", except.what());
+        ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
         goto z;
       }
     }
@@ -508,7 +516,7 @@ void do_handle_repl_command(cow_string&& cmd)
     }
     catch(::std::exception& stdex) {
       // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! unhandled exception: %s\n", do_xindent(::rocket::sref(stdex.what())).c_str());
+      ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
     }
     goto z;
   }
@@ -525,7 +533,7 @@ void do_handle_repl_command(cow_string&& cmd)
     }
     catch(Parser_Error& except) {
       // Report the error and exit.
-      ::fprintf(stderr, "! parser error: %s\n", except.what());
+      ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
       do_quick_exit(exit_parser_error);
     }
 
@@ -548,7 +556,7 @@ void do_handle_repl_command(cow_string&& cmd)
     }
     catch(::std::exception& stdex) {
       // If an exception was thrown, print something informative.
-      ::fprintf(stderr, "! unhandled exception: %s\n", do_xindent(::rocket::sref(stdex.what())).c_str());
+      ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
     }
     do_quick_exit(status);
   }
@@ -582,6 +590,6 @@ int main(int argc, char** argv)
   }
   catch(::std::exception& stdex) {
     // Print a message followed by the backtrace if it is available. There isn't much we can do.
-    ::fprintf(stderr, "! unhandled exception: %s\n", do_xindent(::rocket::sref(stdex.what())).c_str());
+    ::fprintf(stderr, "! unhandled exception: %s\n", do_stringify(stdex).c_str());
     do_quick_exit(exit_unspecified);
   }
