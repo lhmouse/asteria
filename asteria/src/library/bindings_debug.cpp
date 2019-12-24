@@ -24,8 +24,7 @@ bool std_debug_print(const G_string& templ, const cow_vector<Value>& values)
     // Compose the string into a stream.
     ::rocket::tinyfmt_str fmt;
     vformat(fmt, templ.data(), templ.size(), insts.data(), insts.size());
-    bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
-    return succ;
+    return write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
   }
 
 bool std_debug_dump(const Value& value, const opt<G_integer>& indent)
@@ -35,8 +34,7 @@ bool std_debug_dump(const Value& value, const opt<G_integer>& indent)
     // Format the value.
     ::rocket::tinyfmt_str fmt;
     value.dump(fmt, rindent);
-    bool succ = write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
-    return succ;
+    return write_log_to_stderr(__FILE__, __LINE__, fmt.extract_string());
   }
 
 void create_bindings_debug(G_object& result, API_Version /*version*/)
