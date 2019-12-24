@@ -73,11 +73,11 @@ var foo;
 const inc = 42;
 // `inc` refers to an "immutable variable" holding an `integer` of `42`.
 
-var bar = func() { return false;  };   // return by value
+var bar = func() { return& inc;  };      // return by reference
 // `bar` refers to an "immutable variable" holding a function.
-// `bar()` refers to a "temporary" holding a `boolean` of `false`.
+// `bar()` refers to the same "variable" as `inc`.
 
-func add(x) { return& x + inc;  }      // return by reference
+func add(x) { return x + inc;  };   // return by value
 // `add` refers to an "immutable variable" holding a function.
 // `add(5)` refers to a "temporary" holding an `integer` of `47`.
 ```
