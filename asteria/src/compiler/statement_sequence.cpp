@@ -1577,37 +1577,37 @@ bool do_accept_primary_expression(cow_vector<Xprunit>& units, Token_Stream& tstr
     //   fused-multiply-add
     bool succ = do_accept_named_reference(units, tstrm);
     if(succ) {
-      return succ;
+      return true;
     }
     succ = do_accept_literal(units, tstrm);
     if(succ) {
-      return succ;
+      return true;
     }
     succ = do_accept_this(units, tstrm);
     if(succ) {
-      return succ;
+      return true;
     }
     succ = do_accept_closure_function(units, tstrm);
     if(succ) {
-      return succ;
+      return true;
     }
     succ = do_accept_unnamed_array(units, tstrm);
     if(succ) {
-      return succ;
+      return true;
     }
     succ = do_accept_unnamed_object(units, tstrm);
     if(succ) {
-      return succ;
+      return true;
     }
     succ = do_accept_nested_expression(units, tstrm);
     if(succ) {
-      return succ;
+      return true;
     }
     succ = do_accept_fused_multiply_add(units, tstrm);
     if(succ) {
-      return succ;
+      return true;
     }
-    return succ;
+    return false;
   }
 
 struct Postfix_Operator_Element
