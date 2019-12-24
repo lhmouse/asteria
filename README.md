@@ -48,7 +48,7 @@ But comparing to typed languages such as **Java**, **JavaScript** has a few adva
 
 # Data Types
 
-**Asteria** is _untyped_. _Variables_ do not have types. Only _values_ in variables have types. In this sense functions are considered opaque data.
+**Asteria** is _untyped_. _Variables_ do not have types. Only _values_ (which can be stored in in variables) do. In this sense functions are considered opaque data.
 
 There are 9 data types:
 
