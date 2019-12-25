@@ -10,32 +10,10 @@
 #include "../utilities.hpp"
 
 namespace Asteria {
+namespace {
 
-Instantiated_Function::~Instantiated_Function()
+ROCKET_NOINLINE Reference& do_handle_status(Reference& self, Evaluation_Stack& stack, AIR_Status status)
   {
-  }
-
-void Instantiated_Function::do_solidify_code(const cow_vector<AIR_Node>& code)
-  {
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_queue, 0);  });  // 1st pass
-    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_queue, 1);  });  // 2nd pass
-  }
-
-tinyfmt& Instantiated_Function::describe(tinyfmt& fmt) const
-  {
-    return fmt << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
-  }
-
-Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const
-  {
-    // Create the stack and context for this function.
-    Evaluation_Stack stack;
-    Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(*(this->m_zvarg)),
-                               this->m_params, ::rocket::move(self), ::rocket::move(args));
-    stack.reserve(::rocket::move(args));
-    // Execute the function body.
-    auto status = this->m_queue.execute(ctx_func);
-    // Handle the return reference.
     switch(status) {
     case air_status_next: {
         // Return `null` if the control flow reached the end of the function.
@@ -62,6 +40,35 @@ Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global
       ASTERIA_TERMINATE("invalid AIR status code (status `$1`)", status);
     }
     return self;
+  }
+
+}  // namespace
+
+Instantiated_Function::~Instantiated_Function()
+  {
+  }
+
+void Instantiated_Function::do_solidify_code(const cow_vector<AIR_Node>& code)
+  {
+    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_queue, 0);  });  // 1st pass
+    ::rocket::for_each(code, [&](const AIR_Node& node) { node.solidify(this->m_queue, 1);  });  // 2nd pass
+  }
+
+tinyfmt& Instantiated_Function::describe(tinyfmt& fmt) const
+  {
+    return fmt << this->m_zvarg->func() << " @ " << this->m_zvarg->sloc();
+  }
+
+Reference& Instantiated_Function::invoke(Reference& self, Global_Context& global, cow_vector<Reference>&& args) const
+  {
+    // Create the stack and context for this function.
+    Evaluation_Stack stack;
+    Executive_Context ctx_func(::rocket::ref(global), ::rocket::ref(stack), ::rocket::ref(*(this->m_zvarg)),
+                               this->m_params, ::rocket::move(self), ::rocket::move(args));
+    stack.reserve(::rocket::move(args));
+    // Execute the function body.
+    auto status = this->m_queue.execute(ctx_func);
+    return do_handle_status(self, stack, status);
   }
 
 Variable_Callback& Instantiated_Function::enumerate_variables(Variable_Callback& callback) const
