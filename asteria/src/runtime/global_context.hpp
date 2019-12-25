@@ -62,12 +62,13 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
     void initialize(API_Version version = api_version_latest);
 
     // These are interfaces of the global garbage collector.
-    Collector* get_collector_opt(GC_Generation gc_gen) const;
-    rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest) const;
-    size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest) const;
+    const Collector* get_collector_opt(GC_Generation gc_gen) const;
+    Collector* open_collector_opt(GC_Generation gc_gen);
+    rcptr<Variable> create_variable(GC_Generation gc_hint = gc_generation_newest);
+    size_t collect_variables(GC_Generation gc_limit = gc_generation_oldest);
 
     // These are interfaces of the PRNG.
-    uint32_t get_random_uint32() const noexcept;
+    uint32_t get_random_uint32() noexcept;
 
     // These are interfaces of the standard library.
     const Value& get_std_member(const phsh_string& name) const;
@@ -76,7 +77,7 @@ class Global_Context final : public virtual Rcbase, public Abstract_Context
 
     // These are interfaces of the hook dispatcher.
     rcptr<Abstract_Hooks> get_hooks_opt() const noexcept;
-    rcptr<Abstract_Hooks> set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept;
+    Global_Context& set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept;
   };
 
 }  // namespace Asteria

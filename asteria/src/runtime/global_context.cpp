@@ -131,43 +131,43 @@ void Global_Context::initialize(API_Version version)
     this->m_stdv = stdv;
   }
 
-Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
+const Collector* Global_Context::get_collector_opt(GC_Generation gc_gen) const
   {
-    Collector* coll = nullptr;
-    // Get the collector for generation `gc_gen`.
     auto gcoll = this->get_tied_collector_opt();
-    if(ROCKET_EXPECT(gcoll)) {
-      coll = ::std::addressof(gcoll->open_collector(gc_gen));
+    if(ROCKET_UNEXPECT(!gcoll)) {
+      return nullptr;
     }
-    return coll;
+    return ::std::addressof(gcoll->get_collector(gc_gen));
   }
 
-rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint) const
+Collector* Global_Context::open_collector_opt(GC_Generation gc_gen)
   {
-    rcptr<Variable> var;
-    // Allocate a variable from the collector.
     auto gcoll = this->get_tied_collector_opt();
-    if(ROCKET_EXPECT(gcoll)) {
-      var = gcoll->create_variable(gc_hint);
+    if(ROCKET_UNEXPECT(!gcoll)) {
+      return nullptr;
     }
-    if(ROCKET_UNEXPECT(!var)) {
-      var = ::rocket::make_refcnt<Variable>();
-    }
-    return var;
+    return ::std::addressof(gcoll->open_collector(gc_gen));
   }
 
-size_t Global_Context::collect_variables(GC_Generation gc_limit) const
+rcptr<Variable> Global_Context::create_variable(GC_Generation gc_hint)
   {
-    size_t nfreed = 0;
-    // Perform garbage collection up to `gc_limit`.
     auto gcoll = this->get_tied_collector_opt();
-    if(ROCKET_EXPECT(gcoll)) {
-      nfreed = gcoll->collect_variables(gc_limit);
+    if(ROCKET_UNEXPECT(!gcoll)) {
+      return ::rocket::make_refcnt<Variable>();
     }
-    return nfreed;
+    return gcoll->create_variable(gc_hint);
   }
 
-uint32_t Global_Context::get_random_uint32() const noexcept
+size_t Global_Context::collect_variables(GC_Generation gc_limit)
+  {
+    auto gcoll = this->get_tied_collector_opt();
+    if(ROCKET_UNEXPECT(!gcoll)) {
+      return 0;
+    }
+    return gcoll->collect_variables(gc_limit);
+  }
+
+uint32_t Global_Context::get_random_uint32() noexcept
   {
     auto prng = ::rocket::dynamic_pointer_cast<Random_Number_Generator>(this->m_prng);
     ROCKET_ASSERT(prng);
@@ -200,9 +200,9 @@ rcptr<Abstract_Hooks> Global_Context::get_hooks_opt() const noexcept
     return ::rocket::dynamic_pointer_cast<Abstract_Hooks>(this->m_hooks_opt);
   }
 
-rcptr<Abstract_Hooks> Global_Context::set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
+Global_Context& Global_Context::set_hooks(rcptr<Abstract_Hooks> hooks_opt) noexcept
   {
-    return ::rocket::dynamic_pointer_cast<Abstract_Hooks>(::std::exchange(this->m_hooks_opt, ::rocket::move(hooks_opt)));
+    return this->m_hooks_opt = ::rocket::move(hooks_opt), *this;
   }
 
 }  // namespace Asteria

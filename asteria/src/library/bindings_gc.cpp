@@ -50,7 +50,7 @@ opt<G_integer> std_gc_set_threshold(Global_Context& global, const G_integer& gen
     }
     auto gc_gen = static_cast<GC_Generation>(generation);
     // Get the collector.
-    auto qcoll = global.get_collector_opt(gc_gen);
+    auto qcoll = global.open_collector_opt(gc_gen);
     if(!qcoll) {
       return ::rocket::clear;
     }
