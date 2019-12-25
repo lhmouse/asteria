@@ -57,6 +57,15 @@ class AVMC_Queue
           const Vtable* vtbl;  // active otherwise
         };
         alignas(max_align_t) intptr_t paramv[];  // user-defined data [3]
+
+        constexpr ParamU get_paramu() const noexcept
+          {
+            return {{ this->paramu_x32, this->paramu_x16 }};
+          }
+        constexpr void* get_paramv() const noexcept
+          {
+            return const_cast<intptr_t*>(this->paramv);
+          }
       };
 
     struct Storage

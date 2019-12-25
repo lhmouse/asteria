@@ -18,7 +18,7 @@ void AVMC_Queue::do_deallocate_storage() const
       // Call the destructor for this node.
       auto dtor = qnode->has_vtbl ? qnode->vtbl->dtor : nullptr;
       if(ROCKET_UNEXPECT(dtor))
-        (*dtor)({{ qnode->paramu_x32, qnode->paramu_x16 }}, qnode->paramv);
+        (*dtor)(qnode->get_paramu(), qnode->get_paramv());
       qnode += qnode->nphdrs + size_t(1);
     }
     // Deallocate the storage if any.
@@ -37,7 +37,7 @@ void AVMC_Queue::do_execute_all_break(AIR_Status& status, Executive_Context& ctx
       // Call the executor function for this node.
       auto exec = qnode->has_vtbl ? qnode->vtbl->exec : qnode->exec;
       ROCKET_ASSERT(exec);
-      status = (*exec)(ctx, {{ qnode->paramu_x32, qnode->paramu_x16 }}, qnode->paramv);
+      status = (*exec)(ctx, qnode->get_paramu(), qnode->get_paramv());
       if(ROCKET_UNEXPECT(status != air_status_next))
         return;
       qnode += qnode->nphdrs + size_t(1);
@@ -54,7 +54,7 @@ void AVMC_Queue::do_enumerate_variables(Variable_Callback& callback) const
       // Call the enumerator function for this node.
       auto vnum = qnode->has_vtbl ? qnode->vtbl->vnum : nullptr;
       if(ROCKET_UNEXPECT(vnum))
-        (*vnum)(callback, {{ qnode->paramu_x32, qnode->paramu_x16 }}, qnode->paramv);
+        (*vnum)(callback, qnode->get_paramu(), qnode->get_paramv());
       qnode += qnode->nphdrs + size_t(1);
     }
   }
