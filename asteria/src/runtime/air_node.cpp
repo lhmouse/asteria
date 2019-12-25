@@ -133,55 +133,55 @@ AIR_Status do_execute_catch(const AVMC_Queue& queue, const phsh_string& name_exc
     return queue.execute(ctx_next);
   }
 
-template<typename PvT> inline const PvT* do_pcast(const void* pv) noexcept
+template<typename ParamV> inline const ParamV* do_pcast(const void* pv) noexcept
   {
-    return static_cast<const PvT*>(pv);
+    return static_cast<const ParamV*>(pv);
   }
 
-template<typename PvT> Variable_Callback& do_penum(Variable_Callback& callback, ParamU /*pu*/, const void* pv)
+template<typename ParamV> Variable_Callback& do_penum(Variable_Callback& callback, ParamU /*pu*/, const void* pv)
   {
-    return do_pcast<PvT>(pv)->enumerate_variables(callback);
+    return static_cast<const ParamV*>(pv)->enumerate_variables(callback);
   }
 
 // This is the trait struct for parameter types that implement `enumerate_variables()`.
-template<typename PvT, typename = void> struct AVMC_Appender : PvT
+template<typename ParamV, typename = void> struct AVMC_Appender : ParamV
   {
     ParamU pu;
 
     constexpr AVMC_Appender()
       :
-        PvT(), pu()
+        ParamV(), pu()
       {
       }
 
     AVMC_Queue& request(AVMC_Queue& queue) const
       {
-        return queue.request(sizeof(PvT));
+        return queue.request(sizeof(ParamV));
       }
     template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
       {
-        return queue.append<executorT, do_penum<PvT>>(this->pu, static_cast<PvT&&>(*this));
+        return queue.append<executorT, do_penum<ParamV>>(this->pu, static_cast<ParamV&&>(*this));
       }
   };
 
 // This is the trait struct for parameter types that do not implement `enumerate_variables()`.
-template<typename PvT> struct AVMC_Appender<PvT, ASTERIA_VOID_T(typename PvT::nonenumerable)> : PvT
+template<typename ParamV> struct AVMC_Appender<ParamV, ASTERIA_VOID_T(typename ParamV::nonenumerable)> : ParamV
   {
     ParamU pu;
 
     constexpr AVMC_Appender()
       :
-        PvT(), pu()
+        ParamV(), pu()
       {
       }
 
     AVMC_Queue& request(AVMC_Queue& queue) const
       {
-        return queue.request(sizeof(PvT));
+        return queue.request(sizeof(ParamV));
       }
     template<Executor executorT> AVMC_Queue& output(AVMC_Queue& queue)
       {
-        return queue.append<executorT>(this->pu, static_cast<PvT&&>(*this));
+        return queue.append<executorT>(this->pu, static_cast<ParamV&&>(*this));
       }
   };
 

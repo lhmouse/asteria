@@ -26,10 +26,10 @@ class AVMC_Queue
       };
 
     // These are prototypes for callbacks.
-    using Constructor  = void (ParamU paramu, void* params, intptr_t source);
-    using Destructor   = void (ParamU paramu, void* params);
-    using Executor     = AIR_Status (Executive_Context& ctx, ParamU paramu, const void* params);
-    using Enumerator   = Variable_Callback& (Variable_Callback& callback, ParamU paramu, const void* params);
+    using Constructor  = void (ParamU paramu, void* paramv, intptr_t source);
+    using Destructor   = void (ParamU paramu, void* paramv);
+    using Executor     = AIR_Status (Executive_Context& ctx, ParamU paramu, const void* paramv);
+    using Enumerator   = Variable_Callback& (Variable_Callback& callback, ParamU paramu, const void* paramv);
 
     // This specifies characteristics of the data contained.
     struct Vtable
@@ -48,22 +48,22 @@ class AVMC_Queue
 
     struct Header
       {
-        uint16_t nphdrs : 8;  // size of `params`, in number of `sizeof(Header)` (!)
+        uint16_t nphdrs : 8;  // size of `paramv`, in number of `Header`s [!]
         uint16_t has_vtbl : 1;  // vtable exists?
-        uint16_t paramu_x16;  // user-defined data (1)
-        uint32_t paramu_x32;  // user-defined data (2)
+        uint16_t paramu_x16;  // user-defined data [1]
+        uint32_t paramu_x32;  // user-defined data [2]
         union {
           Executor* exec;  // active if `has_vtbl`
           const Vtable* vtbl;  // active otherwise
         };
-        alignas(max_align_t) intptr_t params[];  // user-defined data (3)
+        alignas(max_align_t) intptr_t paramv[];  // user-defined data [3]
       };
 
     struct Storage
       {
         Header* bptr;  // beginning of raw storage
-        uint32_t nrsrv;  // size of raw storage, in number of `sizeof(Header)` (!)
-        uint32_t nused;  // size of used storage, in number of `sizeof(Header)` (!)
+        uint32_t nrsrv;  // size of raw storage, in number of `Header`s [!]
+        uint32_t nused;  // size of used storage, in number of `Header`s [!]
       };
     Storage m_stor;
 
@@ -99,16 +99,17 @@ class AVMC_Queue
     void do_execute_all_break(AIR_Status& status, Executive_Context& ctx) const;
     void do_enumerate_variables(Variable_Callback& callback) const;
 
-    // Reserve storage for another node. `nbytes` is the size of `params` to reserve in bytes.
-    // Note: All calls to this function must precede calls to `do_check_storage_for_params()`.
+    // Reserve storage for another node. `nbytes` is the size of `paramv` to reserve in bytes.
+    // Note: All calls to this function must precede calls to `do_check_storage_for_paramv()`.
     void do_reserve_delta(size_t nbytes);
-    // Allocate storage for all nodes that have been reserved so far, then checks whether there is enough room for a new node
-    // with `params` whose size is `nbytes` in bytes. An exception is thrown in case of failure.
-    Header* do_check_storage_for_params(size_t nbytes);
-    // Append a new node to the end. `nbytes` is the size of `params` to initialize in bytes.
+    // Allocate storage for all nodes that have been reserved so far, then checks whether there is enough room
+    // for a new node with `paramv` whose size is `nbytes` in bytes. An exception is thrown in case of failure.
+    Header* do_check_storage_for_paramv(size_t nbytes);
+    // Append a new node to the end. `nbytes` is the size of `paramv` to initialize in bytes.
     // Note: The storage must have been reserved using `do_reserve_delta()`.
     void do_append_trivial(Executor* exec, ParamU paramu, size_t nbytes, const void* source);
-    void do_append_nontrivial(ref_to<const Vtable> vtbl, ParamU paramu, size_t nbytes, Constructor* ctor, intptr_t source);
+    void do_append_nontrivial(ref_to<const Vtable> vtbl, ParamU paramu, size_t nbytes,
+                              Constructor* ctor, intptr_t source);
 
     template<Executor execT, nullptr_t, typename XNodeT>
         void do_dispatch_append(::std::true_type, ParamU paramu, XNodeT&& xnode)
@@ -120,20 +121,22 @@ class AVMC_Queue
     template<Executor execT, Enumerator* enumT, typename XNodeT>
         void do_dispatch_append(::std::false_type, ParamU paramu, XNodeT&& xnode)
       {
-        // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real' function pointers.
-        // Those converted from non-capturing lambdas are not an option.
+        // The vtable must have static storage duration. As it is defined `constexpr` here, we need 'real'
+        // function pointers. Those converted from non-capturing lambdas are not an option.
         struct H
           {
-            static void construct(ParamU /*paramu*/, void* params, intptr_t source)
+            static void construct(ParamU /*paramu*/, void* paramv, intptr_t source)
               {
                 // Construct the bound parameter using perfect forwarding.
-                ::rocket::construct_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(params),
-                                     ::rocket::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));
+                ::rocket::construct_at(
+                  static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv),
+                  ::rocket::forward<XNodeT>(*(typename ::std::remove_reference<XNodeT>::type*)source));
               }
-            static void destroy(ParamU /*paramu*/, void* params) noexcept
+            static void destroy(ParamU /*paramu*/, void* paramv) noexcept
               {
                 // Destroy the bound parameter.
-                ::rocket::destroy_at(static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(params));
+                ::rocket::destroy_at(
+                  static_cast<typename ::rocket::remove_cvref<XNodeT>::type*>(paramv));
               }
           };
         static constexpr Vtable s_vtbl =
@@ -184,7 +187,7 @@ class AVMC_Queue
       {
         // Append a node with a parameter of type `remove_cvref_t<XNodeT>`.
         this->do_dispatch_append<execT, nullptr>(::std::is_trivial<typename ::std::remove_reference<XNodeT>::type>(),
-                                                     paramu, ::rocket::forward<XNodeT>(xnode));
+                                                 paramu, ::rocket::forward<XNodeT>(xnode));
         return *this;
       }
     template<Executor execT, Enumerator enumT, typename XNodeT> AVMC_Queue& append(ParamU paramu, XNodeT&& xnode)
