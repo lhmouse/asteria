@@ -1031,27 +1031,27 @@ AIR_Status do_push_unnamed_object(Executive_Context& ctx, ParamU /*pu*/, const v
     return air_status_next;
   }
 
-ROCKET_PURE_FUNCTION G_boolean do_operator_not(const G_boolean& rhs)
+ROCKET_PURE_FUNCTION G_boolean do_operator_NOT(const G_boolean& rhs)
   {
     return !rhs;
   }
 
-ROCKET_PURE_FUNCTION G_boolean do_operator_and(const G_boolean& lhs, const G_boolean& rhs)
+ROCKET_PURE_FUNCTION G_boolean do_operator_AND(const G_boolean& lhs, const G_boolean& rhs)
   {
     return lhs & rhs;
   }
 
-ROCKET_PURE_FUNCTION G_boolean do_operator_or(const G_boolean& lhs, const G_boolean& rhs)
+ROCKET_PURE_FUNCTION G_boolean do_operator_OR(const G_boolean& lhs, const G_boolean& rhs)
   {
     return lhs | rhs;
   }
 
-ROCKET_PURE_FUNCTION G_boolean do_operator_xor(const G_boolean& lhs, const G_boolean& rhs)
+ROCKET_PURE_FUNCTION G_boolean do_operator_XOR(const G_boolean& lhs, const G_boolean& rhs)
   {
     return lhs ^ rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_neg(const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_NEG(const G_integer& rhs)
   {
     if(rhs == INT64_MIN) {
       ASTERIA_THROW("integer negation overflow (operand was `$1`)", rhs);
@@ -1059,22 +1059,22 @@ ROCKET_PURE_FUNCTION G_integer do_operator_neg(const G_integer& rhs)
     return -rhs;
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_sqrt(const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_SQRT(const G_integer& rhs)
   {
     return ::std::sqrt(G_real(rhs));
   }
 
-ROCKET_PURE_FUNCTION G_boolean do_operator_isinf(const G_integer& /*rhs*/)
+ROCKET_PURE_FUNCTION G_boolean do_operator_ISINF(const G_integer& /*rhs*/)
   {
     return false;
   }
 
-ROCKET_PURE_FUNCTION G_boolean do_operator_isnan(const G_integer& /*rhs*/)
+ROCKET_PURE_FUNCTION G_boolean do_operator_ISNAN(const G_integer& /*rhs*/)
   {
     return false;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_abs(const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_ABS(const G_integer& rhs)
   {
     if(rhs == INT64_MIN) {
       ASTERIA_THROW("integer absolute value overflow (operand was `$1`)", rhs);
@@ -1082,12 +1082,12 @@ ROCKET_PURE_FUNCTION G_integer do_operator_abs(const G_integer& rhs)
     return ::std::abs(rhs);
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_sign(const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_SIGN(const G_integer& rhs)
   {
     return rhs >> 63;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_ADD(const G_integer& lhs, const G_integer& rhs)
   {
     if((rhs >= 0) ? (lhs > INT64_MAX - rhs) : (lhs < INT64_MIN - rhs)) {
       ASTERIA_THROW("integer addition overflow (operands were `$1` and `$2`)", lhs, rhs);
@@ -1095,7 +1095,7 @@ ROCKET_PURE_FUNCTION G_integer do_operator_add(const G_integer& lhs, const G_int
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_sub(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_SUB(const G_integer& lhs, const G_integer& rhs)
   {
     if((rhs >= 0) ? (lhs < INT64_MIN + rhs) : (lhs > INT64_MAX + rhs)) {
       ASTERIA_THROW("integer subtraction overflow (operands were `$1` and `$2`)", lhs, rhs);
@@ -1103,7 +1103,7 @@ ROCKET_PURE_FUNCTION G_integer do_operator_sub(const G_integer& lhs, const G_int
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_mul(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_MUL(const G_integer& lhs, const G_integer& rhs)
   {
     if((lhs == 0) || (rhs == 0)) {
       return 0;
@@ -1128,7 +1128,7 @@ ROCKET_PURE_FUNCTION G_integer do_operator_mul(const G_integer& lhs, const G_int
     return alhs * srhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_div(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_DIV(const G_integer& lhs, const G_integer& rhs)
   {
     if(rhs == 0) {
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
@@ -1139,7 +1139,7 @@ ROCKET_PURE_FUNCTION G_integer do_operator_div(const G_integer& lhs, const G_int
     return lhs / rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_mod(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_MOD(const G_integer& lhs, const G_integer& rhs)
   {
     if(rhs == 0) {
       ASTERIA_THROW("integer divided by zero (operands were `$1` and `$2`)", lhs, rhs);
@@ -1150,7 +1150,7 @@ ROCKET_PURE_FUNCTION G_integer do_operator_mod(const G_integer& lhs, const G_int
     return lhs % rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_sll(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_SLL(const G_integer& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1161,7 +1161,7 @@ ROCKET_PURE_FUNCTION G_integer do_operator_sll(const G_integer& lhs, const G_int
     return G_integer(static_cast<uint64_t>(lhs) << rhs);
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_srl(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_SRL(const G_integer& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1172,7 +1172,7 @@ ROCKET_PURE_FUNCTION G_integer do_operator_srl(const G_integer& lhs, const G_int
     return G_integer(static_cast<uint64_t>(lhs) >> rhs);
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_sla(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_SLA(const G_integer& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1192,7 +1192,7 @@ ROCKET_PURE_FUNCTION G_integer do_operator_sla(const G_integer& lhs, const G_int
     return G_integer(static_cast<uint64_t>(lhs) << rhs);
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_sra(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_SRA(const G_integer& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1203,72 +1203,72 @@ ROCKET_PURE_FUNCTION G_integer do_operator_sra(const G_integer& lhs, const G_int
     return lhs >> rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_not(const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_NOT(const G_integer& rhs)
   {
     return ~rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_and(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_AND(const G_integer& lhs, const G_integer& rhs)
   {
     return lhs & rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_or(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_OR(const G_integer& lhs, const G_integer& rhs)
   {
     return lhs | rhs;
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_xor(const G_integer& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_XOR(const G_integer& lhs, const G_integer& rhs)
   {
     return lhs ^ rhs;
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_neg(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_NEG(const G_real& rhs)
   {
     return -rhs;
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_sqrt(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_SQRT(const G_real& rhs)
   {
     return ::std::sqrt(rhs);
   }
 
-ROCKET_PURE_FUNCTION G_boolean do_operator_isinf(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_boolean do_operator_ISINF(const G_real& rhs)
   {
     return ::std::isinf(rhs);
   }
 
-ROCKET_PURE_FUNCTION G_boolean do_operator_isnan(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_boolean do_operator_ISNAN(const G_real& rhs)
   {
     return ::std::isnan(rhs);
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_abs(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_ABS(const G_real& rhs)
   {
     return ::std::fabs(rhs);
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_sign(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_SIGN(const G_real& rhs)
   {
     return ::std::signbit(rhs) ? -1 : 0;
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_round(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_ROUND(const G_real& rhs)
   {
     return ::std::round(rhs);
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_floor(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_FLOOR(const G_real& rhs)
   {
     return ::std::floor(rhs);
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_ceil(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_CEIL(const G_real& rhs)
   {
     return ::std::ceil(rhs);
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_trunc(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_TRUNC(const G_real& rhs)
   {
     return ::std::trunc(rhs);
   }
@@ -1281,52 +1281,52 @@ G_integer do_cast_to_integer(const G_real& value)
     return G_integer(value);
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_iround(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_IROUND(const G_real& rhs)
   {
     return do_cast_to_integer(::std::round(rhs));
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_ifloor(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_IFLOOR(const G_real& rhs)
   {
     return do_cast_to_integer(::std::floor(rhs));
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_iceil(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_ICEIL(const G_real& rhs)
   {
     return do_cast_to_integer(::std::ceil(rhs));
   }
 
-ROCKET_PURE_FUNCTION G_integer do_operator_itrunc(const G_real& rhs)
+ROCKET_PURE_FUNCTION G_integer do_operator_ITRUNC(const G_real& rhs)
   {
     return do_cast_to_integer(::std::trunc(rhs));
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_add(const G_real& lhs, const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_ADD(const G_real& lhs, const G_real& rhs)
   {
     return lhs + rhs;
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_sub(const G_real& lhs, const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_SUB(const G_real& lhs, const G_real& rhs)
   {
     return lhs - rhs;
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_mul(const G_real& lhs, const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_MUL(const G_real& lhs, const G_real& rhs)
   {
     return lhs * rhs;
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_div(const G_real& lhs, const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_DIV(const G_real& lhs, const G_real& rhs)
   {
     return lhs / rhs;
   }
 
-ROCKET_PURE_FUNCTION G_real do_operator_mod(const G_real& lhs, const G_real& rhs)
+ROCKET_PURE_FUNCTION G_real do_operator_MOD(const G_real& lhs, const G_real& rhs)
   {
     return ::std::fmod(lhs, rhs);
   }
 
-ROCKET_PURE_FUNCTION G_string do_operator_add(const G_string& lhs, const G_string& rhs)
+ROCKET_PURE_FUNCTION G_string do_operator_ADD(const G_string& lhs, const G_string& rhs)
   {
     return lhs + rhs;
   }
@@ -1364,7 +1364,7 @@ G_string do_duplicate_string(const G_string& source, uint64_t count)
     return res;
   }
 
-ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_string& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_string do_operator_MUL(const G_string& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1372,7 +1372,7 @@ ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_string& lhs, const G_integ
     return do_duplicate_string(lhs, static_cast<uint64_t>(rhs));
   }
 
-ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_integer& lhs, const G_string& rhs)
+ROCKET_PURE_FUNCTION G_string do_operator_MUL(const G_integer& lhs, const G_string& rhs)
   {
     if(lhs < 0) {
       ASTERIA_THROW("negative duplicate count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1380,7 +1380,7 @@ ROCKET_PURE_FUNCTION G_string do_operator_mul(const G_integer& lhs, const G_stri
     return do_duplicate_string(rhs, static_cast<uint64_t>(lhs));
   }
 
-ROCKET_PURE_FUNCTION G_string do_operator_sll(const G_string& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_string do_operator_SLL(const G_string& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1397,7 +1397,7 @@ ROCKET_PURE_FUNCTION G_string do_operator_sll(const G_string& lhs, const G_integ
     return res;
   }
 
-ROCKET_PURE_FUNCTION G_string do_operator_srl(const G_string& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_string do_operator_SRL(const G_string& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1414,7 +1414,7 @@ ROCKET_PURE_FUNCTION G_string do_operator_srl(const G_string& lhs, const G_integ
     return res;
   }
 
-ROCKET_PURE_FUNCTION G_string do_operator_sla(const G_string& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_string do_operator_SLA(const G_string& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1430,7 +1430,7 @@ ROCKET_PURE_FUNCTION G_string do_operator_sla(const G_string& lhs, const G_integ
     return res;
   }
 
-ROCKET_PURE_FUNCTION G_string do_operator_sra(const G_string& lhs, const G_integer& rhs)
+ROCKET_PURE_FUNCTION G_string do_operator_SRA(const G_string& lhs, const G_integer& rhs)
   {
     if(rhs < 0) {
       ASTERIA_THROW("negative shift count (operands were `$1` and `$2`)", lhs, rhs);
@@ -1453,12 +1453,12 @@ AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, ParamU /*pu*/, const vo
     if(lhs.is_integer()) {
       auto& reg = lhs.open_integer();
       do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
-      reg = do_operator_add(reg, G_integer(1));
+      reg = do_operator_ADD(reg, G_integer(1));
     }
     else if(lhs.is_real()) {
       auto& reg = lhs.open_real();
       do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
-      reg = do_operator_add(reg, G_real(1));
+      reg = do_operator_ADD(reg, G_real(1));
     }
     else {
       ASTERIA_THROW("postfix increment not applicable (operand was `$1`)", lhs);
@@ -1474,12 +1474,12 @@ AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, ParamU /*pu*/, const vo
     if(lhs.is_integer()) {
       auto& reg = lhs.open_integer();
       do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
-      reg = do_operator_sub(reg, G_integer(1));
+      reg = do_operator_SUB(reg, G_integer(1));
     }
     else if(lhs.is_real()) {
       auto& reg = lhs.open_real();
       do_set_temporary(ctx.stack(), false, ::rocket::move(lhs));
-      reg = do_operator_sub(reg, G_real(1));
+      reg = do_operator_SUB(reg, G_real(1));
     }
     else {
       ASTERIA_THROW("postfix decrement not applicable (operand was `$1`)", lhs);
@@ -1533,11 +1533,11 @@ AIR_Status do_apply_xop_neg(Executive_Context& ctx, ParamU pu, const void* /*pv*
     // Get the opposite of the operand as a temporary value, then return it.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
-      reg = do_operator_neg(reg);
+      reg = do_operator_NEG(reg);
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_neg(reg);
+      reg = do_operator_NEG(reg);
     }
     else {
       ASTERIA_THROW("prefix negation not applicable (operand was `$1`)", rhs);
@@ -1556,11 +1556,11 @@ AIR_Status do_apply_xop_notb(Executive_Context& ctx, ParamU pu, const void* /*pv
     // Perform bitwise NOT operation on the operand to create a temporary value, then return it.
     if(rhs.is_boolean()) {
       auto& reg = rhs.open_boolean();
-      reg = do_operator_not(reg);
+      reg = do_operator_NOT(reg);
     }
     else if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
-      reg = do_operator_not(reg);
+      reg = do_operator_NOT(reg);
     }
     else {
       ASTERIA_THROW("prefix bitwise NOT not applicable (operand was `$1`)", rhs);
@@ -1578,7 +1578,7 @@ AIR_Status do_apply_xop_notl(Executive_Context& ctx, ParamU pu, const void* /*pv
     const auto& rhs = ctx.stack().get_top().read();
     // Perform logical NOT operation on the operand to create a temporary value, then return it.
     // N.B. This is one of the few operators that work on all types.
-    do_set_temporary(ctx.stack(), assign, do_operator_not(rhs.test()));
+    do_set_temporary(ctx.stack(), assign, do_operator_NOT(rhs.test()));
     return air_status_next;
   }
 
@@ -1589,11 +1589,11 @@ AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, ParamU /*pu*/, const voi
     // Increment the operand and return it. `assign` is ignored.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
-      reg = do_operator_add(reg, G_integer(1));
+      reg = do_operator_ADD(reg, G_integer(1));
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_add(reg, G_real(1));
+      reg = do_operator_ADD(reg, G_real(1));
     }
     else {
       ASTERIA_THROW("prefix increment not applicable (operand was `$1`)", rhs);
@@ -1608,11 +1608,11 @@ AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, ParamU /*pu*/, const voi
     // Decrement the operand and return it. `assign` is ignored.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
-      reg = do_operator_sub(reg, G_integer(1));
+      reg = do_operator_SUB(reg, G_integer(1));
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_sub(reg, G_real(1));
+      reg = do_operator_SUB(reg, G_real(1));
     }
     else {
       ASTERIA_THROW("prefix decrement not applicable (operand was `$1`)", rhs);
@@ -1688,11 +1688,11 @@ AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, ParamU pu, const void* /*pv
     // Get the square root of the operand as a temporary value, then return it.
     if(rhs.is_integer()) {
       // Note that `rhs` does not have type `G_real`, thus this branch can't be optimized.
-      rhs = do_operator_sqrt(rhs.as_integer());
+      rhs = do_operator_SQRT(rhs.as_integer());
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_sqrt(reg);
+      reg = do_operator_SQRT(reg);
     }
     else {
       ASTERIA_THROW("prefix `__sqrt` not applicable (operand was `$1`)", rhs);
@@ -1711,11 +1711,11 @@ AIR_Status do_apply_xop_isnan(Executive_Context& ctx, ParamU pu, const void* /*p
     // Check whether the operand is a NaN, store the result in a temporary value, then return it.
     if(rhs.is_integer()) {
       // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
-      rhs = do_operator_isnan(rhs.as_integer());
+      rhs = do_operator_ISNAN(rhs.as_integer());
     }
     else if(rhs.is_real()) {
       // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
-      rhs = do_operator_isnan(rhs.as_real());
+      rhs = do_operator_ISNAN(rhs.as_real());
     }
     else {
       ASTERIA_THROW("prefix `__isnan` not applicable (operand was `$1`)", rhs);
@@ -1734,11 +1734,11 @@ AIR_Status do_apply_xop_isinf(Executive_Context& ctx, ParamU pu, const void* /*p
     // Check whether the operand is an infinity, store the result in a temporary value, then return it.
     if(rhs.is_integer()) {
       // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
-      rhs = do_operator_isinf(rhs.as_integer());
+      rhs = do_operator_ISINF(rhs.as_integer());
     }
     else if(rhs.is_real()) {
       // Note that `rhs` does not have type `G_boolean`, thus this branch can't be optimized.
-      rhs = do_operator_isinf(rhs.as_real());
+      rhs = do_operator_ISINF(rhs.as_real());
     }
     else {
       ASTERIA_THROW("prefix `__isinf` not applicable (operand was `$1`)", rhs);
@@ -1757,11 +1757,11 @@ AIR_Status do_apply_xop_abs(Executive_Context& ctx, ParamU pu, const void* /*pv*
     // Get the absolute value of the operand as a temporary value, then return it.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
-      reg = do_operator_abs(reg);
+      reg = do_operator_ABS(reg);
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_abs(reg);
+      reg = do_operator_ABS(reg);
     }
     else {
       ASTERIA_THROW("prefix `__abs` not applicable (operand was `$1`)", rhs);
@@ -1780,11 +1780,11 @@ AIR_Status do_apply_xop_sign(Executive_Context& ctx, ParamU pu, const void* /*pv
     // Get the sign bit of the operand as a temporary value, then return it.
     if(rhs.is_integer()) {
       auto& reg = rhs.open_integer();
-      reg = do_operator_sign(reg);
+      reg = do_operator_SIGN(reg);
     }
     else if(rhs.is_real()) {
       // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
-      rhs = do_operator_sign(rhs.as_real());
+      rhs = do_operator_SIGN(rhs.as_real());
     }
     else {
       ASTERIA_THROW("prefix `__sign` not applicable (operand was `$1`)", rhs);
@@ -1807,7 +1807,7 @@ AIR_Status do_apply_xop_round(Executive_Context& ctx, ParamU pu, const void* /*p
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_round(reg);
+      reg = do_operator_ROUND(reg);
     }
     else {
       ASTERIA_THROW("prefix `__round` not applicable (operand was `$1`)", rhs);
@@ -1830,7 +1830,7 @@ AIR_Status do_apply_xop_floor(Executive_Context& ctx, ParamU pu, const void* /*p
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_floor(reg);
+      reg = do_operator_FLOOR(reg);
     }
     else {
       ASTERIA_THROW("prefix `__floor` not applicable (operand was `$1`)", rhs);
@@ -1853,7 +1853,7 @@ AIR_Status do_apply_xop_ceil(Executive_Context& ctx, ParamU pu, const void* /*pv
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_ceil(reg);
+      reg = do_operator_CEIL(reg);
     }
     else {
       ASTERIA_THROW("prefix `__ceil` not applicable (operand was `$1`)", rhs);
@@ -1876,7 +1876,7 @@ AIR_Status do_apply_xop_trunc(Executive_Context& ctx, ParamU pu, const void* /*p
     }
     else if(rhs.is_real()) {
       auto& reg = rhs.open_real();
-      reg = do_operator_trunc(reg);
+      reg = do_operator_TRUNC(reg);
     }
     else {
       ASTERIA_THROW("prefix `__trunc` not applicable (operand was `$1`)", rhs);
@@ -1899,7 +1899,7 @@ AIR_Status do_apply_xop_iround(Executive_Context& ctx, ParamU pu, const void* /*
     }
     else if(rhs.is_real()) {
       // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
-      rhs = do_operator_iround(rhs.as_real());
+      rhs = do_operator_IROUND(rhs.as_real());
     }
     else {
       ASTERIA_THROW("prefix `__iround` not applicable (operand was `$1`)", rhs);
@@ -1922,7 +1922,7 @@ AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, ParamU pu, const void* /*
     }
     else if(rhs.is_real()) {
       // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
-      rhs = do_operator_ifloor(rhs.as_real());
+      rhs = do_operator_IFLOOR(rhs.as_real());
     }
     else {
       ASTERIA_THROW("prefix `__ifloor` not applicable (operand was `$1`)", rhs);
@@ -1945,7 +1945,7 @@ AIR_Status do_apply_xop_iceil(Executive_Context& ctx, ParamU pu, const void* /*p
     }
     else if(rhs.is_real()) {
       // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
-      rhs = do_operator_iceil(rhs.as_real());
+      rhs = do_operator_ICEIL(rhs.as_real());
     }
     else {
       ASTERIA_THROW("prefix `__iceil` not applicable (operand was `$1`)", rhs);
@@ -1968,7 +1968,7 @@ AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, ParamU pu, const void* /*
     }
     else if(rhs.is_real()) {
       // Note that `rhs` does not have type `G_integer`, thus this branch can't be optimized.
-      rhs = do_operator_itrunc(rhs.as_real());
+      rhs = do_operator_ITRUNC(rhs.as_real());
     }
     else {
       ASTERIA_THROW("prefix `__itrunc` not applicable (operand was `$1`)", rhs);
@@ -2063,21 +2063,21 @@ AIR_Status do_apply_xop_add(Executive_Context& ctx, ParamU pu, const void* /*pv*
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical OR'd result of both operands.
       auto& reg = rhs.open_boolean();
-      reg = do_operator_or(lhs.as_boolean(), reg);
+      reg = do_operator_OR(lhs.as_boolean(), reg);
     }
     else if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` and `real` types, return the sum of both operands.
       auto& reg = rhs.open_integer();
-      reg = do_operator_add(lhs.as_integer(), reg);
+      reg = do_operator_ADD(lhs.as_integer(), reg);
     }
     else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
       // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
-      rhs = do_operator_add(lhs.convert_to_real(), rhs.convert_to_real());
+      rhs = do_operator_ADD(lhs.convert_to_real(), rhs.convert_to_real());
     }
     else if(lhs.is_string() && rhs.is_string()) {
       // For the `string` type, concatenate the operands in lexical order to create a new string, then return it.
       auto& reg = rhs.open_string();
-      reg = do_operator_add(lhs.as_string(), reg);
+      reg = do_operator_ADD(lhs.as_string(), reg);
     }
     else {
       ASTERIA_THROW("infix addition not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2098,16 +2098,16 @@ AIR_Status do_apply_xop_sub(Executive_Context& ctx, ParamU pu, const void* /*pv*
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical XOR'd result of both operands.
       auto& reg = rhs.open_boolean();
-      reg = do_operator_xor(lhs.as_boolean(), reg);
+      reg = do_operator_XOR(lhs.as_boolean(), reg);
     }
     else if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` and `real` types, return the difference of both operands.
       auto& reg = rhs.open_integer();
-      reg = do_operator_sub(lhs.as_integer(), reg);
+      reg = do_operator_SUB(lhs.as_integer(), reg);
     }
     else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
       // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
-      rhs = do_operator_sub(lhs.convert_to_real(), rhs.convert_to_real());
+      rhs = do_operator_SUB(lhs.convert_to_real(), rhs.convert_to_real());
     }
     else {
       ASTERIA_THROW("infix subtraction not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2128,26 +2128,26 @@ AIR_Status do_apply_xop_mul(Executive_Context& ctx, ParamU pu, const void* /*pv*
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical AND'd result of both operands.
       auto& reg = rhs.open_boolean();
-      reg = do_operator_and(lhs.as_boolean(), reg);
+      reg = do_operator_AND(lhs.as_boolean(), reg);
     }
     else if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` and `real` types, return the product of both operands.
       auto& reg = rhs.open_integer();
-      reg = do_operator_mul(lhs.as_integer(), reg);
+      reg = do_operator_MUL(lhs.as_integer(), reg);
     }
     else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
       // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
-      rhs = do_operator_mul(lhs.convert_to_real(), rhs.convert_to_real());
+      rhs = do_operator_MUL(lhs.convert_to_real(), rhs.convert_to_real());
     }
     else if(lhs.is_string() && rhs.is_integer()) {
       // If either operand has type `string` and the other has type `integer`, duplicate the string up to
       // the specified number of times and return the result.
       // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-      rhs = do_operator_mul(lhs.as_string(), rhs.as_integer());
+      rhs = do_operator_MUL(lhs.as_string(), rhs.as_integer());
     }
     else if(lhs.is_integer() && rhs.is_string()) {
       auto& reg = rhs.open_string();
-      reg = do_operator_mul(lhs.as_integer(), reg);
+      reg = do_operator_MUL(lhs.as_integer(), reg);
     }
     else {
       ASTERIA_THROW("infix multiplication not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2168,11 +2168,11 @@ AIR_Status do_apply_xop_div(Executive_Context& ctx, ParamU pu, const void* /*pv*
     if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` and `real` types, return the quotient of both operands.
       auto& reg = rhs.open_integer();
-      reg = do_operator_div(lhs.as_integer(), reg);
+      reg = do_operator_DIV(lhs.as_integer(), reg);
     }
     else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
       // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
-      rhs = do_operator_div(lhs.convert_to_real(), rhs.convert_to_real());
+      rhs = do_operator_DIV(lhs.convert_to_real(), rhs.convert_to_real());
     }
     else {
       ASTERIA_THROW("infix division not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2193,11 +2193,11 @@ AIR_Status do_apply_xop_mod(Executive_Context& ctx, ParamU pu, const void* /*pv*
     if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` and `real` types, return the remainder of both operands.
       auto& reg = rhs.open_integer();
-      reg = do_operator_mod(lhs.as_integer(), reg);
+      reg = do_operator_MOD(lhs.as_integer(), reg);
     }
     else if(lhs.is_convertible_to_real() && rhs.is_convertible_to_real()) {
       // Note that `rhs` might not have type `G_real`, thus this branch can't be optimized.
-      rhs = do_operator_mod(lhs.convert_to_real(), rhs.convert_to_real());
+      rhs = do_operator_MOD(lhs.convert_to_real(), rhs.convert_to_real());
     }
     else {
       ASTERIA_THROW("infix modulo not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2219,13 +2219,13 @@ AIR_Status do_apply_xop_sll(Executive_Context& ctx, ParamU pu, const void* /*pv*
       // If the LHS operand has type `integer`, shift the LHS operand to the left by the number of bits specified by the RHS operand.
       // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
       auto& reg = rhs.open_integer();
-      reg = do_operator_sll(lhs.as_integer(), reg);
+      reg = do_operator_SLL(lhs.as_integer(), reg);
     }
     else if(lhs.is_string() && rhs.is_integer()) {
       // If the LHS operand has type `string`, fill space characters in the right and discard characters from the left.
       // The number of bytes in the LHS operand will be preserved.
       // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-      rhs = do_operator_sll(lhs.as_string(), rhs.as_integer());
+      rhs = do_operator_SLL(lhs.as_string(), rhs.as_integer());
     }
     else {
       ASTERIA_THROW("infix logical left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2247,13 +2247,13 @@ AIR_Status do_apply_xop_srl(Executive_Context& ctx, ParamU pu, const void* /*pv*
       // If the LHS operand has type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
       // Bits shifted out are discarded. Bits shifted in are filled with zeroes.
       auto& reg = rhs.open_integer();
-      reg = do_operator_srl(lhs.as_integer(), reg);
+      reg = do_operator_SRL(lhs.as_integer(), reg);
     }
     else if(lhs.is_string() && rhs.is_integer()) {
       // If the LHS operand has type `string`, fill space characters in the left and discard characters from the right.
       // The number of bytes in the LHS operand will be preserved.
       // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-      rhs = do_operator_srl(lhs.as_string(), rhs.as_integer());
+      rhs = do_operator_SRL(lhs.as_string(), rhs.as_integer());
     }
     else {
       ASTERIA_THROW("infix logical right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2276,12 +2276,12 @@ AIR_Status do_apply_xop_sla(Executive_Context& ctx, ParamU pu, const void* /*pv*
       // Bits shifted out that are equal to the sign bit are discarded. Bits shifted in are filled with zeroes.
       // If any bits that are different from the sign bit would be shifted out, an exception is thrown.
       auto& reg = rhs.open_integer();
-      reg = do_operator_sla(lhs.as_integer(), reg);
+      reg = do_operator_SLA(lhs.as_integer(), reg);
     }
     else if(lhs.is_string() && rhs.is_integer()) {
       // If the LHS operand has type `string`, fill space characters in the right.
       // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-      rhs = do_operator_sla(lhs.as_string(), rhs.as_integer());
+      rhs = do_operator_SLA(lhs.as_string(), rhs.as_integer());
     }
     else {
       ASTERIA_THROW("infix arithmetic left shift not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2303,12 +2303,12 @@ AIR_Status do_apply_xop_sra(Executive_Context& ctx, ParamU pu, const void* /*pv*
       // If the LHS operand is of type `integer`, shift the LHS operand to the right by the number of bits specified by the RHS operand.
       // Bits shifted out are discarded. Bits shifted in are filled with the sign bit.
       auto& reg = rhs.open_integer();
-      reg = do_operator_sra(lhs.as_integer(), reg);
+      reg = do_operator_SRA(lhs.as_integer(), reg);
     }
     else if(lhs.is_string() && rhs.is_integer()) {
       // If the LHS operand has type `string`, discard characters from the right.
       // Note that `rhs` does not have type `G_string`, thus this branch can't be optimized.
-      rhs = do_operator_sra(lhs.as_string(), rhs.as_integer());
+      rhs = do_operator_SRA(lhs.as_string(), rhs.as_integer());
     }
     else {
       ASTERIA_THROW("infix arithmetic right shift not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2329,12 +2329,12 @@ AIR_Status do_apply_xop_andb(Executive_Context& ctx, ParamU pu, const void* /*pv
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical AND'd result of both operands.
       auto& reg = rhs.open_boolean();
-      reg = do_operator_and(lhs.as_boolean(), reg);
+      reg = do_operator_AND(lhs.as_boolean(), reg);
     }
     else if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` type, return bitwise AND'd result of both operands.
       auto& reg = rhs.open_integer();
-      reg = do_operator_and(lhs.as_integer(), reg);
+      reg = do_operator_AND(lhs.as_integer(), reg);
     }
     else {
       ASTERIA_THROW("infix bitwise AND not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2355,12 +2355,12 @@ AIR_Status do_apply_xop_orb(Executive_Context& ctx, ParamU pu, const void* /*pv*
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical OR'd result of both operands.
       auto& reg = rhs.open_boolean();
-      reg = do_operator_or(lhs.as_boolean(), reg);
+      reg = do_operator_OR(lhs.as_boolean(), reg);
     }
     else if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` type, return bitwise OR'd result of both operands.
       auto& reg = rhs.open_integer();
-      reg = do_operator_or(lhs.as_integer(), reg);
+      reg = do_operator_OR(lhs.as_integer(), reg);
     }
     else {
       ASTERIA_THROW("infix bitwise OR not defined (operands were `$1` and `$2`)", lhs, rhs);
@@ -2381,12 +2381,12 @@ AIR_Status do_apply_xop_xorb(Executive_Context& ctx, ParamU pu, const void* /*pv
     if(lhs.is_boolean() && rhs.is_boolean()) {
       // For the `boolean` type, return the logical XOR'd result of both operands.
       auto& reg = rhs.open_boolean();
-      reg = do_operator_xor(lhs.as_boolean(), reg);
+      reg = do_operator_XOR(lhs.as_boolean(), reg);
     }
     else if(lhs.is_integer() && rhs.is_integer()) {
       // For the `integer` type, return bitwise XOR'd result of both operands.
       auto& reg = rhs.open_integer();
-      reg = do_operator_xor(lhs.as_integer(), reg);
+      reg = do_operator_XOR(lhs.as_integer(), reg);
     }
     else {
       ASTERIA_THROW("infix bitwise XOR not defined (operands were `$1` and `$2`)", lhs, rhs);
