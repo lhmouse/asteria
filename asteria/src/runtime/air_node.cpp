@@ -863,6 +863,78 @@ AIR_Status do_coalescence(Executive_Context& ctx, ParamU pu, const void* pv)
     return air_status_next;
   }
 
+ROCKET_NOINLINE ckptr<Abstract_Function> do_pop_arguments(cow_vector<Reference>& args, Executive_Context& ctx,
+                                                          const cow_vector<bool>& args_by_refs)
+  {
+    // Pop arguments off the stack backwards.
+    args.resize(args_by_refs.size());
+    for(size_t i = args.size() - 1; i != SIZE_MAX; --i) {
+      auto& arg = ctx.stack().open_top();
+      // Convert the argument to an rvalue if it shouldn't be passed by reference.
+      bool by_ref = args_by_refs[i];
+      if(!by_ref) {
+        arg.convert_to_rvalue();
+      }
+      // Ensure it is dereferenceable.
+      arg.read();
+      // Move and pop this argument.
+      args.mut(i) = ::rocket::move(arg);
+      ctx.stack().pop();
+    }
+    // Copy the target value, which shall be of type `function`.
+    auto value = ctx.stack().get_top().read();
+    if(!value.is_function()) {
+      ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
+    }
+    return ::rocket::move(value.open_function());
+  }
+
+ROCKET_NOINLINE Reference& do_get_this(Executive_Context& ctx)
+  {
+    return ctx.stack().open_top().zoom_out();
+  }
+
+ROCKET_NOINLINE AIR_Status do_wrap_tail_call(Reference& self, const Source_Location& sloc, PTC_Aware ptc_aware,
+                                             const cow_string& inside, const ckptr<Abstract_Function>& target,
+                                             cow_vector<Reference>&& args)
+  {
+    // Pack arguments for this proper tail call.
+    args.emplace_back(::rocket::move(self));
+    // Create a PTC wrapper.
+    auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, ptc_aware, target, ::rocket::move(args));
+    // Return it.
+    Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
+    self = ::rocket::move(xref);
+    // Force `air_status_return` if control flow reaches the end of a function.
+    // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
+    return air_status_return;
+  }
+
+ROCKET_NOINLINE [[noreturn]] void do_xrethrow(Runtime_Error& except, const Source_Location& sloc,
+                                              const cow_string& inside, const rcptr<Abstract_Hooks>& qhooks)
+  {
+    // Append the current frame and rethrow the exception.
+    except.push_frame_func(sloc, inside);
+    // Call the hook function if any.
+    if(qhooks) {
+      qhooks->on_function_except(sloc, inside, except);
+    }
+    throw;
+  }
+
+ROCKET_NOINLINE [[noreturn]] void do_xrethrow(::std::exception& stdex, const Source_Location& sloc,
+                                              const cow_string& inside, const rcptr<Abstract_Hooks>& qhooks)
+  {
+    // Translate the exception, append the current frame, and throw the new exception.
+    Runtime_Error except(stdex);
+    except.push_frame_func(sloc, inside);
+    // Call the hook function if any.
+    if(qhooks) {
+      qhooks->on_function_except(sloc, inside, except);
+    }
+    throw except;
+  }
+
 AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
   {
     // Unpack arguments.
@@ -878,45 +950,15 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     if(qhooks) {
       qhooks->on_single_step_trap(sloc, inside, ::std::addressof(ctx));
     }
-    // Pop arguments off the stack backwards.
+    // Prepare arguments.
     cow_vector<Reference> args;
-    args.resize(args_by_refs.size());
-    for(size_t i = args.size() - 1; i != SIZE_MAX; --i) {
-      auto& arg = ctx.stack().open_top();
-      // Convert the argument to an rvalue if it shouldn't be passed by reference.
-      bool by_ref = args_by_refs[i];
-      if(!by_ref) {
-        arg.convert_to_rvalue();
-      }
-      // Ensure it is dereferenceable.
-      arg.read();
-      // Move and pop this argument.
-      args.mut(i) = ::rocket::move(arg);
-      ctx.stack().pop();
-    }
-    // Get the target reference.
-    auto& self = ctx.stack().open_top();
-    // Copy the target value, which shall be of type `function`.
-    const auto value = self.read();
-    if(!value.is_function()) {
-      ASTERIA_THROW("attempt to call a non-function (value `$1`)", value);
-    }
-    const auto& target = value.as_function();
+    auto target = do_pop_arguments(args, ctx, args_by_refs);
     // Initialize the `this` reference.
-    self.zoom_out();
+    auto& self = do_get_this(ctx);
 
     // Call the function now.
     if(ptc_aware != ptc_aware_none) {
-      // Pack arguments for this proper tail call.
-      args.emplace_back(::rocket::move(self));
-      // Create a PTC wrapper.
-      auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, ptc_aware, target, ::rocket::move(args));
-      // Return it.
-      Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
-      self = ::rocket::move(xref);
-      // Force `air_status_return` if control flow reaches the end of a function.
-      // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
-      return air_status_return;
+      return do_wrap_tail_call(self, sloc, ptc_aware, inside, target, ::rocket::move(args));
     }
     // Call the hook function if any.
     if(qhooks) {
@@ -928,23 +970,10 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
       self.finish_call(ctx.global());
     }
     catch(Runtime_Error& except) {
-      // Append the current frame and rethrow the exception.
-      except.push_frame_func(sloc, inside);
-      // Call the hook function if any.
-      if(qhooks) {
-        qhooks->on_function_except(sloc, inside, except);
-      }
-      throw;
+      do_xrethrow(except, sloc, inside, qhooks);
     }
     catch(::std::exception& stdex) {
-      // Translate the exception, append the current frame, and throw the new exception.
-      Runtime_Error except(stdex);
-      except.push_frame_func(sloc, inside);
-      // Call the hook function if any.
-      if(qhooks) {
-        qhooks->on_function_except(sloc, inside, except);
-      }
-      throw except;
+      do_xrethrow(stdex, sloc, inside, qhooks);
     }
     // Call the hook function if any.
     if(qhooks) {
