@@ -95,17 +95,17 @@ template<typename elementT> class stored_pointer
     pointer fork() const noexcept
       {
         auto ptr = this->m_ptr;
-        if(!ptr) {
-          return pointer();
+        if(ptr) {
+          ptr->reference_counter_base::add_reference();
         }
-        ptr->reference_counter_base::add_reference();
         return ptr;
       }
     void reset(pointer ptr_new) noexcept
       {
         auto ptr = ::std::exchange(this->m_ptr, ptr_new);
-        if(ptr && ROCKET_UNEXPECT(ptr->reference_counter_base::drop_reference()))
-          copy_deleter</*noadl*/>(*ptr)(ptr);
+        if(ptr)
+          if(ROCKET_UNEXPECT(ptr->reference_counter_base::drop_reference()))
+            (copy_deleter)(*ptr)(ptr);
       }
     void exchange_with(stored_pointer& other) noexcept
       {
