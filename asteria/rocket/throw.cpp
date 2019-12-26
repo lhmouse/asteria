@@ -2,19 +2,52 @@
 // Copyleft 2018 - 2019, LH_Mouse. All wrongs reserved.
 
 #include "throw.hpp"
-#include <cstdarg>
+#include <stdlib.h>  // ::free()
+#include <stdarg.h>  // ::va_list
+#include <stdio.h>  // ::vasprintf()
 
 namespace rocket {
+namespace {
+
+class vasprintf_guard
+  {
+  private:
+    char* m_str;
+
+  public:
+    vasprintf_guard(const char* fmt, ::va_list ap)
+      {
+        if(::vasprintf(&(this->m_str), fmt, ap) < 0)
+          throw ::std::bad_alloc();
+      }
+    ~vasprintf_guard()
+      {
+        ::free(this->m_str);
+      }
+    vasprintf_guard(const vasprintf_guard&)
+      = delete;
+    vasprintf_guard& operator=(const vasprintf_guard&)
+      = delete;
+
+  public:
+    const char* c_str() const noexcept
+      {
+        return this->m_str;
+      }
+  };
+
+}  // namespace
 
 // Define the main template.
-template<typename exceptT> [[noreturn]] ROCKET_ATTRIBUTE_PRINTF(1, 2) void sprintf_and_throw(const char* fmt, ...)
+template<typename exceptT> void sprintf_and_throw(const char* fmt, ...)
   {
-    char msg[1024];
-    ::std::va_list ap;
+    // Compose the error message in allocated storage.
+    ::va_list ap;
     va_start(ap, fmt);
-    ::std::vsnprintf(msg, sizeof(msg), fmt, ap);
+    vasprintf_guard msg(fmt, ap);
     va_end(ap);
-    throw exceptT(msg);
+    // Construct the exception object and throw it.
+    throw exceptT(msg.c_str());
   }
 
 // Define specializations.

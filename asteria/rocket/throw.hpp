@@ -9,7 +9,8 @@
 namespace rocket {
 
 // Don't define this template here.
-template<typename exceptT> [[noreturn]] ROCKET_ATTRIBUTE_PRINTF(1, 2) extern void sprintf_and_throw(const char* fmt, ...);
+template<typename exceptT> ROCKET_ATTRIBUTE_PRINTF(1, 2)
+  [[noreturn]] extern void sprintf_and_throw(const char* fmt, ...);
 
 // Declare specializations.
 extern template void sprintf_and_throw<logic_error>(const char* fmt, ...);
