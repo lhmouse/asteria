@@ -11,27 +11,27 @@ Abstract_Hooks::~Abstract_Hooks()
   {
   }
 
-void Abstract_Hooks::on_variable_declare(const Source_Location& /*sloc*/, const phsh_string& /*inside*/,
+void Abstract_Hooks::on_variable_declare(const Source_Location& /*sloc*/, const cow_string& /*inside*/,
                                          const phsh_string& /*name*/)
   {
   }
 
-void Abstract_Hooks::on_function_call(const Source_Location& /*sloc*/, const phsh_string& /*inside*/,
+void Abstract_Hooks::on_function_call(const Source_Location& /*sloc*/, const cow_string& /*inside*/,
                                       const ckptr<Abstract_Function>& /*target*/)
   {
   }
 
-void Abstract_Hooks::on_function_return(const Source_Location& /*sloc*/, const phsh_string& /*inside*/,
+void Abstract_Hooks::on_function_return(const Source_Location& /*sloc*/, const cow_string& /*inside*/,
                                         const Reference& /*result*/)
   {
   }
 
-void Abstract_Hooks::on_function_except(const Source_Location& /*sloc*/, const phsh_string& /*inside*/,
+void Abstract_Hooks::on_function_except(const Source_Location& /*sloc*/, const cow_string& /*inside*/,
                                         const Runtime_Error& /*except*/)
   {
   }
 
-void Abstract_Hooks::on_single_step_trap(const Source_Location& /*sloc*/, const phsh_string& /*inside*/,
+void Abstract_Hooks::on_single_step_trap(const Source_Location& /*sloc*/, const cow_string& /*inside*/,
                                          Executive_Context* /*ctx_opt*/)
   {
   }
