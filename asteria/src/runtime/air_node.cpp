@@ -888,11 +888,6 @@ ROCKET_NOINLINE ckptr<Abstract_Function> do_pop_arguments(cow_vector<Reference>&
     return ::rocket::move(value.open_function());
   }
 
-ROCKET_NOINLINE Reference& do_get_this(Executive_Context& ctx)
-  {
-    return ctx.stack().open_top().zoom_out();
-  }
-
 ROCKET_NOINLINE AIR_Status do_wrap_tail_call(Reference& self, const Source_Location& sloc, PTC_Aware ptc_aware,
                                              const cow_string& inside, const ckptr<Abstract_Function>& target,
                                              cow_vector<Reference>&& args)
@@ -953,7 +948,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     cow_vector<Reference> args;
     auto target = do_pop_arguments(args, ctx, args_by_refs);
     // Initialize the `this` reference.
-    auto& self = do_get_this(ctx);
+    auto& self = ctx.stack().open_top().zoom_out();
 
     // Wrap proper tail calls. The result will be unpacked outside this scope.
     if(ptc_aware != ptc_aware_none) {
