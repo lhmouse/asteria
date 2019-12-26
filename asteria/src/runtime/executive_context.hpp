@@ -6,6 +6,7 @@
 
 #include "../fwd.hpp"
 #include "abstract_context.hpp"
+#include "variadic_arguer.hpp"
 
 namespace Asteria {
 
@@ -18,10 +19,11 @@ class Executive_Context final : public Abstract_Context
     // so they are not passed here and there upon each native call.
     ref_to<Global_Context> m_global;
     ref_to<Evaluation_Stack> m_stack;
-    ref_to<Variadic_Arguer> m_zvarg;
+    ckptr<Variadic_Arguer> m_zvarg;
 
-    // The last reference is `self`. This member is used for lazy initialization.
-    mutable cow_vector<Reference> m_args_self;
+    // These members are used for lazy initialization.
+    mutable opt<Reference> m_self_opt;
+    mutable opt<cow_vector<Reference>> m_args_opt;
 
   public:
     template<typename ContextT, ASTERIA_SFINAE_CONVERT(ContextT*, const Executive_Context*)>
@@ -31,8 +33,9 @@ class Executive_Context final : public Abstract_Context
         m_global(parent->m_global), m_stack(parent->m_stack), m_zvarg(parent->m_zvarg)
       {
       }
-    Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack, ref_to<Variadic_Arguer> xzvarg,
-                      const cow_vector<phsh_string>& params, Reference&& self, cow_vector<Reference>&& args)  // for functions
+    Executive_Context(ref_to<Global_Context> xglobal, ref_to<Evaluation_Stack> xstack,
+                      const ckptr<Variadic_Arguer> xzvarg, const cow_vector<phsh_string>& params,
+                      Reference&& self, cow_vector<Reference>&& args)  // for functions
       :
         m_parent_opt(nullptr),
         m_global(xglobal), m_stack(xstack), m_zvarg(xzvarg)
@@ -67,9 +70,9 @@ class Executive_Context final : public Abstract_Context
       {
         return this->m_stack;
       }
-    Variadic_Arguer& zvarg() const noexcept
+    const cow_string& func() const noexcept
       {
-        return this->m_zvarg;
+        return this->m_zvarg->func();
       }
   };
 

@@ -356,7 +356,7 @@ AIR_Status do_declare_variable(Executive_Context& ctx, ParamU /*pu*/, const void
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc_name>(pv)->sloc;
     const auto& name = do_pcast<Pv_sloc_name>(pv)->name;
-    const auto& inside = ctx.zvarg().func();
+    const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Allocate a variable and initialize it to `null`.
@@ -941,7 +941,7 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     const auto& sloc = do_pcast<Pv_call>(pv)->sloc;
     const auto& args_by_refs = do_pcast<Pv_call>(pv)->args_by_refs;
     const auto& ptc_aware = static_cast<PTC_Aware>(pu.u8s[0]);
-    const auto& inside = ctx.zvarg().func();
+    const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Check for stack overflows.
@@ -956,10 +956,11 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Initialize the `this` reference.
     auto& self = do_get_this(ctx);
 
-    // Call the function now.
+    // Wrap proper tail calls. The result will be unpacked outside this scope.
     if(ptc_aware != ptc_aware_none) {
       return do_wrap_tail_call(self, sloc, ptc_aware, inside, target, ::rocket::move(args));
     }
+
     // Call the hook function if any.
     if(qhooks) {
       qhooks->on_function_call(sloc, inside, target);
@@ -2514,7 +2515,7 @@ AIR_Status do_define_null_variable(Executive_Context& ctx, ParamU pu, const void
     const auto& immutable = static_cast<bool>(pu.u8s[0]);
     const auto& sloc = do_pcast<Pv_sloc_name>(pv)->sloc;
     const auto& name = do_pcast<Pv_sloc_name>(pv)->name;
-    const auto& inside = ctx.zvarg().func();
+    const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Allocate a variable and initialize it to `null`.
@@ -2534,7 +2535,7 @@ AIR_Status do_single_step_trap(Executive_Context& ctx, ParamU /*pu*/, const void
   {
     // Unpack arguments.
     const auto& sloc = do_pcast<Pv_sloc>(pv)->sloc;
-    const auto& inside = ctx.zvarg().func();
+    const auto& inside = ctx.func();
     const auto& qhooks = ctx.global().get_hooks_opt();
 
     // Call the hook function if any.

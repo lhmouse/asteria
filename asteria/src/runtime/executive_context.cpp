@@ -3,7 +3,6 @@
 
 #include "../precompiled.hpp"
 #include "executive_context.hpp"
-#include "variadic_arguer.hpp"
 #include "../utilities.hpp"
 
 namespace Asteria {
@@ -41,10 +40,11 @@ void Executive_Context::do_prepare_function(const cow_vector<phsh_string>& param
       // Disallow exceess arguments if the function is not variadic.
       ASTERIA_THROW("too many arguments (`$1` > `$2`)", args.size(), params.size());
     }
-    // Pack `__this` and `__varg`. This is tricky.
     args.erase(0, elps);
-    args.emplace_back(::rocket::move(self));
-    this->m_args_self = ::rocket::move(args);
+
+    // Stash arguments for lazy initialization.
+    this->m_self_opt = ::rocket::move(self);
+    this->m_args_opt = ::rocket::move(args);
   }
 
 bool Executive_Context::do_is_analytic() const noexcept
@@ -62,36 +62,26 @@ Reference* Executive_Context::do_lazy_lookup_opt(Reference_Dictionary& named_ref
     // Create pre-defined references as needed.
     // N.B. If you have ever changed these, remember to update 'analytic_context.cpp' as well.
     if(name == "__func") {
-      auto& func = named_refs.open(::rocket::sref("__func"));
-      // Create a constant string of the function signature.
+      auto& ref = named_refs.open(::rocket::sref("__func"));
       Reference_Root::S_constant xref = { G_string(this->m_zvarg->func()) };
-      func = ::rocket::move(xref);
-      return &func;
+      ref = ::rocket::move(xref);
+      return &ref;
     }
-    if((name == "__this") || (name == "__varg")) {
-      auto& self = named_refs.open(::rocket::sref("__this"));
-      auto& varg = named_refs.open(::rocket::sref("__varg"));
-      // Unpack the `this` reference.
-      ROCKET_ASSERT(!this->m_args_self.empty());
-      self = ::rocket::move(this->m_args_self.mut_back());
-      this->m_args_self.pop_back();
-      // Initialize the variadic argument getter.
-      rcptr<Variadic_Arguer> kvarg;
-      if(this->m_args_self.empty()) {
-        // Reference the pre-allocated zero-ary argument getter if there are variadic arguments.
-        this->m_zvarg->add_reference();
-        kvarg.reset(this->m_zvarg.ptr());
-      }
-      else {
-        // Create a new argument getter otherwise.
-        kvarg = ::rocket::make_refcnt<Variadic_Arguer>(this->m_zvarg, ::rocket::move(this->m_args_self));
-        this->m_args_self.clear();
-      }
-      // Set it.
-      Reference_Root::S_constant xref = { G_function(::rocket::move(kvarg)) };
-      varg = ::rocket::move(xref);
-      // Return a pointer to the reference requested.
-      return (name[2] == 't') ? &self : &varg;
+    if(name == "__this") {
+      auto& ref = named_refs.open(::rocket::sref("__this"));
+      ref = ::rocket::move(*(this->m_self_opt));
+      this->m_self_opt.reset();
+      return &ref;
+    }
+    if(name == "__varg") {
+      auto& ref = named_refs.open(::rocket::sref("__varg"));
+      auto varg = this->m_zvarg;
+      if(!this->m_args_opt->empty())
+        varg = ::rocket::make_refcnt<Variadic_Arguer>(*(this->m_zvarg), ::rocket::move(*(this->m_args_opt)));
+      this->m_args_opt.reset();
+      Reference_Root::S_constant xref = { G_function(::rocket::move(varg)) };
+      ref = ::rocket::move(xref);
+      return &ref;
     }
     return nullptr;
   }
