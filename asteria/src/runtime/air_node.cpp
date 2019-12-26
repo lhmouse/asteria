@@ -901,7 +901,7 @@ ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Locat
     return self = ::rocket::move(xref);
   }
 
-ROCKET_NOINLINE [[noreturn]] void do_xrethrow(Runtime_Error& except, const Source_Location& sloc,
+[[noreturn]] ROCKET_NOINLINE void do_xrethrow(Runtime_Error& except, const Source_Location& sloc,
                                               const cow_string& inside, const rcptr<Abstract_Hooks>& qhooks)
   {
     // Append the current frame and rethrow the exception.
@@ -913,7 +913,7 @@ ROCKET_NOINLINE [[noreturn]] void do_xrethrow(Runtime_Error& except, const Sourc
     throw;
   }
 
-ROCKET_NOINLINE [[noreturn]] void do_xrethrow(::std::exception& stdex, const Source_Location& sloc,
+[[noreturn]] ROCKET_NOINLINE void do_xrethrow(::std::exception& stdex, const Source_Location& sloc,
                                               const cow_string& inside, const rcptr<Abstract_Hooks>& qhooks)
   {
     // Translate the exception, append the current frame, and throw the new exception.
