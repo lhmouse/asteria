@@ -1445,7 +1445,7 @@ ROCKET_PURE_FUNCTION G_string do_operator_SRA(const G_string& lhs, const G_integ
     return res;
   }
 
-AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_apply_xop_INC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lhs = ctx.stack().get_top().open();
@@ -1466,7 +1466,7 @@ AIR_Status do_apply_xop_inc_post(Executive_Context& ctx, ParamU /*pu*/, const vo
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_apply_xop_DEC_POST(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lhs = ctx.stack().get_top().open();
@@ -1487,7 +1487,7 @@ AIR_Status do_apply_xop_dec_post(Executive_Context& ctx, ParamU /*pu*/, const vo
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_subscr(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_apply_xop_SUBSCR(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is binary.
     auto rhs = ctx.stack().get_top().read();
@@ -1510,7 +1510,7 @@ AIR_Status do_apply_xop_subscr(Executive_Context& ctx, ParamU /*pu*/, const void
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_pos(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_POS(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1523,7 +1523,7 @@ AIR_Status do_apply_xop_pos(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_neg(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_NEG(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1546,7 +1546,7 @@ AIR_Status do_apply_xop_neg(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_notb(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_NOTB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1569,7 +1569,7 @@ AIR_Status do_apply_xop_notb(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_notl(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_NOTL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1582,7 +1582,7 @@ AIR_Status do_apply_xop_notl(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_apply_xop_INC_PRE(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& rhs = ctx.stack().get_top().open();
@@ -1601,7 +1601,7 @@ AIR_Status do_apply_xop_inc_pre(Executive_Context& ctx, ParamU /*pu*/, const voi
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_apply_xop_DEC_PRE(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& rhs = ctx.stack().get_top().open();
@@ -1620,7 +1620,7 @@ AIR_Status do_apply_xop_dec_pre(Executive_Context& ctx, ParamU /*pu*/, const voi
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_unset(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_UNSET(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1632,7 +1632,7 @@ AIR_Status do_apply_xop_unset(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_LENGTHOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1665,7 +1665,7 @@ AIR_Status do_apply_xop_lengthof(Executive_Context& ctx, ParamU pu, const void* 
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_typeof(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_TYPEOF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1678,7 +1678,7 @@ AIR_Status do_apply_xop_typeof(Executive_Context& ctx, ParamU pu, const void* /*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_SQRT(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1701,7 +1701,7 @@ AIR_Status do_apply_xop_sqrt(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_isnan(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ISNAN(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1724,7 +1724,7 @@ AIR_Status do_apply_xop_isnan(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_isinf(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ISINF(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1747,7 +1747,7 @@ AIR_Status do_apply_xop_isinf(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_abs(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ABS(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1770,7 +1770,7 @@ AIR_Status do_apply_xop_abs(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_sign(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_SIGN(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1793,7 +1793,7 @@ AIR_Status do_apply_xop_sign(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_round(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ROUND(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1816,7 +1816,7 @@ AIR_Status do_apply_xop_round(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_floor(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_FLOOR(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1839,7 +1839,7 @@ AIR_Status do_apply_xop_floor(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ceil(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_CEIL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1862,7 +1862,7 @@ AIR_Status do_apply_xop_ceil(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_trunc(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_TRUNC(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1885,7 +1885,7 @@ AIR_Status do_apply_xop_trunc(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_iround(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_IROUND(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1908,7 +1908,7 @@ AIR_Status do_apply_xop_iround(Executive_Context& ctx, ParamU pu, const void* /*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_IFLOOR(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1931,7 +1931,7 @@ AIR_Status do_apply_xop_ifloor(Executive_Context& ctx, ParamU pu, const void* /*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_iceil(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ICEIL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1954,7 +1954,7 @@ AIR_Status do_apply_xop_iceil(Executive_Context& ctx, ParamU pu, const void* /*p
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ITRUNC(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1977,7 +1977,7 @@ AIR_Status do_apply_xop_itrunc(Executive_Context& ctx, ParamU pu, const void* /*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_CMP_XEQ(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -1995,7 +1995,7 @@ AIR_Status do_apply_xop_cmp_xeq(Executive_Context& ctx, ParamU pu, const void* /
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_CMP_XREL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2016,7 +2016,7 @@ AIR_Status do_apply_xop_cmp_xrel(Executive_Context& ctx, ParamU pu, const void* 
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_CMP_3WAY(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2051,7 +2051,7 @@ AIR_Status do_apply_xop_cmp_3way(Executive_Context& ctx, ParamU pu, const void* 
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_add(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ADD(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2086,7 +2086,7 @@ AIR_Status do_apply_xop_add(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_sub(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_SUB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2116,7 +2116,7 @@ AIR_Status do_apply_xop_sub(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_mul(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_MUL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2156,7 +2156,7 @@ AIR_Status do_apply_xop_mul(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_div(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_DIV(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2181,7 +2181,7 @@ AIR_Status do_apply_xop_div(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_mod(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_MOD(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2206,7 +2206,7 @@ AIR_Status do_apply_xop_mod(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_sll(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_SLL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2234,7 +2234,7 @@ AIR_Status do_apply_xop_sll(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_srl(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_SRL(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2262,7 +2262,7 @@ AIR_Status do_apply_xop_srl(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_sla(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_SLA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2290,7 +2290,7 @@ AIR_Status do_apply_xop_sla(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_sra(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_SRA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2317,7 +2317,7 @@ AIR_Status do_apply_xop_sra(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_andb(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ANDB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2343,7 +2343,7 @@ AIR_Status do_apply_xop_andb(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_orb(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_ORB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2369,7 +2369,7 @@ AIR_Status do_apply_xop_orb(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_xorb(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_XORB(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2395,7 +2395,7 @@ AIR_Status do_apply_xop_xorb(Executive_Context& ctx, ParamU pu, const void* /*pv
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_assign(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_apply_xop_ASSIGN(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // Pop the RHS operand.
     auto rhs = ctx.stack().get_top().read();
@@ -2405,7 +2405,7 @@ AIR_Status do_apply_xop_assign(Executive_Context& ctx, ParamU /*pu*/, const void
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_fma(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
+AIR_Status do_apply_xop_FMA(Executive_Context& ctx, ParamU pu, const void* /*pv*/)
   {
     // Unpack arguments.
     const auto& assign = static_cast<bool>(pu.u8s[0]);
@@ -2428,7 +2428,7 @@ AIR_Status do_apply_xop_fma(Executive_Context& ctx, ParamU pu, const void* /*pv*
     return air_status_next;
   }
 
-AIR_Status do_apply_xop_tail(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
+AIR_Status do_apply_xop_TAIL(Executive_Context& ctx, ParamU /*pu*/, const void* /*pv*/)
   {
     // This operator is unary.
     auto& lref = ctx.stack().open_top();
@@ -3227,145 +3227,145 @@ AVMC_Queue& AIR_Node::solidify(AVMC_Queue& queue, uint8_t ipass) const
         // Push a new node.
         switch(altr.xop) {
         case xop_inc_post: {
-            return avmcp.output<do_apply_xop_inc_post>(queue);
+            return avmcp.output<do_apply_xop_INC_POST>(queue);
           }
         case xop_dec_post: {
-            return avmcp.output<do_apply_xop_dec_post>(queue);
+            return avmcp.output<do_apply_xop_DEC_POST>(queue);
           }
         case xop_subscr: {
-            return avmcp.output<do_apply_xop_subscr>(queue);
+            return avmcp.output<do_apply_xop_SUBSCR>(queue);
           }
         case xop_pos: {
-            return avmcp.output<do_apply_xop_pos>(queue);
+            return avmcp.output<do_apply_xop_POS>(queue);
           }
         case xop_neg: {
-            return avmcp.output<do_apply_xop_neg>(queue);
+            return avmcp.output<do_apply_xop_NEG>(queue);
           }
         case xop_notb: {
-            return avmcp.output<do_apply_xop_notb>(queue);
+            return avmcp.output<do_apply_xop_NOTB>(queue);
           }
         case xop_notl: {
-            return avmcp.output<do_apply_xop_notl>(queue);
+            return avmcp.output<do_apply_xop_NOTL>(queue);
           }
         case xop_inc_pre: {
-            return avmcp.output<do_apply_xop_inc_pre>(queue);
+            return avmcp.output<do_apply_xop_INC_PRE>(queue);
           }
         case xop_dec_pre: {
-            return avmcp.output<do_apply_xop_dec_pre>(queue);
+            return avmcp.output<do_apply_xop_DEC_PRE>(queue);
           }
         case xop_unset: {
-            return avmcp.output<do_apply_xop_unset>(queue);
+            return avmcp.output<do_apply_xop_UNSET>(queue);
           }
         case xop_lengthof: {
-            return avmcp.output<do_apply_xop_lengthof>(queue);
+            return avmcp.output<do_apply_xop_LENGTHOF>(queue);
           }
         case xop_typeof: {
-            return avmcp.output<do_apply_xop_typeof>(queue);
+            return avmcp.output<do_apply_xop_TYPEOF>(queue);
           }
         case xop_sqrt: {
-            return avmcp.output<do_apply_xop_sqrt>(queue);
+            return avmcp.output<do_apply_xop_SQRT>(queue);
           }
         case xop_isnan: {
-            return avmcp.output<do_apply_xop_isnan>(queue);
+            return avmcp.output<do_apply_xop_ISNAN>(queue);
           }
         case xop_isinf: {
-            return avmcp.output<do_apply_xop_isinf>(queue);
+            return avmcp.output<do_apply_xop_ISINF>(queue);
           }
         case xop_abs: {
-            return avmcp.output<do_apply_xop_abs>(queue);
+            return avmcp.output<do_apply_xop_ABS>(queue);
           }
         case xop_sign: {
-            return avmcp.output<do_apply_xop_sign>(queue);
+            return avmcp.output<do_apply_xop_SIGN>(queue);
           }
         case xop_round: {
-            return avmcp.output<do_apply_xop_round>(queue);
+            return avmcp.output<do_apply_xop_ROUND>(queue);
           }
         case xop_floor: {
-            return avmcp.output<do_apply_xop_floor>(queue);
+            return avmcp.output<do_apply_xop_FLOOR>(queue);
           }
         case xop_ceil: {
-            return avmcp.output<do_apply_xop_ceil>(queue);
+            return avmcp.output<do_apply_xop_CEIL>(queue);
           }
         case xop_trunc: {
-            return avmcp.output<do_apply_xop_trunc>(queue);
+            return avmcp.output<do_apply_xop_TRUNC>(queue);
           }
         case xop_iround: {
-            return avmcp.output<do_apply_xop_iround>(queue);
+            return avmcp.output<do_apply_xop_IROUND>(queue);
           }
         case xop_ifloor: {
-            return avmcp.output<do_apply_xop_ifloor>(queue);
+            return avmcp.output<do_apply_xop_IFLOOR>(queue);
           }
         case xop_iceil: {
-            return avmcp.output<do_apply_xop_iceil>(queue);
+            return avmcp.output<do_apply_xop_ICEIL>(queue);
           }
         case xop_itrunc: {
-            return avmcp.output<do_apply_xop_itrunc>(queue);
+            return avmcp.output<do_apply_xop_ITRUNC>(queue);
           }
         case xop_cmp_eq: {
-            return avmcp.output<do_apply_xop_cmp_xeq>(queue);
+            return avmcp.output<do_apply_xop_CMP_XEQ>(queue);
           }
         case xop_cmp_ne: {
-            return avmcp.output<do_apply_xop_cmp_xeq>(queue);
+            return avmcp.output<do_apply_xop_CMP_XEQ>(queue);
           }
         case xop_cmp_lt: {
-            return avmcp.output<do_apply_xop_cmp_xrel>(queue);
+            return avmcp.output<do_apply_xop_CMP_XREL>(queue);
           }
         case xop_cmp_gt: {
-            return avmcp.output<do_apply_xop_cmp_xrel>(queue);
+            return avmcp.output<do_apply_xop_CMP_XREL>(queue);
           }
         case xop_cmp_lte: {
-            return avmcp.output<do_apply_xop_cmp_xrel>(queue);
+            return avmcp.output<do_apply_xop_CMP_XREL>(queue);
           }
         case xop_cmp_gte: {
-            return avmcp.output<do_apply_xop_cmp_xrel>(queue);
+            return avmcp.output<do_apply_xop_CMP_XREL>(queue);
           }
         case xop_cmp_3way: {
-            return avmcp.output<do_apply_xop_cmp_3way>(queue);
+            return avmcp.output<do_apply_xop_CMP_3WAY>(queue);
           }
         case xop_add: {
-            return avmcp.output<do_apply_xop_add>(queue);
+            return avmcp.output<do_apply_xop_ADD>(queue);
           }
         case xop_sub: {
-            return avmcp.output<do_apply_xop_sub>(queue);
+            return avmcp.output<do_apply_xop_SUB>(queue);
           }
         case xop_mul: {
-            return avmcp.output<do_apply_xop_mul>(queue);
+            return avmcp.output<do_apply_xop_MUL>(queue);
           }
         case xop_div: {
-            return avmcp.output<do_apply_xop_div>(queue);
+            return avmcp.output<do_apply_xop_DIV>(queue);
           }
         case xop_mod: {
-            return avmcp.output<do_apply_xop_mod>(queue);
+            return avmcp.output<do_apply_xop_MOD>(queue);
           }
         case xop_sll: {
-            return avmcp.output<do_apply_xop_sll>(queue);
+            return avmcp.output<do_apply_xop_SLL>(queue);
           }
         case xop_srl: {
-            return avmcp.output<do_apply_xop_srl>(queue);
+            return avmcp.output<do_apply_xop_SRL>(queue);
           }
         case xop_sla: {
-            return avmcp.output<do_apply_xop_sla>(queue);
+            return avmcp.output<do_apply_xop_SLA>(queue);
           }
         case xop_sra: {
-            return avmcp.output<do_apply_xop_sra>(queue);
+            return avmcp.output<do_apply_xop_SRA>(queue);
           }
         case xop_andb: {
-            return avmcp.output<do_apply_xop_andb>(queue);
+            return avmcp.output<do_apply_xop_ANDB>(queue);
           }
         case xop_orb: {
-            return avmcp.output<do_apply_xop_orb>(queue);
+            return avmcp.output<do_apply_xop_ORB>(queue);
           }
         case xop_xorb: {
-            return avmcp.output<do_apply_xop_xorb>(queue);
+            return avmcp.output<do_apply_xop_XORB>(queue);
           }
         case xop_assign: {
-            return avmcp.output<do_apply_xop_assign>(queue);
+            return avmcp.output<do_apply_xop_ASSIGN>(queue);
           }
         case xop_fma_3: {
-            return avmcp.output<do_apply_xop_fma>(queue);
+            return avmcp.output<do_apply_xop_FMA>(queue);
           }
         case xop_tail: {
-            return avmcp.output<do_apply_xop_tail>(queue);
+            return avmcp.output<do_apply_xop_TAIL>(queue);
           }
         default:
           ASTERIA_TERMINATE("invalid operator type (xop `$1`)", altr.xop);
