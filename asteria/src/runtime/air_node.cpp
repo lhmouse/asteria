@@ -888,9 +888,9 @@ ROCKET_NOINLINE ckptr<Abstract_Function> do_pop_arguments(cow_vector<Reference>&
     return ::rocket::move(value.open_function());
   }
 
-ROCKET_NOINLINE AIR_Status do_wrap_tail_call(Reference& self, const Source_Location& sloc, PTC_Aware ptc_aware,
-                                             const cow_string& inside, const ckptr<Abstract_Function>& target,
-                                             cow_vector<Reference>&& args)
+ROCKET_NOINLINE Reference& do_wrap_tail_call(Reference& self, const Source_Location& sloc, const cow_string& inside,
+                                             const ckptr<Abstract_Function>& target, cow_vector<Reference>&& args,
+                                             PTC_Aware ptc_aware)
   {
     // Pack arguments for this proper tail call.
     args.emplace_back(::rocket::move(self));
@@ -898,10 +898,7 @@ ROCKET_NOINLINE AIR_Status do_wrap_tail_call(Reference& self, const Source_Locat
     auto tca = ::rocket::make_refcnt<Tail_Call_Arguments>(sloc, inside, ptc_aware, target, ::rocket::move(args));
     // Return it.
     Reference_Root::S_tail_call xref = { ::rocket::move(tca) };
-    self = ::rocket::move(xref);
-    // Force `air_status_return` if control flow reaches the end of a function.
-    // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
-    return air_status_return;
+    return self = ::rocket::move(xref);
   }
 
 ROCKET_NOINLINE [[noreturn]] void do_xrethrow(Runtime_Error& except, const Source_Location& sloc,
@@ -950,9 +947,13 @@ AIR_Status do_function_call(Executive_Context& ctx, ParamU pu, const void* pv)
     // Initialize the `this` reference.
     auto& self = ctx.stack().open_top().zoom_out();
 
-    // Wrap proper tail calls. The result will be unpacked outside this scope.
+    // Wrap proper tail calls.
     if(ptc_aware != ptc_aware_none) {
-      return do_wrap_tail_call(self, sloc, ptc_aware, inside, target, ::rocket::move(args));
+      // The result will be unpacked outside this scope.
+      do_wrap_tail_call(self, sloc, inside, target, ::rocket::move(args), ptc_aware);
+      // Force `air_status_return` if control flow reaches the end of a function.
+      // Otherwise a null reference is returned instead of this PTC wrapper, which can then never be unpacked.
+      return air_status_return;
     }
 
     // Call the hook function if any.
