@@ -693,9 +693,8 @@ AIR_Status do_throw_statement(Executive_Context& ctx, ParamU /*pu*/, const void*
     try {
       // Unpack nested exceptions, if any.
       auto eptr = ::std::current_exception();
-      if(eptr) {
+      if(eptr)
         ::std::rethrow_exception(eptr);
-      }
     }
     catch(Runtime_Error& except) {
       // Modify it in place. Don't bother allocating a new one.
