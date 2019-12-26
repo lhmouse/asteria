@@ -498,7 +498,7 @@ void do_handle_repl_command(cow_string&& cmd)
       }
       if(!retry) {
         // Bail out upon irrecoverable errors.
-        ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
+        ::fprintf(stderr, "! invalid script: %s\n", do_stringify(except).c_str());
         goto z;
       }
     }
@@ -532,7 +532,7 @@ void do_handle_repl_command(cow_string&& cmd)
     }
     catch(Parser_Error& except) {
       // Report the error and exit.
-      ::fprintf(stderr, "! parser error: %s\n", do_stringify(except).c_str());
+      ::fprintf(stderr, "! invalid script: %s\n", do_stringify(except).c_str());
       do_quick_exit(exit_parser_error);
     }
 
