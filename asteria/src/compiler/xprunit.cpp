@@ -87,7 +87,7 @@ cow_vector<AIR_Node>& Xprunit::generate_code(cow_vector<AIR_Node>& code, const C
         size_t epos = altr.params.size() - 1;
         if(epos != SIZE_MAX) {
           for(size_t i = 0; i != epos; ++i) {
-            fmt << altr.params[i] << ',';
+            fmt << altr.params[i] << ", ";
           }
           fmt << altr.params[epos];
         }
